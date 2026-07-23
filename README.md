@@ -18,7 +18,7 @@ Protocolo N° 01-2024-UNTRM/DBU · R.C.U. N° 283-2024
 | Infraestructura | Docker · Docker Compose |
 | Autenticación | JWT (access + refresh) · BCrypt |
 | Validación | Zod |
-| Testing | Jest |
+| Testing | Jest (server) · Vitest + Testing Library (client) |
 
 ## Requisitos previos
 
@@ -183,6 +183,7 @@ Se ejecuta en cada push y PR a `develop` y `main`:
 | **Server — Test** | Jest con PostgreSQL de servicio + coverage |
 | **Server — Audit** | Vulnerabilidades en dependencias de producción |
 | **Client — Lint** | ESLint con react-hooks y react-refresh |
+| **Client — Test** | Vitest + Testing Library + coverage |
 | **Client — Build** | Type check (`tsc --noEmit`) + Vite build |
 | **Docker — Build** | Build de imágenes (solo en push, no en PRs) |
 

@@ -57,3 +57,20 @@
   font-weight: 700;
   font-size: 12px;
 }
+
+.logout {
+  font-family: var(--ft);
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--g600);
+  background: none;
+  border: 1.5px solid var(--g300);
+  border-radius: 8px;
+  padding: 6px 12px;
+  cursor: pointer;
+}
+
+.logout:hover {
+  color: var(--azul);
+  border-color: var(--azul-med);
+}

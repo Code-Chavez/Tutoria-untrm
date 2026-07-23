@@ -92,8 +92,27 @@
   cursor: pointer;
 }
 
-.btn:hover {
+.btn:hover:not(:disabled) {
   background: var(--azul-osc);
+}
+
+.btn:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+}
+
+.error {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  font-size: 12.5px;
+  line-height: 1.45;
+  color: #991b1b;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  border-radius: 8px;
+  padding: 10px 12px;
+  margin-bottom: 14px;
 }
 
 .forgot {

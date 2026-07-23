@@ -174,6 +174,38 @@ jobs:
         working-directory: client
         run: pnpm run lint
 
+  client-test:
+    name: Client — Test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+          cache-dependency-path: client/pnpm-lock.yaml
+
+      - name: Install dependencies
+        working-directory: client
+        run: pnpm install --frozen-lockfile
+
+      - name: Run tests with coverage
+        working-directory: client
+        run: pnpm test -- --coverage
+
+      - name: Upload coverage artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: client-coverage
+          path: client/coverage/lcov.info
+          retention-days: 7
+
   client-build:
     name: Client — Type Check & Build
     runs-on: ubuntu-latest
@@ -211,6 +243,7 @@ jobs:
       - server-build
       - server-test
       - client-lint
+      - client-test
       - client-build
     if: github.event_name == 'push'
 
