@@ -34,7 +34,7 @@ backups/
 coverage/
 
 # Prisma
-backend/prisma/*.db
+server/prisma/*.db
 
 # Temp
 tmp/

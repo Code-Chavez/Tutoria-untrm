@@ -31,9 +31,9 @@
 
 ### C-02 · Calidad de Código
 
-- [ ] TypeScript compila sin errores en modo estricto en backend y frontend.
+- [ ] TypeScript compila sin errores en modo estricto en server y client.
 - [ ] Clean Code aplicado: nombres descriptivos, responsabilidad única, sin código muerto.
-- [ ] Arquitectura Hexagonal (backend) y estructura por features (frontend) respetadas.
+- [ ] Arquitectura Hexagonal (server) y estructura por features (client) respetadas.
 
 ### C-03 · Pruebas
 
@@ -87,7 +87,7 @@
 
 ## 🏷️ Versionado
 
-- [ ] Versión actualizada en `backend/package.json` y `frontend/package.json`.
+- [ ] Versión actualizada en `server/package.json` y `client/package.json`.
 - [ ] Tag `vX.Y.Z` creado tras el merge.
 - [ ] Merge de vuelta a `develop` realizado para sincronizar.
 

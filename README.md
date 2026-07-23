@@ -12,8 +12,8 @@ Protocolo N° 01-2024-UNTRM/DBU · R.C.U. N° 283-2024
 
 | Capa | Tecnología |
 |------|-----------|
-| Backend | Node.js · Express · TypeScript · Arquitectura Hexagonal |
-| Frontend | React · Vite · TypeScript · Organización por features |
+| Server | Node.js · Express · TypeScript · Arquitectura Hexagonal |
+| Client | React · Vite · TypeScript · Organización por features |
 | Base de datos | PostgreSQL 16 · Prisma ORM |
 | Infraestructura | Docker · Docker Compose |
 | Autenticación | JWT (access + refresh) · BCrypt |
@@ -38,13 +38,13 @@ cd Tutoria-untrm
 docker-compose up --build
 
 # 3. Ejecutar migración y seed (en otra terminal)
-docker exec -it sit-backend pnpm prisma migrate deploy
-docker exec -it sit-backend pnpm ts-node prisma/seed.ts
+docker exec -it sit-server pnpm prisma migrate deploy
+docker exec -it sit-server pnpm ts-node prisma/seed.ts
 ```
 
 Los servicios estarán disponibles en:
-- **Frontend**: http://localhost:5173
-- **Backend API**: http://localhost:3000/api/health
+- **Client**: http://localhost:5173
+- **Server API**: http://localhost:3000/api/health
 - **PostgreSQL**: localhost:5432
 
 ## Arranque local (sin Docker)
@@ -52,16 +52,16 @@ Los servicios estarán disponibles en:
 ```bash
 # 1. PostgreSQL debe estar corriendo en localhost:5432
 
-# 2. Backend
-cd backend
+# 2. Server
+cd server
 cp .env.example .env    # ajustar DATABASE_URL si es necesario
 pnpm install
 pnpm prisma migrate deploy
 pnpm ts-node prisma/seed.ts
 pnpm dev
 
-# 3. Frontend (otra terminal)
-cd frontend
+# 3. Client (otra terminal)
+cd client
 pnpm install
 pnpm dev
 ```
@@ -70,7 +70,7 @@ pnpm dev
 
 ```
 Tutoria-untrm/
-├── backend/
+├── server/
 │   ├── prisma/              # Schema y migraciones
 │   ├── src/
 │   │   ├── domain/          # Entidades e interfaces de repositorio
@@ -92,7 +92,7 @@ Tutoria-untrm/
 │   │           ├── routes/
 │   │           └── validators/
 │   └── tests/
-├── frontend/
+├── client/
 │   ├── public/
 │   └── src/
 │       ├── features/        # Módulos por funcionalidad
@@ -178,12 +178,12 @@ Se ejecuta en cada push y PR a `develop` y `main`:
 
 | Job | Qué verifica |
 |-----|-------------|
-| **Backend — Lint** | ESLint con typescript-eslint |
-| **Backend — Build** | TypeScript compila (`strict: true`) + Prisma |
-| **Backend — Test** | Jest con PostgreSQL de servicio + coverage |
-| **Backend — Audit** | Vulnerabilidades en dependencias de producción |
-| **Frontend — Lint** | ESLint con react-hooks y react-refresh |
-| **Frontend — Build** | Type check (`tsc --noEmit`) + Vite build |
+| **Server — Lint** | ESLint con typescript-eslint |
+| **Server — Build** | TypeScript compila (`strict: true`) + Prisma |
+| **Server — Test** | Jest con PostgreSQL de servicio + coverage |
+| **Server — Audit** | Vulnerabilidades en dependencias de producción |
+| **Client — Lint** | ESLint con react-hooks y react-refresh |
+| **Client — Build** | Type check (`tsc --noEmit`) + Vite build |
 | **Docker — Build** | Build de imágenes (solo en push, no en PRs) |
 
 ### PR Checks (`pr-checks.yml`)
@@ -198,8 +198,8 @@ Se ejecuta en cada Pull Request:
 ## Convenciones de código
 
 - **TypeScript estricto**: `strict: true` en ambos tsconfig
-- **Backend**: Arquitectura Hexagonal — el dominio no depende de la infraestructura
-- **Frontend**: Organizado por features; cada feature contiene sus componentes, hooks y servicios
+- **Server**: Arquitectura Hexagonal — el dominio no depende de la infraestructura
+- **Client**: Organizado por features; cada feature contiene sus componentes, hooks y servicios
 - **Clean Code**: nombres descriptivos, responsabilidad única, sin código muerto
 
 ## Roles del sistema

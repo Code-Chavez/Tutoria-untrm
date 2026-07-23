@@ -28,7 +28,7 @@
 
 - [ ] TypeScript compila sin errores en modo estricto (`strict: true`).
 - [ ] Aplica Clean Code: nombres descriptivos, responsabilidad única, sin código muerto.
-- [ ] Respeta la Arquitectura Hexagonal (backend) y la estructura por features (frontend).
+- [ ] Respeta la Arquitectura Hexagonal (server) y la estructura por features (client).
 
 ### C-03 · Pruebas
 
