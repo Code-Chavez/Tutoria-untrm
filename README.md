@@ -130,19 +130,34 @@ El proyecto sigue Git Flow con la siguiente estructura de ramas:
 | `hotfix/descripcion` | Correcciones urgentes desde main |
 | `release/vX.Y.Z` | Preparación de release |
 
-### Flujo de trabajo
+### Flujo de trabajo y templates de PR
+
+Cada escenario tiene su propio template de PR con el DoD (DoD-SIT-001) adaptado:
+
+| Escenario | Rama origen → destino | Template | Comando |
+|-----------|----------------------|----------|---------|
+| **Feature/Fix** | `feature/*` → `develop` | Default (automático) | `gh pr create` |
+| **Hotfix** | `hotfix/*` → `main` | `hotfix_main.md` | `gh pr create --template hotfix_main.md` |
+| **Release** | `release/*` → `main` | `release_main.md` | `gh pr create --template release_main.md` |
 
 ```bash
-# 1. Crear rama desde develop
+# Feature → develop (template por defecto con DoD completo)
 git checkout -b feature/HU-01-login develop
-
-# 2. Desarrollar con Conventional Commits
 git commit -m "feat: add login endpoint with JWT"
-
-# 3. Push y crear Pull Request → develop
 git push -u origin feature/HU-01-login
+gh pr create  # usa el template por defecto
 
-# 4. CI verde + review → merge a develop
+# Hotfix → main (corrección urgente)
+git checkout -b hotfix/fix-token-expiry main
+git commit -m "fix: correct JWT expiry validation"
+git push -u origin hotfix/fix-token-expiry
+gh pr create --template hotfix_main.md
+
+# Release → main (fin de Sprint)
+git checkout -b release/v1.0.0 develop
+git commit -m "chore: bump version to 1.0.0"
+git push -u origin release/v1.0.0
+gh pr create --template release_main.md
 ```
 
 ### Conventional Commits
