@@ -23,7 +23,7 @@ Protocolo N° 01-2024-UNTRM/DBU · R.C.U. N° 283-2024
 ## Requisitos previos
 
 - [Docker Desktop](https://www.docker.com/products/docker-desktop/) (incluye Docker Compose)
-- [Node.js 22+](https://nodejs.org/) (para desarrollo local sin Docker)
+- [Node.js 20+](https://nodejs.org/) (para desarrollo local sin Docker)
 - [pnpm](https://pnpm.io/) (`corepack enable && corepack prepare pnpm@latest --activate`)
 - Git
 
