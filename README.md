@@ -39,7 +39,7 @@ docker-compose up --build
 
 # 3. Ejecutar migración y seed (en otra terminal)
 docker exec -it sit-server pnpm prisma migrate deploy
-docker exec -it sit-server pnpm ts-node prisma/seed.ts
+docker exec -it sit-server pnpm run seed
 ```
 
 Los servicios estarán disponibles en:
@@ -57,7 +57,7 @@ cd server
 cp .env.example .env    # ajustar DATABASE_URL si es necesario
 pnpm install
 pnpm prisma migrate deploy
-pnpm ts-node prisma/seed.ts
+pnpm run seed
 pnpm dev
 
 # 3. Client (otra terminal)

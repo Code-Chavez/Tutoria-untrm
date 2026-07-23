@@ -12,10 +12,14 @@ export default defineConfig({
     },
   },
   server: {
+    // Escucha en 0.0.0.0: sin esto el servidor solo responde dentro del
+    // contenedor y el mapeo de puertos de Docker no alcanza a nada.
+    host: true,
     port: 5173,
     proxy: {
       '/api': {
-        target: 'http://localhost:3000',
+        // En Docker el API vive en otro contenedor ('server'), no en localhost.
+        target: process.env.VITE_PROXY_TARGET ?? 'http://localhost:3000',
         changeOrigin: true,
       },
     },

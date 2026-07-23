@@ -45,6 +45,8 @@ services:
       context: ./client
       dockerfile: Dockerfile
     container_name: sit-client
+    environment:
+      VITE_PROXY_TARGET: http://server:3000
     ports:
       - "5173:5173"
     volumes:
