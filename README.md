@@ -38,7 +38,7 @@ cd Tutoria-untrm
 docker-compose up --build
 
 # 3. Ejecutar migración y seed (en otra terminal)
-docker exec -it sit-backend pnpm prisma migrate dev --name init
+docker exec -it sit-backend pnpm prisma migrate deploy
 docker exec -it sit-backend pnpm ts-node prisma/seed.ts
 ```
 
@@ -56,7 +56,7 @@ Los servicios estarán disponibles en:
 cd backend
 cp .env.example .env    # ajustar DATABASE_URL si es necesario
 pnpm install
-pnpm prisma migrate dev --name init
+pnpm prisma migrate deploy
 pnpm ts-node prisma/seed.ts
 pnpm dev
 

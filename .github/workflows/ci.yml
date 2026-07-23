@@ -108,9 +108,9 @@ jobs:
         working-directory: backend
         run: pnpm prisma generate
 
-      - name: Push schema to database
+      - name: Apply database migrations
         working-directory: backend
-        run: pnpm prisma db push
+        run: pnpm prisma migrate deploy
 
       - name: Run tests with coverage
         working-directory: backend
