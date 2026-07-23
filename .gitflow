@@ -1,0 +1,31 @@
+# Git Flow Configuration — SIT UNTRM
+#
+# Ramas principales:
+#   main    — Código en producción (releases etiquetadas)
+#   develop — Integración de features, siempre desplegable en staging
+#
+# Ramas de trabajo:
+#   feature/HU-XX-descripcion  — Nuevas funcionalidades (desde develop)
+#   feature/TT-XXX-descripcion — Tareas técnicas (desde develop)
+#   feature/RSK-XXX-descripcion — Mitigación de riesgos (desde develop)
+#   bugfix/descripcion          — Correcciones no urgentes (desde develop)
+#   hotfix/descripcion          — Correcciones urgentes (desde main)
+#   release/vX.Y.Z              — Preparación de release (desde develop)
+#
+# Convención de commits (Conventional Commits):
+#   feat:     Nueva funcionalidad
+#   fix:      Corrección de bug
+#   docs:     Documentación
+#   refactor: Refactorización sin cambio funcional
+#   test:     Pruebas
+#   chore:    Mantenimiento, configuración
+#   ci:       Cambios en CI/CD
+#
+# Flujo:
+#   1. Crear rama: git checkout -b feature/HU-01-login develop
+#   2. Desarrollar y commitear con Conventional Commits
+#   3. Push: git push -u origin feature/HU-01-login
+#   4. Crear Pull Request → develop
+#   5. Review + CI verde → Merge a develop
+#   6. Para release: crear rama release/v1.0.0 desde develop
+#   7. Merge release → main (tag) y → develop

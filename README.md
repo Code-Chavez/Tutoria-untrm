@@ -115,13 +115,65 @@ Tutoria-untrm/
 └── README.md
 ```
 
-## Convenciones
+## Git Flow
 
-- **Git Flow**: ramas `main`, `develop`, `feature/HU-XX-descripcion`
-- **Conventional Commits**: `feat:`, `fix:`, `docs:`, `refactor:`, `test:`
+El proyecto sigue Git Flow con la siguiente estructura de ramas:
+
+| Rama | Propósito |
+|------|-----------|
+| `main` | Código en producción (releases etiquetadas) |
+| `develop` | Integración, siempre desplegable en staging |
+| `feature/HU-XX-descripcion` | Nuevas funcionalidades |
+| `feature/TT-XXX-descripcion` | Tareas técnicas |
+| `bugfix/descripcion` | Correcciones no urgentes |
+| `hotfix/descripcion` | Correcciones urgentes desde main |
+| `release/vX.Y.Z` | Preparación de release |
+
+### Flujo de trabajo
+
+```bash
+# 1. Crear rama desde develop
+git checkout -b feature/HU-01-login develop
+
+# 2. Desarrollar con Conventional Commits
+git commit -m "feat: add login endpoint with JWT"
+
+# 3. Push y crear Pull Request → develop
+git push -u origin feature/HU-01-login
+
+# 4. CI verde + review → merge a develop
+```
+
+### Conventional Commits
+
+- `feat:` — Nueva funcionalidad
+- `fix:` — Corrección de bug
+- `docs:` — Documentación
+- `refactor:` — Refactorización
+- `test:` — Pruebas
+- `chore:` — Mantenimiento
+- `ci:` — CI/CD
+
+## CI/CD (GitHub Actions)
+
+El pipeline se ejecuta en cada push y PR a `develop` y `main`:
+
+1. **Backend**: Lint → Build → Test (con PostgreSQL de servicio)
+2. **Frontend**: Type check → Build
+3. **Docker**: Build de imágenes (solo en push a develop/main)
+
+Los criterios de la DoD C-07 se verifican automáticamente:
+- TypeScript estricto sin errores
+- Tests pasan
+- Auditoría de dependencias
+- Build exitoso
+
+## Convenciones de código
+
 - **TypeScript estricto**: `strict: true` en ambos tsconfig
 - **Backend**: Arquitectura Hexagonal — el dominio no depende de la infraestructura
 - **Frontend**: Organizado por features; cada feature contiene sus componentes, hooks y servicios
+- **Clean Code**: nombres descriptivos, responsabilidad única, sin código muerto
 
 ## Roles del sistema
 
