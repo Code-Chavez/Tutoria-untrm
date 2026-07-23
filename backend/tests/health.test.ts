@@ -17,7 +17,7 @@ describe('GET /api/health', () => {
     if (!address || typeof address === 'string') throw new Error('No address');
 
     const res = await fetch(`http://localhost:${address.port}/api/health`);
-    const body = await res.json();
+    const body = (await res.json()) as { service: string; status: string; timestamp: string };
 
     expect(body).toHaveProperty('service', 'SIT API');
     expect(body).toHaveProperty('timestamp');
