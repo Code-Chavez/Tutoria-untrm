@@ -113,6 +113,22 @@ describe('LoginPage', () => {
     expect(screen.queryByRole('heading', { name: /panel principal/i })).not.toBeInTheDocument();
   });
 
+  it('alterna la visibilidad de la contraseña sin perder lo escrito', async () => {
+    const user = userEvent.setup();
+    renderLogin();
+
+    const passwordInput = screen.getByLabelText(/contraseña/i);
+    await user.type(passwordInput, 'Password123!');
+    expect(passwordInput).toHaveAttribute('type', 'password');
+
+    await user.click(screen.getByRole('button', { name: /mostrar la clave/i }));
+    expect(passwordInput).toHaveAttribute('type', 'text');
+    expect(passwordInput).toHaveValue('Password123!');
+
+    await user.click(screen.getByRole('button', { name: /ocultar la clave/i }));
+    expect(passwordInput).toHaveAttribute('type', 'password');
+  });
+
   it('deshabilita el botón mientras la petición está en curso', async () => {
     let resolveLogin: (value: LoginResult) => void = () => {};
     loginMock.mockImplementation(
