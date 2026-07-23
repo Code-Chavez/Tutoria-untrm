@@ -157,17 +157,28 @@ git push -u origin feature/HU-01-login
 
 ## CI/CD (GitHub Actions)
 
-El pipeline se ejecuta en cada push y PR a `develop` y `main`:
+### CI Pipeline (`ci.yml`)
 
-1. **Backend**: Lint → Build → Test (con PostgreSQL de servicio)
-2. **Frontend**: Type check → Build
-3. **Docker**: Build de imágenes (solo en push a develop/main)
+Se ejecuta en cada push y PR a `develop` y `main`:
 
-Los criterios de la DoD C-07 se verifican automáticamente:
-- TypeScript estricto sin errores
-- Tests pasan
-- Auditoría de dependencias
-- Build exitoso
+| Job | Qué verifica |
+|-----|-------------|
+| **Backend — Lint** | ESLint con typescript-eslint |
+| **Backend — Build** | TypeScript compila (`strict: true`) + Prisma |
+| **Backend — Test** | Jest con PostgreSQL de servicio + coverage |
+| **Backend — Audit** | Vulnerabilidades en dependencias de producción |
+| **Frontend — Lint** | ESLint con react-hooks y react-refresh |
+| **Frontend — Build** | Type check (`tsc --noEmit`) + Vite build |
+| **Docker — Build** | Build de imágenes (solo en push, no en PRs) |
+
+### PR Checks (`pr-checks.yml`)
+
+Se ejecuta en cada Pull Request:
+
+- **Título**: debe seguir Conventional Commits (`feat:`, `fix:`, etc.)
+- **Descripción**: debe tener contenido mínimo
+- **Protección de main**: solo permite PRs desde `release/*`, `hotfix/*` o `develop`
+- **DoD checklist**: verifica que todos los items estén marcados (PRs a main)
 
 ## Convenciones de código
 

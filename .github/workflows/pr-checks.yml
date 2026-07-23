@@ -1,0 +1,103 @@
+name: PR Checks
+
+on:
+  pull_request:
+    branches: [develop, main]
+    types: [opened, edited, synchronize, reopened]
+
+jobs:
+  validate-pr-title:
+    name: Validate PR Title (Conventional Commits)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check PR title format
+        uses: amannn/action-semantic-pull-request@v5
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          types: |
+            feat
+            fix
+            docs
+            refactor
+            test
+            chore
+            ci
+            perf
+            revert
+          requireScope: false
+          subjectPattern: ^.+$
+          subjectPatternError: |
+            El título del PR debe seguir Conventional Commits:
+            feat: descripción, fix: descripción, etc.
+
+  validate-pr-body:
+    name: Validate PR Description
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check PR has description
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const body = context.payload.pull_request.body || '';
+            const stripped = body.replace(/<!--[\s\S]*?-->/g, '').trim();
+
+            if (stripped.length < 20) {
+              core.setFailed(
+                '❌ El PR necesita una descripción. ' +
+                'Completa la plantilla con los detalles del cambio.'
+              );
+            }
+
+  protect-main:
+    name: Gate — Main Branch Protection
+    if: github.base_ref == 'main'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Validate source branch
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const head = context.payload.pull_request.head.ref;
+            const allowed = /^(release\/|hotfix\/|develop$)/;
+
+            if (!allowed.test(head)) {
+              core.setFailed(
+                `❌ Solo se permite mergear a main desde:\n` +
+                `  • release/*\n` +
+                `  • hotfix/*\n` +
+                `  • develop\n\n` +
+                `Rama actual: ${head}\n\n` +
+                `Flujo correcto:\n` +
+                `  feature/* → develop → release/* → main`
+              );
+            }
+
+            core.info(`✅ Rama '${head}' autorizada para mergear a main`);
+
+      - name: Require DoD checklist completed
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const body = context.payload.pull_request.body || '';
+            const checkboxes = body.match(/- \[[ x]\]/g) || [];
+            const checked = body.match(/- \[x\]/gi) || [];
+
+            if (checkboxes.length === 0) {
+              core.setFailed(
+                '❌ El PR hacia main debe incluir el checklist del DoD. ' +
+                'Usa la plantilla de PR.'
+              );
+              return;
+            }
+
+            const unchecked = checkboxes.length - checked.length;
+            if (unchecked > 0) {
+              core.setFailed(
+                `❌ Faltan ${unchecked} items del DoD por completar.\n` +
+                `Checklist: ${checked.length}/${checkboxes.length} completados.\n` +
+                `Revisa y marca todos los criterios antes de mergear a main.`
+              );
+            }
+
+            core.info(`✅ DoD checklist completo: ${checked.length}/${checkboxes.length}`);
