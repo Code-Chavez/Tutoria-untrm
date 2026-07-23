@@ -24,6 +24,7 @@ Protocolo N° 01-2024-UNTRM/DBU · R.C.U. N° 283-2024
 
 - [Docker Desktop](https://www.docker.com/products/docker-desktop/) (incluye Docker Compose)
 - [Node.js 20+](https://nodejs.org/) (para desarrollo local sin Docker)
+- [pnpm](https://pnpm.io/) (`corepack enable && corepack prepare pnpm@latest --activate`)
 - Git
 
 ## Arranque rápido con Docker
@@ -37,8 +38,8 @@ cd Tutoria-untrm
 docker-compose up --build
 
 # 3. Ejecutar migración y seed (en otra terminal)
-docker exec -it sit-backend npx prisma migrate dev --name init
-docker exec -it sit-backend npx ts-node prisma/seed.ts
+docker exec -it sit-backend pnpm prisma migrate dev --name init
+docker exec -it sit-backend pnpm ts-node prisma/seed.ts
 ```
 
 Los servicios estarán disponibles en:
@@ -54,15 +55,15 @@ Los servicios estarán disponibles en:
 # 2. Backend
 cd backend
 cp .env.example .env    # ajustar DATABASE_URL si es necesario
-npm install
-npx prisma migrate dev --name init
-npx ts-node prisma/seed.ts
-npm run dev
+pnpm install
+pnpm prisma migrate dev --name init
+pnpm ts-node prisma/seed.ts
+pnpm dev
 
 # 3. Frontend (otra terminal)
 cd frontend
-npm install
-npm run dev
+pnpm install
+pnpm dev
 ```
 
 ## Estructura del proyecto

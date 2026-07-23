@@ -34,35 +34,39 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - uses: pnpm/action-setup@v4
+        with:
+          version: latest
+
       - uses: actions/setup-node@v4
         with:
           node-version: 20
-          cache: npm
-          cache-dependency-path: backend/package-lock.json
+          cache: pnpm
+          cache-dependency-path: backend/pnpm-lock.yaml
 
       - name: Install dependencies
         working-directory: backend
-        run: npm ci
+        run: pnpm install --frozen-lockfile
 
       - name: Generate Prisma Client
         working-directory: backend
-        run: npx prisma generate
+        run: pnpm prisma generate
 
       - name: Push schema to database
         working-directory: backend
-        run: npx prisma db push
+        run: pnpm prisma db push
 
       - name: Build
         working-directory: backend
-        run: npm run build
+        run: pnpm run build
 
       - name: Run tests
         working-directory: backend
-        run: npm test
+        run: pnpm test
 
       - name: Audit dependencies
         working-directory: backend
-        run: npm audit --audit-level=high || true
+        run: pnpm audit --prod || true
 
   frontend-lint-build:
     name: Frontend — Lint & Build
@@ -71,23 +75,27 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - uses: pnpm/action-setup@v4
+        with:
+          version: latest
+
       - uses: actions/setup-node@v4
         with:
           node-version: 20
-          cache: npm
-          cache-dependency-path: frontend/package-lock.json
+          cache: pnpm
+          cache-dependency-path: frontend/pnpm-lock.yaml
 
       - name: Install dependencies
         working-directory: frontend
-        run: npm ci
+        run: pnpm install --frozen-lockfile
 
       - name: Type check
         working-directory: frontend
-        run: npx tsc --noEmit
+        run: pnpm tsc --noEmit
 
       - name: Build
         working-directory: frontend
-        run: npm run build
+        run: pnpm run build
 
   docker-build:
     name: Docker — Build images

@@ -1,11 +1,11 @@
-import express from 'express';
+import express, { type Application } from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
 import { env } from './infrastructure/config/env';
 import { errorHandler } from './infrastructure/middleware/errorHandler';
 import routes from './interfaces/http/routes';
 
-const app = express();
+const app: Application = express();
 
 app.use(helmet());
 app.use(cors({ origin: env.CORS_ORIGIN, credentials: true }));

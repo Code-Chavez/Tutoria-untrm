@@ -1,7 +1,7 @@
-import { Router, Request, Response } from 'express';
+import { Router, type Request, type Response, type IRouter } from 'express';
 import { prisma } from '../../../infrastructure/database/prisma';
 
-const router = Router();
+const router: IRouter = Router();
 
 router.get('/health', async (_req: Request, res: Response) => {
   try {
