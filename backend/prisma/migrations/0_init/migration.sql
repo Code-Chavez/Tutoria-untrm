@@ -189,20 +189,4 @@ ALTER TABLE "schools" ADD CONSTRAINT "schools_faculty_id_fkey" FOREIGN KEY ("fac
 
 -- AddForeignKey
 ALTER TABLE "students" ADD CONSTRAINT "students_school_id_fkey" FOREIGN KEY ("school_id") REFERENCES "schools"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
-node.exe : ┌─────────────────────────────────────────────────────────┐
-En línea: 1 Carácter: 1
-+ & "C:\Program Files\nodejs/node.exe" "C:\Program Files\nodejs/node_mo ...
-+ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    + CategoryInfo          : NotSpecified: (┌──────────────...──────────────┐:String) [], RemoteException
-    + FullyQualifiedErrorId : NativeCommandError
- 
-│  Update available 6.19.3 -> 7.9.0                       │
-│                                                         │
-│  This is a major update - please follow the guide at    │
-│  https://pris.ly/d/major-version-upgrade                │
-│                                                         │
-│  Run the following to update                            │
-│    npm i --save-dev prisma@latest                       │
-│    npm i @prisma/client@latest                          │
-└─────────────────────────────────────────────────────────┘
 
