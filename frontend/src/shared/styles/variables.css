@@ -1,0 +1,29 @@
+:root {
+  /* Paleta institucional UNTRM */
+  --azul: #14315F;
+  --azul-osc: #0B1F3F;
+  --azul-med: #2E5FA3;
+  --celeste: #EAF1FA;
+  --dorado: #D9A404;
+
+  /* Neutros */
+  --g900: #1C2430;
+  --g600: #55606E;
+  --g300: #C9D2DD;
+  --g100: #F4F6F9;
+  --blanco: #fff;
+
+  /* Semánticos */
+  --ok: #1E7F4F;
+  --alerta: #C77800;
+  --peligro: #B3261E;
+  --info: #2E5FA3;
+
+  /* Tipografía */
+  --ft: 'Montserrat', sans-serif;
+  --fx: 'Inter', sans-serif;
+
+  /* Forma */
+  --r: 10px;
+  --sombra: 0 2px 12px rgba(11, 31, 63, 0.10);
+}

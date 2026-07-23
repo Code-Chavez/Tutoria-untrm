@@ -1,0 +1,32 @@
+@import './variables.css';
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: var(--fx);
+  color: var(--g900);
+  background: var(--g100);
+  font-size: 14px;
+  -webkit-font-smoothing: antialiased;
+}
+
+h1, h2, h3, h4 {
+  font-family: var(--ft);
+}
+
+a {
+  color: var(--azul-med);
+  text-decoration: none;
+}
+
+button {
+  cursor: pointer;
+}
+
+input, select, textarea {
+  font-family: var(--fx);
+}

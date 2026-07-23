@@ -1,0 +1,63 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: sit-postgres
+    environment:
+      POSTGRES_DB: sit_db
+      POSTGRES_USER: sit_user
+      POSTGRES_PASSWORD: sit_pass
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    networks:
+      - sit-net
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U sit_user -d sit_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: sit-backend
+    environment:
+      NODE_ENV: development
+      PORT: 3000
+      DATABASE_URL: postgresql://sit_user:sit_pass@postgres:5432/sit_db
+      JWT_SECRET: dev-secret-change-in-production
+      CORS_ORIGIN: http://localhost:5173
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./backend/src:/app/src
+      - ./backend/prisma:/app/prisma
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - sit-net
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: sit-frontend
+    ports:
+      - "5173:5173"
+    volumes:
+      - ./frontend/src:/app/src
+      - ./frontend/public:/app/public
+    depends_on:
+      - backend
+    networks:
+      - sit-net
+
+volumes:
+  pgdata:
+
+networks:
+  sit-net:
+    driver: bridge
