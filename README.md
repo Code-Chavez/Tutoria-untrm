@@ -35,17 +35,22 @@ git clone <url-del-repositorio>
 cd Tutoria-untrm
 
 # 2. Levantar los servicios
-docker-compose up --build
-
-# 3. Ejecutar migración y seed (en otra terminal)
-docker exec -it sit-server pnpm prisma migrate deploy
-docker exec -it sit-server pnpm run seed
+docker compose up --build
 ```
+
+Eso es todo: el contenedor del server aplica las migraciones y ejecuta el seed
+automáticamente en cada arranque, así que el entorno queda listo incluso con una
+base de datos vacía. El seed es idempotente (todo son `upsert`).
 
 Los servicios estarán disponibles en:
 - **Client**: http://localhost:5173
 - **Server API**: http://localhost:3000/api/health
 - **PostgreSQL**: localhost:5432
+
+Credenciales por defecto: `admin@untrm.edu.pe` / `Admin2026!`
+
+> Si editas `vite.config.ts`, `package.json` o un `Dockerfile`, vuelve a levantar
+> con `--build`: solo `src/` y `prisma/` están montados como volumen.
 
 ## Arranque local (sin Docker)
 
