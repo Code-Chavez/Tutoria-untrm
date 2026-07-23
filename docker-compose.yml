@@ -18,11 +18,11 @@ services:
       timeout: 5s
       retries: 5
 
-  backend:
+  server:
     build:
-      context: ./backend
+      context: ./server
       dockerfile: Dockerfile
-    container_name: sit-backend
+    container_name: sit-server
     environment:
       NODE_ENV: development
       PORT: 3000
@@ -32,26 +32,26 @@ services:
     ports:
       - "3000:3000"
     volumes:
-      - ./backend/src:/app/src
-      - ./backend/prisma:/app/prisma
+      - ./server/src:/app/src
+      - ./server/prisma:/app/prisma
     depends_on:
       postgres:
         condition: service_healthy
     networks:
       - sit-net
 
-  frontend:
+  client:
     build:
-      context: ./frontend
+      context: ./client
       dockerfile: Dockerfile
-    container_name: sit-frontend
+    container_name: sit-client
     ports:
       - "5173:5173"
     volumes:
-      - ./frontend/src:/app/src
-      - ./frontend/public:/app/public
+      - ./client/src:/app/src
+      - ./client/public:/app/public
     depends_on:
-      - backend
+      - server
     networks:
       - sit-net
 
