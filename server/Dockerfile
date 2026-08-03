@@ -14,4 +14,7 @@ COPY . .
 
 EXPOSE 3000
 
-CMD ["pnpm", "run", "dev"]
+# Imagen de desarrollo: deja la base lista en cada arranque para que
+# `docker compose up` siempre levante un entorno usable, incluso con un
+# volumen nuevo. El seed es idempotente (todo son upserts).
+CMD ["sh", "-c", "pnpm prisma migrate deploy && pnpm run seed && pnpm run dev"]

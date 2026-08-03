@@ -18,7 +18,7 @@ Protocolo N° 01-2024-UNTRM/DBU · R.C.U. N° 283-2024
 | Infraestructura | Docker · Docker Compose |
 | Autenticación | JWT (access + refresh) · BCrypt |
 | Validación | Zod |
-| Testing | Jest |
+| Testing | Jest (server) · Vitest + Testing Library (client) |
 
 ## Requisitos previos
 
@@ -35,17 +35,22 @@ git clone <url-del-repositorio>
 cd Tutoria-untrm
 
 # 2. Levantar los servicios
-docker-compose up --build
-
-# 3. Ejecutar migración y seed (en otra terminal)
-docker exec -it sit-server pnpm prisma migrate deploy
-docker exec -it sit-server pnpm ts-node prisma/seed.ts
+docker compose up --build
 ```
+
+Eso es todo: el contenedor del server aplica las migraciones y ejecuta el seed
+automáticamente en cada arranque, así que el entorno queda listo incluso con una
+base de datos vacía. El seed es idempotente (todo son `upsert`).
 
 Los servicios estarán disponibles en:
 - **Client**: http://localhost:5173
 - **Server API**: http://localhost:3000/api/health
 - **PostgreSQL**: localhost:5432
+
+Credenciales por defecto: `admin@untrm.edu.pe` / `Admin2026!`
+
+> Si editas `vite.config.ts`, `package.json` o un `Dockerfile`, vuelve a levantar
+> con `--build`: solo `src/` y `prisma/` están montados como volumen.
 
 ## Arranque local (sin Docker)
 
@@ -57,7 +62,7 @@ cd server
 cp .env.example .env    # ajustar DATABASE_URL si es necesario
 pnpm install
 pnpm prisma migrate deploy
-pnpm ts-node prisma/seed.ts
+pnpm run seed
 pnpm dev
 
 # 3. Client (otra terminal)
@@ -183,6 +188,7 @@ Se ejecuta en cada push y PR a `develop` y `main`:
 | **Server — Test** | Jest con PostgreSQL de servicio + coverage |
 | **Server — Audit** | Vulnerabilidades en dependencias de producción |
 | **Client — Lint** | ESLint con react-hooks y react-refresh |
+| **Client — Test** | Vitest + Testing Library + coverage |
 | **Client — Build** | Type check (`tsc --noEmit`) + Vite build |
 | **Docker — Build** | Build de imágenes (solo en push, no en PRs) |
 
