@@ -88,10 +88,10 @@ async function main() {
   // Usuario administrador por defecto
   const passwordHash = await bcrypt.hash('Admin2026!', 12);
   await prisma.user.upsert({
-    where: { email: 'admin@untrm.edu.pe' },
+    where: { email: '7183255722@untrm.edu.pe' },
     update: {},
     create: {
-      email: 'admin@untrm.edu.pe',
+      email: '7183255722@untrm.edu.pe',
       passwordHash,
       firstName: 'Administrador',
       lastName: 'SIT',
