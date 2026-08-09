@@ -3,6 +3,7 @@ import styles from './Sidebar.module.css';
 
 const navItems = [
   { label: 'Panel de inicio', path: '/', icon: '▚' },
+  { label: 'Gestión de Usuarios', path: '/users', icon: '👥' },
 ];
 
 export function Sidebar() {
@@ -17,7 +18,7 @@ export function Sidebar() {
           <NavLink
             key={item.path}
             to={item.path}
-            end
+            end={item.path === '/'}
             className={({ isActive }) =>
               `${styles.link} ${isActive ? styles.active : ''}`
             }
