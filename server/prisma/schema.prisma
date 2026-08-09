@@ -28,7 +28,7 @@ model User {
 
   auditLogs     AuditLog[]
   refreshTokens RefreshToken[]
-
+  passwordResetTokens PasswordResetToken[]
   @@map("users")
 }
 
@@ -78,6 +78,19 @@ model RefreshToken {
 }
 
 // ─── Auditoría ─────────────────────────────────────────────────
+
+model PasswordResetToken {
+  id        String   @id @default(uuid())
+  token     String   @unique
+  userId    String   @map("user_id")
+  expiresAt DateTime @map("expires_at")
+  used      Boolean  @default(false)
+  createdAt DateTime @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id])
+
+  @@map("password_reset_tokens")
+}
 
 model AuditLog {
   id        String   @id @default(uuid())
