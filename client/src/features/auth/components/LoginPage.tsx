@@ -1,5 +1,5 @@
 import { useState, type FormEvent } from 'react';
-import { Navigate, useLocation, useNavigate } from 'react-router-dom';
+import { Navigate, useLocation, useNavigate, Link } from 'react-router-dom';
 import { getApiErrorMessage } from '@shared/services/apiClient';
 import { useAuth } from '../hooks/useAuth';
 import styles from './LoginPage.module.css';
@@ -117,9 +117,9 @@ export function LoginPage() {
           </div>
 
           <div className={styles.forgotRow}>
-            <a href="#" className={styles.forgot}>
+            <Link to="/forgot-password" className={styles.forgot}>
               ¿Olvidaste tu contraseña?
-            </a>
+            </Link>
           </div>
 
           <button type="submit" className={styles.submit} disabled={isSubmitting}>

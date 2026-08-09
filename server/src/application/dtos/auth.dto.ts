@@ -15,3 +15,8 @@ export interface LoginOutput {
     role: string;
   };
 }
+
+export interface ResetPasswordInput {
+  token: string;
+  newPassword: string;
+}
