@@ -46,11 +46,13 @@ import { CreateUserUseCase } from '@application/use-cases/users/CreateUserUseCas
 import { UpdateUserUseCase } from '@application/use-cases/users/UpdateUserUseCase';
 import { ToggleUserStatusUseCase } from '@application/use-cases/users/ToggleUserStatusUseCase';
 import { ListUsersUseCase } from '@application/use-cases/users/ListUsersUseCase';
+import { ListRolesUseCase } from '@application/use-cases/roles/ListRolesUseCase';
 
 const createUserUseCase = new CreateUserUseCase(userRepository, passwordHasher);
 const updateUserUseCase = new UpdateUserUseCase(userRepository);
 const toggleUserStatusUseCase = new ToggleUserStatusUseCase(userRepository);
 const listUsersUseCase = new ListUsersUseCase(userRepository);
+const listRolesUseCase = new ListRolesUseCase(roleRepository);
 
 export const container = {
   repositories: {
@@ -72,5 +74,6 @@ export const container = {
     updateUserUseCase,
     toggleUserStatusUseCase,
     listUsersUseCase,
+    listRolesUseCase,
   },
 } as const;
