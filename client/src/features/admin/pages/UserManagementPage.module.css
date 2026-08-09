@@ -1,89 +1,100 @@
 .pageContainer {
-  padding: 0;
-  color: var(--g900);
+  /* Contenedor principal */
 }
 
+/* Encabezado de la página (.ph) */
 .header {
   display: flex;
   justify-content: space-between;
-  align-items: center;
-  margin-bottom: 24px;
+  align-items: flex-end;
+  margin-bottom: 18px;
+  gap: 14px;
+  flex-wrap: wrap;
 }
 
 .title {
-  font-size: 1.4rem;
-  font-weight: 700;
-  color: var(--azul-osc);
+  font-size: 20px;
+  color: var(--azul);
   margin: 0;
 }
 
+/* Botón Primario (.btn .b-pri) */
 .addButton {
-  background-color: var(--azul);
-  color: var(--blanco);
-  border: none;
-  padding: 10px 20px;
-  border-radius: var(--r);
-  font-weight: 600;
   font-family: var(--ft);
+  font-weight: 600;
   font-size: 13px;
+  border: none;
+  border-radius: 8px;
+  padding: 9px 16px;
   cursor: pointer;
-  transition: background-color 0.2s;
-  display: flex;
+  display: inline-flex;
   align-items: center;
-  gap: 8px;
+  gap: 7px;
+  background: var(--azul);
+  color: #fff;
+  transition: background 0.2s;
 }
 
 .addButton:hover {
-  background-color: var(--azul-med);
+  background: var(--azul-osc);
 }
 
+/* Controles de Filtro */
 .filters {
   display: flex;
   gap: 16px;
-  margin-bottom: 24px;
+  margin-bottom: 18px;
 }
 
 .filterSelect {
-  padding: 10px 14px;
-  border-radius: var(--r);
-  border: 1px solid var(--g300);
-  background-color: var(--blanco);
-  color: var(--g900);
-  font-size: 13px;
+  width: auto;
+  min-width: 150px;
   font-family: var(--fx);
+  font-size: 13px;
+  padding: 9px 11px;
+  border: 1.5px solid var(--g300);
+  border-radius: 8px;
+  background: #fff;
+  color: var(--g900);
   outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
 }
 
 .filterSelect:focus {
   border-color: var(--azul-med);
+  box-shadow: 0 0 0 3px rgba(46,95,163,.15);
 }
 
+/* Panel (.panel) */
 .tableContainer {
-  background: var(--blanco);
+  background: #fff;
   border-radius: var(--r);
   box-shadow: var(--sombra);
+  margin-bottom: 18px;
   overflow: hidden;
-  border: 1px solid var(--g300);
 }
 
+/* Tabla */
 .table {
   width: 100%;
   border-collapse: collapse;
-}
-
-.table th,
-.table td {
-  padding: 14px 20px;
-  text-align: left;
-  border-bottom: 1px solid var(--g300);
-  font-size: 13px;
+  font-size: 12.5px;
 }
 
 .table th {
-  background-color: var(--azul-osc);
-  font-weight: 600;
-  color: var(--blanco);
+  background: var(--azul);
+  color: #fff;
   font-family: var(--ft);
+  font-weight: 600;
+  font-size: 11.5px;
+  text-align: left;
+  padding: 10px 12px;
+  letter-spacing: .3px;
+}
+
+.table td {
+  padding: 9px 12px;
+  border-bottom: 1px solid var(--g100);
 }
 
 .table tr:last-child td {
@@ -91,27 +102,30 @@
 }
 
 .table tr:hover td {
-  background-color: var(--g100);
+  background: var(--celeste);
 }
 
+/* Badges (.bdg) */
 .statusBadge {
-  padding: 4px 10px;
-  border-radius: 12px;
-  font-size: 11px;
+  font-size: 10.5px;
   font-weight: 600;
-  font-family: var(--ft);
+  padding: 3px 9px;
+  border-radius: 99px;
+  white-space: nowrap;
+  display: inline-block;
 }
 
 .statusActive {
-  background-color: var(--celeste);
-  color: var(--info);
+  background: #E3F3EA;
+  color: var(--ok); /* Equivalente a .b-ok */
 }
 
 .statusInactive {
-  background-color: #FDE8E8;
-  color: var(--peligro);
+  background: #FBE4E2;
+  color: var(--peligro); /* Equivalente a .b-ur */
 }
 
+/* Acciones en la tabla */
 .actions {
   display: flex;
   gap: 8px;
@@ -119,34 +133,35 @@
 
 .actionButton {
   background: none;
-  border: 1px solid var(--g300);
+  border: 1.5px solid var(--g300);
   color: var(--g600);
   cursor: pointer;
-  padding: 6px 10px;
+  padding: 4px 8px;
   border-radius: 6px;
   transition: all 0.2s;
-  display: flex;
+  display: inline-flex;
   align-items: center;
   justify-content: center;
-  font-size: 13px;
+  font-size: 12px;
 }
 
 .actionButton:hover {
-  background-color: var(--g100);
+  background: #fff;
   color: var(--azul);
   border-color: var(--azul-med);
 }
 
+/* Estados de carga/vacío */
 .loading {
   text-align: center;
   padding: 40px;
   color: var(--g600);
-  font-size: 14px;
+  font-size: 13px;
 }
 
 .emptyState {
   text-align: center;
   padding: 60px 20px;
   color: var(--g600);
-  font-size: 14px;
+  font-size: 13px;
 }

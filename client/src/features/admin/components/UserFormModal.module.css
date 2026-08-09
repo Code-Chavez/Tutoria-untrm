@@ -4,7 +4,7 @@
   left: 0;
   width: 100vw;
   height: 100vh;
-  background-color: rgba(11, 31, 63, 0.6);
+  background-color: rgba(11, 31, 63, 0.4);
   display: flex;
   justify-content: center;
   align-items: center;
@@ -13,14 +13,14 @@
 }
 
 .modalContent {
-  background-color: var(--blanco);
+  background: #fff;
   border-radius: var(--r);
   width: 100%;
-  max-width: 500px;
+  max-width: 460px; /* Un poco más estrecho para forms */
   padding: 24px;
-  box-shadow: 0 10px 25px rgba(11, 31, 63, 0.2);
-  animation: slideUp 0.3s ease-out;
-  border: 1px solid var(--g300);
+  box-shadow: var(--sombra);
+  animation: slideUp 0.25s ease-out;
+  border-top: 3px solid var(--azul); /* Estilo .kpi */
 }
 
 @keyframes slideUp {
@@ -39,22 +39,19 @@
   justify-content: space-between;
   align-items: center;
   margin-bottom: 20px;
-  border-bottom: 1px solid var(--g300);
-  padding-bottom: 16px;
 }
 
 .modalHeader h2 {
+  font-size: 18px;
+  color: var(--azul);
   margin: 0;
-  font-size: 1.25rem;
-  color: var(--azul-osc);
-  font-weight: 700;
 }
 
 .closeButton {
   background: none;
   border: none;
   color: var(--g600);
-  font-size: 1.5rem;
+  font-size: 1.2rem;
   cursor: pointer;
   transition: color 0.2s;
   display: grid;
@@ -65,34 +62,38 @@
   color: var(--peligro);
 }
 
+/* Campos de formulario (.field) */
 .formGroup {
-  margin-bottom: 16px;
+  margin-bottom: 13px;
 }
 
 .formGroup label {
   display: block;
-  margin-bottom: 6px;
-  color: var(--g900);
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 600;
+  margin-bottom: 5px;
+  color: var(--g900);
 }
 
+/* Inputs (.inp) */
 .input,
 .select {
   width: 100%;
-  padding: 10px 12px;
-  border-radius: 6px;
-  border: 1px solid var(--g300);
-  background-color: var(--blanco);
+  font-family: var(--fx);
+  font-size: 13px;
+  padding: 9px 11px;
+  border: 1.5px solid var(--g300);
+  border-radius: 8px;
+  background: #fff;
   color: var(--g900);
-  font-size: 14px;
-  transition: border-color 0.2s;
   outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
 }
 
 .input:focus,
 .select:focus {
   border-color: var(--azul-med);
+  box-shadow: 0 0 0 3px rgba(46, 95, 163, 0.15);
 }
 
 .formActions {
@@ -100,40 +101,43 @@
   justify-content: flex-end;
   gap: 12px;
   margin-top: 24px;
-  padding-top: 16px;
-  border-top: 1px solid var(--g300);
 }
 
+/* Botones (.btn) */
 .cancelButton,
 .submitButton {
-  padding: 10px 16px;
-  border-radius: 6px;
-  font-size: 13px;
   font-family: var(--ft);
   font-weight: 600;
+  font-size: 13px;
+  border: none;
+  border-radius: 8px;
+  padding: 9px 16px;
   cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   transition: all 0.2s;
 }
 
+/* .b-out */
 .cancelButton {
-  background-color: transparent;
-  color: var(--g600);
-  border: 1px solid var(--g300);
+  background: #fff;
+  color: var(--azul);
+  border: 1.5px solid var(--azul);
 }
 
 .cancelButton:hover {
-  background-color: var(--g100);
-  color: var(--g900);
+  background: var(--celeste);
 }
 
+/* .b-pri */
 .submitButton {
-  background-color: var(--azul);
-  color: var(--blanco);
-  border: none;
+  background: var(--azul);
+  color: #fff;
 }
 
 .submitButton:hover {
-  background-color: var(--azul-med);
+  background: var(--azul-osc);
 }
 
 .submitButton:disabled {
