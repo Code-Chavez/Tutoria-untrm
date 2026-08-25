@@ -54,6 +54,33 @@
   font-weight: 600;
 }
 
+/* Ítems de HUs aún no construidas: visibles pero no navegables. */
+.disabled {
+  color: rgba(255, 255, 255, 0.4);
+  cursor: default;
+}
+
+.disabled:hover {
+  background: none;
+  color: rgba(255, 255, 255, 0.4);
+}
+
+.disabled .icon {
+  opacity: 0.7;
+}
+
+.soon {
+  margin-left: auto;
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: 0.4px;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.55);
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 5px;
+  padding: 2px 6px;
+}
+
 .icon {
   display: grid;
   place-items: center;
