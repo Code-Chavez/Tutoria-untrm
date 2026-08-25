@@ -1,15 +1,10 @@
-.pageContainer {
-  /* Contenedor principal */
+.page {
+  max-width: 1180px;
 }
 
-/* Encabezado de la página (.ph) */
+/* ── Encabezado (.ph) ─────────────────────────────────────── */
 .header {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-end;
   margin-bottom: 18px;
-  gap: 14px;
-  flex-wrap: wrap;
 }
 
 .title {
@@ -24,63 +19,132 @@
   margin-top: 3px;
 }
 
-/* Botón Primario (.btn .b-pri) */
+/* ── Pestañas (.tabs) ─────────────────────────────────────── */
+.tabs {
+  display: flex;
+  gap: 4px;
+  border-bottom: 2px solid var(--g100);
+  margin-bottom: 18px;
+  flex-wrap: wrap;
+}
+
+.tab {
+  padding: 9px 15px;
+  font-family: var(--ft);
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--g600);
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -2px;
+  cursor: pointer;
+  transition: color 0.15s;
+}
+
+.tab:hover {
+  color: var(--azul);
+}
+
+.tabActive {
+  color: var(--azul);
+  border-bottom-color: var(--dorado);
+}
+
+/* ── Rejilla de 2 columnas (.grid2) ───────────────────────── */
+.grid2 {
+  display: grid;
+  grid-template-columns: 1.35fr 1fr;
+  gap: 18px;
+  align-items: start;
+}
+
+@media (max-width: 900px) {
+  .grid2 {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ── Panel (.panel) ───────────────────────────────────────── */
+.panel {
+  background: #fff;
+  border-radius: var(--r);
+  box-shadow: var(--sombra);
+  overflow: hidden;
+}
+
+.panelHead {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 13px 18px;
+  border-bottom: 1px solid var(--g100);
+}
+
+.panelHead h3 {
+  font-size: 14.5px;
+  color: var(--azul);
+  margin: 0;
+}
+
+.panelBody {
+  padding: 16px 18px;
+}
+
+/* Botón primario pequeño (.btn .b-pri .b-sm) */
 .addButton {
   font-family: var(--ft);
   font-weight: 600;
-  font-size: 13px;
+  font-size: 12px;
   border: none;
   border-radius: 8px;
-  padding: 9px 16px;
+  padding: 7px 12px;
   cursor: pointer;
   display: inline-flex;
   align-items: center;
-  gap: 7px;
+  gap: 6px;
   background: var(--azul);
   color: #fff;
-  transition: background 0.2s;
+  transition: background 0.18s;
 }
 
 .addButton:hover {
   background: var(--azul-osc);
 }
 
-/* Controles de Filtro */
+/* ── Filtros ──────────────────────────────────────────────── */
 .filters {
   display: flex;
-  gap: 16px;
-  margin-bottom: 18px;
+  gap: 10px;
+  padding: 12px 18px;
+  border-bottom: 1px solid var(--g100);
+  flex-wrap: wrap;
 }
 
 .filterSelect {
-  width: auto;
-  min-width: 150px;
+  flex: 1;
+  min-width: 130px;
   font-family: var(--fx);
-  font-size: 13px;
-  padding: 9px 11px;
+  font-size: 12.5px;
+  padding: 8px 10px;
   border: 1.5px solid var(--g300);
   border-radius: 8px;
   background: #fff;
   color: var(--g900);
   outline: none;
-  transition: border-color 0.2s, box-shadow 0.2s;
+  transition: border-color 0.18s, box-shadow 0.18s;
 }
 
 .filterSelect:focus {
   border-color: var(--azul-med);
-  box-shadow: 0 0 0 3px rgba(46,95,163,.15);
+  box-shadow: 0 0 0 3px rgba(46, 95, 163, 0.15);
 }
 
-/* Panel (.panel) */
-.tableContainer {
-  background: #fff;
-  border-radius: var(--r);
-  box-shadow: var(--sombra);
-  margin-bottom: 18px;
-  overflow: hidden;
+/* ── Tabla ────────────────────────────────────────────────── */
+.tableWrap {
+  overflow-x: auto;
 }
 
-/* Tabla */
 .table {
   width: 100%;
   border-collapse: collapse;
@@ -94,69 +158,82 @@
   font-weight: 600;
   font-size: 11.5px;
   text-align: left;
-  padding: 10px 12px;
-  letter-spacing: .3px;
+  padding: 10px 14px;
+  letter-spacing: 0.3px;
+  white-space: nowrap;
+}
+
+.actionsHead {
+  text-align: right;
 }
 
 .table td {
-  padding: 9px 12px;
+  padding: 10px 14px;
   border-bottom: 1px solid var(--g100);
+  vertical-align: middle;
 }
 
 .table tr:last-child td {
   border-bottom: none;
 }
 
-.table tr:hover td {
+.table tbody tr:hover td {
   background: var(--celeste);
 }
 
-/* Celda de nombre con avatar de iniciales (patrón .avat del mockup) */
-.nameCell {
+.userCell {
   display: flex;
-  align-items: center;
-  gap: 10px;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.userEmail {
+  color: var(--g900);
   font-weight: 500;
 }
 
-.avatar {
-  width: 30px;
-  height: 30px;
-  flex-shrink: 0;
-  border-radius: 50%;
-  background: var(--azul-med);
-  color: #fff;
-  display: grid;
-  place-items: center;
-  font-family: var(--ft);
-  font-weight: 700;
+.userName {
   font-size: 11px;
+  color: var(--g600);
 }
 
-/* Badges (.bdg) */
+/* Píldora de rol (.pill) */
+.pill {
+  display: inline-block;
+  padding: 2px 9px;
+  border-radius: 6px;
+  background: var(--celeste);
+  color: var(--azul);
+  font-size: 11px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+/* Badges de estado (.bdg) */
 .statusBadge {
+  display: inline-block;
   font-size: 10.5px;
   font-weight: 600;
   padding: 3px 9px;
   border-radius: 99px;
   white-space: nowrap;
-  display: inline-block;
 }
 
 .statusActive {
-  background: #E3F3EA;
-  color: var(--ok); /* Equivalente a .b-ok */
+  background: #e3f3ea;
+  color: var(--ok);
 }
 
 .statusInactive {
-  background: #EEEEEE;
-  color: var(--g600); /* Neutral (.b-nt): inactivo no es un error */
+  background: #eeeeee;
+  color: var(--g600);
 }
 
-/* Acciones en la tabla */
+/* ── Acciones ─────────────────────────────────────────────── */
 .actions {
   display: flex;
-  gap: 8px;
+  gap: 7px;
+  justify-content: flex-end;
 }
 
 .actionButton {
@@ -164,8 +241,8 @@
   border: 1.5px solid var(--g300);
   color: var(--g600);
   cursor: pointer;
-  width: 32px;
-  height: 32px;
+  width: 30px;
+  height: 30px;
   border-radius: 8px;
   transition: color 0.18s, border-color 0.18s, background 0.18s;
   display: inline-flex;
@@ -182,26 +259,99 @@
 .deactivateButton:hover {
   color: var(--peligro);
   border-color: var(--peligro);
-  background: #FBE4E2;
+  background: #fbe4e2;
 }
 
 .activateButton:hover {
   color: var(--ok);
   border-color: var(--ok);
-  background: #E3F3EA;
+  background: #e3f3ea;
 }
 
-/* Estados de carga/vacío */
-.loading {
+.stateMsg {
   text-align: center;
-  padding: 40px;
+  padding: 44px 20px;
   color: var(--g600);
   font-size: 13px;
 }
 
-.emptyState {
-  text-align: center;
-  padding: 60px 20px;
-  color: var(--g600);
+/* ── Parámetros del sistema ───────────────────────────────── */
+.field {
+  margin-bottom: 14px;
+}
+
+.field label {
+  display: block;
+  font-family: var(--ft);
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--g900);
+  margin-bottom: 6px;
+}
+
+.input {
+  width: 100%;
+  font-family: var(--fx);
   font-size: 13px;
+  padding: 9px 11px;
+  border: 1.5px solid var(--g300);
+  border-radius: 8px;
+  background: #fff;
+  color: var(--g900);
+  outline: none;
+  transition: border-color 0.18s, box-shadow 0.18s;
+}
+
+.input:focus {
+  border-color: var(--azul-med);
+  box-shadow: 0 0 0 3px rgba(46, 95, 163, 0.15);
+}
+
+.saveButton {
+  font-family: var(--ft);
+  font-weight: 600;
+  font-size: 13px;
+  border: none;
+  border-radius: 8px;
+  padding: 10px 16px;
+  cursor: pointer;
+  background: var(--azul);
+  color: #fff;
+  margin-top: 4px;
+  transition: background 0.18s;
+}
+
+.saveButton:hover {
+  background: var(--azul-osc);
+}
+
+.paramHint {
+  margin-top: 12px;
+  font-size: 11px;
+  color: var(--g600);
+  line-height: 1.5;
+}
+
+/* ── Placeholder de pestañas no construidas ───────────────── */
+.placeholder {
+  background: #fff;
+  border-radius: var(--r);
+  box-shadow: var(--sombra);
+  padding: 48px 24px;
+  text-align: center;
+  color: var(--g600);
+  font-size: 13.5px;
+}
+
+.soonTag {
+  display: inline-block;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  color: var(--alerta);
+  background: #fbf0dc;
+  border-radius: 6px;
+  padding: 3px 9px;
+  margin-bottom: 12px;
 }
