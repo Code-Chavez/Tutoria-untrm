@@ -3,6 +3,11 @@ import styles from './UserManagementPage.module.css';
 import { User, userService, CreateUserData, UpdateUserData } from '../services/userService';
 import { Role, roleService } from '../services/roleService';
 import { UserFormModal } from '../components/UserFormModal';
+import { PlusIcon, PencilIcon, BanIcon, CheckCircleIcon } from '@shared/components/icons';
+
+function getInitials(firstName: string, lastName: string): string {
+  return `${firstName.charAt(0)}${lastName.charAt(0)}`.toUpperCase();
+}
 
 export const UserManagementPage: React.FC = () => {
   const [users, setUsers] = useState<User[]>([]);
@@ -94,9 +99,15 @@ export const UserManagementPage: React.FC = () => {
   return (
     <div className={styles.pageContainer}>
       <div className={styles.header}>
-        <h1 className={styles.title}>Gestión de Usuarios</h1>
+        <div>
+          <h1 className={styles.title}>Gestión de Usuarios</h1>
+          <p className={styles.subtitle}>
+            Administra las cuentas del personal y sus roles en el sistema.
+          </p>
+        </div>
         <button className={styles.addButton} onClick={() => handleOpenModal()}>
-          + Nuevo Usuario
+          <PlusIcon size={16} />
+          Nuevo Usuario
         </button>
       </div>
 
@@ -142,7 +153,14 @@ export const UserManagementPage: React.FC = () => {
             <tbody>
               {users.map(user => (
                 <tr key={user.id}>
-                  <td>{`${user.firstName} ${user.lastName}`}</td>
+                  <td>
+                    <div className={styles.nameCell}>
+                      <span className={styles.avatar}>
+                        {getInitials(user.firstName, user.lastName)}
+                      </span>
+                      <span>{`${user.firstName} ${user.lastName}`}</span>
+                    </div>
+                  </td>
                   <td>{user.email}</td>
                   <td>{getRoleName(user.roleId)}</td>
                   <td>
@@ -152,19 +170,21 @@ export const UserManagementPage: React.FC = () => {
                   </td>
                   <td>
                     <div className={styles.actions}>
-                      <button 
+                      <button
                         className={`${styles.actionButton} ${styles.editButton}`}
                         onClick={() => handleOpenModal(user)}
                         title="Editar"
+                        aria-label={`Editar a ${user.firstName} ${user.lastName}`}
                       >
-                        ✏️
+                        <PencilIcon size={16} />
                       </button>
-                      <button 
-                        className={`${styles.actionButton} ${styles.toggleButton}`}
+                      <button
+                        className={`${styles.actionButton} ${user.isActive ? styles.deactivateButton : styles.activateButton}`}
                         onClick={() => handleToggleStatus(user.id)}
                         title={user.isActive ? 'Desactivar' : 'Activar'}
+                        aria-label={user.isActive ? `Desactivar a ${user.firstName} ${user.lastName}` : `Activar a ${user.firstName} ${user.lastName}`}
                       >
-                        {user.isActive ? '🛑' : '✅'}
+                        {user.isActive ? <BanIcon size={16} /> : <CheckCircleIcon size={16} />}
                       </button>
                     </div>
                   </td>

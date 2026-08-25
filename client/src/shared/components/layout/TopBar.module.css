@@ -28,8 +28,21 @@
 
 .bell {
   position: relative;
-  font-size: 17px;
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border: none;
+  border-radius: 8px;
+  background: none;
+  color: var(--g600);
   cursor: pointer;
+  transition: color 0.15s, background 0.15s;
+}
+
+.bell:hover {
+  color: var(--azul);
+  background: var(--g100);
 }
 
 .who {

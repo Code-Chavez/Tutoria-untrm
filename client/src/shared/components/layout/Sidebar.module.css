@@ -55,7 +55,9 @@
 }
 
 .icon {
-  width: 17px;
-  text-align: center;
-  font-size: 14px;
+  display: grid;
+  place-items: center;
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
 }

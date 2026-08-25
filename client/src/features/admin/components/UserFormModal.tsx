@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import styles from './UserFormModal.module.css';
 import { User, CreateUserData, UpdateUserData } from '../services/userService';
 import { Role } from '../services/roleService';
+import { CloseIcon } from '@shared/components/icons';
 
 interface UserFormModalProps {
   onClose: () => void;
@@ -56,8 +57,8 @@ export const UserFormModal: React.FC<UserFormModalProps> = ({
       <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
         <div className={styles.modalHeader}>
           <h2>{userToEdit ? 'Editar Usuario' : 'Nuevo Usuario'}</h2>
-          <button className={styles.closeButton} onClick={onClose}>
-            &times;
+          <button className={styles.closeButton} onClick={onClose} aria-label="Cerrar">
+            <CloseIcon size={18} />
           </button>
         </div>
 

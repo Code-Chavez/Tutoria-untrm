@@ -1,9 +1,10 @@
 import { NavLink } from 'react-router-dom';
+import { DashboardIcon, UsersIcon } from '@shared/components/icons';
 import styles from './Sidebar.module.css';
 
 const navItems = [
-  { label: 'Panel de inicio', path: '/', icon: '▚' },
-  { label: 'Gestión de Usuarios', path: '/users', icon: '👥' },
+  { label: 'Panel de inicio', path: '/', Icon: DashboardIcon },
+  { label: 'Gestión de Usuarios', path: '/users', Icon: UsersIcon },
 ];
 
 export function Sidebar() {
@@ -14,17 +15,19 @@ export function Sidebar() {
       </div>
       <nav className={styles.nav}>
         <span className={styles.group}>Principal</span>
-        {navItems.map((item) => (
+        {navItems.map(({ label, path, Icon }) => (
           <NavLink
-            key={item.path}
-            to={item.path}
-            end={item.path === '/'}
+            key={path}
+            to={path}
+            end={path === '/'}
             className={({ isActive }) =>
               `${styles.link} ${isActive ? styles.active : ''}`
             }
           >
-            <span className={styles.icon}>{item.icon}</span>
-            {item.label}
+            <span className={styles.icon}>
+              <Icon size={18} />
+            </span>
+            {label}
           </NavLink>
         ))}
       </nav>

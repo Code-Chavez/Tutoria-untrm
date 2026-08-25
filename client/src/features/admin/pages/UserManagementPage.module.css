@@ -18,6 +18,12 @@
   margin: 0;
 }
 
+.subtitle {
+  font-size: 12.5px;
+  color: var(--g600);
+  margin-top: 3px;
+}
+
 /* Botón Primario (.btn .b-pri) */
 .addButton {
   font-family: var(--ft);
@@ -105,6 +111,28 @@
   background: var(--celeste);
 }
 
+/* Celda de nombre con avatar de iniciales (patrón .avat del mockup) */
+.nameCell {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-weight: 500;
+}
+
+.avatar {
+  width: 30px;
+  height: 30px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  background: var(--azul-med);
+  color: #fff;
+  display: grid;
+  place-items: center;
+  font-family: var(--ft);
+  font-weight: 700;
+  font-size: 11px;
+}
+
 /* Badges (.bdg) */
 .statusBadge {
   font-size: 10.5px;
@@ -121,8 +149,8 @@
 }
 
 .statusInactive {
-  background: #FBE4E2;
-  color: var(--peligro); /* Equivalente a .b-ur */
+  background: #EEEEEE;
+  color: var(--g600); /* Neutral (.b-nt): inactivo no es un error */
 }
 
 /* Acciones en la tabla */
@@ -132,23 +160,35 @@
 }
 
 .actionButton {
-  background: none;
+  background: #fff;
   border: 1.5px solid var(--g300);
   color: var(--g600);
   cursor: pointer;
-  padding: 4px 8px;
-  border-radius: 6px;
-  transition: all 0.2s;
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  transition: color 0.18s, border-color 0.18s, background 0.18s;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  font-size: 12px;
 }
 
-.actionButton:hover {
-  background: #fff;
-  color: var(--azul);
+.editButton:hover {
+  color: var(--azul-med);
   border-color: var(--azul-med);
+  background: var(--celeste);
+}
+
+.deactivateButton:hover {
+  color: var(--peligro);
+  border-color: var(--peligro);
+  background: #FBE4E2;
+}
+
+.activateButton:hover {
+  color: var(--ok);
+  border-color: var(--ok);
+  background: #E3F3EA;
 }
 
 /* Estados de carga/vacío */
