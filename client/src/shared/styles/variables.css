@@ -25,5 +25,11 @@
 
   /* Forma */
   --r: 10px;
-  --sombra: 0 2px 12px rgba(11, 31, 63, 0.10);
+  --r-lg: 14px;
+  --sombra: 0 1px 2px rgba(11, 31, 63, 0.04), 0 4px 14px rgba(11, 31, 63, 0.06);
+  --sombra-hover: 0 2px 4px rgba(11, 31, 63, 0.06), 0 10px 24px rgba(11, 31, 63, 0.12);
+
+  /* Bordes */
+  --borde: #E4E9F1;
+  --borde-fuerte: #D3DBE6;
 }
