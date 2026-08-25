@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useState } from 'react';
 import styles from './UserManagementPage.module.css';
 import { User, userService, CreateUserData, UpdateUserData } from '../services/userService';
 import { Role, roleService } from '../services/roleService';
@@ -17,20 +17,9 @@ export const UserManagementPage: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [userToEdit, setUserToEdit] = useState<User | null>(null);
 
-  const fetchUsers = useCallback(async () => {
-    try {
-      setLoading(true);
-      const data = await userService.getUsers({
-        roleId: filterRole || undefined,
-        isActive: filterStatus === 'active' ? true : filterStatus === 'inactive' ? false : undefined,
-      });
-      setUsers(data);
-    } catch (error) {
-      console.error('Error fetching users', error);
-    } finally {
-      setLoading(false);
-    }
-  }, [filterRole, filterStatus]);
+  // Se incrementa para forzar una recarga de la tabla tras crear/editar/togglear.
+  const [refreshKey, setRefreshKey] = useState(0);
+  const refreshUsers = () => setRefreshKey((key) => key + 1);
 
   useEffect(() => {
     const fetchRoles = async () => {
@@ -45,8 +34,27 @@ export const UserManagementPage: React.FC = () => {
   }, []);
 
   useEffect(() => {
+    let ignore = false;
+    // `loading` arranca en true para la carga inicial; en refetch por filtro
+    // la tabla se actualiza en sitio sin volver a mostrar el spinner.
+    const fetchUsers = async () => {
+      try {
+        const data = await userService.getUsers({
+          roleId: filterRole || undefined,
+          isActive: filterStatus === 'active' ? true : filterStatus === 'inactive' ? false : undefined,
+        });
+        if (!ignore) setUsers(data);
+      } catch (error) {
+        console.error('Error fetching users', error);
+      } finally {
+        if (!ignore) setLoading(false);
+      }
+    };
     fetchUsers();
-  }, [fetchUsers]);
+    return () => {
+      ignore = true;
+    };
+  }, [filterRole, filterStatus, refreshKey]);
 
   const handleOpenModal = (user?: User) => {
     setUserToEdit(user || null);
@@ -64,14 +72,14 @@ export const UserManagementPage: React.FC = () => {
     } else {
       await userService.createUser(data as CreateUserData);
     }
-    fetchUsers(); // Recargar la tabla
+    refreshUsers(); // Recargar la tabla
   };
 
   const handleToggleStatus = async (id: string) => {
     if (window.confirm('¿Estás seguro de que deseas cambiar el estado de este usuario?')) {
       try {
         await userService.toggleUserStatus(id);
-        fetchUsers();
+        refreshUsers();
       } catch (error) {
         console.error('Error toggling status', error);
       }
@@ -167,13 +175,15 @@ export const UserManagementPage: React.FC = () => {
         )}
       </div>
 
-      <UserFormModal 
-        isOpen={isModalOpen}
-        onClose={handleCloseModal}
-        onSubmit={handleSubmit}
-        userToEdit={userToEdit}
-        roles={roles}
-      />
+      {isModalOpen && (
+        <UserFormModal
+          key={userToEdit?.id ?? 'new'}
+          onClose={handleCloseModal}
+          onSubmit={handleSubmit}
+          userToEdit={userToEdit}
+          roles={roles}
+        />
+      )}
     </div>
   );
 };

@@ -87,7 +87,7 @@ export class UserController {
 
       const users = await this.listUsersUseCase.execute(filters);
       res.status(200).json({ users });
-    } catch (error) {
+    } catch {
       res.status(500).json({ error: 'Error interno del servidor' });
     }
   };

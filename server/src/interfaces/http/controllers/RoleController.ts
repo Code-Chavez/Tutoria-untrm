@@ -8,7 +8,7 @@ export class RoleController {
     try {
       const roles = await this.listRolesUseCase.execute();
       res.status(200).json({ roles });
-    } catch (error) {
+    } catch {
       res.status(500).json({ error: 'Error interno del servidor' });
     }
   };

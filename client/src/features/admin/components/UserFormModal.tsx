@@ -1,10 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import styles from './UserFormModal.module.css';
 import { User, CreateUserData, UpdateUserData } from '../services/userService';
 import { Role } from '../services/roleService';
 
 interface UserFormModalProps {
-  isOpen: boolean;
   onClose: () => void;
   onSubmit: (data: CreateUserData | UpdateUserData) => Promise<void>;
   userToEdit: User | null;
@@ -12,42 +11,25 @@ interface UserFormModalProps {
 }
 
 export const UserFormModal: React.FC<UserFormModalProps> = ({
-  isOpen,
   onClose,
   onSubmit,
   userToEdit,
   roles,
 }) => {
-  const [formData, setFormData] = useState<CreateUserData>({
-    email: '',
-    firstName: '',
-    lastName: '',
-    roleId: '',
-    phone: '',
-  });
+  // El componente se remonta (vía `key`) cuando cambia el usuario a editar,
+  // así que el estado inicial se deriva del prop sin necesidad de un efecto.
+  const [formData, setFormData] = useState<CreateUserData>(() =>
+    userToEdit
+      ? {
+          email: userToEdit.email,
+          firstName: userToEdit.firstName,
+          lastName: userToEdit.lastName,
+          roleId: userToEdit.roleId,
+          phone: userToEdit.phone || '',
+        }
+      : { email: '', firstName: '', lastName: '', roleId: '', phone: '' },
+  );
   const [loading, setLoading] = useState(false);
-
-  useEffect(() => {
-    if (userToEdit) {
-      setFormData({
-        email: userToEdit.email,
-        firstName: userToEdit.firstName,
-        lastName: userToEdit.lastName,
-        roleId: userToEdit.roleId,
-        phone: userToEdit.phone || '',
-      });
-    } else {
-      setFormData({
-        email: '',
-        firstName: '',
-        lastName: '',
-        roleId: '',
-        phone: '',
-      });
-    }
-  }, [userToEdit, isOpen]);
-
-  if (!isOpen) return null;
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
