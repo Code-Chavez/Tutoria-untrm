@@ -2,6 +2,7 @@ import { useState, type FormEvent } from 'react';
 import { Navigate, useLocation, useNavigate, Link } from 'react-router-dom';
 import { getApiErrorMessage } from '@shared/services/apiClient';
 import { useAuth } from '../hooks/useAuth';
+import logoUntrm from '@assets/logo-untrm.png';
 import styles from './LoginPage.module.css';
 
 interface LocationState {
@@ -43,18 +44,17 @@ export function LoginPage() {
   return (
     <div className={styles.page}>
       <main className={styles.card}>
-        <div className={styles.brandRow}>
-          <div className={styles.emblem}>SIT</div>
-          <div>
-            <b>UNTRM</b>
-            <small>Bienestar Universitario</small>
-          </div>
+        <div className={styles.brand}>
+          <img
+            src={logoUntrm}
+            alt="Universidad Nacional Toribio Rodríguez de Mendoza de Amazonas"
+            className={styles.logo}
+          />
+          <h1 className={styles.title}>Bienvenido de nuevo</h1>
+          <p className={styles.subtitle}>
+            Ingresa con tu cuenta institucional para continuar.
+          </p>
         </div>
-
-        <h1 className={styles.title}>Bienvenido de nuevo</h1>
-        <p className={styles.subtitle}>
-          Ingresa con tu cuenta institucional para continuar.
-        </p>
 
         <form onSubmit={handleSubmit} noValidate>
           {error && (
