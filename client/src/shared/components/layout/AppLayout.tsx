@@ -1,6 +1,7 @@
 import { Outlet, useLocation } from 'react-router-dom';
 import { Sidebar } from './Sidebar';
 import { TopBar } from './TopBar';
+import { SessionTimeout } from '@features/auth/components/SessionTimeout';
 import styles from './AppLayout.module.css';
 
 // Título mostrado en el breadcrumb del TopBar según la ruta activa.
@@ -23,6 +24,7 @@ export function AppLayout() {
           <Outlet />
         </div>
       </div>
+      <SessionTimeout />
     </div>
   );
 }
