@@ -7,6 +7,7 @@ import { ProtectedRoute } from '@shared/components/ProtectedRoute';
 import { AppLayout } from '@shared/components/layout/AppLayout';
 import { DashboardPage } from '@features/dashboard/components/DashboardPage';
 import { UserManagementPage } from '@features/admin/pages/UserManagementPage';
+import { ProfilePage } from '@features/profile/pages/ProfilePage';
 
 export default function App() {
   return (
@@ -21,6 +22,7 @@ export default function App() {
             <Route path="/" element={<AppLayout />}>
               <Route index element={<DashboardPage />} />
               <Route path="users" element={<UserManagementPage />} />
+              <Route path="profile" element={<ProfilePage />} />
             </Route>
           </Route>
 
