@@ -4,6 +4,8 @@ import { LoginPage } from '@features/auth/components/LoginPage';
 import { ForgotPasswordPage } from '@features/auth/components/ForgotPasswordPage';
 import { ResetPasswordPage } from '@features/auth/components/ResetPasswordPage';
 import { ProtectedRoute } from '@shared/components/ProtectedRoute';
+import { RequireRole } from '@shared/components/RequireRole';
+import { UnauthorizedPage } from '@shared/components/UnauthorizedPage';
 import { AppLayout } from '@shared/components/layout/AppLayout';
 import { DashboardPage } from '@features/dashboard/components/DashboardPage';
 import { UserManagementPage } from '@features/admin/pages/UserManagementPage';
@@ -21,8 +23,16 @@ export default function App() {
           <Route element={<ProtectedRoute />}>
             <Route path="/" element={<AppLayout />}>
               <Route index element={<DashboardPage />} />
-              <Route path="users" element={<UserManagementPage />} />
+              <Route
+                path="users"
+                element={
+                  <RequireRole roles={['Administrador DBU']}>
+                    <UserManagementPage />
+                  </RequireRole>
+                }
+              />
               <Route path="profile" element={<ProfilePage />} />
+              <Route path="unauthorized" element={<UnauthorizedPage />} />
             </Route>
           </Route>
 

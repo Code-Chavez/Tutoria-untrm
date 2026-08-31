@@ -3,6 +3,9 @@ import { CreateUserUseCase, DuplicateEmailError } from '@application/use-cases/u
 import { UpdateUserUseCase, UserNotFoundError } from '@application/use-cases/users/UpdateUserUseCase';
 import { ToggleUserStatusUseCase } from '@application/use-cases/users/ToggleUserStatusUseCase';
 import { ListUsersUseCase } from '@application/use-cases/users/ListUsersUseCase';
+import { AssignRoleUseCase } from '@application/use-cases/roles/AssignRoleUseCase';
+import { RoleNotFoundError, RoleTargetUserNotFoundError } from '@application/use-cases/roles/RoleErrors';
+import { assignRoleSchema } from '../validators/role.validators';
 import { z } from 'zod';
 
 const createUserSchema = z.object({
@@ -21,8 +24,29 @@ export class UserController {
     private readonly createUserUseCase: CreateUserUseCase,
     private readonly updateUserUseCase: UpdateUserUseCase,
     private readonly toggleUserStatusUseCase: ToggleUserStatusUseCase,
-    private readonly listUsersUseCase: ListUsersUseCase
+    private readonly listUsersUseCase: ListUsersUseCase,
+    private readonly assignRoleUseCase: AssignRoleUseCase
   ) {}
+
+  assignRole = async (req: Request, res: Response) => {
+    try {
+      const id = req.params.id as string;
+      const { roleId } = assignRoleSchema.parse(req.body);
+      const user = await this.assignRoleUseCase.execute(id, roleId);
+      res.status(200).json({ message: 'Rol asignado exitosamente', user });
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        res.status(400).json({ error: 'Datos de entrada inválidos', details: error.errors });
+      } else if (
+        error instanceof RoleTargetUserNotFoundError ||
+        error instanceof RoleNotFoundError
+      ) {
+        res.status(404).json({ error: error.message });
+      } else {
+        res.status(500).json({ error: 'Error interno del servidor' });
+      }
+    }
+  };
 
   create = async (req: Request, res: Response) => {
     try {

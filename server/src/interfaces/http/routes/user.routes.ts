@@ -9,7 +9,8 @@ const userController = new UserController(
   container.useCases.createUserUseCase,
   container.useCases.updateUserUseCase,
   container.useCases.toggleUserStatusUseCase,
-  container.useCases.listUsersUseCase
+  container.useCases.listUsersUseCase,
+  container.useCases.assignRoleUseCase
 );
 
 // Todas las rutas de usuarios requieren autenticación
@@ -26,5 +27,8 @@ router.patch('/users/:id', authorize(['users:write']), userController.update);
 
 // Cambiar estado (requiere permiso de desactivar usuarios)
 router.patch('/users/:id/status', authorize(['users:delete']), userController.toggleStatus);
+
+// Asignar rol a un usuario (administración del sistema, solo DBU)
+router.put('/users/:id/role', authorize(['admin:system']), userController.assignRole);
 
 export default router;
