@@ -3,6 +3,7 @@ import cors from 'cors';
 import helmet from 'helmet';
 import { env } from './infrastructure/config/env';
 import { errorHandler } from './infrastructure/middleware/errorHandler';
+import { requestContextMiddleware } from './infrastructure/middleware/requestContext';
 import routes from './interfaces/http/routes';
 
 const app: Application = express();
@@ -11,6 +12,9 @@ app.use(helmet());
 app.use(cors({ origin: env.CORS_ORIGIN, credentials: true }));
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true }));
+
+// Abre el contexto por petición antes de las rutas (auditoría automática).
+app.use(requestContextMiddleware);
 
 app.use('/api', routes);
 
