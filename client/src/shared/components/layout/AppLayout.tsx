@@ -9,6 +9,7 @@ const PAGE_TITLES: Record<string, string> = {
   '/': 'Panel de inicio',
   '/users': 'Administración',
   '/profile': 'Mi perfil',
+  '/unauthorized': 'Acceso denegado',
 };
 
 export function AppLayout() {

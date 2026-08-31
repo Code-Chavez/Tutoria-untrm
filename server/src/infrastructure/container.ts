@@ -47,6 +47,8 @@ import { UpdateUserUseCase } from '@application/use-cases/users/UpdateUserUseCas
 import { ToggleUserStatusUseCase } from '@application/use-cases/users/ToggleUserStatusUseCase';
 import { ListUsersUseCase } from '@application/use-cases/users/ListUsersUseCase';
 import { ListRolesUseCase } from '@application/use-cases/roles/ListRolesUseCase';
+import { CreateRoleUseCase } from '@application/use-cases/roles/CreateRoleUseCase';
+import { AssignRoleUseCase } from '@application/use-cases/roles/AssignRoleUseCase';
 import { GetProfileUseCase } from '@application/use-cases/profile/GetProfileUseCase';
 import { UpdateProfileUseCase } from '@application/use-cases/profile/UpdateProfileUseCase';
 import { ChangePasswordUseCase } from '@application/use-cases/profile/ChangePasswordUseCase';
@@ -56,6 +58,8 @@ const updateUserUseCase = new UpdateUserUseCase(userRepository);
 const toggleUserStatusUseCase = new ToggleUserStatusUseCase(userRepository);
 const listUsersUseCase = new ListUsersUseCase(userRepository);
 const listRolesUseCase = new ListRolesUseCase(roleRepository);
+const createRoleUseCase = new CreateRoleUseCase(roleRepository);
+const assignRoleUseCase = new AssignRoleUseCase(userRepository, roleRepository, auditLogRepository);
 
 const getProfileUseCase = new GetProfileUseCase(userRepository, roleRepository);
 const updateProfileUseCase = new UpdateProfileUseCase(userRepository, roleRepository);
@@ -87,6 +91,8 @@ export const container = {
     toggleUserStatusUseCase,
     listUsersUseCase,
     listRolesUseCase,
+    createRoleUseCase,
+    assignRoleUseCase,
     getProfileUseCase,
     updateProfileUseCase,
     changePasswordUseCase,
