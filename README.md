@@ -226,6 +226,30 @@ Email:    admin@untrm.edu.pe
 Password: Admin2026!
 ```
 
+## Respaldos automáticos (RSK-001)
+
+El servicio `backup` (Alpine + `pg_dump` + cron) genera un volcado comprimido de
+la base de datos según la expresión cron configurada y conserva los últimos N en
+un volumen aislado (`backup_data`).
+
+| Variable | Por defecto | Descripción |
+|----------|-------------|-------------|
+| `BACKUP_CRON` | `0 2 * * *` | Programación del volcado (diario a las 02:00) |
+| `BACKUP_KEEP` | `7` | Cantidad de volcados a conservar |
+
+Al arrancar ejecuta un volcado inicial. Comandos útiles:
+
+```bash
+# Lanzar un respaldo manual
+docker exec sit-backup /usr/local/bin/backup.sh
+
+# Listar los respaldos
+docker exec sit-backup ls -lh /backups
+
+# Restaurar un volcado
+docker exec -i sit-postgres sh -c 'zcat | psql -U sit_user -d sit_db' < backup.sql.gz
+```
+
 ## Licencia
 
 Proyecto académico — UNTRM, Prácticas Pre-Profesionales.
