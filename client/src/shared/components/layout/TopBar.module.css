@@ -50,6 +50,19 @@
   align-items: center;
   gap: 9px;
   font-size: 12.5px;
+  color: var(--g900);
+  text-decoration: none;
+  padding: 4px 8px 4px 4px;
+  border-radius: 999px;
+  transition: background 0.15s;
+}
+
+.who:hover {
+  background: var(--g100);
+}
+
+.who b {
+  font-family: var(--ft);
 }
 
 .who small {

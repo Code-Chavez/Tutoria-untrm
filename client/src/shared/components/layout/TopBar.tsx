@@ -1,4 +1,4 @@
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '@features/auth/hooks/useAuth';
 import { BellIcon } from '@shared/components/icons';
 import styles from './TopBar.module.css';
@@ -30,7 +30,7 @@ export function TopBar({ title }: TopBarProps) {
           <BellIcon size={19} />
         </button>
         {user && (
-          <div className={styles.who}>
+          <Link className={styles.who} to="/profile" title="Ver mi perfil">
             <div className={styles.avatar}>
               {getInitials(user.firstName, user.lastName)}
             </div>
@@ -40,7 +40,7 @@ export function TopBar({ title }: TopBarProps) {
               </b>
               <small>{user.role}</small>
             </div>
-          </div>
+          </Link>
         )}
         <button type="button" className={styles.logout} onClick={handleLogout}>
           Salir

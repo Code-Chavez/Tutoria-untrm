@@ -1,14 +1,24 @@
-import { Outlet } from 'react-router-dom';
+import { Outlet, useLocation } from 'react-router-dom';
 import { Sidebar } from './Sidebar';
 import { TopBar } from './TopBar';
 import styles from './AppLayout.module.css';
 
+// Título mostrado en el breadcrumb del TopBar según la ruta activa.
+const PAGE_TITLES: Record<string, string> = {
+  '/': 'Panel de inicio',
+  '/users': 'Administración',
+  '/profile': 'Mi perfil',
+};
+
 export function AppLayout() {
+  const { pathname } = useLocation();
+  const title = PAGE_TITLES[pathname] ?? 'Panel de inicio';
+
   return (
     <div className={styles.app}>
       <Sidebar />
       <div className={styles.main}>
-        <TopBar title="Panel de inicio" />
+        <TopBar title={title} />
         <div className={styles.content}>
           <Outlet />
         </div>
