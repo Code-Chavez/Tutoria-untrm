@@ -1,6 +1,6 @@
 {
   "name": "sit-server",
-  "version": "0.1.0",
+  "version": "0.0.1",
   "description": "SIT UNTRM — Server API",
   "private": true,
   "scripts": {
