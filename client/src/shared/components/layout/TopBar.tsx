@@ -1,5 +1,6 @@
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@features/auth/hooks/useAuth';
+import { BellIcon } from '@shared/components/icons';
 import styles from './TopBar.module.css';
 
 interface TopBarProps {
@@ -25,9 +26,9 @@ export function TopBar({ title }: TopBarProps) {
         SIT · <b>{title}</b>
       </div>
       <div className={styles.right}>
-        <div className={styles.bell}>
-          <span role="img" aria-label="notificaciones">🔔</span>
-        </div>
+        <button className={styles.bell} type="button" aria-label="Notificaciones">
+          <BellIcon size={19} />
+        </button>
         {user && (
           <div className={styles.who}>
             <div className={styles.avatar}>

@@ -1,0 +1,146 @@
+.modalOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(11, 31, 63, 0.4);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  backdrop-filter: blur(2px);
+}
+
+.modalContent {
+  background: #fff;
+  border-radius: var(--r);
+  width: 100%;
+  max-width: 460px; /* Un poco más estrecho para forms */
+  padding: 24px;
+  box-shadow: var(--sombra);
+  animation: slideUp 0.25s ease-out;
+  border-top: 3px solid var(--azul); /* Estilo .kpi */
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.modalHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.modalHeader h2 {
+  font-size: 18px;
+  color: var(--azul);
+  margin: 0;
+}
+
+.closeButton {
+  background: none;
+  border: none;
+  color: var(--g600);
+  font-size: 1.2rem;
+  cursor: pointer;
+  transition: color 0.2s;
+  display: grid;
+  place-items: center;
+}
+
+.closeButton:hover {
+  color: var(--peligro);
+}
+
+/* Campos de formulario (.field) */
+.formGroup {
+  margin-bottom: 13px;
+}
+
+.formGroup label {
+  display: block;
+  font-size: 12px;
+  font-weight: 600;
+  margin-bottom: 5px;
+  color: var(--g900);
+}
+
+/* Inputs (.inp) */
+.input,
+.select {
+  width: 100%;
+  font-family: var(--fx);
+  font-size: 13px;
+  padding: 9px 11px;
+  border: 1.5px solid var(--g300);
+  border-radius: 8px;
+  background: #fff;
+  color: var(--g900);
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.input:focus,
+.select:focus {
+  border-color: var(--azul-med);
+  box-shadow: 0 0 0 3px rgba(46, 95, 163, 0.15);
+}
+
+.formActions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 24px;
+}
+
+/* Botones (.btn) */
+.cancelButton,
+.submitButton {
+  font-family: var(--ft);
+  font-weight: 600;
+  font-size: 13px;
+  border: none;
+  border-radius: 8px;
+  padding: 9px 16px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+}
+
+/* .b-out */
+.cancelButton {
+  background: #fff;
+  color: var(--azul);
+  border: 1.5px solid var(--azul);
+}
+
+.cancelButton:hover {
+  background: var(--celeste);
+}
+
+/* .b-pri */
+.submitButton {
+  background: var(--azul);
+  color: #fff;
+}
+
+.submitButton:hover {
+  background: var(--azul-osc);
+}
+
+.submitButton:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
