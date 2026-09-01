@@ -199,7 +199,10 @@ Se ejecuta en cada Pull Request:
 - **Título**: debe seguir Conventional Commits (`feat:`, `fix:`, etc.)
 - **Descripción**: debe tener contenido mínimo
 - **Protección de main**: solo permite PRs desde `release/*`, `hotfix/*` o `develop`
-- **DoD checklist**: verifica que todos los items estén marcados (PRs a main)
+- **DoD técnico**: en PRs a main exige que la sección técnica del DoD (delimitada por
+  `<!-- DOD-GATE:START/END -->` en la plantilla) esté 100% marcada. El sign-off humano
+  (visto bueno del asesor, Sprint Review, tablero) queda fuera del gate y lo confirma
+  quien aprueba el PR — un check automático no puede verificar una reunión.
 
 ## Convenciones de código
 

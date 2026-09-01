@@ -141,25 +141,28 @@ jobs:
 
             core.info(`✅ Rama '${head}' autorizada para mergear a main`);
 
-      - name: Enforce DoD checklist 100% complete
+      - name: Enforce technical DoD checklist
         uses: actions/github-script@v7
         with:
           script: |
             const body = context.payload.pull_request.body || '';
-            const checkboxes = body.match(/- \[[ x]\]/gi) || [];
-            const checked = body.match(/- \[x\]/gi) || [];
-            const total = checkboxes.length;
-            const done = checked.length;
+
+            // El gate solo audita el "DoD técnico": los ítems que el CI puede
+            // respaldar (compila, tests, audit, versión). Van delimitados por
+            // marcadores en la plantilla. El sign-off humano (visto bueno del
+            // asesor, Sprint Review, tablero) queda FUERA y lo confirma quien
+            // aprueba el PR — un check automático no puede verificar una reunión.
+            const gate = body.match(/<!--\s*DOD-GATE:START\s*-->([\s\S]*?)<!--\s*DOD-GATE:END\s*-->/i);
+            const scope = gate ? gate[1] : body;
+            const scopeLabel = gate ? 'la sección técnica' : 'el checklist';
+
+            const total = (scope.match(/- \[[ x]\]/gi) || []).length;
+            const done = (scope.match(/- \[x\]/gi) || []).length;
 
             if (total === 0) {
               core.setFailed(
-                '🚫 El PR hacia main DEBE incluir el checklist del DoD.\n\n' +
-                'Usa la plantilla correcta:\n' +
-                '  • release_main.md — para releases planificados\n' +
-                '  • hotfix_main.md  — para correcciones urgentes\n\n' +
-                'Crea el PR con:\n' +
-                '  gh pr create --template release_main.md\n' +
-                '  gh pr create --template hotfix_main.md'
+                '🚫 El PR hacia main DEBE incluir el checklist del DoD.\n' +
+                'Usa la plantilla release_main.md o hotfix_main.md.'
               );
               return;
             }
@@ -167,15 +170,18 @@ jobs:
             const unchecked = total - done;
             if (unchecked > 0) {
               core.setFailed(
-                `🚫 El DoD debe estar 100% completo para mergear a main.\n\n` +
-                `📊 Progreso: ${done}/${total} (faltan ${unchecked} items)\n\n` +
-                `Revisa y marca TODOS los criterios antes de solicitar el merge.\n` +
-                `Un incremento solo es entregable cuando cumple los 9 criterios universales.`
+                `🚫 El DoD técnico debe estar completo para mergear a main.\n\n` +
+                `📊 Progreso (${scopeLabel}): ${done}/${total} (faltan ${unchecked}).\n\n` +
+                `Son ítems verificables por CI (compila, tests, auditoría, versión).\n` +
+                `El visto bueno del asesor y la Sprint Review se confirman al aprobar el PR, no aquí.`
               );
               return;
             }
 
-            core.info(`✅ DoD completo: ${done}/${total} — listo para merge a main`);
+            core.info(
+              `✅ DoD técnico completo: ${done}/${total}. ` +
+              `El sign-off humano lo valida la aprobación del PR.`
+            );
 
       - name: Verify version bump
         uses: actions/github-script@v7
