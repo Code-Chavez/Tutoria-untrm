@@ -1,0 +1,90 @@
+.side {
+  background: var(--azul-osc);
+  color: #fff;
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  overflow-y: auto;
+  padding-bottom: 20px;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 16px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+  font-family: var(--ft);
+  font-size: 14px;
+}
+
+.nav {
+  display: flex;
+  flex-direction: column;
+}
+
+.group {
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  opacity: 0.5;
+  padding: 14px 16px 6px;
+}
+
+.link {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  color: rgba(255, 255, 255, 0.78);
+  text-decoration: none;
+  font-size: 13px;
+  padding: 9px 16px;
+  border-left: 3px solid transparent;
+}
+
+.link:hover {
+  color: #fff;
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.active {
+  color: #fff;
+  background: rgba(255, 255, 255, 0.08);
+  border-left-color: var(--dorado);
+  font-weight: 600;
+}
+
+/* Ítems de HUs aún no construidas: visibles pero no navegables. */
+.disabled {
+  color: rgba(255, 255, 255, 0.4);
+  cursor: default;
+}
+
+.disabled:hover {
+  background: none;
+  color: rgba(255, 255, 255, 0.4);
+}
+
+.disabled .icon {
+  opacity: 0.7;
+}
+
+.soon {
+  margin-left: auto;
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: 0.4px;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.55);
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 5px;
+  padding: 2px 6px;
+}
+
+.icon {
+  display: grid;
+  place-items: center;
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+}

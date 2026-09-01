@@ -18,45 +18,74 @@ services:
       timeout: 5s
       retries: 5
 
-  backend:
+  server:
     build:
-      context: ./backend
+      context: ./server
       dockerfile: Dockerfile
-    container_name: sit-backend
+    container_name: sit-server
     environment:
       NODE_ENV: development
       PORT: 3000
       DATABASE_URL: postgresql://sit_user:sit_pass@postgres:5432/sit_db
       JWT_SECRET: dev-secret-change-in-production
       CORS_ORIGIN: http://localhost:5173
+      # Sin sondeo, los cambios en el host no disparan recarga dentro del contenedor.
+      CHOKIDAR_USEPOLLING: "true"
+      CHOKIDAR_INTERVAL: "300"
     ports:
       - "3000:3000"
     volumes:
-      - ./backend/src:/app/src
-      - ./backend/prisma:/app/prisma
+      - ./server/src:/app/src
+      - ./server/prisma:/app/prisma
     depends_on:
       postgres:
         condition: service_healthy
     networks:
       - sit-net
 
-  frontend:
+  client:
     build:
-      context: ./frontend
+      context: ./client
       dockerfile: Dockerfile
-    container_name: sit-frontend
+    container_name: sit-client
+    environment:
+      VITE_PROXY_TARGET: http://server:3000
+      VITE_USE_POLLING: "true"
     ports:
       - "5173:5173"
     volumes:
-      - ./frontend/src:/app/src
-      - ./frontend/public:/app/public
+      - ./client/src:/app/src
+      - ./client/public:/app/public
     depends_on:
-      - backend
+      - server
+    networks:
+      - sit-net
+
+  backup:
+    build:
+      context: ./backup
+      dockerfile: Dockerfile
+    container_name: sit-backup
+    environment:
+      PGHOST: postgres
+      PGPORT: 5432
+      PGUSER: sit_user
+      PGPASSWORD: sit_pass
+      PGDATABASE: sit_db
+      # Volcado diario a las 02:00; conservar los últimos 7.
+      BACKUP_CRON: "0 2 * * *"
+      BACKUP_KEEP: "7"
+    volumes:
+      - backup_data:/backups
+    depends_on:
+      postgres:
+        condition: service_healthy
     networks:
       - sit-net
 
 volumes:
   pgdata:
+  backup_data:
 
 networks:
   sit-net:

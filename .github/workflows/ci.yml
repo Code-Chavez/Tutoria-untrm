@@ -1,0 +1,257 @@
+name: CI Pipeline
+
+on:
+  push:
+    branches: [develop, main]
+  pull_request:
+    branches: [develop, main]
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  # ── Server ───────────────────────────────────────────────
+  server-lint:
+    name: Server — Lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+          cache-dependency-path: server/pnpm-lock.yaml
+
+      - name: Install dependencies
+        working-directory: server
+        run: pnpm install --frozen-lockfile
+
+      - name: Lint
+        working-directory: server
+        run: pnpm run lint
+
+  server-build:
+    name: Server — Build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+          cache-dependency-path: server/pnpm-lock.yaml
+
+      - name: Install dependencies
+        working-directory: server
+        run: pnpm install --frozen-lockfile
+
+      - name: Generate Prisma Client
+        working-directory: server
+        run: pnpm prisma generate
+
+      - name: Build
+        working-directory: server
+        run: pnpm run build
+
+  server-test:
+    name: Server — Test
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_DB: sit_db_test
+          POSTGRES_USER: sit_user
+          POSTGRES_PASSWORD: sit_pass
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U sit_user -d sit_db_test"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    env:
+      DATABASE_URL: postgresql://sit_user:sit_pass@localhost:5432/sit_db_test
+      JWT_SECRET: ci-test-secret
+      NODE_ENV: test
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+          cache-dependency-path: server/pnpm-lock.yaml
+
+      - name: Install dependencies
+        working-directory: server
+        run: pnpm install --frozen-lockfile
+
+      - name: Generate Prisma Client
+        working-directory: server
+        run: pnpm prisma generate
+
+      - name: Apply database migrations
+        working-directory: server
+        run: pnpm prisma migrate deploy
+
+      - name: Run tests with coverage
+        working-directory: server
+        run: pnpm test -- --coverage --coverageReporters=text --coverageReporters=lcov
+
+      - name: Upload coverage artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: server-coverage
+          path: server/coverage/lcov.info
+          retention-days: 7
+
+  server-audit:
+    name: Server — Audit
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+          cache-dependency-path: server/pnpm-lock.yaml
+
+      - name: Install dependencies
+        working-directory: server
+        run: pnpm install --frozen-lockfile
+
+      - name: Audit production dependencies
+        working-directory: server
+        run: pnpm audit --prod
+
+  # ── Client ───────────────────────────────────────────────
+  client-lint:
+    name: Client — Lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+          cache-dependency-path: client/pnpm-lock.yaml
+
+      - name: Install dependencies
+        working-directory: client
+        run: pnpm install --frozen-lockfile
+
+      - name: Lint
+        working-directory: client
+        run: pnpm run lint
+
+  client-test:
+    name: Client — Test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+          cache-dependency-path: client/pnpm-lock.yaml
+
+      - name: Install dependencies
+        working-directory: client
+        run: pnpm install --frozen-lockfile
+
+      - name: Run tests with coverage
+        working-directory: client
+        run: pnpm test -- --coverage
+
+      - name: Upload coverage artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: client-coverage
+          path: client/coverage/lcov.info
+          retention-days: 7
+
+  client-build:
+    name: Client — Type Check & Build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+          cache-dependency-path: client/pnpm-lock.yaml
+
+      - name: Install dependencies
+        working-directory: client
+        run: pnpm install --frozen-lockfile
+
+      - name: Type check
+        working-directory: client
+        run: pnpm tsc --noEmit
+
+      - name: Build
+        working-directory: client
+        run: pnpm run build
+
+  # ── Docker ───────────────────────────────────────────────
+  docker-build:
+    name: Docker — Build Images
+    runs-on: ubuntu-latest
+    needs:
+      - server-lint
+      - server-build
+      - server-test
+      - client-lint
+      - client-test
+      - client-build
+    if: github.event_name == 'push'
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build server image
+        run: docker build -t sit-server ./server
+
+      - name: Build client image
+        run: docker build -t sit-client ./client

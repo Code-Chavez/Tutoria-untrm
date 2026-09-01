@@ -1,0 +1,195 @@
+name: PR Checks
+
+on:
+  pull_request:
+    branches: [develop, main]
+    types: [opened, edited, synchronize, reopened]
+
+jobs:
+  validate-pr-title:
+    name: "📝 Validate PR Title"
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check Conventional Commits format
+        uses: amannn/action-semantic-pull-request@v5
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          types: |
+            feat
+            fix
+            docs
+            refactor
+            test
+            chore
+            ci
+            perf
+            revert
+          requireScope: false
+          subjectPattern: ^.+$
+          subjectPatternError: |
+            El título del PR debe seguir Conventional Commits:
+            feat: descripción, fix: descripción, docs: descripción, etc.
+
+  validate-pr-body:
+    name: "📋 Validate PR Description"
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check PR has meaningful description
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const body = context.payload.pull_request.body || '';
+            const stripped = body
+              .replace(/<!--[\s\S]*?-->/g, '')
+              .replace(/- \[ \]/g, '')
+              .replace(/\[.*?\]/g, '')
+              .replace(/[#>|\-*`~_]/g, '')
+              .trim();
+
+            if (stripped.length < 30) {
+              core.setFailed(
+                '❌ El PR necesita una descripción más detallada.\n' +
+                'Completa la plantilla: describe qué se hizo, por qué y el ítem relacionado.'
+              );
+            }
+
+  # ── Checks específicos para PRs hacia develop ──────────
+  validate-develop-pr:
+    name: "🔀 Validate Feature → develop"
+    if: github.base_ref == 'develop'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Validate source branch naming
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const head = context.payload.pull_request.head.ref;
+            const allowed = /^(feature\/|bugfix\/|hotfix\/|release\/|dependabot\/)/;
+
+            if (!allowed.test(head)) {
+              core.warning(
+                `⚠️ La rama '${head}' no sigue la convención de nombres.\n` +
+                `Convención esperada: feature/HU-XX-descripcion, bugfix/descripcion, etc.`
+              );
+            }
+
+      - name: Check DoD checklist (C-01 to C-09)
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const body = context.payload.pull_request.body || '';
+
+            const dodSections = [
+              { id: 'C-01', name: 'Criterios de Aceptación' },
+              { id: 'C-02', name: 'Calidad de Código' },
+              { id: 'C-03', name: 'Pruebas' },
+              { id: 'C-04', name: 'Seguridad' },
+              { id: 'C-07', name: 'CI/CD' },
+            ];
+
+            const missing = dodSections.filter(s => !body.includes(s.id));
+
+            if (missing.length > 0) {
+              core.warning(
+                `⚠️ Faltan secciones del DoD en la descripción:\n` +
+                missing.map(s => `  • ${s.id} — ${s.name}`).join('\n') +
+                `\n\nUsa la plantilla de PR para incluir el checklist completo.`
+              );
+            }
+
+            const checkboxes = body.match(/- \[[ x]\]/gi) || [];
+            const checked = body.match(/- \[x\]/gi) || [];
+            const total = checkboxes.length;
+            const done = checked.length;
+
+            if (total > 0 && done < total) {
+              core.warning(
+                `📊 DoD checklist: ${done}/${total} completados.\n` +
+                `Recuerda completar todos los items antes del merge.`
+              );
+            }
+
+            if (total > 0) {
+              core.info(`✅ DoD checklist presente: ${done}/${total} items marcados`);
+            }
+
+  # ── Checks estrictos para PRs hacia main ────────────────
+  protect-main-branch:
+    name: "🛡️ Gate — Main Branch Protection"
+    if: github.base_ref == 'main'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Validate source branch
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const head = context.payload.pull_request.head.ref;
+            const allowed = /^(release\/|hotfix\/|develop$)/;
+
+            if (!allowed.test(head)) {
+              core.setFailed(
+                `🚫 No se permite mergear a main desde '${head}'.\n\n` +
+                `Ramas permitidas:\n` +
+                `  ✅ release/*  — Releases planificados\n` +
+                `  ✅ hotfix/*   — Correcciones urgentes\n` +
+                `  ✅ develop    — Promoción directa\n\n` +
+                `Flujo correcto:\n` +
+                `  feature/* → develop → release/* → main`
+              );
+            }
+
+            core.info(`✅ Rama '${head}' autorizada para mergear a main`);
+
+      - name: Enforce DoD checklist 100% complete
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const body = context.payload.pull_request.body || '';
+            const checkboxes = body.match(/- \[[ x]\]/gi) || [];
+            const checked = body.match(/- \[x\]/gi) || [];
+            const total = checkboxes.length;
+            const done = checked.length;
+
+            if (total === 0) {
+              core.setFailed(
+                '🚫 El PR hacia main DEBE incluir el checklist del DoD.\n\n' +
+                'Usa la plantilla correcta:\n' +
+                '  • release_main.md — para releases planificados\n' +
+                '  • hotfix_main.md  — para correcciones urgentes\n\n' +
+                'Crea el PR con:\n' +
+                '  gh pr create --template release_main.md\n' +
+                '  gh pr create --template hotfix_main.md'
+              );
+              return;
+            }
+
+            const unchecked = total - done;
+            if (unchecked > 0) {
+              core.setFailed(
+                `🚫 El DoD debe estar 100% completo para mergear a main.\n\n` +
+                `📊 Progreso: ${done}/${total} (faltan ${unchecked} items)\n\n` +
+                `Revisa y marca TODOS los criterios antes de solicitar el merge.\n` +
+                `Un incremento solo es entregable cuando cumple los 9 criterios universales.`
+              );
+              return;
+            }
+
+            core.info(`✅ DoD completo: ${done}/${total} — listo para merge a main`);
+
+      - name: Verify version bump
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const head = context.payload.pull_request.head.ref;
+            if (!head.startsWith('release/')) return;
+
+            const versionMatch = head.match(/release\/v?(\d+\.\d+\.\d+)/);
+            if (!versionMatch) {
+              core.warning(
+                `⚠️ La rama release no sigue el formato release/vX.Y.Z\n` +
+                `Rama actual: ${head}`
+              );
+            } else {
+              core.info(`✅ Release version: ${versionMatch[1]}`);
+            }

@@ -22,7 +22,9 @@ Thumbs.db
 
 # Logs
 *.log
-npm-debug.log*
+
+# TypeScript build info
+*.tsbuildinfo
 
 # Docker volumes
 pgdata/
@@ -32,7 +34,8 @@ backups/
 coverage/
 
 # Prisma
-backend/prisma/*.db
+server/prisma/*.db
 
 # Temp
 tmp/
+doc/

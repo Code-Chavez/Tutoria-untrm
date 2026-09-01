@@ -1,0 +1,3 @@
+# Los scripts de shell DEBEN conservar saltos de línea LF para ejecutarse
+# dentro de los contenedores (CRLF rompe el intérprete /bin/sh en Alpine).
+*.sh text eol=lf

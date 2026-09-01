@@ -1,0 +1,401 @@
+/* ─────────────────────────────────────────────────────────────
+   Login theme-aware. Los colores viven en tokens locales sobre
+   .page; el bloque prefers-color-scheme:dark solo los voltea, así
+   toda la pantalla cambia de tema desde un único lugar.
+   ───────────────────────────────────────────────────────────── */
+
+.page {
+  /* Claro (base) */
+  --bg:
+    radial-gradient(120% 90% at 10% 0%, #eaf1fb 0%, transparent 55%),
+    radial-gradient(100% 80% at 95% 100%, #e7eef9 0%, transparent 60%),
+    linear-gradient(135deg, #f4f7fc 0%, #eef3fa 100%);
+  --dot: rgba(20, 49, 95, 0.06);
+  --halo: rgba(217, 164, 4, 0.1);
+  --card-bg: #ffffff;
+  --card-ring: var(--borde);
+  --card-shadow: 0 20px 50px rgba(20, 49, 95, 0.13);
+  --text-strong: var(--azul-osc);
+  --text-muted: var(--g600);
+  --label: var(--azul-osc);
+  --control-bg: #ffffff;
+  --control-border: var(--g300);
+  --control-border-hover: #adbccd;
+  --input-text: var(--g900);
+  --placeholder: #9aa0b0;
+  --icon: var(--g600);
+  --toggle-hover-bg: var(--g100);
+  --divider: #ececf0;
+  --forgot: var(--azul-med);
+  --forgot-hover: var(--azul-osc);
+  --submit-bg: linear-gradient(135deg, var(--azul) 0%, var(--azul-osc) 100%);
+  --error-bg: #fdf2f2;
+  --error-border: #f5c9c6;
+  --error-text: #8f1f19;
+
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 48px 24px;
+  background: var(--bg);
+}
+
+@media (prefers-color-scheme: dark) {
+  .page {
+    --bg:
+      radial-gradient(110% 80% at 12% 8%, #1d4478 0%, transparent 55%),
+      radial-gradient(90% 70% at 92% 96%, #21528f 0%, transparent 60%),
+      linear-gradient(135deg, var(--azul-osc) 0%, #102a52 52%, #081733 100%);
+    --dot: rgba(255, 255, 255, 0.13);
+    --halo: rgba(217, 164, 4, 0.16);
+    --card-bg: rgba(20, 39, 73, 0.86);
+    --card-ring: rgba(255, 255, 255, 0.09);
+    --card-shadow: 0 30px 70px rgba(0, 0, 0, 0.5);
+    --text-strong: #eef3fb;
+    --text-muted: rgba(233, 241, 250, 0.62);
+    --label: #dfe8f5;
+    --control-bg: rgba(255, 255, 255, 0.05);
+    --control-border: rgba(255, 255, 255, 0.14);
+    --control-border-hover: rgba(255, 255, 255, 0.28);
+    --input-text: #eef3fb;
+    --placeholder: rgba(233, 241, 250, 0.4);
+    --icon: rgba(233, 241, 250, 0.6);
+    --toggle-hover-bg: rgba(255, 255, 255, 0.08);
+    --divider: rgba(255, 255, 255, 0.1);
+    --forgot: #8fb4e6;
+    --forgot-hover: #b9d2f2;
+    --submit-bg: linear-gradient(135deg, var(--azul-med) 0%, var(--azul) 100%);
+    --error-bg: rgba(179, 38, 30, 0.14);
+    --error-border: rgba(179, 38, 30, 0.4);
+    --error-text: #ffb1aa;
+  }
+}
+
+/* Trama de puntos: textura sutil que da profundidad al fondo. */
+.page::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -2;
+  background-image: radial-gradient(var(--dot) 1px, transparent 1px);
+  background-size: 26px 26px;
+}
+
+/* Halo dorado: el acento institucional, apenas perceptible. */
+.page::after {
+  content: '';
+  position: absolute;
+  z-index: -1;
+  width: 620px;
+  height: 620px;
+  right: -180px;
+  bottom: -200px;
+  border-radius: 50%;
+  background: radial-gradient(circle, var(--halo) 0%, transparent 68%);
+}
+
+/* ─── Tarjeta flotante ────────────────────────────────────── */
+
+.card {
+  position: relative;
+  width: 100%;
+  max-width: 460px;
+  padding: 34px 40px 26px;
+  border-radius: 20px;
+  background: var(--card-bg);
+  backdrop-filter: blur(6px);
+  box-shadow: var(--card-shadow), 0 0 0 1px var(--card-ring);
+  animation: float 6s ease-in-out infinite;
+}
+
+/* La animación se detiene mientras se usa el formulario: escribir sobre
+   un objetivo en movimiento es incómodo. */
+.card:focus-within {
+  animation-play-state: paused;
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+}
+
+/* ─── Cabecera de marca ───────────────────────────────────── */
+
+.brand {
+  text-align: center;
+  margin-bottom: 26px;
+}
+
+.logo {
+  display: block;
+  width: 74px;
+  height: 74px;
+  object-fit: contain;
+  margin: 0 auto 16px;
+}
+
+/* En modo oscuro el disco navy del sello se acerca al color de la tarjeta;
+   un halo blanco muy tenue lo separa y lo hace lucir como una insignia. */
+@media (prefers-color-scheme: dark) {
+  .logo {
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.06);
+    box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.06);
+  }
+}
+
+.title {
+  font-size: 26px;
+  letter-spacing: -0.4px;
+  color: var(--text-strong);
+}
+
+.subtitle {
+  margin-top: 8px;
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--text-muted);
+}
+
+/* ─── Campos ──────────────────────────────────────────────── */
+
+.field {
+  margin-bottom: 16px;
+}
+
+.field label {
+  display: block;
+  font-family: var(--ft);
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--label);
+  margin-bottom: 7px;
+}
+
+/* El borde vive en el contenedor, no en el input: así el icono y el
+   botón de visibilidad quedan dentro del mismo marco. */
+.control {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 3px 6px 3px 13px;
+  border: 1.5px solid var(--control-border);
+  border-radius: 11px;
+  background: var(--control-bg);
+  transition: border-color 0.18s ease, box-shadow 0.18s ease;
+}
+
+.control:hover:not(:has(.input:disabled)) {
+  border-color: var(--control-border-hover);
+}
+
+.control:focus-within {
+  border-color: var(--azul-med);
+  box-shadow: 0 0 0 4px rgba(46, 95, 163, 0.18);
+}
+
+.icon {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  color: var(--icon);
+  transition: color 0.18s ease;
+}
+
+.control:focus-within .icon {
+  color: var(--azul-med);
+}
+
+.input {
+  flex: 1;
+  min-width: 0;
+  border: none;
+  outline: none;
+  background: transparent;
+  font-family: var(--fx);
+  font-size: 14px;
+  color: var(--input-text);
+  padding: 11px 0;
+}
+
+.input::placeholder {
+  color: var(--placeholder);
+}
+
+.input:disabled {
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+.toggle {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 32px;
+  height: 32px;
+  border: none;
+  border-radius: 8px;
+  background: none;
+  color: var(--icon);
+  transition: color 0.15s ease, background 0.15s ease;
+}
+
+.toggle:hover:not(:disabled) {
+  color: var(--azul-med);
+  background: var(--toggle-hover-bg);
+}
+
+.toggle:focus-visible {
+  outline: 2px solid var(--azul-med);
+  outline-offset: 1px;
+}
+
+.forgotRow {
+  text-align: right;
+  margin-bottom: 20px;
+}
+
+.forgot {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--forgot);
+}
+
+.forgot:hover {
+  color: var(--forgot-hover);
+  text-decoration: underline;
+}
+
+/* ─── Acciones ────────────────────────────────────────────── */
+
+.submit {
+  width: 100%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  font-family: var(--ft);
+  font-weight: 600;
+  font-size: 14.5px;
+  color: #fff;
+  border: none;
+  border-radius: 11px;
+  padding: 14px 18px;
+  background: var(--submit-bg);
+  box-shadow: 0 8px 20px rgba(20, 49, 95, 0.34);
+  transition: transform 0.16s ease, box-shadow 0.16s ease, filter 0.16s ease;
+}
+
+.submit:hover:not(:disabled) {
+  filter: brightness(1.12);
+  transform: translateY(-1px);
+  box-shadow: 0 12px 26px rgba(20, 49, 95, 0.42);
+}
+
+.submit:active:not(:disabled) {
+  transform: translateY(0);
+  box-shadow: 0 5px 14px rgba(20, 49, 95, 0.3);
+}
+
+.submit:focus-visible {
+  outline: 2px solid var(--azul-med);
+  outline-offset: 3px;
+}
+
+.submit:disabled {
+  opacity: 0.72;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+.spinner {
+  width: 15px;
+  height: 15px;
+  border: 2px solid rgba(255, 255, 255, 0.35);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: spin 0.65s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.error {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--error-text);
+  background: var(--error-bg);
+  border: 1px solid var(--error-border);
+  border-left: 3px solid var(--peligro);
+  border-radius: 10px;
+  padding: 12px 14px;
+  margin-bottom: 18px;
+}
+
+.error svg {
+  flex-shrink: 0;
+  margin-top: 1px;
+  color: var(--peligro);
+}
+
+.divider {
+  height: 1px;
+  background: var(--divider);
+  margin: 22px 0 16px;
+}
+
+.legal {
+  font-size: 11.5px;
+  line-height: 1.6;
+  color: var(--text-muted);
+  text-align: center;
+}
+
+/* ─── Responsive ──────────────────────────────────────────── */
+
+@media (max-width: 520px) {
+  .page {
+    padding: 28px 16px;
+  }
+
+  .card {
+    padding: 28px 24px 22px;
+    border-radius: 16px;
+    /* En pantallas pequeñas el margen es escaso: flotar acerca demasiado
+       la tarjeta a los bordes. */
+    animation: none;
+  }
+
+  .title {
+    font-size: 23px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .card {
+    animation: none;
+  }
+
+  .control,
+  .submit,
+  .toggle,
+  .icon {
+    transition: none;
+  }
+
+  .submit:hover:not(:disabled) {
+    transform: none;
+  }
+
+  .spinner {
+    animation-duration: 2s;
+  }
+}
