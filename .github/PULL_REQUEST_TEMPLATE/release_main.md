@@ -18,92 +18,75 @@
 
 ---
 
-## ✅ Definition of Done — Release (DoD-SIT-001 completo)
+## ✅ DoD técnico — requerido por el gate
 
-> **Todos** los criterios deben estar cumplidos para cada ítem del release.
-> Este checklist valida el incremento como potencialmente entregable.
+> El check `Gate — Main Branch Protection` **solo** valida esta sección: son
+> ítems que el CI respalda (compila, tests, auditoría, versión). Deben estar
+> **todos marcados** para poder mergear.
 
-### C-01 · Criterios de Aceptación
-
-- [ ] Todos los ítems del Sprint superan el 100 % de sus Criterios de Aceptación.
-- [ ] El Product Owner (asesor) otorgó visto bueno en la Sprint Review.
-- [ ] Acta de conformidad firmada o en proceso.
+<!-- DOD-GATE:START -->
 
 ### C-02 · Calidad de Código
-
 - [ ] TypeScript compila sin errores en modo estricto en server y client.
-- [ ] Clean Code aplicado: nombres descriptivos, responsabilidad única, sin código muerto.
-- [ ] Arquitectura Hexagonal (server) y estructura por features (client) respetadas.
+- [ ] Clean Code y arquitectura respetadas (Hexagonal en server, features en client).
 
 ### C-03 · Pruebas
-
 - [ ] Todos los ítems tienen pruebas que validan su comportamiento.
-- [ ] Suite completa sin regresiones.
-- [ ] Cobertura mínima del 70 % en lógica de negocio.
-- [ ] Pruebas de integración ejecutadas contra la base de datos.
+- [ ] Suite completa sin regresiones (CI en verde).
 
 ### C-04 · Seguridad
-
-- [ ] Auditoría de dependencias sin vulnerabilidades críticas.
+- [ ] Auditoría de dependencias sin vulnerabilidades críticas (`pnpm audit --prod`).
 - [ ] No existen credenciales, tokens ni secretos en el código.
-- [ ] Sin vulnerabilidades OWASP Top 10.
-- [ ] Datos del tutorado tratados conforme a la Ley N° 29733.
-
-### C-05 · Revisión (Code Review)
-
-- [ ] Todos los PRs del Sprint pasaron por revisión.
-- [ ] Autorevisión documentada del practicante para cada ítem.
-- [ ] Validación del asesor (Product Owner) completada.
 
 ### C-06 · Documentación Técnica
-
-- [ ] Documentación de API actualizada (endpoints nuevos o modificados).
-- [ ] Manual de usuario actualizado si hay cambios en la UX.
-- [ ] Variables de entorno nuevas documentadas.
-- [ ] Migraciones de base de datos documentadas.
+- [ ] Endpoints y variables de entorno documentados; migraciones versionadas.
 
 ### C-07 · Integración y Despliegue (CI/CD)
+- [ ] Pipeline en verde: lint, build, test y audit.
+- [ ] Imágenes Docker se construyen y las migraciones se aplican en CI.
 
-- [ ] Pipeline en verde para todos los jobs: lint, build, test, audit.
-- [ ] Docker images se construyen correctamente.
-- [ ] El release despliega sin romper funcionalidad existente.
-- [ ] Migraciones de base de datos probadas en entorno de pruebas.
+### C-09 · Git Flow
+- [ ] Ramas y commits siguen la convención (Conventional Commits).
+- [ ] Rama release creada desde develop.
 
-### C-08 · Interfaz y Experiencia de Usuario
+### 🏷️ Versionado
+- [ ] Versión actualizada en `server/package.json` y `client/package.json`.
 
-- [ ] Sin regresiones visuales en ningún módulo.
-- [ ] Todos los componentes nuevos son responsivos (Mobile First).
-- [ ] Identidad visual UNTRM aplicada (colores, tipografía, logos).
-- [ ] Compatibilidad verificada: Chrome, Firefox, Edge y Safari.
-
-### C-09 · Git Flow y Gestión del Tablero
-
-- [ ] Todas las ramas siguen la convención de nombres.
-- [ ] Todos los commits siguen Conventional Commits.
-- [ ] Tarjetas del tablero Scrum movidas a TERMINADO.
-- [ ] Rama release creada desde develop y lista para mergear a main.
+<!-- DOD-GATE:END -->
 
 ---
 
-## 🏷️ Versionado
+## 🧑 Sign-off del incremento — lo confirma quien aprueba el PR
 
-- [ ] Versión actualizada en `server/package.json` y `client/package.json`.
-- [ ] Tag `vX.Y.Z` creado tras el merge.
-- [ ] Merge de vuelta a `develop` realizado para sincronizar.
+> Estos ítems **no** los puede verificar un check automático (dependen de una
+> reunión, del PO o de pruebas manuales). No bloquean el gate: los valida el
+> revisor al **aprobar** el Pull Request.
+
+- [ ] **C-01** · Todos los ítems superan sus Criterios de Aceptación.
+- [ ] **C-01** · El Product Owner (asesor) otorgó su visto bueno en la Sprint Review.
+- [ ] **C-01** · Acta de conformidad firmada o en proceso.
+- [ ] **C-05** · Validación del asesor (Product Owner) completada.
+- [ ] **C-08** · Sin regresiones visuales; responsivo; identidad UNTRM; navegadores objetivo.
+- [ ] **C-03** · Cobertura ≥70 % en lógica de negocio (si se midió).
+- [ ] **C-09** · Tarjetas del tablero Scrum movidas a TERMINADO.
+
+---
+
+## 🏷️ Post-merge (tras mergear a main)
+
+> Acciones que ocurren **después** del merge; no forman parte del gate.
+
+- Crear el tag `vX.Y.Z`.
+- Back-merge `main → develop`.
+- Eliminar la rama `release/*`.
 
 ## 📊 Métricas del Sprint
 
 | Métrica | Planificado | Real |
 |---------|-------------|------|
 | Story Points | X | X |
-| Horas | X | X |
-| Velocidad | X | X |
 | Ítems completados | X/X | X/X |
-
-## 📸 Evidencia de funcionamiento
-
-<!-- Capturas o GIFs de las funcionalidades principales del release -->
 
 ## 📋 Notas del Release
 
-<!-- Cambios importantes, breaking changes, instrucciones de migración, o decisiones de diseño relevantes -->
+<!-- Cambios importantes, HU diferidas, breaking changes o decisiones relevantes -->
