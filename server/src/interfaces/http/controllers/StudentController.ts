@@ -10,9 +10,14 @@ import {
   StudentNotFoundError,
   SchoolNotFoundError,
 } from '@application/use-cases/students/StudentErrors';
-import { createStudentSchema, updateStudentSchema } from '../validators/student.validators';
+import {
+  createStudentSchema,
+  updateStudentSchema,
+  importReportSchema,
+} from '../validators/student.validators';
 import { CreateStudentInput, UpdateStudentInput } from '@application/dtos/student.dto';
 import { ExcelStudentParser } from '@infrastructure/parsers/ExcelStudentParser';
+import { ImportReportWorkbook } from '@infrastructure/parsers/ImportReportWorkbook';
 
 // Normaliza los campos opcionales que llegan como cadena vacía a null/undefined.
 function cleanOptional(value?: string): string | null | undefined {
@@ -28,7 +33,32 @@ export class StudentController {
     private readonly listStudentsUseCase: ListStudentsUseCase,
     private readonly importStudentsUseCase: ImportStudentsUseCase,
     private readonly excelParser: ExcelStudentParser,
+    private readonly reportWorkbook: ImportReportWorkbook,
   ) {}
+
+  // Exporta a Excel el resultado de una carga masiva (HU-09).
+  downloadReport = async (req: Request, res: Response) => {
+    try {
+      const report = importReportSchema.parse(req.body);
+      const buffer = await this.reportWorkbook.build(report, {
+        generatedBy: req.auth?.email ?? 'Desconocido',
+        generatedAt: new Date(),
+      });
+      res.setHeader(
+        'Content-Type',
+        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+      );
+      res.setHeader('Content-Disposition', 'attachment; filename="reporte-carga-tutorados.xlsx"');
+      res.status(200).send(buffer);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        res.status(400).json({ error: 'Reporte inválido', details: error.errors });
+        return;
+      }
+      console.error('Error generando el reporte de carga', error);
+      res.status(500).json({ error: 'No se pudo generar el reporte' });
+    }
+  };
 
   // Carga masiva desde un archivo .xlsx (HU-08).
   bulkImport = async (req: Request, res: Response) => {

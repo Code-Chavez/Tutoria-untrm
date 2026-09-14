@@ -54,6 +54,8 @@ describe('ImportStudentsUseCase', () => {
     expect(report.created).toBe(2);
     expect(report.skipped).toBe(0);
     expect(report.errors).toHaveLength(0);
+    expect(report.createdRows).toHaveLength(2);
+    expect(report.createdRows[0]).toEqual({ row: 2, studentCode: '20191234', fullName: 'Ana Torres' });
     expect(mockStudentRepository.create).toHaveBeenCalledTimes(2);
     expect(mockStudentRepository.create).toHaveBeenCalledWith(
       expect.objectContaining({ schoolId: 'school-1', isActive: true, isAtRisk: false }),
