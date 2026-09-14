@@ -9,6 +9,7 @@ import { UnauthorizedPage } from '@shared/components/UnauthorizedPage';
 import { AppLayout } from '@shared/components/layout/AppLayout';
 import { DashboardPage } from '@features/dashboard/components/DashboardPage';
 import { UserManagementPage } from '@features/admin/pages/UserManagementPage';
+import { StudentsPage } from '@features/tutorados/pages/StudentsPage';
 import { ProfilePage } from '@features/profile/pages/ProfilePage';
 
 export default function App() {
@@ -28,6 +29,14 @@ export default function App() {
                 element={
                   <RequireRole roles={['Administrador DBU']}>
                     <UserManagementPage />
+                  </RequireRole>
+                }
+              />
+              <Route
+                path="tutorados"
+                element={
+                  <RequireRole roles={['Docente Tutor', 'Coordinador', 'Administrador DBU']}>
+                    <StudentsPage />
                   </RequireRole>
                 }
               />

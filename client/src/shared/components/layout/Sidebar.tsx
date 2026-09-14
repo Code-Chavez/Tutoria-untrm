@@ -50,7 +50,7 @@ const NAV: NavGroup[] = [
     title: 'Principal',
     items: [
       { label: 'Panel de inicio', Icon: DashboardIcon, path: '/' },
-      { label: 'Tutorados', Icon: GraduationCapIcon, roles: ['tutor', 'coord', 'dbu'] },
+      { label: 'Tutorados', Icon: GraduationCapIcon, path: '/tutorados', roles: ['tutor', 'coord', 'dbu'] },
       { label: 'Asignación', Icon: SwitchIcon, roles: ['coord', 'dbu'] },
       { label: 'Carga masiva', Icon: UploadIcon, roles: ['coord', 'dbu'] },
       { label: 'Entrevista inicial', Icon: ClipboardIcon, roles: ['tutor'] },
