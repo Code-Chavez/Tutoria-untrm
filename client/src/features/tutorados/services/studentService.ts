@@ -1,5 +1,17 @@
 import { apiClient } from '@shared/services/apiClient';
 
+// Dispara la descarga de un blob en el navegador.
+function saveBlob(data: Blob, filename: string): void {
+  const url = window.URL.createObjectURL(data);
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = filename;
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+  window.URL.revokeObjectURL(url);
+}
+
 export interface Student {
   id: string;
   studentCode: string;
@@ -39,10 +51,17 @@ export interface ImportRowError {
   message: string;
 }
 
+export interface ImportCreatedRow {
+  row: number;
+  studentCode: string;
+  fullName: string;
+}
+
 export interface ImportReport {
   totalRows: number;
   created: number;
   skipped: number;
+  createdRows: ImportCreatedRow[];
   errors: ImportRowError[];
 }
 
@@ -85,13 +104,13 @@ export const studentService = {
 
   downloadTemplate: async (): Promise<void> => {
     const response = await apiClient.get('/students/import/template', { responseType: 'blob' });
-    const url = window.URL.createObjectURL(response.data as Blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = 'plantilla-tutorados.xlsx';
-    document.body.appendChild(link);
-    link.click();
-    link.remove();
-    window.URL.revokeObjectURL(url);
+    saveBlob(response.data as Blob, 'plantilla-tutorados.xlsx');
+  },
+
+  downloadImportReport: async (report: ImportReport): Promise<void> => {
+    const response = await apiClient.post('/students/import/report', report, {
+      responseType: 'blob',
+    });
+    saveBlob(response.data as Blob, 'reporte-carga-tutorados.xlsx');
   },
 };

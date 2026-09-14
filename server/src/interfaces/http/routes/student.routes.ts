@@ -3,6 +3,7 @@ import multer from 'multer';
 import { container } from '../../../infrastructure/container';
 import { StudentController } from '../controllers/StudentController';
 import { ExcelStudentParser } from '../../../infrastructure/parsers/ExcelStudentParser';
+import { ImportReportWorkbook } from '../../../infrastructure/parsers/ImportReportWorkbook';
 import { authenticate } from '../middleware/authenticate';
 import { authorize } from '../middleware/authorize';
 
@@ -25,6 +26,7 @@ const studentController = new StudentController(
   container.useCases.listStudentsUseCase,
   container.useCases.importStudentsUseCase,
   new ExcelStudentParser(),
+  new ImportReportWorkbook(),
 );
 
 // Todas las rutas de estudiantes requieren autenticación.
@@ -43,6 +45,9 @@ router.post(
   upload.single('file'),
   studentController.bulkImport,
 );
+
+// Exportar a Excel el resultado de la carga masiva (HU-09).
+router.post('/students/import/report', authorize(['students:import']), studentController.downloadReport);
 
 // Registrar un estudiante individual.
 router.post('/students', authorize(['students:write']), studentController.create);

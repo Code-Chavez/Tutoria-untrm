@@ -8,6 +8,7 @@ vi.mock('../services/studentService', () => ({
   studentService: {
     importStudents: vi.fn(),
     downloadTemplate: vi.fn(),
+    downloadImportReport: vi.fn(),
   },
 }));
 
@@ -40,6 +41,10 @@ describe('BulkImportPage', () => {
       totalRows: 3,
       created: 2,
       skipped: 1,
+      createdRows: [
+        { row: 2, studentCode: '20191234', fullName: 'Ana Torres' },
+        { row: 3, studentCode: '20195678', fullName: 'Luis Pérez' },
+      ],
       errors: [{ row: 4, studentCode: '123', message: 'El código universitario debe tener entre 8 y 12 dígitos numéricos' }],
     };
     mocked.importStudents.mockResolvedValue(report);
@@ -56,6 +61,10 @@ describe('BulkImportPage', () => {
     // La fila de error muestra el número de fila y el código conflictivo (valores únicos).
     expect(screen.getByText('4')).toBeInTheDocument();
     expect(screen.getByText('123')).toBeInTheDocument();
+
+    // HU-09: el resultado se puede exportar a Excel.
+    await user.click(screen.getByRole('button', { name: /descargar reporte/i }));
+    expect(mocked.downloadImportReport).toHaveBeenCalledWith(report);
   });
 
   it('descarga la plantilla', async () => {

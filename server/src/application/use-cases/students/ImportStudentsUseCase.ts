@@ -4,6 +4,7 @@ import {
   ImportStudentRow,
   ImportReport,
   ImportRowError,
+  ImportCreatedRow,
 } from '@application/dtos/studentImport.dto';
 
 const CODE_PATTERN = /^\d{8,12}$/;
@@ -28,7 +29,7 @@ export class ImportStudentsUseCase {
     const schoolByName = new Map(schools.map((s) => [normalize(s.name), s.id]));
 
     const errors: ImportRowError[] = [];
-    let created = 0;
+    const createdRows: ImportCreatedRow[] = [];
 
     // Códigos ya vistos en este mismo archivo, para detectar duplicados internos.
     const seenCodes = new Set<string>();
@@ -75,10 +76,12 @@ export class ImportStudentsUseCase {
         continue;
       }
 
+      const firstName = row.firstName.trim();
+      const lastName = row.lastName.trim();
       await this.students.create({
         studentCode: code,
-        firstName: row.firstName.trim(),
-        lastName: row.lastName.trim(),
+        firstName,
+        lastName,
         email: row.email?.trim() || null,
         phone: row.phone?.trim() || null,
         cycle,
@@ -87,13 +90,14 @@ export class ImportStudentsUseCase {
         isActive: true,
       });
       seenCodes.add(code);
-      created += 1;
+      createdRows.push({ row: row.rowNumber, studentCode: code, fullName: `${firstName} ${lastName}` });
     }
 
     return {
       totalRows: rows.length,
-      created,
+      created: createdRows.length,
       skipped: errors.length,
+      createdRows,
       errors,
     };
   }

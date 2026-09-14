@@ -17,9 +17,16 @@ export interface ImportRowError {
   message: string;
 }
 
+export interface ImportCreatedRow {
+  row: number;
+  studentCode: string;
+  fullName: string;
+}
+
 export interface ImportReport {
   totalRows: number;
   created: number;
   skipped: number;
+  createdRows: ImportCreatedRow[];
   errors: ImportRowError[];
 }

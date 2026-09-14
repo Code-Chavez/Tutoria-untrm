@@ -22,5 +22,30 @@ export const createStudentSchema = z.object({
 
 export const updateStudentSchema = createStudentSchema.partial();
 
+// Reporte de carga masiva enviado por el cliente para exportarlo a Excel (HU-09).
+export const importReportSchema = z.object({
+  totalRows: z.number().int().min(0),
+  created: z.number().int().min(0),
+  skipped: z.number().int().min(0),
+  createdRows: z
+    .array(
+      z.object({
+        row: z.number().int(),
+        studentCode: z.string(),
+        fullName: z.string(),
+      }),
+    )
+    .max(20000),
+  errors: z
+    .array(
+      z.object({
+        row: z.number().int(),
+        studentCode: z.string().optional(),
+        message: z.string(),
+      }),
+    )
+    .max(20000),
+});
+
 export type CreateStudentBody = z.infer<typeof createStudentSchema>;
 export type UpdateStudentBody = z.infer<typeof updateStudentSchema>;

@@ -58,6 +58,15 @@ export const BulkImportPage: React.FC = () => {
     }
   };
 
+  const handleDownloadReport = async () => {
+    if (!report) return;
+    try {
+      await studentService.downloadImportReport(report);
+    } catch {
+      setError('No se pudo descargar el reporte.');
+    }
+  };
+
   return (
     <div className={styles.page}>
       <div className={styles.header}>
@@ -136,6 +145,13 @@ export const BulkImportPage: React.FC = () => {
 
         {report && (
           <div className={styles.report}>
+            <div className={styles.reportHead}>
+              <h3 className={styles.reportTitle}>Resultado de la carga</h3>
+              <button className={styles.reportButton} onClick={handleDownloadReport}>
+                <ReportIcon size={15} />
+                Descargar reporte
+              </button>
+            </div>
             <div className={styles.summary}>
               <div className={`${styles.stat} ${styles.statTotal}`}>
                 <div className={styles.statNumber}>{report.totalRows}</div>
