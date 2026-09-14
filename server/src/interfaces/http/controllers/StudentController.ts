@@ -3,6 +3,7 @@ import { z } from 'zod';
 import { CreateStudentUseCase } from '@application/use-cases/students/CreateStudentUseCase';
 import { UpdateStudentUseCase } from '@application/use-cases/students/UpdateStudentUseCase';
 import { ListStudentsUseCase } from '@application/use-cases/students/ListStudentsUseCase';
+import { ImportStudentsUseCase } from '@application/use-cases/students/ImportStudentsUseCase';
 import { StudentFilters } from '@domain/repositories/StudentRepository';
 import {
   DuplicateStudentCodeError,
@@ -11,6 +12,7 @@ import {
 } from '@application/use-cases/students/StudentErrors';
 import { createStudentSchema, updateStudentSchema } from '../validators/student.validators';
 import { CreateStudentInput, UpdateStudentInput } from '@application/dtos/student.dto';
+import { ExcelStudentParser } from '@infrastructure/parsers/ExcelStudentParser';
 
 // Normaliza los campos opcionales que llegan como cadena vacía a null/undefined.
 function cleanOptional(value?: string): string | null | undefined {
@@ -24,7 +26,49 @@ export class StudentController {
     private readonly createStudentUseCase: CreateStudentUseCase,
     private readonly updateStudentUseCase: UpdateStudentUseCase,
     private readonly listStudentsUseCase: ListStudentsUseCase,
+    private readonly importStudentsUseCase: ImportStudentsUseCase,
+    private readonly excelParser: ExcelStudentParser,
   ) {}
+
+  // Carga masiva desde un archivo .xlsx (HU-08).
+  bulkImport = async (req: Request, res: Response) => {
+    try {
+      const file = req.file;
+      if (!file) {
+        res.status(400).json({ error: 'Debe adjuntar un archivo Excel (.xlsx) en el campo «file»' });
+        return;
+      }
+
+      const rows = await this.excelParser.parse(file.buffer);
+      if (rows.length === 0) {
+        res.status(400).json({
+          error: 'El archivo no contiene filas de datos o los encabezados no coinciden con la plantilla',
+        });
+        return;
+      }
+
+      const report = await this.importStudentsUseCase.execute(rows);
+      res.status(200).json({ message: 'Carga masiva procesada', report });
+    } catch (error) {
+      console.error('Error en carga masiva de estudiantes', error);
+      res.status(500).json({ error: 'No se pudo procesar el archivo. Verifique que sea un .xlsx válido.' });
+    }
+  };
+
+  // Descarga la plantilla .xlsx con los encabezados esperados.
+  downloadTemplate = async (_req: Request, res: Response) => {
+    try {
+      const buffer = await this.excelParser.buildTemplate();
+      res.setHeader(
+        'Content-Type',
+        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+      );
+      res.setHeader('Content-Disposition', 'attachment; filename="plantilla-tutorados.xlsx"');
+      res.status(200).send(buffer);
+    } catch {
+      res.status(500).json({ error: 'No se pudo generar la plantilla' });
+    }
+  };
 
   list = async (req: Request, res: Response) => {
     try {

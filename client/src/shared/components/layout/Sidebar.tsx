@@ -52,7 +52,7 @@ const NAV: NavGroup[] = [
       { label: 'Panel de inicio', Icon: DashboardIcon, path: '/' },
       { label: 'Tutorados', Icon: GraduationCapIcon, path: '/tutorados', roles: ['tutor', 'coord', 'dbu'] },
       { label: 'Asignación', Icon: SwitchIcon, roles: ['coord', 'dbu'] },
-      { label: 'Carga masiva', Icon: UploadIcon, roles: ['coord', 'dbu'] },
+      { label: 'Carga masiva', Icon: UploadIcon, path: '/carga-masiva', roles: ['coord', 'dbu'] },
       { label: 'Entrevista inicial', Icon: ClipboardIcon, roles: ['tutor'] },
       { label: 'Expediente', Icon: FolderIcon, roles: ['tutor', 'coord', 'dbu'] },
       { label: 'Sesiones', Icon: CalendarIcon, roles: ['tutor', 'est'] },

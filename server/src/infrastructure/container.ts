@@ -59,6 +59,7 @@ import { ChangePasswordUseCase } from '@application/use-cases/profile/ChangePass
 import { CreateStudentUseCase } from '@application/use-cases/students/CreateStudentUseCase';
 import { UpdateStudentUseCase } from '@application/use-cases/students/UpdateStudentUseCase';
 import { ListStudentsUseCase } from '@application/use-cases/students/ListStudentsUseCase';
+import { ImportStudentsUseCase } from '@application/use-cases/students/ImportStudentsUseCase';
 import { ListSchoolsUseCase } from '@application/use-cases/schools/ListSchoolsUseCase';
 
 const createUserUseCase = new CreateUserUseCase(userRepository, passwordHasher);
@@ -81,6 +82,7 @@ const changePasswordUseCase = new ChangePasswordUseCase(
 const createStudentUseCase = new CreateStudentUseCase(studentRepository, schoolRepository);
 const updateStudentUseCase = new UpdateStudentUseCase(studentRepository, schoolRepository);
 const listStudentsUseCase = new ListStudentsUseCase(studentRepository);
+const importStudentsUseCase = new ImportStudentsUseCase(studentRepository, schoolRepository);
 const listSchoolsUseCase = new ListSchoolsUseCase(schoolRepository);
 
 export const container = {
@@ -114,6 +116,7 @@ export const container = {
     createStudentUseCase,
     updateStudentUseCase,
     listStudentsUseCase,
+    importStudentsUseCase,
     listSchoolsUseCase,
   },
 } as const;

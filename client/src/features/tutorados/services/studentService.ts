@@ -33,6 +33,19 @@ export interface CreateStudentData {
 
 export type UpdateStudentData = Partial<CreateStudentData>;
 
+export interface ImportRowError {
+  row: number;
+  studentCode?: string;
+  message: string;
+}
+
+export interface ImportReport {
+  totalRows: number;
+  created: number;
+  skipped: number;
+  errors: ImportRowError[];
+}
+
 export const studentService = {
   getStudents: async (filters?: StudentFilters): Promise<Student[]> => {
     const params = new URLSearchParams();
@@ -57,5 +70,28 @@ export const studentService = {
       data,
     );
     return response.data.student;
+  },
+
+  importStudents: async (file: File): Promise<ImportReport> => {
+    const formData = new FormData();
+    formData.append('file', file);
+    const response = await apiClient.post<{ message: string; report: ImportReport }>(
+      '/students/import',
+      formData,
+      { headers: { 'Content-Type': 'multipart/form-data' } },
+    );
+    return response.data.report;
+  },
+
+  downloadTemplate: async (): Promise<void> => {
+    const response = await apiClient.get('/students/import/template', { responseType: 'blob' });
+    const url = window.URL.createObjectURL(response.data as Blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = 'plantilla-tutorados.xlsx';
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    window.URL.revokeObjectURL(url);
   },
 };
