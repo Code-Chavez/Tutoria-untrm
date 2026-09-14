@@ -10,6 +10,7 @@ import { AppLayout } from '@shared/components/layout/AppLayout';
 import { DashboardPage } from '@features/dashboard/components/DashboardPage';
 import { UserManagementPage } from '@features/admin/pages/UserManagementPage';
 import { StudentsPage } from '@features/tutorados/pages/StudentsPage';
+import { BulkImportPage } from '@features/tutorados/pages/BulkImportPage';
 import { ProfilePage } from '@features/profile/pages/ProfilePage';
 
 export default function App() {
@@ -37,6 +38,14 @@ export default function App() {
                 element={
                   <RequireRole roles={['Docente Tutor', 'Coordinador', 'Administrador DBU']}>
                     <StudentsPage />
+                  </RequireRole>
+                }
+              />
+              <Route
+                path="carga-masiva"
+                element={
+                  <RequireRole roles={['Coordinador', 'Administrador DBU']}>
+                    <BulkImportPage />
                   </RequireRole>
                 }
               />

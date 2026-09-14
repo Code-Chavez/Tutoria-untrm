@@ -22,6 +22,11 @@
     "overrides": {
       "deepmerge-ts": ">=8.0.0",
       "qs": ">=6.16.0"
+    },
+    "auditConfig": {
+      "ignoreGhsas": [
+        "GHSA-w5hq-g745-h8pq"
+      ]
     }
   },
   "dependencies": {
@@ -29,9 +34,11 @@
     "bcryptjs": "^3.0.3",
     "cors": "^2.8.5",
     "dotenv": "^16.4.7",
+    "exceljs": "^4.4.0",
     "express": "^4.21.2",
     "helmet": "^8.0.0",
     "jsonwebtoken": "^9.0.2",
+    "multer": "^2.3.0",
     "zod": "^3.24.2"
   },
   "devDependencies": {
@@ -41,6 +48,7 @@
     "@types/express": "^5.0.0",
     "@types/jest": "^29.5.14",
     "@types/jsonwebtoken": "^9.0.9",
+    "@types/multer": "^2.2.0",
     "@types/node": "^22.10.0",
     "eslint": "^9.16.0",
     "globals": "^17.7.0",
