@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen, waitFor, fireEvent } from '@testing-library/react';
+import { render, screen, waitFor, fireEvent, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { BulkImportPage } from './BulkImportPage';
 import { studentService, type ImportReport } from '../services/studentService';
@@ -57,10 +57,10 @@ describe('BulkImportPage', () => {
     await user.click(screen.getByRole('button', { name: /importar estudiantes/i }));
 
     await waitFor(() => expect(mocked.importStudents).toHaveBeenCalledTimes(1));
-    expect(await screen.findByText('2')).toBeInTheDocument(); // registrados
-    // La fila de error muestra el número de fila y el código conflictivo (valores únicos).
-    expect(screen.getByText('4')).toBeInTheDocument();
-    expect(screen.getByText('123')).toBeInTheDocument();
+    // La tabla de errores muestra el número de fila y el código conflictivo.
+    const errorsTable = await screen.findByRole('table');
+    expect(within(errorsTable).getByText('4')).toBeInTheDocument();
+    expect(within(errorsTable).getByText('123')).toBeInTheDocument();
 
     // HU-09: el resultado se puede exportar a Excel.
     await user.click(screen.getByRole('button', { name: /descargar reporte/i }));

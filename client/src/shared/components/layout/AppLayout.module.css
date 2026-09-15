@@ -1,22 +1,42 @@
 .app {
   display: grid;
-  grid-template-columns: 230px 1fr;
+  grid-template-columns: var(--sidebar-w) 1fr;
   min-height: 100vh;
+  background: var(--g100);
 }
 
 .main {
   display: flex;
   flex-direction: column;
   min-width: 0;
+  height: 100vh;
 }
 
-.content {
-  padding: 22px 24px;
+.scroll {
+  flex: 1;
   overflow-y: auto;
 }
 
+/* Contenedor central: aprovecha el ancho pero se mantiene legible en monitores grandes */
+.content {
+  width: 100%;
+  max-width: var(--contenido-max);
+  margin: 0 auto;
+  padding: var(--s7) var(--s7) var(--s8);
+}
+
+@media (max-width: 1200px) {
+  .content {
+    padding: var(--s6) var(--s6) var(--s7);
+  }
+}
+
+/* En tablet/móvil el sidebar pasa a drawer y el contenido ocupa todo el ancho */
 @media (max-width: 900px) {
   .app {
     grid-template-columns: 1fr;
+  }
+  .content {
+    padding: var(--s5) var(--s4) var(--s7);
   }
 }

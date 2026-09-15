@@ -1,0 +1,44 @@
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-family: var(--fx);
+  font-size: var(--fs-xs);
+  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: 999px;
+  border: 1px solid transparent;
+  white-space: nowrap;
+  line-height: 1.4;
+}
+
+.dot {
+  display: inline-flex;
+  align-items: center;
+}
+
+.success {
+  background: var(--ok-bg);
+  color: var(--ok);
+  border-color: rgba(30, 127, 79, 0.18);
+}
+.neutral {
+  background: var(--g100);
+  color: var(--g600);
+  border-color: var(--borde);
+}
+.danger {
+  background: var(--peligro-bg);
+  color: var(--peligro);
+  border-color: rgba(179, 38, 30, 0.16);
+}
+.warning {
+  background: var(--alerta-bg);
+  color: var(--alerta);
+  border-color: rgba(199, 120, 0, 0.18);
+}
+.info {
+  background: var(--info-bg);
+  color: var(--azul-med);
+  border-color: rgba(46, 95, 163, 0.18);
+}

@@ -1,0 +1,65 @@
+.input {
+  width: 100%;
+  font-family: var(--fx);
+  font-size: var(--fs-sm);
+  color: var(--g900);
+  background: #fff;
+  border: 1.5px solid var(--borde-fuerte);
+  border-radius: var(--r-sm);
+  padding: 10px 12px;
+  outline: none;
+  transition: border-color 0.16s, box-shadow 0.16s;
+  height: 42px;
+}
+
+.input::placeholder {
+  color: var(--g400);
+}
+
+.input:focus {
+  border-color: var(--azul-med);
+  box-shadow: var(--focus-ring);
+}
+
+/* Búsqueda */
+.search {
+  position: relative;
+  flex: 1;
+  min-width: 220px;
+}
+
+.searchIcon {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--g400);
+  display: inline-flex;
+  pointer-events: none;
+}
+
+.withIcon {
+  padding-left: 38px;
+}
+
+/* Select */
+.selectWrap {
+  position: relative;
+}
+
+.select {
+  appearance: none;
+  -webkit-appearance: none;
+  padding-right: 34px;
+  cursor: pointer;
+}
+
+.chevron {
+  position: absolute;
+  right: 11px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--g500);
+  display: inline-flex;
+  pointer-events: none;
+}
