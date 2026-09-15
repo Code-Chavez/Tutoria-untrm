@@ -6,16 +6,28 @@
   padding: 0;
 }
 
+html,
+body {
+  height: 100%;
+}
+
 body {
   font-family: var(--fx);
   color: var(--g900);
   background: var(--g100);
-  font-size: 14px;
+  font-size: var(--fs-body);
+  line-height: 1.5;
   -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
 }
 
-h1, h2, h3, h4 {
+h1,
+h2,
+h3,
+h4 {
   font-family: var(--ft);
+  color: var(--g900);
+  line-height: 1.25;
 }
 
 a {
@@ -25,8 +37,61 @@ a {
 
 button {
   cursor: pointer;
+  font-family: var(--fx);
 }
 
-input, select, textarea {
+input,
+select,
+textarea {
   font-family: var(--fx);
+}
+
+/* Foco accesible y consistente en toda la app */
+:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
+  border-radius: var(--r-sm);
+}
+
+/* Barra de desplazamiento discreta */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--g300) transparent;
+}
+*::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+*::-webkit-scrollbar-thumb {
+  background: var(--g300);
+  border-radius: 999px;
+  border: 3px solid transparent;
+  background-clip: padding-box;
+}
+*::-webkit-scrollbar-thumb:hover {
+  background: var(--g400);
+  background-clip: padding-box;
+}
+
+/* Utilidad: solo para lectores de pantalla */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
 }
