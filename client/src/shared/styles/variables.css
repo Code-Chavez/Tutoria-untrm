@@ -3,33 +3,75 @@
   --azul: #14315F;
   --azul-osc: #0B1F3F;
   --azul-med: #2E5FA3;
+  --azul-claro: #3D74C4;
   --celeste: #EAF1FA;
+  --celeste-2: #DCE8F7;
   --dorado: #D9A404;
 
   /* Neutros */
-  --g900: #1C2430;
+  --g900: #16202E;
+  --g700: #384456;
   --g600: #55606E;
+  --g500: #6B7683;
+  --g400: #94A0AE;
   --g300: #C9D2DD;
+  --g200: #E4E9F1;
   --g100: #F4F6F9;
+  --g50: #F8FAFC;
   --blanco: #fff;
 
   /* Semánticos */
   --ok: #1E7F4F;
+  --ok-bg: #E6F4EC;
   --alerta: #C77800;
+  --alerta-bg: #FBF0DC;
   --peligro: #B3261E;
+  --peligro-bg: #FBE7E5;
   --info: #2E5FA3;
+  --info-bg: #EAF1FA;
 
   /* Tipografía */
-  --ft: 'Montserrat', sans-serif;
-  --fx: 'Inter', sans-serif;
+  --ft: 'Montserrat', 'Inter', system-ui, sans-serif;
+  --fx: 'Inter', system-ui, -apple-system, sans-serif;
+
+  /* Escala tipográfica */
+  --fs-display: 30px;
+  --fs-h1: 24px;
+  --fs-h2: 19px;
+  --fs-h3: 16px;
+  --fs-body: 14.5px;
+  --fs-sm: 13px;
+  --fs-xs: 11.5px;
+
+  /* Escala de espaciado */
+  --s1: 4px;
+  --s2: 8px;
+  --s3: 12px;
+  --s4: 16px;
+  --s5: 20px;
+  --s6: 24px;
+  --s7: 32px;
+  --s8: 40px;
 
   /* Forma */
+  --r-sm: 8px;
   --r: 10px;
   --r-lg: 14px;
+  --r-xl: 18px;
+  --sombra-xs: 0 1px 2px rgba(11, 31, 63, 0.05);
   --sombra: 0 1px 2px rgba(11, 31, 63, 0.04), 0 4px 14px rgba(11, 31, 63, 0.06);
+  --sombra-md: 0 2px 6px rgba(11, 31, 63, 0.06), 0 12px 28px rgba(11, 31, 63, 0.10);
   --sombra-hover: 0 2px 4px rgba(11, 31, 63, 0.06), 0 10px 24px rgba(11, 31, 63, 0.12);
 
   /* Bordes */
   --borde: #E4E9F1;
   --borde-fuerte: #D3DBE6;
+
+  /* Anillo de foco accesible */
+  --focus-ring: 0 0 0 3px rgba(46, 95, 163, 0.35);
+
+  /* Layout */
+  --contenido-max: 1440px;
+  --sidebar-w: 256px;
+  --topbar-h: 60px;
 }

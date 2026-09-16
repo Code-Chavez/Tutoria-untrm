@@ -1,102 +1,189 @@
 .top {
   background: #fff;
-  border-bottom: 1px solid var(--g300);
-  padding: 12px 24px;
+  border-bottom: 1px solid var(--borde);
+  height: var(--topbar-h);
+  padding: 0 var(--s6);
   display: flex;
   justify-content: space-between;
   align-items: center;
   position: sticky;
   top: 0;
-  z-index: 5;
+  z-index: 20;
+  flex-shrink: 0;
 }
 
-.crumb {
-  font-size: 12px;
-  color: var(--g600);
+.left {
+  display: flex;
+  align-items: center;
+  gap: var(--s3);
+  min-width: 0;
 }
 
-.crumb b {
+.menuBtn {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  border: 1.5px solid var(--borde-fuerte);
+  border-radius: var(--r-sm);
+  background: #fff;
+  color: var(--g700);
+}
+.menuBtn:hover {
+  background: var(--g100);
   color: var(--azul);
+}
+
+.crumbs {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.breadcrumb {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: var(--fs-xs);
+  color: var(--g500);
+}
+
+.crumbRoot {
+  font-weight: 600;
+  color: var(--azul-med);
+}
+
+.section {
   font-family: var(--ft);
+  font-size: var(--fs-h3);
+  font-weight: 700;
+  color: var(--g900);
+  line-height: 1.1;
+  margin: 0;
 }
 
 .right {
   display: flex;
   align-items: center;
-  gap: 14px;
+  gap: var(--s3);
 }
 
 .bell {
   position: relative;
   display: grid;
   place-items: center;
-  width: 34px;
-  height: 34px;
-  border: none;
-  border-radius: 8px;
-  background: none;
+  width: 38px;
+  height: 38px;
+  border: 1.5px solid var(--borde);
+  border-radius: var(--r-sm);
+  background: #fff;
   color: var(--g600);
-  cursor: pointer;
-  transition: color 0.15s, background 0.15s;
+  transition: color 0.15s, background 0.15s, border-color 0.15s;
 }
 
 .bell:hover {
   color: var(--azul);
-  background: var(--g100);
+  background: var(--celeste);
+  border-color: var(--azul-med);
+}
+
+.bellDot {
+  position: absolute;
+  top: 8px;
+  right: 9px;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--dorado);
+  border: 1.5px solid #fff;
 }
 
 .who {
   display: flex;
   align-items: center;
-  gap: 9px;
-  font-size: 12.5px;
+  gap: var(--s2);
   color: var(--g900);
-  text-decoration: none;
-  padding: 4px 8px 4px 4px;
+  padding: 4px 10px 4px 4px;
   border-radius: 999px;
-  transition: background 0.15s;
+  border: 1px solid var(--borde);
+  transition: background 0.15s, border-color 0.15s;
 }
 
 .who:hover {
   background: var(--g100);
+  border-color: var(--borde-fuerte);
 }
 
-.who b {
+.whoText {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.25;
+}
+
+.whoText b {
   font-family: var(--ft);
+  font-size: var(--fs-sm);
+  font-weight: 600;
 }
 
-.who small {
+.whoText small {
   color: var(--g600);
-  display: block;
   font-size: 11px;
 }
 
 .avatar {
-  width: 34px;
-  height: 34px;
+  width: 36px;
+  height: 36px;
   border-radius: 50%;
-  background: var(--azul-med);
+  background: linear-gradient(135deg, var(--azul-med), var(--azul));
   color: #fff;
   display: grid;
   place-items: center;
   font-family: var(--ft);
   font-weight: 700;
-  font-size: 12px;
+  font-size: 12.5px;
+  flex-shrink: 0;
 }
 
 .logout {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
   font-family: var(--ft);
-  font-size: 12px;
+  font-size: var(--fs-sm);
   font-weight: 600;
   color: var(--g600);
-  background: none;
-  border: 1.5px solid var(--g300);
-  border-radius: 8px;
-  padding: 6px 12px;
-  cursor: pointer;
+  background: #fff;
+  border: 1.5px solid var(--borde-fuerte);
+  border-radius: var(--r-sm);
+  padding: 8px 14px;
+  height: 38px;
 }
 
 .logout:hover {
-  color: var(--azul);
-  border-color: var(--azul-med);
+  color: var(--peligro);
+  border-color: var(--peligro-bg);
+  background: var(--peligro-bg);
+}
+
+@media (max-width: 900px) {
+  .menuBtn {
+    display: inline-flex;
+  }
+}
+
+@media (max-width: 640px) {
+  .top {
+    padding: 0 var(--s4);
+  }
+  .whoText {
+    display: none;
+  }
+  .logoutText {
+    display: none;
+  }
+  .logout {
+    padding: 8px 10px;
+  }
 }

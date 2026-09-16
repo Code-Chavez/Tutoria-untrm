@@ -231,3 +231,155 @@ export function CloseIcon({ size = 18, className }: IconProps) {
     </svg>
   );
 }
+
+export function SearchIcon({ size = 18, className }: IconProps) {
+  return (
+    <svg {...baseProps(size)} className={className} aria-hidden="true">
+      <circle cx="11" cy="11" r="8" />
+      <path d="m21 21-4.3-4.3" />
+    </svg>
+  );
+}
+
+export function DownloadIcon({ size = 18, className }: IconProps) {
+  return (
+    <svg {...baseProps(size)} className={className} aria-hidden="true">
+      <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+      <path d="M7 10l5 5 5-5" />
+      <path d="M12 15V3" />
+    </svg>
+  );
+}
+
+export function MenuIcon({ size = 18, className }: IconProps) {
+  return (
+    <svg {...baseProps(size)} className={className} aria-hidden="true">
+      <path d="M3 12h18M3 6h18M3 18h18" />
+    </svg>
+  );
+}
+
+export function FilterIcon({ size = 18, className }: IconProps) {
+  return (
+    <svg {...baseProps(size)} className={className} aria-hidden="true">
+      <path d="M22 3H2l8 9.46V19l4 2v-8.54L22 3Z" />
+    </svg>
+  );
+}
+
+export function ChevronLeftIcon({ size = 18, className }: IconProps) {
+  return (
+    <svg {...baseProps(size)} className={className} aria-hidden="true">
+      <path d="m15 18-6-6 6-6" />
+    </svg>
+  );
+}
+
+export function ChevronRightIcon({ size = 18, className }: IconProps) {
+  return (
+    <svg {...baseProps(size)} className={className} aria-hidden="true">
+      <path d="m9 18 6-6-6-6" />
+    </svg>
+  );
+}
+
+export function ChevronDownIcon({ size = 18, className }: IconProps) {
+  return (
+    <svg {...baseProps(size)} className={className} aria-hidden="true">
+      <path d="m6 9 6 6 6-6" />
+    </svg>
+  );
+}
+
+export function TrashIcon({ size = 18, className }: IconProps) {
+  return (
+    <svg {...baseProps(size)} className={className} aria-hidden="true">
+      <path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+      <path d="M10 11v6M14 11v6" />
+    </svg>
+  );
+}
+
+export function UserPlusIcon({ size = 18, className }: IconProps) {
+  return (
+    <svg {...baseProps(size)} className={className} aria-hidden="true">
+      <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+      <circle cx="9" cy="7" r="4" />
+      <path d="M19 8v6M22 11h-6" />
+    </svg>
+  );
+}
+
+export function ClockIcon({ size = 18, className }: IconProps) {
+  return (
+    <svg {...baseProps(size)} className={className} aria-hidden="true">
+      <circle cx="12" cy="12" r="10" />
+      <path d="M12 6v6l4 2" />
+    </svg>
+  );
+}
+
+export function LayersIcon({ size = 18, className }: IconProps) {
+  return (
+    <svg {...baseProps(size)} className={className} aria-hidden="true">
+      <path d="m12 2 9 5-9 5-9-5 9-5Z" />
+      <path d="m3 12 9 5 9-5M3 17l9 5 9-5" />
+    </svg>
+  );
+}
+
+export function LogOutIcon({ size = 18, className }: IconProps) {
+  return (
+    <svg {...baseProps(size)} className={className} aria-hidden="true">
+      <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+      <path d="m16 17 5-5-5-5M21 12H9" />
+    </svg>
+  );
+}
+
+export function RefreshIcon({ size = 18, className }: IconProps) {
+  return (
+    <svg {...baseProps(size)} className={className} aria-hidden="true">
+      <path d="M3 12a9 9 0 0 1 15-6.7L21 8" />
+      <path d="M21 3v5h-5" />
+      <path d="M21 12a9 9 0 0 1-15 6.7L3 16" />
+      <path d="M3 21v-5h5" />
+    </svg>
+  );
+}
+
+export function FileSpreadsheetIcon({ size = 18, className }: IconProps) {
+  return (
+    <svg {...baseProps(size)} className={className} aria-hidden="true">
+      <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z" />
+      <path d="M14 2v6h6" />
+      <path d="M8 13h8M8 17h8M10 13v4M14 13v4" />
+    </svg>
+  );
+}
+
+export function CheckIcon({ size = 18, className }: IconProps) {
+  return (
+    <svg {...baseProps(size)} className={className} aria-hidden="true">
+      <path d="M20 6 9 17l-5-5" />
+    </svg>
+  );
+}
+
+export function XCircleIcon({ size = 18, className }: IconProps) {
+  return (
+    <svg {...baseProps(size)} className={className} aria-hidden="true">
+      <circle cx="12" cy="12" r="10" />
+      <path d="m15 9-6 6M9 9l6 6" />
+    </svg>
+  );
+}
+
+export function InfoIcon({ size = 18, className }: IconProps) {
+  return (
+    <svg {...baseProps(size)} className={className} aria-hidden="true">
+      <circle cx="12" cy="12" r="10" />
+      <path d="M12 16v-4M12 8h.01" />
+    </svg>
+  );
+}

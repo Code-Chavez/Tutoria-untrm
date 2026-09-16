@@ -1,244 +1,26 @@
-.page {
-  max-width: 1180px;
-}
-
-.header {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-end;
-  gap: 16px;
-  margin-bottom: 18px;
-  flex-wrap: wrap;
-}
-
-.titleWrap {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.titleIcon {
-  color: var(--azul);
+.kpis {
   display: grid;
-  place-items: center;
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--s4);
+  margin-bottom: var(--s6);
 }
 
-.title {
-  font-size: 20px;
-  color: var(--azul);
-  margin: 0;
-}
-
-.subtitle {
-  font-size: 12.5px;
-  color: var(--g600);
-  margin-top: 3px;
-}
-
-.addButton {
-  font-family: var(--ft);
-  font-weight: 600;
-  font-size: 12.5px;
-  border: none;
-  border-radius: 8px;
-  padding: 9px 15px;
-  cursor: pointer;
-  display: inline-flex;
-  align-items: center;
-  gap: 7px;
-  background: var(--azul);
-  color: #fff;
-  transition: background 0.18s;
-}
-
-.addButton:hover {
-  background: var(--azul-osc);
-}
-
-.panel {
+.tableCard {
   background: #fff;
   border: 1px solid var(--borde);
   border-radius: var(--r-lg);
-  box-shadow: var(--sombra);
+  box-shadow: var(--sombra-xs);
   overflow: hidden;
 }
 
-.filters {
-  display: flex;
-  gap: 10px;
-  padding: 14px 18px;
-  border-bottom: 1px solid var(--g100);
-  flex-wrap: wrap;
+@media (max-width: 1100px) {
+  .kpis {
+    grid-template-columns: repeat(2, 1fr);
+  }
 }
 
-.search {
-  flex: 2;
-  min-width: 200px;
-  font-family: var(--fx);
-  font-size: 12.5px;
-  padding: 8px 12px;
-  border: 1.5px solid var(--g300);
-  border-radius: 8px;
-  background: #fff;
-  color: var(--g900);
-  outline: none;
-  transition: border-color 0.18s, box-shadow 0.18s;
-}
-
-.filterSelect {
-  flex: 1;
-  min-width: 140px;
-  font-family: var(--fx);
-  font-size: 12.5px;
-  padding: 8px 10px;
-  border: 1.5px solid var(--g300);
-  border-radius: 8px;
-  background: #fff;
-  color: var(--g900);
-  outline: none;
-  transition: border-color 0.18s, box-shadow 0.18s;
-}
-
-.search:focus,
-.filterSelect:focus {
-  border-color: var(--azul-med);
-  box-shadow: 0 0 0 3px rgba(46, 95, 163, 0.15);
-}
-
-.tableWrap {
-  overflow-x: auto;
-}
-
-.table {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: 12.5px;
-}
-
-.table th {
-  background: var(--azul);
-  color: #fff;
-  font-family: var(--ft);
-  font-weight: 600;
-  font-size: 11.5px;
-  text-align: left;
-  padding: 10px 14px;
-  letter-spacing: 0.3px;
-  white-space: nowrap;
-}
-
-.actionsHead {
-  text-align: right;
-}
-
-.table td {
-  padding: 10px 14px;
-  border-bottom: 1px solid var(--g100);
-  vertical-align: middle;
-}
-
-.table tr:last-child td {
-  border-bottom: none;
-}
-
-.table tbody tr:hover td {
-  background: var(--celeste);
-}
-
-.nameCell {
-  display: flex;
-  flex-direction: column;
-  gap: 1px;
-}
-
-.name {
-  color: var(--g900);
-  font-weight: 500;
-}
-
-.email {
-  font-size: 11px;
-  color: var(--g600);
-}
-
-.code {
-  font-family: var(--fx);
-  font-weight: 600;
-  color: var(--azul);
-}
-
-.pill {
-  display: inline-block;
-  padding: 2px 9px;
-  border-radius: 6px;
-  background: var(--celeste);
-  color: var(--azul);
-  font-size: 11px;
-  font-weight: 600;
-  white-space: nowrap;
-}
-
-.statusBadge {
-  display: inline-block;
-  font-size: 10.5px;
-  font-weight: 600;
-  padding: 3px 9px;
-  border-radius: 99px;
-  white-space: nowrap;
-}
-
-.statusActive {
-  background: #e3f3ea;
-  color: var(--ok);
-}
-
-.statusInactive {
-  background: #eeeeee;
-  color: var(--g600);
-}
-
-.riskBadge {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  font-size: 10.5px;
-  font-weight: 700;
-  padding: 3px 9px;
-  border-radius: 99px;
-  background: #fbe4e2;
-  color: var(--peligro);
-  white-space: nowrap;
-}
-
-.actions {
-  display: flex;
-  gap: 7px;
-  justify-content: flex-end;
-}
-
-.actionButton {
-  background: #fff;
-  border: 1.5px solid var(--g300);
-  color: var(--g600);
-  cursor: pointer;
-  width: 30px;
-  height: 30px;
-  border-radius: 8px;
-  transition: color 0.18s, border-color 0.18s, background 0.18s;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.actionButton:hover {
-  color: var(--azul-med);
-  border-color: var(--azul-med);
-  background: var(--celeste);
-}
-
-.stateMsg {
-  text-align: center;
-  padding: 44px 20px;
-  color: var(--g600);
-  font-size: 13px;
+@media (max-width: 560px) {
+  .kpis {
+    grid-template-columns: 1fr;
+  }
 }

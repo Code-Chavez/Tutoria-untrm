@@ -1,0 +1,72 @@
+.overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(11, 31, 63, 0.45);
+  backdrop-filter: blur(3px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1100;
+  padding: var(--s4);
+  animation: fade 0.15s ease;
+}
+
+.dialog {
+  background: #fff;
+  border-radius: var(--r-lg);
+  box-shadow: var(--sombra-md);
+  width: 100%;
+  max-width: 420px;
+  padding: var(--s6);
+  text-align: center;
+  animation: pop 0.18s ease-out;
+}
+
+.iconWrap {
+  display: grid;
+  place-items: center;
+  width: 54px;
+  height: 54px;
+  border-radius: 50%;
+  margin: 0 auto var(--s4);
+}
+
+.iconWrap.primary {
+  background: var(--info-bg);
+  color: var(--azul-med);
+}
+.iconWrap.danger {
+  background: var(--peligro-bg);
+  color: var(--peligro);
+}
+
+.title {
+  font-size: var(--fs-h3);
+  color: var(--g900);
+  margin: 0 0 var(--s2);
+}
+
+.message {
+  font-size: var(--fs-sm);
+  color: var(--g600);
+  line-height: 1.55;
+  margin-bottom: var(--s5);
+}
+
+.actions {
+  display: flex;
+  gap: var(--s3);
+  justify-content: center;
+}
+
+@keyframes fade {
+  from {
+    opacity: 0;
+  }
+}
+@keyframes pop {
+  from {
+    transform: translateY(10px) scale(0.98);
+    opacity: 0;
+  }
+}

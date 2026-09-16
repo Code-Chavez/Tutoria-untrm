@@ -1,0 +1,105 @@
+/* Skin de tabla compartido: se importa en varias páginas para una apariencia coherente. */
+.scroll {
+  overflow-x: auto;
+}
+
+.table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  font-size: var(--fs-sm);
+}
+
+.table thead th {
+  background: var(--g50);
+  color: var(--g600);
+  font-family: var(--ft);
+  font-weight: 700;
+  font-size: var(--fs-xs);
+  letter-spacing: 0.4px;
+  text-transform: uppercase;
+  text-align: left;
+  padding: 13px var(--s5);
+  border-bottom: 1.5px solid var(--borde);
+  white-space: nowrap;
+  position: sticky;
+  top: 0;
+  z-index: 1;
+}
+
+.table tbody td {
+  padding: 15px var(--s5);
+  border-bottom: 1px solid var(--g100);
+  vertical-align: middle;
+  color: var(--g700);
+}
+
+.table tbody tr {
+  transition: background 0.14s ease;
+}
+
+.table tbody tr:hover td {
+  background: var(--celeste);
+}
+
+.table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.right {
+  text-align: right;
+}
+
+.actions {
+  display: flex;
+  gap: var(--s2);
+  justify-content: flex-end;
+}
+
+/* Celda de identidad (código / nombre / correo) */
+.primary {
+  font-family: var(--fx);
+  font-weight: 700;
+  color: var(--azul);
+}
+
+.stack {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.stack .name {
+  font-weight: 600;
+  color: var(--g900);
+}
+
+.stack .sub {
+  font-size: var(--fs-xs);
+  color: var(--g500);
+}
+
+.muted {
+  color: var(--g400);
+}
+
+/* Celda de usuario con avatar */
+.userCell {
+  display: flex;
+  align-items: center;
+  gap: var(--s3);
+}
+
+.avatar {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--celeste), var(--celeste-2));
+  color: var(--azul);
+  display: grid;
+  place-items: center;
+  font-family: var(--ft);
+  font-weight: 700;
+  font-size: 12.5px;
+  flex-shrink: 0;
+}

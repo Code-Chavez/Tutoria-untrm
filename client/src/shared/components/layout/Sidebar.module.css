@@ -1,63 +1,144 @@
 .side {
-  background: var(--azul-osc);
-  color: #fff;
   position: sticky;
   top: 0;
   height: 100vh;
-  overflow-y: auto;
-  padding-bottom: 20px;
+  background: linear-gradient(180deg, var(--azul) 0%, var(--azul-osc) 100%);
+  color: #fff;
+  display: flex;
+  flex-direction: column;
+  border-right: 1px solid rgba(255, 255, 255, 0.06);
 }
 
+/* Marca */
 .brand {
   display: flex;
   align-items: center;
-  gap: 10px;
-  padding: 16px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.12);
-  font-family: var(--ft);
-  font-size: 14px;
+  gap: var(--s3);
+  padding: var(--s5) var(--s5);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.09);
 }
 
-.nav {
+.logo {
+  width: 38px;
+  height: 38px;
+  object-fit: contain;
+  background: #fff;
+  border-radius: 8px;
+  padding: 3px;
+  flex-shrink: 0;
+}
+
+.brandText {
   display: flex;
   flex-direction: column;
+  line-height: 1.25;
+  min-width: 0;
+}
+
+.brandText b {
+  font-family: var(--ft);
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: 0.2px;
+}
+
+.brandText small {
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.62);
+}
+
+.closeBtn {
+  display: none;
+  margin-left: auto;
+  background: none;
+  border: none;
+  color: rgba(255, 255, 255, 0.75);
+  padding: 4px;
+  border-radius: 6px;
+}
+.closeBtn:hover {
+  color: #fff;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+/* Navegación */
+.nav {
+  flex: 1;
+  overflow-y: auto;
+  padding: var(--s4) var(--s3);
+}
+
+.navGroup {
+  margin-bottom: var(--s5);
 }
 
 .group {
-  font-size: 10px;
-  text-transform: uppercase;
+  display: block;
+  font-family: var(--ft);
+  font-size: 10.5px;
+  font-weight: 700;
   letter-spacing: 1px;
-  opacity: 0.5;
-  padding: 14px 16px 6px;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.45);
+  padding: 0 var(--s3);
+  margin-bottom: var(--s2);
 }
 
 .link {
   display: flex;
   align-items: center;
-  gap: 9px;
-  color: rgba(255, 255, 255, 0.78);
-  text-decoration: none;
-  font-size: 13px;
-  padding: 9px 16px;
-  border-left: 3px solid transparent;
+  gap: var(--s3);
+  padding: 10px var(--s3);
+  border-radius: var(--r-sm);
+  font-size: var(--fs-sm);
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.82);
+  margin-bottom: 2px;
+  position: relative;
+  transition: background 0.16s ease, color 0.16s ease;
 }
 
 .link:hover {
+  background: rgba(255, 255, 255, 0.08);
   color: #fff;
-  background: rgba(255, 255, 255, 0.05);
+}
+
+.icon {
+  display: inline-flex;
+  align-items: center;
+  color: rgba(255, 255, 255, 0.7);
+  transition: color 0.16s ease;
+  flex-shrink: 0;
+}
+
+.link:hover .icon {
+  color: #fff;
 }
 
 .active {
+  background: rgba(255, 255, 255, 0.14);
   color: #fff;
-  background: rgba(255, 255, 255, 0.08);
-  border-left-color: var(--dorado);
   font-weight: 600;
 }
 
-/* Ítems de HUs aún no construidas: visibles pero no navegables. */
+.active::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 8px;
+  bottom: 8px;
+  width: 3px;
+  border-radius: 0 3px 3px 0;
+  background: var(--dorado);
+}
+
+.active .icon {
+  color: var(--dorado);
+}
+
 .disabled {
   color: rgba(255, 255, 255, 0.4);
-  cursor: default;
+  cursor: not-allowed;
 }
 
 .disabled:hover {
@@ -66,25 +147,103 @@
 }
 
 .disabled .icon {
-  opacity: 0.7;
+  color: rgba(255, 255, 255, 0.32);
 }
 
 .soon {
   margin-left: auto;
   font-size: 9px;
-  font-weight: 600;
-  letter-spacing: 0.4px;
+  font-weight: 700;
   text-transform: uppercase;
+  letter-spacing: 0.4px;
   color: rgba(255, 255, 255, 0.55);
-  background: rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.1);
   border-radius: 5px;
   padding: 2px 6px;
 }
 
-.icon {
+/* Pie con usuario */
+.foot {
+  display: flex;
+  align-items: center;
+  gap: var(--s3);
+  padding: var(--s4) var(--s5);
+  border-top: 1px solid rgba(255, 255, 255, 0.09);
+}
+
+.footAvatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: var(--azul-med);
+  color: #fff;
   display: grid;
   place-items: center;
-  width: 18px;
-  height: 18px;
+  font-family: var(--ft);
+  font-weight: 700;
+  font-size: 12px;
   flex-shrink: 0;
+}
+
+.footText {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.3;
+  min-width: 0;
+}
+
+.footText b {
+  font-size: var(--fs-sm);
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.footText small {
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+/* Backdrop del drawer (oculto en desktop) */
+.backdrop {
+  display: none;
+}
+
+/* Drawer en tablet/móvil */
+@media (max-width: 900px) {
+  .side {
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 1000;
+    width: min(84vw, var(--sidebar-w));
+    transform: translateX(-100%);
+    transition: transform 0.22s ease;
+    box-shadow: var(--sombra-md);
+  }
+
+  .open {
+    transform: translateX(0);
+  }
+
+  .closeBtn {
+    display: inline-flex;
+  }
+
+  .backdrop {
+    display: block;
+    position: fixed;
+    inset: 0;
+    z-index: 999;
+    background: rgba(11, 31, 63, 0.5);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.22s ease;
+  }
+
+  .backdropOpen {
+    opacity: 1;
+    pointer-events: auto;
+  }
 }
