@@ -6,6 +6,7 @@ import roleRoutes from './role.routes';
 import profileRoutes from './profile.routes';
 import studentRoutes from './student.routes';
 import schoolRoutes from './school.routes';
+import assignmentRoutes from './assignment.routes';
 
 const router: IRouter = Router();
 
@@ -16,5 +17,6 @@ router.use(roleRoutes);
 router.use(profileRoutes);
 router.use(studentRoutes);
 router.use(schoolRoutes);
+router.use(assignmentRoutes);
 
 export default router;

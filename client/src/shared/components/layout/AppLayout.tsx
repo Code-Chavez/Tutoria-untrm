@@ -10,6 +10,7 @@ const ROUTE_META: Record<string, { title: string; group: string }> = {
   '/': { title: 'Panel de inicio', group: 'Principal' },
   '/tutorados': { title: 'Tutorados', group: 'Principal' },
   '/carga-masiva': { title: 'Carga masiva', group: 'Principal' },
+  '/asignacion': { title: 'Asignación', group: 'Principal' },
   '/users': { title: 'Administración', group: 'Gestión' },
   '/profile': { title: 'Mi perfil', group: 'Cuenta' },
   '/unauthorized': { title: 'Acceso denegado', group: '' },
