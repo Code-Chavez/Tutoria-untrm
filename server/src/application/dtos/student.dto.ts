@@ -9,3 +9,9 @@ export interface CreateStudentInput {
 }
 
 export type UpdateStudentInput = Partial<CreateStudentInput>;
+
+export interface MarkStudentRiskInput {
+  isAtRisk: boolean;
+  // Obligatorio al marcar en riesgo; se ignora al quitar la marca.
+  reason?: string;
+}

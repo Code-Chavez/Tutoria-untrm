@@ -18,3 +18,10 @@ export class SchoolNotFoundError extends Error {
     this.name = 'SchoolNotFoundError';
   }
 }
+
+export class RiskReasonRequiredError extends Error {
+  constructor() {
+    super('Debe indicar el motivo al marcar a un estudiante en riesgo académico');
+    this.name = 'RiskReasonRequiredError';
+  }
+}

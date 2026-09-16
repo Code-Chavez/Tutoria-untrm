@@ -1,6 +1,6 @@
 import React from 'react';
 import { Badge, IconButton } from '@shared/components/ui';
-import { PencilIcon, AlertTriangleIcon } from '@shared/components/icons';
+import { PencilIcon, AlertTriangleIcon, CheckCircleIcon } from '@shared/components/icons';
 import { Student } from '../services/studentService';
 import table from '@shared/components/ui/DataTable.module.css';
 
@@ -9,6 +9,8 @@ interface TutoradoTableProps {
   schoolName: (schoolId: string) => string;
   canWrite: boolean;
   onEdit: (student: Student) => void;
+  onMarkRisk: (student: Student) => void;
+  onUnmarkRisk: (student: Student) => void;
 }
 
 export const TutoradoTable: React.FC<TutoradoTableProps> = ({
@@ -16,6 +18,8 @@ export const TutoradoTable: React.FC<TutoradoTableProps> = ({
   schoolName,
   canWrite,
   onEdit,
+  onMarkRisk,
+  onUnmarkRisk,
 }) => (
   <div className={table.scroll}>
     <table className={table.table}>
@@ -49,9 +53,11 @@ export const TutoradoTable: React.FC<TutoradoTableProps> = ({
             </td>
             <td>
               {student.isAtRisk ? (
-                <Badge tone="danger" icon={<AlertTriangleIcon size={12} />}>
-                  En riesgo
-                </Badge>
+                <span title={student.riskReason ?? undefined}>
+                  <Badge tone="danger" icon={<AlertTriangleIcon size={12} />}>
+                    En riesgo
+                  </Badge>
+                </span>
               ) : student.isActive ? (
                 <Badge tone="success">Activo</Badge>
               ) : (
@@ -61,10 +67,24 @@ export const TutoradoTable: React.FC<TutoradoTableProps> = ({
             {canWrite && (
               <td>
                 <div className={table.actions}>
-                  <IconButton
-                    label="Editar tutorado"
-                    onClick={() => onEdit(student)}
-                  >
+                  {student.isAtRisk ? (
+                    <IconButton
+                      label="Quitar riesgo"
+                      tone="success"
+                      onClick={() => onUnmarkRisk(student)}
+                    >
+                      <CheckCircleIcon size={16} />
+                    </IconButton>
+                  ) : (
+                    <IconButton
+                      label="Marcar en riesgo"
+                      tone="danger"
+                      onClick={() => onMarkRisk(student)}
+                    >
+                      <AlertTriangleIcon size={16} />
+                    </IconButton>
+                  )}
+                  <IconButton label="Editar tutorado" onClick={() => onEdit(student)}>
                     <PencilIcon size={16} />
                   </IconButton>
                 </div>

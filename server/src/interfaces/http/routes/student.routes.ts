@@ -27,6 +27,7 @@ const studentController = new StudentController(
   container.useCases.importStudentsUseCase,
   new ExcelStudentParser(),
   new ImportReportWorkbook(),
+  container.useCases.markStudentRiskUseCase,
 );
 
 // Todas las rutas de estudiantes requieren autenticación.
@@ -51,6 +52,9 @@ router.post('/students/import/report', authorize(['students:import']), studentCo
 
 // Registrar un estudiante individual.
 router.post('/students', authorize(['students:write']), studentController.create);
+
+// Marcar/quitar riesgo académico de un estudiante (HU-11).
+router.patch('/students/:id/risk', authorize(['students:write']), studentController.markRisk);
 
 // Editar los datos de filiación de un estudiante.
 router.patch('/students/:id', authorize(['students:write']), studentController.update);
