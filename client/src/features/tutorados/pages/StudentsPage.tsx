@@ -10,8 +10,11 @@ import { StudentFormModal } from '../components/StudentFormModal';
 import { TutoradoFilters, StudentFilterValues } from '../components/TutoradoFilters';
 import { TutoradoTable } from '../components/TutoradoTable';
 import { RiskModal } from '../components/RiskModal';
+import { ReassignModal } from '../components/ReassignModal';
 import { useStudents } from '../hooks/useStudents';
 import { useAuth } from '@features/auth/hooks/useAuth';
+import { assignmentService } from '@features/asignacion/services/assignmentService';
+import { getApiErrorMessage } from '@shared/services/apiClient';
 import {
   PageHeader,
   StatCard,
@@ -41,7 +44,7 @@ export const StudentsPage: React.FC = () => {
   const { user } = useAuth();
   const canWrite = user ? WRITE_ROLES.includes(user.role) : false;
 
-  const { students, schools, loading, error, refresh } = useStudents();
+  const { students, schools, tutors, loading, error, refresh } = useStudents();
 
   const [filters, setFilters] = useState<StudentFilterValues>(EMPTY_FILTERS);
   const [page, setPage] = useState(1);
@@ -54,8 +57,18 @@ export const StudentsPage: React.FC = () => {
   const [studentToUnmark, setStudentToUnmark] = useState<Student | null>(null);
   const [riskLoading, setRiskLoading] = useState(false);
 
+  // Reasignación individual (HU-13).
+  const [studentToReassign, setStudentToReassign] = useState<Student | null>(null);
+  const [reassignLoading, setReassignLoading] = useState(false);
+  const [reassignError, setReassignError] = useState('');
+
   const schoolName = (schoolId: string) =>
     schools.find((s) => s.id === schoolId)?.name ?? 'Sin escuela';
+
+  const tutorName = (tutorId?: string | null): string | null => {
+    if (!tutorId) return null;
+    return tutors.find((t) => t.tutorId === tutorId)?.fullName ?? 'Asignado';
+  };
 
   const cycles = useMemo(
     () => Array.from(new Set(students.map((s) => s.cycle))).sort((a, b) => a - b),
@@ -133,6 +146,21 @@ export const StudentsPage: React.FC = () => {
     }
   };
 
+  const confirmReassign = async (newTutorId: string, reason: string) => {
+    if (!studentToReassign) return;
+    setReassignLoading(true);
+    setReassignError('');
+    try {
+      await assignmentService.reassignStudent(studentToReassign.id, newTutorId, reason);
+      setStudentToReassign(null);
+      refresh();
+    } catch (err) {
+      setReassignError(getApiErrorMessage(err));
+    } finally {
+      setReassignLoading(false);
+    }
+  };
+
   const total = students.length;
   const active = students.filter((s) => s.isActive).length;
   const atRisk = students.filter((s) => s.isAtRisk).length;
@@ -170,7 +198,7 @@ export const StudentsPage: React.FC = () => {
         />
 
         {loading ? (
-          <TableSkeleton rows={6} columns={canWrite ? 6 : 5} />
+          <TableSkeleton rows={6} columns={canWrite ? 7 : 6} />
         ) : error ? (
           <EmptyState
             variant="error"
@@ -201,10 +229,15 @@ export const StudentsPage: React.FC = () => {
             <TutoradoTable
               students={pageItems}
               schoolName={schoolName}
+              tutorName={tutorName}
               canWrite={canWrite}
               onEdit={handleOpenModal}
               onMarkRisk={setStudentToMark}
               onUnmarkRisk={setStudentToUnmark}
+              onReassign={(student) => {
+                setReassignError('');
+                setStudentToReassign(student);
+              }}
             />
             <Pagination
               page={page}
@@ -232,6 +265,18 @@ export const StudentsPage: React.FC = () => {
           loading={riskLoading}
           onConfirm={confirmMarkRisk}
           onCancel={() => setStudentToMark(null)}
+        />
+      )}
+
+      {studentToReassign && (
+        <ReassignModal
+          student={studentToReassign}
+          tutors={tutors}
+          currentTutorName={tutorName(studentToReassign.tutorId)}
+          loading={reassignLoading}
+          serverError={reassignError}
+          onConfirm={confirmReassign}
+          onCancel={() => setStudentToReassign(null)}
         />
       )}
 

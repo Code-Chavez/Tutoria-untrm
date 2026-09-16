@@ -2,9 +2,8 @@ import { StudentRepository } from '@domain/repositories/StudentRepository';
 import { UserRepository } from '@domain/repositories/UserRepository';
 import { RoleRepository } from '@domain/repositories/RoleRepository';
 import { AssignStudentsInput, AssignStudentsResult } from '@application/dtos/assignment.dto';
-import { TutorNotFoundError, NoStudentsSelectedError } from './AssignmentErrors';
-
-export const TUTOR_ROLE_NAME = 'Docente Tutor';
+import { NoStudentsSelectedError } from './AssignmentErrors';
+import { assertActiveTutor } from './TutorValidation';
 
 /**
  * Asignación masiva de tutorados a un Docente Tutor (HU-12). Valida que el tutor
@@ -23,11 +22,7 @@ export class AssignStudentsUseCase {
       throw new NoStudentsSelectedError();
     }
 
-    const tutorRole = await this.roles.findByName(TUTOR_ROLE_NAME);
-    const tutor = await this.users.findById(input.tutorId);
-    if (!tutor || !tutor.isActive || !tutorRole || tutor.roleId !== tutorRole.id) {
-      throw new TutorNotFoundError();
-    }
+    const tutor = await assertActiveTutor(this.users, this.roles, input.tutorId);
 
     const assigned = await this.students.assignTutor(studentIds, tutor.id, new Date());
     return { assigned };

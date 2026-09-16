@@ -5,3 +5,4 @@ export type { RefreshTokenRepository } from './RefreshTokenRepository';
 export type { PasswordResetTokenRepository } from './PasswordResetTokenRepository';
 export type { StudentRepository, StudentFilters } from './StudentRepository';
 export type { SchoolRepository } from './SchoolRepository';
+export type { TutorAssignmentHistoryRepository } from './TutorAssignmentHistoryRepository';

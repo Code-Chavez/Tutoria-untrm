@@ -1,4 +1,5 @@
 import { apiClient } from '@shared/services/apiClient';
+import type { Student } from '@features/tutorados/services/studentService';
 
 export interface TutorWorkload {
   tutorId: string;
@@ -19,5 +20,13 @@ export const assignmentService = {
       { tutorId, studentIds },
     );
     return response.data.assigned;
+  },
+
+  reassignStudent: async (studentId: string, newTutorId: string, reason: string): Promise<Student> => {
+    const response = await apiClient.patch<{ message: string; student: Student }>(
+      `/students/${studentId}/reassign`,
+      { newTutorId, reason },
+    );
+    return response.data.student;
   },
 };

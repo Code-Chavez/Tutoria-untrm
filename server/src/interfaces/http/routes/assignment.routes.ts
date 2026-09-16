@@ -8,15 +8,23 @@ const router: IRouter = Router();
 const assignmentController = new AssignmentController(
   container.useCases.assignStudentsUseCase,
   container.useCases.getTutorWorkloadUseCase,
+  container.useCases.reassignStudentUseCase,
 );
 
-router.use('/tutors', authenticate(container.services.tokenService));
-router.use('/students/assign', authenticate(container.services.tokenService));
+const requireAuth = authenticate(container.services.tokenService);
 
 // Carga de tutorados por tutor (para la vista de asignación).
-router.get('/tutors/workload', authorize(['students:write']), assignmentController.workload);
+router.get('/tutors/workload', requireAuth, authorize(['students:write']), assignmentController.workload);
 
 // Asignación masiva tutor↔tutorados (HU-12).
-router.post('/students/assign', authorize(['students:write']), assignmentController.assign);
+router.post('/students/assign', requireAuth, authorize(['students:write']), assignmentController.assign);
+
+// Reasignación individual de un tutorado, con motivo obligatorio (HU-13).
+router.patch(
+  '/students/:id/reassign',
+  requireAuth,
+  authorize(['students:write']),
+  assignmentController.reassign,
+);
 
 export default router;
