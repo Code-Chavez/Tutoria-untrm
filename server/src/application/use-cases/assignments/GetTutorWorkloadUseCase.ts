@@ -2,7 +2,7 @@ import { StudentRepository } from '@domain/repositories/StudentRepository';
 import { UserRepository } from '@domain/repositories/UserRepository';
 import { RoleRepository } from '@domain/repositories/RoleRepository';
 import { TutorWorkload } from '@application/dtos/assignment.dto';
-import { TUTOR_ROLE_NAME } from './AssignStudentsUseCase';
+import { TUTOR_ROLE_NAME } from './TutorValidation';
 
 /**
  * Carga de tutorados por tutor (HU-12): lista los Docentes Tutores activos con

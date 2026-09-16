@@ -13,3 +13,8 @@ export interface TutorWorkload {
   email: string;
   assignedCount: number;
 }
+
+export interface ReassignStudentInput {
+  newTutorId: string;
+  reason: string;
+}

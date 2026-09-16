@@ -5,6 +5,7 @@ import { PrismaRefreshTokenRepository } from './repositories/PrismaRefreshTokenR
 import { PrismaAuditLogRepository } from './repositories/PrismaAuditLogRepository';
 import { PrismaPasswordResetTokenRepository } from './repositories/PrismaPasswordResetTokenRepository';
 import { PrismaStudentRepository } from './repositories/PrismaStudentRepository';
+import { PrismaTutorAssignmentHistoryRepository } from './repositories/PrismaTutorAssignmentHistoryRepository';
 import { PrismaSchoolRepository } from './repositories/PrismaSchoolRepository';
 import { BcryptPasswordHasher } from './services/BcryptPasswordHasher';
 import { JwtTokenService } from './services/JwtTokenService';
@@ -21,6 +22,7 @@ const refreshTokenRepository = new PrismaRefreshTokenRepository(prisma);
 const auditLogRepository = new PrismaAuditLogRepository(prisma);
 const passwordResetTokenRepository = new PrismaPasswordResetTokenRepository(prisma);
 const studentRepository = new PrismaStudentRepository(prisma);
+const tutorAssignmentHistoryRepository = new PrismaTutorAssignmentHistoryRepository(prisma);
 const schoolRepository = new PrismaSchoolRepository(prisma);
 
 const passwordHasher = new BcryptPasswordHasher();
@@ -63,6 +65,7 @@ import { ImportStudentsUseCase } from '@application/use-cases/students/ImportStu
 import { MarkStudentRiskUseCase } from '@application/use-cases/students/MarkStudentRiskUseCase';
 import { AssignStudentsUseCase } from '@application/use-cases/assignments/AssignStudentsUseCase';
 import { GetTutorWorkloadUseCase } from '@application/use-cases/assignments/GetTutorWorkloadUseCase';
+import { ReassignStudentUseCase } from '@application/use-cases/assignments/ReassignStudentUseCase';
 import { ListSchoolsUseCase } from '@application/use-cases/schools/ListSchoolsUseCase';
 
 const createUserUseCase = new CreateUserUseCase(userRepository, passwordHasher);
@@ -97,6 +100,12 @@ const getTutorWorkloadUseCase = new GetTutorWorkloadUseCase(
   userRepository,
   roleRepository,
 );
+const reassignStudentUseCase = new ReassignStudentUseCase(
+  studentRepository,
+  userRepository,
+  roleRepository,
+  tutorAssignmentHistoryRepository,
+);
 const listSchoolsUseCase = new ListSchoolsUseCase(schoolRepository);
 
 export const container = {
@@ -108,6 +117,7 @@ export const container = {
     passwordResetTokenRepository,
     studentRepository,
     schoolRepository,
+    tutorAssignmentHistoryRepository,
   },
   services: {
     passwordHasher,
@@ -134,6 +144,7 @@ export const container = {
     markStudentRiskUseCase,
     assignStudentsUseCase,
     getTutorWorkloadUseCase,
+    reassignStudentUseCase,
     listSchoolsUseCase,
   },
 } as const;

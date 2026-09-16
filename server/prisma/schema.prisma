@@ -30,6 +30,11 @@ model User {
   refreshTokens RefreshToken[]
   passwordResetTokens PasswordResetToken[]
   tutoredStudents Student[] @relation("TutorStudents")
+
+  previousTutorHistory TutorAssignmentHistory[] @relation("PreviousTutorHistory")
+  newTutorHistory      TutorAssignmentHistory[] @relation("NewTutorHistory")
+  reassignmentsMade    TutorAssignmentHistory[] @relation("ReassignedByHistory")
+
   @@map("users")
 }
 
@@ -173,8 +178,33 @@ model Student {
   tutor      User?     @relation("TutorStudents", fields: [tutorId], references: [id])
   assignedAt DateTime? @map("assigned_at")
 
+  assignmentHistory TutorAssignmentHistory[]
+
   @@index([tutorId])
   @@map("students")
+}
+
+// Historial de reasignaciones de tutor por estudiante (HU-13, Art. 24.b):
+// conserva el tutor anterior, el nuevo tutor, el motivo y quién la realizó.
+model TutorAssignmentHistory {
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now()) @map("created_at")
+  reason    String
+
+  studentId String  @map("student_id")
+  student   Student @relation(fields: [studentId], references: [id])
+
+  previousTutorId String? @map("previous_tutor_id")
+  previousTutor   User?   @relation("PreviousTutorHistory", fields: [previousTutorId], references: [id])
+
+  newTutorId String @map("new_tutor_id")
+  newTutor   User   @relation("NewTutorHistory", fields: [newTutorId], references: [id])
+
+  reassignedById String @map("reassigned_by_id")
+  reassignedBy   User   @relation("ReassignedByHistory", fields: [reassignedById], references: [id])
+
+  @@index([studentId])
+  @@map("tutor_assignment_history")
 }
 
 // ─── Parámetros del Sistema ────────────────────────────────────

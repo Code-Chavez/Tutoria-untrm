@@ -11,3 +11,17 @@ export class NoStudentsSelectedError extends Error {
     this.name = 'NoStudentsSelectedError';
   }
 }
+
+export class ReassignReasonRequiredError extends Error {
+  constructor() {
+    super('Debe indicar el motivo de la reasignación');
+    this.name = 'ReassignReasonRequiredError';
+  }
+}
+
+export class SameTutorAssignmentError extends Error {
+  constructor() {
+    super('El estudiante ya está asignado a ese tutor');
+    this.name = 'SameTutorAssignmentError';
+  }
+}
