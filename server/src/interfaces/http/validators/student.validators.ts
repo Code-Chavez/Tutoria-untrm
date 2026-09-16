@@ -22,6 +22,12 @@ export const createStudentSchema = z.object({
 
 export const updateStudentSchema = createStudentSchema.partial();
 
+// Marcado de riesgo académico (HU-11).
+export const markStudentRiskSchema = z.object({
+  isAtRisk: z.boolean(),
+  reason: z.string().trim().max(500, 'El motivo es demasiado largo').optional(),
+});
+
 // Reporte de carga masiva enviado por el cliente para exportarlo a Excel (HU-09).
 export const importReportSchema = z.object({
   totalRows: z.number().int().min(0),

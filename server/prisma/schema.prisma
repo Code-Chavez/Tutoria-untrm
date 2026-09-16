@@ -158,10 +158,12 @@ model Student {
   email          String?
   phone          String?
   cycle          Int
-  isAtRisk       Boolean  @default(false) @map("is_at_risk")
-  isActive       Boolean  @default(true) @map("is_active")
-  createdAt      DateTime @default(now()) @map("created_at")
-  updatedAt      DateTime @updatedAt @map("updated_at")
+  isAtRisk       Boolean   @default(false) @map("is_at_risk")
+  riskReason     String?   @map("risk_reason")
+  riskMarkedAt   DateTime? @map("risk_marked_at")
+  isActive       Boolean   @default(true) @map("is_active")
+  createdAt      DateTime  @default(now()) @map("created_at")
+  updatedAt      DateTime  @updatedAt @map("updated_at")
 
   schoolId String @map("school_id")
   school   School @relation(fields: [schoolId], references: [id])

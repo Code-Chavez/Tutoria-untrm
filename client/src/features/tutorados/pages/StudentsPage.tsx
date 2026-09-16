@@ -9,6 +9,7 @@ import {
 import { StudentFormModal } from '../components/StudentFormModal';
 import { TutoradoFilters, StudentFilterValues } from '../components/TutoradoFilters';
 import { TutoradoTable } from '../components/TutoradoTable';
+import { RiskModal } from '../components/RiskModal';
 import { useStudents } from '../hooks/useStudents';
 import { useAuth } from '@features/auth/hooks/useAuth';
 import {
@@ -18,6 +19,7 @@ import {
   EmptyState,
   TableSkeleton,
   Pagination,
+  ConfirmDialog,
 } from '@shared/components/ui';
 import {
   GraduationCapIcon,
@@ -46,6 +48,11 @@ export const StudentsPage: React.FC = () => {
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [studentToEdit, setStudentToEdit] = useState<Student | null>(null);
+
+  // Marcado de riesgo (HU-11).
+  const [studentToMark, setStudentToMark] = useState<Student | null>(null);
+  const [studentToUnmark, setStudentToUnmark] = useState<Student | null>(null);
+  const [riskLoading, setRiskLoading] = useState(false);
 
   const schoolName = (schoolId: string) =>
     schools.find((s) => s.id === schoolId)?.name ?? 'Sin escuela';
@@ -96,6 +103,34 @@ export const StudentsPage: React.FC = () => {
       await studentService.createStudent(data as CreateStudentData);
     }
     refresh();
+  };
+
+  const confirmMarkRisk = async (reason: string) => {
+    if (!studentToMark) return;
+    setRiskLoading(true);
+    try {
+      await studentService.markRisk(studentToMark.id, true, reason);
+      setStudentToMark(null);
+      refresh();
+    } catch (err) {
+      console.error('Error marking risk', err);
+    } finally {
+      setRiskLoading(false);
+    }
+  };
+
+  const confirmUnmarkRisk = async () => {
+    if (!studentToUnmark) return;
+    setRiskLoading(true);
+    try {
+      await studentService.markRisk(studentToUnmark.id, false);
+      setStudentToUnmark(null);
+      refresh();
+    } catch (err) {
+      console.error('Error unmarking risk', err);
+    } finally {
+      setRiskLoading(false);
+    }
   };
 
   const total = students.length;
@@ -168,6 +203,8 @@ export const StudentsPage: React.FC = () => {
               schoolName={schoolName}
               canWrite={canWrite}
               onEdit={handleOpenModal}
+              onMarkRisk={setStudentToMark}
+              onUnmarkRisk={setStudentToUnmark}
             />
             <Pagination
               page={page}
@@ -188,6 +225,29 @@ export const StudentsPage: React.FC = () => {
           schools={schools}
         />
       )}
+
+      {studentToMark && (
+        <RiskModal
+          student={studentToMark}
+          loading={riskLoading}
+          onConfirm={confirmMarkRisk}
+          onCancel={() => setStudentToMark(null)}
+        />
+      )}
+
+      <ConfirmDialog
+        open={studentToUnmark !== null}
+        title="Quitar marca de riesgo"
+        message={
+          studentToUnmark
+            ? `¿Confirmas quitar la marca de riesgo académico de ${studentToUnmark.firstName} ${studentToUnmark.lastName}?`
+            : ''
+        }
+        confirmLabel="Quitar riesgo"
+        loading={riskLoading}
+        onConfirm={confirmUnmarkRisk}
+        onCancel={() => setStudentToUnmark(null)}
+      />
     </div>
   );
 };

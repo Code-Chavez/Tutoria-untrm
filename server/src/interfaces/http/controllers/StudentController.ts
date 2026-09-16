@@ -4,16 +4,19 @@ import { CreateStudentUseCase } from '@application/use-cases/students/CreateStud
 import { UpdateStudentUseCase } from '@application/use-cases/students/UpdateStudentUseCase';
 import { ListStudentsUseCase } from '@application/use-cases/students/ListStudentsUseCase';
 import { ImportStudentsUseCase } from '@application/use-cases/students/ImportStudentsUseCase';
+import { MarkStudentRiskUseCase } from '@application/use-cases/students/MarkStudentRiskUseCase';
 import { StudentFilters } from '@domain/repositories/StudentRepository';
 import {
   DuplicateStudentCodeError,
   StudentNotFoundError,
   SchoolNotFoundError,
+  RiskReasonRequiredError,
 } from '@application/use-cases/students/StudentErrors';
 import {
   createStudentSchema,
   updateStudentSchema,
   importReportSchema,
+  markStudentRiskSchema,
 } from '../validators/student.validators';
 import { CreateStudentInput, UpdateStudentInput } from '@application/dtos/student.dto';
 import { ExcelStudentParser } from '@infrastructure/parsers/ExcelStudentParser';
@@ -34,7 +37,33 @@ export class StudentController {
     private readonly importStudentsUseCase: ImportStudentsUseCase,
     private readonly excelParser: ExcelStudentParser,
     private readonly reportWorkbook: ImportReportWorkbook,
+    private readonly markStudentRiskUseCase: MarkStudentRiskUseCase,
   ) {}
+
+  // Marca o quita el riesgo académico de un estudiante (HU-11).
+  markRisk = async (req: Request, res: Response) => {
+    try {
+      const id = req.params.id as string;
+      const data = markStudentRiskSchema.parse(req.body);
+      const student = await this.markStudentRiskUseCase.execute(id, data);
+      res.status(200).json({
+        message: data.isAtRisk
+          ? 'Estudiante marcado en riesgo académico'
+          : 'Se retiró la marca de riesgo académico',
+        student,
+      });
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        res.status(400).json({ error: 'Datos de entrada inválidos', details: error.errors });
+      } else if (error instanceof RiskReasonRequiredError) {
+        res.status(400).json({ error: error.message });
+      } else if (error instanceof StudentNotFoundError) {
+        res.status(404).json({ error: error.message });
+      } else {
+        res.status(500).json({ error: 'Error interno del servidor' });
+      }
+    }
+  };
 
   // Exporta a Excel el resultado de una carga masiva (HU-09).
   downloadReport = async (req: Request, res: Response) => {

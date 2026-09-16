@@ -21,6 +21,8 @@ export interface Student {
   phone?: string | null;
   cycle: number;
   isAtRisk: boolean;
+  riskReason?: string | null;
+  riskMarkedAt?: string | null;
   isActive: boolean;
   schoolId: string;
 }
@@ -87,6 +89,14 @@ export const studentService = {
     const response = await apiClient.patch<{ message: string; student: Student }>(
       `/students/${id}`,
       data,
+    );
+    return response.data.student;
+  },
+
+  markRisk: async (id: string, isAtRisk: boolean, reason?: string): Promise<Student> => {
+    const response = await apiClient.patch<{ message: string; student: Student }>(
+      `/students/${id}/risk`,
+      { isAtRisk, reason },
     );
     return response.data.student;
   },
