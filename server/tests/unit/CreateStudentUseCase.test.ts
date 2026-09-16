@@ -38,6 +38,8 @@ describe('CreateStudentUseCase', () => {
       findAll: jest.fn(),
       create: jest.fn(),
       update: jest.fn(),
+      assignTutor: jest.fn(),
+      countByTutor: jest.fn(),
     };
 
     mockSchoolRepository = {

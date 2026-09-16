@@ -11,6 +11,7 @@ import { DashboardPage } from '@features/dashboard/components/DashboardPage';
 import { UserManagementPage } from '@features/admin/pages/UserManagementPage';
 import { StudentsPage } from '@features/tutorados/pages/StudentsPage';
 import { BulkImportPage } from '@features/tutorados/pages/BulkImportPage';
+import { AssignmentPage } from '@features/asignacion/pages/AssignmentPage';
 import { ProfilePage } from '@features/profile/pages/ProfilePage';
 
 export default function App() {
@@ -46,6 +47,14 @@ export default function App() {
                 element={
                   <RequireRole roles={['Coordinador', 'Administrador DBU']}>
                     <BulkImportPage />
+                  </RequireRole>
+                }
+              />
+              <Route
+                path="asignacion"
+                element={
+                  <RequireRole roles={['Coordinador', 'Administrador DBU']}>
+                    <AssignmentPage />
                   </RequireRole>
                 }
               />

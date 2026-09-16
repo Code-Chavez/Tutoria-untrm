@@ -61,6 +61,8 @@ import { UpdateStudentUseCase } from '@application/use-cases/students/UpdateStud
 import { ListStudentsUseCase } from '@application/use-cases/students/ListStudentsUseCase';
 import { ImportStudentsUseCase } from '@application/use-cases/students/ImportStudentsUseCase';
 import { MarkStudentRiskUseCase } from '@application/use-cases/students/MarkStudentRiskUseCase';
+import { AssignStudentsUseCase } from '@application/use-cases/assignments/AssignStudentsUseCase';
+import { GetTutorWorkloadUseCase } from '@application/use-cases/assignments/GetTutorWorkloadUseCase';
 import { ListSchoolsUseCase } from '@application/use-cases/schools/ListSchoolsUseCase';
 
 const createUserUseCase = new CreateUserUseCase(userRepository, passwordHasher);
@@ -85,6 +87,16 @@ const updateStudentUseCase = new UpdateStudentUseCase(studentRepository, schoolR
 const listStudentsUseCase = new ListStudentsUseCase(studentRepository);
 const importStudentsUseCase = new ImportStudentsUseCase(studentRepository, schoolRepository);
 const markStudentRiskUseCase = new MarkStudentRiskUseCase(studentRepository);
+const assignStudentsUseCase = new AssignStudentsUseCase(
+  studentRepository,
+  userRepository,
+  roleRepository,
+);
+const getTutorWorkloadUseCase = new GetTutorWorkloadUseCase(
+  studentRepository,
+  userRepository,
+  roleRepository,
+);
 const listSchoolsUseCase = new ListSchoolsUseCase(schoolRepository);
 
 export const container = {
@@ -120,6 +132,8 @@ export const container = {
     listStudentsUseCase,
     importStudentsUseCase,
     markStudentRiskUseCase,
+    assignStudentsUseCase,
+    getTutorWorkloadUseCase,
     listSchoolsUseCase,
   },
 } as const;

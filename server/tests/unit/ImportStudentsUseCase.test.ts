@@ -37,6 +37,8 @@ describe('ImportStudentsUseCase', () => {
       findAll: jest.fn(),
       create: jest.fn().mockImplementation(async (data) => ({ id: 'new', createdAt: new Date(), updatedAt: new Date(), ...data } as Student)),
       update: jest.fn(),
+      assignTutor: jest.fn(),
+      countByTutor: jest.fn(),
     };
     mockSchoolRepository = {
       findAll: jest.fn().mockResolvedValue([school]),

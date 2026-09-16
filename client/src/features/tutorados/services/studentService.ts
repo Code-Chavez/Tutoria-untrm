@@ -25,6 +25,8 @@ export interface Student {
   riskMarkedAt?: string | null;
   isActive: boolean;
   schoolId: string;
+  tutorId?: string | null;
+  assignedAt?: string | null;
 }
 
 export interface StudentFilters {

@@ -29,6 +29,7 @@ model User {
   auditLogs     AuditLog[]
   refreshTokens RefreshToken[]
   passwordResetTokens PasswordResetToken[]
+  tutoredStudents Student[] @relation("TutorStudents")
   @@map("users")
 }
 
@@ -168,6 +169,11 @@ model Student {
   schoolId String @map("school_id")
   school   School @relation(fields: [schoolId], references: [id])
 
+  tutorId    String?   @map("tutor_id")
+  tutor      User?     @relation("TutorStudents", fields: [tutorId], references: [id])
+  assignedAt DateTime? @map("assigned_at")
+
+  @@index([tutorId])
   @@map("students")
 }
 

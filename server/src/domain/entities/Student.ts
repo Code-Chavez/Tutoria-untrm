@@ -11,6 +11,8 @@ export interface Student {
   riskMarkedAt?: Date | null;
   isActive: boolean;
   schoolId: string;
+  tutorId?: string | null;
+  assignedAt?: Date | null;
   createdAt: Date;
   updatedAt: Date;
 }
