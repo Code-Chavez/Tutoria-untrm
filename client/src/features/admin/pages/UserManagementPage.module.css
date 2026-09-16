@@ -45,6 +45,7 @@
   box-shadow: var(--sombra-xs);
   overflow: hidden;
   max-width: 760px;
+  margin: 0 auto;
 }
 
 .paramsHead {
