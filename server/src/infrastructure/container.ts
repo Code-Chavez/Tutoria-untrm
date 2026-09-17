@@ -7,6 +7,7 @@ import { PrismaPasswordResetTokenRepository } from './repositories/PrismaPasswor
 import { PrismaStudentRepository } from './repositories/PrismaStudentRepository';
 import { PrismaTutorAssignmentHistoryRepository } from './repositories/PrismaTutorAssignmentHistoryRepository';
 import { PrismaTutorInterviewRepository } from './repositories/PrismaTutorInterviewRepository';
+import { PrismaSupportContactRepository } from './repositories/PrismaSupportContactRepository';
 import { PrismaSchoolRepository } from './repositories/PrismaSchoolRepository';
 import { BcryptPasswordHasher } from './services/BcryptPasswordHasher';
 import { JwtTokenService } from './services/JwtTokenService';
@@ -25,6 +26,7 @@ const passwordResetTokenRepository = new PrismaPasswordResetTokenRepository(pris
 const studentRepository = new PrismaStudentRepository(prisma);
 const tutorAssignmentHistoryRepository = new PrismaTutorAssignmentHistoryRepository(prisma);
 const tutorInterviewRepository = new PrismaTutorInterviewRepository(prisma);
+const supportContactRepository = new PrismaSupportContactRepository(prisma);
 const schoolRepository = new PrismaSchoolRepository(prisma);
 
 const passwordHasher = new BcryptPasswordHasher();
@@ -70,6 +72,8 @@ import { GetTutorWorkloadUseCase } from '@application/use-cases/assignments/GetT
 import { ReassignStudentUseCase } from '@application/use-cases/assignments/ReassignStudentUseCase';
 import { CreateInterviewUseCase } from '@application/use-cases/interviews/CreateInterviewUseCase';
 import { ListInterviewsByStudentUseCase } from '@application/use-cases/interviews/ListInterviewsByStudentUseCase';
+import { UpsertSupportContactUseCase } from '@application/use-cases/support-contacts/UpsertSupportContactUseCase';
+import { GetSupportContactUseCase } from '@application/use-cases/support-contacts/GetSupportContactUseCase';
 import { ListSchoolsUseCase } from '@application/use-cases/schools/ListSchoolsUseCase';
 
 const createUserUseCase = new CreateUserUseCase(userRepository, passwordHasher);
@@ -117,6 +121,11 @@ const createInterviewUseCase = new CreateInterviewUseCase(
 const listInterviewsByStudentUseCase = new ListInterviewsByStudentUseCase(
   tutorInterviewRepository,
 );
+const upsertSupportContactUseCase = new UpsertSupportContactUseCase(
+  supportContactRepository,
+  studentRepository,
+);
+const getSupportContactUseCase = new GetSupportContactUseCase(supportContactRepository);
 const listSchoolsUseCase = new ListSchoolsUseCase(schoolRepository);
 
 export const container = {
@@ -130,6 +139,7 @@ export const container = {
     schoolRepository,
     tutorAssignmentHistoryRepository,
     tutorInterviewRepository,
+    supportContactRepository,
   },
   services: {
     passwordHasher,
@@ -159,6 +169,8 @@ export const container = {
     reassignStudentUseCase,
     createInterviewUseCase,
     listInterviewsByStudentUseCase,
+    upsertSupportContactUseCase,
+    getSupportContactUseCase,
     listSchoolsUseCase,
   },
 } as const;

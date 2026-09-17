@@ -16,8 +16,8 @@
   border-radius: var(--r-lg);
   box-shadow: var(--sombra-md);
   width: 100%;
-  max-width: 640px;
-  max-height: 90vh;
+  max-width: 820px;
+  max-height: 94vh;
   display: flex;
   flex-direction: column;
   border-top: 3px solid var(--azul-med);
@@ -78,6 +78,7 @@
 .body {
   padding: 0 var(--s5) var(--s4);
   overflow-y: auto;
+  overflow-x: hidden;
   flex: 1;
 }
 

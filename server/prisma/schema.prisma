@@ -181,6 +181,7 @@ model Student {
 
   assignmentHistory TutorAssignmentHistory[]
   interviews        TutorInterview[]
+  supportContact    SupportContact?
 
   @@index([tutorId])
   @@map("students")
@@ -250,6 +251,25 @@ model TutorInterview {
 
   @@index([studentId])
   @@map("tutor_interviews")
+}
+
+// Persona de red de apoyo — Anexo N° 3, sección II del Protocolo (HU-15).
+// Un contacto por estudiante (se actualiza, no se acumula historial); su
+// lectura queda restringida a Docente Tutor y Administrador DBU.
+model SupportContact {
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  studentId    String  @unique @map("student_id")
+  student      Student @relation(fields: [studentId], references: [id])
+  fullName     String  @map("full_name")
+  relationship String
+  age          Int?
+  occupation   String?
+  phone        String
+
+  @@map("support_contacts")
 }
 
 // ─── Parámetros del Sistema ────────────────────────────────────

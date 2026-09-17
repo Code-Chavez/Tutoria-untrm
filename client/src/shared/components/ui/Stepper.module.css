@@ -69,7 +69,7 @@
   background: var(--ok);
 }
 
-@media (max-width: 700px) {
+@media (max-width: 860px) {
   .label {
     display: none;
   }
