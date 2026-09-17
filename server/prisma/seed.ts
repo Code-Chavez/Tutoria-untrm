@@ -17,6 +17,8 @@ async function main() {
     prisma.permission.upsert({ where: { code: 'students:read' }, update: {}, create: { code: 'students:read', description: 'Ver tutorados' } }),
     prisma.permission.upsert({ where: { code: 'students:write' }, update: {}, create: { code: 'students:write', description: 'Crear/editar tutorados' } }),
     prisma.permission.upsert({ where: { code: 'students:import' }, update: {}, create: { code: 'students:import', description: 'Carga masiva de tutorados' } }),
+    prisma.permission.upsert({ where: { code: 'interviews:read' }, update: {}, create: { code: 'interviews:read', description: 'Ver entrevistas iniciales' } }),
+    prisma.permission.upsert({ where: { code: 'interviews:write' }, update: {}, create: { code: 'interviews:write', description: 'Registrar entrevistas iniciales' } }),
     prisma.permission.upsert({ where: { code: 'sessions:read' }, update: {}, create: { code: 'sessions:read', description: 'Ver sesiones' } }),
     prisma.permission.upsert({ where: { code: 'sessions:write' }, update: {}, create: { code: 'sessions:write', description: 'Programar sesiones' } }),
     prisma.permission.upsert({ where: { code: 'referrals:read' }, update: {}, create: { code: 'referrals:read', description: 'Ver derivaciones' } }),
@@ -71,8 +73,8 @@ async function main() {
   // Asignar permisos a roles
   const rolePerms: Record<string, string[]> = {
     [adminRole.id]: Object.keys(permMap),
-    [coordRole.id]: ['users:read', 'students:read', 'students:write', 'students:import', 'sessions:read', 'referrals:read', 'reports:read', 'reports:export', 'evaluation:manage'],
-    [tutorRole.id]: ['students:read', 'sessions:read', 'sessions:write', 'referrals:read', 'referrals:write', 'reports:read'],
+    [coordRole.id]: ['users:read', 'students:read', 'students:write', 'students:import', 'interviews:read', 'sessions:read', 'referrals:read', 'reports:read', 'reports:export', 'evaluation:manage'],
+    [tutorRole.id]: ['students:read', 'interviews:read', 'interviews:write', 'sessions:read', 'sessions:write', 'referrals:read', 'referrals:write', 'reports:read'],
     [studentRole.id]: ['sessions:read', 'evaluation:respond'],
     [serviceRole.id]: ['referrals:read', 'referrals:write'],
     [viceRole.id]: ['reports:read'],

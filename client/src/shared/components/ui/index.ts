@@ -9,3 +9,4 @@ export { IconButton } from './IconButton';
 export { ConfirmDialog } from './ConfirmDialog';
 export { Pagination } from './Pagination';
 export { SearchField, SelectField } from './Field';
+export { Stepper } from './Stepper';
