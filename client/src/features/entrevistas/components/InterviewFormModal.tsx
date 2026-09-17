@@ -4,16 +4,19 @@ import { ClipboardIcon, CloseIcon, CheckCircleIcon } from '@shared/components/ic
 import { useAuth } from '@features/auth/hooks/useAuth';
 import { Student } from '@features/tutorados/services/studentService';
 import { CreateInterviewData } from '../services/interviewService';
+import { UpsertSupportContactData } from '../services/supportContactService';
 import styles from './InterviewFormModal.module.css';
 
-const STEPS = ['Filiación', 'Motivo', 'Aspectos', 'Acuerdos'];
+// Orden del Anexo N° 3: I. Filiación, II. Red de apoyo, III. Motivo,
+// IV. Aspectos tratados, V. Acuerdos.
+const STEPS = ['Filiación', 'Red de apoyo', 'Motivo', 'Aspectos', 'Acuerdos'];
 
 interface InterviewFormModalProps {
   student: Student;
   schoolName: string;
   loading?: boolean;
   serverError?: string;
-  onSubmit: (data: CreateInterviewData) => void;
+  onSubmit: (data: CreateInterviewData, supportContact?: UpsertSupportContactData) => void;
   onCancel: () => void;
 }
 
@@ -26,6 +29,11 @@ interface FormState {
   siblingsOrder: string;
   address: string;
   admissionYear: string;
+  contactFullName: string;
+  contactRelationship: string;
+  contactAge: string;
+  contactOccupation: string;
+  contactPhone: string;
   motiveAcademic: boolean;
   motivePersonalEmotional: boolean;
   motiveVocational: boolean;
@@ -43,6 +51,11 @@ const EMPTY_FORM: FormState = {
   siblingsOrder: '',
   address: '',
   admissionYear: '',
+  contactFullName: '',
+  contactRelationship: '',
+  contactAge: '',
+  contactOccupation: '',
+  contactPhone: '',
   motiveAcademic: false,
   motivePersonalEmotional: false,
   motiveVocational: false,
@@ -77,16 +90,27 @@ export const InterviewFormModal: React.FC<InterviewFormModalProps> = ({
     setError('');
   };
 
+  // La sección de red de apoyo es opcional; si se empieza a llenar, se exigen
+  // los campos clave del Anexo (apellidos/nombres, vínculo, celular).
+  const contactStarted =
+    form.contactFullName.trim() || form.contactRelationship.trim() || form.contactPhone.trim();
+
   const validateStep = (): boolean => {
-    if (step === 1 && !form.motiveAcademic && !form.motivePersonalEmotional && !form.motiveVocational) {
+    if (step === 1 && contactStarted) {
+      if (!form.contactFullName.trim() || !form.contactRelationship.trim() || !form.contactPhone.trim()) {
+        setError('Completa apellidos y nombres, vínculo y celular de la persona de red de apoyo, o deja la sección vacía.');
+        return false;
+      }
+    }
+    if (step === 2 && !form.motiveAcademic && !form.motivePersonalEmotional && !form.motiveVocational) {
       setError('Marca al menos un motivo de la entrevista.');
       return false;
     }
-    if (step === 2 && form.aspectsDiscussed.trim().length < 3) {
+    if (step === 3 && form.aspectsDiscussed.trim().length < 3) {
       setError('Describe los aspectos tratados o dificultades manifestadas.');
       return false;
     }
-    if (step === 3 && form.agreements.trim().length < 3) {
+    if (step === 4 && form.agreements.trim().length < 3) {
       setError('Describe los acuerdos tomados.');
       return false;
     }
@@ -118,7 +142,18 @@ export const InterviewFormModal: React.FC<InterviewFormModalProps> = ({
       aspectsDiscussed: form.aspectsDiscussed.trim(),
       agreements: form.agreements.trim(),
     };
-    onSubmit(data);
+
+    const supportContact: UpsertSupportContactData | undefined = contactStarted
+      ? {
+          fullName: form.contactFullName.trim(),
+          relationship: form.contactRelationship.trim(),
+          age: form.contactAge ? Number(form.contactAge) : undefined,
+          occupation: form.contactOccupation.trim() || undefined,
+          phone: form.contactPhone.trim(),
+        }
+      : undefined;
+
+    onSubmit(data, supportContact);
   };
 
   return (
@@ -242,6 +277,69 @@ export const InterviewFormModal: React.FC<InterviewFormModalProps> = ({
           {step === 1 && (
             <div>
               <p className={styles.sectionHint}>
+                Persona a contactar en caso de requerirse (Anexo N° 3, sección II). Sección
+                opcional, visible solo para el Docente Tutor y Administración.
+              </p>
+              <div className={styles.grid}>
+                <div className={`${styles.field} ${styles.fieldWide}`}>
+                  <label htmlFor="contactFullName">Apellidos y nombres</label>
+                  <input
+                    id="contactFullName"
+                    type="text"
+                    className={styles.input}
+                    value={form.contactFullName}
+                    onChange={(e) => set('contactFullName', e.target.value)}
+                  />
+                </div>
+                <div className={styles.field}>
+                  <label htmlFor="contactRelationship">Parentesco / vínculo</label>
+                  <input
+                    id="contactRelationship"
+                    type="text"
+                    className={styles.input}
+                    value={form.contactRelationship}
+                    onChange={(e) => set('contactRelationship', e.target.value)}
+                  />
+                </div>
+                <div className={styles.field}>
+                  <label htmlFor="contactAge">Edad</label>
+                  <input
+                    id="contactAge"
+                    type="number"
+                    min={0}
+                    max={120}
+                    className={styles.input}
+                    value={form.contactAge}
+                    onChange={(e) => set('contactAge', e.target.value)}
+                  />
+                </div>
+                <div className={styles.field}>
+                  <label htmlFor="contactOccupation">Ocupación</label>
+                  <input
+                    id="contactOccupation"
+                    type="text"
+                    className={styles.input}
+                    value={form.contactOccupation}
+                    onChange={(e) => set('contactOccupation', e.target.value)}
+                  />
+                </div>
+                <div className={styles.field}>
+                  <label htmlFor="contactPhone">Celular</label>
+                  <input
+                    id="contactPhone"
+                    type="tel"
+                    className={styles.input}
+                    value={form.contactPhone}
+                    onChange={(e) => set('contactPhone', e.target.value)}
+                  />
+                </div>
+              </div>
+            </div>
+          )}
+
+          {step === 2 && (
+            <div>
+              <p className={styles.sectionHint}>
                 Marca al menos un motivo de la entrevista (Anexo N° 3, sección III).
               </p>
               <div className={styles.checks}>
@@ -283,7 +381,7 @@ export const InterviewFormModal: React.FC<InterviewFormModalProps> = ({
             </div>
           )}
 
-          {step === 2 && (
+          {step === 3 && (
             <div className={styles.field}>
               <label htmlFor="aspectsDiscussed">
                 Aspectos tratados o dificultades manifestadas (académicas y/o personales)
@@ -299,7 +397,7 @@ export const InterviewFormModal: React.FC<InterviewFormModalProps> = ({
             </div>
           )}
 
-          {step === 3 && (
+          {step === 4 && (
             <>
               <div className={styles.field}>
                 <label htmlFor="agreements">Acuerdos tomados</label>

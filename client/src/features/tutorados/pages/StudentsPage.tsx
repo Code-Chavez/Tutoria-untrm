@@ -13,6 +13,7 @@ import { RiskModal } from '../components/RiskModal';
 import { ReassignModal } from '../components/ReassignModal';
 import { InterviewFormModal } from '@features/entrevistas/components/InterviewFormModal';
 import { interviewService, CreateInterviewData } from '@features/entrevistas/services/interviewService';
+import { supportContactService, UpsertSupportContactData } from '@features/entrevistas/services/supportContactService';
 import { useStudents } from '../hooks/useStudents';
 import { useAuth } from '@features/auth/hooks/useAuth';
 import { assignmentService } from '@features/asignacion/services/assignmentService';
@@ -171,11 +172,17 @@ export const StudentsPage: React.FC = () => {
     }
   };
 
-  const confirmInterview = async (data: CreateInterviewData) => {
+  const confirmInterview = async (
+    data: CreateInterviewData,
+    supportContact?: UpsertSupportContactData,
+  ) => {
     if (!studentForInterview) return;
     setInterviewLoading(true);
     setInterviewError('');
     try {
+      if (supportContact) {
+        await supportContactService.upsertSupportContact(studentForInterview.id, supportContact);
+      }
       await interviewService.createInterview(studentForInterview.id, data);
       setStudentForInterview(null);
     } catch (err) {
