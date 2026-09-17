@@ -6,3 +6,4 @@ export type { PasswordResetTokenRepository } from './PasswordResetTokenRepositor
 export type { StudentRepository, StudentFilters } from './StudentRepository';
 export type { SchoolRepository } from './SchoolRepository';
 export type { TutorAssignmentHistoryRepository } from './TutorAssignmentHistoryRepository';
+export type { TutorInterviewRepository } from './TutorInterviewRepository';

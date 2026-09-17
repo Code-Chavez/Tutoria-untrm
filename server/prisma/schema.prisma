@@ -34,6 +34,7 @@ model User {
   previousTutorHistory TutorAssignmentHistory[] @relation("PreviousTutorHistory")
   newTutorHistory      TutorAssignmentHistory[] @relation("NewTutorHistory")
   reassignmentsMade    TutorAssignmentHistory[] @relation("ReassignedByHistory")
+  interviewsConducted  TutorInterview[]
 
   @@map("users")
 }
@@ -179,6 +180,7 @@ model Student {
   assignedAt DateTime? @map("assigned_at")
 
   assignmentHistory TutorAssignmentHistory[]
+  interviews        TutorInterview[]
 
   @@index([tutorId])
   @@map("students")
@@ -205,6 +207,49 @@ model TutorAssignmentHistory {
 
   @@index([studentId])
   @@map("tutor_assignment_history")
+}
+
+// Entrevista inicial tutorial — Anexo N° 3 del Protocolo (R.C.U. N°283-2024).
+// Solo guarda los datos de filiación que NO existen ya en Student (nombre,
+// código, ciclo y programa se obtienen uniendo con el estudiante). La sección
+// II (persona de red de apoyo) es de HU-15 y vive en su propio modelo.
+// La firma del Anexo se reemplaza por la confirmación del usuario autenticado
+// que registra la entrevista (conductedById).
+model TutorInterview {
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  studentId String  @map("student_id")
+  student   Student @relation(fields: [studentId], references: [id])
+
+  conductedById String @map("conducted_by_id")
+  conductedBy   User   @relation(fields: [conductedById], references: [id])
+
+  // I. Datos de filiación adicionales (no presentes en Student)
+  birthDate     DateTime? @map("birth_date")
+  originPlace   String?   @map("origin_place")
+  age           Int?
+  religion      String?
+  maritalStatus String?   @map("marital_status")
+  siblingsOrder String?   @map("siblings_order")
+  address       String?
+  admissionYear Int?      @map("admission_year")
+
+  // III. Motivo de la entrevista (checkboxes, al menos uno obligatorio) + detalle
+  motiveAcademic          Boolean @default(false) @map("motive_academic")
+  motivePersonalEmotional Boolean @default(false) @map("motive_personal_emotional")
+  motiveVocational        Boolean @default(false) @map("motive_vocational")
+  motiveDetail            String? @map("motive_detail")
+
+  // IV. Aspectos tratados o dificultades manifestadas
+  aspectsDiscussed String @map("aspects_discussed")
+
+  // V. Acuerdos tomados
+  agreements String
+
+  @@index([studentId])
+  @@map("tutor_interviews")
 }
 
 // ─── Parámetros del Sistema ────────────────────────────────────

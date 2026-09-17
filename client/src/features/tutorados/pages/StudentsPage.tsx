@@ -11,6 +11,8 @@ import { TutoradoFilters, StudentFilterValues } from '../components/TutoradoFilt
 import { TutoradoTable } from '../components/TutoradoTable';
 import { RiskModal } from '../components/RiskModal';
 import { ReassignModal } from '../components/ReassignModal';
+import { InterviewFormModal } from '@features/entrevistas/components/InterviewFormModal';
+import { interviewService, CreateInterviewData } from '@features/entrevistas/services/interviewService';
 import { useStudents } from '../hooks/useStudents';
 import { useAuth } from '@features/auth/hooks/useAuth';
 import { assignmentService } from '@features/asignacion/services/assignmentService';
@@ -36,6 +38,8 @@ import {
 
 // Roles con permiso students:write (el resto solo puede consultar).
 const WRITE_ROLES = ['Coordinador', 'Administrador DBU'];
+// Roles con permiso interviews:write (quien realiza la entrevista, Art. 15.a).
+const INTERVIEW_ROLES = ['Docente Tutor', 'Administrador DBU'];
 const PAGE_SIZE = 10;
 
 const EMPTY_FILTERS: StudentFilterValues = { search: '', schoolId: '', cycle: '', status: '' };
@@ -43,6 +47,7 @@ const EMPTY_FILTERS: StudentFilterValues = { search: '', schoolId: '', cycle: ''
 export const StudentsPage: React.FC = () => {
   const { user } = useAuth();
   const canWrite = user ? WRITE_ROLES.includes(user.role) : false;
+  const canConductInterview = user ? INTERVIEW_ROLES.includes(user.role) : false;
 
   const { students, schools, tutors, loading, error, refresh } = useStudents();
 
@@ -61,6 +66,11 @@ export const StudentsPage: React.FC = () => {
   const [studentToReassign, setStudentToReassign] = useState<Student | null>(null);
   const [reassignLoading, setReassignLoading] = useState(false);
   const [reassignError, setReassignError] = useState('');
+
+  // Entrevista inicial tutorial (HU-14).
+  const [studentForInterview, setStudentForInterview] = useState<Student | null>(null);
+  const [interviewLoading, setInterviewLoading] = useState(false);
+  const [interviewError, setInterviewError] = useState('');
 
   const schoolName = (schoolId: string) =>
     schools.find((s) => s.id === schoolId)?.name ?? 'Sin escuela';
@@ -161,6 +171,20 @@ export const StudentsPage: React.FC = () => {
     }
   };
 
+  const confirmInterview = async (data: CreateInterviewData) => {
+    if (!studentForInterview) return;
+    setInterviewLoading(true);
+    setInterviewError('');
+    try {
+      await interviewService.createInterview(studentForInterview.id, data);
+      setStudentForInterview(null);
+    } catch (err) {
+      setInterviewError(getApiErrorMessage(err));
+    } finally {
+      setInterviewLoading(false);
+    }
+  };
+
   const total = students.length;
   const active = students.filter((s) => s.isActive).length;
   const atRisk = students.filter((s) => s.isAtRisk).length;
@@ -198,7 +222,7 @@ export const StudentsPage: React.FC = () => {
         />
 
         {loading ? (
-          <TableSkeleton rows={6} columns={canWrite ? 7 : 6} />
+          <TableSkeleton rows={6} columns={canWrite || canConductInterview ? 7 : 6} />
         ) : error ? (
           <EmptyState
             variant="error"
@@ -231,12 +255,17 @@ export const StudentsPage: React.FC = () => {
               schoolName={schoolName}
               tutorName={tutorName}
               canWrite={canWrite}
+              canConductInterview={canConductInterview}
               onEdit={handleOpenModal}
               onMarkRisk={setStudentToMark}
               onUnmarkRisk={setStudentToUnmark}
               onReassign={(student) => {
                 setReassignError('');
                 setStudentToReassign(student);
+              }}
+              onRegisterInterview={(student) => {
+                setInterviewError('');
+                setStudentForInterview(student);
               }}
             />
             <Pagination
@@ -277,6 +306,18 @@ export const StudentsPage: React.FC = () => {
           serverError={reassignError}
           onConfirm={confirmReassign}
           onCancel={() => setStudentToReassign(null)}
+        />
+      )}
+
+      {studentForInterview && (
+        <InterviewFormModal
+          key={studentForInterview.id}
+          student={studentForInterview}
+          schoolName={schoolName(studentForInterview.schoolId)}
+          loading={interviewLoading}
+          serverError={interviewError}
+          onSubmit={confirmInterview}
+          onCancel={() => setStudentForInterview(null)}
         />
       )}
 
