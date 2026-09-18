@@ -6,6 +6,7 @@ import {
   CheckCircleIcon,
   SwitchIcon,
   ClipboardIcon,
+  FolderIcon,
 } from '@shared/components/icons';
 import { Student } from '../services/studentService';
 import table from '@shared/components/ui/DataTable.module.css';
@@ -21,6 +22,7 @@ interface TutoradoTableProps {
   onUnmarkRisk: (student: Student) => void;
   onReassign: (student: Student) => void;
   onRegisterInterview: (student: Student) => void;
+  onViewRecord: (student: Student) => void;
 }
 
 export const TutoradoTable: React.FC<TutoradoTableProps> = ({
@@ -34,8 +36,11 @@ export const TutoradoTable: React.FC<TutoradoTableProps> = ({
   onUnmarkRisk,
   onReassign,
   onRegisterInterview,
+  onViewRecord,
 }) => {
-  const showActions = canWrite || canConductInterview;
+  // El expediente solo requiere students:read, así que se muestra a
+  // cualquier rol que pueda ver esta tabla.
+  const showActions = true;
 
   return (
     <div className={table.scroll}>
@@ -94,6 +99,9 @@ export const TutoradoTable: React.FC<TutoradoTableProps> = ({
                 {showActions && (
                   <td>
                     <div className={table.actions}>
+                      <IconButton label="Ver expediente" onClick={() => onViewRecord(student)}>
+                        <FolderIcon size={16} />
+                      </IconButton>
                       {canConductInterview && (
                         <IconButton
                           label="Registrar entrevista inicial"
