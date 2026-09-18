@@ -74,6 +74,7 @@ import { CreateInterviewUseCase } from '@application/use-cases/interviews/Create
 import { ListInterviewsByStudentUseCase } from '@application/use-cases/interviews/ListInterviewsByStudentUseCase';
 import { UpsertSupportContactUseCase } from '@application/use-cases/support-contacts/UpsertSupportContactUseCase';
 import { GetSupportContactUseCase } from '@application/use-cases/support-contacts/GetSupportContactUseCase';
+import { GetStudentRecordUseCase } from '@application/use-cases/student-record/GetStudentRecordUseCase';
 import { ListSchoolsUseCase } from '@application/use-cases/schools/ListSchoolsUseCase';
 
 const createUserUseCase = new CreateUserUseCase(userRepository, passwordHasher);
@@ -126,6 +127,14 @@ const upsertSupportContactUseCase = new UpsertSupportContactUseCase(
   studentRepository,
 );
 const getSupportContactUseCase = new GetSupportContactUseCase(supportContactRepository);
+const getStudentRecordUseCase = new GetStudentRecordUseCase(
+  studentRepository,
+  schoolRepository,
+  userRepository,
+  tutorInterviewRepository,
+  tutorAssignmentHistoryRepository,
+  supportContactRepository,
+);
 const listSchoolsUseCase = new ListSchoolsUseCase(schoolRepository);
 
 export const container = {
@@ -171,6 +180,7 @@ export const container = {
     listInterviewsByStudentUseCase,
     upsertSupportContactUseCase,
     getSupportContactUseCase,
+    getStudentRecordUseCase,
     listSchoolsUseCase,
   },
 } as const;

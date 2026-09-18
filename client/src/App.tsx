@@ -12,6 +12,8 @@ import { UserManagementPage } from '@features/admin/pages/UserManagementPage';
 import { StudentsPage } from '@features/tutorados/pages/StudentsPage';
 import { BulkImportPage } from '@features/tutorados/pages/BulkImportPage';
 import { AssignmentPage } from '@features/asignacion/pages/AssignmentPage';
+import { ExpedienteIndexPage } from '@features/expediente/pages/ExpedienteIndexPage';
+import { ExpedientePage } from '@features/expediente/pages/ExpedientePage';
 import { ProfilePage } from '@features/profile/pages/ProfilePage';
 
 export default function App() {
@@ -55,6 +57,22 @@ export default function App() {
                 element={
                   <RequireRole roles={['Coordinador', 'Administrador DBU']}>
                     <AssignmentPage />
+                  </RequireRole>
+                }
+              />
+              <Route
+                path="expediente"
+                element={
+                  <RequireRole roles={['Docente Tutor', 'Coordinador', 'Administrador DBU']}>
+                    <ExpedienteIndexPage />
+                  </RequireRole>
+                }
+              />
+              <Route
+                path="expediente/:id"
+                element={
+                  <RequireRole roles={['Docente Tutor', 'Coordinador', 'Administrador DBU']}>
+                    <ExpedientePage />
                   </RequireRole>
                 }
               />

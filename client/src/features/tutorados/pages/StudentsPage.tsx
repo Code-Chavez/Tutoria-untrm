@@ -1,4 +1,5 @@
 import React, { useMemo, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import styles from './StudentsPage.module.css';
 import {
   Student,
@@ -47,6 +48,7 @@ const EMPTY_FILTERS: StudentFilterValues = { search: '', schoolId: '', cycle: ''
 
 export const StudentsPage: React.FC = () => {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const canWrite = user ? WRITE_ROLES.includes(user.role) : false;
   const canConductInterview = user ? INTERVIEW_ROLES.includes(user.role) : false;
 
@@ -274,6 +276,7 @@ export const StudentsPage: React.FC = () => {
                 setInterviewError('');
                 setStudentForInterview(student);
               }}
+              onViewRecord={(student) => navigate(`/expediente/${student.id}`)}
             />
             <Pagination
               page={page}

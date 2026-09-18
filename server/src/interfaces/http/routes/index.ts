@@ -9,6 +9,7 @@ import schoolRoutes from './school.routes';
 import assignmentRoutes from './assignment.routes';
 import interviewRoutes from './interview.routes';
 import supportContactRoutes from './supportContact.routes';
+import studentRecordRoutes from './studentRecord.routes';
 
 const router: IRouter = Router();
 
@@ -22,5 +23,6 @@ router.use(schoolRoutes);
 router.use(assignmentRoutes);
 router.use(interviewRoutes);
 router.use(supportContactRoutes);
+router.use(studentRecordRoutes);
 
 export default router;

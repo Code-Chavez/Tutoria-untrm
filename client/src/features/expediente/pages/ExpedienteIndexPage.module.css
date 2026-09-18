@@ -1,0 +1,12 @@
+.search {
+  padding: var(--s4) var(--s5);
+  border-bottom: 1px solid var(--borde);
+}
+
+.row {
+  cursor: pointer;
+}
+
+.row td {
+  color: var(--g500);
+}
