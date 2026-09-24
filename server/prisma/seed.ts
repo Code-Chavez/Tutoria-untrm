@@ -21,6 +21,8 @@ async function main() {
     prisma.permission.upsert({ where: { code: 'interviews:write' }, update: {}, create: { code: 'interviews:write', description: 'Registrar entrevistas iniciales' } }),
     prisma.permission.upsert({ where: { code: 'support-contacts:read' }, update: {}, create: { code: 'support-contacts:read', description: 'Ver persona de red de apoyo' } }),
     prisma.permission.upsert({ where: { code: 'support-contacts:write' }, update: {}, create: { code: 'support-contacts:write', description: 'Registrar persona de red de apoyo' } }),
+    prisma.permission.upsert({ where: { code: 'tutoring-requests:read' }, update: {}, create: { code: 'tutoring-requests:read', description: 'Ver solicitudes de tutoría' } }),
+    prisma.permission.upsert({ where: { code: 'tutoring-requests:write' }, update: {}, create: { code: 'tutoring-requests:write', description: 'Registrar solicitudes de tutoría' } }),
     prisma.permission.upsert({ where: { code: 'sessions:read' }, update: {}, create: { code: 'sessions:read', description: 'Ver sesiones' } }),
     prisma.permission.upsert({ where: { code: 'sessions:write' }, update: {}, create: { code: 'sessions:write', description: 'Programar sesiones' } }),
     prisma.permission.upsert({ where: { code: 'referrals:read' }, update: {}, create: { code: 'referrals:read', description: 'Ver derivaciones' } }),
@@ -75,8 +77,8 @@ async function main() {
   // Asignar permisos a roles
   const rolePerms: Record<string, string[]> = {
     [adminRole.id]: Object.keys(permMap),
-    [coordRole.id]: ['users:read', 'students:read', 'students:write', 'students:import', 'interviews:read', 'sessions:read', 'referrals:read', 'reports:read', 'reports:export', 'evaluation:manage'],
-    [tutorRole.id]: ['students:read', 'interviews:read', 'interviews:write', 'support-contacts:read', 'support-contacts:write', 'sessions:read', 'sessions:write', 'referrals:read', 'referrals:write', 'reports:read'],
+    [coordRole.id]: ['users:read', 'students:read', 'students:write', 'students:import', 'interviews:read', 'tutoring-requests:read', 'tutoring-requests:write', 'sessions:read', 'referrals:read', 'reports:read', 'reports:export', 'evaluation:manage'],
+    [tutorRole.id]: ['students:read', 'interviews:read', 'interviews:write', 'support-contacts:read', 'support-contacts:write', 'tutoring-requests:read', 'tutoring-requests:write', 'sessions:read', 'sessions:write', 'referrals:read', 'referrals:write', 'reports:read'],
     [studentRole.id]: ['sessions:read', 'evaluation:respond'],
     [serviceRole.id]: ['referrals:read', 'referrals:write'],
     [viceRole.id]: ['reports:read'],
@@ -166,16 +168,22 @@ async function main() {
     create: { name: 'Facultad de Ciencias Económicas y Administrativas' },
   });
 
+  // Coordinadores por escuela (Art. 17.a); Administración de Empresas se deja
+  // sin coordinador a propósito, para ejercitar el respaldo a Administrador
+  // DBU al enrutar solicitudes de tutoría (HU-17).
+  const coordSistemasId = demoUsers.get('rosa.mendoza@untrm.edu.pe');
+  const coordMecanicaId = demoUsers.get('carlos.vega@untrm.edu.pe');
+
   const schoolSistemas = await prisma.school.upsert({
     where: { name_facultyId: { name: 'Ingeniería de Sistemas', facultyId: fisme.id } },
-    update: {},
-    create: { name: 'Ingeniería de Sistemas', facultyId: fisme.id },
+    update: { coordinatorId: coordSistemasId },
+    create: { name: 'Ingeniería de Sistemas', facultyId: fisme.id, coordinatorId: coordSistemasId },
   });
 
   const schoolMecanica = await prisma.school.upsert({
     where: { name_facultyId: { name: 'Ingeniería Mecánica Eléctrica', facultyId: fisme.id } },
-    update: {},
-    create: { name: 'Ingeniería Mecánica Eléctrica', facultyId: fisme.id },
+    update: { coordinatorId: coordMecanicaId },
+    create: { name: 'Ingeniería Mecánica Eléctrica', facultyId: fisme.id, coordinatorId: coordMecanicaId },
   });
 
   const schoolAdmin = await prisma.school.upsert({
