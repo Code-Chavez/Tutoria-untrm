@@ -11,6 +11,7 @@ import interviewRoutes from './interview.routes';
 import supportContactRoutes from './supportContact.routes';
 import studentRecordRoutes from './studentRecord.routes';
 import tutoringRequestRoutes from './tutoringRequest.routes';
+import sessionRoutes from './session.routes';
 
 const router: IRouter = Router();
 
@@ -26,5 +27,6 @@ router.use(interviewRoutes);
 router.use(supportContactRoutes);
 router.use(studentRecordRoutes);
 router.use(tutoringRequestRoutes);
+router.use(sessionRoutes);
 
 export default router;

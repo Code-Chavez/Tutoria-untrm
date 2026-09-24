@@ -8,6 +8,8 @@ import { PrismaStudentRepository } from './repositories/PrismaStudentRepository'
 import { PrismaTutorAssignmentHistoryRepository } from './repositories/PrismaTutorAssignmentHistoryRepository';
 import { PrismaTutorInterviewRepository } from './repositories/PrismaTutorInterviewRepository';
 import { PrismaTutoringRequestRepository } from './repositories/PrismaTutoringRequestRepository';
+import { PrismaSessionRepository } from './repositories/PrismaSessionRepository';
+import { PrismaSystemParameterRepository } from './repositories/PrismaSystemParameterRepository';
 import { PrismaSupportContactRepository } from './repositories/PrismaSupportContactRepository';
 import { PrismaSchoolRepository } from './repositories/PrismaSchoolRepository';
 import { BcryptPasswordHasher } from './services/BcryptPasswordHasher';
@@ -28,6 +30,8 @@ const studentRepository = new PrismaStudentRepository(prisma);
 const tutorAssignmentHistoryRepository = new PrismaTutorAssignmentHistoryRepository(prisma);
 const tutorInterviewRepository = new PrismaTutorInterviewRepository(prisma);
 const tutoringRequestRepository = new PrismaTutoringRequestRepository(prisma);
+const sessionRepository = new PrismaSessionRepository(prisma);
+const systemParameterRepository = new PrismaSystemParameterRepository(prisma);
 const supportContactRepository = new PrismaSupportContactRepository(prisma);
 const schoolRepository = new PrismaSchoolRepository(prisma);
 
@@ -79,6 +83,8 @@ import { GetSupportContactUseCase } from '@application/use-cases/support-contact
 import { GetStudentRecordUseCase } from '@application/use-cases/student-record/GetStudentRecordUseCase';
 import { CreateTutoringRequestUseCase } from '@application/use-cases/tutoring-requests/CreateTutoringRequestUseCase';
 import { ListTutoringRequestsUseCase } from '@application/use-cases/tutoring-requests/ListTutoringRequestsUseCase';
+import { ScheduleSessionUseCase } from '@application/use-cases/sessions/ScheduleSessionUseCase';
+import { ListSessionsUseCase } from '@application/use-cases/sessions/ListSessionsUseCase';
 import { ListSchoolsUseCase } from '@application/use-cases/schools/ListSchoolsUseCase';
 
 const createUserUseCase = new CreateUserUseCase(userRepository, passwordHasher);
@@ -147,6 +153,12 @@ const createTutoringRequestUseCase = new CreateTutoringRequestUseCase(
   roleRepository,
 );
 const listTutoringRequestsUseCase = new ListTutoringRequestsUseCase(tutoringRequestRepository);
+const scheduleSessionUseCase = new ScheduleSessionUseCase(
+  sessionRepository,
+  studentRepository,
+  systemParameterRepository,
+);
+const listSessionsUseCase = new ListSessionsUseCase(sessionRepository);
 const listSchoolsUseCase = new ListSchoolsUseCase(schoolRepository);
 
 export const container = {
@@ -162,6 +174,8 @@ export const container = {
     tutorInterviewRepository,
     supportContactRepository,
     tutoringRequestRepository,
+    sessionRepository,
+    systemParameterRepository,
   },
   services: {
     passwordHasher,
@@ -196,6 +210,8 @@ export const container = {
     getStudentRecordUseCase,
     createTutoringRequestUseCase,
     listTutoringRequestsUseCase,
+    scheduleSessionUseCase,
+    listSessionsUseCase,
     listSchoolsUseCase,
   },
 } as const;

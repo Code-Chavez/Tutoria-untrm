@@ -1,0 +1,89 @@
+import { ScheduleSessionUseCase } from '@application/use-cases/sessions/ScheduleSessionUseCase';
+import { TutorScheduleConflictError } from '@application/use-cases/sessions/SessionErrors';
+import { StudentNotFoundError } from '@application/use-cases/students/StudentErrors';
+import { SessionRepository } from '@domain/repositories/SessionRepository';
+import { StudentRepository } from '@domain/repositories/StudentRepository';
+import { SystemParameterRepository } from '@domain/repositories/SystemParameterRepository';
+import { Student } from '@domain/entities/Student';
+import { Session, SessionWithParticipants } from '@domain/entities/Session';
+import { SystemParameter } from '@domain/entities/SystemParameter';
+import { ScheduleSessionInput } from '@application/dtos/session.dto';
+
+describe('ScheduleSessionUseCase', () => {
+  let useCase: ScheduleSessionUseCase;
+  let sessions: jest.Mocked<SessionRepository>;
+  let students: jest.Mocked<StudentRepository>;
+  let systemParameters: jest.Mocked<SystemParameterRepository>;
+
+  const baseInput: ScheduleSessionInput = {
+    studentId: 'student-1',
+    topic: 'Reforzamiento de Cálculo',
+    scheduledAt: '2026-10-01T15:00:00.000Z',
+  };
+
+  beforeEach(() => {
+    sessions = {
+      create: jest.fn().mockImplementation(async (data, studentIds) => ({
+        id: 'session-1',
+        createdAt: new Date(),
+        studentIds,
+        ...data,
+      } as SessionWithParticipants)),
+      findOverlapping: jest.fn().mockResolvedValue([]),
+      findAll: jest.fn(),
+      findByStudent: jest.fn(),
+    };
+    students = {
+      findById: jest.fn().mockResolvedValue({ id: 'student-1' } as Student),
+      findByCode: jest.fn(),
+      findAll: jest.fn(),
+      create: jest.fn(),
+      update: jest.fn(),
+      assignTutor: jest.fn(),
+      countByTutor: jest.fn(),
+    };
+    systemParameters = {
+      findByKey: jest
+        .fn()
+        .mockResolvedValue({ key: 'session_duration_minutes', value: '45' } as SystemParameter),
+    };
+    useCase = new ScheduleSessionUseCase(sessions, students, systemParameters);
+  });
+
+  it('programa la sesión con la duración configurada (45 min) y calcula el fin', async () => {
+    const result = await useCase.execute('tutor-1', baseInput);
+
+    expect(result.durationMinutes).toBe(45);
+    expect(result.endsAt.toISOString()).toBe('2026-10-01T15:45:00.000Z');
+    expect(result.studentIds).toEqual(['student-1']);
+    expect(sessions.findOverlapping).toHaveBeenCalledWith(
+      'tutor-1',
+      new Date('2026-10-01T15:00:00.000Z'),
+      new Date('2026-10-01T15:45:00.000Z'),
+    );
+  });
+
+  it('usa 45 minutos por defecto si el parámetro del sistema no existe', async () => {
+    systemParameters.findByKey.mockResolvedValue(null);
+
+    const result = await useCase.execute('tutor-1', baseInput);
+
+    expect(result.durationMinutes).toBe(45);
+  });
+
+  it('rechaza la sesión si el tutor tiene otra que se solapa', async () => {
+    sessions.findOverlapping.mockResolvedValue([{ id: 'other-session' } as Session]);
+
+    await expect(useCase.execute('tutor-1', baseInput)).rejects.toThrow(
+      TutorScheduleConflictError,
+    );
+    expect(sessions.create).not.toHaveBeenCalled();
+  });
+
+  it('lanza StudentNotFoundError si el estudiante no existe', async () => {
+    students.findById.mockResolvedValue(null);
+
+    await expect(useCase.execute('tutor-1', baseInput)).rejects.toThrow(StudentNotFoundError);
+    expect(sessions.findOverlapping).not.toHaveBeenCalled();
+  });
+});

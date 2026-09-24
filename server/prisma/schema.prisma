@@ -38,6 +38,7 @@ model User {
   coordinatedSchools   School[]                 @relation("SchoolCoordinator")
   requestsCreated      TutoringRequest[]        @relation("RequestsCreated")
   requestsRouted       TutoringRequest[]        @relation("RequestsRouted")
+  sessionsAsTutor      Session[]                @relation("SessionsAsTutor")
 
   @@map("users")
 }
@@ -191,6 +192,7 @@ model Student {
   interviews        TutorInterview[]
   supportContact    SupportContact?
   tutoringRequests  TutoringRequest[]
+  sessionParticipations SessionParticipant[]
 
   @@index([tutorId])
   @@map("students")
@@ -315,6 +317,40 @@ model TutoringRequest {
   @@index([studentId])
   @@index([routedToId])
   @@map("tutoring_requests")
+}
+
+// Sesión de tutoría (HU-18, Art. 15.c: 45 minutos, individual o grupal). El
+// tutor sale siempre del usuario autenticado (sessions:write es exclusivo de
+// Docente Tutor). Los participantes viven en su propia tabla desde el inicio
+// para que HU-19 (sesiones grupales) solo extienda este mismo modelo, tal
+// como indica su tarea, sin rediseñarlo.
+model Session {
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now()) @map("created_at")
+
+  tutorId String @map("tutor_id")
+  tutor   User   @relation("SessionsAsTutor", fields: [tutorId], references: [id])
+
+  topic           String
+  scheduledAt     DateTime @map("scheduled_at")
+  durationMinutes Int      @map("duration_minutes")
+  endsAt          DateTime @map("ends_at")
+
+  participants SessionParticipant[]
+
+  @@index([tutorId])
+  @@map("sessions")
+}
+
+model SessionParticipant {
+  id        String  @id @default(uuid())
+  sessionId String  @map("session_id")
+  session   Session @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  studentId String  @map("student_id")
+  student   Student @relation(fields: [studentId], references: [id])
+
+  @@unique([sessionId, studentId])
+  @@map("session_participants")
 }
 
 // ─── Parámetros del Sistema ────────────────────────────────────

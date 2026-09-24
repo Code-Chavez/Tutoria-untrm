@@ -20,6 +20,8 @@ import {
   tutoringRequestService,
   CreateTutoringRequestData,
 } from '@features/solicitudes/services/tutoringRequestService';
+import { SessionFormModal } from '../components/SessionFormModal';
+import { sessionService, ScheduleSessionData } from '@features/sesiones/services/sessionService';
 import { useStudents } from '../hooks/useStudents';
 import { useAuth } from '@features/auth/hooks/useAuth';
 import { assignmentService } from '@features/asignacion/services/assignmentService';
@@ -42,6 +44,10 @@ import {
   SearchIcon,
   XCircleIcon,
 } from '@shared/components/icons';
+
+// Duración por defecto (Art. 15.c); el valor real lo determina el servidor a
+// partir del parámetro del sistema. Solo se usa aquí para el texto de ayuda.
+const DEFAULT_SESSION_DURATION = 45;
 
 // Roles con permiso students:write (el resto solo puede consultar).
 const WRITE_ROLES = ['Coordinador', 'Administrador DBU'];
@@ -85,6 +91,11 @@ export const StudentsPage: React.FC = () => {
   const [requestLoading, setRequestLoading] = useState(false);
   const [requestError, setRequestError] = useState('');
   const [requestFeedback, setRequestFeedback] = useState('');
+
+  // Programación de sesión (HU-18).
+  const [studentForSession, setStudentForSession] = useState<Student | null>(null);
+  const [sessionLoading, setSessionLoading] = useState(false);
+  const [sessionError, setSessionError] = useState('');
 
   const schoolName = (schoolId: string) =>
     schools.find((s) => s.id === schoolId)?.name ?? 'Sin escuela';
@@ -225,6 +236,27 @@ export const StudentsPage: React.FC = () => {
     }
   };
 
+  const confirmSchedule = async (data: ScheduleSessionData) => {
+    if (!studentForSession) return;
+    setSessionLoading(true);
+    setSessionError('');
+    try {
+      const session = await sessionService.scheduleSession(data);
+      const when = new Date(session.scheduledAt).toLocaleString('es-PE', {
+        dateStyle: 'medium',
+        timeStyle: 'short',
+      });
+      setRequestFeedback(
+        `Sesión programada para el ${when} con ${studentForSession.firstName} ${studentForSession.lastName}.`,
+      );
+      setStudentForSession(null);
+    } catch (err) {
+      setSessionError(getApiErrorMessage(err));
+    } finally {
+      setSessionLoading(false);
+    }
+  };
+
   const total = students.length;
   const active = students.filter((s) => s.isActive).length;
   const atRisk = students.filter((s) => s.isAtRisk).length;
@@ -319,6 +351,10 @@ export const StudentsPage: React.FC = () => {
                 setRequestError('');
                 setStudentForRequest(student);
               }}
+              onScheduleSession={(student) => {
+                setSessionError('');
+                setStudentForSession(student);
+              }}
             />
             <Pagination
               page={page}
@@ -380,6 +416,17 @@ export const StudentsPage: React.FC = () => {
           serverError={requestError}
           onSubmit={confirmTutoringRequest}
           onCancel={() => setStudentForRequest(null)}
+        />
+      )}
+
+      {studentForSession && (
+        <SessionFormModal
+          student={studentForSession}
+          durationMinutes={DEFAULT_SESSION_DURATION}
+          loading={sessionLoading}
+          serverError={sessionError}
+          onSubmit={confirmSchedule}
+          onCancel={() => setStudentForSession(null)}
         />
       )}
 

@@ -12,3 +12,5 @@ export type {
   TutoringRequestRepository,
   TutoringRequestFilters,
 } from './TutoringRequestRepository';
+export type { SessionRepository, SessionFilters } from './SessionRepository';
+export type { SystemParameterRepository } from './SystemParameterRepository';
