@@ -1,0 +1,115 @@
+.dropzone {
+  border: 2px dashed var(--borde-fuerte);
+  border-radius: var(--r-lg);
+  background: var(--g50);
+  padding: var(--s8) var(--s6);
+  text-align: center;
+  transition: border-color 0.18s, background 0.18s;
+}
+
+.dropzone.dragging {
+  border-color: var(--azul-med);
+  background: var(--celeste);
+}
+
+.label {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--s3);
+  cursor: pointer;
+}
+
+.arrow {
+  display: grid;
+  place-items: center;
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: var(--celeste);
+  color: var(--azul-med);
+  transition: transform 0.18s;
+}
+
+.dropzone:hover .arrow {
+  transform: translateY(-2px);
+}
+
+.big {
+  font-family: var(--ft);
+  font-size: var(--fs-h3);
+  color: var(--g700);
+}
+
+.big strong {
+  color: var(--azul-med);
+}
+
+.meta {
+  font-size: var(--fs-sm);
+  color: var(--g500);
+}
+
+.hiddenInput {
+  display: none;
+}
+
+/* Estado con archivo seleccionado */
+.selected {
+  display: flex;
+  align-items: center;
+  gap: var(--s4);
+  border: 1.5px solid var(--celeste-2);
+  background: var(--celeste);
+  border-radius: var(--r-lg);
+  padding: var(--s5);
+}
+
+.fileIcon {
+  display: grid;
+  place-items: center;
+  width: 52px;
+  height: 52px;
+  border-radius: var(--r);
+  background: #fff;
+  color: var(--ok);
+  flex-shrink: 0;
+}
+
+.fileInfo {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  flex: 1;
+}
+
+.fileInfo b {
+  font-size: var(--fs-body);
+  color: var(--g900);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.fileInfo small {
+  font-size: var(--fs-sm);
+  color: var(--g600);
+}
+
+.remove {
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border-radius: var(--r-sm);
+  border: 1.5px solid transparent;
+  background: #fff;
+  color: var(--g600);
+  flex-shrink: 0;
+  transition: color 0.16s, border-color 0.16s;
+}
+
+.remove:hover {
+  color: var(--peligro);
+  border-color: var(--peligro-bg);
+}

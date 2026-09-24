@@ -3,6 +3,9 @@ import bcrypt from 'bcryptjs';
 
 const prisma = new PrismaClient();
 
+// Contraseña compartida por todas las cuentas de prueba (no la del admin).
+const DEMO_PASSWORD = 'Demo2026!';
+
 async function main() {
   console.log('Seeding database...');
 
@@ -14,6 +17,10 @@ async function main() {
     prisma.permission.upsert({ where: { code: 'students:read' }, update: {}, create: { code: 'students:read', description: 'Ver tutorados' } }),
     prisma.permission.upsert({ where: { code: 'students:write' }, update: {}, create: { code: 'students:write', description: 'Crear/editar tutorados' } }),
     prisma.permission.upsert({ where: { code: 'students:import' }, update: {}, create: { code: 'students:import', description: 'Carga masiva de tutorados' } }),
+    prisma.permission.upsert({ where: { code: 'interviews:read' }, update: {}, create: { code: 'interviews:read', description: 'Ver entrevistas iniciales' } }),
+    prisma.permission.upsert({ where: { code: 'interviews:write' }, update: {}, create: { code: 'interviews:write', description: 'Registrar entrevistas iniciales' } }),
+    prisma.permission.upsert({ where: { code: 'support-contacts:read' }, update: {}, create: { code: 'support-contacts:read', description: 'Ver persona de red de apoyo' } }),
+    prisma.permission.upsert({ where: { code: 'support-contacts:write' }, update: {}, create: { code: 'support-contacts:write', description: 'Registrar persona de red de apoyo' } }),
     prisma.permission.upsert({ where: { code: 'sessions:read' }, update: {}, create: { code: 'sessions:read', description: 'Ver sesiones' } }),
     prisma.permission.upsert({ where: { code: 'sessions:write' }, update: {}, create: { code: 'sessions:write', description: 'Programar sesiones' } }),
     prisma.permission.upsert({ where: { code: 'referrals:read' }, update: {}, create: { code: 'referrals:read', description: 'Ver derivaciones' } }),
@@ -68,8 +75,8 @@ async function main() {
   // Asignar permisos a roles
   const rolePerms: Record<string, string[]> = {
     [adminRole.id]: Object.keys(permMap),
-    [coordRole.id]: ['users:read', 'students:read', 'students:write', 'students:import', 'sessions:read', 'referrals:read', 'reports:read', 'reports:export', 'evaluation:manage'],
-    [tutorRole.id]: ['students:read', 'sessions:read', 'sessions:write', 'referrals:read', 'referrals:write', 'reports:read'],
+    [coordRole.id]: ['users:read', 'students:read', 'students:write', 'students:import', 'interviews:read', 'sessions:read', 'referrals:read', 'reports:read', 'reports:export', 'evaluation:manage'],
+    [tutorRole.id]: ['students:read', 'interviews:read', 'interviews:write', 'support-contacts:read', 'support-contacts:write', 'sessions:read', 'sessions:write', 'referrals:read', 'referrals:write', 'reports:read'],
     [studentRole.id]: ['sessions:read', 'evaluation:respond'],
     [serviceRole.id]: ['referrals:read', 'referrals:write'],
     [viceRole.id]: ['reports:read'],
@@ -85,37 +92,96 @@ async function main() {
     }
   }
 
-  // Usuario administrador por defecto
-  const passwordHash = await bcrypt.hash('Admin2026!', 12);
+  // Usuario administrador por defecto (credenciales productivas, no tocar)
+  const adminPasswordHash = await bcrypt.hash('Admin2026!', 12);
   await prisma.user.upsert({
     where: { email: '7183255722@untrm.edu.pe' },
     update: {},
     create: {
       email: '7183255722@untrm.edu.pe',
-      passwordHash,
+      passwordHash: adminPasswordHash,
       firstName: 'Administrador',
       lastName: 'SIT',
       roleId: adminRole.id,
     },
   });
 
-  // Facultad y escuelas de ejemplo
+  // ── Usuarios de prueba (uno o más por rol, para pruebas manuales) ──────
+  // Todos comparten DEMO_PASSWORD ('Demo2026!'); se listan al final del seed.
+  const demoPasswordHash = await bcrypt.hash(DEMO_PASSWORD, 12);
+
+  const demoUsersInput: { email: string; firstName: string; lastName: string; phone: string; roleId: string }[] = [
+    // Coordinador
+    { email: 'rosa.mendoza@untrm.edu.pe', firstName: 'Rosa', lastName: 'Mendoza Vargas', phone: '941000001', roleId: coordRole.id },
+    { email: 'carlos.vega@untrm.edu.pe', firstName: 'Carlos', lastName: 'Vega Ramos', phone: '941000002', roleId: coordRole.id },
+    // Docente Tutor (varios, para probar la asignación masiva y su carga)
+    { email: 'elena.ramirez@untrm.edu.pe', firstName: 'Elena', lastName: 'Ramírez Chávez', phone: '941000003', roleId: tutorRole.id },
+    { email: 'jorge.salazar@untrm.edu.pe', firstName: 'Jorge', lastName: 'Salazar Puertas', phone: '941000004', roleId: tutorRole.id },
+    { email: 'patricia.nunez@untrm.edu.pe', firstName: 'Patricia', lastName: 'Núñez Ortiz', phone: '941000005', roleId: tutorRole.id },
+    { email: 'miguel.torres@untrm.edu.pe', firstName: 'Miguel', lastName: 'Torres Guevara', phone: '941000006', roleId: tutorRole.id },
+    // Profesional de Servicio
+    { email: 'lucia.flores@untrm.edu.pe', firstName: 'Lucía', lastName: 'Flores Bardales', phone: '941000007', roleId: serviceRole.id },
+    { email: 'ronald.diaz@untrm.edu.pe', firstName: 'Ronald', lastName: 'Díaz Cabrera', phone: '941000008', roleId: serviceRole.id },
+    // Vicerrectorado
+    { email: 'vicerrectorado.academico@untrm.edu.pe', firstName: 'Segundo', lastName: 'Ortiz Fernández', phone: '941000009', roleId: viceRole.id },
+    // Tutorado (cuentas de estudiante que inician sesión en el sistema)
+    { email: '20191234@untrm.edu.pe', firstName: 'Ana', lastName: 'Torres Ramos', phone: '941000010', roleId: studentRole.id },
+    { email: '20195678@untrm.edu.pe', firstName: 'Luis', lastName: 'Pérez Huamán', phone: '941000011', roleId: studentRole.id },
+  ];
+
+  const demoUsers = new Map<string, string>(); // email -> user id
+  for (const u of demoUsersInput) {
+    const user = await prisma.user.upsert({
+      where: { email: u.email },
+      update: {},
+      create: {
+        email: u.email,
+        passwordHash: demoPasswordHash,
+        firstName: u.firstName,
+        lastName: u.lastName,
+        phone: u.phone,
+        roleId: u.roleId,
+      },
+    });
+    demoUsers.set(u.email, user.id);
+  }
+
+  const tutorIds = [
+    demoUsers.get('elena.ramirez@untrm.edu.pe')!,
+    demoUsers.get('jorge.salazar@untrm.edu.pe')!,
+    demoUsers.get('patricia.nunez@untrm.edu.pe')!,
+    demoUsers.get('miguel.torres@untrm.edu.pe')!,
+  ];
+
+  // Facultades y escuelas de ejemplo
   const fisme = await prisma.faculty.upsert({
     where: { name: 'Facultad de Ingeniería de Sistemas y Mecánica Eléctrica' },
     update: {},
     create: { name: 'Facultad de Ingeniería de Sistemas y Mecánica Eléctrica' },
   });
 
-  await prisma.school.upsert({
+  const fcea = await prisma.faculty.upsert({
+    where: { name: 'Facultad de Ciencias Económicas y Administrativas' },
+    update: {},
+    create: { name: 'Facultad de Ciencias Económicas y Administrativas' },
+  });
+
+  const schoolSistemas = await prisma.school.upsert({
     where: { name_facultyId: { name: 'Ingeniería de Sistemas', facultyId: fisme.id } },
     update: {},
     create: { name: 'Ingeniería de Sistemas', facultyId: fisme.id },
   });
 
-  await prisma.school.upsert({
+  const schoolMecanica = await prisma.school.upsert({
     where: { name_facultyId: { name: 'Ingeniería Mecánica Eléctrica', facultyId: fisme.id } },
     update: {},
     create: { name: 'Ingeniería Mecánica Eléctrica', facultyId: fisme.id },
+  });
+
+  const schoolAdmin = await prisma.school.upsert({
+    where: { name_facultyId: { name: 'Administración de Empresas', facultyId: fcea.id } },
+    update: {},
+    create: { name: 'Administración de Empresas', facultyId: fcea.id },
   });
 
   // Periodo académico
@@ -124,6 +190,60 @@ async function main() {
     update: {},
     create: { name: '2026-II', startDate: new Date('2026-08-01'), endDate: new Date('2026-12-20') },
   });
+
+  // ── Tutorados de prueba (mezcla de escuelas, ciclos, riesgo y asignación) ──
+  const now = new Date();
+  const daysAgo = (n: number) => new Date(now.getTime() - n * 24 * 60 * 60 * 1000);
+
+  const studentsInput: {
+    studentCode: string;
+    firstName: string;
+    lastName: string;
+    email?: string;
+    phone?: string;
+    cycle: number;
+    schoolId: string;
+    isAtRisk?: boolean;
+    riskReason?: string;
+    isActive?: boolean;
+    tutorId?: string;
+    assignedAt?: Date;
+  }[] = [
+    { studentCode: '20191234', firstName: 'Ana', lastName: 'Torres Ramos', email: '20191234@untrm.edu.pe', phone: '987000001', cycle: 5, schoolId: schoolSistemas.id, tutorId: tutorIds[0], assignedAt: daysAgo(30) },
+    { studentCode: '20195678', firstName: 'Luis', lastName: 'Pérez Huamán', email: '20195678@untrm.edu.pe', phone: '987000002', cycle: 3, schoolId: schoolSistemas.id, tutorId: tutorIds[0], assignedAt: daysAgo(30) },
+    { studentCode: '20201122', firstName: 'María', lastName: 'Cruz Delgado', phone: '987000003', cycle: 7, schoolId: schoolSistemas.id, isAtRisk: true, riskReason: 'Bajo rendimiento en dos cursos consecutivos', tutorId: tutorIds[1], assignedAt: daysAgo(20) },
+    { studentCode: '20203344', firstName: 'Jhon', lastName: 'Rojas Bardales', phone: '987000004', cycle: 2, schoolId: schoolSistemas.id, tutorId: tutorIds[1], assignedAt: daysAgo(20) },
+    { studentCode: '20215566', firstName: 'Katherine', lastName: 'Vásquez León', phone: '987000005', cycle: 9, schoolId: schoolSistemas.id },
+    { studentCode: '20217788', firstName: 'Deyvis', lastName: 'Chávez Caruajulca', phone: '987000006', cycle: 4, schoolId: schoolMecanica.id, isAtRisk: true, riskReason: 'Inasistencias reiteradas superando el umbral permitido', tutorId: tutorIds[2], assignedAt: daysAgo(10) },
+    { studentCode: '20229900', firstName: 'Fiorella', lastName: 'Guevara Sánchez', phone: '987000007', cycle: 6, schoolId: schoolMecanica.id, tutorId: tutorIds[2], assignedAt: daysAgo(10) },
+    { studentCode: '20221011', firstName: 'Brayan', lastName: 'Huamán Torres', phone: '987000008', cycle: 1, schoolId: schoolMecanica.id },
+    { studentCode: '20231213', firstName: 'Silvia', lastName: 'Ortiz Rivera', phone: '987000009', cycle: 8, schoolId: schoolAdmin.id, tutorId: tutorIds[3], assignedAt: daysAgo(5) },
+    { studentCode: '20231415', firstName: 'Diego', lastName: 'Fernández Puertas', phone: '987000010', cycle: 3, schoolId: schoolAdmin.id },
+    { studentCode: '20241617', firstName: 'Gabriela', lastName: 'Ramos Núñez', phone: '987000011', cycle: 2, schoolId: schoolAdmin.id, isAtRisk: true, riskReason: 'Situación personal-emocional en seguimiento', tutorId: tutorIds[3], assignedAt: daysAgo(5) },
+    { studentCode: '20191819', firstName: 'Estefany', lastName: 'Bardales Cabrera', phone: '987000012', cycle: 10, schoolId: schoolSistemas.id, isActive: false },
+  ];
+
+  for (const s of studentsInput) {
+    await prisma.student.upsert({
+      where: { studentCode: s.studentCode },
+      update: {},
+      create: {
+        studentCode: s.studentCode,
+        firstName: s.firstName,
+        lastName: s.lastName,
+        email: s.email ?? null,
+        phone: s.phone ?? null,
+        cycle: s.cycle,
+        schoolId: s.schoolId,
+        isAtRisk: s.isAtRisk ?? false,
+        riskReason: s.isAtRisk ? s.riskReason ?? null : null,
+        riskMarkedAt: s.isAtRisk ? daysAgo(3) : null,
+        isActive: s.isActive ?? true,
+        tutorId: s.tutorId ?? null,
+        assignedAt: s.assignedAt ?? null,
+      },
+    });
+  }
 
   // Parámetros del sistema
   const params = [
@@ -144,6 +264,12 @@ async function main() {
   }
 
   console.log('Seed completed successfully');
+  console.log('');
+  console.log('Cuentas de prueba (todas con contraseña: %s):', DEMO_PASSWORD);
+  for (const u of demoUsersInput) {
+    console.log(`  - ${u.email}`);
+  }
+  console.log('  (Administrador: 7183255722@untrm.edu.pe / Admin2026!)');
 }
 
 main()

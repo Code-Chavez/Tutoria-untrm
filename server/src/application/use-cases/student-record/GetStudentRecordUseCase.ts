@@ -1,0 +1,109 @@
+import { StudentRepository } from '@domain/repositories/StudentRepository';
+import { SchoolRepository } from '@domain/repositories/SchoolRepository';
+import { UserRepository } from '@domain/repositories/UserRepository';
+import { TutorInterviewRepository } from '@domain/repositories/TutorInterviewRepository';
+import { TutorAssignmentHistoryRepository } from '@domain/repositories/TutorAssignmentHistoryRepository';
+import { SupportContactRepository } from '@domain/repositories/SupportContactRepository';
+import { StudentRecord, StudentRecordEvent } from '@application/dtos/studentRecord.dto';
+import { StudentNotFoundError } from '@application/use-cases/students/StudentErrors';
+
+const MOTIVE_LABELS: { key: 'motiveAcademic' | 'motivePersonalEmotional' | 'motiveVocational'; label: string }[] = [
+  { key: 'motiveAcademic', label: 'Académica' },
+  { key: 'motivePersonalEmotional', label: 'Personal-emocional' },
+  { key: 'motiveVocational', label: 'Vocacional-profesional' },
+];
+
+/**
+ * Consolida el expediente del tutorado (HU-16): entrevista(s), historial de
+ * asignación de tutor y el estado actual, en orden cronológico. Las sesiones,
+ * seguimientos y derivaciones (Sprint 3 en adelante) todavía no existen en el
+ * sistema; el tipo StudentRecordEvent queda preparado para incorporarlas sin
+ * rediseñar la línea de tiempo.
+ */
+export class GetStudentRecordUseCase {
+  constructor(
+    private readonly students: StudentRepository,
+    private readonly schools: SchoolRepository,
+    private readonly users: UserRepository,
+    private readonly interviews: TutorInterviewRepository,
+    private readonly assignmentHistory: TutorAssignmentHistoryRepository,
+    private readonly supportContacts: SupportContactRepository,
+  ) {}
+
+  async execute(studentId: string, includeSupportContact: boolean): Promise<StudentRecord> {
+    const student = await this.students.findById(studentId);
+    if (!student) {
+      throw new StudentNotFoundError(studentId);
+    }
+
+    const school = await this.schools.findById(student.schoolId);
+    const [interviews, history] = await Promise.all([
+      this.interviews.findByStudent(studentId),
+      this.assignmentHistory.findByStudent(studentId),
+    ]);
+
+    // Resuelve en un solo mapa los nombres de todos los usuarios involucrados
+    // (tutor actual, quien condujo cada entrevista, tutores del historial).
+    const userIds = new Set<string>();
+    if (student.tutorId) userIds.add(student.tutorId);
+    interviews.forEach((i) => userIds.add(i.conductedById));
+    history.forEach((h) => {
+      if (h.previousTutorId) userIds.add(h.previousTutorId);
+      userIds.add(h.newTutorId);
+    });
+
+    const userEntries = await Promise.all(
+      [...userIds].map(async (id) => [id, await this.users.findById(id)] as const),
+    );
+    const userName = (id?: string | null): string | null => {
+      if (!id) return null;
+      const user = userEntries.find(([uid]) => uid === id)?.[1];
+      return user ? `${user.firstName} ${user.lastName}` : null;
+    };
+
+    const interviewEvents: StudentRecordEvent[] = interviews.map((i) => ({
+      type: 'interview',
+      id: i.id,
+      date: i.createdAt,
+      conductedByName: userName(i.conductedById) ?? 'Desconocido',
+      motives: MOTIVE_LABELS.filter((m) => i[m.key]).map((m) => m.label),
+      aspectsDiscussed: i.aspectsDiscussed,
+      agreements: i.agreements,
+    }));
+
+    const assignmentEvents: StudentRecordEvent[] = history.map((h) => ({
+      type: 'assignment',
+      id: h.id,
+      date: h.createdAt,
+      previousTutorName: userName(h.previousTutorId),
+      newTutorName: userName(h.newTutorId) ?? 'Desconocido',
+      reason: h.reason,
+    }));
+
+    const timeline = [...interviewEvents, ...assignmentEvents].sort(
+      (a, b) => b.date.getTime() - a.date.getTime(),
+    );
+
+    const record: StudentRecord = {
+      student: {
+        id: student.id,
+        studentCode: student.studentCode,
+        firstName: student.firstName,
+        lastName: student.lastName,
+        cycle: student.cycle,
+        isActive: student.isActive,
+        isAtRisk: student.isAtRisk,
+        riskReason: student.riskReason ?? null,
+      },
+      schoolName: school?.name ?? 'Sin escuela',
+      tutorName: userName(student.tutorId),
+      timeline,
+    };
+
+    if (includeSupportContact) {
+      record.supportContact = await this.supportContacts.findByStudent(studentId);
+    }
+
+    return record;
+  }
+}

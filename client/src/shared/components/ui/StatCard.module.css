@@ -1,0 +1,105 @@
+.card {
+  position: relative;
+  background: #fff;
+  border: 1px solid var(--borde);
+  border-radius: var(--r-lg);
+  box-shadow: var(--sombra-xs);
+  padding: var(--s5);
+  overflow: hidden;
+  transition: box-shadow 0.2s ease, transform 0.2s ease;
+}
+
+.card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 4px;
+  height: 100%;
+  background: var(--accent, var(--azul-med));
+}
+
+.card:hover {
+  box-shadow: var(--sombra);
+  transform: translateY(-2px);
+}
+
+.top {
+  display: flex;
+  justify-content: flex-start;
+  margin-bottom: var(--s3);
+}
+
+.icon {
+  display: grid;
+  place-items: center;
+  width: 42px;
+  height: 42px;
+  border-radius: var(--r-sm);
+  background: var(--accentBg, var(--celeste));
+  color: var(--accent, var(--azul-med));
+}
+
+.value {
+  font-family: var(--ft);
+  font-weight: 800;
+  font-size: 30px;
+  line-height: 1;
+  color: var(--g900);
+  letter-spacing: -0.5px;
+}
+
+.label {
+  font-family: var(--ft);
+  font-size: var(--fs-body);
+  font-weight: 600;
+  color: var(--g700);
+  margin-top: var(--s2);
+}
+
+.hint {
+  font-size: var(--fs-xs);
+  color: var(--g500);
+  margin-top: 3px;
+}
+
+.skeleton {
+  display: inline-block;
+  width: 44px;
+  height: 28px;
+  border-radius: 6px;
+  background: linear-gradient(90deg, var(--g100) 25%, var(--g200) 37%, var(--g100) 63%);
+  background-size: 400% 100%;
+  animation: shimmer 1.3s ease infinite;
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0 50%;
+  }
+}
+
+/* Tonos: fijan el color de acento */
+.info {
+  --accent: var(--azul-med);
+  --accentBg: var(--info-bg);
+}
+.success {
+  --accent: var(--ok);
+  --accentBg: var(--ok-bg);
+}
+.warning {
+  --accent: var(--alerta);
+  --accentBg: var(--alerta-bg);
+}
+.danger {
+  --accent: var(--peligro);
+  --accentBg: var(--peligro-bg);
+}
+.neutral {
+  --accent: var(--g500);
+  --accentBg: var(--g100);
+}

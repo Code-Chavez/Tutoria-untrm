@@ -1,6 +1,7 @@
 import { type ComponentType } from 'react';
 import { NavLink } from 'react-router-dom';
 import { useAuth } from '@features/auth/hooks/useAuth';
+import logoUntrm from '@assets/logo-untrm.png';
 import {
   DashboardIcon,
   GraduationCapIcon,
@@ -17,6 +18,7 @@ import {
   ReportIcon,
   PieChartIcon,
   SettingsIcon,
+  CloseIcon,
 } from '@shared/components/icons';
 import styles from './Sidebar.module.css';
 
@@ -50,11 +52,11 @@ const NAV: NavGroup[] = [
     title: 'Principal',
     items: [
       { label: 'Panel de inicio', Icon: DashboardIcon, path: '/' },
-      { label: 'Tutorados', Icon: GraduationCapIcon, roles: ['tutor', 'coord', 'dbu'] },
-      { label: 'Asignación', Icon: SwitchIcon, roles: ['coord', 'dbu'] },
-      { label: 'Carga masiva', Icon: UploadIcon, roles: ['coord', 'dbu'] },
+      { label: 'Tutorados', Icon: GraduationCapIcon, path: '/tutorados', roles: ['tutor', 'coord', 'dbu'] },
+      { label: 'Asignación', Icon: SwitchIcon, path: '/asignacion', roles: ['coord', 'dbu'] },
+      { label: 'Carga masiva', Icon: UploadIcon, path: '/carga-masiva', roles: ['coord', 'dbu'] },
       { label: 'Entrevista inicial', Icon: ClipboardIcon, roles: ['tutor'] },
-      { label: 'Expediente', Icon: FolderIcon, roles: ['tutor', 'coord', 'dbu'] },
+      { label: 'Expediente', Icon: FolderIcon, path: '/expediente', roles: ['tutor', 'coord', 'dbu'] },
       { label: 'Sesiones', Icon: CalendarIcon, roles: ['tutor', 'est'] },
       { label: 'Seguimiento', Icon: ActivityIcon, roles: ['tutor'] },
       { label: 'Derivar caso', Icon: SendIcon, roles: ['tutor'] },
@@ -73,7 +75,12 @@ const NAV: NavGroup[] = [
   },
 ];
 
-export function Sidebar() {
+interface SidebarProps {
+  drawerOpen: boolean;
+  onClose: () => void;
+}
+
+export function Sidebar({ drawerOpen, onClose }: SidebarProps) {
   const { user } = useAuth();
   const roleCode = user ? ROLE_CODES[user.role] : undefined;
 
@@ -81,52 +88,81 @@ export function Sidebar() {
     !item.roles || (roleCode !== undefined && item.roles.includes(roleCode));
 
   return (
-    <aside className={styles.side}>
-      <div className={styles.brand}>
-        <b>SIT · UNTRM</b>
-      </div>
-      <nav className={styles.nav}>
-        {NAV.map((group) => {
-          const visible = group.items.filter(canSee);
-          if (visible.length === 0) return null;
+    <>
+      <div
+        className={`${styles.backdrop} ${drawerOpen ? styles.backdropOpen : ''}`}
+        onClick={onClose}
+        aria-hidden="true"
+      />
+      <aside className={`${styles.side} ${drawerOpen ? styles.open : ''}`}>
+        <div className={styles.brand}>
+          <img src={logoUntrm} alt="" className={styles.logo} />
+          <div className={styles.brandText}>
+            <b>SIT · UNTRM</b>
+            <small>Bienestar Universitario</small>
+          </div>
+          <button className={styles.closeBtn} onClick={onClose} aria-label="Cerrar menú">
+            <CloseIcon size={18} />
+          </button>
+        </div>
 
-          return (
-            <div key={group.title} className={styles.navGroup}>
-              <span className={styles.group}>{group.title}</span>
-              {visible.map((item) =>
-                item.path ? (
-                  <NavLink
-                    key={item.label}
-                    to={item.path}
-                    end={item.path === '/'}
-                    className={({ isActive }) =>
-                      `${styles.link} ${isActive ? styles.active : ''}`
-                    }
-                  >
-                    <span className={styles.icon}>
-                      <item.Icon size={18} />
+        <nav className={styles.nav} aria-label="Navegación principal">
+          {NAV.map((group) => {
+            const visible = group.items.filter(canSee);
+            if (visible.length === 0) return null;
+
+            return (
+              <div key={group.title} className={styles.navGroup}>
+                <span className={styles.group}>{group.title}</span>
+                {visible.map((item) =>
+                  item.path ? (
+                    <NavLink
+                      key={item.label}
+                      to={item.path}
+                      end={item.path === '/'}
+                      onClick={onClose}
+                      className={({ isActive }) => `${styles.link} ${isActive ? styles.active : ''}`}
+                    >
+                      <span className={styles.icon}>
+                        <item.Icon size={19} />
+                      </span>
+                      {item.label}
+                    </NavLink>
+                  ) : (
+                    <span
+                      key={item.label}
+                      className={`${styles.link} ${styles.disabled}`}
+                      aria-disabled="true"
+                      title="Disponible próximamente"
+                    >
+                      <span className={styles.icon}>
+                        <item.Icon size={19} />
+                      </span>
+                      {item.label}
+                      <span className={styles.soon}>Próx.</span>
                     </span>
-                    {item.label}
-                  </NavLink>
-                ) : (
-                  <span
-                    key={item.label}
-                    className={`${styles.link} ${styles.disabled}`}
-                    aria-disabled="true"
-                    title="Disponible próximamente"
-                  >
-                    <span className={styles.icon}>
-                      <item.Icon size={18} />
-                    </span>
-                    {item.label}
-                    <span className={styles.soon}>Próx.</span>
-                  </span>
-                ),
-              )}
+                  ),
+                )}
+              </div>
+            );
+          })}
+        </nav>
+
+        {user && (
+          <div className={styles.foot}>
+            <div className={styles.footAvatar}>
+              {user.firstName.charAt(0)}
+              {user.lastName.charAt(0)}
             </div>
-          );
-        })}
-      </nav>
-    </aside>
+            <div className={styles.footText}>
+              <b>
+                {user.firstName} {user.lastName}
+              </b>
+              <small>{user.role}</small>
+            </div>
+          </div>
+        )}
+      </aside>
+    </>
   );
 }

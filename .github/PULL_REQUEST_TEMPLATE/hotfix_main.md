@@ -9,7 +9,7 @@
 
 ## 💥 Impacto
 
-- **Severidad:** [ ] Crítico / [ ] Alto
+- **Severidad:** Crítico / Alto
 - **Usuarios afectados:** [Todos / Rol específico / Funcionalidad específica]
 - **Desde cuándo ocurre:** [Fecha o commit que introdujo el problema]
 
@@ -19,53 +19,51 @@
 
 ## 📖 Ítem relacionado
 
-- [ ] HU-XX / TT-XX / RSK-XX: [Referencia si aplica]
+HU-XX / TT-XX / RSK-XX: [Referencia si aplica]
 
 ---
 
-## ✅ Definition of Done — Hotfix (DoD-SIT-001 adaptado)
+## ✅ DoD técnico — requerido por el gate
 
-> Marca **todas** las casillas. Un hotfix requiere los mismos estándares de calidad
-> con énfasis en no introducir regresiones.
+> El check `Gate — Main Branch Protection` **solo** valida esta sección: ítems
+> verificables (compila, tests, auditoría). Deben estar **todos marcados**.
+
+<!-- DOD-GATE:START -->
 
 ### C-01 · Criterios de Aceptación
-
-- [ ] La corrección resuelve el problema reportado al 100 %.
-- [ ] Se verificó que el escenario problemático ya no ocurre.
+- [ ] La corrección resuelve el problema reportado y el escenario ya no ocurre.
 
 ### C-02 · Calidad de Código
-
-- [ ] TypeScript compila sin errores en modo estricto (`strict: true`).
+- [ ] TypeScript compila sin errores en modo estricto.
 - [ ] El fix es mínimo y focalizado — sin refactorizaciones oportunistas.
 
 ### C-03 · Pruebas
-
 - [ ] Se agregó al menos un test que reproduce el bug corregido.
-- [ ] La suite existente no presenta regresiones.
-- [ ] Todas las pruebas pasan localmente.
+- [ ] La suite existente pasa sin regresiones.
 
 ### C-04 · Seguridad
-
 - [ ] No se exponen credenciales, tokens ni secretos.
 - [ ] El fix no introduce vulnerabilidades OWASP Top 10.
 
-### C-05 · Revisión (Code Review)
-
+### C-05 · Autorevisión
 - [ ] Autorevisión completada con foco en efectos colaterales.
-- [ ] Validación del Product Owner (asesor) sobre la corrección.
 
 ### C-07 · Integración y Despliegue (CI/CD)
-
 - [ ] Pipeline en verde: lint, build, test y auditoría.
-- [ ] El hotfix no rompe funcionalidad existente.
 - [ ] Variables de entorno o migraciones documentadas si aplica.
+
+### 🔄 Rollback
+- [ ] El fix se puede revertir con `git revert` sin efectos colaterales.
+
+<!-- DOD-GATE:END -->
 
 ---
 
-## 🔄 Plan de Rollback
+## 🧑 Sign-off — lo confirma quien aprueba el PR
 
-- [ ] Si el fix falla, se puede revertir con `git revert` sin efectos colaterales.
-- [ ] Pasos de rollback documentados: [Describir o indicar "revert directo"]
+> No lo verifica un check automático; lo valida el revisor al aprobar el PR.
+
+- [ ] Validación del Product Owner (asesor) sobre la corrección.
 
 ## 📸 Evidencia
 
@@ -75,8 +73,10 @@
 |-------------|---------------|
 |             |               |
 
-## ⚠️ Post-merge
+## ⚠️ Post-merge (tras mergear a main)
 
-- [ ] Merge del hotfix también hacia `develop` para sincronizar.
-- [ ] Crear tag de versión patch (`vX.Y.Z`).
-- [ ] Notificar al equipo / asesor sobre el fix desplegado.
+> Acciones posteriores al merge; no forman parte del gate.
+
+- Merge del hotfix también hacia `develop` para sincronizar.
+- Crear tag de versión patch (`vX.Y.Z`).
+- Notificar al equipo / asesor sobre el fix desplegado.

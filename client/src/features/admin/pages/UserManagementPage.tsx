@@ -1,9 +1,18 @@
-import React, { useEffect, useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import styles from './UserManagementPage.module.css';
 import { User, userService, CreateUserData, UpdateUserData } from '../services/userService';
-import { Role, roleService } from '../services/roleService';
 import { UserFormModal } from '../components/UserFormModal';
-import { PlusIcon, PencilIcon, BanIcon, CheckCircleIcon } from '@shared/components/icons';
+import { UserFilters, UserFilterValues } from '../components/UserFilters';
+import { UserTable } from '../components/UserTable';
+import { useUsers } from '../hooks/useUsers';
+import {
+  PageHeader,
+  Button,
+  EmptyState,
+  TableSkeleton,
+  ConfirmDialog,
+} from '@shared/components/ui';
+import { SettingsIcon, PlusIcon, UsersIcon, XCircleIcon, SearchIcon } from '@shared/components/icons';
 
 type TabId = 'usuarios' | 'catalogos' | 'parametros' | 'bitacora';
 
@@ -14,56 +23,34 @@ const TABS: { id: TabId; label: string }[] = [
   { id: 'bitacora', label: 'Bitácora de auditoría' },
 ];
 
+const EMPTY_FILTERS: UserFilterValues = { search: '', roleId: '', status: '' };
+
 export const UserManagementPage: React.FC = () => {
-  const [users, setUsers] = useState<User[]>([]);
-  const [roles, setRoles] = useState<Role[]>([]);
-  const [loading, setLoading] = useState(true);
+  const { users, roles, loading, error, refresh } = useUsers();
 
   const [activeTab, setActiveTab] = useState<TabId>('usuarios');
+  const [filters, setFilters] = useState<UserFilterValues>(EMPTY_FILTERS);
 
-  // Filtros
-  const [filterRole, setFilterRole] = useState('');
-  const [filterStatus, setFilterStatus] = useState('');
-
-  // Modal
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [userToEdit, setUserToEdit] = useState<User | null>(null);
+  const [userToToggle, setUserToToggle] = useState<User | null>(null);
+  const [toggling, setToggling] = useState(false);
 
-  // Se incrementa para forzar una recarga de la tabla tras crear/editar/togglear.
-  const [refreshKey, setRefreshKey] = useState(0);
-  const refreshUsers = () => setRefreshKey((key) => key + 1);
+  const roleName = (roleId: string) => roles.find((r) => r.id === roleId)?.name ?? 'Sin rol';
 
-  useEffect(() => {
-    const fetchRoles = async () => {
-      try {
-        setRoles(await roleService.getRoles());
-      } catch (error) {
-        console.error('Error fetching roles', error);
+  const filtered = useMemo(() => {
+    const term = filters.search.trim().toLowerCase();
+    return users.filter((u) => {
+      if (filters.roleId && u.roleId !== filters.roleId) return false;
+      if (filters.status === 'active' && !u.isActive) return false;
+      if (filters.status === 'inactive' && u.isActive) return false;
+      if (term) {
+        const haystack = `${u.firstName} ${u.lastName} ${u.email}`.toLowerCase();
+        if (!haystack.includes(term)) return false;
       }
-    };
-    fetchRoles();
-  }, []);
-
-  useEffect(() => {
-    let ignore = false;
-    const fetchUsers = async () => {
-      try {
-        const data = await userService.getUsers({
-          roleId: filterRole || undefined,
-          isActive: filterStatus === 'active' ? true : filterStatus === 'inactive' ? false : undefined,
-        });
-        if (!ignore) setUsers(data);
-      } catch (error) {
-        console.error('Error fetching users', error);
-      } finally {
-        if (!ignore) setLoading(false);
-      }
-    };
-    fetchUsers();
-    return () => {
-      ignore = true;
-    };
-  }, [filterRole, filterStatus, refreshKey]);
+      return true;
+    });
+  }, [users, filters]);
 
   const handleOpenModal = (user?: User) => {
     setUserToEdit(user || null);
@@ -81,30 +68,39 @@ export const UserManagementPage: React.FC = () => {
     } else {
       await userService.createUser(data as CreateUserData);
     }
-    refreshUsers();
+    refresh();
   };
 
-  const handleToggleStatus = async (id: string) => {
-    if (window.confirm('¿Estás seguro de que deseas cambiar el estado de este usuario?')) {
-      try {
-        await userService.toggleUserStatus(id);
-        refreshUsers();
-      } catch (error) {
-        console.error('Error toggling status', error);
-      }
+  const confirmToggle = async () => {
+    if (!userToToggle) return;
+    setToggling(true);
+    try {
+      await userService.toggleUserStatus(userToToggle.id);
+      refresh();
+      setUserToToggle(null);
+    } catch (err) {
+      console.error('Error toggling status', err);
+    } finally {
+      setToggling(false);
     }
   };
-
-  const getRoleName = (roleId: string) => roles.find((r) => r.id === roleId)?.name ?? 'Desconocido';
 
   const activeLabel = TABS.find((t) => t.id === activeTab)?.label ?? '';
 
   return (
-    <div className={styles.page}>
-      <div className={styles.header}>
-        <h1 className={styles.title}>Administración del Sistema</h1>
-        <p className={styles.subtitle}>Usuarios, roles, catálogos maestros y parámetros</p>
-      </div>
+    <div>
+      <PageHeader
+        title="Administración del Sistema"
+        subtitle="Usuarios, roles, catálogos maestros y parámetros"
+        icon={<SettingsIcon size={24} />}
+        actions={
+          activeTab === 'usuarios' && (
+            <Button icon={<PlusIcon size={17} />} onClick={() => handleOpenModal()}>
+              Nuevo usuario
+            </Button>
+          )
+        }
+      />
 
       <div className={styles.tabs} role="tablist">
         {TABS.map((tab) => (
@@ -120,115 +116,55 @@ export const UserManagementPage: React.FC = () => {
         ))}
       </div>
 
-      {activeTab === 'usuarios' ? (
-        <div className={styles.grid2}>
-          {/* ── Usuarios ─────────────────────────────── */}
-          <section className={styles.panel}>
-            <div className={styles.panelHead}>
-              <h3>Usuarios</h3>
-              <button className={styles.addButton} onClick={() => handleOpenModal()}>
-                <PlusIcon size={15} />
-                Nuevo
-              </button>
-            </div>
+      {activeTab === 'usuarios' && (
+        <div className={styles.tableCard}>
+          <UserFilters
+            values={filters}
+            roles={roles}
+            onChange={setFilters}
+            onClear={() => setFilters(EMPTY_FILTERS)}
+          />
 
-            <div className={styles.filters}>
-              <select
-                className={styles.filterSelect}
-                value={filterRole}
-                onChange={(e) => setFilterRole(e.target.value)}
-              >
-                <option value="">Todos los roles</option>
-                {roles.map((r) => (
-                  <option key={r.id} value={r.id}>
-                    {r.name}
-                  </option>
-                ))}
-              </select>
-              <select
-                className={styles.filterSelect}
-                value={filterStatus}
-                onChange={(e) => setFilterStatus(e.target.value)}
-              >
-                <option value="">Todos los estados</option>
-                <option value="active">Activos</option>
-                <option value="inactive">Inactivos</option>
-              </select>
-            </div>
-
-            <div className={styles.tableWrap}>
-              {loading ? (
-                <div className={styles.stateMsg}>Cargando usuarios…</div>
-              ) : users.length === 0 ? (
-                <div className={styles.stateMsg}>No se encontraron usuarios</div>
-              ) : (
-                <table className={styles.table}>
-                  <thead>
-                    <tr>
-                      <th>Usuario</th>
-                      <th>Rol</th>
-                      <th>Estado</th>
-                      <th className={styles.actionsHead}>Acciones</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {users.map((user) => (
-                      <tr key={user.id}>
-                        <td className={styles.userCell}>
-                          <span className={styles.userEmail}>{user.email}</span>
-                          <span className={styles.userName}>
-                            {user.firstName} {user.lastName}
-                          </span>
-                        </td>
-                        <td>
-                          <span className={styles.pill}>{getRoleName(user.roleId)}</span>
-                        </td>
-                        <td>
-                          <span
-                            className={`${styles.statusBadge} ${user.isActive ? styles.statusActive : styles.statusInactive}`}
-                          >
-                            {user.isActive ? 'Activo' : 'Inactivo'}
-                          </span>
-                        </td>
-                        <td>
-                          <div className={styles.actions}>
-                            <button
-                              className={`${styles.actionButton} ${styles.editButton}`}
-                              onClick={() => handleOpenModal(user)}
-                              title="Editar"
-                              aria-label={`Editar a ${user.firstName} ${user.lastName}`}
-                            >
-                              <PencilIcon size={15} />
-                            </button>
-                            <button
-                              className={`${styles.actionButton} ${user.isActive ? styles.deactivateButton : styles.activateButton}`}
-                              onClick={() => handleToggleStatus(user.id)}
-                              title={user.isActive ? 'Desactivar' : 'Activar'}
-                              aria-label={
-                                user.isActive
-                                  ? `Desactivar a ${user.firstName} ${user.lastName}`
-                                  : `Activar a ${user.firstName} ${user.lastName}`
-                              }
-                            >
-                              {user.isActive ? <BanIcon size={15} /> : <CheckCircleIcon size={15} />}
-                            </button>
-                          </div>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              )}
-            </div>
-          </section>
-
-          {/* ── Parámetros del sistema ───────────────── */}
-          <SystemParametersPanel />
+          {loading ? (
+            <TableSkeleton rows={6} columns={5} />
+          ) : error ? (
+            <EmptyState
+              variant="error"
+              icon={<XCircleIcon size={26} />}
+              title="No se pudieron cargar los usuarios"
+              description="Ocurrió un error al consultar la información. Vuelve a intentarlo."
+              action={<Button variant="secondary" onClick={refresh}>Reintentar</Button>}
+            />
+          ) : filtered.length === 0 ? (
+            <EmptyState
+              icon={<SearchIcon size={26} />}
+              title={users.length === 0 ? 'Aún no hay usuarios' : 'Sin resultados'}
+              description={
+                users.length === 0
+                  ? 'Crea el primer usuario del sistema para comenzar.'
+                  : 'No se encontraron usuarios con los filtros aplicados.'
+              }
+            />
+          ) : (
+            <UserTable
+              users={filtered}
+              roleName={roleName}
+              onEdit={handleOpenModal}
+              onToggleStatus={setUserToToggle}
+            />
+          )}
         </div>
-      ) : (
-        <div className={styles.placeholder}>
-          <span className={styles.soonTag}>Próximamente</span>
-          <p>La sección «{activeLabel}» estará disponible en una próxima iteración.</p>
+      )}
+
+      {activeTab === 'parametros' && <SystemParametersPanel />}
+
+      {(activeTab === 'catalogos' || activeTab === 'bitacora') && (
+        <div className={styles.tableCard}>
+          <EmptyState
+            icon={<UsersIcon size={26} />}
+            title={`Sección «${activeLabel}»`}
+            description="Este módulo estará disponible en una próxima iteración."
+          />
         </div>
       )}
 
@@ -241,13 +177,28 @@ export const UserManagementPage: React.FC = () => {
           roles={roles}
         />
       )}
+
+      <ConfirmDialog
+        open={userToToggle !== null}
+        tone={userToToggle?.isActive ? 'danger' : 'primary'}
+        title={userToToggle?.isActive ? 'Desactivar usuario' : 'Activar usuario'}
+        message={
+          userToToggle
+            ? `¿Confirmas ${userToToggle.isActive ? 'desactivar' : 'activar'} a ${userToToggle.firstName} ${userToToggle.lastName}?`
+            : ''
+        }
+        confirmLabel={userToToggle?.isActive ? 'Desactivar' : 'Activar'}
+        loading={toggling}
+        onConfirm={confirmToggle}
+        onCancel={() => setUserToToggle(null)}
+      />
     </div>
   );
 };
 
 /**
- * Panel de parámetros del sistema. Réplica visual del mockup; la persistencia
- * se conectará al backend en una TT posterior (aún no hay endpoint de parámetros).
+ * Panel de parámetros del sistema. Réplica visual; la persistencia se conectará
+ * al backend en una TT posterior (aún no hay endpoint de parámetros).
  */
 function SystemParametersPanel() {
   const [params, setParams] = useState({
@@ -263,50 +214,33 @@ function SystemParametersPanel() {
   };
 
   return (
-    <section className={styles.panel}>
-      <div className={styles.panelHead}>
+    <div className={styles.paramsCard}>
+      <div className={styles.paramsHead}>
         <h3>Parámetros del sistema</h3>
+        <p>Valores de configuración del programa de tutoría</p>
       </div>
-      <div className={styles.panelBody}>
+      <div className={styles.paramsGrid}>
         <div className={styles.field}>
           <label htmlFor="sessionDuration">Duración de sesión (min)</label>
-          <input
-            id="sessionDuration"
-            type="number"
-            className={styles.input}
-            value={params.sessionDuration}
-            onChange={update('sessionDuration')}
-          />
+          <input id="sessionDuration" type="number" className={styles.input} value={params.sessionDuration} onChange={update('sessionDuration')} />
         </div>
         <div className={styles.field}>
           <label htmlFor="sessionsPerTerm">N° de sesiones por semestre</label>
-          <input
-            id="sessionsPerTerm"
-            type="number"
-            className={styles.input}
-            value={params.sessionsPerTerm}
-            onChange={update('sessionsPerTerm')}
-          />
+          <input id="sessionsPerTerm" type="number" className={styles.input} value={params.sessionsPerTerm} onChange={update('sessionsPerTerm')} />
         </div>
         <div className={styles.field}>
           <label htmlFor="absenceThreshold">Umbral de alerta por inasistencias</label>
-          <input
-            id="absenceThreshold"
-            type="number"
-            className={styles.input}
-            value={params.absenceThreshold}
-            onChange={update('absenceThreshold')}
-          />
+          <input id="absenceThreshold" type="number" className={styles.input} value={params.absenceThreshold} onChange={update('absenceThreshold')} />
         </div>
-        <button className={styles.saveButton} onClick={() => setSaved(true)}>
-          Guardar parámetros
-        </button>
+      </div>
+      <div className={styles.paramsFoot}>
+        <Button onClick={() => setSaved(true)}>Guardar parámetros</Button>
         <p className={styles.paramHint}>
           {saved
             ? 'Valores registrados localmente. La persistencia se habilitará en una próxima iteración.'
             : 'Vista previa — esta sección se conectará al backend próximamente.'}
         </p>
       </div>
-    </section>
+    </div>
   );
 }

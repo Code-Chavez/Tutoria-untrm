@@ -1,0 +1,135 @@
+.wrap {
+  margin-top: var(--s6);
+  border-top: 1px solid var(--borde);
+  padding-top: var(--s6);
+}
+
+.head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--s4);
+  margin-bottom: var(--s5);
+  flex-wrap: wrap;
+}
+
+.headText {
+  display: flex;
+  align-items: center;
+  gap: var(--s3);
+}
+
+.headIcon {
+  display: grid;
+  place-items: center;
+  width: 42px;
+  height: 42px;
+  border-radius: var(--r-sm);
+  flex-shrink: 0;
+}
+
+.headIcon.ok {
+  background: var(--ok-bg);
+  color: var(--ok);
+}
+.headIcon.warn {
+  background: var(--alerta-bg);
+  color: var(--alerta);
+}
+
+.headText h3 {
+  font-size: var(--fs-h3);
+  color: var(--g900);
+  margin: 0;
+}
+
+.headText p {
+  font-size: var(--fs-sm);
+  color: var(--g600);
+  margin-top: 2px;
+}
+
+.stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--s4);
+  margin-bottom: var(--s5);
+}
+
+.stat {
+  position: relative;
+  border: 1px solid var(--borde);
+  border-radius: var(--r);
+  padding: var(--s4) var(--s5);
+  overflow: hidden;
+}
+
+.stat::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 4px;
+  height: 100%;
+  background: var(--accent);
+}
+
+.num {
+  display: block;
+  font-family: var(--ft);
+  font-weight: 800;
+  font-size: 28px;
+  line-height: 1;
+  color: var(--g900);
+}
+
+.lbl {
+  display: block;
+  font-size: var(--fs-sm);
+  color: var(--g600);
+  margin-top: var(--s2);
+}
+
+.total {
+  --accent: var(--azul-med);
+}
+.created {
+  --accent: var(--ok);
+}
+.skipped {
+  --accent: var(--peligro);
+}
+
+.successBox {
+  display: flex;
+  align-items: center;
+  gap: var(--s2);
+  font-size: var(--fs-body);
+  color: var(--ok);
+  background: var(--ok-bg);
+  border: 1px solid rgba(30, 127, 79, 0.2);
+  border-radius: var(--r);
+  padding: var(--s4) var(--s5);
+}
+
+.errorsCard {
+  border: 1px solid var(--borde);
+  border-radius: var(--r);
+  overflow: hidden;
+}
+
+.errorsHead {
+  font-family: var(--ft);
+  font-size: var(--fs-sm);
+  font-weight: 700;
+  color: var(--peligro);
+  background: var(--peligro-bg);
+  padding: 11px var(--s5);
+  border-bottom: 1px solid rgba(179, 38, 30, 0.15);
+}
+
+@media (max-width: 560px) {
+  .stats {
+    grid-template-columns: 1fr;
+  }
+}

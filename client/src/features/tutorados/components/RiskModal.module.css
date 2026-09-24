@@ -1,0 +1,128 @@
+.overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(11, 31, 63, 0.45);
+  backdrop-filter: blur(3px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1100;
+  padding: var(--s4);
+  animation: fade 0.15s ease;
+}
+
+.dialog {
+  background: #fff;
+  border-radius: var(--r-lg);
+  box-shadow: var(--sombra-md);
+  width: 100%;
+  max-width: 480px;
+  border-top: 3px solid var(--alerta);
+  animation: pop 0.18s ease-out;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  gap: var(--s3);
+  padding: var(--s5) var(--s5) var(--s4);
+}
+
+.icon {
+  display: grid;
+  place-items: center;
+  width: 42px;
+  height: 42px;
+  border-radius: var(--r-sm);
+  background: var(--alerta-bg);
+  color: var(--alerta);
+  flex-shrink: 0;
+}
+
+.headText {
+  flex: 1;
+  min-width: 0;
+}
+
+.headText h2 {
+  font-size: var(--fs-h3);
+  color: var(--g900);
+  margin: 0;
+}
+
+.headText p {
+  font-size: var(--fs-sm);
+  color: var(--g600);
+  margin-top: 2px;
+}
+
+.close {
+  background: none;
+  border: none;
+  color: var(--g500);
+  display: grid;
+  place-items: center;
+  padding: 4px;
+  border-radius: 6px;
+}
+.close:hover {
+  color: var(--peligro);
+  background: var(--g100);
+}
+
+.body {
+  padding: 0 var(--s5) var(--s3);
+}
+
+.label {
+  display: block;
+  font-family: var(--ft);
+  font-size: var(--fs-sm);
+  font-weight: 600;
+  color: var(--g700);
+  margin-bottom: var(--s2);
+}
+
+.textarea {
+  width: 100%;
+  font-family: var(--fx);
+  font-size: var(--fs-sm);
+  color: var(--g900);
+  border: 1.5px solid var(--borde-fuerte);
+  border-radius: var(--r-sm);
+  padding: 10px 12px;
+  resize: vertical;
+  outline: none;
+  transition: border-color 0.16s, box-shadow 0.16s;
+}
+
+.textarea:focus {
+  border-color: var(--azul-med);
+  box-shadow: var(--focus-ring);
+}
+
+.error {
+  display: block;
+  margin-top: 6px;
+  font-size: var(--fs-xs);
+  color: var(--peligro);
+}
+
+.actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--s3);
+  padding: var(--s4) var(--s5) var(--s5);
+}
+
+@keyframes fade {
+  from {
+    opacity: 0;
+  }
+}
+@keyframes pop {
+  from {
+    transform: translateY(10px) scale(0.98);
+    opacity: 0;
+  }
+}
