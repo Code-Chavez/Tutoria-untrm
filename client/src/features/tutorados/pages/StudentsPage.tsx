@@ -15,6 +15,11 @@ import { ReassignModal } from '../components/ReassignModal';
 import { InterviewFormModal } from '@features/entrevistas/components/InterviewFormModal';
 import { interviewService, CreateInterviewData } from '@features/entrevistas/services/interviewService';
 import { supportContactService, UpsertSupportContactData } from '@features/entrevistas/services/supportContactService';
+import { TutoringRequestModal } from '../components/TutoringRequestModal';
+import {
+  tutoringRequestService,
+  CreateTutoringRequestData,
+} from '@features/solicitudes/services/tutoringRequestService';
 import { useStudents } from '../hooks/useStudents';
 import { useAuth } from '@features/auth/hooks/useAuth';
 import { assignmentService } from '@features/asignacion/services/assignmentService';
@@ -74,6 +79,12 @@ export const StudentsPage: React.FC = () => {
   const [studentForInterview, setStudentForInterview] = useState<Student | null>(null);
   const [interviewLoading, setInterviewLoading] = useState(false);
   const [interviewError, setInterviewError] = useState('');
+
+  // Solicitud de tutoría (HU-17).
+  const [studentForRequest, setStudentForRequest] = useState<Student | null>(null);
+  const [requestLoading, setRequestLoading] = useState(false);
+  const [requestError, setRequestError] = useState('');
+  const [requestFeedback, setRequestFeedback] = useState('');
 
   const schoolName = (schoolId: string) =>
     schools.find((s) => s.id === schoolId)?.name ?? 'Sin escuela';
@@ -194,6 +205,26 @@ export const StudentsPage: React.FC = () => {
     }
   };
 
+  const confirmTutoringRequest = async (data: CreateTutoringRequestData) => {
+    if (!studentForRequest) return;
+    setRequestLoading(true);
+    setRequestError('');
+    try {
+      const request = await tutoringRequestService.createTutoringRequest(
+        studentForRequest.id,
+        data,
+      );
+      setRequestFeedback(
+        `Solicitud registrada y enrutada a ${request.routedToRole === 'tutor' ? 'el tutor' : 'el coordinador'} de ${studentForRequest.firstName} ${studentForRequest.lastName}.`,
+      );
+      setStudentForRequest(null);
+    } catch (err) {
+      setRequestError(getApiErrorMessage(err));
+    } finally {
+      setRequestLoading(false);
+    }
+  };
+
   const total = students.length;
   const active = students.filter((s) => s.isActive).length;
   const atRisk = students.filter((s) => s.isAtRisk).length;
@@ -213,6 +244,13 @@ export const StudentsPage: React.FC = () => {
           )
         }
       />
+
+      {requestFeedback && (
+        <div className={styles.feedback}>
+          <CheckCircleIcon size={16} />
+          {requestFeedback}
+        </div>
+      )}
 
       <div className={styles.kpis}>
         <StatCard icon={<GraduationCapIcon size={22} />} value={String(total)} label="Total de tutorados" hint="Registrados en el sistema" tone="info" loading={loading} />
@@ -277,6 +315,10 @@ export const StudentsPage: React.FC = () => {
                 setStudentForInterview(student);
               }}
               onViewRecord={(student) => navigate(`/expediente/${student.id}`)}
+              onRequestTutoring={(student) => {
+                setRequestError('');
+                setStudentForRequest(student);
+              }}
             />
             <Pagination
               page={page}
@@ -328,6 +370,16 @@ export const StudentsPage: React.FC = () => {
           serverError={interviewError}
           onSubmit={confirmInterview}
           onCancel={() => setStudentForInterview(null)}
+        />
+      )}
+
+      {studentForRequest && (
+        <TutoringRequestModal
+          student={studentForRequest}
+          loading={requestLoading}
+          serverError={requestError}
+          onSubmit={confirmTutoringRequest}
+          onCancel={() => setStudentForRequest(null)}
         />
       )}
 

@@ -7,6 +7,7 @@ import {
   SwitchIcon,
   ClipboardIcon,
   FolderIcon,
+  SendIcon,
 } from '@shared/components/icons';
 import { Student } from '../services/studentService';
 import table from '@shared/components/ui/DataTable.module.css';
@@ -23,6 +24,7 @@ interface TutoradoTableProps {
   onReassign: (student: Student) => void;
   onRegisterInterview: (student: Student) => void;
   onViewRecord: (student: Student) => void;
+  onRequestTutoring: (student: Student) => void;
 }
 
 export const TutoradoTable: React.FC<TutoradoTableProps> = ({
@@ -37,6 +39,7 @@ export const TutoradoTable: React.FC<TutoradoTableProps> = ({
   onReassign,
   onRegisterInterview,
   onViewRecord,
+  onRequestTutoring,
 }) => {
   // El expediente solo requiere students:read, así que se muestra a
   // cualquier rol que pueda ver esta tabla.
@@ -101,6 +104,12 @@ export const TutoradoTable: React.FC<TutoradoTableProps> = ({
                     <div className={table.actions}>
                       <IconButton label="Ver expediente" onClick={() => onViewRecord(student)}>
                         <FolderIcon size={16} />
+                      </IconButton>
+                      <IconButton
+                        label="Solicitar tutoría"
+                        onClick={() => onRequestTutoring(student)}
+                      >
+                        <SendIcon size={16} />
                       </IconButton>
                       {canConductInterview && (
                         <IconButton

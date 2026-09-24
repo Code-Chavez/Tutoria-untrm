@@ -10,6 +10,7 @@ import assignmentRoutes from './assignment.routes';
 import interviewRoutes from './interview.routes';
 import supportContactRoutes from './supportContact.routes';
 import studentRecordRoutes from './studentRecord.routes';
+import tutoringRequestRoutes from './tutoringRequest.routes';
 
 const router: IRouter = Router();
 
@@ -24,5 +25,6 @@ router.use(assignmentRoutes);
 router.use(interviewRoutes);
 router.use(supportContactRoutes);
 router.use(studentRecordRoutes);
+router.use(tutoringRequestRoutes);
 
 export default router;

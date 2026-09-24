@@ -3,5 +3,6 @@ export interface School {
   name: string;
   facultyId: string;
   isActive: boolean;
+  coordinatorId?: string | null;
   createdAt: Date;
 }

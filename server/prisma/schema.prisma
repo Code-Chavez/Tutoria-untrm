@@ -35,6 +35,9 @@ model User {
   newTutorHistory      TutorAssignmentHistory[] @relation("NewTutorHistory")
   reassignmentsMade    TutorAssignmentHistory[] @relation("ReassignedByHistory")
   interviewsConducted  TutorInterview[]
+  coordinatedSchools   School[]                 @relation("SchoolCoordinator")
+  requestsCreated      TutoringRequest[]        @relation("RequestsCreated")
+  requestsRouted       TutoringRequest[]        @relation("RequestsRouted")
 
   @@map("users")
 }
@@ -140,6 +143,11 @@ model School {
   faculty  Faculty   @relation(fields: [facultyId], references: [id])
   students Student[]
 
+  // Coordinador de tutoría de la escuela (Art. 17.a); usado para enrutar
+  // solicitudes de tutoría cuando el estudiante no tiene tutor asignado.
+  coordinatorId String? @map("coordinator_id")
+  coordinator   User?   @relation("SchoolCoordinator", fields: [coordinatorId], references: [id])
+
   @@unique([name, facultyId])
   @@map("schools")
 }
@@ -182,6 +190,7 @@ model Student {
   assignmentHistory TutorAssignmentHistory[]
   interviews        TutorInterview[]
   supportContact    SupportContact?
+  tutoringRequests  TutoringRequest[]
 
   @@index([tutorId])
   @@map("students")
@@ -270,6 +279,42 @@ model SupportContact {
   phone        String
 
   @@map("support_contacts")
+}
+
+// Solicitud de tutoría (HU-17, Art. 19.b y 19.c del Protocolo). El Tutorado
+// aún no tiene portal propio en el sistema, así que la registra un usuario
+// con acceso (Docente Tutor, Coordinador o DBU), indicando si el origen fue
+// el propio estudiante o un docente de asignatura (nombre y curso en texto
+// libre, ya que ese rol no existe en el sistema). Se enruta automáticamente:
+// al tutor si el estudiante ya tiene uno asignado, o al coordinador de su
+// escuela en caso contrario (con Administrador DBU como respaldo si la
+// escuela no tiene coordinador asignado).
+model TutoringRequest {
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now()) @map("created_at")
+
+  studentId String  @map("student_id")
+  student   Student @relation(fields: [studentId], references: [id])
+
+  requestedById String @map("requested_by_id")
+  requestedBy   User   @relation("RequestsCreated", fields: [requestedById], references: [id])
+
+  // 'STUDENT' (Art. 19.b) | 'INSTRUCTOR' (Art. 19.c)
+  source         String  @map("source")
+  instructorName String? @map("instructor_name")
+  courseName     String? @map("course_name")
+
+  // 'ACADEMIC' | 'PSYCHOLOGICAL' | 'SOCIAL' | 'HEALTH' (Art. 20)
+  caseType String @map("case_type")
+  reason   String
+
+  routedToId   String @map("routed_to_id")
+  routedTo     User   @relation("RequestsRouted", fields: [routedToId], references: [id])
+  routedToRole String @map("routed_to_role") // 'tutor' | 'coordinator'
+
+  @@index([studentId])
+  @@index([routedToId])
+  @@map("tutoring_requests")
 }
 
 // ─── Parámetros del Sistema ────────────────────────────────────
