@@ -63,6 +63,7 @@ describe('GetStudentRecordUseCase', () => {
     students = {
       findById: jest.fn().mockResolvedValue(student),
       findByCode: jest.fn(),
+      findByUserId: jest.fn(),
       findAll: jest.fn(),
       create: jest.fn(),
       update: jest.fn(),

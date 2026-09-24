@@ -17,6 +17,10 @@ export class PrismaStudentRepository implements StudentRepository {
     return this.prisma.student.findUnique({ where: { studentCode } });
   }
 
+  findByUserId(userId: string): Promise<Student | null> {
+    return this.prisma.student.findUnique({ where: { userId } });
+  }
+
   findAll(filters?: StudentFilters): Promise<Student[]> {
     const where: Prisma.StudentWhereInput = {
       ...(filters?.schoolId && { schoolId: filters.schoolId }),

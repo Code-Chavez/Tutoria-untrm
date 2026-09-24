@@ -8,6 +8,7 @@ const router: IRouter = Router();
 const tutoringRequestController = new TutoringRequestController(
   container.useCases.createTutoringRequestUseCase,
   container.useCases.listTutoringRequestsUseCase,
+  container.useCases.createOwnTutoringRequestUseCase,
 );
 
 const requireAuth = authenticate(container.services.tokenService);
@@ -18,6 +19,14 @@ router.post(
   requireAuth,
   authorize(['tutoring-requests:write']),
   tutoringRequestController.create,
+);
+
+// Autoservicio: el propio tutorado solicita tutoría para sí mismo.
+router.post(
+  '/tutoring-requests/me',
+  requireAuth,
+  authorize(['tutoring-requests:self']),
+  tutoringRequestController.createOwn,
 );
 
 // Listar solicitudes (propias con ?mine=true, o de un estudiante con ?studentId=).

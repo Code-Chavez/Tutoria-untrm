@@ -73,6 +73,7 @@ import { UpdateStudentUseCase } from '@application/use-cases/students/UpdateStud
 import { ListStudentsUseCase } from '@application/use-cases/students/ListStudentsUseCase';
 import { ImportStudentsUseCase } from '@application/use-cases/students/ImportStudentsUseCase';
 import { MarkStudentRiskUseCase } from '@application/use-cases/students/MarkStudentRiskUseCase';
+import { LinkStudentPortalAccountUseCase } from '@application/use-cases/students/LinkStudentPortalAccountUseCase';
 import { AssignStudentsUseCase } from '@application/use-cases/assignments/AssignStudentsUseCase';
 import { GetTutorWorkloadUseCase } from '@application/use-cases/assignments/GetTutorWorkloadUseCase';
 import { ReassignStudentUseCase } from '@application/use-cases/assignments/ReassignStudentUseCase';
@@ -82,6 +83,7 @@ import { UpsertSupportContactUseCase } from '@application/use-cases/support-cont
 import { GetSupportContactUseCase } from '@application/use-cases/support-contacts/GetSupportContactUseCase';
 import { GetStudentRecordUseCase } from '@application/use-cases/student-record/GetStudentRecordUseCase';
 import { CreateTutoringRequestUseCase } from '@application/use-cases/tutoring-requests/CreateTutoringRequestUseCase';
+import { CreateOwnTutoringRequestUseCase } from '@application/use-cases/tutoring-requests/CreateOwnTutoringRequestUseCase';
 import { ListTutoringRequestsUseCase } from '@application/use-cases/tutoring-requests/ListTutoringRequestsUseCase';
 import { ScheduleSessionUseCase } from '@application/use-cases/sessions/ScheduleSessionUseCase';
 import { ListSessionsUseCase } from '@application/use-cases/sessions/ListSessionsUseCase';
@@ -109,6 +111,11 @@ const updateStudentUseCase = new UpdateStudentUseCase(studentRepository, schoolR
 const listStudentsUseCase = new ListStudentsUseCase(studentRepository);
 const importStudentsUseCase = new ImportStudentsUseCase(studentRepository, schoolRepository);
 const markStudentRiskUseCase = new MarkStudentRiskUseCase(studentRepository);
+const linkStudentPortalAccountUseCase = new LinkStudentPortalAccountUseCase(
+  studentRepository,
+  userRepository,
+  roleRepository,
+);
 const assignStudentsUseCase = new AssignStudentsUseCase(
   studentRepository,
   userRepository,
@@ -153,6 +160,10 @@ const createTutoringRequestUseCase = new CreateTutoringRequestUseCase(
   roleRepository,
 );
 const listTutoringRequestsUseCase = new ListTutoringRequestsUseCase(tutoringRequestRepository);
+const createOwnTutoringRequestUseCase = new CreateOwnTutoringRequestUseCase(
+  studentRepository,
+  createTutoringRequestUseCase,
+);
 const scheduleSessionUseCase = new ScheduleSessionUseCase(
   sessionRepository,
   studentRepository,
@@ -200,6 +211,7 @@ export const container = {
     listStudentsUseCase,
     importStudentsUseCase,
     markStudentRiskUseCase,
+    linkStudentPortalAccountUseCase,
     assignStudentsUseCase,
     getTutorWorkloadUseCase,
     reassignStudentUseCase,
@@ -209,6 +221,7 @@ export const container = {
     getSupportContactUseCase,
     getStudentRecordUseCase,
     createTutoringRequestUseCase,
+    createOwnTutoringRequestUseCase,
     listTutoringRequestsUseCase,
     scheduleSessionUseCase,
     listSessionsUseCase,

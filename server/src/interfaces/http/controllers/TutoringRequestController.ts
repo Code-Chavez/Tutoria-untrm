@@ -1,19 +1,45 @@
 import { Request, Response } from 'express';
 import { z } from 'zod';
 import { CreateTutoringRequestUseCase } from '@application/use-cases/tutoring-requests/CreateTutoringRequestUseCase';
+import { CreateOwnTutoringRequestUseCase } from '@application/use-cases/tutoring-requests/CreateOwnTutoringRequestUseCase';
 import { ListTutoringRequestsUseCase } from '@application/use-cases/tutoring-requests/ListTutoringRequestsUseCase';
 import {
   InstructorDetailsRequiredError,
   NoRoutingTargetError,
+  StudentProfileNotLinkedError,
 } from '@application/use-cases/tutoring-requests/TutoringRequestErrors';
 import { StudentNotFoundError } from '@application/use-cases/students/StudentErrors';
-import { createTutoringRequestSchema } from '../validators/tutoringRequest.validators';
+import {
+  createTutoringRequestSchema,
+  createOwnTutoringRequestSchema,
+} from '../validators/tutoringRequest.validators';
 
 export class TutoringRequestController {
   constructor(
     private readonly createTutoringRequestUseCase: CreateTutoringRequestUseCase,
     private readonly listTutoringRequestsUseCase: ListTutoringRequestsUseCase,
+    private readonly createOwnTutoringRequestUseCase: CreateOwnTutoringRequestUseCase,
   ) {}
+
+  // Autoservicio (HU-17 ext.): el propio tutorado solicita tutoría para sí mismo.
+  createOwn = async (req: Request, res: Response) => {
+    try {
+      const data = createOwnTutoringRequestSchema.parse(req.body);
+      const userId = req.auth?.sub as string; // authenticate() garantiza req.auth
+      const request = await this.createOwnTutoringRequestUseCase.execute(userId, data);
+      res.status(201).json({ message: 'Solicitud de tutoría registrada exitosamente', request });
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        res.status(400).json({ error: 'Datos de entrada inválidos', details: error.errors });
+      } else if (error instanceof StudentProfileNotLinkedError) {
+        res.status(404).json({ error: error.message });
+      } else if (error instanceof NoRoutingTargetError) {
+        res.status(409).json({ error: error.message });
+      } else {
+        res.status(500).json({ error: 'Error interno del servidor' });
+      }
+    }
+  };
 
   create = async (req: Request, res: Response) => {
     try {

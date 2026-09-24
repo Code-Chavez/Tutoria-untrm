@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styles from './StudentsPage.module.css';
 import {
@@ -12,6 +12,9 @@ import { TutoradoFilters, StudentFilterValues } from '../components/TutoradoFilt
 import { TutoradoTable } from '../components/TutoradoTable';
 import { RiskModal } from '../components/RiskModal';
 import { ReassignModal } from '../components/ReassignModal';
+import { LinkPortalAccountModal, PortalAccountOption } from '../components/LinkPortalAccountModal';
+import { roleService } from '@features/admin/services/roleService';
+import { userService } from '@features/admin/services/userService';
 import { InterviewFormModal } from '@features/entrevistas/components/InterviewFormModal';
 import { interviewService, CreateInterviewData } from '@features/entrevistas/services/interviewService';
 import { supportContactService, UpsertSupportContactData } from '@features/entrevistas/services/supportContactService';
@@ -96,6 +99,41 @@ export const StudentsPage: React.FC = () => {
   const [studentForSession, setStudentForSession] = useState<Student | null>(null);
   const [sessionLoading, setSessionLoading] = useState(false);
   const [sessionError, setSessionError] = useState('');
+
+  // Vinculación de cuenta de portal (autoservicio de solicitud de tutoría).
+  const [studentToLink, setStudentToLink] = useState<Student | null>(null);
+  const [linkLoading, setLinkLoading] = useState(false);
+  const [linkError, setLinkError] = useState('');
+  const [tutoradoAccounts, setTutoradoAccounts] = useState<PortalAccountOption[]>([]);
+
+  useEffect(() => {
+    if (!canWrite) return;
+    let ignore = false;
+
+    (async () => {
+      try {
+        const roles = await roleService.getRoles();
+        const studentRole = roles.find((r) => r.name === 'Tutorado');
+        if (!studentRole) return;
+        const users = await userService.getUsers({ roleId: studentRole.id, isActive: true });
+        if (ignore) return;
+        setTutoradoAccounts(
+          users.map((u) => ({
+            userId: u.id,
+            fullName: `${u.firstName} ${u.lastName}`,
+            email: u.email,
+          })),
+        );
+      } catch {
+        // La vinculación es una acción secundaria; si falla, el modal simplemente
+        // no ofrecerá opciones en vez de romper la página de tutorados.
+      }
+    })();
+
+    return () => {
+      ignore = true;
+    };
+  }, [canWrite]);
 
   const schoolName = (schoolId: string) =>
     schools.find((s) => s.id === schoolId)?.name ?? 'Sin escuela';
@@ -257,6 +295,21 @@ export const StudentsPage: React.FC = () => {
     }
   };
 
+  const confirmLinkAccount = async (userId: string | null) => {
+    if (!studentToLink) return;
+    setLinkLoading(true);
+    setLinkError('');
+    try {
+      await studentService.linkPortalAccount(studentToLink.id, userId);
+      setStudentToLink(null);
+      refresh();
+    } catch (err) {
+      setLinkError(getApiErrorMessage(err));
+    } finally {
+      setLinkLoading(false);
+    }
+  };
+
   const total = students.length;
   const active = students.filter((s) => s.isActive).length;
   const atRisk = students.filter((s) => s.isAtRisk).length;
@@ -355,6 +408,10 @@ export const StudentsPage: React.FC = () => {
                 setSessionError('');
                 setStudentForSession(student);
               }}
+              onLinkAccount={(student) => {
+                setLinkError('');
+                setStudentToLink(student);
+              }}
             />
             <Pagination
               page={page}
@@ -427,6 +484,21 @@ export const StudentsPage: React.FC = () => {
           serverError={sessionError}
           onSubmit={confirmSchedule}
           onCancel={() => setStudentForSession(null)}
+        />
+      )}
+
+      {studentToLink && (
+        <LinkPortalAccountModal
+          student={studentToLink}
+          options={tutoradoAccounts.filter(
+            (a) =>
+              a.userId === studentToLink.userId ||
+              !students.some((s) => s.userId === a.userId),
+          )}
+          loading={linkLoading}
+          serverError={linkError}
+          onSubmit={confirmLinkAccount}
+          onCancel={() => setStudentToLink(null)}
         />
       )}
 

@@ -30,6 +30,7 @@ model User {
   refreshTokens RefreshToken[]
   passwordResetTokens PasswordResetToken[]
   tutoredStudents Student[] @relation("TutorStudents")
+  studentProfile  Student?  @relation("StudentPortalUser")
 
   previousTutorHistory TutorAssignmentHistory[] @relation("PreviousTutorHistory")
   newTutorHistory      TutorAssignmentHistory[] @relation("NewTutorHistory")
@@ -187,6 +188,11 @@ model Student {
   tutorId    String?   @map("tutor_id")
   tutor      User?     @relation("TutorStudents", fields: [tutorId], references: [id])
   assignedAt DateTime? @map("assigned_at")
+
+  // Cuenta de portal del propio tutorado (rol Tutorado), para autoservicio.
+  // Opcional: no todo estudiante tiene una cuenta creada en el sistema.
+  userId     String?   @unique @map("user_id")
+  portalUser User?     @relation("StudentPortalUser", fields: [userId], references: [id])
 
   assignmentHistory TutorAssignmentHistory[]
   interviews        TutorInterview[]
