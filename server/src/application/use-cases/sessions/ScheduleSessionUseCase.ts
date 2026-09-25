@@ -4,7 +4,11 @@ import { StudentRepository } from '@domain/repositories/StudentRepository';
 import { SystemParameterRepository } from '@domain/repositories/SystemParameterRepository';
 import { ScheduleSessionInput } from '@application/dtos/session.dto';
 import { StudentNotFoundError } from '@application/use-cases/students/StudentErrors';
-import { TutorScheduleConflictError } from './SessionErrors';
+import {
+  TutorScheduleConflictError,
+  LocationRequiredError,
+  MeetingLinkRequiredError,
+} from './SessionErrors';
 
 const DEFAULT_DURATION_MINUTES = 45; // Art. 15.c, usado si el parámetro no está configurado.
 const DURATION_PARAM_KEY = 'session_duration_minutes';
@@ -31,6 +35,13 @@ export class ScheduleSessionUseCase {
       }
     }
 
+    if (input.modality === 'PRESENCIAL' && !input.location?.trim()) {
+      throw new LocationRequiredError();
+    }
+    if (input.modality === 'VIRTUAL' && !input.meetingLink?.trim()) {
+      throw new MeetingLinkRequiredError();
+    }
+
     const durationMinutes = await this.resolveDuration();
     const scheduledAt = new Date(input.scheduledAt);
     const endsAt = new Date(scheduledAt.getTime() + durationMinutes * 60_000);
@@ -47,6 +58,9 @@ export class ScheduleSessionUseCase {
         scheduledAt,
         durationMinutes,
         endsAt,
+        modality: input.modality,
+        location: input.modality === 'PRESENCIAL' ? input.location!.trim() : null,
+        meetingLink: input.modality === 'VIRTUAL' ? input.meetingLink!.trim() : null,
       },
       input.studentIds,
     );

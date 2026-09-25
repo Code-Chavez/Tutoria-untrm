@@ -87,7 +87,7 @@ describe('GroupSessionFormModal', () => {
     expect(onSubmit).not.toHaveBeenCalled();
   });
 
-  it('confirma con dos o más tutorados seleccionados', async () => {
+  it('exige el lugar de una sesión grupal presencial (por defecto)', async () => {
     const onSubmit = renderModal();
     const user = userEvent.setup();
 
@@ -98,10 +98,52 @@ describe('GroupSessionFormModal', () => {
     await user.click(screen.getByLabelText(/seleccionar luis pérez/i));
     await user.click(screen.getByRole('button', { name: /programar sesión grupal/i }));
 
+    expect(await screen.findByText(/indica el lugar/i)).toBeInTheDocument();
+    expect(onSubmit).not.toHaveBeenCalled();
+  });
+
+  it('confirma con dos o más tutorados seleccionados y el lugar (presencial)', async () => {
+    const onSubmit = renderModal();
+    const user = userEvent.setup();
+
+    await user.type(screen.getByLabelText(/fecha/i), '2026-10-01');
+    await user.type(screen.getByLabelText(/hora/i), '15:00');
+    await user.type(screen.getByLabelText(/tema de la sesión/i), 'Técnicas de estudio');
+    await user.type(screen.getByLabelText(/^lugar$/i), 'Auditorio de la Escuela');
+    await user.click(screen.getByLabelText(/seleccionar ana torres/i));
+    await user.click(screen.getByLabelText(/seleccionar luis pérez/i));
+    await user.click(screen.getByRole('button', { name: /programar sesión grupal/i }));
+
     expect(onSubmit).toHaveBeenCalledWith({
       studentIds: ['s1', 's2'],
       topic: 'Técnicas de estudio',
       scheduledAt: new Date('2026-10-01T15:00').toISOString(),
+      modality: 'PRESENCIAL',
+      location: 'Auditorio de la Escuela',
+      meetingLink: undefined,
+    });
+  });
+
+  it('confirma con el enlace de videollamada al elegir modalidad virtual', async () => {
+    const onSubmit = renderModal();
+    const user = userEvent.setup();
+
+    await user.type(screen.getByLabelText(/fecha/i), '2026-10-01');
+    await user.type(screen.getByLabelText(/hora/i), '15:00');
+    await user.type(screen.getByLabelText(/tema de la sesión/i), 'Técnicas de estudio');
+    await user.click(screen.getByLabelText(/^virtual$/i));
+    await user.type(screen.getByLabelText(/enlace de videollamada/i), 'https://meet.example.com/grupo');
+    await user.click(screen.getByLabelText(/seleccionar ana torres/i));
+    await user.click(screen.getByLabelText(/seleccionar luis pérez/i));
+    await user.click(screen.getByRole('button', { name: /programar sesión grupal/i }));
+
+    expect(onSubmit).toHaveBeenCalledWith({
+      studentIds: ['s1', 's2'],
+      topic: 'Técnicas de estudio',
+      scheduledAt: new Date('2026-10-01T15:00').toISOString(),
+      modality: 'VIRTUAL',
+      location: undefined,
+      meetingLink: 'https://meet.example.com/grupo',
     });
   });
 });

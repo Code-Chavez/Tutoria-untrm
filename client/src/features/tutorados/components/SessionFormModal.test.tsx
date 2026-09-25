@@ -57,7 +57,7 @@ describe('SessionFormModal', () => {
     expect(onSubmit).not.toHaveBeenCalled();
   });
 
-  it('confirma con la fecha/hora combinadas en ISO', async () => {
+  it('exige el lugar en una sesión presencial (por defecto)', async () => {
     const onSubmit = vi.fn();
     const user = userEvent.setup();
     render(
@@ -74,10 +74,64 @@ describe('SessionFormModal', () => {
     await user.type(screen.getByLabelText(/tema de la sesión/i), 'Reforzamiento de Cálculo');
     await user.click(screen.getByRole('button', { name: /programar sesión/i }));
 
+    expect(await screen.findByText(/indica el lugar/i)).toBeInTheDocument();
+    expect(onSubmit).not.toHaveBeenCalled();
+  });
+
+  it('confirma con la fecha/hora combinadas en ISO y el lugar (presencial)', async () => {
+    const onSubmit = vi.fn();
+    const user = userEvent.setup();
+    render(
+      <SessionFormModal
+        student={student}
+        durationMinutes={45}
+        onSubmit={onSubmit}
+        onCancel={vi.fn()}
+      />,
+    );
+
+    await user.type(screen.getByLabelText(/fecha/i), '2026-10-01');
+    await user.type(screen.getByLabelText(/hora/i), '15:00');
+    await user.type(screen.getByLabelText(/tema de la sesión/i), 'Reforzamiento de Cálculo');
+    await user.type(screen.getByLabelText(/lugar/i), 'Oficina de tutoría 204');
+    await user.click(screen.getByRole('button', { name: /programar sesión/i }));
+
     expect(onSubmit).toHaveBeenCalledWith({
       studentIds: ['s1'],
       topic: 'Reforzamiento de Cálculo',
       scheduledAt: new Date('2026-10-01T15:00').toISOString(),
+      modality: 'PRESENCIAL',
+      location: 'Oficina de tutoría 204',
+      meetingLink: undefined,
+    });
+  });
+
+  it('confirma con el enlace de videollamada al elegir modalidad virtual', async () => {
+    const onSubmit = vi.fn();
+    const user = userEvent.setup();
+    render(
+      <SessionFormModal
+        student={student}
+        durationMinutes={45}
+        onSubmit={onSubmit}
+        onCancel={vi.fn()}
+      />,
+    );
+
+    await user.type(screen.getByLabelText(/fecha/i), '2026-10-01');
+    await user.type(screen.getByLabelText(/hora/i), '15:00');
+    await user.type(screen.getByLabelText(/tema de la sesión/i), 'Reforzamiento de Cálculo');
+    await user.click(screen.getByLabelText(/^virtual$/i));
+    await user.type(screen.getByLabelText(/enlace de videollamada/i), 'https://meet.example.com/abc');
+    await user.click(screen.getByRole('button', { name: /programar sesión/i }));
+
+    expect(onSubmit).toHaveBeenCalledWith({
+      studentIds: ['s1'],
+      topic: 'Reforzamiento de Cálculo',
+      scheduledAt: new Date('2026-10-01T15:00').toISOString(),
+      modality: 'VIRTUAL',
+      location: undefined,
+      meetingLink: 'https://meet.example.com/abc',
     });
   });
 });

@@ -1,5 +1,9 @@
 import { ScheduleSessionUseCase } from '@application/use-cases/sessions/ScheduleSessionUseCase';
-import { TutorScheduleConflictError } from '@application/use-cases/sessions/SessionErrors';
+import {
+  TutorScheduleConflictError,
+  LocationRequiredError,
+  MeetingLinkRequiredError,
+} from '@application/use-cases/sessions/SessionErrors';
 import { StudentNotFoundError } from '@application/use-cases/students/StudentErrors';
 import { SessionRepository } from '@domain/repositories/SessionRepository';
 import { StudentRepository } from '@domain/repositories/StudentRepository';
@@ -19,6 +23,8 @@ describe('ScheduleSessionUseCase', () => {
     studentIds: ['student-1'],
     topic: 'Reforzamiento de Cálculo',
     scheduledAt: '2026-10-01T15:00:00.000Z',
+    modality: 'PRESENCIAL',
+    location: 'Oficina de tutoría 204',
   };
 
   beforeEach(() => {
@@ -109,6 +115,41 @@ describe('ScheduleSessionUseCase', () => {
     await expect(
       useCase.execute('tutor-1', { ...baseInput, studentIds: ['student-1', 'student-2'] }),
     ).rejects.toThrow(StudentNotFoundError);
+    expect(sessions.create).not.toHaveBeenCalled();
+  });
+
+  it('guarda el lugar en una sesión presencial (Art. 8.c)', async () => {
+    const result = await useCase.execute('tutor-1', baseInput);
+
+    expect(result.modality).toBe('PRESENCIAL');
+    expect(result.location).toBe('Oficina de tutoría 204');
+    expect(result.meetingLink).toBeNull();
+  });
+
+  it('lanza LocationRequiredError si la sesión presencial no indica lugar', async () => {
+    await expect(
+      useCase.execute('tutor-1', { ...baseInput, location: '  ' }),
+    ).rejects.toThrow(LocationRequiredError);
+    expect(sessions.create).not.toHaveBeenCalled();
+  });
+
+  it('guarda el enlace en una sesión virtual (Art. 8.d)', async () => {
+    const result = await useCase.execute('tutor-1', {
+      ...baseInput,
+      modality: 'VIRTUAL',
+      location: undefined,
+      meetingLink: 'https://meet.example.com/abc',
+    });
+
+    expect(result.modality).toBe('VIRTUAL');
+    expect(result.meetingLink).toBe('https://meet.example.com/abc');
+    expect(result.location).toBeNull();
+  });
+
+  it('lanza MeetingLinkRequiredError si la sesión virtual no indica enlace', async () => {
+    await expect(
+      useCase.execute('tutor-1', { ...baseInput, modality: 'VIRTUAL', location: undefined }),
+    ).rejects.toThrow(MeetingLinkRequiredError);
     expect(sessions.create).not.toHaveBeenCalled();
   });
 });

@@ -7,7 +7,7 @@ import {
   StudentSelectList,
   AssignFilterValues,
 } from '@features/asignacion/components/StudentSelectList';
-import { ScheduleSessionData } from '@features/sesiones/services/sessionService';
+import { ScheduleSessionData, SessionModality } from '@features/sesiones/services/sessionService';
 import styles from './GroupSessionFormModal.module.css';
 
 interface GroupSessionFormModalProps {
@@ -43,6 +43,9 @@ export const GroupSessionFormModal: React.FC<GroupSessionFormModalProps> = ({
   const [date, setDate] = useState('');
   const [time, setTime] = useState('');
   const [topic, setTopic] = useState('');
+  const [modality, setModality] = useState<SessionModality>('PRESENCIAL');
+  const [location, setLocation] = useState('');
+  const [meetingLink, setMeetingLink] = useState('');
   const [filters, setFilters] = useState<AssignFilterValues>(EMPTY_FILTERS);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [error, setError] = useState('');
@@ -110,10 +113,21 @@ export const GroupSessionFormModal: React.FC<GroupSessionFormModalProps> = ({
       setError('Selecciona al menos dos tutorados para una sesión grupal (Art. 7.b).');
       return;
     }
+    if (modality === 'PRESENCIAL' && !location.trim()) {
+      setError('Indica el lugar de la sesión presencial.');
+      return;
+    }
+    if (modality === 'VIRTUAL' && !meetingLink.trim()) {
+      setError('Indica el enlace de la videollamada.');
+      return;
+    }
     onSubmit({
       studentIds: [...selectedIds],
       topic: topic.trim(),
       scheduledAt: scheduledAt.toISOString(),
+      modality,
+      location: modality === 'PRESENCIAL' ? location.trim() : undefined,
+      meetingLink: modality === 'VIRTUAL' ? meetingLink.trim() : undefined,
     });
   };
 
@@ -183,6 +197,66 @@ export const GroupSessionFormModal: React.FC<GroupSessionFormModalProps> = ({
               }}
             />
           </div>
+
+          <label className={styles.label}>Modalidad (Art. 8)</label>
+          <div className={styles.sourceOptions}>
+            <label className={styles.radio}>
+              <input
+                type="radio"
+                name="groupModality"
+                checked={modality === 'PRESENCIAL'}
+                onChange={() => {
+                  setModality('PRESENCIAL');
+                  setError('');
+                }}
+              />
+              Presencial
+            </label>
+            <label className={styles.radio}>
+              <input
+                type="radio"
+                name="groupModality"
+                checked={modality === 'VIRTUAL'}
+                onChange={() => {
+                  setModality('VIRTUAL');
+                  setError('');
+                }}
+              />
+              Virtual
+            </label>
+          </div>
+
+          {modality === 'PRESENCIAL' ? (
+            <div className={styles.field}>
+              <label htmlFor="groupLocation">Lugar</label>
+              <input
+                id="groupLocation"
+                type="text"
+                className={styles.input}
+                placeholder="Ej. Auditorio de la Escuela"
+                value={location}
+                onChange={(e) => {
+                  setLocation(e.target.value);
+                  setError('');
+                }}
+              />
+            </div>
+          ) : (
+            <div className={styles.field}>
+              <label htmlFor="groupMeetingLink">Enlace de videollamada</label>
+              <input
+                id="groupMeetingLink"
+                type="text"
+                className={styles.input}
+                placeholder="Ej. https://meet.google.com/xxx-xxxx-xxx"
+                value={meetingLink}
+                onChange={(e) => {
+                  setMeetingLink(e.target.value);
+                  setError('');
+                }}
+              />
+            </div>
+          )}
 
           <div className={styles.listSection}>
             <div className={styles.listHead}>

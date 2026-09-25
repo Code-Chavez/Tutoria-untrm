@@ -1,5 +1,9 @@
 import { apiClient } from '@shared/services/apiClient';
 
+// Modalidad de la sesión (Art. 8): presencial registra el lugar, virtual el
+// enlace de videollamada.
+export type SessionModality = 'PRESENCIAL' | 'VIRTUAL';
+
 export interface TutoringSession {
   id: string;
   tutorId: string;
@@ -7,6 +11,9 @@ export interface TutoringSession {
   scheduledAt: string;
   durationMinutes: number;
   endsAt: string;
+  modality: SessionModality;
+  location: string | null;
+  meetingLink: string | null;
   studentIds: string[];
   createdAt: string;
 }
@@ -16,6 +23,9 @@ export interface ScheduleSessionData {
   studentIds: string[];
   topic: string;
   scheduledAt: string; // ISO datetime
+  modality: SessionModality;
+  location?: string;
+  meetingLink?: string;
 }
 
 export const sessionService = {
