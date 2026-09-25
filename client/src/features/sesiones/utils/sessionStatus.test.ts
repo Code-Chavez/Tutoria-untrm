@@ -13,6 +13,7 @@ const baseSession: TutoringSession = {
   location: 'Oficina 204',
   meetingLink: null,
   studentIds: ['a1'],
+  attendance: null,
   createdAt: '2026-10-01T00:00:00.000Z',
 };
 

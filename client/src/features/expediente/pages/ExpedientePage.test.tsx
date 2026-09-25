@@ -86,6 +86,29 @@ describe('ExpedientePage', () => {
     expect(screen.queryByText(/persona de red de apoyo/i)).not.toBeInTheDocument();
   });
 
+  it('muestra la asistencia confirmada de una sesión individual (HU-22)', async () => {
+    mocked.getStudentRecord.mockResolvedValue({
+      ...baseRecord,
+      timeline: [
+        {
+          type: 'attendance',
+          id: 'att-1',
+          date: '2026-09-20T15:45:00.000Z',
+          sequenceNumber: 2,
+          topic: 'Reforzamiento de Cálculo',
+          tutorName: 'Elena Ramírez',
+          scheduledAt: '2026-09-20T15:00:00.000Z',
+        },
+        ...baseRecord.timeline,
+      ],
+    });
+    renderPage();
+
+    expect(await screen.findByText(/asistencia a sesión/i)).toBeInTheDocument();
+    expect(screen.getByText(/sesión 2 de 8/i)).toBeInTheDocument();
+    expect(screen.getByText(/confirmada con elena ramírez/i)).toBeInTheDocument();
+  });
+
   it('muestra un estado vacío cuando no hay eventos', async () => {
     mocked.getStudentRecord.mockResolvedValue({ ...baseRecord, timeline: [] });
     renderPage();

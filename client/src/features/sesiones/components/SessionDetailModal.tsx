@@ -1,15 +1,30 @@
 import React, { useEffect } from 'react';
 import { Badge, Button } from '@shared/components/ui';
-import { CalendarIcon, CloseIcon, ClockIcon, UsersIcon, LinkIcon } from '@shared/components/icons';
+import {
+  CalendarIcon,
+  CloseIcon,
+  ClockIcon,
+  UsersIcon,
+  LinkIcon,
+  CheckCircleIcon,
+} from '@shared/components/icons';
 import { TutoringSession } from '../services/sessionService';
 import { getSessionStatus, SESSION_STATUS_LABEL } from '../utils/sessionStatus';
 import type { Student } from '@features/tutorados/services/studentService';
 import styles from './SessionDetailModal.module.css';
 
+// Tope por defecto (Anexo N°4); el servidor aplica el valor real a partir
+// del parámetro del sistema. Aquí solo se usa para el texto informativo.
+const DEFAULT_MAX_SESSIONS = 8;
+
 interface SessionDetailModalProps {
   session: TutoringSession;
   students: Student[];
+  allSessions: TutoringSession[];
   onClose: () => void;
+  onRegisterAttendance: () => void;
+  registeringAttendance?: boolean;
+  attendanceError?: string;
 }
 
 const STATUS_TONE = {
@@ -22,7 +37,11 @@ const STATUS_TONE = {
 export const SessionDetailModal: React.FC<SessionDetailModalProps> = ({
   session,
   students,
+  allSessions,
   onClose,
+  onRegisterAttendance,
+  registeringAttendance,
+  attendanceError,
 }) => {
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -43,6 +62,20 @@ export const SessionDetailModal: React.FC<SessionDetailModalProps> = ({
       ? `${student.firstName} ${student.lastName} · ${student.studentCode}`
       : 'Tutorado';
   });
+
+  // Cuántas sesiones individuales de esta misma tutoría (mismo tutor y
+  // tutorado) ya tienen asistencia confirmada (Anexo N°4).
+  const confirmedCount = isGroup
+    ? 0
+    : allSessions.filter(
+        (s) =>
+          s.tutorId === session.tutorId &&
+          s.studentIds.length === 1 &&
+          s.studentIds[0] === session.studentIds[0] &&
+          s.attendance,
+      ).length;
+  const limitReached = confirmedCount >= DEFAULT_MAX_SESSIONS;
+  const canRegister = !isGroup && !session.attendance && status !== 'PROXIMA' && !limitReached;
 
   return (
     <div className={styles.overlay} onClick={onClose}>
@@ -114,6 +147,44 @@ export const SessionDetailModal: React.FC<SessionDetailModalProps> = ({
               ))}
             </ul>
           </div>
+
+          {!isGroup && (
+            <div className={styles.attendance}>
+              <div className={styles.row}>
+                <CheckCircleIcon size={16} />
+                {session.attendance ? (
+                  <span>
+                    Asistencia registrada · Sesión {session.attendance.sequenceNumber} de{' '}
+                    {DEFAULT_MAX_SESSIONS} · Confirmada el{' '}
+                    {new Date(session.attendance.confirmedAt).toLocaleString('es-PE', {
+                      dateStyle: 'medium',
+                      timeStyle: 'short',
+                    })}
+                  </span>
+                ) : status === 'PROXIMA' ? (
+                  <span>
+                    Podrás registrar la asistencia (Anexo N° 4) cuando la sesión comience.
+                  </span>
+                ) : limitReached ? (
+                  <span>
+                    Se alcanzó el máximo de {DEFAULT_MAX_SESSIONS} sesiones registradas para esta
+                    tutoría individual.
+                  </span>
+                ) : (
+                  <span>
+                    Sesión {confirmedCount + 1} de {DEFAULT_MAX_SESSIONS} · Asistencia sin
+                    registrar.
+                  </span>
+                )}
+              </div>
+              {canRegister && (
+                <Button size="sm" loading={registeringAttendance} onClick={onRegisterAttendance}>
+                  Registrar asistencia
+                </Button>
+              )}
+              {attendanceError && <span className={styles.error}>{attendanceError}</span>}
+            </div>
+          )}
         </div>
 
         <div className={styles.actions}>

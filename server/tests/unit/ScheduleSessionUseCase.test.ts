@@ -35,9 +35,12 @@ describe('ScheduleSessionUseCase', () => {
         studentIds,
         ...data,
       } as SessionWithParticipants)),
+      findById: jest.fn(),
       findOverlapping: jest.fn().mockResolvedValue([]),
       findAll: jest.fn(),
       findByStudent: jest.fn(),
+      countAttendanceByTutorAndStudent: jest.fn(),
+      createAttendance: jest.fn(),
     };
     students = {
       findById: jest.fn().mockImplementation(async (id: string) => ({ id } as Student)),

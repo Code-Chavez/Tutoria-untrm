@@ -22,7 +22,18 @@ export interface SessionParticipant {
   studentId: string;
 }
 
+// Registro de asistencia de una sesión individual (HU-22, Anexo N°4):
+// reemplaza la firma del tutorado por una confirmación digital.
+export interface SessionAttendance {
+  id: string;
+  sessionId: string;
+  sequenceNumber: number;
+  confirmedAt: Date;
+  createdAt: Date;
+}
+
 // Sesión con sus participantes, para exponer al cliente en una sola pieza.
 export interface SessionWithParticipants extends Session {
   studentIds: string[];
+  attendance: SessionAttendance | null;
 }

@@ -49,6 +49,11 @@
   color: var(--alerta);
 }
 
+.icon.attendance {
+  background: #e9f6ef;
+  color: var(--ok);
+}
+
 .card {
   flex: 1;
   min-width: 0;

@@ -18,3 +18,45 @@ export class MeetingLinkRequiredError extends Error {
     this.name = 'MeetingLinkRequiredError';
   }
 }
+
+export class SessionNotFoundError extends Error {
+  constructor(id: string) {
+    super(`No se encontró la sesión con ID ${id}`);
+    this.name = 'SessionNotFoundError';
+  }
+}
+
+export class NotSessionTutorError extends Error {
+  constructor() {
+    super('Solo el tutor de la sesión puede registrar su asistencia');
+    this.name = 'NotSessionTutorError';
+  }
+}
+
+export class GroupSessionAttendanceError extends Error {
+  constructor() {
+    super('El registro de asistencia (Anexo N° 4) es exclusivo de sesiones individuales');
+    this.name = 'GroupSessionAttendanceError';
+  }
+}
+
+export class SessionNotStartedError extends Error {
+  constructor() {
+    super('No se puede registrar la asistencia de una sesión que aún no comienza');
+    this.name = 'SessionNotStartedError';
+  }
+}
+
+export class AttendanceAlreadyRegisteredError extends Error {
+  constructor() {
+    super('Esta sesión ya tiene la asistencia registrada');
+    this.name = 'AttendanceAlreadyRegisteredError';
+  }
+}
+
+export class AttendanceLimitReachedError extends Error {
+  constructor(limit: number) {
+    super(`Se alcanzó el máximo de ${limit} sesiones registradas para esta tutoría individual`);
+    this.name = 'AttendanceLimitReachedError';
+  }
+}

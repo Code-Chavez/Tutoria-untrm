@@ -4,6 +4,7 @@ import { UserRepository } from '@domain/repositories/UserRepository';
 import { TutorInterviewRepository } from '@domain/repositories/TutorInterviewRepository';
 import { TutorAssignmentHistoryRepository } from '@domain/repositories/TutorAssignmentHistoryRepository';
 import { SupportContactRepository } from '@domain/repositories/SupportContactRepository';
+import { SessionRepository } from '@domain/repositories/SessionRepository';
 import { StudentRecord, StudentRecordEvent } from '@application/dtos/studentRecord.dto';
 import { StudentNotFoundError } from '@application/use-cases/students/StudentErrors';
 
@@ -15,10 +16,10 @@ const MOTIVE_LABELS: { key: 'motiveAcademic' | 'motivePersonalEmotional' | 'moti
 
 /**
  * Consolida el expediente del tutorado (HU-16): entrevista(s), historial de
- * asignación de tutor y el estado actual, en orden cronológico. Las sesiones,
- * seguimientos y derivaciones (Sprint 3 en adelante) todavía no existen en el
- * sistema; el tipo StudentRecordEvent queda preparado para incorporarlas sin
- * rediseñar la línea de tiempo.
+ * asignación de tutor, asistencia a sesiones individuales (HU-22) y el
+ * estado actual, en orden cronológico. Seguimientos y derivaciones (Sprint 3
+ * en adelante) todavía no existen en el sistema; el tipo StudentRecordEvent
+ * queda preparado para incorporarlos sin rediseñar la línea de tiempo.
  */
 export class GetStudentRecordUseCase {
   constructor(
@@ -28,6 +29,7 @@ export class GetStudentRecordUseCase {
     private readonly interviews: TutorInterviewRepository,
     private readonly assignmentHistory: TutorAssignmentHistoryRepository,
     private readonly supportContacts: SupportContactRepository,
+    private readonly sessions: SessionRepository,
   ) {}
 
   async execute(studentId: string, includeSupportContact: boolean): Promise<StudentRecord> {
@@ -37,10 +39,12 @@ export class GetStudentRecordUseCase {
     }
 
     const school = await this.schools.findById(student.schoolId);
-    const [interviews, history] = await Promise.all([
+    const [interviews, history, sessions] = await Promise.all([
       this.interviews.findByStudent(studentId),
       this.assignmentHistory.findByStudent(studentId),
+      this.sessions.findByStudent(studentId),
     ]);
+    const attendedSessions = sessions.filter((s) => s.attendance);
 
     // Resuelve en un solo mapa los nombres de todos los usuarios involucrados
     // (tutor actual, quien condujo cada entrevista, tutores del historial).
@@ -51,6 +55,7 @@ export class GetStudentRecordUseCase {
       if (h.previousTutorId) userIds.add(h.previousTutorId);
       userIds.add(h.newTutorId);
     });
+    attendedSessions.forEach((s) => userIds.add(s.tutorId));
 
     const userEntries = await Promise.all(
       [...userIds].map(async (id) => [id, await this.users.findById(id)] as const),
@@ -80,7 +85,17 @@ export class GetStudentRecordUseCase {
       reason: h.reason,
     }));
 
-    const timeline = [...interviewEvents, ...assignmentEvents].sort(
+    const attendanceEvents: StudentRecordEvent[] = attendedSessions.map((s) => ({
+      type: 'attendance',
+      id: s.attendance!.id,
+      date: s.attendance!.confirmedAt,
+      sequenceNumber: s.attendance!.sequenceNumber,
+      topic: s.topic,
+      tutorName: userName(s.tutorId) ?? 'Desconocido',
+      scheduledAt: s.scheduledAt,
+    }));
+
+    const timeline = [...interviewEvents, ...assignmentEvents, ...attendanceEvents].sort(
       (a, b) => b.date.getTime() - a.date.getTime(),
     );
 

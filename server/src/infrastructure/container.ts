@@ -87,6 +87,7 @@ import { CreateOwnTutoringRequestUseCase } from '@application/use-cases/tutoring
 import { ListTutoringRequestsUseCase } from '@application/use-cases/tutoring-requests/ListTutoringRequestsUseCase';
 import { ScheduleSessionUseCase } from '@application/use-cases/sessions/ScheduleSessionUseCase';
 import { ListSessionsUseCase } from '@application/use-cases/sessions/ListSessionsUseCase';
+import { RegisterAttendanceUseCase } from '@application/use-cases/sessions/RegisterAttendanceUseCase';
 import { ListSchoolsUseCase } from '@application/use-cases/schools/ListSchoolsUseCase';
 
 const createUserUseCase = new CreateUserUseCase(userRepository, passwordHasher);
@@ -151,6 +152,7 @@ const getStudentRecordUseCase = new GetStudentRecordUseCase(
   tutorInterviewRepository,
   tutorAssignmentHistoryRepository,
   supportContactRepository,
+  sessionRepository,
 );
 const createTutoringRequestUseCase = new CreateTutoringRequestUseCase(
   tutoringRequestRepository,
@@ -170,6 +172,10 @@ const scheduleSessionUseCase = new ScheduleSessionUseCase(
   systemParameterRepository,
 );
 const listSessionsUseCase = new ListSessionsUseCase(sessionRepository);
+const registerAttendanceUseCase = new RegisterAttendanceUseCase(
+  sessionRepository,
+  systemParameterRepository,
+);
 const listSchoolsUseCase = new ListSchoolsUseCase(schoolRepository);
 
 export const container = {
@@ -225,6 +231,7 @@ export const container = {
     listTutoringRequestsUseCase,
     scheduleSessionUseCase,
     listSessionsUseCase,
+    registerAttendanceUseCase,
     listSchoolsUseCase,
   },
 } as const;
