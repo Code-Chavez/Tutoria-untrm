@@ -9,6 +9,7 @@ import {
 import { useDashboardMetrics } from '../hooks/useDashboardMetrics';
 import { QuickActions } from './QuickActions';
 import { RecentActivity } from './RecentActivity';
+import { RiskAlerts } from './RiskAlerts';
 import styles from './DashboardPage.module.css';
 
 export function DashboardPage() {
@@ -84,6 +85,14 @@ export function DashboardPage() {
           <RecentActivity />
         </Card>
       </div>
+
+      <Card>
+        <CardHeader
+          title="Alertas de inasistencia y riesgo"
+          description="Tutorados en riesgo sin sesiones o con inasistencias por encima del umbral"
+        />
+        <RiskAlerts />
+      </Card>
     </div>
   );
 }

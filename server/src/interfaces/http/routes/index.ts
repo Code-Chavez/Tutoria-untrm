@@ -13,6 +13,7 @@ import studentRecordRoutes from './studentRecord.routes';
 import tutoringRequestRoutes from './tutoringRequest.routes';
 import sessionRoutes from './session.routes';
 import followUpRoutes from './followUp.routes';
+import alertRoutes from './alert.routes';
 
 const router: IRouter = Router();
 
@@ -30,5 +31,6 @@ router.use(studentRecordRoutes);
 router.use(tutoringRequestRoutes);
 router.use(sessionRoutes);
 router.use(followUpRoutes);
+router.use(alertRoutes);
 
 export default router;
