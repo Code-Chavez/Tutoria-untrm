@@ -62,7 +62,7 @@ const NAV: NavGroup[] = [
       { label: 'Seguimiento', Icon: ActivityIcon, roles: ['tutor'] },
       { label: 'Derivar caso', Icon: SendIcon, roles: ['tutor'] },
       { label: 'Solicitar tutoría', Icon: SendIcon, path: '/solicitar-tutoria', roles: ['est'] },
-      { label: 'Casos derivados', Icon: InboxIcon, roles: ['serv', 'dbu'] },
+      { label: 'Casos derivados', Icon: InboxIcon, path: '/derivaciones', roles: ['tutor', 'coord', 'serv', 'dbu'] },
       { label: 'Evaluar tutoría', Icon: StarIcon, roles: ['est'] },
     ],
   },

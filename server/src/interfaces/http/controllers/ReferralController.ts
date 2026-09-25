@@ -2,6 +2,8 @@ import { Request, Response } from 'express';
 import { z } from 'zod';
 import { CreateReferralUseCase } from '@application/use-cases/referrals/CreateReferralUseCase';
 import { GetReferralConstanciaUseCase } from '@application/use-cases/referrals/GetReferralConstanciaUseCase';
+import { GetReferralsUseCase } from '@application/use-cases/referrals/GetReferralsUseCase';
+import { GetReferralByIdUseCase } from '@application/use-cases/referrals/GetReferralByIdUseCase';
 import { ReferralConstanciaPdf } from '@infrastructure/parsers/ReferralConstanciaPdf';
 import { ReferralNotFoundError } from '@application/use-cases/referrals/ReferralErrors';
 import { StudentNotFoundError } from '@application/use-cases/students/StudentErrors';
@@ -11,6 +13,8 @@ export class ReferralController {
   constructor(
     private readonly createReferralUseCase: CreateReferralUseCase,
     private readonly getReferralConstanciaUseCase: GetReferralConstanciaUseCase,
+    private readonly getReferralsUseCase: GetReferralsUseCase,
+    private readonly getReferralByIdUseCase: GetReferralByIdUseCase,
     private readonly constanciaPdf: ReferralConstanciaPdf,
   ) {}
 
@@ -47,6 +51,34 @@ export class ReferralController {
         res.status(404).json({ error: error.message });
       } else {
         res.status(500).json({ error: 'Error interno del servidor' });
+      }
+    }
+  };
+  // Obtiene las derivaciones según el rol (HU-30)
+  getAll = async (req: Request, res: Response) => {
+    try {
+      const userId = req.auth?.sub as string;
+      const referrals = await this.getReferralsUseCase.execute(userId);
+      res.status(200).json(referrals);
+    } catch (error: any) {
+      res.status(500).json({ error: error.message || 'Error interno del servidor' });
+    }
+  };
+
+  // Obtiene una derivación por ID validando visibilidad (HU-30)
+  getById = async (req: Request, res: Response) => {
+    try {
+      const referralId = req.params.id as string;
+      const userId = req.auth?.sub as string;
+      const referral = await this.getReferralByIdUseCase.execute(referralId, userId);
+      res.status(200).json(referral);
+    } catch (error: any) {
+      if (error instanceof ReferralNotFoundError) {
+        res.status(404).json({ error: error.message });
+      } else if (error.message === 'No autorizado para ver esta derivación') {
+        res.status(403).json({ error: error.message });
+      } else {
+        res.status(500).json({ error: error.message || 'Error interno del servidor' });
       }
     }
   };

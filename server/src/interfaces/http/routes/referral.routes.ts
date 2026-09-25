@@ -9,6 +9,8 @@ const router: IRouter = Router();
 const referralController = new ReferralController(
   container.useCases.createReferralUseCase,
   container.useCases.getReferralConstanciaUseCase,
+  container.useCases.getReferralsUseCase,
+  container.useCases.getReferralByIdUseCase,
   new ReferralConstanciaPdf(),
 );
 
@@ -28,6 +30,20 @@ router.get(
   requireAuth,
   authorize(['referrals:read']),
   referralController.downloadConstancia,
+);
+
+// HU-30: Bandeja y detalle con visibilidad restringida por servicio/rol
+router.get(
+  '/referrals',
+  requireAuth,
+  authorize(['referrals:read']),
+  referralController.getAll,
+);
+router.get(
+  '/referrals/:id',
+  requireAuth,
+  authorize(['referrals:read']),
+  referralController.getById,
 );
 
 export default router;
