@@ -25,7 +25,11 @@ import {
 } from '@features/solicitudes/services/tutoringRequestService';
 import { SessionFormModal } from '../components/SessionFormModal';
 import { GroupSessionFormModal } from '../components/GroupSessionFormModal';
-import { sessionService, ScheduleSessionData } from '@features/sesiones/services/sessionService';
+import {
+  sessionService,
+  ScheduleSessionData,
+  TutoringSession,
+} from '@features/sesiones/services/sessionService';
 import { useStudents } from '../hooks/useStudents';
 import { useAuth } from '@features/auth/hooks/useAuth';
 import { assignmentService } from '@features/asignacion/services/assignmentService';
@@ -95,7 +99,7 @@ export const StudentsPage: React.FC = () => {
   const [studentForRequest, setStudentForRequest] = useState<Student | null>(null);
   const [requestLoading, setRequestLoading] = useState(false);
   const [requestError, setRequestError] = useState('');
-  const [requestFeedback, setRequestFeedback] = useState('');
+  const [requestFeedback, setRequestFeedback] = useState<React.ReactNode>('');
 
   // Programación de sesión individual (HU-18) o grupal (HU-19).
   const [studentForSession, setStudentForSession] = useState<Student | null>(null);
@@ -277,6 +281,22 @@ export const StudentsPage: React.FC = () => {
     }
   };
 
+  // Muestra el lugar o el enlace de videollamada en la confirmación (Art. 8);
+  // hasta que exista un detalle de sesión propio (HU-21), esta es la única
+  // pantalla donde el tutor vuelve a ver ese dato tras programarla.
+  const sessionModalityNote = (session: TutoringSession) =>
+    session.modality === 'VIRTUAL' ? (
+      <>
+        {' '}
+        · Enlace:{' '}
+        <a href={session.meetingLink ?? undefined} target="_blank" rel="noreferrer">
+          {session.meetingLink}
+        </a>
+      </>
+    ) : (
+      session.location && <> · Lugar: {session.location}</>
+    );
+
   const confirmSchedule = async (data: ScheduleSessionData) => {
     if (!studentForSession) return;
     setSessionLoading(true);
@@ -288,7 +308,10 @@ export const StudentsPage: React.FC = () => {
         timeStyle: 'short',
       });
       setRequestFeedback(
-        `Sesión programada para el ${when} con ${studentForSession.firstName} ${studentForSession.lastName}.`,
+        <>
+          Sesión programada para el {when} con {studentForSession.firstName}{' '}
+          {studentForSession.lastName}.{sessionModalityNote(session)}
+        </>,
       );
       setStudentForSession(null);
     } catch (err) {
@@ -308,7 +331,10 @@ export const StudentsPage: React.FC = () => {
         timeStyle: 'short',
       });
       setRequestFeedback(
-        `Sesión grupal programada para el ${when} con ${session.studentIds.length} tutorados.`,
+        <>
+          Sesión grupal programada para el {when} con {session.studentIds.length} tutorados.
+          {sessionModalityNote(session)}
+        </>,
       );
       setGroupSessionOpen(false);
     } catch (err) {

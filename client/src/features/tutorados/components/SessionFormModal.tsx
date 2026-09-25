@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Button } from '@shared/components/ui';
 import { CalendarIcon, CloseIcon, InfoIcon } from '@shared/components/icons';
 import { Student } from '../services/studentService';
-import { ScheduleSessionData } from '@features/sesiones/services/sessionService';
+import { ScheduleSessionData, SessionModality } from '@features/sesiones/services/sessionService';
 import styles from './SessionFormModal.module.css';
 
 interface SessionFormModalProps {
@@ -25,6 +25,9 @@ export const SessionFormModal: React.FC<SessionFormModalProps> = ({
   const [date, setDate] = useState('');
   const [time, setTime] = useState('');
   const [topic, setTopic] = useState('');
+  const [modality, setModality] = useState<SessionModality>('PRESENCIAL');
+  const [location, setLocation] = useState('');
+  const [meetingLink, setMeetingLink] = useState('');
   const [error, setError] = useState('');
 
   useEffect(() => {
@@ -49,10 +52,21 @@ export const SessionFormModal: React.FC<SessionFormModalProps> = ({
       setError('Indica el tema de la sesión.');
       return;
     }
+    if (modality === 'PRESENCIAL' && !location.trim()) {
+      setError('Indica el lugar de la sesión presencial.');
+      return;
+    }
+    if (modality === 'VIRTUAL' && !meetingLink.trim()) {
+      setError('Indica el enlace de la videollamada.');
+      return;
+    }
     onSubmit({
       studentIds: [student.id],
       topic: topic.trim(),
       scheduledAt: scheduledAt.toISOString(),
+      modality,
+      location: modality === 'PRESENCIAL' ? location.trim() : undefined,
+      meetingLink: modality === 'VIRTUAL' ? meetingLink.trim() : undefined,
     });
   };
 
@@ -124,6 +138,66 @@ export const SessionFormModal: React.FC<SessionFormModalProps> = ({
               }}
             />
           </div>
+
+          <label className={styles.label}>Modalidad (Art. 8)</label>
+          <div className={styles.sourceOptions}>
+            <label className={styles.radio}>
+              <input
+                type="radio"
+                name="modality"
+                checked={modality === 'PRESENCIAL'}
+                onChange={() => {
+                  setModality('PRESENCIAL');
+                  setError('');
+                }}
+              />
+              Presencial
+            </label>
+            <label className={styles.radio}>
+              <input
+                type="radio"
+                name="modality"
+                checked={modality === 'VIRTUAL'}
+                onChange={() => {
+                  setModality('VIRTUAL');
+                  setError('');
+                }}
+              />
+              Virtual
+            </label>
+          </div>
+
+          {modality === 'PRESENCIAL' ? (
+            <div className={styles.field}>
+              <label htmlFor="location">Lugar</label>
+              <input
+                id="location"
+                type="text"
+                className={styles.input}
+                placeholder="Ej. Oficina de tutoría 204"
+                value={location}
+                onChange={(e) => {
+                  setLocation(e.target.value);
+                  setError('');
+                }}
+              />
+            </div>
+          ) : (
+            <div className={styles.field}>
+              <label htmlFor="meetingLink">Enlace de videollamada</label>
+              <input
+                id="meetingLink"
+                type="text"
+                className={styles.input}
+                placeholder="Ej. https://meet.google.com/xxx-xxxx-xxx"
+                value={meetingLink}
+                onChange={(e) => {
+                  setMeetingLink(e.target.value);
+                  setError('');
+                }}
+              />
+            </div>
+          )}
 
           <div className={styles.hint}>
             <InfoIcon size={16} />

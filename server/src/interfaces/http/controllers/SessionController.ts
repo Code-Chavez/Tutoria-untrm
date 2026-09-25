@@ -2,7 +2,11 @@ import { Request, Response } from 'express';
 import { z } from 'zod';
 import { ScheduleSessionUseCase } from '@application/use-cases/sessions/ScheduleSessionUseCase';
 import { ListSessionsUseCase } from '@application/use-cases/sessions/ListSessionsUseCase';
-import { TutorScheduleConflictError } from '@application/use-cases/sessions/SessionErrors';
+import {
+  TutorScheduleConflictError,
+  LocationRequiredError,
+  MeetingLinkRequiredError,
+} from '@application/use-cases/sessions/SessionErrors';
 import { StudentNotFoundError } from '@application/use-cases/students/StudentErrors';
 import { scheduleSessionSchema } from '../validators/session.validators';
 
@@ -23,6 +27,11 @@ export class SessionController {
         res.status(400).json({ error: 'Datos de entrada inválidos', details: error.errors });
       } else if (error instanceof StudentNotFoundError) {
         res.status(404).json({ error: error.message });
+      } else if (
+        error instanceof LocationRequiredError ||
+        error instanceof MeetingLinkRequiredError
+      ) {
+        res.status(400).json({ error: error.message });
       } else if (error instanceof TutorScheduleConflictError) {
         res.status(409).json({ error: error.message });
       } else {

@@ -12,6 +12,12 @@ export const scheduleSessionSchema = z.object({
     }),
   topic: z.string().trim().min(3, 'Indique el tema de la sesión').max(200),
   scheduledAt: z.string().datetime({ message: 'Fecha y hora inválidas' }),
+  // Modalidad (Art. 8): la obligatoriedad de location/meetingLink según el
+  // valor elegido se valida en el caso de uso, no aquí (mismo patrón que
+  // instructorName/courseName en tutoring-requests).
+  modality: z.enum(['PRESENCIAL', 'VIRTUAL']),
+  location: z.string().trim().max(200).optional(),
+  meetingLink: z.string().trim().max(500).optional(),
 });
 
 export type ScheduleSessionBody = z.infer<typeof scheduleSessionSchema>;

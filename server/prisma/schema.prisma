@@ -342,6 +342,13 @@ model Session {
   durationMinutes Int      @map("duration_minutes")
   endsAt          DateTime @map("ends_at")
 
+  // Modalidad de la sesión (Art. 8): presencial registra el lugar, virtual
+  // el enlace de videollamada. Se guarda como texto, como el resto de
+  // valores tipo-enum del proyecto (p. ej. TutoringRequest.source).
+  modality    String  @default("PRESENCIAL")
+  location    String? @map("location")
+  meetingLink String? @map("meeting_link")
+
   participants SessionParticipant[]
 
   @@index([tutorId])

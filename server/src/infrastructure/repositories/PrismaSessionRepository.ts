@@ -12,6 +12,9 @@ function toSessionWithParticipants(row: SessionRow): SessionWithParticipants {
     scheduledAt: row.scheduledAt,
     durationMinutes: row.durationMinutes,
     endsAt: row.endsAt,
+    modality: row.modality as Session['modality'],
+    location: row.location,
+    meetingLink: row.meetingLink,
     createdAt: row.createdAt,
     studentIds: row.participants.map((p) => p.studentId),
   };
@@ -43,7 +46,7 @@ export class PrismaSessionRepository implements SessionRepository {
         scheduledAt: { lt: end },
         endsAt: { gt: start },
       },
-    });
+    }) as Promise<Session[]>;
   }
 
   async findAll(filters?: SessionFilters): Promise<SessionWithParticipants[]> {
