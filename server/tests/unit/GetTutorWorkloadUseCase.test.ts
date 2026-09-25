@@ -15,6 +15,7 @@ describe('GetTutorWorkloadUseCase', () => {
     students = {
       findById: jest.fn(),
       findByCode: jest.fn(),
+      findByUserId: jest.fn(),
       findAll: jest.fn(),
       create: jest.fn(),
       update: jest.fn(),

@@ -11,3 +11,11 @@ export const createTutoringRequestSchema = z.object({
 });
 
 export type CreateTutoringRequestBody = z.infer<typeof createTutoringRequestSchema>;
+
+// Autoservicio (el propio tutorado): sin origen ni datos de docente, siempre STUDENT.
+export const createOwnTutoringRequestSchema = z.object({
+  caseType: z.enum(['ACADEMIC', 'PSYCHOLOGICAL', 'SOCIAL', 'HEALTH']),
+  reason: z.string().trim().min(3, 'Describa el motivo de la solicitud').max(1000),
+});
+
+export type CreateOwnTutoringRequestBody = z.infer<typeof createOwnTutoringRequestSchema>;

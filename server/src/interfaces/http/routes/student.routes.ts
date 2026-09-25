@@ -28,6 +28,7 @@ const studentController = new StudentController(
   new ExcelStudentParser(),
   new ImportReportWorkbook(),
   container.useCases.markStudentRiskUseCase,
+  container.useCases.linkStudentPortalAccountUseCase,
 );
 
 // Todas las rutas de estudiantes requieren autenticación.
@@ -58,5 +59,12 @@ router.patch('/students/:id/risk', authorize(['students:write']), studentControl
 
 // Editar los datos de filiación de un estudiante.
 router.patch('/students/:id', authorize(['students:write']), studentController.update);
+
+// Vincular/desvincular la cuenta de portal (rol Tutorado) de un estudiante.
+router.patch(
+  '/students/:id/portal-account',
+  authorize(['students:write']),
+  studentController.linkPortalAccount,
+);
 
 export default router;

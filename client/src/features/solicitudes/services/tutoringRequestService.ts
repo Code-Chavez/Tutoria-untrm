@@ -24,6 +24,11 @@ export interface CreateTutoringRequestData {
   reason: string;
 }
 
+export interface CreateOwnTutoringRequestData {
+  caseType: TutoringCaseType;
+  reason: string;
+}
+
 export const tutoringRequestService = {
   createTutoringRequest: async (
     studentId: string,
@@ -41,5 +46,16 @@ export const tutoringRequestService = {
       '/tutoring-requests?mine=true',
     );
     return response.data.requests;
+  },
+
+  // Autoservicio: el propio tutorado solicita tutoría para sí mismo.
+  createOwnTutoringRequest: async (
+    data: CreateOwnTutoringRequestData,
+  ): Promise<TutoringRequest> => {
+    const response = await apiClient.post<{ message: string; request: TutoringRequest }>(
+      '/tutoring-requests/me',
+      data,
+    );
+    return response.data.request;
   },
 };

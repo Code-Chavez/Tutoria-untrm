@@ -23,6 +23,7 @@ async function main() {
     prisma.permission.upsert({ where: { code: 'support-contacts:write' }, update: {}, create: { code: 'support-contacts:write', description: 'Registrar persona de red de apoyo' } }),
     prisma.permission.upsert({ where: { code: 'tutoring-requests:read' }, update: {}, create: { code: 'tutoring-requests:read', description: 'Ver solicitudes de tutoría' } }),
     prisma.permission.upsert({ where: { code: 'tutoring-requests:write' }, update: {}, create: { code: 'tutoring-requests:write', description: 'Registrar solicitudes de tutoría' } }),
+    prisma.permission.upsert({ where: { code: 'tutoring-requests:self' }, update: {}, create: { code: 'tutoring-requests:self', description: 'Solicitar tutoría para sí mismo (autoservicio)' } }),
     prisma.permission.upsert({ where: { code: 'sessions:read' }, update: {}, create: { code: 'sessions:read', description: 'Ver sesiones' } }),
     prisma.permission.upsert({ where: { code: 'sessions:write' }, update: {}, create: { code: 'sessions:write', description: 'Programar sesiones' } }),
     prisma.permission.upsert({ where: { code: 'referrals:read' }, update: {}, create: { code: 'referrals:read', description: 'Ver derivaciones' } }),
@@ -79,7 +80,7 @@ async function main() {
     [adminRole.id]: Object.keys(permMap),
     [coordRole.id]: ['users:read', 'students:read', 'students:write', 'students:import', 'interviews:read', 'tutoring-requests:read', 'tutoring-requests:write', 'sessions:read', 'referrals:read', 'reports:read', 'reports:export', 'evaluation:manage'],
     [tutorRole.id]: ['students:read', 'interviews:read', 'interviews:write', 'support-contacts:read', 'support-contacts:write', 'tutoring-requests:read', 'tutoring-requests:write', 'sessions:read', 'sessions:write', 'referrals:read', 'referrals:write', 'reports:read'],
-    [studentRole.id]: ['sessions:read', 'evaluation:respond'],
+    [studentRole.id]: ['sessions:read', 'evaluation:respond', 'tutoring-requests:self'],
     [serviceRole.id]: ['referrals:read', 'referrals:write'],
     [viceRole.id]: ['reports:read'],
   };
@@ -251,6 +252,23 @@ async function main() {
         assignedAt: s.assignedAt ?? null,
       },
     });
+  }
+
+  // Vincula las cuentas Tutorado de prueba a su propio registro de estudiante
+  // (mismo studentCode que su correo institucional), habilitando el
+  // autoservicio de solicitud de tutoría desde su cuenta.
+  const portalLinks: { studentCode: string; email: string }[] = [
+    { studentCode: '20191234', email: '20191234@untrm.edu.pe' },
+    { studentCode: '20195678', email: '20195678@untrm.edu.pe' },
+  ];
+  for (const link of portalLinks) {
+    const userId = demoUsers.get(link.email);
+    if (userId) {
+      await prisma.student.update({
+        where: { studentCode: link.studentCode },
+        data: { userId },
+      });
+    }
   }
 
   // Parámetros del sistema

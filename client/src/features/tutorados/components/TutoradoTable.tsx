@@ -8,6 +8,8 @@ import {
   ClipboardIcon,
   FolderIcon,
   SendIcon,
+  CalendarIcon,
+  LinkIcon,
 } from '@shared/components/icons';
 import { Student } from '../services/studentService';
 import table from '@shared/components/ui/DataTable.module.css';
@@ -25,6 +27,8 @@ interface TutoradoTableProps {
   onRegisterInterview: (student: Student) => void;
   onViewRecord: (student: Student) => void;
   onRequestTutoring: (student: Student) => void;
+  onScheduleSession: (student: Student) => void;
+  onLinkAccount: (student: Student) => void;
 }
 
 export const TutoradoTable: React.FC<TutoradoTableProps> = ({
@@ -40,6 +44,8 @@ export const TutoradoTable: React.FC<TutoradoTableProps> = ({
   onRegisterInterview,
   onViewRecord,
   onRequestTutoring,
+  onScheduleSession,
+  onLinkAccount,
 }) => {
   // El expediente solo requiere students:read, así que se muestra a
   // cualquier rol que pueda ver esta tabla.
@@ -119,9 +125,26 @@ export const TutoradoTable: React.FC<TutoradoTableProps> = ({
                           <ClipboardIcon size={16} />
                         </IconButton>
                       )}
+                      {/* sessions:write es exclusivo de Docente Tutor, igual que interviews:write. */}
+                      {canConductInterview && (
+                        <IconButton
+                          label="Programar sesión"
+                          onClick={() => onScheduleSession(student)}
+                        >
+                          <CalendarIcon size={16} />
+                        </IconButton>
+                      )}
                       {canWrite && student.tutorId && (
                         <IconButton label="Reasignar tutor" onClick={() => onReassign(student)}>
                           <SwitchIcon size={16} />
+                        </IconButton>
+                      )}
+                      {canWrite && (
+                        <IconButton
+                          label={student.userId ? 'Cambiar cuenta de portal' : 'Vincular cuenta'}
+                          onClick={() => onLinkAccount(student)}
+                        >
+                          <LinkIcon size={16} />
                         </IconButton>
                       )}
                       {canWrite &&

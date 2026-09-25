@@ -13,6 +13,8 @@ export interface Student {
   schoolId: string;
   tutorId?: string | null;
   assignedAt?: Date | null;
+  // Cuenta de portal del propio tutorado (rol Tutorado), para autoservicio.
+  userId?: string | null;
   createdAt: Date;
   updatedAt: Date;
 }

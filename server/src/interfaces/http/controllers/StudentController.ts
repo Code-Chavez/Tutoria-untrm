@@ -5,18 +5,23 @@ import { UpdateStudentUseCase } from '@application/use-cases/students/UpdateStud
 import { ListStudentsUseCase } from '@application/use-cases/students/ListStudentsUseCase';
 import { ImportStudentsUseCase } from '@application/use-cases/students/ImportStudentsUseCase';
 import { MarkStudentRiskUseCase } from '@application/use-cases/students/MarkStudentRiskUseCase';
+import { LinkStudentPortalAccountUseCase } from '@application/use-cases/students/LinkStudentPortalAccountUseCase';
 import { StudentFilters } from '@domain/repositories/StudentRepository';
 import {
   DuplicateStudentCodeError,
   StudentNotFoundError,
   SchoolNotFoundError,
   RiskReasonRequiredError,
+  PortalUserNotFoundError,
+  PortalUserRoleMismatchError,
+  PortalUserAlreadyLinkedError,
 } from '@application/use-cases/students/StudentErrors';
 import {
   createStudentSchema,
   updateStudentSchema,
   importReportSchema,
   markStudentRiskSchema,
+  linkPortalAccountSchema,
 } from '../validators/student.validators';
 import { CreateStudentInput, UpdateStudentInput } from '@application/dtos/student.dto';
 import { ExcelStudentParser } from '@infrastructure/parsers/ExcelStudentParser';
@@ -38,7 +43,39 @@ export class StudentController {
     private readonly excelParser: ExcelStudentParser,
     private readonly reportWorkbook: ImportReportWorkbook,
     private readonly markStudentRiskUseCase: MarkStudentRiskUseCase,
+    private readonly linkStudentPortalAccountUseCase: LinkStudentPortalAccountUseCase,
   ) {}
+
+  // Vincula/desvincula la cuenta de portal (rol Tutorado) de un estudiante.
+  linkPortalAccount = async (req: Request, res: Response) => {
+    try {
+      const id = req.params.id as string;
+      const { userId } = linkPortalAccountSchema.parse(req.body);
+      const student = await this.linkStudentPortalAccountUseCase.execute(id, userId);
+      res.status(200).json({
+        message: userId
+          ? 'Cuenta de portal vinculada exitosamente'
+          : 'Cuenta de portal desvinculada',
+        student,
+      });
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        res.status(400).json({ error: 'Datos de entrada inválidos', details: error.errors });
+      } else if (
+        error instanceof PortalUserNotFoundError ||
+        error instanceof StudentNotFoundError
+      ) {
+        res.status(404).json({ error: error.message });
+      } else if (
+        error instanceof PortalUserRoleMismatchError ||
+        error instanceof PortalUserAlreadyLinkedError
+      ) {
+        res.status(409).json({ error: error.message });
+      } else {
+        res.status(500).json({ error: 'Error interno del servidor' });
+      }
+    }
+  };
 
   // Marca o quita el riesgo académico de un estudiante (HU-11).
   markRisk = async (req: Request, res: Response) => {

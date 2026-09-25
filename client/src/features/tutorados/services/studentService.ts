@@ -27,6 +27,7 @@ export interface Student {
   schoolId: string;
   tutorId?: string | null;
   assignedAt?: string | null;
+  userId?: string | null;
 }
 
 export interface StudentFilters {
@@ -99,6 +100,14 @@ export const studentService = {
     const response = await apiClient.patch<{ message: string; student: Student }>(
       `/students/${id}/risk`,
       { isAtRisk, reason },
+    );
+    return response.data.student;
+  },
+
+  linkPortalAccount: async (id: string, userId: string | null): Promise<Student> => {
+    const response = await apiClient.patch<{ message: string; student: Student }>(
+      `/students/${id}/portal-account`,
+      { userId },
     );
     return response.data.student;
   },

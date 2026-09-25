@@ -8,6 +8,8 @@ import { PrismaStudentRepository } from './repositories/PrismaStudentRepository'
 import { PrismaTutorAssignmentHistoryRepository } from './repositories/PrismaTutorAssignmentHistoryRepository';
 import { PrismaTutorInterviewRepository } from './repositories/PrismaTutorInterviewRepository';
 import { PrismaTutoringRequestRepository } from './repositories/PrismaTutoringRequestRepository';
+import { PrismaSessionRepository } from './repositories/PrismaSessionRepository';
+import { PrismaSystemParameterRepository } from './repositories/PrismaSystemParameterRepository';
 import { PrismaSupportContactRepository } from './repositories/PrismaSupportContactRepository';
 import { PrismaSchoolRepository } from './repositories/PrismaSchoolRepository';
 import { BcryptPasswordHasher } from './services/BcryptPasswordHasher';
@@ -28,6 +30,8 @@ const studentRepository = new PrismaStudentRepository(prisma);
 const tutorAssignmentHistoryRepository = new PrismaTutorAssignmentHistoryRepository(prisma);
 const tutorInterviewRepository = new PrismaTutorInterviewRepository(prisma);
 const tutoringRequestRepository = new PrismaTutoringRequestRepository(prisma);
+const sessionRepository = new PrismaSessionRepository(prisma);
+const systemParameterRepository = new PrismaSystemParameterRepository(prisma);
 const supportContactRepository = new PrismaSupportContactRepository(prisma);
 const schoolRepository = new PrismaSchoolRepository(prisma);
 
@@ -69,6 +73,7 @@ import { UpdateStudentUseCase } from '@application/use-cases/students/UpdateStud
 import { ListStudentsUseCase } from '@application/use-cases/students/ListStudentsUseCase';
 import { ImportStudentsUseCase } from '@application/use-cases/students/ImportStudentsUseCase';
 import { MarkStudentRiskUseCase } from '@application/use-cases/students/MarkStudentRiskUseCase';
+import { LinkStudentPortalAccountUseCase } from '@application/use-cases/students/LinkStudentPortalAccountUseCase';
 import { AssignStudentsUseCase } from '@application/use-cases/assignments/AssignStudentsUseCase';
 import { GetTutorWorkloadUseCase } from '@application/use-cases/assignments/GetTutorWorkloadUseCase';
 import { ReassignStudentUseCase } from '@application/use-cases/assignments/ReassignStudentUseCase';
@@ -78,7 +83,10 @@ import { UpsertSupportContactUseCase } from '@application/use-cases/support-cont
 import { GetSupportContactUseCase } from '@application/use-cases/support-contacts/GetSupportContactUseCase';
 import { GetStudentRecordUseCase } from '@application/use-cases/student-record/GetStudentRecordUseCase';
 import { CreateTutoringRequestUseCase } from '@application/use-cases/tutoring-requests/CreateTutoringRequestUseCase';
+import { CreateOwnTutoringRequestUseCase } from '@application/use-cases/tutoring-requests/CreateOwnTutoringRequestUseCase';
 import { ListTutoringRequestsUseCase } from '@application/use-cases/tutoring-requests/ListTutoringRequestsUseCase';
+import { ScheduleSessionUseCase } from '@application/use-cases/sessions/ScheduleSessionUseCase';
+import { ListSessionsUseCase } from '@application/use-cases/sessions/ListSessionsUseCase';
 import { ListSchoolsUseCase } from '@application/use-cases/schools/ListSchoolsUseCase';
 
 const createUserUseCase = new CreateUserUseCase(userRepository, passwordHasher);
@@ -103,6 +111,11 @@ const updateStudentUseCase = new UpdateStudentUseCase(studentRepository, schoolR
 const listStudentsUseCase = new ListStudentsUseCase(studentRepository);
 const importStudentsUseCase = new ImportStudentsUseCase(studentRepository, schoolRepository);
 const markStudentRiskUseCase = new MarkStudentRiskUseCase(studentRepository);
+const linkStudentPortalAccountUseCase = new LinkStudentPortalAccountUseCase(
+  studentRepository,
+  userRepository,
+  roleRepository,
+);
 const assignStudentsUseCase = new AssignStudentsUseCase(
   studentRepository,
   userRepository,
@@ -147,6 +160,16 @@ const createTutoringRequestUseCase = new CreateTutoringRequestUseCase(
   roleRepository,
 );
 const listTutoringRequestsUseCase = new ListTutoringRequestsUseCase(tutoringRequestRepository);
+const createOwnTutoringRequestUseCase = new CreateOwnTutoringRequestUseCase(
+  studentRepository,
+  createTutoringRequestUseCase,
+);
+const scheduleSessionUseCase = new ScheduleSessionUseCase(
+  sessionRepository,
+  studentRepository,
+  systemParameterRepository,
+);
+const listSessionsUseCase = new ListSessionsUseCase(sessionRepository);
 const listSchoolsUseCase = new ListSchoolsUseCase(schoolRepository);
 
 export const container = {
@@ -162,6 +185,8 @@ export const container = {
     tutorInterviewRepository,
     supportContactRepository,
     tutoringRequestRepository,
+    sessionRepository,
+    systemParameterRepository,
   },
   services: {
     passwordHasher,
@@ -186,6 +211,7 @@ export const container = {
     listStudentsUseCase,
     importStudentsUseCase,
     markStudentRiskUseCase,
+    linkStudentPortalAccountUseCase,
     assignStudentsUseCase,
     getTutorWorkloadUseCase,
     reassignStudentUseCase,
@@ -195,7 +221,10 @@ export const container = {
     getSupportContactUseCase,
     getStudentRecordUseCase,
     createTutoringRequestUseCase,
+    createOwnTutoringRequestUseCase,
     listTutoringRequestsUseCase,
+    scheduleSessionUseCase,
+    listSessionsUseCase,
     listSchoolsUseCase,
   },
 } as const;

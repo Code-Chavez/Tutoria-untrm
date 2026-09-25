@@ -12,3 +12,9 @@ export interface CreateTutoringRequestInput {
   caseType: TutoringCaseType;
   reason: string;
 }
+
+// Autoservicio: el propio tutorado solicita, sin origen/datos de docente.
+export interface CreateOwnTutoringRequestInput {
+  caseType: TutoringCaseType;
+  reason: string;
+}

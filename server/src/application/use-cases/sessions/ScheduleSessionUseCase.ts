@@ -1,0 +1,56 @@
+import { SessionWithParticipants } from '@domain/entities/Session';
+import { SessionRepository } from '@domain/repositories/SessionRepository';
+import { StudentRepository } from '@domain/repositories/StudentRepository';
+import { SystemParameterRepository } from '@domain/repositories/SystemParameterRepository';
+import { ScheduleSessionInput } from '@application/dtos/session.dto';
+import { StudentNotFoundError } from '@application/use-cases/students/StudentErrors';
+import { TutorScheduleConflictError } from './SessionErrors';
+
+const DEFAULT_DURATION_MINUTES = 45; // Art. 15.c, usado si el parámetro no está configurado.
+const DURATION_PARAM_KEY = 'session_duration_minutes';
+
+/**
+ * Programa una sesión de tutoría individual (HU-18, Art. 15.c). La duración
+ * sale del parámetro del sistema (45 min por defecto) y se valida que el
+ * tutor no tenga otra sesión que se solape con el horario elegido.
+ */
+export class ScheduleSessionUseCase {
+  constructor(
+    private readonly sessions: SessionRepository,
+    private readonly students: StudentRepository,
+    private readonly systemParameters: SystemParameterRepository,
+  ) {}
+
+  async execute(tutorId: string, input: ScheduleSessionInput): Promise<SessionWithParticipants> {
+    const student = await this.students.findById(input.studentId);
+    if (!student) {
+      throw new StudentNotFoundError(input.studentId);
+    }
+
+    const durationMinutes = await this.resolveDuration();
+    const scheduledAt = new Date(input.scheduledAt);
+    const endsAt = new Date(scheduledAt.getTime() + durationMinutes * 60_000);
+
+    const overlapping = await this.sessions.findOverlapping(tutorId, scheduledAt, endsAt);
+    if (overlapping.length > 0) {
+      throw new TutorScheduleConflictError();
+    }
+
+    return this.sessions.create(
+      {
+        tutorId,
+        topic: input.topic.trim(),
+        scheduledAt,
+        durationMinutes,
+        endsAt,
+      },
+      [input.studentId],
+    );
+  }
+
+  private async resolveDuration(): Promise<number> {
+    const param = await this.systemParameters.findByKey(DURATION_PARAM_KEY);
+    const parsed = param ? Number(param.value) : NaN;
+    return Number.isFinite(parsed) && parsed > 0 ? parsed : DEFAULT_DURATION_MINUTES;
+  }
+}

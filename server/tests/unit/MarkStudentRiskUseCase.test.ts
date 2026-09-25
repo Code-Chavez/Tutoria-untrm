@@ -31,6 +31,7 @@ describe('MarkStudentRiskUseCase', () => {
     mockStudentRepository = {
       findById: jest.fn().mockResolvedValue(baseStudent),
       findByCode: jest.fn(),
+      findByUserId: jest.fn(),
       findAll: jest.fn(),
       create: jest.fn(),
       update: jest.fn().mockImplementation(async (id, data) => ({ ...baseStudent, ...data, id })),

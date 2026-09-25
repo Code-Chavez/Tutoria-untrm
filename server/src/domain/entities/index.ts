@@ -13,3 +13,5 @@ export type {
   TutoringCaseType,
   TutoringRequestRoutedRole,
 } from './TutoringRequest';
+export type { Session, SessionParticipant, SessionWithParticipants } from './Session';
+export type { SystemParameter } from './SystemParameter';

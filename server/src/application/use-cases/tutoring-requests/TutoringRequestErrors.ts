@@ -11,3 +11,10 @@ export class NoRoutingTargetError extends Error {
     this.name = 'NoRoutingTargetError';
   }
 }
+
+export class StudentProfileNotLinkedError extends Error {
+  constructor() {
+    super('Tu cuenta aún no está vinculada a tu registro de estudiante. Contacta a Bienestar Universitario.');
+    this.name = 'StudentProfileNotLinkedError';
+  }
+}
