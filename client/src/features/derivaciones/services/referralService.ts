@@ -64,6 +64,7 @@ export interface StudentReferral {
   checkedAspects: ReferralAspectCode[];
   reason: string;
   service: ReferralService;
+  receivingInstance?: string;
   createdAt: string;
 }
 
@@ -71,6 +72,23 @@ export interface CreateReferralData {
   checkedAspects: ReferralAspectCode[];
   reason: string;
   service: ReferralService;
+  receivingInstance?: string;
+}
+
+/** Sugiere el servicio de derivación (HU-29) */
+export function suggestReferralService(aspects: ReferralAspectCode[]): ReferralService {
+  if (aspects.length === 0) return 'ESCUELA';
+  
+  const hasMentalHealth = aspects.some((a) => a.startsWith('MENTAL_HEALTH_'));
+  const hasSocial = aspects.some((a) => a.startsWith('SOCIAL_'));
+  const hasAppearance = aspects.some((a) => a.startsWith('APPEARANCE_'));
+  const hasAcademic = aspects.some((a) => a.startsWith('ACADEMIC_'));
+
+  if (hasMentalHealth) return 'PSICOLOGIA';
+  if (hasSocial || hasAppearance) return 'PSICOPEDAGOGIA';
+  if (hasAcademic) return 'ESCUELA';
+
+  return 'ESCUELA';
 }
 
 function saveBlob(data: Blob, filename: string): void {

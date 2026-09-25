@@ -23,6 +23,7 @@ describe('GetReferralConstanciaUseCase', () => {
     checkedAspects: ['ACADEMIC_AT_RISK_OF_FAILING', 'MENTAL_HEALTH_ANXIOUS'],
     reason: 'Bajo rendimiento y señales de ansiedad',
     service: 'PSICOLOGIA',
+    receivingInstance: null,
     createdAt: new Date('2026-09-25T10:00:00Z'),
   };
 
