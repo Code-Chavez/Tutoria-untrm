@@ -31,6 +31,7 @@ interface TutoradoTableProps {
   onScheduleSession: (student: Student) => void;
   onLinkAccount: (student: Student) => void;
   onRegisterFollowUp: (student: Student) => void;
+  onDeriveCase: (student: Student) => void;
 }
 
 export const TutoradoTable: React.FC<TutoradoTableProps> = ({
@@ -49,6 +50,7 @@ export const TutoradoTable: React.FC<TutoradoTableProps> = ({
   onScheduleSession,
   onLinkAccount,
   onRegisterFollowUp,
+  onDeriveCase,
 }) => {
   // El expediente solo requiere students:read, así que se muestra a
   // cualquier rol que pueda ver esta tabla.
@@ -143,6 +145,12 @@ export const TutoradoTable: React.FC<TutoradoTableProps> = ({
                           onClick={() => onRegisterFollowUp(student)}
                         >
                           <ActivityIcon size={16} />
+                        </IconButton>
+                      )}
+                      {/* referrals:write también es exclusivo de Docente Tutor. */}
+                      {canConductInterview && (
+                        <IconButton label="Derivar caso" onClick={() => onDeriveCase(student)}>
+                          <SendIcon size={16} />
                         </IconButton>
                       )}
                       {canWrite && student.tutorId && (
