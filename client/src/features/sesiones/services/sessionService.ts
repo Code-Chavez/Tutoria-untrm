@@ -12,7 +12,8 @@ export interface TutoringSession {
 }
 
 export interface ScheduleSessionData {
-  studentId: string;
+  // Uno o más tutorados: 1 = sesión individual, 2+ = grupal (Art. 7.b).
+  studentIds: string[];
   topic: string;
   scheduledAt: string; // ISO datetime
 }

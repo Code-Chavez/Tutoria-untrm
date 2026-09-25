@@ -75,7 +75,7 @@ describe('SessionFormModal', () => {
     await user.click(screen.getByRole('button', { name: /programar sesión/i }));
 
     expect(onSubmit).toHaveBeenCalledWith({
-      studentId: 's1',
+      studentIds: ['s1'],
       topic: 'Reforzamiento de Cálculo',
       scheduledAt: new Date('2026-10-01T15:00').toISOString(),
     });

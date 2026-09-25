@@ -16,7 +16,7 @@ describe('ScheduleSessionUseCase', () => {
   let systemParameters: jest.Mocked<SystemParameterRepository>;
 
   const baseInput: ScheduleSessionInput = {
-    studentId: 'student-1',
+    studentIds: ['student-1'],
     topic: 'Reforzamiento de Cálculo',
     scheduledAt: '2026-10-01T15:00:00.000Z',
   };
@@ -34,7 +34,7 @@ describe('ScheduleSessionUseCase', () => {
       findByStudent: jest.fn(),
     };
     students = {
-      findById: jest.fn().mockResolvedValue({ id: 'student-1' } as Student),
+      findById: jest.fn().mockImplementation(async (id: string) => ({ id } as Student)),
       findByCode: jest.fn(),
       findByUserId: jest.fn(),
       findAll: jest.fn(),
@@ -86,5 +86,29 @@ describe('ScheduleSessionUseCase', () => {
 
     await expect(useCase.execute('tutor-1', baseInput)).rejects.toThrow(StudentNotFoundError);
     expect(sessions.findOverlapping).not.toHaveBeenCalled();
+  });
+
+  it('programa una sesión grupal con dos o más tutorados (Art. 7.b)', async () => {
+    const result = await useCase.execute('tutor-1', {
+      ...baseInput,
+      studentIds: ['student-1', 'student-2', 'student-3'],
+    });
+
+    expect(result.studentIds).toEqual(['student-1', 'student-2', 'student-3']);
+    expect(sessions.create).toHaveBeenCalledWith(
+      expect.anything(),
+      ['student-1', 'student-2', 'student-3'],
+    );
+  });
+
+  it('lanza StudentNotFoundError si alguno de los tutorados de una sesión grupal no existe', async () => {
+    students.findById.mockImplementation(async (id: string) =>
+      id === 'student-2' ? null : ({ id } as Student),
+    );
+
+    await expect(
+      useCase.execute('tutor-1', { ...baseInput, studentIds: ['student-1', 'student-2'] }),
+    ).rejects.toThrow(StudentNotFoundError);
+    expect(sessions.create).not.toHaveBeenCalled();
   });
 });

@@ -10,9 +10,11 @@ const DEFAULT_DURATION_MINUTES = 45; // Art. 15.c, usado si el parámetro no est
 const DURATION_PARAM_KEY = 'session_duration_minutes';
 
 /**
- * Programa una sesión de tutoría individual (HU-18, Art. 15.c). La duración
- * sale del parámetro del sistema (45 min por defecto) y se valida que el
- * tutor no tenga otra sesión que se solape con el horario elegido.
+ * Programa una sesión de tutoría individual o grupal (HU-18/HU-19, Art. 15.c
+ * y Art. 7.b: la tutoría grupal admite dos o más tutorados para abordar
+ * temas comunes). La duración sale del parámetro del sistema (45 min por
+ * defecto) y se valida que el tutor no tenga otra sesión que se solape con
+ * el horario elegido.
  */
 export class ScheduleSessionUseCase {
   constructor(
@@ -22,9 +24,11 @@ export class ScheduleSessionUseCase {
   ) {}
 
   async execute(tutorId: string, input: ScheduleSessionInput): Promise<SessionWithParticipants> {
-    const student = await this.students.findById(input.studentId);
-    if (!student) {
-      throw new StudentNotFoundError(input.studentId);
+    for (const studentId of input.studentIds) {
+      const student = await this.students.findById(studentId);
+      if (!student) {
+        throw new StudentNotFoundError(studentId);
+      }
     }
 
     const durationMinutes = await this.resolveDuration();
@@ -44,7 +48,7 @@ export class ScheduleSessionUseCase {
         durationMinutes,
         endsAt,
       },
-      [input.studentId],
+      input.studentIds,
     );
   }
 
