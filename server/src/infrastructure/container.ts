@@ -100,6 +100,7 @@ import { UploadSessionEvidenceUseCase } from '@application/use-cases/sessions/Up
 import { ListSessionEvidenceUseCase } from '@application/use-cases/sessions/ListSessionEvidenceUseCase';
 import { GetSessionEvidenceFileUseCase } from '@application/use-cases/sessions/GetSessionEvidenceFileUseCase';
 import { ListSchoolsUseCase } from '@application/use-cases/schools/ListSchoolsUseCase';
+import { GetRiskAlertsUseCase } from '@application/use-cases/alerts/GetRiskAlertsUseCase';
 
 const createUserUseCase = new CreateUserUseCase(userRepository, passwordHasher);
 const updateUserUseCase = new UpdateUserUseCase(userRepository);
@@ -202,6 +203,12 @@ const getSessionEvidenceFileUseCase = new GetSessionEvidenceFileUseCase(
   evidenceStorage,
 );
 const listSchoolsUseCase = new ListSchoolsUseCase(schoolRepository);
+const getRiskAlertsUseCase = new GetRiskAlertsUseCase(
+  studentRepository,
+  sessionRepository,
+  userRepository,
+  systemParameterRepository,
+);
 
 export const container = {
   repositories: {
@@ -267,5 +274,6 @@ export const container = {
     listSessionEvidenceUseCase,
     getSessionEvidenceFileUseCase,
     listSchoolsUseCase,
+    getRiskAlertsUseCase,
   },
 } as const;
