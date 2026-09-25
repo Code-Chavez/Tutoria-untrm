@@ -16,6 +16,7 @@ import { ExpedienteIndexPage } from '@features/expediente/pages/ExpedienteIndexP
 import { ExpedientePage } from '@features/expediente/pages/ExpedientePage';
 import { ProfilePage } from '@features/profile/pages/ProfilePage';
 import { MyTutoringRequestPage } from '@features/solicitudes/pages/MyTutoringRequestPage';
+import { SessionsCalendarPage } from '@features/sesiones/pages/SessionsCalendarPage';
 
 export default function App() {
   return (
@@ -74,6 +75,14 @@ export default function App() {
                 element={
                   <RequireRole roles={['Docente Tutor', 'Coordinador', 'Administrador DBU']}>
                     <ExpedientePage />
+                  </RequireRole>
+                }
+              />
+              <Route
+                path="sesiones"
+                element={
+                  <RequireRole roles={['Docente Tutor']}>
+                    <SessionsCalendarPage />
                   </RequireRole>
                 }
               />
