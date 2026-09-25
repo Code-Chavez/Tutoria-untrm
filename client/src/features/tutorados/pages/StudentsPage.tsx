@@ -24,6 +24,7 @@ import {
   CreateTutoringRequestData,
 } from '@features/solicitudes/services/tutoringRequestService';
 import { SessionFormModal } from '../components/SessionFormModal';
+import { GroupSessionFormModal } from '../components/GroupSessionFormModal';
 import { sessionService, ScheduleSessionData } from '@features/sesiones/services/sessionService';
 import { useStudents } from '../hooks/useStudents';
 import { useAuth } from '@features/auth/hooks/useAuth';
@@ -46,6 +47,7 @@ import {
   BanIcon,
   SearchIcon,
   XCircleIcon,
+  CalendarIcon,
 } from '@shared/components/icons';
 
 // Duración por defecto (Art. 15.c); el valor real lo determina el servidor a
@@ -95,8 +97,9 @@ export const StudentsPage: React.FC = () => {
   const [requestError, setRequestError] = useState('');
   const [requestFeedback, setRequestFeedback] = useState('');
 
-  // Programación de sesión (HU-18).
+  // Programación de sesión individual (HU-18) o grupal (HU-19).
   const [studentForSession, setStudentForSession] = useState<Student | null>(null);
+  const [groupSessionOpen, setGroupSessionOpen] = useState(false);
   const [sessionLoading, setSessionLoading] = useState(false);
   const [sessionError, setSessionError] = useState('');
 
@@ -295,6 +298,26 @@ export const StudentsPage: React.FC = () => {
     }
   };
 
+  const confirmScheduleGroup = async (data: ScheduleSessionData) => {
+    setSessionLoading(true);
+    setSessionError('');
+    try {
+      const session = await sessionService.scheduleSession(data);
+      const when = new Date(session.scheduledAt).toLocaleString('es-PE', {
+        dateStyle: 'medium',
+        timeStyle: 'short',
+      });
+      setRequestFeedback(
+        `Sesión grupal programada para el ${when} con ${session.studentIds.length} tutorados.`,
+      );
+      setGroupSessionOpen(false);
+    } catch (err) {
+      setSessionError(getApiErrorMessage(err));
+    } finally {
+      setSessionLoading(false);
+    }
+  };
+
   const confirmLinkAccount = async (userId: string | null) => {
     if (!studentToLink) return;
     setLinkLoading(true);
@@ -322,11 +345,25 @@ export const StudentsPage: React.FC = () => {
         subtitle="Gestión de estudiantes en el programa de tutoría"
         icon={<GraduationCapIcon size={24} />}
         actions={
-          canWrite && (
-            <Button icon={<PlusIcon size={17} />} onClick={() => handleOpenModal()}>
-              Nuevo tutorado
-            </Button>
-          )
+          <>
+            {canConductInterview && (
+              <Button
+                variant="secondary"
+                icon={<CalendarIcon size={17} />}
+                onClick={() => {
+                  setSessionError('');
+                  setGroupSessionOpen(true);
+                }}
+              >
+                Sesión grupal
+              </Button>
+            )}
+            {canWrite && (
+              <Button icon={<PlusIcon size={17} />} onClick={() => handleOpenModal()}>
+                Nuevo tutorado
+              </Button>
+            )}
+          </>
         }
       />
 
@@ -484,6 +521,19 @@ export const StudentsPage: React.FC = () => {
           serverError={sessionError}
           onSubmit={confirmSchedule}
           onCancel={() => setStudentForSession(null)}
+        />
+      )}
+
+      {groupSessionOpen && (
+        <GroupSessionFormModal
+          students={students}
+          schools={schools}
+          tutorName={tutorName}
+          durationMinutes={DEFAULT_SESSION_DURATION}
+          loading={sessionLoading}
+          serverError={sessionError}
+          onSubmit={confirmScheduleGroup}
+          onCancel={() => setGroupSessionOpen(false)}
         />
       )}
 

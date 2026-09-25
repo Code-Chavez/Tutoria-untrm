@@ -50,7 +50,7 @@ export const SessionFormModal: React.FC<SessionFormModalProps> = ({
       return;
     }
     onSubmit({
-      studentId: student.id,
+      studentIds: [student.id],
       topic: topic.trim(),
       scheduledAt: scheduledAt.toISOString(),
     });
