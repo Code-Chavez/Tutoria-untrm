@@ -125,8 +125,8 @@ async function main() {
     { email: 'patricia.nunez@untrm.edu.pe', firstName: 'Patricia', lastName: 'Núñez Ortiz', phone: '941000005', roleId: tutorRole.id },
     { email: 'miguel.torres@untrm.edu.pe', firstName: 'Miguel', lastName: 'Torres Guevara', phone: '941000006', roleId: tutorRole.id },
     // Profesional de Servicio
-    { email: 'lucia.flores@untrm.edu.pe', firstName: 'Lucía', lastName: 'Flores Bardales', phone: '941000007', roleId: serviceRole.id },
-    { email: 'ronald.diaz@untrm.edu.pe', firstName: 'Ronald', lastName: 'Díaz Cabrera', phone: '941000008', roleId: serviceRole.id },
+    { email: 'lucia.flores@untrm.edu.pe', firstName: 'Lucía', lastName: 'Flores Bardales', phone: '941000007', roleId: serviceRole.id, service: 'PSICOLOGIA' },
+    { email: 'ronald.diaz@untrm.edu.pe', firstName: 'Ronald', lastName: 'Díaz Cabrera', phone: '941000008', roleId: serviceRole.id, service: 'SALUD' },
     // Vicerrectorado
     { email: 'vicerrectorado.academico@untrm.edu.pe', firstName: 'Segundo', lastName: 'Ortiz Fernández', phone: '941000009', roleId: viceRole.id },
     // Tutorado (cuentas de estudiante que inician sesión en el sistema)
@@ -146,6 +146,7 @@ async function main() {
         lastName: u.lastName,
         phone: u.phone,
         roleId: u.roleId,
+        service: (u as any).service || null,
       },
     });
     demoUsers.set(u.email, user.id);

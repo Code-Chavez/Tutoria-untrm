@@ -61,6 +61,9 @@ export class ReferralConstanciaPdf {
       doc.fontSize(12).text('Servicio al que se deriva', { underline: true });
       doc.moveDown(0.3);
       doc.fontSize(10).text(SERVICE_LABEL[data.service] ?? data.service);
+      if (data.receivingInstance) {
+        doc.text(`Instancia o profesional que recibe: ${data.receivingInstance}`);
+      }
       doc.moveDown(2);
 
       doc.fontSize(9).fillColor('#555').text(
