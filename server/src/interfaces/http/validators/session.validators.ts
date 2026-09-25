@@ -21,3 +21,17 @@ export const scheduleSessionSchema = z.object({
 });
 
 export type ScheduleSessionBody = z.infer<typeof scheduleSessionSchema>;
+
+// Reprogramación y cancelación (HU-23): ambas exigen motivo (Art. 24-símil,
+// trazabilidad de cambios).
+export const rescheduleSessionSchema = z.object({
+  scheduledAt: z.string().datetime({ message: 'Fecha y hora inválidas' }),
+  reason: z.string().trim().min(3, 'Indique el motivo de la reprogramación').max(500),
+});
+
+export const cancelSessionSchema = z.object({
+  reason: z.string().trim().min(3, 'Indique el motivo de la cancelación').max(500),
+});
+
+export type RescheduleSessionBody = z.infer<typeof rescheduleSessionSchema>;
+export type CancelSessionBody = z.infer<typeof cancelSessionSchema>;

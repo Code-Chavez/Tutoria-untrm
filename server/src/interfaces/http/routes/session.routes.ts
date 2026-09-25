@@ -9,6 +9,8 @@ const sessionController = new SessionController(
   container.useCases.scheduleSessionUseCase,
   container.useCases.listSessionsUseCase,
   container.useCases.registerAttendanceUseCase,
+  container.useCases.rescheduleSessionUseCase,
+  container.useCases.cancelSessionUseCase,
 );
 
 const requireAuth = authenticate(container.services.tokenService);
@@ -26,6 +28,20 @@ router.post(
   requireAuth,
   authorize(['sessions:write']),
   sessionController.registerAttendance,
+);
+
+// Reprogramar o cancelar una sesión con motivo obligatorio (HU-23).
+router.patch(
+  '/sessions/:id/reschedule',
+  requireAuth,
+  authorize(['sessions:write']),
+  sessionController.reschedule,
+);
+router.patch(
+  '/sessions/:id/cancel',
+  requireAuth,
+  authorize(['sessions:write']),
+  sessionController.cancel,
 );
 
 export default router;

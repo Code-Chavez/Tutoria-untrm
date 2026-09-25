@@ -1,3 +1,4 @@
+import type React from 'react';
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -33,9 +34,27 @@ function makeSession(overrides: Partial<TutoringSession> = {}): TutoringSession 
     meetingLink: null,
     studentIds: ['s1'],
     attendance: null,
+    cancelledAt: null,
+    cancelReason: null,
     createdAt: new Date(2026, 9, 1).toISOString(),
     ...overrides,
   };
+}
+
+function renderModal(props: Partial<React.ComponentProps<typeof SessionDetailModal>> & {
+  session: TutoringSession;
+  allSessions: TutoringSession[];
+}) {
+  return render(
+    <SessionDetailModal
+      students={[student]}
+      onClose={vi.fn()}
+      onRegisterAttendance={vi.fn()}
+      onReschedule={vi.fn()}
+      onCancelSession={vi.fn()}
+      {...props}
+    />,
+  );
 }
 
 describe('SessionDetailModal', () => {
@@ -50,15 +69,7 @@ describe('SessionDetailModal', () => {
 
   it('no permite registrar asistencia antes de que empiece la sesión', () => {
     const future = makeSession({ scheduledAt: new Date(2026, 9, 15, 9, 0).toISOString() });
-    render(
-      <SessionDetailModal
-        session={future}
-        students={[student]}
-        allSessions={[future]}
-        onClose={vi.fn()}
-        onRegisterAttendance={vi.fn()}
-      />,
-    );
+    renderModal({ session: future, allSessions: [future] });
 
     expect(screen.getByText(/podrás registrar la asistencia/i)).toBeInTheDocument();
     expect(screen.queryByRole('button', { name: /registrar asistencia/i })).not.toBeInTheDocument();
@@ -68,15 +79,7 @@ describe('SessionDetailModal', () => {
     const onRegister = vi.fn();
     const past = makeSession();
     const user = userEvent.setup();
-    render(
-      <SessionDetailModal
-        session={past}
-        students={[student]}
-        allSessions={[past]}
-        onClose={vi.fn()}
-        onRegisterAttendance={onRegister}
-      />,
-    );
+    renderModal({ session: past, allSessions: [past], onRegisterAttendance: onRegister });
 
     expect(screen.getByText(/sesión 1 de 8/i)).toBeInTheDocument();
     await user.click(screen.getByRole('button', { name: /registrar asistencia/i }));
@@ -93,15 +96,7 @@ describe('SessionDetailModal', () => {
         createdAt: new Date(2026, 9, 10, 9, 45).toISOString(),
       },
     });
-    render(
-      <SessionDetailModal
-        session={confirmed}
-        students={[student]}
-        allSessions={[confirmed]}
-        onClose={vi.fn()}
-        onRegisterAttendance={vi.fn()}
-      />,
-    );
+    renderModal({ session: confirmed, allSessions: [confirmed] });
 
     expect(screen.getByText(/asistencia registrada · sesión 3 de 8/i)).toBeInTheDocument();
     expect(screen.queryByRole('button', { name: /registrar asistencia/i })).not.toBeInTheDocument();
@@ -121,15 +116,7 @@ describe('SessionDetailModal', () => {
         },
       }),
     );
-    render(
-      <SessionDetailModal
-        session={target}
-        students={[student]}
-        allSessions={[...priorConfirmed, target]}
-        onClose={vi.fn()}
-        onRegisterAttendance={vi.fn()}
-      />,
-    );
+    renderModal({ session: target, allSessions: [...priorConfirmed, target] });
 
     expect(screen.getByText(/se alcanzó el máximo de 8 sesiones/i)).toBeInTheDocument();
     expect(screen.queryByRole('button', { name: /registrar asistencia/i })).not.toBeInTheDocument();
@@ -137,16 +124,49 @@ describe('SessionDetailModal', () => {
 
   it('no muestra la sección de asistencia en sesiones grupales', () => {
     const group = makeSession({ studentIds: ['s1', 's2'] });
-    render(
-      <SessionDetailModal
-        session={group}
-        students={[student]}
-        allSessions={[group]}
-        onClose={vi.fn()}
-        onRegisterAttendance={vi.fn()}
-      />,
-    );
+    renderModal({ session: group, allSessions: [group] });
 
     expect(screen.queryByText(/sesión de asistencia|asistencia registrada|de 8/i)).not.toBeInTheDocument();
+  });
+
+  it('permite reprogramar y cancelar una sesión próxima o en curso', async () => {
+    const onReschedule = vi.fn();
+    const onCancelSession = vi.fn();
+    const upcoming = makeSession({ scheduledAt: new Date(2026, 9, 15, 9, 0).toISOString() });
+    const user = userEvent.setup();
+    renderModal({
+      session: upcoming,
+      allSessions: [upcoming],
+      onReschedule,
+      onCancelSession,
+    });
+
+    await user.click(screen.getByRole('button', { name: /^reprogramar$/i }));
+    expect(onReschedule).toHaveBeenCalled();
+
+    await user.click(screen.getByRole('button', { name: /cancelar sesión/i }));
+    expect(onCancelSession).toHaveBeenCalled();
+  });
+
+  it('no permite reprogramar ni cancelar una sesión ya realizada', () => {
+    const past = makeSession();
+    renderModal({ session: past, allSessions: [past] });
+
+    expect(screen.queryByRole('button', { name: /^reprogramar$/i })).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /cancelar sesión/i })).not.toBeInTheDocument();
+  });
+
+  it('muestra el motivo cuando la sesión está cancelada, sin acciones de modificarla', () => {
+    const cancelled = makeSession({
+      cancelledAt: new Date(2026, 9, 9).toISOString(),
+      cancelReason: 'El tutor tuvo una emergencia',
+    });
+    renderModal({ session: cancelled, allSessions: [cancelled] });
+
+    expect(screen.getByText(/cancelada el/i)).toBeInTheDocument();
+    expect(screen.getByText(/el tutor tuvo una emergencia/i)).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /^reprogramar$/i })).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /cancelar sesión/i })).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /registrar asistencia/i })).not.toBeInTheDocument();
   });
 });

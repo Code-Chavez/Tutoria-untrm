@@ -6,6 +6,7 @@ import {
   SessionNotStartedError,
   AttendanceAlreadyRegisteredError,
   AttendanceLimitReachedError,
+  SessionAlreadyCancelledError,
 } from '@application/use-cases/sessions/SessionErrors';
 import { SessionRepository } from '@domain/repositories/SessionRepository';
 import { SystemParameterRepository } from '@domain/repositories/SystemParameterRepository';
@@ -50,6 +51,9 @@ describe('RegisterAttendanceUseCase', () => {
         confirmedAt,
         createdAt: confirmedAt,
       })),
+      reschedule: jest.fn(),
+      cancel: jest.fn(),
+      createChangeHistory: jest.fn(),
     };
     systemParameters = {
       findByKey: jest
@@ -87,6 +91,18 @@ describe('RegisterAttendanceUseCase', () => {
 
   it('lanza NotSessionTutorError si quien registra no es el tutor de la sesión', async () => {
     await expect(useCase.execute('session-1', 'otro-tutor')).rejects.toThrow(NotSessionTutorError);
+    expect(sessions.createAttendance).not.toHaveBeenCalled();
+  });
+
+  it('lanza SessionAlreadyCancelledError si la sesión fue cancelada', async () => {
+    sessions.findById.mockResolvedValue({
+      ...baseSession,
+      cancelledAt: new Date(),
+      cancelReason: 'El tutorado avisó que no podía asistir',
+    });
+    await expect(useCase.execute('session-1', 'tutor-1')).rejects.toThrow(
+      SessionAlreadyCancelledError,
+    );
     expect(sessions.createAttendance).not.toHaveBeenCalled();
   });
 

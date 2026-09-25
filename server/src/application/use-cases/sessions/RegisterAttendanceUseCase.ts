@@ -8,6 +8,7 @@ import {
   SessionNotStartedError,
   AttendanceAlreadyRegisteredError,
   AttendanceLimitReachedError,
+  SessionAlreadyCancelledError,
 } from './SessionErrors';
 
 const DEFAULT_MAX_SESSIONS = 8; // Anexo N°4: 8 filas por tutoría individual.
@@ -32,6 +33,9 @@ export class RegisterAttendanceUseCase {
     }
     if (session.tutorId !== tutorId) {
       throw new NotSessionTutorError();
+    }
+    if (session.cancelledAt) {
+      throw new SessionAlreadyCancelledError();
     }
     if (session.studentIds.length !== 1) {
       throw new GroupSessionAttendanceError();

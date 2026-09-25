@@ -3,6 +3,8 @@ import { z } from 'zod';
 import { ScheduleSessionUseCase } from '@application/use-cases/sessions/ScheduleSessionUseCase';
 import { ListSessionsUseCase } from '@application/use-cases/sessions/ListSessionsUseCase';
 import { RegisterAttendanceUseCase } from '@application/use-cases/sessions/RegisterAttendanceUseCase';
+import { RescheduleSessionUseCase } from '@application/use-cases/sessions/RescheduleSessionUseCase';
+import { CancelSessionUseCase } from '@application/use-cases/sessions/CancelSessionUseCase';
 import {
   TutorScheduleConflictError,
   LocationRequiredError,
@@ -13,15 +15,24 @@ import {
   SessionNotStartedError,
   AttendanceAlreadyRegisteredError,
   AttendanceLimitReachedError,
+  SessionAlreadyCancelledError,
+  SessionAlreadyCompletedError,
+  ChangeReasonRequiredError,
 } from '@application/use-cases/sessions/SessionErrors';
 import { StudentNotFoundError } from '@application/use-cases/students/StudentErrors';
-import { scheduleSessionSchema } from '../validators/session.validators';
+import {
+  scheduleSessionSchema,
+  rescheduleSessionSchema,
+  cancelSessionSchema,
+} from '../validators/session.validators';
 
 export class SessionController {
   constructor(
     private readonly scheduleSessionUseCase: ScheduleSessionUseCase,
     private readonly listSessionsUseCase: ListSessionsUseCase,
     private readonly registerAttendanceUseCase: RegisterAttendanceUseCase,
+    private readonly rescheduleSessionUseCase: RescheduleSessionUseCase,
+    private readonly cancelSessionUseCase: CancelSessionUseCase,
   ) {}
 
   // Registra la asistencia de una sesión individual (HU-22, Anexo N°4).
@@ -43,7 +54,8 @@ export class SessionController {
         res.status(400).json({ error: error.message });
       } else if (
         error instanceof AttendanceAlreadyRegisteredError ||
-        error instanceof AttendanceLimitReachedError
+        error instanceof AttendanceLimitReachedError ||
+        error instanceof SessionAlreadyCancelledError
       ) {
         res.status(409).json({ error: error.message });
       } else {
@@ -51,6 +63,52 @@ export class SessionController {
       }
     }
   };
+
+  // Reprograma una sesión con motivo obligatorio (HU-23).
+  reschedule = async (req: Request, res: Response) => {
+    try {
+      const sessionId = req.params.id as string;
+      const data = rescheduleSessionSchema.parse(req.body);
+      const tutorId = req.auth?.sub as string;
+      const session = await this.rescheduleSessionUseCase.execute(sessionId, tutorId, data);
+      res.status(200).json({ message: 'Sesión reprogramada exitosamente', session });
+    } catch (error) {
+      this.handleChangeError(error, res);
+    }
+  };
+
+  // Cancela una sesión con motivo obligatorio (HU-23).
+  cancel = async (req: Request, res: Response) => {
+    try {
+      const sessionId = req.params.id as string;
+      const data = cancelSessionSchema.parse(req.body);
+      const tutorId = req.auth?.sub as string;
+      const session = await this.cancelSessionUseCase.execute(sessionId, tutorId, data);
+      res.status(200).json({ message: 'Sesión cancelada exitosamente', session });
+    } catch (error) {
+      this.handleChangeError(error, res);
+    }
+  };
+
+  private handleChangeError(error: unknown, res: Response) {
+    if (error instanceof z.ZodError) {
+      res.status(400).json({ error: 'Datos de entrada inválidos', details: error.errors });
+    } else if (error instanceof SessionNotFoundError) {
+      res.status(404).json({ error: error.message });
+    } else if (error instanceof NotSessionTutorError) {
+      res.status(403).json({ error: error.message });
+    } else if (error instanceof ChangeReasonRequiredError) {
+      res.status(400).json({ error: error.message });
+    } else if (
+      error instanceof SessionAlreadyCancelledError ||
+      error instanceof SessionAlreadyCompletedError ||
+      error instanceof TutorScheduleConflictError
+    ) {
+      res.status(409).json({ error: error.message });
+    } else {
+      res.status(500).json({ error: 'Error interno del servidor' });
+    }
+  }
 
   create = async (req: Request, res: Response) => {
     try {

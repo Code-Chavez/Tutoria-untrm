@@ -28,7 +28,7 @@ export class SessionNotFoundError extends Error {
 
 export class NotSessionTutorError extends Error {
   constructor() {
-    super('Solo el tutor de la sesión puede registrar su asistencia');
+    super('Solo el tutor de la sesión puede modificarla');
     this.name = 'NotSessionTutorError';
   }
 }
@@ -58,5 +58,26 @@ export class AttendanceLimitReachedError extends Error {
   constructor(limit: number) {
     super(`Se alcanzó el máximo de ${limit} sesiones registradas para esta tutoría individual`);
     this.name = 'AttendanceLimitReachedError';
+  }
+}
+
+export class ChangeReasonRequiredError extends Error {
+  constructor() {
+    super('Debe indicar el motivo del cambio');
+    this.name = 'ChangeReasonRequiredError';
+  }
+}
+
+export class SessionAlreadyCompletedError extends Error {
+  constructor() {
+    super('No se puede modificar una sesión que ya se realizó');
+    this.name = 'SessionAlreadyCompletedError';
+  }
+}
+
+export class SessionAlreadyCancelledError extends Error {
+  constructor() {
+    super('Esta sesión ya fue cancelada');
+    this.name = 'SessionAlreadyCancelledError';
   }
 }

@@ -82,6 +82,11 @@
   background: #c07a00;
 }
 
+.dotCancelled {
+  composes: dot;
+  background: var(--g400);
+}
+
 /* ── Vista mensual ─────────────────────────────────────────── */
 .monthHead {
   display: grid;
@@ -162,6 +167,12 @@
   background: #c07a00;
 }
 
+.chipCancelled {
+  background: var(--g300);
+  color: var(--g700);
+  text-decoration: line-through;
+}
+
 .more {
   font-size: 10px;
   color: var(--g600);
@@ -219,6 +230,15 @@
 
 .weekCardGroup {
   border-left-color: #c07a00;
+}
+
+.weekCardCancelled {
+  border-left-color: var(--g400);
+  opacity: 0.6;
+}
+
+.weekCardCancelled .weekCardTopic {
+  text-decoration: line-through;
 }
 
 .weekCardTime {

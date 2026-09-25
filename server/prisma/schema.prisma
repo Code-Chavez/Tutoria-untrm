@@ -40,6 +40,7 @@ model User {
   requestsCreated      TutoringRequest[]        @relation("RequestsCreated")
   requestsRouted       TutoringRequest[]        @relation("RequestsRouted")
   sessionsAsTutor      Session[]                @relation("SessionsAsTutor")
+  sessionChangesMade   SessionChangeHistory[]   @relation("SessionChangesMade")
 
   @@map("users")
 }
@@ -349,8 +350,14 @@ model Session {
   location    String? @map("location")
   meetingLink String? @map("meeting_link")
 
+  // Cancelación (HU-23, Art. 24-símil): la sesión se conserva (trazabilidad),
+  // no se borra. cancelledAt no nulo = cancelada.
+  cancelledAt  DateTime? @map("cancelled_at")
+  cancelReason String?   @map("cancel_reason")
+
   participants SessionParticipant[]
   attendance   SessionAttendance?
+  changeHistory SessionChangeHistory[]
 
   @@index([tutorId])
   @@map("sessions")
@@ -382,6 +389,31 @@ model SessionAttendance {
   createdAt      DateTime @default(now()) @map("created_at")
 
   @@map("session_attendances")
+}
+
+// Trazabilidad de reprogramaciones y cancelaciones (HU-23), mismo patrón que
+// TutorAssignmentHistory (HU-13): la Session conserva su estado actual
+// (scheduledAt/endsAt o cancelledAt) y esta tabla acumula el historial con
+// motivo y quién hizo el cambio, sin borrar nada.
+model SessionChangeHistory {
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now()) @map("created_at")
+
+  sessionId String  @map("session_id")
+  session   Session @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+
+  // 'RESCHEDULE' | 'CANCEL'
+  changeType String @map("change_type")
+  reason     String
+
+  previousScheduledAt DateTime? @map("previous_scheduled_at")
+  newScheduledAt      DateTime? @map("new_scheduled_at")
+
+  changedById String @map("changed_by_id")
+  changedBy   User   @relation("SessionChangesMade", fields: [changedById], references: [id])
+
+  @@index([sessionId])
+  @@map("session_change_history")
 }
 
 // ─── Parámetros del Sistema ────────────────────────────────────

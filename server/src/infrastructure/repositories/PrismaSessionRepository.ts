@@ -1,5 +1,10 @@
 import { PrismaClient, Prisma } from '@prisma/client';
-import { Session, SessionAttendance, SessionWithParticipants } from '@domain/entities/Session';
+import {
+  Session,
+  SessionAttendance,
+  SessionChangeHistory,
+  SessionWithParticipants,
+} from '@domain/entities/Session';
 import { SessionRepository, SessionFilters } from '@domain/repositories/SessionRepository';
 
 type SessionRow = Prisma.SessionGetPayload<{ include: { participants: true; attendance: true } }>;
@@ -26,6 +31,8 @@ function toSessionWithParticipants(row: SessionRow): SessionWithParticipants {
     modality: row.modality as Session['modality'],
     location: row.location,
     meetingLink: row.meetingLink,
+    cancelledAt: row.cancelledAt,
+    cancelReason: row.cancelReason,
     createdAt: row.createdAt,
     studentIds: row.participants.map((p) => p.studentId),
     attendance: toAttendance(row.attendance),
@@ -58,12 +65,19 @@ export class PrismaSessionRepository implements SessionRepository {
     return row ? toSessionWithParticipants(row) : null;
   }
 
-  findOverlapping(tutorId: string, start: Date, end: Date): Promise<Session[]> {
+  findOverlapping(
+    tutorId: string,
+    start: Date,
+    end: Date,
+    excludeSessionId?: string,
+  ): Promise<Session[]> {
     return this.prisma.session.findMany({
       where: {
         tutorId,
         scheduledAt: { lt: end },
         endsAt: { gt: start },
+        cancelledAt: null,
+        ...(excludeSessionId && { id: { not: excludeSessionId } }),
       },
     }) as Promise<Session[]>;
   }
@@ -104,6 +118,35 @@ export class PrismaSessionRepository implements SessionRepository {
       sessionId: row.sessionId,
       sequenceNumber: row.sequenceNumber,
       confirmedAt: row.confirmedAt,
+      createdAt: row.createdAt,
+    };
+  }
+
+  async reschedule(id: string, scheduledAt: Date, endsAt: Date): Promise<SessionWithParticipants> {
+    await this.prisma.session.update({ where: { id }, data: { scheduledAt, endsAt } });
+    return (await this.findById(id)) as SessionWithParticipants;
+  }
+
+  async cancel(id: string, cancelledAt: Date, reason: string): Promise<SessionWithParticipants> {
+    await this.prisma.session.update({
+      where: { id },
+      data: { cancelledAt, cancelReason: reason },
+    });
+    return (await this.findById(id)) as SessionWithParticipants;
+  }
+
+  async createChangeHistory(
+    data: Omit<SessionChangeHistory, 'id' | 'createdAt'>,
+  ): Promise<SessionChangeHistory> {
+    const row = await this.prisma.sessionChangeHistory.create({ data });
+    return {
+      id: row.id,
+      sessionId: row.sessionId,
+      changeType: row.changeType as SessionChangeHistory['changeType'],
+      reason: row.reason,
+      previousScheduledAt: row.previousScheduledAt,
+      newScheduledAt: row.newScheduledAt,
+      changedById: row.changedById,
       createdAt: row.createdAt,
     };
   }

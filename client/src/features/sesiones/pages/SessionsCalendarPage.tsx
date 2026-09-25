@@ -7,8 +7,14 @@ import {
   XCircleIcon,
 } from '@shared/components/icons';
 import { useMySessions } from '../hooks/useMySessions';
-import { sessionService, TutoringSession } from '../services/sessionService';
+import {
+  sessionService,
+  TutoringSession,
+  RescheduleSessionData,
+} from '../services/sessionService';
 import { SessionDetailModal } from '../components/SessionDetailModal';
+import { RescheduleSessionModal } from '../components/RescheduleSessionModal';
+import { CancelSessionModal } from '../components/CancelSessionModal';
 import { getApiErrorMessage } from '@shared/services/apiClient';
 import {
   addDays,
@@ -42,6 +48,10 @@ export const SessionsCalendarPage: React.FC = () => {
   const [selectedSession, setSelectedSession] = useState<TutoringSession | null>(null);
   const [registeringAttendance, setRegisteringAttendance] = useState(false);
   const [attendanceError, setAttendanceError] = useState('');
+  const [rescheduleOpen, setRescheduleOpen] = useState(false);
+  const [cancelOpen, setCancelOpen] = useState(false);
+  const [changeLoading, setChangeLoading] = useState(false);
+  const [changeError, setChangeError] = useState('');
 
   const monthDays = useMemo(() => getMonthGridDays(cursor), [cursor]);
   const weekDays = useMemo(() => getWeekDays(cursor), [cursor]);
@@ -63,6 +73,38 @@ export const SessionsCalendarPage: React.FC = () => {
       setAttendanceError(getApiErrorMessage(err));
     } finally {
       setRegisteringAttendance(false);
+    }
+  };
+
+  const handleReschedule = async (data: RescheduleSessionData) => {
+    if (!selectedSession) return;
+    setChangeLoading(true);
+    setChangeError('');
+    try {
+      await sessionService.rescheduleSession(selectedSession.id, data);
+      setRescheduleOpen(false);
+      setSelectedSession(null);
+      refresh();
+    } catch (err) {
+      setChangeError(getApiErrorMessage(err));
+    } finally {
+      setChangeLoading(false);
+    }
+  };
+
+  const handleCancelSession = async (reason: string) => {
+    if (!selectedSession) return;
+    setChangeLoading(true);
+    setChangeError('');
+    try {
+      await sessionService.cancelSession(selectedSession.id, { reason });
+      setCancelOpen(false);
+      setSelectedSession(null);
+      refresh();
+    } catch (err) {
+      setChangeError(getApiErrorMessage(err));
+    } finally {
+      setChangeLoading(false);
     }
   };
 
@@ -114,6 +156,9 @@ export const SessionsCalendarPage: React.FC = () => {
           <span className={styles.legendItem}>
             <span className={styles.dotGroup} /> Grupal
           </span>
+          <span className={styles.legendItem}>
+            <span className={styles.dotCancelled} /> Cancelada
+          </span>
         </div>
 
         {loading ? (
@@ -157,7 +202,11 @@ export const SessionsCalendarPage: React.FC = () => {
                       <button
                         key={s.id}
                         className={`${styles.chip} ${
-                          s.studentIds.length > 1 ? styles.chipGroup : styles.chipIndividual
+                          s.cancelledAt
+                            ? styles.chipCancelled
+                            : s.studentIds.length > 1
+                              ? styles.chipGroup
+                              : styles.chipIndividual
                         }`}
                         onClick={() => {
                           setAttendanceError('');
@@ -197,7 +246,11 @@ export const SessionsCalendarPage: React.FC = () => {
                         <button
                           key={s.id}
                           className={`${styles.weekCard} ${
-                            s.studentIds.length > 1 ? styles.weekCardGroup : ''
+                            s.cancelledAt
+                              ? styles.weekCardCancelled
+                              : s.studentIds.length > 1
+                                ? styles.weekCardGroup
+                                : ''
                           }`}
                           onClick={() => {
                             setAttendanceError('');
@@ -222,7 +275,7 @@ export const SessionsCalendarPage: React.FC = () => {
         )}
       </Card>
 
-      {selectedSession && (
+      {selectedSession && !rescheduleOpen && !cancelOpen && (
         <SessionDetailModal
           session={selectedSession}
           students={students}
@@ -231,6 +284,34 @@ export const SessionsCalendarPage: React.FC = () => {
           onRegisterAttendance={handleRegisterAttendance}
           registeringAttendance={registeringAttendance}
           attendanceError={attendanceError}
+          onReschedule={() => {
+            setChangeError('');
+            setRescheduleOpen(true);
+          }}
+          onCancelSession={() => {
+            setChangeError('');
+            setCancelOpen(true);
+          }}
+        />
+      )}
+
+      {selectedSession && rescheduleOpen && (
+        <RescheduleSessionModal
+          session={selectedSession}
+          loading={changeLoading}
+          serverError={changeError}
+          onSubmit={handleReschedule}
+          onCancel={() => setRescheduleOpen(false)}
+        />
+      )}
+
+      {selectedSession && cancelOpen && (
+        <CancelSessionModal
+          session={selectedSession}
+          loading={changeLoading}
+          serverError={changeError}
+          onConfirm={handleCancelSession}
+          onCancel={() => setCancelOpen(false)}
         />
       )}
     </div>

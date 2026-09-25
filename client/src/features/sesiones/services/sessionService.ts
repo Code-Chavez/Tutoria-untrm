@@ -26,7 +26,19 @@ export interface TutoringSession {
   meetingLink: string | null;
   studentIds: string[];
   attendance: SessionAttendance | null;
+  // Cancelación (HU-23): no nulo = cancelada. La sesión se conserva (trazabilidad).
+  cancelledAt: string | null;
+  cancelReason: string | null;
   createdAt: string;
+}
+
+export interface RescheduleSessionData {
+  scheduledAt: string; // ISO datetime
+  reason: string;
+}
+
+export interface CancelSessionData {
+  reason: string;
 }
 
 export interface ScheduleSessionData {
@@ -57,6 +69,26 @@ export const sessionService = {
   registerAttendance: async (sessionId: string): Promise<TutoringSession> => {
     const response = await apiClient.post<{ message: string; session: TutoringSession }>(
       `/sessions/${sessionId}/attendance`,
+    );
+    return response.data.session;
+  },
+
+  // Reprograma o cancela una sesión con motivo obligatorio (HU-23).
+  rescheduleSession: async (
+    sessionId: string,
+    data: RescheduleSessionData,
+  ): Promise<TutoringSession> => {
+    const response = await apiClient.patch<{ message: string; session: TutoringSession }>(
+      `/sessions/${sessionId}/reschedule`,
+      data,
+    );
+    return response.data.session;
+  },
+
+  cancelSession: async (sessionId: string, data: CancelSessionData): Promise<TutoringSession> => {
+    const response = await apiClient.patch<{ message: string; session: TutoringSession }>(
+      `/sessions/${sessionId}/cancel`,
+      data,
     );
     return response.data.session;
   },
