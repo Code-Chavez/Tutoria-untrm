@@ -43,6 +43,7 @@ model User {
   sessionsAsTutor      Session[]                @relation("SessionsAsTutor")
   sessionChangesMade   SessionChangeHistory[]   @relation("SessionChangesMade")
   sessionEvidenceUploads SessionEvidence[]      @relation("SessionEvidenceUploads")
+  referralsCreated       StudentReferral[]      @relation("ReferralsCreated")
 
   @@map("users")
 }
@@ -203,6 +204,7 @@ model Student {
   supportContact    SupportContact?
   tutoringRequests  TutoringRequest[]
   sessionParticipations SessionParticipant[]
+  referrals             StudentReferral[]
 
   @@index([tutorId])
   @@map("students")
@@ -469,6 +471,30 @@ model SessionEvidence {
 
   @@index([sessionId])
   @@map("session_evidences")
+}
+
+// Ficha de derivación (HU-28, Anexo N°6): checklist fijo de 17 aspectos en 4
+// categorías (académicos, sociales, apariencia, salud mental), guardado como
+// arreglo de códigos en vez de 17 columnas booleanas — es un catálogo cerrado
+// que se valida en la capa de aplicación (ver REFERRAL_ASPECTS).
+model StudentReferral {
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now()) @map("created_at")
+
+  studentId String  @map("student_id")
+  student   Student @relation(fields: [studentId], references: [id])
+
+  referredById String @map("referred_by_id")
+  referredBy   User   @relation("ReferralsCreated", fields: [referredById], references: [id])
+
+  checkedAspects String[] @map("checked_aspects")
+  reason         String
+
+  // 'ESCUELA' | 'PSICOPEDAGOGIA' | 'PSICOLOGIA' | 'ASISTENCIA_SOCIAL' | 'SALUD' (Art. 21)
+  service String
+
+  @@index([studentId])
+  @@map("student_referrals")
 }
 
 // ─── Parámetros del Sistema ────────────────────────────────────

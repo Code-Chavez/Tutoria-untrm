@@ -10,6 +10,7 @@ import { PrismaTutorInterviewRepository } from './repositories/PrismaTutorInterv
 import { PrismaTutorFollowUpRepository } from './repositories/PrismaTutorFollowUpRepository';
 import { PrismaTutoringRequestRepository } from './repositories/PrismaTutoringRequestRepository';
 import { PrismaSessionRepository } from './repositories/PrismaSessionRepository';
+import { PrismaStudentReferralRepository } from './repositories/PrismaStudentReferralRepository';
 import { PrismaSystemParameterRepository } from './repositories/PrismaSystemParameterRepository';
 import { PrismaSupportContactRepository } from './repositories/PrismaSupportContactRepository';
 import { PrismaSchoolRepository } from './repositories/PrismaSchoolRepository';
@@ -34,6 +35,7 @@ const tutorInterviewRepository = new PrismaTutorInterviewRepository(prisma);
 const tutorFollowUpRepository = new PrismaTutorFollowUpRepository(prisma);
 const tutoringRequestRepository = new PrismaTutoringRequestRepository(prisma);
 const sessionRepository = new PrismaSessionRepository(prisma);
+const studentReferralRepository = new PrismaStudentReferralRepository(prisma);
 const systemParameterRepository = new PrismaSystemParameterRepository(prisma);
 const supportContactRepository = new PrismaSupportContactRepository(prisma);
 const schoolRepository = new PrismaSchoolRepository(prisma);
@@ -102,6 +104,8 @@ import { GetSessionEvidenceFileUseCase } from '@application/use-cases/sessions/G
 import { ListSchoolsUseCase } from '@application/use-cases/schools/ListSchoolsUseCase';
 import { GetRiskAlertsUseCase } from '@application/use-cases/alerts/GetRiskAlertsUseCase';
 import { GetScheduleAttendanceReportUseCase } from '@application/use-cases/reports/GetScheduleAttendanceReportUseCase';
+import { CreateReferralUseCase } from '@application/use-cases/referrals/CreateReferralUseCase';
+import { GetReferralConstanciaUseCase } from '@application/use-cases/referrals/GetReferralConstanciaUseCase';
 
 const createUserUseCase = new CreateUserUseCase(userRepository, passwordHasher);
 const updateUserUseCase = new UpdateUserUseCase(userRepository);
@@ -216,6 +220,13 @@ const getScheduleAttendanceReportUseCase = new GetScheduleAttendanceReportUseCas
   sessionRepository,
   studentRepository,
 );
+const createReferralUseCase = new CreateReferralUseCase(studentReferralRepository, studentRepository);
+const getReferralConstanciaUseCase = new GetReferralConstanciaUseCase(
+  studentReferralRepository,
+  studentRepository,
+  userRepository,
+  schoolRepository,
+);
 
 export const container = {
   repositories: {
@@ -233,6 +244,7 @@ export const container = {
     tutoringRequestRepository,
     sessionRepository,
     systemParameterRepository,
+    studentReferralRepository,
   },
   services: {
     passwordHasher,
@@ -283,5 +295,7 @@ export const container = {
     listSchoolsUseCase,
     getRiskAlertsUseCase,
     getScheduleAttendanceReportUseCase,
+    createReferralUseCase,
+    getReferralConstanciaUseCase,
   },
 } as const;
