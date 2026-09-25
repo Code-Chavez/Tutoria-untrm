@@ -54,3 +54,17 @@ export interface SessionWithParticipants extends Session {
   studentIds: string[];
   attendance: SessionAttendance | null;
 }
+
+// Evidencia (PDF o imagen) adjunta a una sesión (HU-25) para respaldar los
+// informes semestrales (Art. 15.d). El archivo vive en disco bajo storageKey;
+// aquí solo su metadata (quién la subió y cuándo).
+export interface SessionEvidence {
+  id: string;
+  sessionId: string;
+  fileName: string;
+  mimeType: string;
+  fileSize: number;
+  storageKey: string;
+  uploadedById: string;
+  createdAt: Date;
+}

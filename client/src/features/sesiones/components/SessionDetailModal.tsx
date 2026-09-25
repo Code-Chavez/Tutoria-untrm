@@ -8,8 +8,11 @@ import {
   LinkIcon,
   CheckCircleIcon,
   AlertTriangleIcon,
+  ClipboardIcon,
+  UploadIcon,
+  DownloadIcon,
 } from '@shared/components/icons';
-import { TutoringSession } from '../services/sessionService';
+import { TutoringSession, SessionEvidence } from '../services/sessionService';
 import { getSessionStatus, SESSION_STATUS_LABEL } from '../utils/sessionStatus';
 import type { Student } from '@features/tutorados/services/studentService';
 import styles from './SessionDetailModal.module.css';
@@ -17,6 +20,12 @@ import styles from './SessionDetailModal.module.css';
 // Tope por defecto (Anexo N°4); el servidor aplica el valor real a partir
 // del parámetro del sistema. Aquí solo se usa para el texto informativo.
 const DEFAULT_MAX_SESSIONS = 8;
+
+function formatFileSize(bytes: number): string {
+  if (bytes < 1024) return `${bytes} B`;
+  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+  return `${(bytes / (1024 * 1024)).toFixed(2)} MB`;
+}
 
 interface SessionDetailModalProps {
   session: TutoringSession;
@@ -28,6 +37,13 @@ interface SessionDetailModalProps {
   attendanceError?: string;
   onReschedule: () => void;
   onCancelSession: () => void;
+  // Repositorio de evidencias (HU-25): PDF o imagen que respalda la sesión.
+  evidences?: SessionEvidence[];
+  evidencesLoading?: boolean;
+  onUploadEvidence?: (file: File) => void;
+  uploadingEvidence?: boolean;
+  evidenceError?: string;
+  onDownloadEvidence?: (evidence: SessionEvidence) => void;
 }
 
 const STATUS_TONE = {
@@ -48,6 +64,12 @@ export const SessionDetailModal: React.FC<SessionDetailModalProps> = ({
   attendanceError,
   onReschedule,
   onCancelSession,
+  evidences = [],
+  evidencesLoading,
+  onUploadEvidence,
+  uploadingEvidence,
+  evidenceError,
+  onDownloadEvidence,
 }) => {
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -212,6 +234,57 @@ export const SessionDetailModal: React.FC<SessionDetailModalProps> = ({
               {attendanceError && <span className={styles.error}>{attendanceError}</span>}
             </div>
           )}
+
+          <div className={styles.evidence}>
+            <div className={styles.row}>
+              <ClipboardIcon size={16} />
+              <span>
+                Evidencias{evidences.length > 0 ? ` (${evidences.length})` : ''} · Anexo N° 5
+              </span>
+            </div>
+            {evidencesLoading ? (
+              <span className={styles.meta}>Cargando evidencias…</span>
+            ) : evidences.length === 0 ? (
+              <span className={styles.meta}>Aún no se adjuntaron evidencias.</span>
+            ) : (
+              <ul className={styles.evidenceList}>
+                {evidences.map((evidence) => (
+                  <li key={evidence.id} className={styles.evidenceItem}>
+                    <button
+                      type="button"
+                      className={styles.evidenceName}
+                      onClick={() => onDownloadEvidence?.(evidence)}
+                    >
+                      <DownloadIcon size={14} />
+                      {evidence.fileName}
+                    </button>
+                    <span className={styles.evidenceMeta}>
+                      {formatFileSize(evidence.fileSize)} · {evidence.uploadedByName} ·{' '}
+                      {new Date(evidence.createdAt).toLocaleDateString('es-PE', {
+                        dateStyle: 'medium',
+                      })}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            )}
+            <label className={styles.uploadLabel}>
+              <UploadIcon size={14} />
+              {uploadingEvidence ? 'Subiendo…' : 'Adjuntar evidencia'}
+              <input
+                type="file"
+                accept=".pdf,.png,.jpg,.jpeg"
+                className={styles.hiddenInput}
+                disabled={uploadingEvidence}
+                onChange={(e) => {
+                  const file = e.target.files?.[0];
+                  if (file) onUploadEvidence?.(file);
+                  e.target.value = '';
+                }}
+              />
+            </label>
+            {evidenceError && <span className={styles.error}>{evidenceError}</span>}
+          </div>
         </div>
 
         <div className={styles.actions}>

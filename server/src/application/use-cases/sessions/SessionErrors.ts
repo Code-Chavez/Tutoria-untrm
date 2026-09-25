@@ -81,3 +81,10 @@ export class SessionAlreadyCancelledError extends Error {
     this.name = 'SessionAlreadyCancelledError';
   }
 }
+
+export class SessionEvidenceNotFoundError extends Error {
+  constructor(id: string) {
+    super(`No se encontró la evidencia con ID ${id}`);
+    this.name = 'SessionEvidenceNotFoundError';
+  }
+}

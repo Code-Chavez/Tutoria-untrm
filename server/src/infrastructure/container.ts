@@ -15,6 +15,7 @@ import { PrismaSupportContactRepository } from './repositories/PrismaSupportCont
 import { PrismaSchoolRepository } from './repositories/PrismaSchoolRepository';
 import { BcryptPasswordHasher } from './services/BcryptPasswordHasher';
 import { JwtTokenService } from './services/JwtTokenService';
+import { LocalEvidenceStorage } from './services/LocalEvidenceStorage';
 import { LoginUseCase } from '@application/use-cases/auth/LoginUseCase';
 import { RequestPasswordResetUseCase } from '@application/use-cases/auth/RequestPasswordResetUseCase';
 import { ResetPasswordUseCase } from '@application/use-cases/auth/ResetPasswordUseCase';
@@ -39,6 +40,7 @@ const schoolRepository = new PrismaSchoolRepository(prisma);
 
 const passwordHasher = new BcryptPasswordHasher();
 const tokenService = new JwtTokenService();
+const evidenceStorage = new LocalEvidenceStorage();
 
 const loginUseCase = new LoginUseCase(
   userRepository,
@@ -94,6 +96,9 @@ import { ListSessionsUseCase } from '@application/use-cases/sessions/ListSession
 import { RegisterAttendanceUseCase } from '@application/use-cases/sessions/RegisterAttendanceUseCase';
 import { RescheduleSessionUseCase } from '@application/use-cases/sessions/RescheduleSessionUseCase';
 import { CancelSessionUseCase } from '@application/use-cases/sessions/CancelSessionUseCase';
+import { UploadSessionEvidenceUseCase } from '@application/use-cases/sessions/UploadSessionEvidenceUseCase';
+import { ListSessionEvidenceUseCase } from '@application/use-cases/sessions/ListSessionEvidenceUseCase';
+import { GetSessionEvidenceFileUseCase } from '@application/use-cases/sessions/GetSessionEvidenceFileUseCase';
 import { ListSchoolsUseCase } from '@application/use-cases/schools/ListSchoolsUseCase';
 
 const createUserUseCase = new CreateUserUseCase(userRepository, passwordHasher);
@@ -187,6 +192,15 @@ const registerAttendanceUseCase = new RegisterAttendanceUseCase(
 );
 const rescheduleSessionUseCase = new RescheduleSessionUseCase(sessionRepository);
 const cancelSessionUseCase = new CancelSessionUseCase(sessionRepository);
+const uploadSessionEvidenceUseCase = new UploadSessionEvidenceUseCase(
+  sessionRepository,
+  evidenceStorage,
+);
+const listSessionEvidenceUseCase = new ListSessionEvidenceUseCase(sessionRepository, userRepository);
+const getSessionEvidenceFileUseCase = new GetSessionEvidenceFileUseCase(
+  sessionRepository,
+  evidenceStorage,
+);
 const listSchoolsUseCase = new ListSchoolsUseCase(schoolRepository);
 
 export const container = {
@@ -209,6 +223,7 @@ export const container = {
   services: {
     passwordHasher,
     tokenService,
+    evidenceStorage,
   },
   useCases: {
     loginUseCase,
@@ -248,6 +263,9 @@ export const container = {
     registerAttendanceUseCase,
     rescheduleSessionUseCase,
     cancelSessionUseCase,
+    uploadSessionEvidenceUseCase,
+    listSessionEvidenceUseCase,
+    getSessionEvidenceFileUseCase,
     listSchoolsUseCase,
   },
 } as const;

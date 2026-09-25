@@ -54,6 +54,9 @@ describe('RescheduleSessionUseCase', () => {
       })),
       cancel: jest.fn(),
       createChangeHistory: jest.fn(),
+      createEvidence: jest.fn(),
+      listEvidenceBySession: jest.fn(),
+      findEvidenceById: jest.fn(),
     };
     useCase = new RescheduleSessionUseCase(sessions);
   });
