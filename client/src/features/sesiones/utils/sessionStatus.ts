@@ -1,11 +1,12 @@
 import { TutoringSession } from '../services/sessionService';
 
-export type SessionStatus = 'PROXIMA' | 'EN_CURSO' | 'REALIZADA';
+export type SessionStatus = 'CANCELADA' | 'PROXIMA' | 'EN_CURSO' | 'REALIZADA';
 
-// La sesión todavía no guarda un estado propio (llegará con HU-23, que
-// permitirá cancelarla o reprogramarla); mientras tanto se deriva de la
-// hora actual contra su horario, que es toda la información disponible.
+// El estado no vive en un campo propio salvo la cancelación (HU-23); el
+// resto se deriva de la hora actual contra el horario, que es toda la
+// información disponible.
 export function getSessionStatus(session: TutoringSession, now: Date = new Date()): SessionStatus {
+  if (session.cancelledAt) return 'CANCELADA';
   const start = new Date(session.scheduledAt);
   const end = new Date(session.endsAt);
   if (now < start) return 'PROXIMA';
@@ -14,6 +15,7 @@ export function getSessionStatus(session: TutoringSession, now: Date = new Date(
 }
 
 export const SESSION_STATUS_LABEL: Record<SessionStatus, string> = {
+  CANCELADA: 'Cancelada',
   PROXIMA: 'Próxima',
   EN_CURSO: 'En curso',
   REALIZADA: 'Realizada',

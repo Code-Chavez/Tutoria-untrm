@@ -11,3 +11,14 @@ export interface ScheduleSessionInput {
   location?: string;
   meetingLink?: string;
 }
+
+// Reprogramación de sesión (HU-23): solo cambia el horario; duración,
+// modalidad y participantes se conservan.
+export interface RescheduleSessionInput {
+  scheduledAt: string; // ISO datetime
+  reason: string;
+}
+
+export interface CancelSessionInput {
+  reason: string;
+}

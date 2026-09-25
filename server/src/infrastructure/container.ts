@@ -88,6 +88,8 @@ import { ListTutoringRequestsUseCase } from '@application/use-cases/tutoring-req
 import { ScheduleSessionUseCase } from '@application/use-cases/sessions/ScheduleSessionUseCase';
 import { ListSessionsUseCase } from '@application/use-cases/sessions/ListSessionsUseCase';
 import { RegisterAttendanceUseCase } from '@application/use-cases/sessions/RegisterAttendanceUseCase';
+import { RescheduleSessionUseCase } from '@application/use-cases/sessions/RescheduleSessionUseCase';
+import { CancelSessionUseCase } from '@application/use-cases/sessions/CancelSessionUseCase';
 import { ListSchoolsUseCase } from '@application/use-cases/schools/ListSchoolsUseCase';
 
 const createUserUseCase = new CreateUserUseCase(userRepository, passwordHasher);
@@ -176,6 +178,8 @@ const registerAttendanceUseCase = new RegisterAttendanceUseCase(
   sessionRepository,
   systemParameterRepository,
 );
+const rescheduleSessionUseCase = new RescheduleSessionUseCase(sessionRepository);
+const cancelSessionUseCase = new CancelSessionUseCase(sessionRepository);
 const listSchoolsUseCase = new ListSchoolsUseCase(schoolRepository);
 
 export const container = {
@@ -232,6 +236,8 @@ export const container = {
     scheduleSessionUseCase,
     listSessionsUseCase,
     registerAttendanceUseCase,
+    rescheduleSessionUseCase,
+    cancelSessionUseCase,
     listSchoolsUseCase,
   },
 } as const;

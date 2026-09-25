@@ -13,6 +13,23 @@ export interface Session {
   modality: SessionModality;
   location: string | null;
   meetingLink: string | null;
+  // Cancelación (HU-23): no nulo = cancelada. La sesión se conserva (trazabilidad).
+  cancelledAt: Date | null;
+  cancelReason: string | null;
+  createdAt: Date;
+}
+
+// Tipo de cambio trazado sobre una sesión (HU-23).
+export type SessionChangeType = 'RESCHEDULE' | 'CANCEL';
+
+export interface SessionChangeHistory {
+  id: string;
+  sessionId: string;
+  changeType: SessionChangeType;
+  reason: string;
+  previousScheduledAt: Date | null;
+  newScheduledAt: Date | null;
+  changedById: string;
   createdAt: Date;
 }
 

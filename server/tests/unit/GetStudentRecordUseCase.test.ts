@@ -103,6 +103,9 @@ describe('GetStudentRecordUseCase', () => {
       findByStudent: jest.fn().mockResolvedValue([]),
       countAttendanceByTutorAndStudent: jest.fn(),
       createAttendance: jest.fn(),
+      reschedule: jest.fn(),
+      cancel: jest.fn(),
+      createChangeHistory: jest.fn(),
     };
     useCase = new GetStudentRecordUseCase(
       students,

@@ -7,6 +7,7 @@ import {
   UsersIcon,
   LinkIcon,
   CheckCircleIcon,
+  AlertTriangleIcon,
 } from '@shared/components/icons';
 import { TutoringSession } from '../services/sessionService';
 import { getSessionStatus, SESSION_STATUS_LABEL } from '../utils/sessionStatus';
@@ -25,9 +26,12 @@ interface SessionDetailModalProps {
   onRegisterAttendance: () => void;
   registeringAttendance?: boolean;
   attendanceError?: string;
+  onReschedule: () => void;
+  onCancelSession: () => void;
 }
 
 const STATUS_TONE = {
+  CANCELADA: 'danger',
   PROXIMA: 'info',
   EN_CURSO: 'success',
   REALIZADA: 'neutral',
@@ -42,6 +46,8 @@ export const SessionDetailModal: React.FC<SessionDetailModalProps> = ({
   onRegisterAttendance,
   registeringAttendance,
   attendanceError,
+  onReschedule,
+  onCancelSession,
 }) => {
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -75,7 +81,14 @@ export const SessionDetailModal: React.FC<SessionDetailModalProps> = ({
           s.attendance,
       ).length;
   const limitReached = confirmedCount >= DEFAULT_MAX_SESSIONS;
-  const canRegister = !isGroup && !session.attendance && status !== 'PROXIMA' && !limitReached;
+  const canRegister =
+    !isGroup &&
+    !session.attendance &&
+    status !== 'PROXIMA' &&
+    status !== 'CANCELADA' &&
+    !limitReached;
+  // No tiene sentido reprogramar/cancelar algo que ya pasó o que ya está cancelado.
+  const canModify = status !== 'REALIZADA' && status !== 'CANCELADA';
 
   return (
     <div className={styles.overlay} onClick={onClose}>
@@ -134,6 +147,20 @@ export const SessionDetailModal: React.FC<SessionDetailModalProps> = ({
             )}
           </div>
 
+          {session.cancelledAt && (
+            <div className={styles.row}>
+              <AlertTriangleIcon size={16} />
+              <span>
+                Cancelada el{' '}
+                {new Date(session.cancelledAt).toLocaleString('es-PE', {
+                  dateStyle: 'medium',
+                  timeStyle: 'short',
+                })}{' '}
+                · Motivo: {session.cancelReason}
+              </span>
+            </div>
+          )}
+
           <div className={styles.participants}>
             <div className={styles.row}>
               <UsersIcon size={16} />
@@ -148,7 +175,7 @@ export const SessionDetailModal: React.FC<SessionDetailModalProps> = ({
             </ul>
           </div>
 
-          {!isGroup && (
+          {!isGroup && !session.cancelledAt && (
             <div className={styles.attendance}>
               <div className={styles.row}>
                 <CheckCircleIcon size={16} />
@@ -188,6 +215,16 @@ export const SessionDetailModal: React.FC<SessionDetailModalProps> = ({
         </div>
 
         <div className={styles.actions}>
+          {canModify && (
+            <>
+              <Button variant="danger" onClick={onCancelSession}>
+                Cancelar sesión
+              </Button>
+              <Button variant="secondary" onClick={onReschedule}>
+                Reprogramar
+              </Button>
+            </>
+          )}
           <Button variant="secondary" onClick={onClose}>
             Cerrar
           </Button>

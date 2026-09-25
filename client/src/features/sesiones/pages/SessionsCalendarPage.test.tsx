@@ -53,6 +53,8 @@ const individualSession: TutoringSession = {
   meetingLink: 'https://meet.example.com/abc',
   studentIds: ['s1'],
   attendance: null,
+  cancelledAt: null,
+  cancelReason: null,
   createdAt: new Date(2026, 9, 1).toISOString(),
 };
 
@@ -68,6 +70,8 @@ const groupSession: TutoringSession = {
   meetingLink: null,
   studentIds: ['s1', 's2'],
   attendance: null,
+  cancelledAt: null,
+  cancelReason: null,
   createdAt: new Date(2026, 9, 1).toISOString(),
 };
 

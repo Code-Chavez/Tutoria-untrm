@@ -61,6 +61,8 @@ export class ScheduleSessionUseCase {
         modality: input.modality,
         location: input.modality === 'PRESENCIAL' ? input.location!.trim() : null,
         meetingLink: input.modality === 'VIRTUAL' ? input.meetingLink!.trim() : null,
+        cancelledAt: null,
+        cancelReason: null,
       },
       input.studentIds,
     );

@@ -14,6 +14,8 @@ const baseSession: TutoringSession = {
   meetingLink: null,
   studentIds: ['a1'],
   attendance: null,
+  cancelledAt: null,
+  cancelReason: null,
   createdAt: '2026-10-01T00:00:00.000Z',
 };
 
@@ -28,5 +30,11 @@ describe('getSessionStatus', () => {
 
   it('es REALIZADA después del fin', () => {
     expect(getSessionStatus(baseSession, new Date('2026-10-05T16:00:00.000Z'))).toBe('REALIZADA');
+  });
+
+  it('es CANCELADA sin importar la hora, si cancelledAt está definido', () => {
+    const cancelled = { ...baseSession, cancelledAt: '2026-10-04T00:00:00.000Z' };
+    expect(getSessionStatus(cancelled, new Date('2026-10-05T14:00:00.000Z'))).toBe('CANCELADA');
+    expect(getSessionStatus(cancelled, new Date('2026-10-05T16:00:00.000Z'))).toBe('CANCELADA');
   });
 });

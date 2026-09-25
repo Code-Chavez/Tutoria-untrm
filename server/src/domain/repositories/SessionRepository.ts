@@ -1,4 +1,9 @@
-import { Session, SessionAttendance, SessionWithParticipants } from '../entities/Session';
+import {
+  Session,
+  SessionAttendance,
+  SessionChangeHistory,
+  SessionWithParticipants,
+} from '../entities/Session';
 
 export interface SessionFilters {
   tutorId?: string;
@@ -12,8 +17,16 @@ export interface SessionRepository {
     studentIds: string[],
   ): Promise<SessionWithParticipants>;
   findById(id: string): Promise<SessionWithParticipants | null>;
-  /** Sesiones de un tutor que se solapan con el rango [start, end). */
-  findOverlapping(tutorId: string, start: Date, end: Date): Promise<Session[]>;
+  /**
+   * Sesiones (no canceladas) de un tutor que se solapan con [start, end).
+   * excludeSessionId permite comparar contra las demás al reprogramar una.
+   */
+  findOverlapping(
+    tutorId: string,
+    start: Date,
+    end: Date,
+    excludeSessionId?: string,
+  ): Promise<Session[]>;
   findAll(filters?: SessionFilters): Promise<SessionWithParticipants[]>;
   /** Sesiones de un estudiante, más reciente primero (para el expediente). */
   findByStudent(studentId: string): Promise<SessionWithParticipants[]>;
@@ -27,4 +40,12 @@ export interface SessionRepository {
     sequenceNumber: number,
     confirmedAt: Date,
   ): Promise<SessionAttendance>;
+
+  /** Cambia el horario de la sesión (HU-23); no toca participantes ni modalidad. */
+  reschedule(id: string, scheduledAt: Date, endsAt: Date): Promise<SessionWithParticipants>;
+  /** Marca la sesión como cancelada (HU-23), sin borrarla. */
+  cancel(id: string, cancelledAt: Date, reason: string): Promise<SessionWithParticipants>;
+  createChangeHistory(
+    data: Omit<SessionChangeHistory, 'id' | 'createdAt'>,
+  ): Promise<SessionChangeHistory>;
 }
