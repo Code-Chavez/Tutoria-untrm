@@ -19,7 +19,17 @@ interface AssignmentRecordEvent {
   reason: string;
 }
 
-export type StudentRecordEvent = InterviewRecordEvent | AssignmentRecordEvent;
+interface AttendanceRecordEvent {
+  type: 'attendance';
+  id: string;
+  date: string;
+  sequenceNumber: number;
+  topic: string;
+  tutorName: string;
+  scheduledAt: string;
+}
+
+export type StudentRecordEvent = InterviewRecordEvent | AssignmentRecordEvent | AttendanceRecordEvent;
 
 export interface SupportContactRecord {
   fullName: string;

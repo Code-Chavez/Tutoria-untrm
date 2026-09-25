@@ -350,6 +350,7 @@ model Session {
   meetingLink String? @map("meeting_link")
 
   participants SessionParticipant[]
+  attendance   SessionAttendance?
 
   @@index([tutorId])
   @@map("sessions")
@@ -364,6 +365,23 @@ model SessionParticipant {
 
   @@unique([sessionId, studentId])
   @@map("session_participants")
+}
+
+// Registro de asistencia de una sesión individual (HU-22, Anexo N°4):
+// reemplaza la firma del tutorado por una confirmación digital. Solo aplica
+// a sesiones individuales (un participante); el número de sesión (1-8) se
+// calcula al registrar, contando las ya confirmadas del mismo tutor con el
+// mismo tutorado — no se guarda fecha/tema/hora aparte porque ya viven en
+// la Session enlazada.
+model SessionAttendance {
+  id             String   @id @default(uuid())
+  sessionId      String   @unique @map("session_id")
+  session        Session  @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  sequenceNumber Int      @map("sequence_number")
+  confirmedAt    DateTime @map("confirmed_at")
+  createdAt      DateTime @default(now()) @map("created_at")
+
+  @@map("session_attendances")
 }
 
 // ─── Parámetros del Sistema ────────────────────────────────────

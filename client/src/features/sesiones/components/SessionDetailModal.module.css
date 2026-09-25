@@ -131,6 +131,23 @@
   border-bottom: none;
 }
 
+.attendance {
+  border-top: 1px solid var(--borde);
+  padding-top: var(--s4);
+  margin-top: var(--s4);
+}
+
+.attendance .row {
+  margin-bottom: var(--s3);
+}
+
+.error {
+  display: block;
+  margin-top: var(--s2);
+  font-size: var(--fs-xs);
+  color: var(--peligro);
+}
+
 .actions {
   display: flex;
   justify-content: flex-end;

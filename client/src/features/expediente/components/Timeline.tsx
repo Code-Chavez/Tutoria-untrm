@@ -1,6 +1,6 @@
 import React from 'react';
 import { Badge, EmptyState } from '@shared/components/ui';
-import { ClipboardIcon, SwitchIcon, FolderIcon } from '@shared/components/icons';
+import { ClipboardIcon, SwitchIcon, FolderIcon, CheckCircleIcon } from '@shared/components/icons';
 import { StudentRecordEvent } from '../services/studentRecordService';
 import styles from './Timeline.module.css';
 
@@ -32,11 +32,23 @@ export const Timeline: React.FC<TimelineProps> = ({ events }) => {
       {events.map((event) => (
         <li key={`${event.type}-${event.id}`} className={styles.item}>
           <span className={`${styles.icon} ${styles[event.type]}`}>
-            {event.type === 'interview' ? <ClipboardIcon size={16} /> : <SwitchIcon size={16} />}
+            {event.type === 'interview' ? (
+              <ClipboardIcon size={16} />
+            ) : event.type === 'assignment' ? (
+              <SwitchIcon size={16} />
+            ) : (
+              <CheckCircleIcon size={16} />
+            )}
           </span>
           <div className={styles.card}>
             <div className={styles.cardHead}>
-              <b>{event.type === 'interview' ? 'Entrevista inicial tutorial' : 'Asignación de tutor'}</b>
+              <b>
+                {event.type === 'interview'
+                  ? 'Entrevista inicial tutorial'
+                  : event.type === 'assignment'
+                    ? 'Asignación de tutor'
+                    : 'Asistencia a sesión'}
+              </b>
               <span className={styles.date}>{formatDate(event.date)}</span>
             </div>
 
@@ -57,7 +69,7 @@ export const Timeline: React.FC<TimelineProps> = ({ events }) => {
                 </p>
                 <span className={styles.meta}>Registrada por {event.conductedByName}</span>
               </div>
-            ) : (
+            ) : event.type === 'assignment' ? (
               <div className={styles.cardBody}>
                 <p>
                   {event.previousTutorName ? (
@@ -71,6 +83,13 @@ export const Timeline: React.FC<TimelineProps> = ({ events }) => {
                   )}
                 </p>
                 <span className={styles.meta}>Motivo: {event.reason}</span>
+              </div>
+            ) : (
+              <div className={styles.cardBody}>
+                <p>
+                  Sesión {event.sequenceNumber} de 8 (Anexo N° 4): <b>{event.topic}</b>
+                </p>
+                <span className={styles.meta}>Confirmada con {event.tutorName}</span>
               </div>
             )}
           </div>

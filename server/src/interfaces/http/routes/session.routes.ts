@@ -8,6 +8,7 @@ const router: IRouter = Router();
 const sessionController = new SessionController(
   container.useCases.scheduleSessionUseCase,
   container.useCases.listSessionsUseCase,
+  container.useCases.registerAttendanceUseCase,
 );
 
 const requireAuth = authenticate(container.services.tokenService);
@@ -18,5 +19,13 @@ router.post('/sessions', requireAuth, authorize(['sessions:write']), sessionCont
 
 // Listar sesiones (?mine=true para la agenda propia, ?studentId= para las de un estudiante).
 router.get('/sessions', requireAuth, authorize(['sessions:read']), sessionController.list);
+
+// Registrar la asistencia de una sesión individual (HU-22, Anexo N°4).
+router.post(
+  '/sessions/:id/attendance',
+  requireAuth,
+  authorize(['sessions:write']),
+  sessionController.registerAttendance,
+);
 
 export default router;

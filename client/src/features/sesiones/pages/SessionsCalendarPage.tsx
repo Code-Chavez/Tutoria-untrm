@@ -7,8 +7,9 @@ import {
   XCircleIcon,
 } from '@shared/components/icons';
 import { useMySessions } from '../hooks/useMySessions';
-import { TutoringSession } from '../services/sessionService';
+import { sessionService, TutoringSession } from '../services/sessionService';
 import { SessionDetailModal } from '../components/SessionDetailModal';
+import { getApiErrorMessage } from '@shared/services/apiClient';
 import {
   addDays,
   addMonths,
@@ -39,6 +40,8 @@ export const SessionsCalendarPage: React.FC = () => {
   const [view, setView] = useState<ViewMode>('month');
   const [cursor, setCursor] = useState(new Date());
   const [selectedSession, setSelectedSession] = useState<TutoringSession | null>(null);
+  const [registeringAttendance, setRegisteringAttendance] = useState(false);
+  const [attendanceError, setAttendanceError] = useState('');
 
   const monthDays = useMemo(() => getMonthGridDays(cursor), [cursor]);
   const weekDays = useMemo(() => getWeekDays(cursor), [cursor]);
@@ -47,6 +50,21 @@ export const SessionsCalendarPage: React.FC = () => {
   const goPrev = () => setCursor((c) => (view === 'month' ? addMonths(c, -1) : addDays(c, -7)));
   const goNext = () => setCursor((c) => (view === 'month' ? addMonths(c, 1) : addDays(c, 7)));
   const goToday = () => setCursor(new Date());
+
+  const handleRegisterAttendance = async () => {
+    if (!selectedSession) return;
+    setRegisteringAttendance(true);
+    setAttendanceError('');
+    try {
+      const updated = await sessionService.registerAttendance(selectedSession.id);
+      setSelectedSession(updated);
+      refresh();
+    } catch (err) {
+      setAttendanceError(getApiErrorMessage(err));
+    } finally {
+      setRegisteringAttendance(false);
+    }
+  };
 
   return (
     <div>
@@ -141,7 +159,10 @@ export const SessionsCalendarPage: React.FC = () => {
                         className={`${styles.chip} ${
                           s.studentIds.length > 1 ? styles.chipGroup : styles.chipIndividual
                         }`}
-                        onClick={() => setSelectedSession(s)}
+                        onClick={() => {
+                          setAttendanceError('');
+                          setSelectedSession(s);
+                        }}
                         title={s.topic}
                       >
                         {new Date(s.scheduledAt).toLocaleTimeString('es-PE', {
@@ -178,7 +199,10 @@ export const SessionsCalendarPage: React.FC = () => {
                           className={`${styles.weekCard} ${
                             s.studentIds.length > 1 ? styles.weekCardGroup : ''
                           }`}
-                          onClick={() => setSelectedSession(s)}
+                          onClick={() => {
+                            setAttendanceError('');
+                            setSelectedSession(s);
+                          }}
                         >
                           <div className={styles.weekCardTime}>
                             {new Date(s.scheduledAt).toLocaleTimeString('es-PE', {
@@ -202,7 +226,11 @@ export const SessionsCalendarPage: React.FC = () => {
         <SessionDetailModal
           session={selectedSession}
           students={students}
+          allSessions={sessions}
           onClose={() => setSelectedSession(null)}
+          onRegisterAttendance={handleRegisterAttendance}
+          registeringAttendance={registeringAttendance}
+          attendanceError={attendanceError}
         />
       )}
     </div>

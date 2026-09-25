@@ -6,12 +6,14 @@ import { UserRepository } from '@domain/repositories/UserRepository';
 import { TutorInterviewRepository } from '@domain/repositories/TutorInterviewRepository';
 import { TutorAssignmentHistoryRepository } from '@domain/repositories/TutorAssignmentHistoryRepository';
 import { SupportContactRepository } from '@domain/repositories/SupportContactRepository';
+import { SessionRepository } from '@domain/repositories/SessionRepository';
 import { Student } from '@domain/entities/Student';
 import { School } from '@domain/entities/School';
 import { User } from '@domain/entities/User';
 import { TutorInterview } from '@domain/entities/TutorInterview';
 import { TutorAssignmentHistory } from '@domain/entities/TutorAssignmentHistory';
 import { SupportContact } from '@domain/entities/SupportContact';
+import { SessionWithParticipants } from '@domain/entities/Session';
 
 describe('GetStudentRecordUseCase', () => {
   let useCase: GetStudentRecordUseCase;
@@ -21,6 +23,7 @@ describe('GetStudentRecordUseCase', () => {
   let interviews: jest.Mocked<TutorInterviewRepository>;
   let history: jest.Mocked<TutorAssignmentHistoryRepository>;
   let contacts: jest.Mocked<SupportContactRepository>;
+  let sessions: jest.Mocked<SessionRepository>;
 
   const student = {
     id: 'student-1',
@@ -92,7 +95,24 @@ describe('GetStudentRecordUseCase', () => {
       findByStudent: jest.fn().mockResolvedValue(null),
       upsert: jest.fn(),
     };
-    useCase = new GetStudentRecordUseCase(students, schools, users, interviews, history, contacts);
+    sessions = {
+      create: jest.fn(),
+      findById: jest.fn(),
+      findOverlapping: jest.fn(),
+      findAll: jest.fn(),
+      findByStudent: jest.fn().mockResolvedValue([]),
+      countAttendanceByTutorAndStudent: jest.fn(),
+      createAttendance: jest.fn(),
+    };
+    useCase = new GetStudentRecordUseCase(
+      students,
+      schools,
+      users,
+      interviews,
+      history,
+      contacts,
+      sessions,
+    );
   });
 
   it('consolida entrevistas e historial de asignación en orden cronológico descendente', async () => {
@@ -128,5 +148,40 @@ describe('GetStudentRecordUseCase', () => {
   it('lanza StudentNotFoundError si el estudiante no existe', async () => {
     students.findById.mockResolvedValue(null);
     await expect(useCase.execute('missing', false)).rejects.toThrow(StudentNotFoundError);
+  });
+
+  it('incluye la asistencia confirmada de sesiones individuales (HU-22)', async () => {
+    const attendedSession = {
+      id: 'session-1',
+      tutorId: 'tutor-new',
+      topic: 'Reforzamiento de Cálculo',
+      scheduledAt: new Date('2026-09-20T15:00:00.000Z'),
+      durationMinutes: 45,
+      endsAt: new Date('2026-09-20T15:45:00.000Z'),
+      modality: 'PRESENCIAL',
+      location: 'Oficina 204',
+      meetingLink: null,
+      createdAt: new Date('2026-09-15'),
+      studentIds: ['student-1'],
+      attendance: {
+        id: 'att-1',
+        sessionId: 'session-1',
+        sequenceNumber: 1,
+        confirmedAt: new Date('2026-09-20T15:45:00.000Z'),
+        createdAt: new Date('2026-09-20T15:45:00.000Z'),
+      },
+    } as SessionWithParticipants;
+    sessions.findByStudent.mockResolvedValue([attendedSession]);
+
+    const record = await useCase.execute('student-1', false);
+
+    expect(record.timeline).toHaveLength(3);
+    const attendanceEvent = record.timeline.find((e) => e.type === 'attendance');
+    expect(attendanceEvent).toBeDefined();
+    if (attendanceEvent?.type === 'attendance') {
+      expect(attendanceEvent.sequenceNumber).toBe(1);
+      expect(attendanceEvent.topic).toBe('Reforzamiento de Cálculo');
+      expect(attendanceEvent.tutorName).toBe('Elena Ramírez');
+    }
   });
 });

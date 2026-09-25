@@ -1,8 +1,19 @@
 import { PrismaClient, Prisma } from '@prisma/client';
-import { Session, SessionWithParticipants } from '@domain/entities/Session';
+import { Session, SessionAttendance, SessionWithParticipants } from '@domain/entities/Session';
 import { SessionRepository, SessionFilters } from '@domain/repositories/SessionRepository';
 
-type SessionRow = Prisma.SessionGetPayload<{ include: { participants: true } }>;
+type SessionRow = Prisma.SessionGetPayload<{ include: { participants: true; attendance: true } }>;
+
+function toAttendance(row: SessionRow['attendance']): SessionAttendance | null {
+  if (!row) return null;
+  return {
+    id: row.id,
+    sessionId: row.sessionId,
+    sequenceNumber: row.sequenceNumber,
+    confirmedAt: row.confirmedAt,
+    createdAt: row.createdAt,
+  };
+}
 
 function toSessionWithParticipants(row: SessionRow): SessionWithParticipants {
   return {
@@ -17,8 +28,11 @@ function toSessionWithParticipants(row: SessionRow): SessionWithParticipants {
     meetingLink: row.meetingLink,
     createdAt: row.createdAt,
     studentIds: row.participants.map((p) => p.studentId),
+    attendance: toAttendance(row.attendance),
   };
 }
+
+const WITH_DETAILS = { include: { participants: true, attendance: true } } as const;
 
 export class PrismaSessionRepository implements SessionRepository {
   constructor(private readonly prisma: PrismaClient) {}
@@ -34,9 +48,14 @@ export class PrismaSessionRepository implements SessionRepository {
           create: studentIds.map((studentId) => ({ studentId })),
         },
       },
-      include: { participants: true },
+      ...WITH_DETAILS,
     });
     return toSessionWithParticipants(row);
+  }
+
+  async findById(id: string): Promise<SessionWithParticipants | null> {
+    const row = await this.prisma.session.findUnique({ where: { id }, ...WITH_DETAILS });
+    return row ? toSessionWithParticipants(row) : null;
   }
 
   findOverlapping(tutorId: string, start: Date, end: Date): Promise<Session[]> {
@@ -56,7 +75,7 @@ export class PrismaSessionRepository implements SessionRepository {
     };
     const rows = await this.prisma.session.findMany({
       where,
-      include: { participants: true },
+      ...WITH_DETAILS,
       orderBy: { scheduledAt: 'desc' },
     });
     return rows.map(toSessionWithParticipants);
@@ -64,5 +83,28 @@ export class PrismaSessionRepository implements SessionRepository {
 
   findByStudent(studentId: string): Promise<SessionWithParticipants[]> {
     return this.findAll({ studentId });
+  }
+
+  async countAttendanceByTutorAndStudent(tutorId: string, studentId: string): Promise<number> {
+    return this.prisma.sessionAttendance.count({
+      where: { session: { tutorId, participants: { some: { studentId } } } },
+    });
+  }
+
+  async createAttendance(
+    sessionId: string,
+    sequenceNumber: number,
+    confirmedAt: Date,
+  ): Promise<SessionAttendance> {
+    const row = await this.prisma.sessionAttendance.create({
+      data: { sessionId, sequenceNumber, confirmedAt },
+    });
+    return {
+      id: row.id,
+      sessionId: row.sessionId,
+      sequenceNumber: row.sequenceNumber,
+      confirmedAt: row.confirmedAt,
+      createdAt: row.createdAt,
+    };
   }
 }

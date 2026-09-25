@@ -52,6 +52,7 @@ const individualSession: TutoringSession = {
   location: null,
   meetingLink: 'https://meet.example.com/abc',
   studentIds: ['s1'],
+  attendance: null,
   createdAt: new Date(2026, 9, 1).toISOString(),
 };
 
@@ -66,6 +67,7 @@ const groupSession: TutoringSession = {
   location: 'Auditorio principal',
   meetingLink: null,
   studentIds: ['s1', 's2'],
+  attendance: null,
   createdAt: new Date(2026, 9, 1).toISOString(),
 };
 
