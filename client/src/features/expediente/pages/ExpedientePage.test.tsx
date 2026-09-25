@@ -109,6 +109,32 @@ describe('ExpedientePage', () => {
     expect(screen.getByText(/confirmada con elena ramírez/i)).toBeInTheDocument();
   });
 
+  it('muestra la ficha de seguimiento con los datos del docente (HU-24)', async () => {
+    mocked.getStudentRecord.mockResolvedValue({
+      ...baseRecord,
+      timeline: [
+        {
+          type: 'followUp',
+          id: 'fu-1',
+          date: '2026-09-18T00:00:00.000Z',
+          reason: 'Seguimiento al acuerdo de reforzamiento',
+          agreements: 'Asesorías los martes',
+          instructorName: 'Prof. Juan Pérez',
+          courseName: 'Cálculo I',
+          courseCycle: 3,
+          conductedByName: 'Elena Ramírez',
+        },
+        ...baseRecord.timeline,
+      ],
+    });
+    renderPage();
+
+    expect(await screen.findByText(/ficha de seguimiento/i)).toBeInTheDocument();
+    expect(screen.getByText(/seguimiento al acuerdo de reforzamiento/i)).toBeInTheDocument();
+    expect(screen.getByText(/prof\. juan pérez/i)).toBeInTheDocument();
+    expect(screen.getByText(/cálculo i · ciclo/i)).toBeInTheDocument();
+  });
+
   it('muestra un estado vacío cuando no hay eventos', async () => {
     mocked.getStudentRecord.mockResolvedValue({ ...baseRecord, timeline: [] });
     renderPage();

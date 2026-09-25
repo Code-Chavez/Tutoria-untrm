@@ -1,9 +1,8 @@
 import { SupportContact } from '@domain/entities/SupportContact';
 
 // Un evento del expediente (HU-16). Se diseña como unión discriminada para
-// poder añadir 'session' | 'followUp' | 'referral' en próximos sprints
-// (HU-17 en adelante) sin rehacer la línea de tiempo.
-export type StudentRecordEventType = 'interview' | 'assignment' | 'attendance';
+// poder añadir 'referral' en próximos sprints sin rehacer la línea de tiempo.
+export type StudentRecordEventType = 'interview' | 'assignment' | 'attendance' | 'followUp';
 
 export interface InterviewRecordEvent {
   type: 'interview';
@@ -35,7 +34,24 @@ export interface AttendanceRecordEvent {
   scheduledAt: Date;
 }
 
-export type StudentRecordEvent = InterviewRecordEvent | AssignmentRecordEvent | AttendanceRecordEvent;
+// Ficha de seguimiento (HU-24, Anexo N°5).
+export interface FollowUpRecordEvent {
+  type: 'followUp';
+  id: string;
+  date: Date;
+  reason: string;
+  agreements: string;
+  instructorName: string | null;
+  courseName: string | null;
+  courseCycle: number | null;
+  conductedByName: string;
+}
+
+export type StudentRecordEvent =
+  | InterviewRecordEvent
+  | AssignmentRecordEvent
+  | AttendanceRecordEvent
+  | FollowUpRecordEvent;
 
 export interface StudentRecord {
   student: {

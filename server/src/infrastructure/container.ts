@@ -7,6 +7,7 @@ import { PrismaPasswordResetTokenRepository } from './repositories/PrismaPasswor
 import { PrismaStudentRepository } from './repositories/PrismaStudentRepository';
 import { PrismaTutorAssignmentHistoryRepository } from './repositories/PrismaTutorAssignmentHistoryRepository';
 import { PrismaTutorInterviewRepository } from './repositories/PrismaTutorInterviewRepository';
+import { PrismaTutorFollowUpRepository } from './repositories/PrismaTutorFollowUpRepository';
 import { PrismaTutoringRequestRepository } from './repositories/PrismaTutoringRequestRepository';
 import { PrismaSessionRepository } from './repositories/PrismaSessionRepository';
 import { PrismaSystemParameterRepository } from './repositories/PrismaSystemParameterRepository';
@@ -29,6 +30,7 @@ const passwordResetTokenRepository = new PrismaPasswordResetTokenRepository(pris
 const studentRepository = new PrismaStudentRepository(prisma);
 const tutorAssignmentHistoryRepository = new PrismaTutorAssignmentHistoryRepository(prisma);
 const tutorInterviewRepository = new PrismaTutorInterviewRepository(prisma);
+const tutorFollowUpRepository = new PrismaTutorFollowUpRepository(prisma);
 const tutoringRequestRepository = new PrismaTutoringRequestRepository(prisma);
 const sessionRepository = new PrismaSessionRepository(prisma);
 const systemParameterRepository = new PrismaSystemParameterRepository(prisma);
@@ -79,6 +81,8 @@ import { GetTutorWorkloadUseCase } from '@application/use-cases/assignments/GetT
 import { ReassignStudentUseCase } from '@application/use-cases/assignments/ReassignStudentUseCase';
 import { CreateInterviewUseCase } from '@application/use-cases/interviews/CreateInterviewUseCase';
 import { ListInterviewsByStudentUseCase } from '@application/use-cases/interviews/ListInterviewsByStudentUseCase';
+import { CreateFollowUpUseCase } from '@application/use-cases/follow-ups/CreateFollowUpUseCase';
+import { ListFollowUpsByStudentUseCase } from '@application/use-cases/follow-ups/ListFollowUpsByStudentUseCase';
 import { UpsertSupportContactUseCase } from '@application/use-cases/support-contacts/UpsertSupportContactUseCase';
 import { GetSupportContactUseCase } from '@application/use-cases/support-contacts/GetSupportContactUseCase';
 import { GetStudentRecordUseCase } from '@application/use-cases/student-record/GetStudentRecordUseCase';
@@ -142,6 +146,8 @@ const createInterviewUseCase = new CreateInterviewUseCase(
 const listInterviewsByStudentUseCase = new ListInterviewsByStudentUseCase(
   tutorInterviewRepository,
 );
+const createFollowUpUseCase = new CreateFollowUpUseCase(tutorFollowUpRepository, studentRepository);
+const listFollowUpsByStudentUseCase = new ListFollowUpsByStudentUseCase(tutorFollowUpRepository);
 const upsertSupportContactUseCase = new UpsertSupportContactUseCase(
   supportContactRepository,
   studentRepository,
@@ -155,6 +161,7 @@ const getStudentRecordUseCase = new GetStudentRecordUseCase(
   tutorAssignmentHistoryRepository,
   supportContactRepository,
   sessionRepository,
+  tutorFollowUpRepository,
 );
 const createTutoringRequestUseCase = new CreateTutoringRequestUseCase(
   tutoringRequestRepository,
@@ -193,6 +200,7 @@ export const container = {
     schoolRepository,
     tutorAssignmentHistoryRepository,
     tutorInterviewRepository,
+    tutorFollowUpRepository,
     supportContactRepository,
     tutoringRequestRepository,
     sessionRepository,
@@ -227,6 +235,8 @@ export const container = {
     reassignStudentUseCase,
     createInterviewUseCase,
     listInterviewsByStudentUseCase,
+    createFollowUpUseCase,
+    listFollowUpsByStudentUseCase,
     upsertSupportContactUseCase,
     getSupportContactUseCase,
     getStudentRecordUseCase,

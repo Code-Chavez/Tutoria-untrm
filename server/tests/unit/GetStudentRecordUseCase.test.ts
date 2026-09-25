@@ -7,6 +7,7 @@ import { TutorInterviewRepository } from '@domain/repositories/TutorInterviewRep
 import { TutorAssignmentHistoryRepository } from '@domain/repositories/TutorAssignmentHistoryRepository';
 import { SupportContactRepository } from '@domain/repositories/SupportContactRepository';
 import { SessionRepository } from '@domain/repositories/SessionRepository';
+import { TutorFollowUpRepository } from '@domain/repositories/TutorFollowUpRepository';
 import { Student } from '@domain/entities/Student';
 import { School } from '@domain/entities/School';
 import { User } from '@domain/entities/User';
@@ -24,6 +25,7 @@ describe('GetStudentRecordUseCase', () => {
   let history: jest.Mocked<TutorAssignmentHistoryRepository>;
   let contacts: jest.Mocked<SupportContactRepository>;
   let sessions: jest.Mocked<SessionRepository>;
+  let followUps: jest.Mocked<TutorFollowUpRepository>;
 
   const student = {
     id: 'student-1',
@@ -107,6 +109,10 @@ describe('GetStudentRecordUseCase', () => {
       cancel: jest.fn(),
       createChangeHistory: jest.fn(),
     };
+    followUps = {
+      create: jest.fn(),
+      findByStudent: jest.fn().mockResolvedValue([]),
+    };
     useCase = new GetStudentRecordUseCase(
       students,
       schools,
@@ -115,6 +121,7 @@ describe('GetStudentRecordUseCase', () => {
       history,
       contacts,
       sessions,
+      followUps,
     );
   });
 
@@ -185,6 +192,34 @@ describe('GetStudentRecordUseCase', () => {
       expect(attendanceEvent.sequenceNumber).toBe(1);
       expect(attendanceEvent.topic).toBe('Reforzamiento de Cálculo');
       expect(attendanceEvent.tutorName).toBe('Elena Ramírez');
+    }
+  });
+
+  it('incluye las fichas de seguimiento (HU-24)', async () => {
+    followUps.findByStudent.mockResolvedValue([
+      {
+        id: 'followup-1',
+        studentId: 'student-1',
+        conductedById: 'tutor-new',
+        reason: 'Bajo rendimiento en Cálculo',
+        agreements: 'Reforzamiento semanal',
+        instructorName: 'Prof. Juan Pérez',
+        courseName: 'Cálculo I',
+        courseCycle: 3,
+        createdAt: new Date('2026-09-18'),
+      },
+    ]);
+
+    const record = await useCase.execute('student-1', false);
+
+    expect(record.timeline).toHaveLength(3);
+    const followUpEvent = record.timeline.find((e) => e.type === 'followUp');
+    expect(followUpEvent).toBeDefined();
+    if (followUpEvent?.type === 'followUp') {
+      expect(followUpEvent.reason).toBe('Bajo rendimiento en Cálculo');
+      expect(followUpEvent.instructorName).toBe('Prof. Juan Pérez');
+      expect(followUpEvent.courseCycle).toBe(3);
+      expect(followUpEvent.conductedByName).toBe('Elena Ramírez');
     }
   });
 });

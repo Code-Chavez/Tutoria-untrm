@@ -36,6 +36,7 @@ model User {
   newTutorHistory      TutorAssignmentHistory[] @relation("NewTutorHistory")
   reassignmentsMade    TutorAssignmentHistory[] @relation("ReassignedByHistory")
   interviewsConducted  TutorInterview[]
+  followUpsConducted   TutorFollowUp[]
   coordinatedSchools   School[]                 @relation("SchoolCoordinator")
   requestsCreated      TutoringRequest[]        @relation("RequestsCreated")
   requestsRouted       TutoringRequest[]        @relation("RequestsRouted")
@@ -197,6 +198,7 @@ model Student {
 
   assignmentHistory TutorAssignmentHistory[]
   interviews        TutorInterview[]
+  followUps         TutorFollowUp[]
   supportContact    SupportContact?
   tutoringRequests  TutoringRequest[]
   sessionParticipations SessionParticipant[]
@@ -269,6 +271,35 @@ model TutorInterview {
 
   @@index([studentId])
   @@map("tutor_interviews")
+}
+
+// Ficha de seguimiento (Anexo N° 5 del Protocolo, HU-24). Los datos de
+// filiación ya presentes en Student no se duplican aquí (mismo criterio que
+// TutorInterview); se obtienen uniendo por studentId.
+model TutorFollowUp {
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now()) @map("created_at")
+
+  studentId String  @map("student_id")
+  student   Student @relation(fields: [studentId], references: [id])
+
+  conductedById String @map("conducted_by_id")
+  conductedBy   User   @relation(fields: [conductedById], references: [id])
+
+  // II. Motivo de seguimiento
+  reason String
+
+  // III. Acuerdos tomados con los docentes o estudiante. Si el acuerdo es
+  // con un docente de asignatura (ese rol no existe en el sistema, mismo
+  // criterio de texto libre que TutoringRequest), se registra nombre, curso
+  // y ciclo; si es con el propio tutorado, estos tres quedan nulos.
+  agreements     String
+  instructorName String? @map("instructor_name")
+  courseName     String? @map("course_name")
+  courseCycle    Int?    @map("course_cycle")
+
+  @@index([studentId])
+  @@map("tutor_follow_ups")
 }
 
 // Persona de red de apoyo — Anexo N° 3, sección II del Protocolo (HU-15).

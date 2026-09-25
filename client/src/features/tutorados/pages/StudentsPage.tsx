@@ -18,6 +18,8 @@ import { userService } from '@features/admin/services/userService';
 import { InterviewFormModal } from '@features/entrevistas/components/InterviewFormModal';
 import { interviewService, CreateInterviewData } from '@features/entrevistas/services/interviewService';
 import { supportContactService, UpsertSupportContactData } from '@features/entrevistas/services/supportContactService';
+import { FollowUpFormModal } from '@features/seguimiento/components/FollowUpFormModal';
+import { followUpService, CreateFollowUpData } from '@features/seguimiento/services/followUpService';
 import { TutoringRequestModal } from '../components/TutoringRequestModal';
 import {
   tutoringRequestService,
@@ -106,6 +108,11 @@ export const StudentsPage: React.FC = () => {
   const [groupSessionOpen, setGroupSessionOpen] = useState(false);
   const [sessionLoading, setSessionLoading] = useState(false);
   const [sessionError, setSessionError] = useState('');
+
+  // Ficha de seguimiento (HU-24).
+  const [studentForFollowUp, setStudentForFollowUp] = useState<Student | null>(null);
+  const [followUpLoading, setFollowUpLoading] = useState(false);
+  const [followUpError, setFollowUpError] = useState('');
 
   // Vinculación de cuenta de portal (autoservicio de solicitud de tutoría).
   const [studentToLink, setStudentToLink] = useState<Student | null>(null);
@@ -344,6 +351,23 @@ export const StudentsPage: React.FC = () => {
     }
   };
 
+  const confirmFollowUp = async (data: CreateFollowUpData) => {
+    if (!studentForFollowUp) return;
+    setFollowUpLoading(true);
+    setFollowUpError('');
+    try {
+      await followUpService.createFollowUp(studentForFollowUp.id, data);
+      setRequestFeedback(
+        `Ficha de seguimiento registrada para ${studentForFollowUp.firstName} ${studentForFollowUp.lastName}.`,
+      );
+      setStudentForFollowUp(null);
+    } catch (err) {
+      setFollowUpError(getApiErrorMessage(err));
+    } finally {
+      setFollowUpLoading(false);
+    }
+  };
+
   const confirmLinkAccount = async (userId: string | null) => {
     if (!studentToLink) return;
     setLinkLoading(true);
@@ -475,6 +499,10 @@ export const StudentsPage: React.FC = () => {
                 setLinkError('');
                 setStudentToLink(student);
               }}
+              onRegisterFollowUp={(student) => {
+                setFollowUpError('');
+                setStudentForFollowUp(student);
+              }}
             />
             <Pagination
               page={page}
@@ -560,6 +588,16 @@ export const StudentsPage: React.FC = () => {
           serverError={sessionError}
           onSubmit={confirmScheduleGroup}
           onCancel={() => setGroupSessionOpen(false)}
+        />
+      )}
+
+      {studentForFollowUp && (
+        <FollowUpFormModal
+          student={studentForFollowUp}
+          loading={followUpLoading}
+          serverError={followUpError}
+          onSubmit={confirmFollowUp}
+          onCancel={() => setStudentForFollowUp(null)}
         />
       )}
 
