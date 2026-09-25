@@ -7,6 +7,10 @@ import {
   SwitchIcon,
   ClipboardIcon,
   FolderIcon,
+  SendIcon,
+  CalendarIcon,
+  LinkIcon,
+  ActivityIcon,
 } from '@shared/components/icons';
 import { Student } from '../services/studentService';
 import table from '@shared/components/ui/DataTable.module.css';
@@ -23,6 +27,10 @@ interface TutoradoTableProps {
   onReassign: (student: Student) => void;
   onRegisterInterview: (student: Student) => void;
   onViewRecord: (student: Student) => void;
+  onRequestTutoring: (student: Student) => void;
+  onScheduleSession: (student: Student) => void;
+  onLinkAccount: (student: Student) => void;
+  onRegisterFollowUp: (student: Student) => void;
 }
 
 export const TutoradoTable: React.FC<TutoradoTableProps> = ({
@@ -37,6 +45,10 @@ export const TutoradoTable: React.FC<TutoradoTableProps> = ({
   onReassign,
   onRegisterInterview,
   onViewRecord,
+  onRequestTutoring,
+  onScheduleSession,
+  onLinkAccount,
+  onRegisterFollowUp,
 }) => {
   // El expediente solo requiere students:read, así que se muestra a
   // cualquier rol que pueda ver esta tabla.
@@ -102,6 +114,12 @@ export const TutoradoTable: React.FC<TutoradoTableProps> = ({
                       <IconButton label="Ver expediente" onClick={() => onViewRecord(student)}>
                         <FolderIcon size={16} />
                       </IconButton>
+                      <IconButton
+                        label="Solicitar tutoría"
+                        onClick={() => onRequestTutoring(student)}
+                      >
+                        <SendIcon size={16} />
+                      </IconButton>
                       {canConductInterview && (
                         <IconButton
                           label="Registrar entrevista inicial"
@@ -110,9 +128,34 @@ export const TutoradoTable: React.FC<TutoradoTableProps> = ({
                           <ClipboardIcon size={16} />
                         </IconButton>
                       )}
+                      {/* sessions:write y followups:write son exclusivos de Docente Tutor, igual que interviews:write. */}
+                      {canConductInterview && (
+                        <IconButton
+                          label="Programar sesión"
+                          onClick={() => onScheduleSession(student)}
+                        >
+                          <CalendarIcon size={16} />
+                        </IconButton>
+                      )}
+                      {canConductInterview && (
+                        <IconButton
+                          label="Registrar seguimiento"
+                          onClick={() => onRegisterFollowUp(student)}
+                        >
+                          <ActivityIcon size={16} />
+                        </IconButton>
+                      )}
                       {canWrite && student.tutorId && (
                         <IconButton label="Reasignar tutor" onClick={() => onReassign(student)}>
                           <SwitchIcon size={16} />
+                        </IconButton>
+                      )}
+                      {canWrite && (
+                        <IconButton
+                          label={student.userId ? 'Cambiar cuenta de portal' : 'Vincular cuenta'}
+                          onClick={() => onLinkAccount(student)}
+                        >
+                          <LinkIcon size={16} />
                         </IconButton>
                       )}
                       {canWrite &&

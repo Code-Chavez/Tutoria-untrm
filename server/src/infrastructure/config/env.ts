@@ -10,4 +10,7 @@ export const env = {
   JWT_REFRESH_EXPIRES_IN: process.env.JWT_REFRESH_EXPIRES_IN || '7d',
   BCRYPT_ROUNDS: parseInt(process.env.BCRYPT_ROUNDS || '12', 10),
   CORS_ORIGIN: process.env.CORS_ORIGIN || 'http://localhost:5173',
+  // Carpeta donde se guardan las evidencias de sesión (HU-25), fuera del
+  // repositorio de código.
+  EVIDENCE_STORAGE_DIR: process.env.EVIDENCE_STORAGE_DIR || 'storage/evidence',
 } as const;

@@ -49,6 +49,16 @@
   color: var(--alerta);
 }
 
+.icon.attendance {
+  background: #e9f6ef;
+  color: var(--ok);
+}
+
+.icon.followUp {
+  background: var(--celeste);
+  color: var(--azul-med);
+}
+
 .card {
   flex: 1;
   min-width: 0;

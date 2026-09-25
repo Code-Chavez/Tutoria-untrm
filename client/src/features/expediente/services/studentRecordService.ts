@@ -19,7 +19,33 @@ interface AssignmentRecordEvent {
   reason: string;
 }
 
-export type StudentRecordEvent = InterviewRecordEvent | AssignmentRecordEvent;
+interface AttendanceRecordEvent {
+  type: 'attendance';
+  id: string;
+  date: string;
+  sequenceNumber: number;
+  topic: string;
+  tutorName: string;
+  scheduledAt: string;
+}
+
+interface FollowUpRecordEvent {
+  type: 'followUp';
+  id: string;
+  date: string;
+  reason: string;
+  agreements: string;
+  instructorName: string | null;
+  courseName: string | null;
+  courseCycle: number | null;
+  conductedByName: string;
+}
+
+export type StudentRecordEvent =
+  | InterviewRecordEvent
+  | AssignmentRecordEvent
+  | AttendanceRecordEvent
+  | FollowUpRecordEvent;
 
 export interface SupportContactRecord {
   fullName: string;

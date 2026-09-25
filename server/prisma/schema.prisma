@@ -30,11 +30,19 @@ model User {
   refreshTokens RefreshToken[]
   passwordResetTokens PasswordResetToken[]
   tutoredStudents Student[] @relation("TutorStudents")
+  studentProfile  Student?  @relation("StudentPortalUser")
 
   previousTutorHistory TutorAssignmentHistory[] @relation("PreviousTutorHistory")
   newTutorHistory      TutorAssignmentHistory[] @relation("NewTutorHistory")
   reassignmentsMade    TutorAssignmentHistory[] @relation("ReassignedByHistory")
   interviewsConducted  TutorInterview[]
+  followUpsConducted   TutorFollowUp[]
+  coordinatedSchools   School[]                 @relation("SchoolCoordinator")
+  requestsCreated      TutoringRequest[]        @relation("RequestsCreated")
+  requestsRouted       TutoringRequest[]        @relation("RequestsRouted")
+  sessionsAsTutor      Session[]                @relation("SessionsAsTutor")
+  sessionChangesMade   SessionChangeHistory[]   @relation("SessionChangesMade")
+  sessionEvidenceUploads SessionEvidence[]      @relation("SessionEvidenceUploads")
 
   @@map("users")
 }
@@ -140,6 +148,11 @@ model School {
   faculty  Faculty   @relation(fields: [facultyId], references: [id])
   students Student[]
 
+  // Coordinador de tutoría de la escuela (Art. 17.a); usado para enrutar
+  // solicitudes de tutoría cuando el estudiante no tiene tutor asignado.
+  coordinatorId String? @map("coordinator_id")
+  coordinator   User?   @relation("SchoolCoordinator", fields: [coordinatorId], references: [id])
+
   @@unique([name, facultyId])
   @@map("schools")
 }
@@ -179,9 +192,17 @@ model Student {
   tutor      User?     @relation("TutorStudents", fields: [tutorId], references: [id])
   assignedAt DateTime? @map("assigned_at")
 
+  // Cuenta de portal del propio tutorado (rol Tutorado), para autoservicio.
+  // Opcional: no todo estudiante tiene una cuenta creada en el sistema.
+  userId     String?   @unique @map("user_id")
+  portalUser User?     @relation("StudentPortalUser", fields: [userId], references: [id])
+
   assignmentHistory TutorAssignmentHistory[]
   interviews        TutorInterview[]
+  followUps         TutorFollowUp[]
   supportContact    SupportContact?
+  tutoringRequests  TutoringRequest[]
+  sessionParticipations SessionParticipant[]
 
   @@index([tutorId])
   @@map("students")
@@ -253,6 +274,35 @@ model TutorInterview {
   @@map("tutor_interviews")
 }
 
+// Ficha de seguimiento (Anexo N° 5 del Protocolo, HU-24). Los datos de
+// filiación ya presentes en Student no se duplican aquí (mismo criterio que
+// TutorInterview); se obtienen uniendo por studentId.
+model TutorFollowUp {
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now()) @map("created_at")
+
+  studentId String  @map("student_id")
+  student   Student @relation(fields: [studentId], references: [id])
+
+  conductedById String @map("conducted_by_id")
+  conductedBy   User   @relation(fields: [conductedById], references: [id])
+
+  // II. Motivo de seguimiento
+  reason String
+
+  // III. Acuerdos tomados con los docentes o estudiante. Si el acuerdo es
+  // con un docente de asignatura (ese rol no existe en el sistema, mismo
+  // criterio de texto libre que TutoringRequest), se registra nombre, curso
+  // y ciclo; si es con el propio tutorado, estos tres quedan nulos.
+  agreements     String
+  instructorName String? @map("instructor_name")
+  courseName     String? @map("course_name")
+  courseCycle    Int?    @map("course_cycle")
+
+  @@index([studentId])
+  @@map("tutor_follow_ups")
+}
+
 // Persona de red de apoyo — Anexo N° 3, sección II del Protocolo (HU-15).
 // Un contacto por estudiante (se actualiza, no se acumula historial); su
 // lectura queda restringida a Docente Tutor y Administrador DBU.
@@ -270,6 +320,155 @@ model SupportContact {
   phone        String
 
   @@map("support_contacts")
+}
+
+// Solicitud de tutoría (HU-17, Art. 19.b y 19.c del Protocolo). El Tutorado
+// aún no tiene portal propio en el sistema, así que la registra un usuario
+// con acceso (Docente Tutor, Coordinador o DBU), indicando si el origen fue
+// el propio estudiante o un docente de asignatura (nombre y curso en texto
+// libre, ya que ese rol no existe en el sistema). Se enruta automáticamente:
+// al tutor si el estudiante ya tiene uno asignado, o al coordinador de su
+// escuela en caso contrario (con Administrador DBU como respaldo si la
+// escuela no tiene coordinador asignado).
+model TutoringRequest {
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now()) @map("created_at")
+
+  studentId String  @map("student_id")
+  student   Student @relation(fields: [studentId], references: [id])
+
+  requestedById String @map("requested_by_id")
+  requestedBy   User   @relation("RequestsCreated", fields: [requestedById], references: [id])
+
+  // 'STUDENT' (Art. 19.b) | 'INSTRUCTOR' (Art. 19.c)
+  source         String  @map("source")
+  instructorName String? @map("instructor_name")
+  courseName     String? @map("course_name")
+
+  // 'ACADEMIC' | 'PSYCHOLOGICAL' | 'SOCIAL' | 'HEALTH' (Art. 20)
+  caseType String @map("case_type")
+  reason   String
+
+  routedToId   String @map("routed_to_id")
+  routedTo     User   @relation("RequestsRouted", fields: [routedToId], references: [id])
+  routedToRole String @map("routed_to_role") // 'tutor' | 'coordinator'
+
+  @@index([studentId])
+  @@index([routedToId])
+  @@map("tutoring_requests")
+}
+
+// Sesión de tutoría (HU-18, Art. 15.c: 45 minutos, individual o grupal). El
+// tutor sale siempre del usuario autenticado (sessions:write es exclusivo de
+// Docente Tutor). Los participantes viven en su propia tabla desde el inicio
+// para que HU-19 (sesiones grupales) solo extienda este mismo modelo, tal
+// como indica su tarea, sin rediseñarlo.
+model Session {
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now()) @map("created_at")
+
+  tutorId String @map("tutor_id")
+  tutor   User   @relation("SessionsAsTutor", fields: [tutorId], references: [id])
+
+  topic           String
+  scheduledAt     DateTime @map("scheduled_at")
+  durationMinutes Int      @map("duration_minutes")
+  endsAt          DateTime @map("ends_at")
+
+  // Modalidad de la sesión (Art. 8): presencial registra el lugar, virtual
+  // el enlace de videollamada. Se guarda como texto, como el resto de
+  // valores tipo-enum del proyecto (p. ej. TutoringRequest.source).
+  modality    String  @default("PRESENCIAL")
+  location    String? @map("location")
+  meetingLink String? @map("meeting_link")
+
+  // Cancelación (HU-23, Art. 24-símil): la sesión se conserva (trazabilidad),
+  // no se borra. cancelledAt no nulo = cancelada.
+  cancelledAt  DateTime? @map("cancelled_at")
+  cancelReason String?   @map("cancel_reason")
+
+  participants SessionParticipant[]
+  attendance   SessionAttendance?
+  changeHistory SessionChangeHistory[]
+  evidences    SessionEvidence[]
+
+  @@index([tutorId])
+  @@map("sessions")
+}
+
+model SessionParticipant {
+  id        String  @id @default(uuid())
+  sessionId String  @map("session_id")
+  session   Session @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  studentId String  @map("student_id")
+  student   Student @relation(fields: [studentId], references: [id])
+
+  @@unique([sessionId, studentId])
+  @@map("session_participants")
+}
+
+// Registro de asistencia de una sesión individual (HU-22, Anexo N°4):
+// reemplaza la firma del tutorado por una confirmación digital. Solo aplica
+// a sesiones individuales (un participante); el número de sesión (1-8) se
+// calcula al registrar, contando las ya confirmadas del mismo tutor con el
+// mismo tutorado — no se guarda fecha/tema/hora aparte porque ya viven en
+// la Session enlazada.
+model SessionAttendance {
+  id             String   @id @default(uuid())
+  sessionId      String   @unique @map("session_id")
+  session        Session  @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  sequenceNumber Int      @map("sequence_number")
+  confirmedAt    DateTime @map("confirmed_at")
+  createdAt      DateTime @default(now()) @map("created_at")
+
+  @@map("session_attendances")
+}
+
+// Trazabilidad de reprogramaciones y cancelaciones (HU-23), mismo patrón que
+// TutorAssignmentHistory (HU-13): la Session conserva su estado actual
+// (scheduledAt/endsAt o cancelledAt) y esta tabla acumula el historial con
+// motivo y quién hizo el cambio, sin borrar nada.
+model SessionChangeHistory {
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now()) @map("created_at")
+
+  sessionId String  @map("session_id")
+  session   Session @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+
+  // 'RESCHEDULE' | 'CANCEL'
+  changeType String @map("change_type")
+  reason     String
+
+  previousScheduledAt DateTime? @map("previous_scheduled_at")
+  newScheduledAt      DateTime? @map("new_scheduled_at")
+
+  changedById String @map("changed_by_id")
+  changedBy   User   @relation("SessionChangesMade", fields: [changedById], references: [id])
+
+  @@index([sessionId])
+  @@map("session_change_history")
+}
+
+// Repositorio de evidencias de sesión (HU-25): PDF o imagen que respalda la
+// sesión para los informes semestrales (Art. 15.d). El archivo se guarda en
+// disco fuera del repositorio, bajo una clave opaca; aquí solo su metadata.
+model SessionEvidence {
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now()) @map("created_at")
+
+  sessionId String  @map("session_id")
+  session   Session @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+
+  fileName   String @map("file_name")
+  mimeType   String @map("mime_type")
+  fileSize   Int    @map("file_size")
+  storageKey String @map("storage_key")
+
+  uploadedById String @map("uploaded_by_id")
+  uploadedBy   User   @relation("SessionEvidenceUploads", fields: [uploadedById], references: [id])
+
+  @@index([sessionId])
+  @@map("session_evidences")
 }
 
 // ─── Parámetros del Sistema ────────────────────────────────────

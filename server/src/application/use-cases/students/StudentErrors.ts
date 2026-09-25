@@ -25,3 +25,24 @@ export class RiskReasonRequiredError extends Error {
     this.name = 'RiskReasonRequiredError';
   }
 }
+
+export class PortalUserNotFoundError extends Error {
+  constructor(id: string) {
+    super(`No se encontró el usuario con ID ${id}`);
+    this.name = 'PortalUserNotFoundError';
+  }
+}
+
+export class PortalUserRoleMismatchError extends Error {
+  constructor() {
+    super('Solo se puede vincular una cuenta con rol Tutorado');
+    this.name = 'PortalUserRoleMismatchError';
+  }
+}
+
+export class PortalUserAlreadyLinkedError extends Error {
+  constructor() {
+    super('Esa cuenta ya está vinculada al registro de otro estudiante');
+    this.name = 'PortalUserAlreadyLinkedError';
+  }
+}

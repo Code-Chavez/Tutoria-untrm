@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styles from './StudentsPage.module.css';
 import {
@@ -12,9 +12,26 @@ import { TutoradoFilters, StudentFilterValues } from '../components/TutoradoFilt
 import { TutoradoTable } from '../components/TutoradoTable';
 import { RiskModal } from '../components/RiskModal';
 import { ReassignModal } from '../components/ReassignModal';
+import { LinkPortalAccountModal, PortalAccountOption } from '../components/LinkPortalAccountModal';
+import { roleService } from '@features/admin/services/roleService';
+import { userService } from '@features/admin/services/userService';
 import { InterviewFormModal } from '@features/entrevistas/components/InterviewFormModal';
 import { interviewService, CreateInterviewData } from '@features/entrevistas/services/interviewService';
 import { supportContactService, UpsertSupportContactData } from '@features/entrevistas/services/supportContactService';
+import { FollowUpFormModal } from '@features/seguimiento/components/FollowUpFormModal';
+import { followUpService, CreateFollowUpData } from '@features/seguimiento/services/followUpService';
+import { TutoringRequestModal } from '../components/TutoringRequestModal';
+import {
+  tutoringRequestService,
+  CreateTutoringRequestData,
+} from '@features/solicitudes/services/tutoringRequestService';
+import { SessionFormModal } from '../components/SessionFormModal';
+import { GroupSessionFormModal } from '../components/GroupSessionFormModal';
+import {
+  sessionService,
+  ScheduleSessionData,
+  TutoringSession,
+} from '@features/sesiones/services/sessionService';
 import { useStudents } from '../hooks/useStudents';
 import { useAuth } from '@features/auth/hooks/useAuth';
 import { assignmentService } from '@features/asignacion/services/assignmentService';
@@ -36,7 +53,12 @@ import {
   BanIcon,
   SearchIcon,
   XCircleIcon,
+  CalendarIcon,
 } from '@shared/components/icons';
+
+// Duración por defecto (Art. 15.c); el valor real lo determina el servidor a
+// partir del parámetro del sistema. Solo se usa aquí para el texto de ayuda.
+const DEFAULT_SESSION_DURATION = 45;
 
 // Roles con permiso students:write (el resto solo puede consultar).
 const WRITE_ROLES = ['Coordinador', 'Administrador DBU'];
@@ -74,6 +96,58 @@ export const StudentsPage: React.FC = () => {
   const [studentForInterview, setStudentForInterview] = useState<Student | null>(null);
   const [interviewLoading, setInterviewLoading] = useState(false);
   const [interviewError, setInterviewError] = useState('');
+
+  // Solicitud de tutoría (HU-17).
+  const [studentForRequest, setStudentForRequest] = useState<Student | null>(null);
+  const [requestLoading, setRequestLoading] = useState(false);
+  const [requestError, setRequestError] = useState('');
+  const [requestFeedback, setRequestFeedback] = useState<React.ReactNode>('');
+
+  // Programación de sesión individual (HU-18) o grupal (HU-19).
+  const [studentForSession, setStudentForSession] = useState<Student | null>(null);
+  const [groupSessionOpen, setGroupSessionOpen] = useState(false);
+  const [sessionLoading, setSessionLoading] = useState(false);
+  const [sessionError, setSessionError] = useState('');
+
+  // Ficha de seguimiento (HU-24).
+  const [studentForFollowUp, setStudentForFollowUp] = useState<Student | null>(null);
+  const [followUpLoading, setFollowUpLoading] = useState(false);
+  const [followUpError, setFollowUpError] = useState('');
+
+  // Vinculación de cuenta de portal (autoservicio de solicitud de tutoría).
+  const [studentToLink, setStudentToLink] = useState<Student | null>(null);
+  const [linkLoading, setLinkLoading] = useState(false);
+  const [linkError, setLinkError] = useState('');
+  const [tutoradoAccounts, setTutoradoAccounts] = useState<PortalAccountOption[]>([]);
+
+  useEffect(() => {
+    if (!canWrite) return;
+    let ignore = false;
+
+    (async () => {
+      try {
+        const roles = await roleService.getRoles();
+        const studentRole = roles.find((r) => r.name === 'Tutorado');
+        if (!studentRole) return;
+        const users = await userService.getUsers({ roleId: studentRole.id, isActive: true });
+        if (ignore) return;
+        setTutoradoAccounts(
+          users.map((u) => ({
+            userId: u.id,
+            fullName: `${u.firstName} ${u.lastName}`,
+            email: u.email,
+          })),
+        );
+      } catch {
+        // La vinculación es una acción secundaria; si falla, el modal simplemente
+        // no ofrecerá opciones en vez de romper la página de tutorados.
+      }
+    })();
+
+    return () => {
+      ignore = true;
+    };
+  }, [canWrite]);
 
   const schoolName = (schoolId: string) =>
     schools.find((s) => s.id === schoolId)?.name ?? 'Sin escuela';
@@ -194,6 +268,121 @@ export const StudentsPage: React.FC = () => {
     }
   };
 
+  const confirmTutoringRequest = async (data: CreateTutoringRequestData) => {
+    if (!studentForRequest) return;
+    setRequestLoading(true);
+    setRequestError('');
+    try {
+      const request = await tutoringRequestService.createTutoringRequest(
+        studentForRequest.id,
+        data,
+      );
+      setRequestFeedback(
+        `Solicitud registrada y enrutada a ${request.routedToRole === 'tutor' ? 'el tutor' : 'el coordinador'} de ${studentForRequest.firstName} ${studentForRequest.lastName}.`,
+      );
+      setStudentForRequest(null);
+    } catch (err) {
+      setRequestError(getApiErrorMessage(err));
+    } finally {
+      setRequestLoading(false);
+    }
+  };
+
+  // Muestra el lugar o el enlace de videollamada en la confirmación (Art. 8);
+  // hasta que exista un detalle de sesión propio (HU-21), esta es la única
+  // pantalla donde el tutor vuelve a ver ese dato tras programarla.
+  const sessionModalityNote = (session: TutoringSession) =>
+    session.modality === 'VIRTUAL' ? (
+      <>
+        {' '}
+        · Enlace:{' '}
+        <a href={session.meetingLink ?? undefined} target="_blank" rel="noreferrer">
+          {session.meetingLink}
+        </a>
+      </>
+    ) : (
+      session.location && <> · Lugar: {session.location}</>
+    );
+
+  const confirmSchedule = async (data: ScheduleSessionData) => {
+    if (!studentForSession) return;
+    setSessionLoading(true);
+    setSessionError('');
+    try {
+      const session = await sessionService.scheduleSession(data);
+      const when = new Date(session.scheduledAt).toLocaleString('es-PE', {
+        dateStyle: 'medium',
+        timeStyle: 'short',
+      });
+      setRequestFeedback(
+        <>
+          Sesión programada para el {when} con {studentForSession.firstName}{' '}
+          {studentForSession.lastName}.{sessionModalityNote(session)}
+        </>,
+      );
+      setStudentForSession(null);
+    } catch (err) {
+      setSessionError(getApiErrorMessage(err));
+    } finally {
+      setSessionLoading(false);
+    }
+  };
+
+  const confirmScheduleGroup = async (data: ScheduleSessionData) => {
+    setSessionLoading(true);
+    setSessionError('');
+    try {
+      const session = await sessionService.scheduleSession(data);
+      const when = new Date(session.scheduledAt).toLocaleString('es-PE', {
+        dateStyle: 'medium',
+        timeStyle: 'short',
+      });
+      setRequestFeedback(
+        <>
+          Sesión grupal programada para el {when} con {session.studentIds.length} tutorados.
+          {sessionModalityNote(session)}
+        </>,
+      );
+      setGroupSessionOpen(false);
+    } catch (err) {
+      setSessionError(getApiErrorMessage(err));
+    } finally {
+      setSessionLoading(false);
+    }
+  };
+
+  const confirmFollowUp = async (data: CreateFollowUpData) => {
+    if (!studentForFollowUp) return;
+    setFollowUpLoading(true);
+    setFollowUpError('');
+    try {
+      await followUpService.createFollowUp(studentForFollowUp.id, data);
+      setRequestFeedback(
+        `Ficha de seguimiento registrada para ${studentForFollowUp.firstName} ${studentForFollowUp.lastName}.`,
+      );
+      setStudentForFollowUp(null);
+    } catch (err) {
+      setFollowUpError(getApiErrorMessage(err));
+    } finally {
+      setFollowUpLoading(false);
+    }
+  };
+
+  const confirmLinkAccount = async (userId: string | null) => {
+    if (!studentToLink) return;
+    setLinkLoading(true);
+    setLinkError('');
+    try {
+      await studentService.linkPortalAccount(studentToLink.id, userId);
+      setStudentToLink(null);
+      refresh();
+    } catch (err) {
+      setLinkError(getApiErrorMessage(err));
+    } finally {
+      setLinkLoading(false);
+    }
+  };
+
   const total = students.length;
   const active = students.filter((s) => s.isActive).length;
   const atRisk = students.filter((s) => s.isAtRisk).length;
@@ -206,13 +395,34 @@ export const StudentsPage: React.FC = () => {
         subtitle="Gestión de estudiantes en el programa de tutoría"
         icon={<GraduationCapIcon size={24} />}
         actions={
-          canWrite && (
-            <Button icon={<PlusIcon size={17} />} onClick={() => handleOpenModal()}>
-              Nuevo tutorado
-            </Button>
-          )
+          <>
+            {canConductInterview && (
+              <Button
+                variant="secondary"
+                icon={<CalendarIcon size={17} />}
+                onClick={() => {
+                  setSessionError('');
+                  setGroupSessionOpen(true);
+                }}
+              >
+                Sesión grupal
+              </Button>
+            )}
+            {canWrite && (
+              <Button icon={<PlusIcon size={17} />} onClick={() => handleOpenModal()}>
+                Nuevo tutorado
+              </Button>
+            )}
+          </>
         }
       />
+
+      {requestFeedback && (
+        <div className={styles.feedback}>
+          <CheckCircleIcon size={16} />
+          {requestFeedback}
+        </div>
+      )}
 
       <div className={styles.kpis}>
         <StatCard icon={<GraduationCapIcon size={22} />} value={String(total)} label="Total de tutorados" hint="Registrados en el sistema" tone="info" loading={loading} />
@@ -277,6 +487,22 @@ export const StudentsPage: React.FC = () => {
                 setStudentForInterview(student);
               }}
               onViewRecord={(student) => navigate(`/expediente/${student.id}`)}
+              onRequestTutoring={(student) => {
+                setRequestError('');
+                setStudentForRequest(student);
+              }}
+              onScheduleSession={(student) => {
+                setSessionError('');
+                setStudentForSession(student);
+              }}
+              onLinkAccount={(student) => {
+                setLinkError('');
+                setStudentToLink(student);
+              }}
+              onRegisterFollowUp={(student) => {
+                setFollowUpError('');
+                setStudentForFollowUp(student);
+              }}
             />
             <Pagination
               page={page}
@@ -328,6 +554,65 @@ export const StudentsPage: React.FC = () => {
           serverError={interviewError}
           onSubmit={confirmInterview}
           onCancel={() => setStudentForInterview(null)}
+        />
+      )}
+
+      {studentForRequest && (
+        <TutoringRequestModal
+          student={studentForRequest}
+          loading={requestLoading}
+          serverError={requestError}
+          onSubmit={confirmTutoringRequest}
+          onCancel={() => setStudentForRequest(null)}
+        />
+      )}
+
+      {studentForSession && (
+        <SessionFormModal
+          student={studentForSession}
+          durationMinutes={DEFAULT_SESSION_DURATION}
+          loading={sessionLoading}
+          serverError={sessionError}
+          onSubmit={confirmSchedule}
+          onCancel={() => setStudentForSession(null)}
+        />
+      )}
+
+      {groupSessionOpen && (
+        <GroupSessionFormModal
+          students={students}
+          schools={schools}
+          tutorName={tutorName}
+          durationMinutes={DEFAULT_SESSION_DURATION}
+          loading={sessionLoading}
+          serverError={sessionError}
+          onSubmit={confirmScheduleGroup}
+          onCancel={() => setGroupSessionOpen(false)}
+        />
+      )}
+
+      {studentForFollowUp && (
+        <FollowUpFormModal
+          student={studentForFollowUp}
+          loading={followUpLoading}
+          serverError={followUpError}
+          onSubmit={confirmFollowUp}
+          onCancel={() => setStudentForFollowUp(null)}
+        />
+      )}
+
+      {studentToLink && (
+        <LinkPortalAccountModal
+          student={studentToLink}
+          options={tutoradoAccounts.filter(
+            (a) =>
+              a.userId === studentToLink.userId ||
+              !students.some((s) => s.userId === a.userId),
+          )}
+          loading={linkLoading}
+          serverError={linkError}
+          onSubmit={confirmLinkAccount}
+          onCancel={() => setStudentToLink(null)}
         />
       )}
 

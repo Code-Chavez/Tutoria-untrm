@@ -18,6 +18,8 @@ export interface TutorLoad {
 export interface StudentRepository {
   findById(id: string): Promise<Student | null>;
   findByCode(studentCode: string): Promise<Student | null>;
+  /** El estudiante vinculado a esa cuenta de portal (rol Tutorado), si existe. */
+  findByUserId(userId: string): Promise<Student | null>;
   findAll(filters?: StudentFilters): Promise<Student[]>;
   create(data: Omit<Student, 'id' | 'createdAt' | 'updatedAt'>): Promise<Student>;
   update(id: string, data: Partial<Student>): Promise<Student>;

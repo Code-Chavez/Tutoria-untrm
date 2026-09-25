@@ -22,6 +22,11 @@ export const createStudentSchema = z.object({
 
 export const updateStudentSchema = createStudentSchema.partial();
 
+// Vincular/desvincular la cuenta de portal (rol Tutorado) de un estudiante.
+export const linkPortalAccountSchema = z.object({
+  userId: z.string().uuid('El ID de usuario debe ser un UUID válido').nullable(),
+});
+
 // Marcado de riesgo académico (HU-11).
 export const markStudentRiskSchema = z.object({
   isAtRisk: z.boolean(),
