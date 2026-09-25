@@ -3,6 +3,7 @@ import {
   Session,
   SessionAttendance,
   SessionChangeHistory,
+  SessionEvidence,
   SessionWithParticipants,
 } from '@domain/entities/Session';
 import { SessionRepository, SessionFilters } from '@domain/repositories/SessionRepository';
@@ -149,5 +150,20 @@ export class PrismaSessionRepository implements SessionRepository {
       changedById: row.changedById,
       createdAt: row.createdAt,
     };
+  }
+
+  async createEvidence(data: Omit<SessionEvidence, 'id' | 'createdAt'>): Promise<SessionEvidence> {
+    return this.prisma.sessionEvidence.create({ data });
+  }
+
+  listEvidenceBySession(sessionId: string): Promise<SessionEvidence[]> {
+    return this.prisma.sessionEvidence.findMany({
+      where: { sessionId },
+      orderBy: { createdAt: 'desc' },
+    });
+  }
+
+  findEvidenceById(id: string): Promise<SessionEvidence | null> {
+    return this.prisma.sessionEvidence.findUnique({ where: { id } });
   }
 }

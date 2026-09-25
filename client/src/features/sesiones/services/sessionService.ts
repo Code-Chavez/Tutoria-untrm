@@ -1,5 +1,17 @@
 import { apiClient } from '@shared/services/apiClient';
 
+// Dispara la descarga de un blob en el navegador.
+function saveBlob(data: Blob, filename: string): void {
+  const url = window.URL.createObjectURL(data);
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = filename;
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+  window.URL.revokeObjectURL(url);
+}
+
 // Modalidad de la sesión (Art. 8): presencial registra el lugar, virtual el
 // enlace de videollamada.
 export type SessionModality = 'PRESENCIAL' | 'VIRTUAL';
@@ -51,6 +63,18 @@ export interface ScheduleSessionData {
   meetingLink?: string;
 }
 
+// Evidencia (PDF o imagen) adjunta a una sesión (HU-25, repositorio seguro
+// que respalda los informes semestrales).
+export interface SessionEvidence {
+  id: string;
+  sessionId: string;
+  fileName: string;
+  mimeType: string;
+  fileSize: number;
+  uploadedByName: string;
+  createdAt: string;
+}
+
 export const sessionService = {
   scheduleSession: async (data: ScheduleSessionData): Promise<TutoringSession> => {
     const response = await apiClient.post<{ message: string; session: TutoringSession }>(
@@ -91,5 +115,31 @@ export const sessionService = {
       data,
     );
     return response.data.session;
+  },
+
+  // Repositorio de evidencias (HU-25): PDF o imagen que respalda la sesión.
+  listEvidence: async (sessionId: string): Promise<SessionEvidence[]> => {
+    const response = await apiClient.get<{ evidences: SessionEvidence[] }>(
+      `/sessions/${sessionId}/evidence`,
+    );
+    return response.data.evidences;
+  },
+
+  uploadEvidence: async (sessionId: string, file: File): Promise<SessionEvidence> => {
+    const formData = new FormData();
+    formData.append('file', file);
+    const response = await apiClient.post<{ message: string; evidence: SessionEvidence }>(
+      `/sessions/${sessionId}/evidence`,
+      formData,
+      { headers: { 'Content-Type': 'multipart/form-data' } },
+    );
+    return response.data.evidence;
+  },
+
+  downloadEvidence: async (sessionId: string, evidence: SessionEvidence): Promise<void> => {
+    const response = await apiClient.get(`/sessions/${sessionId}/evidence/${evidence.id}/file`, {
+      responseType: 'blob',
+    });
+    saveBlob(response.data as Blob, evidence.fileName);
   },
 };

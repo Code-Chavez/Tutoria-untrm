@@ -44,6 +44,9 @@ describe('ScheduleSessionUseCase', () => {
       reschedule: jest.fn(),
       cancel: jest.fn(),
       createChangeHistory: jest.fn(),
+      createEvidence: jest.fn(),
+      listEvidenceBySession: jest.fn(),
+      findEvidenceById: jest.fn(),
     };
     students = {
       findById: jest.fn().mockImplementation(async (id: string) => ({ id } as Student)),

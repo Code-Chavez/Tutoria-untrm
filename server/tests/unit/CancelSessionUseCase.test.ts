@@ -50,6 +50,9 @@ describe('CancelSessionUseCase', () => {
         cancelReason: reason,
       })),
       createChangeHistory: jest.fn(),
+      createEvidence: jest.fn(),
+      listEvidenceBySession: jest.fn(),
+      findEvidenceById: jest.fn(),
     };
     useCase = new CancelSessionUseCase(sessions);
   });

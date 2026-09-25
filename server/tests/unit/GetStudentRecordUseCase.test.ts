@@ -108,6 +108,9 @@ describe('GetStudentRecordUseCase', () => {
       reschedule: jest.fn(),
       cancel: jest.fn(),
       createChangeHistory: jest.fn(),
+      createEvidence: jest.fn(),
+      listEvidenceBySession: jest.fn(),
+      findEvidenceById: jest.fn(),
     };
     followUps = {
       create: jest.fn(),

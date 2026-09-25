@@ -169,4 +169,64 @@ describe('SessionDetailModal', () => {
     expect(screen.queryByRole('button', { name: /cancelar sesión/i })).not.toBeInTheDocument();
     expect(screen.queryByRole('button', { name: /registrar asistencia/i })).not.toBeInTheDocument();
   });
+
+  it('muestra un mensaje cuando la sesión no tiene evidencias adjuntas', () => {
+    const session = makeSession();
+    renderModal({ session, allSessions: [session], evidences: [] });
+
+    expect(screen.getByText(/aún no se adjuntaron evidencias/i)).toBeInTheDocument();
+  });
+
+  it('lista las evidencias adjuntas con autor y tamaño (HU-25)', () => {
+    const session = makeSession();
+    renderModal({
+      session,
+      allSessions: [session],
+      evidences: [
+        {
+          id: 'ev-1',
+          sessionId: 'sess-1',
+          fileName: 'constancia.pdf',
+          mimeType: 'application/pdf',
+          fileSize: 2048,
+          uploadedByName: 'Elena Ramírez',
+          createdAt: new Date(2026, 9, 9).toISOString(),
+        },
+      ],
+    });
+
+    expect(screen.getByText('constancia.pdf')).toBeInTheDocument();
+    expect(screen.getByText(/2\.0 KB · Elena Ramírez/i)).toBeInTheDocument();
+  });
+
+  it('permite adjuntar una nueva evidencia', async () => {
+    const onUploadEvidence = vi.fn();
+    const session = makeSession();
+    renderModal({ session, allSessions: [session], evidences: [], onUploadEvidence });
+
+    const file = new File(['contenido'], 'evidencia.pdf', { type: 'application/pdf' });
+    const input = document.querySelector('input[type="file"]') as HTMLInputElement;
+    await userEvent.upload(input, file);
+
+    expect(onUploadEvidence).toHaveBeenCalledWith(file);
+  });
+
+  it('descarga una evidencia al hacer clic en su nombre', async () => {
+    const onDownloadEvidence = vi.fn();
+    const session = makeSession();
+    const user = userEvent.setup();
+    const evidence = {
+      id: 'ev-1',
+      sessionId: 'sess-1',
+      fileName: 'constancia.pdf',
+      mimeType: 'application/pdf',
+      fileSize: 2048,
+      uploadedByName: 'Elena Ramírez',
+      createdAt: new Date(2026, 9, 9).toISOString(),
+    };
+    renderModal({ session, allSessions: [session], evidences: [evidence], onDownloadEvidence });
+
+    await user.click(screen.getByRole('button', { name: /constancia\.pdf/i }));
+    expect(onDownloadEvidence).toHaveBeenCalledWith(evidence);
+  });
 });

@@ -22,3 +22,12 @@ export interface RescheduleSessionInput {
 export interface CancelSessionInput {
   reason: string;
 }
+
+// Evidencia adjunta a una sesión (HU-25): el archivo ya llega parseado en
+// memoria por multer; el use case no conoce Express ni multer.
+export interface UploadSessionEvidenceInput {
+  fileBuffer: Buffer;
+  fileName: string;
+  mimeType: string;
+  fileSize: number;
+}

@@ -6,7 +6,13 @@ import { sessionService, TutoringSession } from '../services/sessionService';
 import { studentService, Student } from '@features/tutorados/services/studentService';
 
 vi.mock('../services/sessionService', () => ({
-  sessionService: { getMySessions: vi.fn(), scheduleSession: vi.fn() },
+  sessionService: {
+    getMySessions: vi.fn(),
+    scheduleSession: vi.fn(),
+    listEvidence: vi.fn().mockResolvedValue([]),
+    uploadEvidence: vi.fn(),
+    downloadEvidence: vi.fn(),
+  },
 }));
 vi.mock('@features/tutorados/services/studentService', () => ({
   studentService: { getStudents: vi.fn() },

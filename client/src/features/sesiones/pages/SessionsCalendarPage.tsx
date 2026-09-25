@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { Card, Button, IconButton, EmptyState, TableSkeleton, PageHeader } from '@shared/components/ui';
 import {
   CalendarIcon,
@@ -11,6 +11,7 @@ import {
   sessionService,
   TutoringSession,
   RescheduleSessionData,
+  SessionEvidence,
 } from '../services/sessionService';
 import { SessionDetailModal } from '../components/SessionDetailModal';
 import { RescheduleSessionModal } from '../components/RescheduleSessionModal';
@@ -52,6 +53,10 @@ export const SessionsCalendarPage: React.FC = () => {
   const [cancelOpen, setCancelOpen] = useState(false);
   const [changeLoading, setChangeLoading] = useState(false);
   const [changeError, setChangeError] = useState('');
+  const [evidences, setEvidences] = useState<SessionEvidence[]>([]);
+  const [evidencesLoading, setEvidencesLoading] = useState(false);
+  const [uploadingEvidence, setUploadingEvidence] = useState(false);
+  const [evidenceError, setEvidenceError] = useState('');
 
   const monthDays = useMemo(() => getMonthGridDays(cursor), [cursor]);
   const weekDays = useMemo(() => getWeekDays(cursor), [cursor]);
@@ -105,6 +110,60 @@ export const SessionsCalendarPage: React.FC = () => {
       setChangeError(getApiErrorMessage(err));
     } finally {
       setChangeLoading(false);
+    }
+  };
+
+  // Repositorio de evidencias (HU-25): se cargan al abrir el detalle de la
+  // sesión. El estado de carga se arma al seleccionarla (ver openSession),
+  // no aquí, para no disparar setState de forma síncrona dentro del efecto.
+  const selectedSessionId = selectedSession?.id;
+  useEffect(() => {
+    if (!selectedSessionId) return;
+    let ignore = false;
+    sessionService
+      .listEvidence(selectedSessionId)
+      .then((list) => {
+        if (!ignore) setEvidences(list);
+      })
+      .catch((err) => {
+        if (!ignore) setEvidenceError(getApiErrorMessage(err));
+      })
+      .finally(() => {
+        if (!ignore) setEvidencesLoading(false);
+      });
+    return () => {
+      ignore = true;
+    };
+  }, [selectedSessionId]);
+
+  const openSession = (s: TutoringSession) => {
+    setAttendanceError('');
+    setEvidences([]);
+    setEvidencesLoading(true);
+    setEvidenceError('');
+    setSelectedSession(s);
+  };
+
+  const handleUploadEvidence = async (file: File) => {
+    if (!selectedSession) return;
+    setUploadingEvidence(true);
+    setEvidenceError('');
+    try {
+      const evidence = await sessionService.uploadEvidence(selectedSession.id, file);
+      setEvidences((prev) => [evidence, ...prev]);
+    } catch (err) {
+      setEvidenceError(getApiErrorMessage(err));
+    } finally {
+      setUploadingEvidence(false);
+    }
+  };
+
+  const handleDownloadEvidence = async (evidence: SessionEvidence) => {
+    if (!selectedSession) return;
+    try {
+      await sessionService.downloadEvidence(selectedSession.id, evidence);
+    } catch (err) {
+      setEvidenceError(getApiErrorMessage(err));
     }
   };
 
@@ -208,10 +267,7 @@ export const SessionsCalendarPage: React.FC = () => {
                               ? styles.chipGroup
                               : styles.chipIndividual
                         }`}
-                        onClick={() => {
-                          setAttendanceError('');
-                          setSelectedSession(s);
-                        }}
+                        onClick={() => openSession(s)}
                         title={s.topic}
                       >
                         {new Date(s.scheduledAt).toLocaleTimeString('es-PE', {
@@ -252,10 +308,7 @@ export const SessionsCalendarPage: React.FC = () => {
                                 ? styles.weekCardGroup
                                 : ''
                           }`}
-                          onClick={() => {
-                            setAttendanceError('');
-                            setSelectedSession(s);
-                          }}
+                          onClick={() => openSession(s)}
                         >
                           <div className={styles.weekCardTime}>
                             {new Date(s.scheduledAt).toLocaleTimeString('es-PE', {
@@ -292,6 +345,12 @@ export const SessionsCalendarPage: React.FC = () => {
             setChangeError('');
             setCancelOpen(true);
           }}
+          evidences={evidences}
+          evidencesLoading={evidencesLoading}
+          onUploadEvidence={handleUploadEvidence}
+          uploadingEvidence={uploadingEvidence}
+          evidenceError={evidenceError}
+          onDownloadEvidence={handleDownloadEvidence}
         />
       )}
 

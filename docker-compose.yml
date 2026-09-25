@@ -37,6 +37,7 @@ services:
     volumes:
       - ./server/src:/app/src
       - ./server/prisma:/app/prisma
+      - ./server/storage:/app/storage
     depends_on:
       postgres:
         condition: service_healthy

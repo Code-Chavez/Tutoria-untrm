@@ -5,6 +5,9 @@ import { ListSessionsUseCase } from '@application/use-cases/sessions/ListSession
 import { RegisterAttendanceUseCase } from '@application/use-cases/sessions/RegisterAttendanceUseCase';
 import { RescheduleSessionUseCase } from '@application/use-cases/sessions/RescheduleSessionUseCase';
 import { CancelSessionUseCase } from '@application/use-cases/sessions/CancelSessionUseCase';
+import { UploadSessionEvidenceUseCase } from '@application/use-cases/sessions/UploadSessionEvidenceUseCase';
+import { ListSessionEvidenceUseCase } from '@application/use-cases/sessions/ListSessionEvidenceUseCase';
+import { GetSessionEvidenceFileUseCase } from '@application/use-cases/sessions/GetSessionEvidenceFileUseCase';
 import {
   TutorScheduleConflictError,
   LocationRequiredError,
@@ -18,6 +21,7 @@ import {
   SessionAlreadyCancelledError,
   SessionAlreadyCompletedError,
   ChangeReasonRequiredError,
+  SessionEvidenceNotFoundError,
 } from '@application/use-cases/sessions/SessionErrors';
 import { StudentNotFoundError } from '@application/use-cases/students/StudentErrors';
 import {
@@ -33,6 +37,9 @@ export class SessionController {
     private readonly registerAttendanceUseCase: RegisterAttendanceUseCase,
     private readonly rescheduleSessionUseCase: RescheduleSessionUseCase,
     private readonly cancelSessionUseCase: CancelSessionUseCase,
+    private readonly uploadSessionEvidenceUseCase: UploadSessionEvidenceUseCase,
+    private readonly listSessionEvidenceUseCase: ListSessionEvidenceUseCase,
+    private readonly getSessionEvidenceFileUseCase: GetSessionEvidenceFileUseCase,
   ) {}
 
   // Registra la asistencia de una sesión individual (HU-22, Anexo N°4).
@@ -128,6 +135,69 @@ export class SessionController {
         res.status(400).json({ error: error.message });
       } else if (error instanceof TutorScheduleConflictError) {
         res.status(409).json({ error: error.message });
+      } else {
+        res.status(500).json({ error: 'Error interno del servidor' });
+      }
+    }
+  };
+
+  // Adjunta una evidencia (PDF o imagen) a la sesión (HU-25).
+  uploadEvidence = async (req: Request, res: Response) => {
+    try {
+      const sessionId = req.params.id as string;
+      const tutorId = req.auth?.sub as string;
+      const file = req.file;
+      if (!file) {
+        res.status(400).json({ error: 'Debe adjuntar un archivo PDF o imagen en el campo «file»' });
+        return;
+      }
+      const evidence = await this.uploadSessionEvidenceUseCase.execute(sessionId, tutorId, {
+        fileBuffer: file.buffer,
+        fileName: file.originalname,
+        mimeType: file.mimetype,
+        fileSize: file.size,
+      });
+      res.status(201).json({ message: 'Evidencia registrada exitosamente', evidence });
+    } catch (error) {
+      if (error instanceof SessionNotFoundError) {
+        res.status(404).json({ error: error.message });
+      } else if (error instanceof NotSessionTutorError) {
+        res.status(403).json({ error: error.message });
+      } else {
+        res.status(500).json({ error: 'Error interno del servidor' });
+      }
+    }
+  };
+
+  // Lista las evidencias de una sesión, con quién la subió (HU-25).
+  listEvidence = async (req: Request, res: Response) => {
+    try {
+      const sessionId = req.params.id as string;
+      const evidences = await this.listSessionEvidenceUseCase.execute(sessionId);
+      res.status(200).json({ evidences });
+    } catch (error) {
+      if (error instanceof SessionNotFoundError) {
+        res.status(404).json({ error: error.message });
+      } else {
+        res.status(500).json({ error: 'Error interno del servidor' });
+      }
+    }
+  };
+
+  // Descarga el archivo de una evidencia (HU-25); el acceso ya quedó
+  // controlado por sessions:read en la ruta.
+  downloadEvidence = async (req: Request, res: Response) => {
+    try {
+      const sessionId = req.params.id as string;
+      const evidenceId = req.params.evidenceId as string;
+      const { evidence, absolutePath } = await this.getSessionEvidenceFileUseCase.execute(
+        sessionId,
+        evidenceId,
+      );
+      res.download(absolutePath, evidence.fileName);
+    } catch (error) {
+      if (error instanceof SessionNotFoundError || error instanceof SessionEvidenceNotFoundError) {
+        res.status(404).json({ error: error.message });
       } else {
         res.status(500).json({ error: 'Error interno del servidor' });
       }

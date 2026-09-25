@@ -2,6 +2,7 @@ import {
   Session,
   SessionAttendance,
   SessionChangeHistory,
+  SessionEvidence,
   SessionWithParticipants,
 } from '../entities/Session';
 
@@ -48,4 +49,9 @@ export interface SessionRepository {
   createChangeHistory(
     data: Omit<SessionChangeHistory, 'id' | 'createdAt'>,
   ): Promise<SessionChangeHistory>;
+
+  /** Repositorio de evidencias (HU-25): PDF o imagen que respalda la sesión. */
+  createEvidence(data: Omit<SessionEvidence, 'id' | 'createdAt'>): Promise<SessionEvidence>;
+  listEvidenceBySession(sessionId: string): Promise<SessionEvidence[]>;
+  findEvidenceById(id: string): Promise<SessionEvidence | null>;
 }

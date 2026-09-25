@@ -39,3 +39,6 @@ server/prisma/*.db
 # Temp
 tmp/
 doc/
+
+# Evidencias de sesión (HU-25): archivos subidos, no versionados
+server/storage/

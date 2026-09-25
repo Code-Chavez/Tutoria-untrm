@@ -42,6 +42,7 @@ model User {
   requestsRouted       TutoringRequest[]        @relation("RequestsRouted")
   sessionsAsTutor      Session[]                @relation("SessionsAsTutor")
   sessionChangesMade   SessionChangeHistory[]   @relation("SessionChangesMade")
+  sessionEvidenceUploads SessionEvidence[]      @relation("SessionEvidenceUploads")
 
   @@map("users")
 }
@@ -389,6 +390,7 @@ model Session {
   participants SessionParticipant[]
   attendance   SessionAttendance?
   changeHistory SessionChangeHistory[]
+  evidences    SessionEvidence[]
 
   @@index([tutorId])
   @@map("sessions")
@@ -445,6 +447,28 @@ model SessionChangeHistory {
 
   @@index([sessionId])
   @@map("session_change_history")
+}
+
+// Repositorio de evidencias de sesión (HU-25): PDF o imagen que respalda la
+// sesión para los informes semestrales (Art. 15.d). El archivo se guarda en
+// disco fuera del repositorio, bajo una clave opaca; aquí solo su metadata.
+model SessionEvidence {
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now()) @map("created_at")
+
+  sessionId String  @map("session_id")
+  session   Session @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+
+  fileName   String @map("file_name")
+  mimeType   String @map("mime_type")
+  fileSize   Int    @map("file_size")
+  storageKey String @map("storage_key")
+
+  uploadedById String @map("uploaded_by_id")
+  uploadedBy   User   @relation("SessionEvidenceUploads", fields: [uploadedById], references: [id])
+
+  @@index([sessionId])
+  @@map("session_evidences")
 }
 
 // ─── Parámetros del Sistema ────────────────────────────────────
