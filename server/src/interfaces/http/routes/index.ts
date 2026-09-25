@@ -14,6 +14,7 @@ import tutoringRequestRoutes from './tutoringRequest.routes';
 import sessionRoutes from './session.routes';
 import followUpRoutes from './followUp.routes';
 import alertRoutes from './alert.routes';
+import reportRoutes from './report.routes';
 
 const router: IRouter = Router();
 
@@ -32,5 +33,6 @@ router.use(tutoringRequestRoutes);
 router.use(sessionRoutes);
 router.use(followUpRoutes);
 router.use(alertRoutes);
+router.use(reportRoutes);
 
 export default router;
