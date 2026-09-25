@@ -64,6 +64,7 @@ export interface StudentReferral {
   checkedAspects: ReferralAspectCode[];
   reason: string;
   service: ReferralService;
+  receivingInstance: string | null;
   createdAt: string;
 }
 
@@ -71,6 +72,47 @@ export interface CreateReferralData {
   checkedAspects: ReferralAspectCode[];
   reason: string;
   service: ReferralService;
+  receivingInstance?: string;
+}
+
+// Enrutamiento por servicio (HU-29, Art. 21): sugiere el servicio destino
+// según los aspectos marcados, sin bloquear — el tutor siempre puede elegir
+// cualquiera de los 5 servicios válidos. "Asistencia Social" no tiene
+// aspecto asociado en el checklist (surge de contexto/conversación, no de
+// observación en aula), así que nunca se sugiere automáticamente.
+const CATEGORY_SUGGESTED_SERVICE: Record<string, ReferralService> = {
+  Académicos: 'ESCUELA',
+  Sociales: 'PSICOLOGIA',
+  Apariencia: 'SALUD',
+  'Salud mental': 'PSICOLOGIA',
+};
+
+// Orden de desempate cuando hay aspectos marcados en más de una categoría
+// con la misma cantidad: prioriza las señales más urgentes/especializadas
+// sobre las puramente académicas.
+const CATEGORY_PRIORITY = ['Salud mental', 'Sociales', 'Apariencia', 'Académicos'];
+
+export function suggestReferralService(
+  checkedAspects: ReferralAspectCode[],
+): ReferralService | null {
+  if (checkedAspects.length === 0) return null;
+
+  const aspectByCode = new Map(REFERRAL_ASPECTS.map((a) => [a.code, a]));
+  const countByCategory = new Map<string, number>();
+  checkedAspects.forEach((code) => {
+    const category = aspectByCode.get(code)?.category;
+    if (category) countByCategory.set(category, (countByCategory.get(category) ?? 0) + 1);
+  });
+
+  let best: { category: string; count: number } | null = null;
+  for (const category of CATEGORY_PRIORITY) {
+    const count = countByCategory.get(category) ?? 0;
+    if (count > 0 && (!best || count > best.count)) {
+      best = { category, count };
+    }
+  }
+
+  return best ? CATEGORY_SUGGESTED_SERVICE[best.category] : null;
 }
 
 function saveBlob(data: Blob, filename: string): void {
@@ -98,5 +140,15 @@ export const referralService = {
       responseType: 'blob',
     });
     saveBlob(response.data as Blob, 'constancia-derivacion.pdf');
+  },
+
+  getReferrals: async (): Promise<StudentReferral[]> => {
+    const response = await apiClient.get<StudentReferral[]>('/referrals');
+    return response.data;
+  },
+
+  getReferralById: async (id: string): Promise<StudentReferral> => {
+    const response = await apiClient.get<StudentReferral>(`/referrals/${id}`);
+    return response.data;
   },
 };

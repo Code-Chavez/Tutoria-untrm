@@ -9,6 +9,7 @@ function toReferral(row: {
   checkedAspects: string[];
   reason: string;
   service: string;
+  receivingInstance: string | null;
   createdAt: Date;
 }): StudentReferral {
   return {
@@ -18,6 +19,7 @@ function toReferral(row: {
     checkedAspects: row.checkedAspects as ReferralAspectCode[],
     reason: row.reason,
     service: row.service as ReferralService,
+    receivingInstance: row.receivingInstance,
     createdAt: row.createdAt,
   };
 }
@@ -33,5 +35,16 @@ export class PrismaStudentReferralRepository implements StudentReferralRepositor
   async findById(id: string): Promise<StudentReferral | null> {
     const row = await this.prisma.studentReferral.findUnique({ where: { id } });
     return row ? toReferral(row) : null;
+  }
+
+  async findMany(filters: { referredById?: string; service?: string }): Promise<StudentReferral[]> {
+    const rows = await this.prisma.studentReferral.findMany({
+      where: {
+        ...(filters.referredById ? { referredById: filters.referredById } : {}),
+        ...(filters.service ? { service: filters.service } : {}),
+      },
+      orderBy: { createdAt: 'desc' },
+    });
+    return rows.map(toReferral);
   }
 }

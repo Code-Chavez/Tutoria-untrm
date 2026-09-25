@@ -4,6 +4,7 @@ export interface CreateReferralInput {
   checkedAspects: ReferralAspectCode[];
   reason: string;
   service: ReferralService;
+  receivingInstance?: string;
 }
 
 // Datos ya resueltos (nombres, no solo IDs) para generar la constancia
@@ -17,6 +18,7 @@ export interface ReferralConstancia {
   referredByName: string;
   reason: string;
   service: ReferralService;
+  receivingInstance: string | null;
   aspects: { category: string; label: string }[];
   createdAt: Date;
 }

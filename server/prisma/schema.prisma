@@ -26,6 +26,10 @@ model User {
   roleId String @map("role_id")
   role   Role   @relation(fields: [roleId], references: [id])
 
+  // Para el Profesional de Servicio (HU-30), indica a qué servicio pertenece
+  service String?
+
+
   auditLogs     AuditLog[]
   refreshTokens RefreshToken[]
   passwordResetTokens PasswordResetToken[]
@@ -492,6 +496,10 @@ model StudentReferral {
 
   // 'ESCUELA' | 'PSICOPEDAGOGIA' | 'PSICOLOGIA' | 'ASISTENCIA_SOCIAL' | 'SALUD' (Art. 21)
   service String
+
+  // Instancia o profesional específico que recibe (HU-29); el estado
+  // enviado/recibido/... con fecha y responsable es HU-31, no este campo.
+  receivingInstance String? @map("receiving_instance")
 
   @@index([studentId])
   @@map("student_referrals")

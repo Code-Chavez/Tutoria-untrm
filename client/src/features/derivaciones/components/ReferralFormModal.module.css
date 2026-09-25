@@ -163,6 +163,13 @@
   margin-bottom: var(--s4);
 }
 
+.suggestion {
+  display: block;
+  margin-top: var(--s2);
+  font-size: var(--fs-xs);
+  color: var(--azul-med);
+}
+
 .error {
   display: block;
   margin-top: var(--s2);

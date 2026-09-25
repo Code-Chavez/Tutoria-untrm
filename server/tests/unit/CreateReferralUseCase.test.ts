@@ -26,6 +26,7 @@ describe('CreateReferralUseCase', () => {
         ...data,
       })),
       findById: jest.fn(),
+      findMany: jest.fn(),
     };
     students = {
       findById: jest.fn().mockResolvedValue(student),
@@ -49,8 +50,20 @@ describe('CreateReferralUseCase', () => {
       checkedAspects: input.checkedAspects,
       reason: input.reason,
       service: input.service,
+      receivingInstance: null,
     });
     expect(result.id).toBe('referral-1');
+  });
+
+  it('registra la instancia receptora cuando se indica (HU-29)', async () => {
+    await useCase.execute('student-1', 'tutor-1', {
+      ...input,
+      receivingInstance: '  Psicólogo Juan Pérez - Consultorio 3  ',
+    });
+
+    expect(referrals.create).toHaveBeenCalledWith(
+      expect.objectContaining({ receivingInstance: 'Psicólogo Juan Pérez - Consultorio 3' }),
+    );
   });
 
   it('lanza StudentNotFoundError si el tutorado no existe', async () => {

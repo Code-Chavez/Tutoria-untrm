@@ -23,6 +23,7 @@ describe('GetReferralConstanciaUseCase', () => {
     checkedAspects: ['ACADEMIC_AT_RISK_OF_FAILING', 'MENTAL_HEALTH_ANXIOUS'],
     reason: 'Bajo rendimiento y señales de ansiedad',
     service: 'PSICOLOGIA',
+    receivingInstance: 'Psicóloga Ana García',
     createdAt: new Date('2026-09-25T10:00:00Z'),
   };
 
@@ -42,6 +43,7 @@ describe('GetReferralConstanciaUseCase', () => {
     referrals = {
       create: jest.fn(),
       findById: jest.fn().mockResolvedValue(referral),
+      findMany: jest.fn(),
     };
     students = {
       findById: jest.fn().mockResolvedValue(student),
@@ -75,6 +77,7 @@ describe('GetReferralConstanciaUseCase', () => {
     expect(result.schoolName).toBe('Ingeniería de Sistemas');
     expect(result.referredByName).toBe('Elena Ramírez');
     expect(result.service).toBe('PSICOLOGIA');
+    expect(result.receivingInstance).toBe('Psicóloga Ana García');
     expect(result.aspects).toEqual([
       { category: 'Académicos', label: 'Está en riesgo de repetir algún curso' },
       {

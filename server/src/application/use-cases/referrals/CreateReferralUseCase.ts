@@ -6,10 +6,10 @@ import { StudentNotFoundError } from '@application/use-cases/students/StudentErr
 
 /**
  * Ficha de derivación (HU-28, Anexo N°6): el docente tutor registra el
- * checklist de aspectos observados, el motivo y el servicio destino. El
- * enrutamiento validado/sugerido por aspecto (Art. 21) es HU-29; aquí el
- * servicio ya llega elegido y solo se valida que sea uno de los 5 válidos
- * (ver validators).
+ * checklist de aspectos observados, el motivo, el servicio destino y,
+ * opcionalmente, la instancia o profesional que la recibe (HU-29). El
+ * servicio ya llega elegido por el tutor — la sugerencia por aspecto (Art.
+ * 21) es solo una guía en el cliente, no un bloqueo aquí.
  */
 export class CreateReferralUseCase {
   constructor(
@@ -33,6 +33,7 @@ export class CreateReferralUseCase {
       checkedAspects: input.checkedAspects,
       reason: input.reason,
       service: input.service,
+      receivingInstance: input.receivingInstance?.trim() || null,
     });
   }
 }
