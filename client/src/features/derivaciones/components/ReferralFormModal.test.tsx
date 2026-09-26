@@ -41,7 +41,7 @@ describe('ReferralFormModal', () => {
     expect(onSubmit).not.toHaveBeenCalled();
   });
 
-  it('exige el servicio destino antes de confirmar', async () => {
+  it('pre-selecciona y envía el servicio sugerido automáticamente (HU-29)', async () => {
     const onSubmit = vi.fn();
     const user = userEvent.setup();
     render(<ReferralFormModal student={student} onSubmit={onSubmit} onCancel={vi.fn()} />);
@@ -53,8 +53,9 @@ describe('ReferralFormModal', () => {
     );
     await user.click(screen.getByRole('button', { name: /derivar caso/i }));
 
-    expect(await screen.findByText(/selecciona el servicio/i)).toBeInTheDocument();
-    expect(onSubmit).not.toHaveBeenCalled();
+    expect(onSubmit).toHaveBeenCalledWith(expect.objectContaining({
+      service: 'ESCUELA'
+    }));
   });
 
   it('envía el checklist, motivo y servicio elegidos', async () => {

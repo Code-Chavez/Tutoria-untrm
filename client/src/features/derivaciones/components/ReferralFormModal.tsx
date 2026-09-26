@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { Button, SelectField } from '@shared/components/ui';
 import { SendIcon, CloseIcon, InfoIcon } from '@shared/components/icons';
 import { Student } from '@features/tutorados/services/studentService';
@@ -8,6 +8,7 @@ import {
   ReferralService,
   REFERRAL_ASPECTS,
   REFERRAL_SERVICE_LABEL,
+  suggestReferralService,
 } from '../services/referralService';
 import styles from './ReferralFormModal.module.css';
 
@@ -41,8 +42,16 @@ export const ReferralFormModal: React.FC<ReferralFormModalProps> = ({
 }) => {
   const [checked, setChecked] = useState<Set<ReferralAspectCode>>(new Set());
   const [reason, setReason] = useState('');
-  const [service, setService] = useState<ReferralService | ''>('');
+  // El tutor puede elegir cualquiera de los 5 servicios sin restricción
+  // (HU-29): mientras no lo toque, el select sigue la sugerencia calculada
+  // en vivo a partir de los aspectos marcados; en cuanto elige uno, esa
+  // elección manual prevalece aunque cambien los aspectos.
+  const [manualService, setManualService] = useState<ReferralService | ''>('');
+  const [receivingInstance, setReceivingInstance] = useState('');
   const [error, setError] = useState('');
+
+  const suggestedService = useMemo(() => suggestReferralService([...checked]), [checked]);
+  const effectiveService = manualService || suggestedService || '';
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -71,11 +80,16 @@ export const ReferralFormModal: React.FC<ReferralFormModalProps> = ({
       setError('Describe el motivo de la derivación.');
       return;
     }
-    if (!service) {
+    if (!effectiveService) {
       setError('Selecciona el servicio al que se deriva.');
       return;
     }
-    onSubmit({ checkedAspects: [...checked], reason: reason.trim(), service });
+    onSubmit({
+      checkedAspects: [...checked],
+      reason: reason.trim(),
+      service: effectiveService,
+      receivingInstance: receivingInstance.trim() || undefined,
+    });
   };
 
   return (
@@ -142,9 +156,9 @@ export const ReferralFormModal: React.FC<ReferralFormModalProps> = ({
             <label htmlFor="referralService">Servicio al que se deriva</label>
             <SelectField
               id="referralService"
-              value={service}
+              value={effectiveService}
               onChange={(e) => {
-                setService(e.target.value as ReferralService);
+                setManualService(e.target.value as ReferralService);
                 setError('');
               }}
             >
@@ -155,6 +169,27 @@ export const ReferralFormModal: React.FC<ReferralFormModalProps> = ({
                 </option>
               ))}
             </SelectField>
+            {suggestedService && (
+              <span className={styles.suggestion}>
+                Sugerido según los aspectos marcados: {REFERRAL_SERVICE_LABEL[suggestedService]}.
+                Puedes elegir otro servicio si corresponde.
+              </span>
+            )}
+          </div>
+
+          <div className={styles.field}>
+            <label htmlFor="referralReceivingInstance">
+              Instancia o profesional que recibe (opcional)
+            </label>
+            <input
+              id="referralReceivingInstance"
+              type="text"
+              className={styles.input}
+              value={receivingInstance}
+              maxLength={200}
+              placeholder="Ej. Psicólogo Juan Pérez - Consultorio 3"
+              onChange={(e) => setReceivingInstance(e.target.value)}
+            />
           </div>
 
           <div className={styles.hint}>

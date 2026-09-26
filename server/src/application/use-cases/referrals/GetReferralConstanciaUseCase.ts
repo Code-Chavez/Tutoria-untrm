@@ -40,6 +40,7 @@ export class GetReferralConstanciaUseCase {
       referredByName: referredBy ? `${referredBy.firstName} ${referredBy.lastName}` : 'Desconocido',
       reason: referral.reason,
       service: referral.service,
+      receivingInstance: referral.receivingInstance,
       aspects,
       createdAt: referral.createdAt,
     };

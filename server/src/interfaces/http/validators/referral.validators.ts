@@ -29,6 +29,9 @@ export const createReferralSchema = z.object({
     .min(1, 'Marca al menos un aspecto observado'),
   reason: z.string().trim().min(3, 'Indique el motivo de la derivación').max(1000),
   service: z.enum(['ESCUELA', 'PSICOPEDAGOGIA', 'PSICOLOGIA', 'ASISTENCIA_SOCIAL', 'SALUD']),
+  // Instancia o profesional específico que recibe (HU-29); libre porque no
+  // todo servicio tiene un directorio de personal modelado en el sistema.
+  receivingInstance: z.string().trim().max(200).optional(),
 });
 
 export type CreateReferralBody = z.infer<typeof createReferralSchema>;

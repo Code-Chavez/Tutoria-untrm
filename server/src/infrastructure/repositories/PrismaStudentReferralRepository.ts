@@ -9,6 +9,7 @@ function toReferral(row: {
   checkedAspects: string[];
   reason: string;
   service: string;
+  receivingInstance?: string | null;
   createdAt: Date;
 }): StudentReferral {
   return {
@@ -18,6 +19,7 @@ function toReferral(row: {
     checkedAspects: row.checkedAspects as ReferralAspectCode[],
     reason: row.reason,
     service: row.service as ReferralService,
+    receivingInstance: row.receivingInstance ?? null,
     createdAt: row.createdAt,
   };
 }
