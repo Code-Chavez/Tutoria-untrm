@@ -134,9 +134,13 @@ export const ReferralDetailModal: React.FC<ReferralDetailModalProps> = ({ referr
             </div>
           )}
 
-          {referral.status !== 'ATENDIDO' && referral.status !== 'RECHAZADO' && (
+          {referral.status === 'CERRADO' ? (
+            <div className={styles.closedBanner}>
+              🔒 <strong>Caso Cerrado:</strong> Esta derivación se encuentra archivada y cerrada. No admite modificaciones ulteriores.
+            </div>
+          ) : (
             <div className={styles.updateSection}>
-              <h3 className={styles.updateTitle}>Actualizar Estado</h3>
+              <h3 className={styles.updateTitle}>Registrar Atención y Cambio de Estado (HU-32)</h3>
               {error && <div className={styles.errorMessage}>{error}</div>}
               <div className={styles.updateForm}>
                 <div className={styles.formGroup}>
@@ -154,13 +158,24 @@ export const ReferralDetailModal: React.FC<ReferralDetailModalProps> = ({ referr
                   </select>
                 </div>
                 <div className={styles.formGroup}>
-                  <label htmlFor="notesInput">Notas (opcional)</label>
+                  <label htmlFor="notesInput">
+                    Observaciones / Detalles de Atención
+                    {(newStatus === 'ATENDIDO' || newStatus === 'CERRADO') && (
+                      <span className={styles.requiredMark}> * (Obligatorio)</span>
+                    )}
+                  </label>
                   <textarea
                     id="notesInput"
                     className={styles.textarea}
                     value={notes}
                     onChange={(e) => setNotes(e.target.value)}
-                    placeholder="Escribe alguna observación..."
+                    placeholder={
+                      newStatus === 'CERRADO'
+                        ? 'Ingrese la justificación y síntesis para el cierre formal del caso...'
+                        : newStatus === 'ATENDIDO'
+                        ? 'Detalle las acciones de atención realizadas en el servicio...'
+                        : 'Escribe alguna observación o nota de seguimiento...'
+                    }
                     disabled={updating}
                   />
                 </div>
@@ -168,9 +183,19 @@ export const ReferralDetailModal: React.FC<ReferralDetailModalProps> = ({ referr
                   <Button
                     variant="primary"
                     onClick={handleUpdateStatus}
-                    disabled={updating || (newStatus === referral.status && !notes.trim())}
+                    disabled={
+                      updating ||
+                      (newStatus === referral.status && !notes.trim()) ||
+                      ((newStatus === 'ATENDIDO' || newStatus === 'CERRADO') && !notes.trim())
+                    }
                   >
-                    {updating ? 'Guardando...' : 'Guardar Cambios'}
+                    {updating
+                      ? 'Guardando...'
+                      : newStatus === 'CERRADO'
+                      ? 'Cerrar Caso Derivado'
+                      : newStatus === 'ATENDIDO'
+                      ? 'Registrar Atención'
+                      : 'Guardar Cambios'}
                   </Button>
                 </div>
               </div>

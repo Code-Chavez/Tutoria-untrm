@@ -57,14 +57,16 @@ export const REFERRAL_ASPECTS: ReferralAspectOption[] = [
   { code: 'MENTAL_HEALTH_DEFENSIVE', category: 'Salud mental', label: 'Se muestra a la defensiva, desconfiado/a y suspicaz' },
 ];
 
-export type ReferralStatus = 'ENVIADO' | 'EN_PROGRESO' | 'ATENDIDO' | 'RECHAZADO';
+export type ReferralStatus = 'ENVIADO' | 'RECIBIDO' | 'EN_ATENCION' | 'ATENDIDO' | 'CERRADO';
 
 export const REFERRAL_STATUS_LABEL: Record<ReferralStatus, string> = {
   ENVIADO: 'Enviado',
-  EN_PROGRESO: 'En Progreso',
+  RECIBIDO: 'Recibido',
+  EN_ATENCION: 'En Atención',
   ATENDIDO: 'Atendido',
-  RECHAZADO: 'Rechazado',
+  CERRADO: 'Cerrado',
 };
+
 
 export interface ReferralStatusHistory {
   status: ReferralStatus;

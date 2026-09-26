@@ -6,7 +6,11 @@ import { GetReferralsUseCase } from '@application/use-cases/referrals/GetReferra
 import { GetReferralByIdUseCase } from '@application/use-cases/referrals/GetReferralByIdUseCase';
 import { UpdateReferralStatusUseCase } from '@application/use-cases/referrals/UpdateReferralStatusUseCase';
 import { ReferralConstanciaPdf } from '@infrastructure/parsers/ReferralConstanciaPdf';
-import { ReferralNotFoundError } from '@application/use-cases/referrals/ReferralErrors';
+import {
+  ReferralNotFoundError,
+  ReferralClosedError,
+  ClosureNotesRequiredError,
+} from '@application/use-cases/referrals/ReferralErrors';
 import { StudentNotFoundError } from '@application/use-cases/students/StudentErrors';
 import { createReferralSchema } from '../validators/referral.validators';
 
@@ -87,7 +91,7 @@ export class ReferralController {
     }
   };
 
-  // Actualiza el estado de una derivación (HU-31)
+  // Actualiza el estado de una derivación, incluyendo registro de atención y cierre (HU-31, HU-32)
   updateStatus = async (req: Request, res: Response) => {
     try {
       const referralId = req.params.id as string;
@@ -95,26 +99,23 @@ export class ReferralController {
       const { status, notes } = req.body;
       
       if (!status) {
-        return res.status(400).json({ error: 'Status is required' });
+        res.status(400).json({ error: 'El campo status es obligatorio' });
+        return;
       }
 
-      // TODO: Aquí podría agregarse validación de que el usuario tenga rol de profesional de servicio
-      // o que pertenezca al servicio destino de la derivación.
-
       const referral = await this.updateReferralStatusUseCase.execute(referralId, status, userId, notes);
-      res.status(200).json({ message: 'Estado actualizado exitosamente', referral });
+      res.status(200).json({ message: 'Estado de derivación actualizado exitosamente', referral });
     } catch (error) {
-      if (error instanceof Error) {
-        if (error.message === 'Referral not found') {
-          res.status(404).json({ error: error.message });
-        } else if (error.message === 'Cannot update a closed referral') {
-          res.status(400).json({ error: error.message });
-        } else {
-          res.status(500).json({ error: error.message });
-        }
+      if (error instanceof ReferralNotFoundError) {
+        res.status(404).json({ error: error.message });
+      } else if (error instanceof ReferralClosedError || error instanceof ClosureNotesRequiredError) {
+        res.status(400).json({ error: error.message });
+      } else if (error instanceof Error) {
+        res.status(400).json({ error: error.message });
       } else {
         res.status(500).json({ error: 'Error interno del servidor' });
       }
     }
   };
 }
+
