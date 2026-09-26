@@ -27,6 +27,7 @@ describe('CreateReferralUseCase', () => {
       })),
       findById: jest.fn(),
       findMany: jest.fn(),
+      updateStatus: jest.fn(),
     };
     students = {
       findById: jest.fn().mockResolvedValue(student),

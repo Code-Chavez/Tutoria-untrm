@@ -108,6 +108,7 @@ import { CreateReferralUseCase } from '@application/use-cases/referrals/CreateRe
 import { GetReferralConstanciaUseCase } from '@application/use-cases/referrals/GetReferralConstanciaUseCase';
 import { GetReferralsUseCase } from '@application/use-cases/referrals/GetReferralsUseCase';
 import { GetReferralByIdUseCase } from '@application/use-cases/referrals/GetReferralByIdUseCase';
+import { UpdateReferralStatusUseCase } from '@application/use-cases/referrals/UpdateReferralStatusUseCase';
 
 const createUserUseCase = new CreateUserUseCase(userRepository, passwordHasher);
 const updateUserUseCase = new UpdateUserUseCase(userRepository);
@@ -239,6 +240,9 @@ const getReferralByIdUseCase = new GetReferralByIdUseCase(
   userRepository,
   roleRepository,
 );
+const updateReferralStatusUseCase = new UpdateReferralStatusUseCase(
+  studentReferralRepository,
+);
 
 export const container = {
   repositories: {
@@ -311,5 +315,6 @@ export const container = {
     getReferralConstanciaUseCase,
     getReferralsUseCase,
     getReferralByIdUseCase,
+    updateReferralStatusUseCase,
   },
 } as const;

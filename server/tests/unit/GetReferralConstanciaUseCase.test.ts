@@ -24,6 +24,7 @@ describe('GetReferralConstanciaUseCase', () => {
     reason: 'Bajo rendimiento y señales de ansiedad',
     service: 'PSICOLOGIA',
     receivingInstance: 'Psicóloga Ana García',
+    status: 'ENVIADO',
     createdAt: new Date('2026-09-25T10:00:00Z'),
   };
 
@@ -44,6 +45,7 @@ describe('GetReferralConstanciaUseCase', () => {
       create: jest.fn(),
       findById: jest.fn().mockResolvedValue(referral),
       findMany: jest.fn(),
+      updateStatus: jest.fn(),
     };
     students = {
       findById: jest.fn().mockResolvedValue(student),

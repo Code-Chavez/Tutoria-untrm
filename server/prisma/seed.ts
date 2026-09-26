@@ -115,7 +115,7 @@ async function main() {
   // Todos comparten DEMO_PASSWORD ('Demo2026!'); se listan al final del seed.
   const demoPasswordHash = await bcrypt.hash(DEMO_PASSWORD, 12);
 
-  const demoUsersInput: { email: string; firstName: string; lastName: string; phone: string; roleId: string }[] = [
+  const demoUsersInput: { email: string; firstName: string; lastName: string; phone: string; roleId: string; service?: string }[] = [
     // Coordinador
     { email: 'rosa.mendoza@untrm.edu.pe', firstName: 'Rosa', lastName: 'Mendoza Vargas', phone: '941000001', roleId: coordRole.id },
     { email: 'carlos.vega@untrm.edu.pe', firstName: 'Carlos', lastName: 'Vega Ramos', phone: '941000002', roleId: coordRole.id },
