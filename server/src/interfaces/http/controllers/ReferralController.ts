@@ -62,8 +62,9 @@ export class ReferralController {
       const userId = req.auth?.sub as string;
       const referrals = await this.getReferralsUseCase.execute(userId);
       res.status(200).json(referrals);
-    } catch (error: any) {
-      res.status(500).json({ error: error.message || 'Error interno del servidor' });
+    } catch (error) {
+      const msg = error instanceof Error ? error.message : 'Error interno del servidor';
+      res.status(500).json({ error: msg });
     }
   };
 
@@ -74,13 +75,14 @@ export class ReferralController {
       const userId = req.auth?.sub as string;
       const referral = await this.getReferralByIdUseCase.execute(referralId, userId);
       res.status(200).json(referral);
-    } catch (error: any) {
+    } catch (error) {
       if (error instanceof ReferralNotFoundError) {
         res.status(404).json({ error: error.message });
-      } else if (error.message === 'No autorizado para ver esta derivación') {
+      } else if (error instanceof Error && error.message === 'No autorizado para ver esta derivación') {
         res.status(403).json({ error: error.message });
       } else {
-        res.status(500).json({ error: error.message || 'Error interno del servidor' });
+        const msg = error instanceof Error ? error.message : 'Error interno del servidor';
+        res.status(500).json({ error: msg });
       }
     }
   };
@@ -101,13 +103,17 @@ export class ReferralController {
 
       const referral = await this.updateReferralStatusUseCase.execute(referralId, status, userId, notes);
       res.status(200).json({ message: 'Estado actualizado exitosamente', referral });
-    } catch (error: any) {
-      if (error.message === 'Referral not found') {
-        res.status(404).json({ error: error.message });
-      } else if (error.message === 'Cannot update a closed referral') {
-        res.status(400).json({ error: error.message });
+    } catch (error) {
+      if (error instanceof Error) {
+        if (error.message === 'Referral not found') {
+          res.status(404).json({ error: error.message });
+        } else if (error.message === 'Cannot update a closed referral') {
+          res.status(400).json({ error: error.message });
+        } else {
+          res.status(500).json({ error: error.message });
+        }
       } else {
-        res.status(500).json({ error: error.message || 'Error interno del servidor' });
+        res.status(500).json({ error: 'Error interno del servidor' });
       }
     }
   };

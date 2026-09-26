@@ -1,26 +1,30 @@
 import { PrismaClient } from '@prisma/client';
-import { StudentReferral, ReferralAspectCode, ReferralService, ReferralStatus, ReferralStatusHistory } from '@domain/entities/StudentReferral';
+import { StudentReferral, ReferralAspectCode, ReferralService, ReferralStatus } from '@domain/entities/StudentReferral';
 import { StudentReferralRepository } from '@domain/repositories/StudentReferralRepository';
 
-function toReferral(row: any): StudentReferral {
+function toReferral(row: unknown): StudentReferral {
+  const r = row as any;
   return {
-    id: row.id,
-    studentId: row.studentId,
-    referredById: row.referredById,
-    checkedAspects: row.checkedAspects as ReferralAspectCode[],
-    reason: row.reason,
-    service: row.service as ReferralService,
-    receivingInstance: row.receivingInstance,
-    status: row.status as ReferralStatus,
-    statusHistory: row.statusHistory ? row.statusHistory.map((h: any) => ({
-      id: h.id,
-      referralId: h.referralId,
-      status: h.status as ReferralStatus,
-      notes: h.notes,
-      changedById: h.changedById,
-      createdAt: h.createdAt,
-    })) : undefined,
-    createdAt: row.createdAt,
+    id: r.id,
+    studentId: r.studentId,
+    referredById: r.referredById,
+    checkedAspects: r.checkedAspects as ReferralAspectCode[],
+    reason: r.reason,
+    service: r.service as ReferralService,
+    receivingInstance: r.receivingInstance,
+    status: r.status as ReferralStatus,
+    statusHistory: r.statusHistory ? r.statusHistory.map((h: unknown) => {
+      const historyRow = h as any;
+      return {
+        id: historyRow.id,
+        referralId: historyRow.referralId,
+        status: historyRow.status as ReferralStatus,
+        notes: historyRow.notes,
+        changedById: historyRow.changedById,
+        createdAt: historyRow.createdAt,
+      };
+    }) : undefined,
+    createdAt: r.createdAt,
   };
 }
 

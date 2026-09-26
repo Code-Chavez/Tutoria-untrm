@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { PageHeader, EmptyState, TableSkeleton, Button } from '@shared/components/ui';
 import { SendIcon, InboxIcon, SearchIcon } from '@shared/components/icons';
-import { referralService, StudentReferral, REFERRAL_SERVICE_LABEL, ReferralStatus, REFERRAL_STATUS_LABEL } from '../services/referralService';
+import { referralService, StudentReferral, REFERRAL_SERVICE_LABEL, REFERRAL_STATUS_LABEL } from '../services/referralService';
 import { getApiErrorMessage } from '@shared/services/apiClient';
 import { ReferralDetailModal } from '../components/ReferralDetailModal';
 import styles from './ReferralsPage.module.css';
