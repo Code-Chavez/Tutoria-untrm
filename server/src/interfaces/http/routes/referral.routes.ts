@@ -11,6 +11,7 @@ const referralController = new ReferralController(
   container.useCases.getReferralConstanciaUseCase,
   container.useCases.getReferralsUseCase,
   container.useCases.getReferralByIdUseCase,
+  container.useCases.updateReferralStatusUseCase,
   new ReferralConstanciaPdf(),
 );
 
@@ -44,6 +45,14 @@ router.get(
   requireAuth,
   authorize(['referrals:read']),
   referralController.getById,
+);
+
+// HU-31: Actualización de estado
+router.patch(
+  '/referrals/:id/status',
+  requireAuth,
+  authorize(['referrals:write']),
+  referralController.updateStatus,
 );
 
 export default router;

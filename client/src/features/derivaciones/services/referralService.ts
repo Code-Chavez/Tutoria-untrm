@@ -57,6 +57,21 @@ export const REFERRAL_ASPECTS: ReferralAspectOption[] = [
   { code: 'MENTAL_HEALTH_DEFENSIVE', category: 'Salud mental', label: 'Se muestra a la defensiva, desconfiado/a y suspicaz' },
 ];
 
+export type ReferralStatus = 'ENVIADO' | 'EN_PROGRESO' | 'ATENDIDO' | 'RECHAZADO';
+
+export const REFERRAL_STATUS_LABEL: Record<ReferralStatus, string> = {
+  ENVIADO: 'Enviado',
+  EN_PROGRESO: 'En Progreso',
+  ATENDIDO: 'Atendido',
+  RECHAZADO: 'Rechazado',
+};
+
+export interface ReferralStatusHistory {
+  status: ReferralStatus;
+  notes?: string;
+  createdAt: string;
+}
+
 export interface StudentReferral {
   id: string;
   studentId: string;
@@ -65,6 +80,8 @@ export interface StudentReferral {
   reason: string;
   service: ReferralService;
   receivingInstance: string | null;
+  status: ReferralStatus;
+  statusHistory?: ReferralStatusHistory[];
   createdAt: string;
 }
 
@@ -150,5 +167,17 @@ export const referralService = {
   getReferralById: async (id: string): Promise<StudentReferral> => {
     const response = await apiClient.get<StudentReferral>(`/referrals/${id}`);
     return response.data;
+  },
+
+  updateStatus: async (
+    id: string,
+    status: ReferralStatus,
+    notes?: string,
+  ): Promise<StudentReferral> => {
+    const response = await apiClient.patch<{ message: string; referral: StudentReferral }>(
+      `/referrals/${id}/status`,
+      { status, notes },
+    );
+    return response.data.referral;
   },
 };

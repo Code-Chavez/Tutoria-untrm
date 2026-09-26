@@ -48,6 +48,7 @@ model User {
   sessionChangesMade   SessionChangeHistory[]   @relation("SessionChangesMade")
   sessionEvidenceUploads SessionEvidence[]      @relation("SessionEvidenceUploads")
   referralsCreated       StudentReferral[]      @relation("ReferralsCreated")
+  referralStatusChanges  ReferralStatusHistory[] @relation("ReferralStatusChanges")
 
   @@map("users")
 }
@@ -497,12 +498,36 @@ model StudentReferral {
   // 'ESCUELA' | 'PSICOPEDAGOGIA' | 'PSICOLOGIA' | 'ASISTENCIA_SOCIAL' | 'SALUD' (Art. 21)
   service String
 
-  // Instancia o profesional específico que recibe (HU-29); el estado
-  // enviado/recibido/... con fecha y responsable es HU-31, no este campo.
+  // Instancia o profesional específico que recibe (HU-29)
   receivingInstance String? @map("receiving_instance")
+
+  // 'ENVIADO' | 'RECIBIDO' | 'EN_ATENCION' | 'ATENDIDO' | 'CERRADO' (HU-31)
+  status String @default("ENVIADO")
+
+  statusHistory ReferralStatusHistory[]
 
   @@index([studentId])
   @@map("student_referrals")
+}
+
+// Historial de cambios de estado de una derivación (HU-31)
+model ReferralStatusHistory {
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now()) @map("created_at")
+
+  referralId String @map("referral_id")
+  referral   StudentReferral @relation(fields: [referralId], references: [id], onDelete: Cascade)
+
+  // 'ENVIADO' | 'RECIBIDO' | 'EN_ATENCION' | 'ATENDIDO' | 'CERRADO'
+  status String
+
+  notes String?
+
+  changedById String @map("changed_by_id")
+  changedBy   User   @relation("ReferralStatusChanges", fields: [changedById], references: [id])
+
+  @@index([referralId])
+  @@map("referral_status_history")
 }
 
 // ─── Parámetros del Sistema ────────────────────────────────────

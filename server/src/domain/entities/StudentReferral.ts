@@ -132,6 +132,17 @@ export const REFERRAL_ASPECTS: readonly ReferralAspect[] = [
   },
 ];
 
+export type ReferralStatus = 'ENVIADO' | 'RECIBIDO' | 'EN_ATENCION' | 'ATENDIDO' | 'CERRADO';
+
+export interface ReferralStatusHistory {
+  id: string;
+  referralId: string;
+  status: ReferralStatus;
+  notes: string | null;
+  changedById: string;
+  createdAt: Date;
+}
+
 export interface StudentReferral {
   id: string;
   studentId: string;
@@ -139,10 +150,10 @@ export interface StudentReferral {
   checkedAspects: ReferralAspectCode[];
   reason: string;
   service: ReferralService;
-  // Instancia o profesional específico que recibe (HU-29), p. ej. "Psicólogo
-  // Juan Pérez - Consultorio 3". El estado enviado/recibido/... con fecha y
-  // responsable (Art. 21, trazabilidad) es HU-31, no este campo.
+  // Instancia o profesional específico que recibe (HU-29)
   receivingInstance: string | null;
+  status: ReferralStatus;
+  statusHistory?: ReferralStatusHistory[];
   createdAt: Date;
 }
 
