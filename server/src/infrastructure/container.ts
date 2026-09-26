@@ -106,6 +106,8 @@ import { GetRiskAlertsUseCase } from '@application/use-cases/alerts/GetRiskAlert
 import { GetScheduleAttendanceReportUseCase } from '@application/use-cases/reports/GetScheduleAttendanceReportUseCase';
 import { CreateReferralUseCase } from '@application/use-cases/referrals/CreateReferralUseCase';
 import { GetReferralConstanciaUseCase } from '@application/use-cases/referrals/GetReferralConstanciaUseCase';
+import { GetReferralsUseCase } from '@application/use-cases/referrals/GetReferralsUseCase';
+import { GetReferralByIdUseCase } from '@application/use-cases/referrals/GetReferralByIdUseCase';
 
 const createUserUseCase = new CreateUserUseCase(userRepository, passwordHasher);
 const updateUserUseCase = new UpdateUserUseCase(userRepository);
@@ -227,6 +229,16 @@ const getReferralConstanciaUseCase = new GetReferralConstanciaUseCase(
   userRepository,
   schoolRepository,
 );
+const getReferralsUseCase = new GetReferralsUseCase(
+  studentReferralRepository,
+  userRepository,
+  roleRepository,
+);
+const getReferralByIdUseCase = new GetReferralByIdUseCase(
+  studentReferralRepository,
+  userRepository,
+  roleRepository,
+);
 
 export const container = {
   repositories: {
@@ -297,5 +309,7 @@ export const container = {
     getScheduleAttendanceReportUseCase,
     createReferralUseCase,
     getReferralConstanciaUseCase,
+    getReferralsUseCase,
+    getReferralByIdUseCase,
   },
 } as const;
