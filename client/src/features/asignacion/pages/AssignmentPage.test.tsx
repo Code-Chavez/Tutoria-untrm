@@ -1,6 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { QueryClientTestWrapper } from '@shared/test-utils/QueryClientTestWrapper';
 import { AssignmentPage } from './AssignmentPage';
 import { studentService, type Student } from '@features/tutorados/services/studentService';
 import { schoolService } from '@features/tutorados/services/schoolService';
@@ -43,7 +44,11 @@ describe('AssignmentPage', () => {
 
   it('asigna el estudiante seleccionado al tutor elegido', async () => {
     const user = userEvent.setup();
-    render(<AssignmentPage />);
+    render(
+      <QueryClientTestWrapper>
+        <AssignmentPage />
+      </QueryClientTestWrapper>,
+    );
 
     // Selecciona el estudiante
     const checkbox = await screen.findByLabelText(/seleccionar ana torres/i);
@@ -62,7 +67,11 @@ describe('AssignmentPage', () => {
   });
 
   it('mantiene el botón de asignar deshabilitado sin selección', async () => {
-    render(<AssignmentPage />);
+    render(
+      <QueryClientTestWrapper>
+        <AssignmentPage />
+      </QueryClientTestWrapper>,
+    );
     const button = await screen.findByRole('button', { name: /asignar/i });
     expect(button).toBeDisabled();
   });

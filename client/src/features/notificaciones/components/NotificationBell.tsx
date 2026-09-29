@@ -1,10 +1,9 @@
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { BellIcon } from '@shared/components/icons';
-import { notificationService, AppNotification } from '../services/notificationService';
+import { useNotifications, useMarkNotificationRead } from '../hooks/useNotifications';
+import type { AppNotification } from '../services/notificationService';
 import styles from './NotificationBell.module.css';
-
-const POLL_INTERVAL_MS = 60000;
 
 function formatRelativeTime(iso: string): string {
   const diffMs = Date.now() - new Date(iso).getTime();
@@ -18,21 +17,11 @@ function formatRelativeTime(iso: string): string {
 }
 
 export function NotificationBell() {
-  const [notifications, setNotifications] = useState<AppNotification[]>([]);
+  const { data: notifications = [] } = useNotifications();
+  const markAsRead = useMarkNotificationRead();
   const [open, setOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
-
-  const loadNotifications = () => {
-    // Silencioso: la bandeja de notificaciones no debe interrumpir el resto de la app.
-    notificationService.getNotifications().then(setNotifications).catch(() => {});
-  };
-
-  useEffect(() => {
-    loadNotifications();
-    const interval = setInterval(loadNotifications, POLL_INTERVAL_MS);
-    return () => clearInterval(interval);
-  }, []);
 
   useEffect(() => {
     if (!open) return;
@@ -50,14 +39,7 @@ export function NotificationBell() {
   const handleSelect = async (notification: AppNotification) => {
     setOpen(false);
     if (!notification.read) {
-      setNotifications((prev) =>
-        prev.map((n) => (n.id === notification.id ? { ...n, read: true } : n)),
-      );
-      try {
-        await notificationService.markAsRead(notification.id);
-      } catch {
-        loadNotifications();
-      }
+      await markAsRead(notification);
     }
     if (notification.referralId) {
       navigate('/derivaciones');

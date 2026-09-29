@@ -1,15 +1,14 @@
-import { useCallback, useEffect, useState } from 'react';
-import { Student, studentService } from '../services/studentService';
-import { School, schoolService } from '../services/schoolService';
-import { TutorWorkload, assignmentService } from '@features/asignacion/services/assignmentService';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { studentService } from '../services/studentService';
+import { schoolService } from '../services/schoolService';
+import { assignmentService } from '@features/asignacion/services/assignmentService';
 
-interface State {
-  students: Student[];
-  schools: School[];
-  tutors: TutorWorkload[];
-  loading: boolean;
-  error: boolean;
-}
+// Exportadas para que otras vistas que comparten estos mismos datos
+// (panel de inicio, asignación) reusen la misma entrada de caché en vez de
+// volver a pedirlos.
+export const STUDENTS_QUERY_KEY = ['students'] as const;
+export const SCHOOLS_QUERY_KEY = ['schools'] as const;
+export const TUTOR_WORKLOAD_QUERY_KEY = ['tutorWorkload'] as const;
 
 /**
  * Carga la lista completa de estudiantes, el catálogo de escuelas y los
@@ -17,40 +16,35 @@ interface State {
  * El filtrado y la paginación se resuelven en el cliente sobre estos datos.
  */
 export function useStudents() {
-  const [state, setState] = useState<State>({
-    students: [],
-    schools: [],
-    tutors: [],
-    loading: true,
-    error: false,
+  const queryClient = useQueryClient();
+
+  const studentsQuery = useQuery({
+    queryKey: STUDENTS_QUERY_KEY,
+    queryFn: () => studentService.getStudents(),
   });
-  const [refreshKey, setRefreshKey] = useState(0);
+  const schoolsQuery = useQuery({
+    queryKey: SCHOOLS_QUERY_KEY,
+    queryFn: () => schoolService.getSchools().catch(() => []),
+  });
+  // El listado de tutores requiere students:write; los roles de solo
+  // lectura simplemente no lo obtienen (se degrada sin romper la vista).
+  const tutorsQuery = useQuery({
+    queryKey: TUTOR_WORKLOAD_QUERY_KEY,
+    queryFn: () => assignmentService.getTutorWorkload().catch(() => []),
+  });
 
-  const refresh = useCallback(() => setRefreshKey((k) => k + 1), []);
+  const refresh = () => {
+    queryClient.invalidateQueries({ queryKey: STUDENTS_QUERY_KEY });
+    queryClient.invalidateQueries({ queryKey: SCHOOLS_QUERY_KEY });
+    queryClient.invalidateQueries({ queryKey: TUTOR_WORKLOAD_QUERY_KEY });
+  };
 
-  useEffect(() => {
-    let ignore = false;
-
-    Promise.all([
-      studentService.getStudents(),
-      schoolService.getSchools().catch(() => []),
-      // El listado de tutores requiere students:write; los roles de solo
-      // lectura simplemente no lo obtienen (se degrada sin romper la vista).
-      assignmentService.getTutorWorkload().catch(() => []),
-    ])
-      .then(([students, schools, tutors]) => {
-        if (ignore) return;
-        setState({ students, schools, tutors, loading: false, error: false });
-      })
-      .catch(() => {
-        if (ignore) return;
-        setState({ students: [], schools: [], tutors: [], loading: false, error: true });
-      });
-
-    return () => {
-      ignore = true;
-    };
-  }, [refreshKey]);
-
-  return { ...state, refresh };
+  return {
+    students: studentsQuery.data ?? [],
+    schools: schoolsQuery.data ?? [],
+    tutors: tutorsQuery.data ?? [],
+    loading: studentsQuery.isLoading || schoolsQuery.isLoading || tutorsQuery.isLoading,
+    error: studentsQuery.isError,
+    refresh,
+  };
 }

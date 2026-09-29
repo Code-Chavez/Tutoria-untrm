@@ -1,6 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import { MemoryRouter, Routes, Route } from 'react-router-dom';
+import { QueryClientTestWrapper } from '@shared/test-utils/QueryClientTestWrapper';
 import { ExpedientePage } from './ExpedientePage';
 import { studentRecordService, type StudentRecord } from '../services/studentRecordService';
 
@@ -46,11 +47,13 @@ const baseRecord: StudentRecord = {
 
 function renderPage() {
   return render(
-    <MemoryRouter initialEntries={['/expediente/s1']}>
-      <Routes>
-        <Route path="/expediente/:id" element={<ExpedientePage />} />
-      </Routes>
-    </MemoryRouter>,
+    <QueryClientTestWrapper>
+      <MemoryRouter initialEntries={['/expediente/s1']}>
+        <Routes>
+          <Route path="/expediente/:id" element={<ExpedientePage />} />
+        </Routes>
+      </MemoryRouter>
+    </QueryClientTestWrapper>,
   );
 }
 

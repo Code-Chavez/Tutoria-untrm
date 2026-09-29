@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { useAuth } from '@features/auth/hooks/useAuth';
 import { alertService, StudentAlert } from '../services/alertService';
 
@@ -11,6 +11,13 @@ interface State {
 
 const TUTOR_ROLE_NAME = 'Docente Tutor';
 
+function getStatus(err: unknown): number | undefined {
+  if (typeof err === 'object' && err !== null && 'response' in err) {
+    return (err as { response?: { status?: number } }).response?.status;
+  }
+  return undefined;
+}
+
 /**
  * Alertas de inasistencia y riesgo (HU-26) para el panel. El Docente Tutor
  * ve solo las de sus propios tutorados; el resto de roles con acceso
@@ -18,30 +25,16 @@ const TUTOR_ROLE_NAME = 'Docente Tutor';
  */
 export function useRiskAlerts(): State {
   const { user } = useAuth();
-  const [state, setState] = useState<State>({ alerts: [], loading: true, forbidden: false });
+  const mine = user?.role === TUTOR_ROLE_NAME;
 
-  useEffect(() => {
-    let ignore = false;
-    const mine = user?.role === TUTOR_ROLE_NAME;
+  const query = useQuery<StudentAlert[]>({
+    queryKey: ['riskAlerts', mine],
+    queryFn: () => alertService.getAlerts(mine),
+  });
 
-    alertService
-      .getAlerts(mine)
-      .then((alerts) => {
-        if (!ignore) setState({ alerts, loading: false, forbidden: false });
-      })
-      .catch((err: unknown) => {
-        if (ignore) return;
-        const status =
-          typeof err === 'object' && err !== null && 'response' in err
-            ? (err as { response?: { status?: number } }).response?.status
-            : undefined;
-        setState({ alerts: [], loading: false, forbidden: status === 403 });
-      });
+  if (query.isError) {
+    return { alerts: [], loading: false, forbidden: getStatus(query.error) === 403 };
+  }
 
-    return () => {
-      ignore = true;
-    };
-  }, [user?.role]);
-
-  return state;
+  return { alerts: query.data ?? [], loading: query.isLoading, forbidden: false };
 }
