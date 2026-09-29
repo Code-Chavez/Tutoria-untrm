@@ -176,11 +176,13 @@ const getStudentRecordUseCase = new GetStudentRecordUseCase(
   studentRepository,
   schoolRepository,
   userRepository,
+  roleRepository,
   tutorInterviewRepository,
   tutorAssignmentHistoryRepository,
   supportContactRepository,
   sessionRepository,
   tutorFollowUpRepository,
+  studentReferralRepository,
 );
 const createTutoringRequestUseCase = new CreateTutoringRequestUseCase(
   tutoringRequestRepository,

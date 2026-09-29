@@ -3,18 +3,22 @@ import { StudentNotFoundError } from '@application/use-cases/students/StudentErr
 import { StudentRepository } from '@domain/repositories/StudentRepository';
 import { SchoolRepository } from '@domain/repositories/SchoolRepository';
 import { UserRepository } from '@domain/repositories/UserRepository';
+import { RoleRepository } from '@domain/repositories/RoleRepository';
 import { TutorInterviewRepository } from '@domain/repositories/TutorInterviewRepository';
 import { TutorAssignmentHistoryRepository } from '@domain/repositories/TutorAssignmentHistoryRepository';
 import { SupportContactRepository } from '@domain/repositories/SupportContactRepository';
 import { SessionRepository } from '@domain/repositories/SessionRepository';
 import { TutorFollowUpRepository } from '@domain/repositories/TutorFollowUpRepository';
+import { StudentReferralRepository } from '@domain/repositories/StudentReferralRepository';
 import { Student } from '@domain/entities/Student';
 import { School } from '@domain/entities/School';
 import { User } from '@domain/entities/User';
+import { Role } from '@domain/entities/Role';
 import { TutorInterview } from '@domain/entities/TutorInterview';
 import { TutorAssignmentHistory } from '@domain/entities/TutorAssignmentHistory';
 import { SupportContact } from '@domain/entities/SupportContact';
 import { SessionWithParticipants } from '@domain/entities/Session';
+import { StudentReferral } from '@domain/entities/StudentReferral';
 
 describe('GetStudentRecordUseCase', () => {
   let useCase: GetStudentRecordUseCase;
@@ -26,6 +30,10 @@ describe('GetStudentRecordUseCase', () => {
   let contacts: jest.Mocked<SupportContactRepository>;
   let sessions: jest.Mocked<SessionRepository>;
   let followUps: jest.Mocked<TutorFollowUpRepository>;
+  let roles: jest.Mocked<RoleRepository>;
+  let referrals: jest.Mocked<StudentReferralRepository>;
+
+  const tutorRole = { id: 'role-tutor', name: 'Docente Tutor' } as Role;
 
   const student = {
     id: 'student-1',
@@ -42,8 +50,8 @@ describe('GetStudentRecordUseCase', () => {
 
   const school = { id: 'school-1', name: 'Ingeniería de Sistemas' } as School;
 
-  const tutorOld = { id: 'tutor-old', firstName: 'Jorge', lastName: 'Salazar' } as User;
-  const tutorNew = { id: 'tutor-new', firstName: 'Elena', lastName: 'Ramírez' } as User;
+  const tutorOld = { id: 'tutor-old', firstName: 'Jorge', lastName: 'Salazar', roleId: 'role-tutor' } as User;
+  const tutorNew = { id: 'tutor-new', firstName: 'Elena', lastName: 'Ramírez', roleId: 'role-tutor' } as User;
 
   const interview = {
     id: 'interview-1',
@@ -116,20 +124,34 @@ describe('GetStudentRecordUseCase', () => {
       create: jest.fn(),
       findByStudent: jest.fn().mockResolvedValue([]),
     };
+    roles = {
+      findById: jest.fn().mockResolvedValue(tutorRole),
+      findByName: jest.fn(),
+      findAll: jest.fn(),
+      create: jest.fn(),
+    };
+    referrals = {
+      create: jest.fn(),
+      findById: jest.fn(),
+      findMany: jest.fn().mockResolvedValue([]),
+      updateStatus: jest.fn(),
+    };
     useCase = new GetStudentRecordUseCase(
       students,
       schools,
       users,
+      roles,
       interviews,
       history,
       contacts,
       sessions,
       followUps,
+      referrals,
     );
   });
 
   it('consolida entrevistas e historial de asignación en orden cronológico descendente', async () => {
-    const record = await useCase.execute('student-1', false);
+    const record = await useCase.execute('student-1', false, 'tutor-new');
 
     expect(record.schoolName).toBe('Ingeniería de Sistemas');
     expect(record.tutorName).toBe('Elena Ramírez');
@@ -152,7 +174,7 @@ describe('GetStudentRecordUseCase', () => {
   it('incluye la persona de red de apoyo solo si se solicita', async () => {
     contacts.findByStudent.mockResolvedValue({ fullName: 'María Torres' } as SupportContact);
 
-    const record = await useCase.execute('student-1', true);
+    const record = await useCase.execute('student-1', true, 'tutor-new');
 
     expect(contacts.findByStudent).toHaveBeenCalledWith('student-1');
     expect(record.supportContact?.fullName).toBe('María Torres');
@@ -160,7 +182,7 @@ describe('GetStudentRecordUseCase', () => {
 
   it('lanza StudentNotFoundError si el estudiante no existe', async () => {
     students.findById.mockResolvedValue(null);
-    await expect(useCase.execute('missing', false)).rejects.toThrow(StudentNotFoundError);
+    await expect(useCase.execute('missing', false, 'tutor-new')).rejects.toThrow(StudentNotFoundError);
   });
 
   it('incluye la asistencia confirmada de sesiones individuales (HU-22)', async () => {
@@ -186,7 +208,7 @@ describe('GetStudentRecordUseCase', () => {
     } as SessionWithParticipants;
     sessions.findByStudent.mockResolvedValue([attendedSession]);
 
-    const record = await useCase.execute('student-1', false);
+    const record = await useCase.execute('student-1', false, 'tutor-new');
 
     expect(record.timeline).toHaveLength(3);
     const attendanceEvent = record.timeline.find((e) => e.type === 'attendance');
@@ -213,7 +235,7 @@ describe('GetStudentRecordUseCase', () => {
       },
     ]);
 
-    const record = await useCase.execute('student-1', false);
+    const record = await useCase.execute('student-1', false, 'tutor-new');
 
     expect(record.timeline).toHaveLength(3);
     const followUpEvent = record.timeline.find((e) => e.type === 'followUp');
@@ -224,5 +246,58 @@ describe('GetStudentRecordUseCase', () => {
       expect(followUpEvent.courseCycle).toBe(3);
       expect(followUpEvent.conductedByName).toBe('Elena Ramírez');
     }
+  });
+
+  it('incluye las derivaciones que el propio tutor solicitante registró (HU-35)', async () => {
+    const referral = {
+      id: 'referral-1',
+      studentId: 'student-1',
+      referredById: 'tutor-new',
+      checkedAspects: [],
+      reason: 'Motivo confidencial',
+      service: 'PSICOLOGIA',
+      receivingInstance: 'Gabinete 3',
+      status: 'ENVIADO',
+      createdAt: new Date('2026-09-22'),
+    } as StudentReferral;
+    referrals.findMany.mockResolvedValue([referral]);
+
+    const record = await useCase.execute('student-1', false, 'tutor-new');
+
+    expect(referrals.findMany).toHaveBeenCalledWith({ studentId: 'student-1', referredById: 'tutor-new' });
+    const referralEvent = record.timeline.find((e) => e.type === 'referral');
+    expect(referralEvent).toBeDefined();
+    if (referralEvent?.type === 'referral') {
+      expect(referralEvent.service).toBe('PSICOLOGIA');
+      expect(referralEvent.status).toBe('ENVIADO');
+      expect(referralEvent.receivingInstance).toBe('Gabinete 3');
+    }
+    // No expone motivo ni aspectos observados en el expediente.
+    expect(referralEvent).not.toHaveProperty('reason');
+    expect(referralEvent).not.toHaveProperty('checkedAspects');
+  });
+
+  it('no incluye derivaciones para roles sin visibilidad de seguimiento (ej. Coordinador)', async () => {
+    roles.findById.mockResolvedValue({ id: 'role-coord', name: 'Coordinador' } as Role);
+    referrals.findMany.mockResolvedValue([
+      { id: 'referral-1', studentId: 'student-1', service: 'PSICOLOGIA', status: 'ENVIADO', createdAt: new Date() } as StudentReferral,
+    ]);
+
+    const record = await useCase.execute('student-1', false, 'tutor-new');
+
+    expect(referrals.findMany).not.toHaveBeenCalled();
+    expect(record.timeline.some((e) => e.type === 'referral')).toBe(false);
+  });
+
+  it('incluye todas las derivaciones del tutorado cuando el solicitante es Administrador DBU', async () => {
+    roles.findById.mockResolvedValue({ id: 'role-admin', name: 'Administrador DBU' } as Role);
+    referrals.findMany.mockResolvedValue([
+      { id: 'referral-1', studentId: 'student-1', service: 'SALUD', status: 'CERRADO', createdAt: new Date() } as StudentReferral,
+    ]);
+
+    const record = await useCase.execute('student-1', false, 'tutor-new');
+
+    expect(referrals.findMany).toHaveBeenCalledWith({ studentId: 'student-1' });
+    expect(record.timeline.some((e) => e.type === 'referral')).toBe(true);
   });
 });

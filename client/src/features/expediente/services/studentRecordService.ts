@@ -41,11 +41,24 @@ interface FollowUpRecordEvent {
   conductedByName: string;
 }
 
+// Derivación a un servicio de la DBU (HU-35). Solo visible si el rol
+// solicitante tiene visibilidad de seguimiento (Docente Tutor emisor o
+// Administrador DBU); no incluye motivo ni aspectos observados.
+interface ReferralRecordEvent {
+  type: 'referral';
+  id: string;
+  date: string;
+  service: 'ESCUELA' | 'PSICOPEDAGOGIA' | 'PSICOLOGIA' | 'ASISTENCIA_SOCIAL' | 'SALUD';
+  status: 'ENVIADO' | 'RECIBIDO' | 'EN_ATENCION' | 'ATENDIDO' | 'CERRADO';
+  receivingInstance: string | null;
+}
+
 export type StudentRecordEvent =
   | InterviewRecordEvent
   | AssignmentRecordEvent
   | AttendanceRecordEvent
-  | FollowUpRecordEvent;
+  | FollowUpRecordEvent
+  | ReferralRecordEvent;
 
 export interface SupportContactRecord {
   fullName: string;

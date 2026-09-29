@@ -1,11 +1,13 @@
 import { StudentRepository } from '@domain/repositories/StudentRepository';
 import { SchoolRepository } from '@domain/repositories/SchoolRepository';
 import { UserRepository } from '@domain/repositories/UserRepository';
+import { RoleRepository } from '@domain/repositories/RoleRepository';
 import { TutorInterviewRepository } from '@domain/repositories/TutorInterviewRepository';
 import { TutorAssignmentHistoryRepository } from '@domain/repositories/TutorAssignmentHistoryRepository';
 import { SupportContactRepository } from '@domain/repositories/SupportContactRepository';
 import { SessionRepository } from '@domain/repositories/SessionRepository';
 import { TutorFollowUpRepository } from '@domain/repositories/TutorFollowUpRepository';
+import { StudentReferralRepository } from '@domain/repositories/StudentReferralRepository';
 import { StudentRecord, StudentRecordEvent } from '@application/dtos/studentRecord.dto';
 import { StudentNotFoundError } from '@application/use-cases/students/StudentErrors';
 
@@ -18,35 +20,40 @@ const MOTIVE_LABELS: { key: 'motiveAcademic' | 'motivePersonalEmotional' | 'moti
 /**
  * Consolida el expediente del tutorado (HU-16): entrevista(s), historial de
  * asignación de tutor, asistencia a sesiones individuales (HU-22), fichas de
- * seguimiento (HU-24) y el estado actual, en orden cronológico. Las
- * derivaciones (Sprint 3 en adelante) todavía no existen en el sistema; el
- * tipo StudentRecordEvent queda preparado para incorporarlas sin rediseñar
- * la línea de tiempo.
+ * seguimiento (HU-24), derivaciones (HU-35) y el estado actual, en orden
+ * cronológico.
  */
 export class GetStudentRecordUseCase {
   constructor(
     private readonly students: StudentRepository,
     private readonly schools: SchoolRepository,
     private readonly users: UserRepository,
+    private readonly roles: RoleRepository,
     private readonly interviews: TutorInterviewRepository,
     private readonly assignmentHistory: TutorAssignmentHistoryRepository,
     private readonly supportContacts: SupportContactRepository,
     private readonly sessions: SessionRepository,
     private readonly followUps: TutorFollowUpRepository,
+    private readonly referrals: StudentReferralRepository,
   ) {}
 
-  async execute(studentId: string, includeSupportContact: boolean): Promise<StudentRecord> {
+  async execute(
+    studentId: string,
+    includeSupportContact: boolean,
+    requesterId: string,
+  ): Promise<StudentRecord> {
     const student = await this.students.findById(studentId);
     if (!student) {
       throw new StudentNotFoundError(studentId);
     }
 
     const school = await this.schools.findById(student.schoolId);
-    const [interviews, history, sessions, followUps] = await Promise.all([
+    const [interviews, history, sessions, followUps, referrals] = await Promise.all([
       this.interviews.findByStudent(studentId),
       this.assignmentHistory.findByStudent(studentId),
       this.sessions.findByStudent(studentId),
       this.followUps.findByStudent(studentId),
+      this.visibleReferrals(studentId, requesterId),
     ]);
     const attendedSessions = sessions.filter((s) => s.attendance);
 
@@ -112,11 +119,21 @@ export class GetStudentRecordUseCase {
       conductedByName: userName(f.conductedById) ?? 'Desconocido',
     }));
 
+    const referralEvents: StudentRecordEvent[] = referrals.map((r) => ({
+      type: 'referral',
+      id: r.id,
+      date: r.createdAt,
+      service: r.service,
+      status: r.status,
+      receivingInstance: r.receivingInstance,
+    }));
+
     const timeline = [
       ...interviewEvents,
       ...assignmentEvents,
       ...attendanceEvents,
       ...followUpEvents,
+      ...referralEvents,
     ].sort((a, b) => b.date.getTime() - a.date.getTime());
 
     const record: StudentRecord = {
@@ -140,5 +157,27 @@ export class GetStudentRecordUseCase {
     }
 
     return record;
+  }
+
+  // Reutiliza la misma visibilidad restringida de HU-30: la DBU ve todo, el
+  // tutor solo lo que él mismo derivó, y el resto de roles (p. ej.
+  // Coordinador) no ve derivaciones en el expediente.
+  private async visibleReferrals(studentId: string, requesterId: string) {
+    const requester = await this.users.findById(requesterId);
+    if (!requester) return [];
+
+    const role = await this.roles.findById(requester.roleId);
+    if (!role) return [];
+
+    if (role.name === 'Administrador DBU') {
+      return this.referrals.findMany({ studentId });
+    }
+
+    if (role.name === 'Docente Tutor') {
+      const referrals = await this.referrals.findMany({ studentId, referredById: requesterId });
+      return referrals;
+    }
+
+    return [];
   }
 }

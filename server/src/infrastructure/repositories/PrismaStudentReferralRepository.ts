@@ -50,11 +50,12 @@ export class PrismaStudentReferralRepository implements StudentReferralRepositor
     return row ? toReferral(row) : null;
   }
 
-  async findMany(filters: { referredById?: string; service?: string }): Promise<StudentReferral[]> {
+  async findMany(filters: { referredById?: string; service?: string; studentId?: string }): Promise<StudentReferral[]> {
     const rows = await this.prisma.studentReferral.findMany({
       where: {
         ...(filters.referredById ? { referredById: filters.referredById } : {}),
         ...(filters.service ? { service: filters.service } : {}),
+        ...(filters.studentId ? { studentId: filters.studentId } : {}),
       },
       include: { statusHistory: { orderBy: { createdAt: 'desc' } } },
       orderBy: { createdAt: 'desc' },
