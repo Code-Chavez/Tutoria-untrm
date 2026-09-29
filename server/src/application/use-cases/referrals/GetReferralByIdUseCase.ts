@@ -2,7 +2,7 @@ import { StudentReferral } from '@domain/entities/StudentReferral';
 import { StudentReferralRepository } from '@domain/repositories/StudentReferralRepository';
 import { UserRepository } from '@domain/repositories/UserRepository';
 import { RoleRepository } from '@domain/repositories/RoleRepository';
-import { ReferralNotFoundError } from './ReferralErrors';
+import { ReferralNotFoundError, ReferralForbiddenError } from './ReferralErrors';
 
 export class GetReferralByIdUseCase {
   constructor(
@@ -30,18 +30,18 @@ export class GetReferralByIdUseCase {
 
     if (role.name === 'Docente Tutor') {
       if (referral.referredById !== userId) {
-        throw new Error('No autorizado para ver esta derivación'); // o ForbiddenError
+        throw new ReferralForbiddenError();
       }
       return referral;
     }
 
     if (role.name === 'Profesional de Servicio') {
       if (referral.service !== user.service) {
-        throw new Error('No autorizado para ver esta derivación');
+        throw new ReferralForbiddenError();
       }
       return referral;
     }
 
-    throw new Error('No autorizado para ver esta derivación');
+    throw new ReferralForbiddenError();
   }
 }
