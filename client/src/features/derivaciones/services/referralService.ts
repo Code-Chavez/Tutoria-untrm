@@ -145,6 +145,32 @@ function saveBlob(data: Blob, filename: string): void {
   window.URL.revokeObjectURL(url);
 }
 
+// Tablero de seguimiento de la DBU (HU-34, Art. 22.b).
+export interface ReferralTrackingItem {
+  id: string;
+  studentId: string;
+  service: ReferralService;
+  status: ReferralStatus;
+  createdAt: string;
+  lastUpdatedAt: string;
+  hoursSinceUpdate: number;
+  isOverdue: boolean;
+}
+
+export interface ReferralTrackingServiceSummary {
+  service: ReferralService;
+  total: number;
+  overdue: number;
+  byStatus: Record<ReferralStatus, number>;
+}
+
+export interface ReferralTrackingReport {
+  deadlineHours: number;
+  generatedAt: string;
+  items: ReferralTrackingItem[];
+  summary: ReferralTrackingServiceSummary[];
+}
+
 export const referralService = {
   createReferral: async (studentId: string, data: CreateReferralData): Promise<StudentReferral> => {
     const response = await apiClient.post<{ message: string; referral: StudentReferral }>(
@@ -181,5 +207,10 @@ export const referralService = {
       { status, notes },
     );
     return response.data.referral;
+  },
+
+  getTracking: async (): Promise<ReferralTrackingReport> => {
+    const response = await apiClient.get<ReferralTrackingReport>('/referrals/tracking');
+    return response.data;
   },
 };

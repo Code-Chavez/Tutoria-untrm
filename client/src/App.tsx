@@ -21,6 +21,7 @@ import { MyTutoringRequestPage } from '@features/solicitudes/pages/MyTutoringReq
 import { SessionsCalendarPage } from '@features/sesiones/pages/SessionsCalendarPage';
 import { ScheduleAttendanceReportPage } from '@features/informes/pages/ScheduleAttendanceReportPage';
 import { ReferralsPage } from '@features/derivaciones/pages/ReferralsPage';
+import { ReferralTrackingPage } from '@features/derivaciones/pages/ReferralTrackingPage';
 
 export default function App() {
   return (
@@ -114,6 +115,14 @@ export default function App() {
                 element={
                   <RequireRole roles={['Docente Tutor', 'Profesional de Servicio', 'Administrador DBU', 'Coordinador']}>
                     <ReferralsPage />
+                  </RequireRole>
+                }
+              />
+              <Route
+                path="derivaciones/seguimiento"
+                element={
+                  <RequireRole roles={['Administrador DBU']}>
+                    <ReferralTrackingPage />
                   </RequireRole>
                 }
               />

@@ -282,6 +282,7 @@ async function main() {
     { key: 'inactivity_timeout_minutes', value: '30', label: 'Tiempo de inactividad (minutos)' },
     { key: 'login_max_attempts', value: '3', label: 'Intentos de login antes de bloqueo' },
     { key: 'login_lockout_minutes', value: '15', label: 'Duración del bloqueo (minutos)' },
+    { key: 'referral_followup_deadline_hours', value: '48', label: 'Plazo de atención de derivaciones (horas, Art. 22.b)' },
   ];
 
   for (const p of params) {

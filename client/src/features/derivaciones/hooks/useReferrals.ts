@@ -28,3 +28,20 @@ export function useUpdateReferralInCache() {
     );
   };
 }
+
+export const REFERRAL_TRACKING_QUERY_KEY = ['referrals', 'tracking'] as const;
+
+/** Tablero de seguimiento de casos derivados para la DBU (HU-34, Art. 22.b). */
+export function useReferralTracking() {
+  const query = useQuery({
+    queryKey: REFERRAL_TRACKING_QUERY_KEY,
+    queryFn: () => referralService.getTracking(),
+  });
+
+  return {
+    report: query.data,
+    loading: query.isLoading,
+    error: query.isError,
+    refresh: query.refetch,
+  };
+}

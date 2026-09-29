@@ -111,6 +111,7 @@ import { GetReferralConstanciaUseCase } from '@application/use-cases/referrals/G
 import { GetReferralsUseCase } from '@application/use-cases/referrals/GetReferralsUseCase';
 import { GetReferralByIdUseCase } from '@application/use-cases/referrals/GetReferralByIdUseCase';
 import { UpdateReferralStatusUseCase } from '@application/use-cases/referrals/UpdateReferralStatusUseCase';
+import { GetReferralTrackingUseCase } from '@application/use-cases/referrals/GetReferralTrackingUseCase';
 import { GetNotificationsUseCase } from '@application/use-cases/notifications/GetNotificationsUseCase';
 import { MarkNotificationReadUseCase } from '@application/use-cases/notifications/MarkNotificationReadUseCase';
 
@@ -254,6 +255,12 @@ const updateReferralStatusUseCase = new UpdateReferralStatusUseCase(
   studentReferralRepository,
   notificationRepository,
 );
+const getReferralTrackingUseCase = new GetReferralTrackingUseCase(
+  studentReferralRepository,
+  userRepository,
+  roleRepository,
+  systemParameterRepository,
+);
 const getNotificationsUseCase = new GetNotificationsUseCase(notificationRepository);
 const markNotificationReadUseCase = new MarkNotificationReadUseCase(notificationRepository);
 
@@ -330,6 +337,7 @@ export const container = {
     getReferralsUseCase,
     getReferralByIdUseCase,
     updateReferralStatusUseCase,
+    getReferralTrackingUseCase,
     getNotificationsUseCase,
     markNotificationReadUseCase,
   },
