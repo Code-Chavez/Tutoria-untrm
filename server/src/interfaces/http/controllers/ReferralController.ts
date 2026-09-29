@@ -5,6 +5,7 @@ import { GetReferralConstanciaUseCase } from '@application/use-cases/referrals/G
 import { GetReferralsUseCase } from '@application/use-cases/referrals/GetReferralsUseCase';
 import { GetReferralByIdUseCase } from '@application/use-cases/referrals/GetReferralByIdUseCase';
 import { UpdateReferralStatusUseCase } from '@application/use-cases/referrals/UpdateReferralStatusUseCase';
+import { GetReferralTrackingUseCase } from '@application/use-cases/referrals/GetReferralTrackingUseCase';
 import { ReferralConstanciaPdf } from '@infrastructure/parsers/ReferralConstanciaPdf';
 import {
   ReferralNotFoundError,
@@ -23,6 +24,7 @@ export class ReferralController {
     private readonly getReferralsUseCase: GetReferralsUseCase,
     private readonly getReferralByIdUseCase: GetReferralByIdUseCase,
     private readonly updateReferralStatusUseCase: UpdateReferralStatusUseCase,
+    private readonly getReferralTrackingUseCase: GetReferralTrackingUseCase,
     private readonly constanciaPdf: ReferralConstanciaPdf,
   ) {}
 
@@ -114,6 +116,21 @@ export class ReferralController {
         error instanceof InvalidReferralStatusError
       ) {
         res.status(400).json({ error: error.message });
+      } else {
+        res.status(500).json({ error: 'Error interno del servidor' });
+      }
+    }
+  };
+
+  // Tablero de seguimiento de casos derivados para la DBU (HU-34, Art. 22.b)
+  getTracking = async (req: Request, res: Response) => {
+    try {
+      const userId = req.auth?.sub as string;
+      const report = await this.getReferralTrackingUseCase.execute(userId);
+      res.status(200).json(report);
+    } catch (error) {
+      if (error instanceof ReferralForbiddenError) {
+        res.status(403).json({ error: error.message });
       } else {
         res.status(500).json({ error: 'Error interno del servidor' });
       }

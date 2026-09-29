@@ -1,0 +1,121 @@
+.stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: var(--s4);
+  margin-bottom: var(--s6);
+}
+
+.summaryGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: var(--s4);
+  margin-bottom: var(--s6);
+}
+
+.serviceCard {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s2);
+}
+
+.serviceHead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--s2);
+  font-size: var(--fs-sm);
+  color: var(--g900);
+}
+
+.serviceTotal {
+  font-family: var(--ft);
+  font-size: var(--fs-h1);
+  font-weight: 700;
+  color: var(--g900);
+}
+
+.serviceStatuses {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s1);
+}
+
+.statusChip {
+  background-color: var(--g100);
+  color: var(--g700);
+  border: 1px solid var(--g300);
+  padding: 0.2rem 0.55rem;
+  border-radius: 999px;
+  font-size: var(--fs-xs);
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--fs-sm);
+}
+
+.table th,
+.table td {
+  padding: var(--s4) var(--s7);
+  text-align: left;
+  border-bottom: 1px solid var(--g100);
+}
+
+.table th {
+  font-weight: 600;
+  color: var(--g600);
+  background-color: var(--g50);
+  white-space: nowrap;
+}
+
+.table tbody tr:hover {
+  background-color: var(--g50);
+}
+
+.table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.rowOverdue {
+  background-color: var(--peligro-bg);
+}
+
+.badge {
+  display: inline-block;
+  padding: 0.25rem 0.6rem;
+  border-radius: 999px;
+  font-size: var(--fs-xs);
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.status_ENVIADO {
+  background-color: var(--g100);
+  color: var(--g700);
+  border: 1px solid var(--g300);
+}
+
+.status_RECIBIDO {
+  background-color: var(--celeste);
+  color: var(--azul-osc);
+  border: 1px solid var(--azul-claro);
+}
+
+.status_EN_ATENCION {
+  background-color: var(--info-bg);
+  color: var(--info);
+  border: 1px solid var(--info);
+}
+
+.status_ATENDIDO {
+  background-color: var(--ok-bg);
+  color: var(--ok);
+  border: 1px solid var(--ok);
+}
+
+.status_CERRADO {
+  background-color: var(--g100);
+  color: var(--g500);
+  border: 1px solid var(--g300);
+}

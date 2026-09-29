@@ -12,6 +12,7 @@ const referralController = new ReferralController(
   container.useCases.getReferralsUseCase,
   container.useCases.getReferralByIdUseCase,
   container.useCases.updateReferralStatusUseCase,
+  container.useCases.getReferralTrackingUseCase,
   new ReferralConstanciaPdf(),
 );
 
@@ -31,6 +32,15 @@ router.get(
   requireAuth,
   authorize(['referrals:read']),
   referralController.downloadConstancia,
+);
+
+// HU-34: Tablero de seguimiento de la DBU (antes de /referrals/:id para que
+// "tracking" no se interprete como un ID de derivación).
+router.get(
+  '/referrals/tracking',
+  requireAuth,
+  authorize(['referrals:read']),
+  referralController.getTracking,
 );
 
 // HU-30: Bandeja y detalle con visibilidad restringida por servicio/rol
