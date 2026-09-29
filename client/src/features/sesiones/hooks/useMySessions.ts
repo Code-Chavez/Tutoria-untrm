@@ -1,47 +1,37 @@
-import { useCallback, useEffect, useState } from 'react';
-import { TutoringSession, sessionService } from '../services/sessionService';
-import { Student, studentService } from '@features/tutorados/services/studentService';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { sessionService } from '../services/sessionService';
+import { studentService } from '@features/tutorados/services/studentService';
+import { STUDENTS_QUERY_KEY } from '@features/tutorados/hooks/useStudents';
 
-interface State {
-  sessions: TutoringSession[];
-  students: Student[];
-  loading: boolean;
-  error: boolean;
-}
+export const MY_SESSIONS_QUERY_KEY = ['mySessions'] as const;
 
 /**
  * Carga la agenda de sesiones del tutor autenticado junto con sus tutorados,
  * para poder mostrar nombres de participantes en el calendario sin más
- * llamadas por sesión.
+ * llamadas por sesión. Los tutorados comparten caché con /tutorados.
  */
 export function useMySessions() {
-  const [state, setState] = useState<State>({
-    sessions: [],
-    students: [],
-    loading: true,
-    error: false,
+  const queryClient = useQueryClient();
+
+  const sessionsQuery = useQuery({
+    queryKey: MY_SESSIONS_QUERY_KEY,
+    queryFn: () => sessionService.getMySessions(),
   });
-  const [refreshKey, setRefreshKey] = useState(0);
+  const studentsQuery = useQuery({
+    queryKey: STUDENTS_QUERY_KEY,
+    queryFn: () => studentService.getStudents(),
+  });
 
-  const refresh = useCallback(() => setRefreshKey((k) => k + 1), []);
+  const refresh = () => {
+    queryClient.invalidateQueries({ queryKey: MY_SESSIONS_QUERY_KEY });
+    queryClient.invalidateQueries({ queryKey: STUDENTS_QUERY_KEY });
+  };
 
-  useEffect(() => {
-    let ignore = false;
-
-    Promise.all([sessionService.getMySessions(), studentService.getStudents()])
-      .then(([sessions, students]) => {
-        if (ignore) return;
-        setState({ sessions, students, loading: false, error: false });
-      })
-      .catch(() => {
-        if (ignore) return;
-        setState({ sessions: [], students: [], loading: false, error: true });
-      });
-
-    return () => {
-      ignore = true;
-    };
-  }, [refreshKey]);
-
-  return { ...state, refresh };
+  return {
+    sessions: sessionsQuery.data ?? [],
+    students: studentsQuery.data ?? [],
+    loading: sessionsQuery.isLoading || studentsQuery.isLoading,
+    error: sessionsQuery.isError,
+    refresh,
+  };
 }

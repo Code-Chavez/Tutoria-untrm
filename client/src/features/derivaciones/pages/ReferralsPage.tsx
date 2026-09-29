@@ -1,50 +1,16 @@
-import React, { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { PageHeader, EmptyState, TableSkeleton, Button } from '@shared/components/ui';
 import { SendIcon, InboxIcon, SearchIcon } from '@shared/components/icons';
 import { referralService, StudentReferral, REFERRAL_SERVICE_LABEL, REFERRAL_STATUS_LABEL } from '../services/referralService';
-import { getApiErrorMessage } from '@shared/services/apiClient';
+import { useReferrals, useUpdateReferralInCache } from '../hooks/useReferrals';
 import { ReferralDetailModal } from '../components/ReferralDetailModal';
 import styles from './ReferralsPage.module.css';
 
 export function ReferralsPage() {
-  const [referrals, setReferrals] = useState<StudentReferral[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
+  const { referrals, loading, error, refresh } = useReferrals();
+  const updateReferralInCache = useUpdateReferralInCache();
   const [selectedReferral, setSelectedReferral] = useState<StudentReferral | null>(null);
   const [downloading, setDownloading] = useState<string | null>(null);
-
-  const loadReferrals = async () => {
-    try {
-      setLoading(true);
-      setError('');
-      const data = await referralService.getReferrals();
-      setReferrals(data);
-    } catch (err) {
-      setError(getApiErrorMessage(err));
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    let mounted = true;
-    const fetchReferrals = async () => {
-      try {
-        if (mounted) setLoading(true);
-        if (mounted) setError('');
-        const data = await referralService.getReferrals();
-        if (mounted) setReferrals(data);
-      } catch (err) {
-        if (mounted) setError(getApiErrorMessage(err));
-      } finally {
-        if (mounted) setLoading(false);
-      }
-    };
-    fetchReferrals();
-    return () => {
-      mounted = false;
-    };
-  }, []);
 
   const handleDownload = async (id: string) => {
     try {
@@ -82,7 +48,7 @@ export function ReferralsPage() {
             icon={<InboxIcon size={26} />}
             title="No se pudieron cargar las derivaciones"
             description="Ocurrió un error al consultar la información. Vuelve a intentarlo."
-            action={<Button variant="secondary" onClick={loadReferrals}>Reintentar</Button>}
+            action={<Button variant="secondary" onClick={() => refresh()}>Reintentar</Button>}
           />
         ) : referrals.length === 0 ? (
           <EmptyState
@@ -155,7 +121,7 @@ export function ReferralsPage() {
           referral={selectedReferral}
           onClose={closeDetails}
           onStatusUpdated={(updatedRef) => {
-            setReferrals((prev) => prev.map((r) => r.id === updatedRef.id ? updatedRef : r));
+            updateReferralInCache(updatedRef);
             setSelectedReferral(updatedRef);
           }}
         />

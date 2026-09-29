@@ -1,6 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { QueryClientTestWrapper } from '@shared/test-utils/QueryClientTestWrapper';
 import { ScheduleAttendanceReportPage } from './ScheduleAttendanceReportPage';
 import { reportService, type ScheduleAttendanceReport } from '../services/reportService';
 import { assignmentService } from '@features/asignacion/services/assignmentService';
@@ -69,7 +70,11 @@ describe('ScheduleAttendanceReportPage', () => {
 
   it('carga automáticamente el consolidado propio cuando el rol es Docente Tutor', async () => {
     mockedReports.getScheduleAttendanceReport.mockResolvedValue(sampleReport);
-    render(<ScheduleAttendanceReportPage />);
+    render(
+      <QueryClientTestWrapper>
+        <ScheduleAttendanceReportPage />
+      </QueryClientTestWrapper>,
+    );
 
     expect(await screen.findByText(/sesiones de elena ramírez/i)).toBeInTheDocument();
     expect(mockedReports.getScheduleAttendanceReport).toHaveBeenCalledWith({
@@ -87,11 +92,15 @@ describe('ScheduleAttendanceReportPage', () => {
     mockedAssignments.getTutorWorkload.mockResolvedValue([
       { tutorId: 'tutor-1', fullName: 'Elena Ramírez', email: 'e@x.com', assignedCount: 5 },
     ]);
-    render(<ScheduleAttendanceReportPage />);
+    render(
+      <QueryClientTestWrapper>
+        <ScheduleAttendanceReportPage />
+      </QueryClientTestWrapper>,
+    );
 
     expect(await screen.findByRole('heading', { name: /selecciona un tutor/i })).toBeInTheDocument();
     expect(mockedReports.getScheduleAttendanceReport).not.toHaveBeenCalled();
-    expect(screen.getByRole('option', { name: 'Elena Ramírez' })).toBeInTheDocument();
+    expect(await screen.findByRole('option', { name: 'Elena Ramírez' })).toBeInTheDocument();
   });
 
   it('genera el consolidado del tutor elegido al hacer clic (Coordinador)', async () => {
@@ -101,7 +110,11 @@ describe('ScheduleAttendanceReportPage', () => {
     ]);
     mockedReports.getScheduleAttendanceReport.mockResolvedValue(sampleReport);
     const user = userEvent.setup();
-    render(<ScheduleAttendanceReportPage />);
+    render(
+      <QueryClientTestWrapper>
+        <ScheduleAttendanceReportPage />
+      </QueryClientTestWrapper>,
+    );
 
     await screen.findByRole('option', { name: 'Elena Ramírez' });
     await user.selectOptions(screen.getByRole('combobox'), 'tutor-1');
@@ -116,7 +129,11 @@ describe('ScheduleAttendanceReportPage', () => {
   it('permite exportar a PDF y Excel cuando el rol tiene permiso', async () => {
     mockedReports.getScheduleAttendanceReport.mockResolvedValue(sampleReport);
     const user = userEvent.setup();
-    render(<ScheduleAttendanceReportPage />);
+    render(
+      <QueryClientTestWrapper>
+        <ScheduleAttendanceReportPage />
+      </QueryClientTestWrapper>,
+    );
 
     await screen.findByText(/sesiones de elena ramírez/i);
     await user.click(screen.getByRole('button', { name: /pdf/i }));
@@ -129,7 +146,11 @@ describe('ScheduleAttendanceReportPage', () => {
   it('no muestra botones de exportación para un rol sin permiso (Vicerrectorado)', async () => {
     mockRole = 'Vicerrectorado';
     mockedAssignments.getTutorWorkload.mockResolvedValue([]);
-    render(<ScheduleAttendanceReportPage />);
+    render(
+      <QueryClientTestWrapper>
+        <ScheduleAttendanceReportPage />
+      </QueryClientTestWrapper>,
+    );
 
     await screen.findByRole('heading', { name: /selecciona un tutor/i });
     expect(screen.queryByRole('button', { name: /pdf/i })).not.toBeInTheDocument();

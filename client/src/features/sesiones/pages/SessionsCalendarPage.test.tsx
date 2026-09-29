@@ -1,6 +1,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { QueryClientTestWrapper } from '@shared/test-utils/QueryClientTestWrapper';
 import { SessionsCalendarPage } from './SessionsCalendarPage';
 import { sessionService, TutoringSession } from '../services/sessionService';
 import { studentService, Student } from '@features/tutorados/services/studentService';
@@ -96,7 +97,11 @@ describe('SessionsCalendarPage', () => {
   });
 
   it('muestra ambas sesiones del mes en la vista mensual', async () => {
-    render(<SessionsCalendarPage />);
+    render(
+      <QueryClientTestWrapper>
+        <SessionsCalendarPage />
+      </QueryClientTestWrapper>,
+    );
 
     expect(await screen.findByText(/reforzamiento de cálculo/i)).toBeInTheDocument();
     expect(screen.getByText(/taller de hábitos de estudio/i)).toBeInTheDocument();
@@ -104,7 +109,11 @@ describe('SessionsCalendarPage', () => {
 
   it('abre el detalle con los participantes al hacer clic en una sesión grupal', async () => {
     const user = userEvent.setup();
-    render(<SessionsCalendarPage />);
+    render(
+      <QueryClientTestWrapper>
+        <SessionsCalendarPage />
+      </QueryClientTestWrapper>,
+    );
 
     await user.click(await screen.findByText(/taller de hábitos de estudio/i));
 
@@ -116,7 +125,11 @@ describe('SessionsCalendarPage', () => {
 
   it('en la vista semanal solo muestra las sesiones de la semana actual', async () => {
     const user = userEvent.setup();
-    render(<SessionsCalendarPage />);
+    render(
+      <QueryClientTestWrapper>
+        <SessionsCalendarPage />
+      </QueryClientTestWrapper>,
+    );
 
     await screen.findByText(/reforzamiento de cálculo/i);
     await user.click(screen.getByRole('button', { name: /semanal/i }));
