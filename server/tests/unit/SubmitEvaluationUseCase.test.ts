@@ -40,6 +40,7 @@ describe('SubmitEvaluationUseCase', () => {
     evaluations = {
       create: jest.fn().mockImplementation(async (data) => ({ id: 'eval-1', createdAt: new Date(), ...data })),
       findByStudentAndPeriod: jest.fn().mockResolvedValue(null),
+      findAnonymizedScoresByTutorAndPeriod: jest.fn().mockResolvedValue([]),
     };
     useCase = new SubmitEvaluationUseCase(students, periods, evaluations);
   });

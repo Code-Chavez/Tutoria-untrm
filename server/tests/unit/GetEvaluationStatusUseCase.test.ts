@@ -33,6 +33,7 @@ describe('GetEvaluationStatusUseCase', () => {
     evaluations = {
       create: jest.fn(),
       findByStudentAndPeriod: jest.fn().mockResolvedValue(null),
+      findAnonymizedScoresByTutorAndPeriod: jest.fn().mockResolvedValue([]),
     };
     useCase = new GetEvaluationStatusUseCase(students, periods, evaluations);
   });

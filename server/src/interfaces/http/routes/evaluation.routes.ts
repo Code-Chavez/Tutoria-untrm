@@ -8,6 +8,7 @@ const router: IRouter = Router();
 const evaluationController = new EvaluationController(
   container.useCases.submitEvaluationUseCase,
   container.useCases.getEvaluationStatusUseCase,
+  container.useCases.getEvaluationResultsUseCase,
 );
 
 const requireAuth = authenticate(container.services.tokenService);
@@ -26,6 +27,15 @@ router.post(
   requireAuth,
   authorize(['evaluation:respond']),
   evaluationController.submit,
+);
+
+// Resultados agregados y anónimos de un tutor (HU-37): solo para quien
+// administra el programa de tutoría, nunca el propio tutor evaluado.
+router.get(
+  '/evaluations/results/:tutorId',
+  requireAuth,
+  authorize(['evaluation:manage']),
+  evaluationController.getResults,
 );
 
 export default router;

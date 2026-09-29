@@ -1,6 +1,9 @@
 import { PrismaClient } from '@prisma/client';
 import { TutorEvaluation, EvaluationScaleCode } from '@domain/entities/TutorEvaluation';
-import { TutorEvaluationRepository } from '@domain/repositories/TutorEvaluationRepository';
+import {
+  TutorEvaluationRepository,
+  AnonymizedEvaluationScores,
+} from '@domain/repositories/TutorEvaluationRepository';
 
 function toEvaluation(row: unknown): TutorEvaluation {
   const r = row as {
@@ -38,5 +41,18 @@ export class PrismaTutorEvaluationRepository implements TutorEvaluationRepositor
       where: { studentId_periodId: { studentId, periodId } },
     });
     return row ? toEvaluation(row) : null;
+  }
+
+  // HU-37: el `select` pide únicamente `scores` — studentId nunca sale de
+  // esta consulta, no solo se omite después en el mapeo.
+  async findAnonymizedScoresByTutorAndPeriod(
+    tutorId: string,
+    periodId: string,
+  ): Promise<AnonymizedEvaluationScores[]> {
+    const rows = await this.prisma.tutorEvaluation.findMany({
+      where: { tutorId, periodId },
+      select: { scores: true },
+    });
+    return rows.map((r) => ({ scores: r.scores as EvaluationScaleCode[] }));
   }
 }

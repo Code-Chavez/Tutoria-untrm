@@ -18,3 +18,17 @@ export class TutorNotAssignedError extends Error {
     this.name = 'TutorNotAssignedError';
   }
 }
+
+export class EvaluationResultsForbiddenError extends Error {
+  constructor() {
+    super('No autorizado para ver los resultados de la evaluación');
+    this.name = 'EvaluationResultsForbiddenError';
+  }
+}
+
+export class TutorNotFoundError extends Error {
+  constructor() {
+    super('No se encontró el tutor indicado');
+    this.name = 'TutorNotFoundError';
+  }
+}

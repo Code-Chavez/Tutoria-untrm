@@ -2,11 +2,14 @@ import { Request, Response } from 'express';
 import { z } from 'zod';
 import { SubmitEvaluationUseCase } from '@application/use-cases/evaluation/SubmitEvaluationUseCase';
 import { GetEvaluationStatusUseCase } from '@application/use-cases/evaluation/GetEvaluationStatusUseCase';
+import { GetEvaluationResultsUseCase } from '@application/use-cases/evaluation/GetEvaluationResultsUseCase';
 import { StudentProfileNotLinkedError } from '@application/use-cases/tutoring-requests/TutoringRequestErrors';
 import {
   NoActivePeriodError,
   EvaluationAlreadySubmittedError,
   TutorNotAssignedError,
+  EvaluationResultsForbiddenError,
+  TutorNotFoundError,
 } from '@application/use-cases/evaluation/EvaluationErrors';
 import { submitEvaluationSchema } from '../validators/evaluation.validators';
 
@@ -14,6 +17,7 @@ export class EvaluationController {
   constructor(
     private readonly submitEvaluationUseCase: SubmitEvaluationUseCase,
     private readonly getEvaluationStatusUseCase: GetEvaluationStatusUseCase,
+    private readonly getEvaluationResultsUseCase: GetEvaluationResultsUseCase,
   ) {}
 
   // Cuestionario de evaluación de la función tutorial (HU-36, Anexo N°7).
@@ -44,6 +48,26 @@ export class EvaluationController {
     } catch (error) {
       if (error instanceof StudentProfileNotLinkedError) {
         res.status(400).json({ error: error.message });
+      } else {
+        res.status(500).json({ error: 'Error interno del servidor' });
+      }
+    }
+  };
+
+  // Resultados agregados y anónimos de un tutor (HU-37).
+  getResults = async (req: Request, res: Response) => {
+    try {
+      const requesterId = req.auth?.sub as string;
+      const tutorId = req.params.tutorId as string;
+      const results = await this.getEvaluationResultsUseCase.execute(requesterId, tutorId);
+      res.status(200).json(results);
+    } catch (error) {
+      if (error instanceof EvaluationResultsForbiddenError) {
+        res.status(403).json({ error: error.message });
+      } else if (error instanceof TutorNotFoundError) {
+        res.status(404).json({ error: error.message });
+      } else if (error instanceof NoActivePeriodError) {
+        res.status(409).json({ error: error.message });
       } else {
         res.status(500).json({ error: 'Error interno del servidor' });
       }
