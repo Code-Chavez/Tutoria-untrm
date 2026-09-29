@@ -13,6 +13,7 @@ export interface LoginOutput {
     firstName: string;
     lastName: string;
     role: string;
+    service?: string | null;
   };
 }
 

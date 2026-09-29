@@ -2,6 +2,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '@features/auth/hooks/useAuth';
 import { MenuIcon, ChevronRightIcon, LogOutIcon } from '@shared/components/icons';
 import { NotificationBell } from '@features/notificaciones/components/NotificationBell';
+import { getRoleLabel } from '@shared/utils/roleLabel';
 import styles from './TopBar.module.css';
 
 interface TopBarProps {
@@ -52,7 +53,7 @@ export function TopBar({ title, group, onMenu }: TopBarProps) {
               <b>
                 {user.firstName} {user.lastName}
               </b>
-              <small>{user.role}</small>
+              <small>{getRoleLabel(user.role, user.service)}</small>
             </div>
           </Link>
         )}

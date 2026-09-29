@@ -20,6 +20,7 @@ import {
   SettingsIcon,
   CloseIcon,
 } from '@shared/components/icons';
+import { getRoleLabel } from '@shared/utils/roleLabel';
 import styles from './Sidebar.module.css';
 
 type RoleCode = 'tutor' | 'coord' | 'dbu' | 'serv' | 'est' | 'vice';
@@ -160,7 +161,7 @@ export function Sidebar({ drawerOpen, onClose }: SidebarProps) {
               <b>
                 {user.firstName} {user.lastName}
               </b>
-              <small>{user.role}</small>
+              <small>{getRoleLabel(user.role, user.service)}</small>
             </div>
           </div>
         )}

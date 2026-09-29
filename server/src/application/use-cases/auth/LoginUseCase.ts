@@ -113,6 +113,7 @@ export class LoginUseCase {
         firstName: user.firstName,
         lastName: user.lastName,
         role: roleName,
+        service: user.service,
       },
     };
   }
