@@ -1,8 +1,8 @@
 import { SupportContact } from '@domain/entities/SupportContact';
+import { ReferralService, ReferralStatus } from '@domain/entities/StudentReferral';
 
-// Un evento del expediente (HU-16). Se diseña como unión discriminada para
-// poder añadir 'referral' en próximos sprints sin rehacer la línea de tiempo.
-export type StudentRecordEventType = 'interview' | 'assignment' | 'attendance' | 'followUp';
+// Un evento del expediente (HU-16).
+export type StudentRecordEventType = 'interview' | 'assignment' | 'attendance' | 'followUp' | 'referral';
 
 export interface InterviewRecordEvent {
   type: 'interview';
@@ -47,11 +47,24 @@ export interface FollowUpRecordEvent {
   conductedByName: string;
 }
 
+// Derivación a un servicio de la DBU (HU-28/HU-35). No incluye motivo ni
+// aspectos observados: en el expediente se muestra solo el resumen que ya es
+// visible en la bandeja de derivaciones (HU-30), no el detalle confidencial.
+export interface ReferralRecordEvent {
+  type: 'referral';
+  id: string;
+  date: Date;
+  service: ReferralService;
+  status: ReferralStatus;
+  receivingInstance: string | null;
+}
+
 export type StudentRecordEvent =
   | InterviewRecordEvent
   | AssignmentRecordEvent
   | AttendanceRecordEvent
-  | FollowUpRecordEvent;
+  | FollowUpRecordEvent
+  | ReferralRecordEvent;
 
 export interface StudentRecord {
   student: {

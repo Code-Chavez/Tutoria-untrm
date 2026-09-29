@@ -59,6 +59,11 @@
   color: var(--azul-med);
 }
 
+.icon.referral {
+  background: var(--peligro-bg);
+  color: var(--peligro);
+}
+
 .card {
   flex: 1;
   min-width: 0;

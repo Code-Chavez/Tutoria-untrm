@@ -6,7 +6,12 @@ import {
   FolderIcon,
   CheckCircleIcon,
   ActivityIcon,
+  SendIcon,
 } from '@shared/components/icons';
+import {
+  REFERRAL_SERVICE_LABEL,
+  REFERRAL_STATUS_LABEL,
+} from '@features/derivaciones/services/referralService';
 import { StudentRecordEvent } from '../services/studentRecordService';
 import styles from './Timeline.module.css';
 
@@ -27,6 +32,7 @@ const EVENT_TITLES: Record<StudentRecordEvent['type'], string> = {
   assignment: 'Asignación de tutor',
   attendance: 'Asistencia a sesión',
   followUp: 'Ficha de seguimiento',
+  referral: 'Derivación a servicio',
 };
 
 function EventIcon({ type }: { type: StudentRecordEvent['type'] }) {
@@ -37,6 +43,8 @@ function EventIcon({ type }: { type: StudentRecordEvent['type'] }) {
       return <SwitchIcon size={16} />;
     case 'followUp':
       return <ActivityIcon size={16} />;
+    case 'referral':
+      return <SendIcon size={16} />;
     default:
       return <CheckCircleIcon size={16} />;
   }
@@ -48,7 +56,7 @@ export const Timeline: React.FC<TimelineProps> = ({ events }) => {
       <EmptyState
         icon={<FolderIcon size={26} />}
         title="Sin registros en el expediente"
-        description="Aquí aparecerán la entrevista inicial, la asignación de tutor y, en próximas iteraciones, sesiones, seguimientos y derivaciones."
+        description="Aquí aparecerán la entrevista inicial, la asignación de tutor, la asistencia a sesiones, los seguimientos y las derivaciones."
       />
     );
   }
@@ -126,6 +134,18 @@ export const Timeline: React.FC<TimelineProps> = ({ events }) => {
                   </p>
                 )}
                 <span className={styles.meta}>Registrada por {event.conductedByName}</span>
+              </div>
+            )}
+
+            {event.type === 'referral' && (
+              <div className={styles.cardBody}>
+                <div className={styles.motives}>
+                  <Badge tone="info">{REFERRAL_SERVICE_LABEL[event.service]}</Badge>
+                  <Badge tone="neutral">{REFERRAL_STATUS_LABEL[event.status]}</Badge>
+                </div>
+                {event.receivingInstance && (
+                  <span className={styles.meta}>Recibe: {event.receivingInstance}</span>
+                )}
               </div>
             )}
           </div>

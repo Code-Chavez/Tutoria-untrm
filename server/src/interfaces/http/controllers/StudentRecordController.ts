@@ -8,8 +8,9 @@ export class StudentRecordController {
   get = async (req: Request, res: Response) => {
     try {
       const studentId = req.params.id as string;
+      const requesterId = req.auth?.sub as string;
       const includeSupportContact = Boolean(req.permissions?.includes('support-contacts:read'));
-      const record = await this.getStudentRecordUseCase.execute(studentId, includeSupportContact);
+      const record = await this.getStudentRecordUseCase.execute(studentId, includeSupportContact, requesterId);
       res.status(200).json({ record });
     } catch (error) {
       if (error instanceof StudentNotFoundError) {
