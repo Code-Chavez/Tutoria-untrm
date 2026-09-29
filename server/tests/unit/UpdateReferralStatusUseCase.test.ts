@@ -1,5 +1,6 @@
 import { UpdateReferralStatusUseCase } from '@application/use-cases/referrals/UpdateReferralStatusUseCase';
 import { StudentReferralRepository } from '@domain/repositories/StudentReferralRepository';
+import { NotificationRepository } from '@domain/repositories/NotificationRepository';
 import { StudentReferral } from '@domain/entities/StudentReferral';
 import {
   ReferralNotFoundError,
@@ -9,6 +10,7 @@ import {
 
 describe('UpdateReferralStatusUseCase (HU-32)', () => {
   let repository: jest.Mocked<StudentReferralRepository>;
+  let notifications: jest.Mocked<NotificationRepository>;
   let useCase: UpdateReferralStatusUseCase;
 
   const mockReferral: StudentReferral = {
@@ -30,7 +32,12 @@ describe('UpdateReferralStatusUseCase (HU-32)', () => {
       findMany: jest.fn(),
       updateStatus: jest.fn(),
     };
-    useCase = new UpdateReferralStatusUseCase(repository);
+    notifications = {
+      create: jest.fn(),
+      findByUser: jest.fn(),
+      markRead: jest.fn(),
+    };
+    useCase = new UpdateReferralStatusUseCase(repository, notifications);
   });
 
   it('debe actualizar el estado cuando los datos son válidos', async () => {
@@ -43,6 +50,22 @@ describe('UpdateReferralStatusUseCase (HU-32)', () => {
     expect(repository.findById).toHaveBeenCalledWith('ref-123');
     expect(repository.updateStatus).toHaveBeenCalledWith('ref-123', 'ATENDIDO', 'user-2', 'Se brindó atención integral');
     expect(result.status).toBe('ATENDIDO');
+  });
+
+  it('notifica al tutor emisor tras el cambio de estado (HU-33)', async () => {
+    repository.findById.mockResolvedValue(mockReferral);
+    const updatedReferral = { ...mockReferral, status: 'ATENDIDO' as const };
+    repository.updateStatus.mockResolvedValue(updatedReferral);
+
+    await useCase.execute('ref-123', 'ATENDIDO', 'user-2', 'Se brindó atención integral');
+
+    expect(notifications.create).toHaveBeenCalledWith(
+      expect.objectContaining({
+        userId: mockReferral.referredById,
+        type: 'REFERRAL_STATUS_CHANGED',
+        referralId: mockReferral.id,
+      }),
+    );
   });
 
   it('debe lanzar ReferralNotFoundError si la derivación no existe', async () => {

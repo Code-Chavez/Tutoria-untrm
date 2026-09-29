@@ -1,5 +1,6 @@
 import { StudentReferralRepository } from '@domain/repositories/StudentReferralRepository';
 import { StudentReferral } from '@domain/entities/StudentReferral';
+import { NotificationRepository } from '@domain/repositories/NotificationRepository';
 import {
   ReferralNotFoundError,
   ReferralClosedError,
@@ -9,8 +10,21 @@ import {
 
 const VALID_STATUSES = ['ENVIADO', 'RECIBIDO', 'EN_ATENCION', 'ATENDIDO', 'CERRADO'];
 
+const STATUS_LABEL: Record<string, string> = {
+  ENVIADO: 'Enviado',
+  RECIBIDO: 'Recibido',
+  EN_ATENCION: 'En atención',
+  ATENDIDO: 'Atendido',
+  CERRADO: 'Cerrado',
+};
+
+// HU-33: cada cambio de estado notifica al tutor que emitió la derivación
+// (sin exponer las notas de atención, que son de uso interno del servicio).
 export class UpdateReferralStatusUseCase {
-  constructor(private readonly referralRepo: StudentReferralRepository) {}
+  constructor(
+    private readonly referralRepo: StudentReferralRepository,
+    private readonly notifications: NotificationRepository,
+  ) {}
 
   async execute(
     referralId: string,
@@ -35,7 +49,16 @@ export class UpdateReferralStatusUseCase {
       throw new ClosureNotesRequiredError();
     }
 
-    return this.referralRepo.updateStatus(referralId, status, changedById, notes?.trim());
+    const updated = await this.referralRepo.updateStatus(referralId, status, changedById, notes?.trim());
+
+    await this.notifications.create({
+      userId: updated.referredById,
+      type: 'REFERRAL_STATUS_CHANGED',
+      message: `Tu derivación cambió de estado a "${STATUS_LABEL[status] ?? status}"`,
+      referralId: updated.id,
+    });
+
+    return updated;
   }
 }
 
