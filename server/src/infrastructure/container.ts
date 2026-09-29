@@ -118,6 +118,7 @@ import { UpdateReferralStatusUseCase } from '@application/use-cases/referrals/Up
 import { GetReferralTrackingUseCase } from '@application/use-cases/referrals/GetReferralTrackingUseCase';
 import { SubmitEvaluationUseCase } from '@application/use-cases/evaluation/SubmitEvaluationUseCase';
 import { GetEvaluationStatusUseCase } from '@application/use-cases/evaluation/GetEvaluationStatusUseCase';
+import { GetEvaluationResultsUseCase } from '@application/use-cases/evaluation/GetEvaluationResultsUseCase';
 import { GetNotificationsUseCase } from '@application/use-cases/notifications/GetNotificationsUseCase';
 import { MarkNotificationReadUseCase } from '@application/use-cases/notifications/MarkNotificationReadUseCase';
 
@@ -279,6 +280,12 @@ const getEvaluationStatusUseCase = new GetEvaluationStatusUseCase(
   academicPeriodRepository,
   tutorEvaluationRepository,
 );
+const getEvaluationResultsUseCase = new GetEvaluationResultsUseCase(
+  userRepository,
+  roleRepository,
+  academicPeriodRepository,
+  tutorEvaluationRepository,
+);
 const getNotificationsUseCase = new GetNotificationsUseCase(notificationRepository);
 const markNotificationReadUseCase = new MarkNotificationReadUseCase(notificationRepository);
 
@@ -362,5 +369,6 @@ export const container = {
     markNotificationReadUseCase,
     submitEvaluationUseCase,
     getEvaluationStatusUseCase,
+    getEvaluationResultsUseCase,
   },
 } as const;
