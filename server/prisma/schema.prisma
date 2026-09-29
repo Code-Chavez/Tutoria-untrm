@@ -50,6 +50,7 @@ model User {
   referralsCreated       StudentReferral[]      @relation("ReferralsCreated")
   referralStatusChanges  ReferralStatusHistory[] @relation("ReferralStatusChanges")
   notifications          Notification[]
+  evaluationsReceived    TutorEvaluation[] @relation("TutorEvaluationsReceived")
 
   @@map("users")
 }
@@ -172,6 +173,8 @@ model AcademicPeriod {
   isActive  Boolean  @default(true) @map("is_active")
   createdAt DateTime @default(now()) @map("created_at")
 
+  evaluations TutorEvaluation[]
+
   @@map("academic_periods")
 }
 
@@ -211,6 +214,7 @@ model Student {
   tutoringRequests  TutoringRequest[]
   sessionParticipations SessionParticipant[]
   referrals             StudentReferral[]
+  evaluationsGiven      TutorEvaluation[]
 
   @@index([tutorId])
   @@map("students")
@@ -552,6 +556,32 @@ model Notification {
 
   @@index([userId, read])
   @@map("notifications")
+}
+
+// Cuestionario de evaluación de la función tutorial (HU-36, Anexo N°7): el
+// tutorado responde los 20 ítems (escala N/CN/AV/CS/S) sobre su tutor, una
+// sola vez por periodo académico.
+model TutorEvaluation {
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now()) @map("created_at")
+
+  studentId String  @map("student_id")
+  student   Student @relation(fields: [studentId], references: [id])
+
+  tutorId String @map("tutor_id")
+  tutor   User   @relation("TutorEvaluationsReceived", fields: [tutorId], references: [id])
+
+  periodId String         @map("period_id")
+  period   AcademicPeriod @relation(fields: [periodId], references: [id])
+
+  // 20 respuestas en el mismo orden del Anexo N°7 ('N' | 'CN' | 'AV' | 'CS' | 'S').
+  scores String[]
+
+  likes    String? // "Me gustaría"
+  dislikes String? // "No me gusta"
+
+  @@unique([studentId, periodId])
+  @@map("tutor_evaluations")
 }
 
 // ─── Parámetros del Sistema ────────────────────────────────────

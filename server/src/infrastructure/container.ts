@@ -15,6 +15,8 @@ import { PrismaSystemParameterRepository } from './repositories/PrismaSystemPara
 import { PrismaSupportContactRepository } from './repositories/PrismaSupportContactRepository';
 import { PrismaSchoolRepository } from './repositories/PrismaSchoolRepository';
 import { PrismaNotificationRepository } from './repositories/PrismaNotificationRepository';
+import { PrismaAcademicPeriodRepository } from './repositories/PrismaAcademicPeriodRepository';
+import { PrismaTutorEvaluationRepository } from './repositories/PrismaTutorEvaluationRepository';
 import { BcryptPasswordHasher } from './services/BcryptPasswordHasher';
 import { JwtTokenService } from './services/JwtTokenService';
 import { LocalEvidenceStorage } from './services/LocalEvidenceStorage';
@@ -41,6 +43,8 @@ const systemParameterRepository = new PrismaSystemParameterRepository(prisma);
 const supportContactRepository = new PrismaSupportContactRepository(prisma);
 const schoolRepository = new PrismaSchoolRepository(prisma);
 const notificationRepository = new PrismaNotificationRepository(prisma);
+const academicPeriodRepository = new PrismaAcademicPeriodRepository(prisma);
+const tutorEvaluationRepository = new PrismaTutorEvaluationRepository(prisma);
 
 const passwordHasher = new BcryptPasswordHasher();
 const tokenService = new JwtTokenService();
@@ -112,6 +116,8 @@ import { GetReferralsUseCase } from '@application/use-cases/referrals/GetReferra
 import { GetReferralByIdUseCase } from '@application/use-cases/referrals/GetReferralByIdUseCase';
 import { UpdateReferralStatusUseCase } from '@application/use-cases/referrals/UpdateReferralStatusUseCase';
 import { GetReferralTrackingUseCase } from '@application/use-cases/referrals/GetReferralTrackingUseCase';
+import { SubmitEvaluationUseCase } from '@application/use-cases/evaluation/SubmitEvaluationUseCase';
+import { GetEvaluationStatusUseCase } from '@application/use-cases/evaluation/GetEvaluationStatusUseCase';
 import { GetNotificationsUseCase } from '@application/use-cases/notifications/GetNotificationsUseCase';
 import { MarkNotificationReadUseCase } from '@application/use-cases/notifications/MarkNotificationReadUseCase';
 
@@ -263,6 +269,16 @@ const getReferralTrackingUseCase = new GetReferralTrackingUseCase(
   roleRepository,
   systemParameterRepository,
 );
+const submitEvaluationUseCase = new SubmitEvaluationUseCase(
+  studentRepository,
+  academicPeriodRepository,
+  tutorEvaluationRepository,
+);
+const getEvaluationStatusUseCase = new GetEvaluationStatusUseCase(
+  studentRepository,
+  academicPeriodRepository,
+  tutorEvaluationRepository,
+);
 const getNotificationsUseCase = new GetNotificationsUseCase(notificationRepository);
 const markNotificationReadUseCase = new MarkNotificationReadUseCase(notificationRepository);
 
@@ -284,6 +300,8 @@ export const container = {
     sessionRepository,
     systemParameterRepository,
     studentReferralRepository,
+    academicPeriodRepository,
+    tutorEvaluationRepository,
   },
   services: {
     passwordHasher,
@@ -342,5 +360,7 @@ export const container = {
     getReferralTrackingUseCase,
     getNotificationsUseCase,
     markNotificationReadUseCase,
+    submitEvaluationUseCase,
+    getEvaluationStatusUseCase,
   },
 } as const;
