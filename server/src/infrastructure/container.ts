@@ -14,6 +14,7 @@ import { PrismaStudentReferralRepository } from './repositories/PrismaStudentRef
 import { PrismaSystemParameterRepository } from './repositories/PrismaSystemParameterRepository';
 import { PrismaSupportContactRepository } from './repositories/PrismaSupportContactRepository';
 import { PrismaSchoolRepository } from './repositories/PrismaSchoolRepository';
+import { PrismaNotificationRepository } from './repositories/PrismaNotificationRepository';
 import { BcryptPasswordHasher } from './services/BcryptPasswordHasher';
 import { JwtTokenService } from './services/JwtTokenService';
 import { LocalEvidenceStorage } from './services/LocalEvidenceStorage';
@@ -39,6 +40,7 @@ const studentReferralRepository = new PrismaStudentReferralRepository(prisma);
 const systemParameterRepository = new PrismaSystemParameterRepository(prisma);
 const supportContactRepository = new PrismaSupportContactRepository(prisma);
 const schoolRepository = new PrismaSchoolRepository(prisma);
+const notificationRepository = new PrismaNotificationRepository(prisma);
 
 const passwordHasher = new BcryptPasswordHasher();
 const tokenService = new JwtTokenService();
@@ -109,6 +111,8 @@ import { GetReferralConstanciaUseCase } from '@application/use-cases/referrals/G
 import { GetReferralsUseCase } from '@application/use-cases/referrals/GetReferralsUseCase';
 import { GetReferralByIdUseCase } from '@application/use-cases/referrals/GetReferralByIdUseCase';
 import { UpdateReferralStatusUseCase } from '@application/use-cases/referrals/UpdateReferralStatusUseCase';
+import { GetNotificationsUseCase } from '@application/use-cases/notifications/GetNotificationsUseCase';
+import { MarkNotificationReadUseCase } from '@application/use-cases/notifications/MarkNotificationReadUseCase';
 
 const createUserUseCase = new CreateUserUseCase(userRepository, passwordHasher);
 const updateUserUseCase = new UpdateUserUseCase(userRepository);
@@ -223,7 +227,13 @@ const getScheduleAttendanceReportUseCase = new GetScheduleAttendanceReportUseCas
   sessionRepository,
   studentRepository,
 );
-const createReferralUseCase = new CreateReferralUseCase(studentReferralRepository, studentRepository);
+const createReferralUseCase = new CreateReferralUseCase(
+  studentReferralRepository,
+  studentRepository,
+  userRepository,
+  roleRepository,
+  notificationRepository,
+);
 const getReferralConstanciaUseCase = new GetReferralConstanciaUseCase(
   studentReferralRepository,
   studentRepository,
@@ -242,7 +252,10 @@ const getReferralByIdUseCase = new GetReferralByIdUseCase(
 );
 const updateReferralStatusUseCase = new UpdateReferralStatusUseCase(
   studentReferralRepository,
+  notificationRepository,
 );
+const getNotificationsUseCase = new GetNotificationsUseCase(notificationRepository);
+const markNotificationReadUseCase = new MarkNotificationReadUseCase(notificationRepository);
 
 export const container = {
   repositories: {
@@ -253,6 +266,7 @@ export const container = {
     passwordResetTokenRepository,
     studentRepository,
     schoolRepository,
+    notificationRepository,
     tutorAssignmentHistoryRepository,
     tutorInterviewRepository,
     tutorFollowUpRepository,
@@ -316,5 +330,7 @@ export const container = {
     getReferralsUseCase,
     getReferralByIdUseCase,
     updateReferralStatusUseCase,
+    getNotificationsUseCase,
+    markNotificationReadUseCase,
   },
 } as const;

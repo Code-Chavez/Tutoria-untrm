@@ -16,6 +16,7 @@ import followUpRoutes from './followUp.routes';
 import alertRoutes from './alert.routes';
 import reportRoutes from './report.routes';
 import referralRoutes from './referral.routes';
+import notificationRoutes from './notification.routes';
 
 const router: IRouter = Router();
 
@@ -36,5 +37,6 @@ router.use(followUpRoutes);
 router.use(alertRoutes);
 router.use(reportRoutes);
 router.use(referralRoutes);
+router.use(notificationRoutes);
 
 export default router;

@@ -13,11 +13,12 @@ export class PrismaUserRepository implements UserRepository {
     return this.prisma.user.findUnique({ where: { email } });
   }
 
-  findAll(filters?: { isActive?: boolean; roleId?: string }): Promise<User[]> {
+  findAll(filters?: { isActive?: boolean; roleId?: string; service?: string }): Promise<User[]> {
     return this.prisma.user.findMany({
       where: {
         ...(filters?.isActive !== undefined && { isActive: filters.isActive }),
         ...(filters?.roleId && { roleId: filters.roleId }),
+        ...(filters?.service && { service: filters.service }),
       },
     });
   }
