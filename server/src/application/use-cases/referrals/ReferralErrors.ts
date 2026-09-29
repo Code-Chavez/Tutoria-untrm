@@ -19,3 +19,19 @@ export class ClosureNotesRequiredError extends Error {
   }
 }
 
+export class InvalidReferralStatusError extends Error {
+  constructor(status: string) {
+    super(`Estado '${status}' no es válido`);
+    this.name = 'InvalidReferralStatusError';
+  }
+}
+
+// Visibilidad restringida del caso (HU-30): un rol que no debe ver esta
+// derivación (tutor que no la emitió, profesional de otro servicio, etc.).
+export class ReferralForbiddenError extends Error {
+  constructor() {
+    super('No autorizado para ver esta derivación');
+    this.name = 'ReferralForbiddenError';
+  }
+}
+

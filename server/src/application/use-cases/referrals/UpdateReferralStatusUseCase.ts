@@ -4,6 +4,7 @@ import {
   ReferralNotFoundError,
   ReferralClosedError,
   ClosureNotesRequiredError,
+  InvalidReferralStatusError,
 } from './ReferralErrors';
 
 const VALID_STATUSES = ['ENVIADO', 'RECIBIDO', 'EN_ATENCION', 'ATENDIDO', 'CERRADO'];
@@ -18,7 +19,7 @@ export class UpdateReferralStatusUseCase {
     notes?: string
   ): Promise<StudentReferral> {
     if (!VALID_STATUSES.includes(status)) {
-      throw new Error(`Estado '${status}' no es válido`);
+      throw new InvalidReferralStatusError(status);
     }
 
     const referral = await this.referralRepo.findById(referralId);
