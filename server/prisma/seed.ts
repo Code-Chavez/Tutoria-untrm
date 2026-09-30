@@ -197,10 +197,18 @@ async function main() {
   });
 
   // Periodo académico
-  await prisma.academicPeriod.upsert({
+  const period2026II = await prisma.academicPeriod.upsert({
     where: { name: '2026-II' },
     update: {},
     create: { name: '2026-II', startDate: new Date('2026-08-01'), endDate: new Date('2026-12-20') },
+  });
+
+  // Evaluación de tutoría habilitada para Ingeniería de Sistemas (HU-38):
+  // las demás escuelas quedan cerradas hasta que la DBU las habilite.
+  await prisma.evaluationWindow.upsert({
+    where: { periodId_schoolId: { periodId: period2026II.id, schoolId: schoolSistemas.id } },
+    update: {},
+    create: { periodId: period2026II.id, schoolId: schoolSistemas.id, isOpen: true },
   });
 
   // ── Tutorados de prueba (mezcla de escuelas, ciclos, riesgo y asignación) ──

@@ -161,6 +161,8 @@ model School {
   coordinatorId String? @map("coordinator_id")
   coordinator   User?   @relation("SchoolCoordinator", fields: [coordinatorId], references: [id])
 
+  evaluationWindows EvaluationWindow[]
+
   @@unique([name, facultyId])
   @@map("schools")
 }
@@ -173,7 +175,8 @@ model AcademicPeriod {
   isActive  Boolean  @default(true) @map("is_active")
   createdAt DateTime @default(now()) @map("created_at")
 
-  evaluations TutorEvaluation[]
+  evaluations       TutorEvaluation[]
+  evaluationWindows EvaluationWindow[]
 
   @@map("academic_periods")
 }
@@ -582,6 +585,26 @@ model TutorEvaluation {
 
   @@unique([studentId, periodId])
   @@map("tutor_evaluations")
+}
+
+// Apertura/cierre de la evaluación por periodo y por escuela (HU-38, Art.
+// 17.d): sin una fila con isOpen=true, la evaluación permanece cerrada para
+// esa escuela en ese periodo (opt-in explícito de la DBU).
+model EvaluationWindow {
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  periodId String         @map("period_id")
+  period   AcademicPeriod @relation(fields: [periodId], references: [id])
+
+  schoolId String @map("school_id")
+  school   School @relation(fields: [schoolId], references: [id])
+
+  isOpen Boolean @default(false) @map("is_open")
+
+  @@unique([periodId, schoolId])
+  @@map("evaluation_windows")
 }
 
 // ─── Parámetros del Sistema ────────────────────────────────────

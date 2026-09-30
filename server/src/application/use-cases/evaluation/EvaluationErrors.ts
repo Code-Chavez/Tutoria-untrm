@@ -32,3 +32,24 @@ export class TutorNotFoundError extends Error {
     this.name = 'TutorNotFoundError';
   }
 }
+
+export class EvaluationNotOpenForSchoolError extends Error {
+  constructor() {
+    super('La evaluación aún no está habilitada para tu escuela en este periodo');
+    this.name = 'EvaluationNotOpenForSchoolError';
+  }
+}
+
+export class EvaluationWindowForbiddenError extends Error {
+  constructor() {
+    super('No autorizado para administrar la habilitación de la evaluación');
+    this.name = 'EvaluationWindowForbiddenError';
+  }
+}
+
+export class SchoolNotFoundError extends Error {
+  constructor() {
+    super('No se encontró la escuela indicada');
+    this.name = 'SchoolNotFoundError';
+  }
+}

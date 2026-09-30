@@ -32,3 +32,15 @@ export interface TutorEvaluationResults {
   overallAverage: number | null;
   items: EvaluationItemResult[];
 }
+
+// Configuración de apertura/cierre por escuela (HU-38, Art. 17.d).
+export interface EvaluationWindowSchoolState {
+  schoolId: string;
+  schoolName: string;
+  isOpen: boolean;
+}
+
+export interface EvaluationWindowsOverview {
+  periodName: string;
+  schools: EvaluationWindowSchoolState[];
+}

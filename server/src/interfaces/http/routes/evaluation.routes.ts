@@ -9,6 +9,8 @@ const evaluationController = new EvaluationController(
   container.useCases.submitEvaluationUseCase,
   container.useCases.getEvaluationStatusUseCase,
   container.useCases.getEvaluationResultsUseCase,
+  container.useCases.listEvaluationWindowsUseCase,
+  container.useCases.setEvaluationWindowUseCase,
 );
 
 const requireAuth = authenticate(container.services.tokenService);
@@ -36,6 +38,21 @@ router.get(
   requireAuth,
   authorize(['evaluation:manage']),
   evaluationController.getResults,
+);
+
+// Apertura/cierre de la evaluación por escuela (HU-38, Art. 17.d): exclusivo
+// del Administrador DBU.
+router.get(
+  '/evaluation-windows',
+  requireAuth,
+  authorize(['evaluation:manage']),
+  evaluationController.listWindows,
+);
+router.patch(
+  '/evaluation-windows/:schoolId',
+  requireAuth,
+  authorize(['evaluation:manage']),
+  evaluationController.setWindow,
 );
 
 export default router;
