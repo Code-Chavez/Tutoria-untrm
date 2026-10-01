@@ -52,6 +52,7 @@ describe('GetEvaluationResultsUseCase', () => {
       findAnonymizedScoresByTutorAndPeriod: jest
         .fn()
         .mockResolvedValue([{ scores: allSiempre }, { scores: allNunca }]),
+      findAnonymizedScoresByPeriod: jest.fn().mockResolvedValue([]),
     };
     useCase = new GetEvaluationResultsUseCase(users, roles, periods, evaluations);
   });

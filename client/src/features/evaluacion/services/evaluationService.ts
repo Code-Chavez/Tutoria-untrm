@@ -94,6 +94,31 @@ export interface EvaluationWindowsOverview {
   schools: EvaluationWindowSchoolState[];
 }
 
+// Estadísticas de evaluación por tutor (HU-39).
+export interface EvaluationStatisticsItemAverage {
+  code: string;
+  label: string;
+  average: number;
+}
+
+export interface EvaluationStatisticsTutorRow {
+  tutorId: string;
+  tutorName: string;
+  totalResponses: number;
+  overallAverage: number;
+  items: EvaluationStatisticsItemAverage[];
+}
+
+export interface EvaluationStatisticsReport {
+  periodName: string;
+  tutors: EvaluationStatisticsTutorRow[];
+}
+
+export interface EvaluationStatisticsFilters {
+  schoolId?: string;
+  facultyId?: string;
+}
+
 export const evaluationService = {
   getStatus: async (): Promise<EvaluationStatus> => {
     const response = await apiClient.get<EvaluationStatus>('/evaluations/status');
@@ -115,5 +140,12 @@ export const evaluationService = {
 
   submit: async (data: SubmitEvaluationData): Promise<void> => {
     await apiClient.post('/evaluations', data);
+  },
+
+  getStatistics: async (filters?: EvaluationStatisticsFilters): Promise<EvaluationStatisticsReport> => {
+    const response = await apiClient.get<EvaluationStatisticsReport>('/evaluations/statistics', {
+      params: filters,
+    });
+    return response.data;
   },
 };

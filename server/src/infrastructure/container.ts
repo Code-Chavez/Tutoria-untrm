@@ -14,6 +14,7 @@ import { PrismaStudentReferralRepository } from './repositories/PrismaStudentRef
 import { PrismaSystemParameterRepository } from './repositories/PrismaSystemParameterRepository';
 import { PrismaSupportContactRepository } from './repositories/PrismaSupportContactRepository';
 import { PrismaSchoolRepository } from './repositories/PrismaSchoolRepository';
+import { PrismaFacultyRepository } from './repositories/PrismaFacultyRepository';
 import { PrismaNotificationRepository } from './repositories/PrismaNotificationRepository';
 import { PrismaAcademicPeriodRepository } from './repositories/PrismaAcademicPeriodRepository';
 import { PrismaTutorEvaluationRepository } from './repositories/PrismaTutorEvaluationRepository';
@@ -43,6 +44,7 @@ const studentReferralRepository = new PrismaStudentReferralRepository(prisma);
 const systemParameterRepository = new PrismaSystemParameterRepository(prisma);
 const supportContactRepository = new PrismaSupportContactRepository(prisma);
 const schoolRepository = new PrismaSchoolRepository(prisma);
+const facultyRepository = new PrismaFacultyRepository(prisma);
 const notificationRepository = new PrismaNotificationRepository(prisma);
 const academicPeriodRepository = new PrismaAcademicPeriodRepository(prisma);
 const tutorEvaluationRepository = new PrismaTutorEvaluationRepository(prisma);
@@ -110,6 +112,7 @@ import { UploadSessionEvidenceUseCase } from '@application/use-cases/sessions/Up
 import { ListSessionEvidenceUseCase } from '@application/use-cases/sessions/ListSessionEvidenceUseCase';
 import { GetSessionEvidenceFileUseCase } from '@application/use-cases/sessions/GetSessionEvidenceFileUseCase';
 import { ListSchoolsUseCase } from '@application/use-cases/schools/ListSchoolsUseCase';
+import { ListFacultiesUseCase } from '@application/use-cases/faculties/ListFacultiesUseCase';
 import { GetRiskAlertsUseCase } from '@application/use-cases/alerts/GetRiskAlertsUseCase';
 import { GetScheduleAttendanceReportUseCase } from '@application/use-cases/reports/GetScheduleAttendanceReportUseCase';
 import { CreateReferralUseCase } from '@application/use-cases/referrals/CreateReferralUseCase';
@@ -121,6 +124,7 @@ import { GetReferralTrackingUseCase } from '@application/use-cases/referrals/Get
 import { SubmitEvaluationUseCase } from '@application/use-cases/evaluation/SubmitEvaluationUseCase';
 import { GetEvaluationStatusUseCase } from '@application/use-cases/evaluation/GetEvaluationStatusUseCase';
 import { GetEvaluationResultsUseCase } from '@application/use-cases/evaluation/GetEvaluationResultsUseCase';
+import { GetEvaluationStatisticsUseCase } from '@application/use-cases/evaluation/GetEvaluationStatisticsUseCase';
 import { ListEvaluationWindowsUseCase } from '@application/use-cases/evaluation/ListEvaluationWindowsUseCase';
 import { SetEvaluationWindowUseCase } from '@application/use-cases/evaluation/SetEvaluationWindowUseCase';
 import { GetNotificationsUseCase } from '@application/use-cases/notifications/GetNotificationsUseCase';
@@ -229,6 +233,7 @@ const getSessionEvidenceFileUseCase = new GetSessionEvidenceFileUseCase(
   evidenceStorage,
 );
 const listSchoolsUseCase = new ListSchoolsUseCase(schoolRepository);
+const listFacultiesUseCase = new ListFacultiesUseCase(facultyRepository);
 const getRiskAlertsUseCase = new GetRiskAlertsUseCase(
   studentRepository,
   sessionRepository,
@@ -292,6 +297,12 @@ const getEvaluationResultsUseCase = new GetEvaluationResultsUseCase(
   academicPeriodRepository,
   tutorEvaluationRepository,
 );
+const getEvaluationStatisticsUseCase = new GetEvaluationStatisticsUseCase(
+  userRepository,
+  roleRepository,
+  academicPeriodRepository,
+  tutorEvaluationRepository,
+);
 const listEvaluationWindowsUseCase = new ListEvaluationWindowsUseCase(
   userRepository,
   roleRepository,
@@ -318,6 +329,7 @@ export const container = {
     passwordResetTokenRepository,
     studentRepository,
     schoolRepository,
+    facultyRepository,
     notificationRepository,
     tutorAssignmentHistoryRepository,
     tutorInterviewRepository,
@@ -378,6 +390,7 @@ export const container = {
     listSessionEvidenceUseCase,
     getSessionEvidenceFileUseCase,
     listSchoolsUseCase,
+    listFacultiesUseCase,
     getRiskAlertsUseCase,
     getScheduleAttendanceReportUseCase,
     createReferralUseCase,
@@ -393,5 +406,6 @@ export const container = {
     getEvaluationResultsUseCase,
     listEvaluationWindowsUseCase,
     setEvaluationWindowUseCase,
+    getEvaluationStatisticsUseCase,
   },
 } as const;
