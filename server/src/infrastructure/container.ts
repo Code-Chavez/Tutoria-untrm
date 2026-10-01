@@ -17,6 +17,7 @@ import { PrismaSchoolRepository } from './repositories/PrismaSchoolRepository';
 import { PrismaNotificationRepository } from './repositories/PrismaNotificationRepository';
 import { PrismaAcademicPeriodRepository } from './repositories/PrismaAcademicPeriodRepository';
 import { PrismaTutorEvaluationRepository } from './repositories/PrismaTutorEvaluationRepository';
+import { PrismaEvaluationWindowRepository } from './repositories/PrismaEvaluationWindowRepository';
 import { BcryptPasswordHasher } from './services/BcryptPasswordHasher';
 import { JwtTokenService } from './services/JwtTokenService';
 import { LocalEvidenceStorage } from './services/LocalEvidenceStorage';
@@ -45,6 +46,7 @@ const schoolRepository = new PrismaSchoolRepository(prisma);
 const notificationRepository = new PrismaNotificationRepository(prisma);
 const academicPeriodRepository = new PrismaAcademicPeriodRepository(prisma);
 const tutorEvaluationRepository = new PrismaTutorEvaluationRepository(prisma);
+const evaluationWindowRepository = new PrismaEvaluationWindowRepository(prisma);
 
 const passwordHasher = new BcryptPasswordHasher();
 const tokenService = new JwtTokenService();
@@ -119,6 +121,8 @@ import { GetReferralTrackingUseCase } from '@application/use-cases/referrals/Get
 import { SubmitEvaluationUseCase } from '@application/use-cases/evaluation/SubmitEvaluationUseCase';
 import { GetEvaluationStatusUseCase } from '@application/use-cases/evaluation/GetEvaluationStatusUseCase';
 import { GetEvaluationResultsUseCase } from '@application/use-cases/evaluation/GetEvaluationResultsUseCase';
+import { ListEvaluationWindowsUseCase } from '@application/use-cases/evaluation/ListEvaluationWindowsUseCase';
+import { SetEvaluationWindowUseCase } from '@application/use-cases/evaluation/SetEvaluationWindowUseCase';
 import { GetNotificationsUseCase } from '@application/use-cases/notifications/GetNotificationsUseCase';
 import { MarkNotificationReadUseCase } from '@application/use-cases/notifications/MarkNotificationReadUseCase';
 
@@ -274,17 +278,33 @@ const submitEvaluationUseCase = new SubmitEvaluationUseCase(
   studentRepository,
   academicPeriodRepository,
   tutorEvaluationRepository,
+  evaluationWindowRepository,
 );
 const getEvaluationStatusUseCase = new GetEvaluationStatusUseCase(
   studentRepository,
   academicPeriodRepository,
   tutorEvaluationRepository,
+  evaluationWindowRepository,
 );
 const getEvaluationResultsUseCase = new GetEvaluationResultsUseCase(
   userRepository,
   roleRepository,
   academicPeriodRepository,
   tutorEvaluationRepository,
+);
+const listEvaluationWindowsUseCase = new ListEvaluationWindowsUseCase(
+  userRepository,
+  roleRepository,
+  schoolRepository,
+  academicPeriodRepository,
+  evaluationWindowRepository,
+);
+const setEvaluationWindowUseCase = new SetEvaluationWindowUseCase(
+  userRepository,
+  roleRepository,
+  schoolRepository,
+  academicPeriodRepository,
+  evaluationWindowRepository,
 );
 const getNotificationsUseCase = new GetNotificationsUseCase(notificationRepository);
 const markNotificationReadUseCase = new MarkNotificationReadUseCase(notificationRepository);
@@ -309,6 +329,7 @@ export const container = {
     studentReferralRepository,
     academicPeriodRepository,
     tutorEvaluationRepository,
+    evaluationWindowRepository,
   },
   services: {
     passwordHasher,
@@ -370,5 +391,7 @@ export const container = {
     submitEvaluationUseCase,
     getEvaluationStatusUseCase,
     getEvaluationResultsUseCase,
+    listEvaluationWindowsUseCase,
+    setEvaluationWindowUseCase,
   },
 } as const;

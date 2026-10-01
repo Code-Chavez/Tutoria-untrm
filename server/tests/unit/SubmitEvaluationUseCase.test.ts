@@ -4,12 +4,15 @@ import {
   NoActivePeriodError,
   EvaluationAlreadySubmittedError,
   TutorNotAssignedError,
+  EvaluationNotOpenForSchoolError,
 } from '@application/use-cases/evaluation/EvaluationErrors';
 import { StudentRepository } from '@domain/repositories/StudentRepository';
 import { AcademicPeriodRepository } from '@domain/repositories/AcademicPeriodRepository';
 import { TutorEvaluationRepository } from '@domain/repositories/TutorEvaluationRepository';
+import { EvaluationWindowRepository } from '@domain/repositories/EvaluationWindowRepository';
 import { Student } from '@domain/entities/Student';
 import { AcademicPeriod } from '@domain/entities/AcademicPeriod';
+import { EvaluationWindow } from '@domain/entities/EvaluationWindow';
 import { TutorEvaluation, EVALUATION_ITEMS } from '@domain/entities/TutorEvaluation';
 import { SubmitEvaluationInput } from '@application/dtos/evaluation.dto';
 
@@ -18,9 +21,16 @@ describe('SubmitEvaluationUseCase', () => {
   let students: jest.Mocked<StudentRepository>;
   let periods: jest.Mocked<AcademicPeriodRepository>;
   let evaluations: jest.Mocked<TutorEvaluationRepository>;
+  let windows: jest.Mocked<EvaluationWindowRepository>;
 
-  const linkedStudent = { id: 'student-1', userId: 'user-1', tutorId: 'tutor-1' } as Student;
+  const linkedStudent = {
+    id: 'student-1',
+    userId: 'user-1',
+    tutorId: 'tutor-1',
+    schoolId: 'school-1',
+  } as Student;
   const activePeriod = { id: 'period-1', name: '2026-II', isActive: true } as AcademicPeriod;
+  const openWindow = { id: 'win-1', periodId: 'period-1', schoolId: 'school-1', isOpen: true } as EvaluationWindow;
   const scores = Array(EVALUATION_ITEMS.length).fill('S') as SubmitEvaluationInput['scores'];
 
   beforeEach(() => {
@@ -42,7 +52,12 @@ describe('SubmitEvaluationUseCase', () => {
       findByStudentAndPeriod: jest.fn().mockResolvedValue(null),
       findAnonymizedScoresByTutorAndPeriod: jest.fn().mockResolvedValue([]),
     };
-    useCase = new SubmitEvaluationUseCase(students, periods, evaluations);
+    windows = {
+      findByPeriodAndSchool: jest.fn().mockResolvedValue(openWindow),
+      findAllByPeriod: jest.fn(),
+      upsert: jest.fn(),
+    };
+    useCase = new SubmitEvaluationUseCase(students, periods, evaluations, windows);
   });
 
   it('registra la evaluación con el tutor y periodo resueltos', async () => {
@@ -74,6 +89,18 @@ describe('SubmitEvaluationUseCase', () => {
   it('lanza NoActivePeriodError si no hay periodo habilitado', async () => {
     periods.findActive.mockResolvedValue(null);
     await expect(useCase.execute('user-1', { scores })).rejects.toThrow(NoActivePeriodError);
+    expect(evaluations.create).not.toHaveBeenCalled();
+  });
+
+  it('lanza EvaluationNotOpenForSchoolError si la DBU no abrió la evaluación para la escuela (HU-38)', async () => {
+    windows.findByPeriodAndSchool.mockResolvedValue(null);
+    await expect(useCase.execute('user-1', { scores })).rejects.toThrow(EvaluationNotOpenForSchoolError);
+    expect(evaluations.create).not.toHaveBeenCalled();
+  });
+
+  it('lanza EvaluationNotOpenForSchoolError si la ventana de la escuela está cerrada', async () => {
+    windows.findByPeriodAndSchool.mockResolvedValue({ ...openWindow, isOpen: false });
+    await expect(useCase.execute('user-1', { scores })).rejects.toThrow(EvaluationNotOpenForSchoolError);
     expect(evaluations.create).not.toHaveBeenCalled();
   });
 

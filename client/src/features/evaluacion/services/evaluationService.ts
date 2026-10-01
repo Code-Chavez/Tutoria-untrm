@@ -82,9 +82,34 @@ export interface SubmitEvaluationData {
   dislikes?: string;
 }
 
+// Configuración de apertura/cierre por escuela (HU-38, Art. 17.d).
+export interface EvaluationWindowSchoolState {
+  schoolId: string;
+  schoolName: string;
+  isOpen: boolean;
+}
+
+export interface EvaluationWindowsOverview {
+  periodName: string;
+  schools: EvaluationWindowSchoolState[];
+}
+
 export const evaluationService = {
   getStatus: async (): Promise<EvaluationStatus> => {
     const response = await apiClient.get<EvaluationStatus>('/evaluations/status');
+    return response.data;
+  },
+
+  getWindows: async (): Promise<EvaluationWindowsOverview> => {
+    const response = await apiClient.get<EvaluationWindowsOverview>('/evaluation-windows');
+    return response.data;
+  },
+
+  setWindow: async (schoolId: string, isOpen: boolean): Promise<EvaluationWindowSchoolState> => {
+    const response = await apiClient.patch<EvaluationWindowSchoolState>(
+      `/evaluation-windows/${schoolId}`,
+      { isOpen },
+    );
     return response.data;
   },
 

@@ -23,6 +23,7 @@ import { ScheduleAttendanceReportPage } from '@features/informes/pages/ScheduleA
 import { ReferralsPage } from '@features/derivaciones/pages/ReferralsPage';
 import { ReferralTrackingPage } from '@features/derivaciones/pages/ReferralTrackingPage';
 import { EvaluationPage } from '@features/evaluacion/pages/EvaluationPage';
+import { EvaluationWindowsPage } from '@features/evaluacion/pages/EvaluationWindowsPage';
 
 export default function App() {
   return (
@@ -42,6 +43,14 @@ export default function App() {
                 element={
                   <RequireRole roles={['Administrador DBU']}>
                     <UserManagementPage />
+                  </RequireRole>
+                }
+              />
+              <Route
+                path="evaluacion/configuracion"
+                element={
+                  <RequireRole roles={['Administrador DBU']}>
+                    <EvaluationWindowsPage />
                   </RequireRole>
                 }
               />
