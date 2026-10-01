@@ -1,0 +1,151 @@
+.page {
+  padding-bottom: var(--s8);
+}
+
+.filters {
+  display: flex;
+  gap: var(--s4);
+  flex-wrap: wrap;
+  margin-bottom: var(--s5);
+}
+
+.field {
+  flex: 1;
+  min-width: 220px;
+}
+
+.field label {
+  display: block;
+  font-family: var(--ft);
+  font-size: var(--fs-xs);
+  font-weight: 600;
+  color: var(--g900);
+  margin-bottom: var(--s2);
+}
+
+.head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--s4) var(--s6);
+  border-bottom: 1px solid var(--g100);
+  font-size: var(--fs-sm);
+  font-weight: 600;
+  color: var(--g700);
+}
+
+.count {
+  font-weight: 500;
+  color: var(--g500);
+}
+
+.tutorList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.tutorRow {
+  border-bottom: 1px solid var(--g100);
+}
+
+.tutorRow:last-child {
+  border-bottom: none;
+}
+
+.tutorHead {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--s4);
+  padding: var(--s4) var(--s6);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  text-align: left;
+  transition: background 0.15s;
+}
+
+.tutorHead:hover {
+  background: var(--g50);
+}
+
+.tutorInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 160px;
+}
+
+.tutorInfo b {
+  font-size: var(--fs-sm);
+  color: var(--g900);
+}
+
+.meta {
+  font-size: var(--fs-xs);
+  color: var(--g500);
+}
+
+.overallBar {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: var(--s3);
+  max-width: 320px;
+}
+
+.barTrack {
+  flex: 1;
+  height: 8px;
+  border-radius: 999px;
+  background: var(--g100);
+  overflow: hidden;
+}
+
+.barFill {
+  height: 100%;
+  border-radius: 999px;
+  background: var(--azul-med);
+}
+
+.barFillSmall {
+  height: 100%;
+  border-radius: 999px;
+  background: var(--celeste-2);
+}
+
+.barValue {
+  font-size: var(--fs-xs);
+  font-weight: 600;
+  color: var(--g700);
+  white-space: nowrap;
+}
+
+.itemsList {
+  padding: var(--s2) var(--s6) var(--s4);
+  display: flex;
+  flex-direction: column;
+  gap: var(--s2);
+  background: var(--g50);
+}
+
+.itemRow {
+  display: grid;
+  grid-template-columns: 1fr 160px 48px;
+  align-items: center;
+  gap: var(--s3);
+}
+
+.itemLabel {
+  font-size: var(--fs-xs);
+  color: var(--g700);
+}
+
+.itemValue {
+  font-size: var(--fs-xs);
+  font-weight: 600;
+  color: var(--g600);
+  text-align: right;
+}

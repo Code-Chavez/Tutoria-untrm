@@ -44,3 +44,25 @@ export interface EvaluationWindowsOverview {
   periodName: string;
   schools: EvaluationWindowSchoolState[];
 }
+
+// Estadísticas de evaluación por tutor (HU-39): promedios por ítem y por
+// tutor, filtrables por escuela/facultad. Solo incluye tutores con al menos
+// una respuesta — nunca expone al tutorado que respondió.
+export interface EvaluationStatisticsItemAverage {
+  code: string;
+  label: string;
+  average: number;
+}
+
+export interface EvaluationStatisticsTutorRow {
+  tutorId: string;
+  tutorName: string;
+  totalResponses: number;
+  overallAverage: number;
+  items: EvaluationStatisticsItemAverage[];
+}
+
+export interface EvaluationStatisticsReport {
+  periodName: string;
+  tutors: EvaluationStatisticsTutorRow[];
+}

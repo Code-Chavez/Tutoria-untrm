@@ -51,6 +51,7 @@ describe('SubmitEvaluationUseCase', () => {
       create: jest.fn().mockImplementation(async (data) => ({ id: 'eval-1', createdAt: new Date(), ...data })),
       findByStudentAndPeriod: jest.fn().mockResolvedValue(null),
       findAnonymizedScoresByTutorAndPeriod: jest.fn().mockResolvedValue([]),
+      findAnonymizedScoresByPeriod: jest.fn().mockResolvedValue([]),
     };
     windows = {
       findByPeriodAndSchool: jest.fn().mockResolvedValue(openWindow),

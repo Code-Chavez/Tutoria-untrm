@@ -14,6 +14,7 @@ const ROUTE_META: Record<string, { title: string; group: string }> = {
   '/expediente': { title: 'Expediente', group: 'Principal' },
   '/users': { title: 'Administración', group: 'Gestión' },
   '/evaluacion/configuracion': { title: 'Evaluación de tutoría', group: 'Gestión' },
+  '/evaluacion/resultados': { title: 'Resultados de evaluación', group: 'Gestión' },
   '/profile': { title: 'Mi perfil', group: 'Cuenta' },
   '/derivaciones': { title: 'Casos derivados', group: 'Principal' },
   '/evaluar-tutoria': { title: 'Evaluar tutoría', group: 'Principal' },

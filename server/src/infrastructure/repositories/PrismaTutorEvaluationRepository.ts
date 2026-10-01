@@ -3,6 +3,8 @@ import { TutorEvaluation, EvaluationScaleCode } from '@domain/entities/TutorEval
 import {
   TutorEvaluationRepository,
   AnonymizedEvaluationScores,
+  AnonymizedEvaluationScoresByTutor,
+  EvaluationStatisticsFilters,
 } from '@domain/repositories/TutorEvaluationRepository';
 
 function toEvaluation(row: unknown): TutorEvaluation {
@@ -54,5 +56,29 @@ export class PrismaTutorEvaluationRepository implements TutorEvaluationRepositor
       select: { scores: true },
     });
     return rows.map((r) => ({ scores: r.scores as EvaluationScaleCode[] }));
+  }
+
+  // HU-39: el filtro por escuela/facultad se resuelve vía el tutorado en el
+  // `where`, pero el `select` sigue sin pedir studentId — el anonimato no
+  // se pierde al agregar el filtro.
+  async findAnonymizedScoresByPeriod(
+    periodId: string,
+    filters?: EvaluationStatisticsFilters,
+  ): Promise<AnonymizedEvaluationScoresByTutor[]> {
+    const rows = await this.prisma.tutorEvaluation.findMany({
+      where: {
+        periodId,
+        ...(filters?.schoolId || filters?.facultyId
+          ? {
+              student: {
+                ...(filters.schoolId ? { schoolId: filters.schoolId } : {}),
+                ...(filters.facultyId ? { school: { facultyId: filters.facultyId } } : {}),
+              },
+            }
+          : {}),
+      },
+      select: { tutorId: true, scores: true },
+    });
+    return rows.map((r) => ({ tutorId: r.tutorId, scores: r.scores as EvaluationScaleCode[] }));
   }
 }
