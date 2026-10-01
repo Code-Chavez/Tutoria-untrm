@@ -26,6 +26,10 @@ model User {
   roleId String @map("role_id")
   role   Role   @relation(fields: [roleId], references: [id])
 
+  // Para el Profesional de Servicio (HU-30), indica a qué servicio pertenece
+  service String?
+
+
   auditLogs     AuditLog[]
   refreshTokens RefreshToken[]
   passwordResetTokens PasswordResetToken[]
@@ -43,6 +47,10 @@ model User {
   sessionsAsTutor      Session[]                @relation("SessionsAsTutor")
   sessionChangesMade   SessionChangeHistory[]   @relation("SessionChangesMade")
   sessionEvidenceUploads SessionEvidence[]      @relation("SessionEvidenceUploads")
+  referralsCreated       StudentReferral[]      @relation("ReferralsCreated")
+  referralStatusChanges  ReferralStatusHistory[] @relation("ReferralStatusChanges")
+  notifications          Notification[]
+  evaluationsReceived    TutorEvaluation[] @relation("TutorEvaluationsReceived")
 
   @@map("users")
 }
@@ -153,6 +161,8 @@ model School {
   coordinatorId String? @map("coordinator_id")
   coordinator   User?   @relation("SchoolCoordinator", fields: [coordinatorId], references: [id])
 
+  evaluationWindows EvaluationWindow[]
+
   @@unique([name, facultyId])
   @@map("schools")
 }
@@ -164,6 +174,9 @@ model AcademicPeriod {
   endDate   DateTime @map("end_date")
   isActive  Boolean  @default(true) @map("is_active")
   createdAt DateTime @default(now()) @map("created_at")
+
+  evaluations       TutorEvaluation[]
+  evaluationWindows EvaluationWindow[]
 
   @@map("academic_periods")
 }
@@ -203,6 +216,8 @@ model Student {
   supportContact    SupportContact?
   tutoringRequests  TutoringRequest[]
   sessionParticipations SessionParticipant[]
+  referrals             StudentReferral[]
+  evaluationsGiven      TutorEvaluation[]
 
   @@index([tutorId])
   @@map("students")
@@ -469,6 +484,127 @@ model SessionEvidence {
 
   @@index([sessionId])
   @@map("session_evidences")
+}
+
+// Ficha de derivación (HU-28, Anexo N°6): checklist fijo de 17 aspectos en 4
+// categorías (académicos, sociales, apariencia, salud mental), guardado como
+// arreglo de códigos en vez de 17 columnas booleanas — es un catálogo cerrado
+// que se valida en la capa de aplicación (ver REFERRAL_ASPECTS).
+model StudentReferral {
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now()) @map("created_at")
+
+  studentId String  @map("student_id")
+  student   Student @relation(fields: [studentId], references: [id])
+
+  referredById String @map("referred_by_id")
+  referredBy   User   @relation("ReferralsCreated", fields: [referredById], references: [id])
+
+  checkedAspects String[] @map("checked_aspects")
+  reason         String
+
+  // 'ESCUELA' | 'PSICOPEDAGOGIA' | 'PSICOLOGIA' | 'ASISTENCIA_SOCIAL' | 'SALUD' (Art. 21)
+  service String
+
+  // Instancia o profesional específico que recibe (HU-29)
+  receivingInstance String? @map("receiving_instance")
+
+  // 'ENVIADO' | 'RECIBIDO' | 'EN_ATENCION' | 'ATENDIDO' | 'CERRADO' (HU-31)
+  status String @default("ENVIADO")
+
+  statusHistory ReferralStatusHistory[]
+
+  @@index([studentId])
+  @@map("student_referrals")
+}
+
+// Historial de cambios de estado de una derivación (HU-31)
+model ReferralStatusHistory {
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now()) @map("created_at")
+
+  referralId String @map("referral_id")
+  referral   StudentReferral @relation(fields: [referralId], references: [id], onDelete: Cascade)
+
+  // 'ENVIADO' | 'RECIBIDO' | 'EN_ATENCION' | 'ATENDIDO' | 'CERRADO'
+  status String
+
+  notes String?
+
+  changedById String @map("changed_by_id")
+  changedBy   User   @relation("ReferralStatusChanges", fields: [changedById], references: [id])
+
+  @@index([referralId])
+  @@map("referral_status_history")
+}
+
+// Notificación de derivación (HU-33): al servicio ante un caso nuevo y al
+// tutor emisor ante cada cambio de estado. El mensaje es deliberadamente
+// genérico (sin aspectos ni notas) para no filtrar información confidencial
+// fuera del canal de visibilidad ya restringido por HU-30.
+model Notification {
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now()) @map("created_at")
+
+  userId String @map("user_id")
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // 'REFERRAL_CREATED' | 'REFERRAL_STATUS_CHANGED'
+  type    String
+  message String
+
+  referralId String? @map("referral_id")
+
+  read Boolean @default(false)
+
+  @@index([userId, read])
+  @@map("notifications")
+}
+
+// Cuestionario de evaluación de la función tutorial (HU-36, Anexo N°7): el
+// tutorado responde los 20 ítems (escala N/CN/AV/CS/S) sobre su tutor, una
+// sola vez por periodo académico.
+model TutorEvaluation {
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now()) @map("created_at")
+
+  studentId String  @map("student_id")
+  student   Student @relation(fields: [studentId], references: [id])
+
+  tutorId String @map("tutor_id")
+  tutor   User   @relation("TutorEvaluationsReceived", fields: [tutorId], references: [id])
+
+  periodId String         @map("period_id")
+  period   AcademicPeriod @relation(fields: [periodId], references: [id])
+
+  // 20 respuestas en el mismo orden del Anexo N°7 ('N' | 'CN' | 'AV' | 'CS' | 'S').
+  scores String[]
+
+  likes    String? // "Me gustaría"
+  dislikes String? // "No me gusta"
+
+  @@unique([studentId, periodId])
+  @@map("tutor_evaluations")
+}
+
+// Apertura/cierre de la evaluación por periodo y por escuela (HU-38, Art.
+// 17.d): sin una fila con isOpen=true, la evaluación permanece cerrada para
+// esa escuela en ese periodo (opt-in explícito de la DBU).
+model EvaluationWindow {
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  periodId String         @map("period_id")
+  period   AcademicPeriod @relation(fields: [periodId], references: [id])
+
+  schoolId String @map("school_id")
+  school   School @relation(fields: [schoolId], references: [id])
+
+  isOpen Boolean @default(false) @map("is_open")
+
+  @@unique([periodId, schoolId])
+  @@map("evaluation_windows")
 }
 
 // ─── Parámetros del Sistema ────────────────────────────────────

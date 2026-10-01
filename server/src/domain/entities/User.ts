@@ -7,6 +7,7 @@ export interface User {
   phone?: string | null;
   photoUrl?: string | null;
   roleId: string;
+  service?: string | null;
   isActive: boolean;
   failedLoginAttempts: number;
   lockedUntil?: Date | null;

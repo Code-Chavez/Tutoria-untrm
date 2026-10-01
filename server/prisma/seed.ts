@@ -115,7 +115,7 @@ async function main() {
   // Todos comparten DEMO_PASSWORD ('Demo2026!'); se listan al final del seed.
   const demoPasswordHash = await bcrypt.hash(DEMO_PASSWORD, 12);
 
-  const demoUsersInput: { email: string; firstName: string; lastName: string; phone: string; roleId: string }[] = [
+  const demoUsersInput: { email: string; firstName: string; lastName: string; phone: string; roleId: string; service?: string }[] = [
     // Coordinador
     { email: 'rosa.mendoza@untrm.edu.pe', firstName: 'Rosa', lastName: 'Mendoza Vargas', phone: '941000001', roleId: coordRole.id },
     { email: 'carlos.vega@untrm.edu.pe', firstName: 'Carlos', lastName: 'Vega Ramos', phone: '941000002', roleId: coordRole.id },
@@ -125,8 +125,8 @@ async function main() {
     { email: 'patricia.nunez@untrm.edu.pe', firstName: 'Patricia', lastName: 'Núñez Ortiz', phone: '941000005', roleId: tutorRole.id },
     { email: 'miguel.torres@untrm.edu.pe', firstName: 'Miguel', lastName: 'Torres Guevara', phone: '941000006', roleId: tutorRole.id },
     // Profesional de Servicio
-    { email: 'lucia.flores@untrm.edu.pe', firstName: 'Lucía', lastName: 'Flores Bardales', phone: '941000007', roleId: serviceRole.id },
-    { email: 'ronald.diaz@untrm.edu.pe', firstName: 'Ronald', lastName: 'Díaz Cabrera', phone: '941000008', roleId: serviceRole.id },
+    { email: 'lucia.flores@untrm.edu.pe', firstName: 'Lucía', lastName: 'Flores Bardales', phone: '941000007', roleId: serviceRole.id, service: 'PSICOLOGIA' },
+    { email: 'ronald.diaz@untrm.edu.pe', firstName: 'Ronald', lastName: 'Díaz Cabrera', phone: '941000008', roleId: serviceRole.id, service: 'SALUD' },
     // Vicerrectorado
     { email: 'vicerrectorado.academico@untrm.edu.pe', firstName: 'Segundo', lastName: 'Ortiz Fernández', phone: '941000009', roleId: viceRole.id },
     // Tutorado (cuentas de estudiante que inician sesión en el sistema)
@@ -146,6 +146,7 @@ async function main() {
         lastName: u.lastName,
         phone: u.phone,
         roleId: u.roleId,
+        service: (u as any).service || null,
       },
     });
     demoUsers.set(u.email, user.id);
@@ -196,10 +197,18 @@ async function main() {
   });
 
   // Periodo académico
-  await prisma.academicPeriod.upsert({
+  const period2026II = await prisma.academicPeriod.upsert({
     where: { name: '2026-II' },
     update: {},
     create: { name: '2026-II', startDate: new Date('2026-08-01'), endDate: new Date('2026-12-20') },
+  });
+
+  // Evaluación de tutoría habilitada para Ingeniería de Sistemas (HU-38):
+  // las demás escuelas quedan cerradas hasta que la DBU las habilite.
+  await prisma.evaluationWindow.upsert({
+    where: { periodId_schoolId: { periodId: period2026II.id, schoolId: schoolSistemas.id } },
+    update: {},
+    create: { periodId: period2026II.id, schoolId: schoolSistemas.id, isOpen: true },
   });
 
   // ── Tutorados de prueba (mezcla de escuelas, ciclos, riesgo y asignación) ──
@@ -281,6 +290,7 @@ async function main() {
     { key: 'inactivity_timeout_minutes', value: '30', label: 'Tiempo de inactividad (minutos)' },
     { key: 'login_max_attempts', value: '3', label: 'Intentos de login antes de bloqueo' },
     { key: 'login_lockout_minutes', value: '15', label: 'Duración del bloqueo (minutos)' },
+    { key: 'referral_followup_deadline_hours', value: '48', label: 'Plazo de atención de derivaciones (horas, Art. 22.b)' },
   ];
 
   for (const p of params) {

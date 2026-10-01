@@ -1,0 +1,154 @@
+.page {
+  padding-bottom: var(--s8);
+}
+
+.tableCard {
+  background-color: var(--blanco);
+  border: 1px solid var(--g200);
+  border-radius: var(--r-lg);
+  box-shadow: var(--sombra-xs);
+  overflow: hidden;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--fs-sm);
+}
+
+.table th,
+.table td {
+  padding: var(--s4) var(--s7);
+  text-align: left;
+  border-bottom: 1px solid var(--g100);
+}
+
+.table th {
+  font-weight: 600;
+  color: var(--g600);
+  background-color: var(--g50);
+  white-space: nowrap;
+}
+
+.table tbody tr:hover {
+  background-color: var(--g50);
+}
+
+.table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.badge {
+  display: inline-block;
+  padding: 0.25rem 0.6rem;
+  border-radius: 999px;
+  font-size: var(--fs-xs);
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.badgeBlue {
+  background-color: var(--celeste);
+  color: var(--azul);
+  border: 1px solid var(--celeste-2);
+}
+
+.actions {
+  display: flex;
+  gap: var(--s2);
+}
+
+.actionBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: var(--r);
+  border: none;
+  background: transparent;
+  color: var(--g500);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.actionBtn:hover {
+  background-color: var(--g100);
+  color: var(--g700);
+}
+
+.actionBtn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Modal styles for Referral Details */
+.detailSection {
+  margin-bottom: var(--s6);
+}
+
+.detailLabel {
+  font-size: var(--fs-xs);
+  color: var(--g500);
+  text-transform: uppercase;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  margin-bottom: var(--s1);
+  display: block;
+}
+
+.detailValue {
+  font-size: var(--fs-sm);
+  color: var(--g900);
+}
+
+.reasonBox {
+  background-color: var(--g50);
+  border: 1px solid var(--g200);
+  border-radius: var(--r);
+  padding: var(--s4);
+  margin-top: var(--s1);
+  font-size: var(--fs-sm);
+  line-height: 1.5;
+  color: var(--g700);
+}
+
+.aspectsList {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s1);
+  margin-top: var(--s1);
+}
+
+.aspectBadge {
+  background-color: var(--g100);
+  color: var(--g700);
+  border: 1px solid var(--g300);
+  padding: 0.25rem 0.6rem;
+  border-radius: 999px;
+  font-size: var(--fs-xs);
+}
+
+.status_ENVIADO {
+  background-color: var(--g100);
+  color: var(--g700);
+  border: 1px solid var(--g300);
+}
+
+.status_EN_PROGRESO {
+  background-color: var(--celeste);
+  color: var(--azul-osc);
+  border: 1px solid var(--azul-claro);
+}
+
+.status_ATENDIDO {
+  background-color: var(--ok-bg);
+  color: var(--ok);
+  border: 1px solid var(--ok);
+}
+
+.status_RECHAZADO {
+  background-color: var(--peligro-bg);
+  color: var(--peligro);
+  border: 1px solid var(--peligro);
+}

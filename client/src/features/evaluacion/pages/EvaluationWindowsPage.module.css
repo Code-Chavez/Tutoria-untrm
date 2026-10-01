@@ -1,0 +1,69 @@
+.page {
+  padding-bottom: var(--s8);
+}
+
+.head {
+  padding: var(--s4) var(--s6);
+  border-bottom: 1px solid var(--g100);
+  font-size: var(--fs-sm);
+  font-weight: 600;
+  color: var(--g700);
+}
+
+.error {
+  margin: var(--s4) var(--s6) 0;
+  font-size: var(--fs-sm);
+  color: var(--peligro);
+  background: var(--peligro-bg);
+  border-left: 3px solid var(--peligro);
+  border-radius: var(--r);
+  padding: var(--s3);
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--fs-sm);
+}
+
+.table th,
+.table td {
+  padding: var(--s4) var(--s6);
+  text-align: left;
+  border-bottom: 1px solid var(--g100);
+}
+
+.table th {
+  font-weight: 600;
+  color: var(--g600);
+  background-color: var(--g50);
+  white-space: nowrap;
+}
+
+.table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.actionCell {
+  width: 1%;
+  white-space: nowrap;
+}
+
+.badgeOpen,
+.badgeClosed {
+  display: inline-block;
+  padding: 0.25rem 0.6rem;
+  border-radius: 999px;
+  font-size: var(--fs-xs);
+  font-weight: 600;
+}
+
+.badgeOpen {
+  background: var(--ok-bg);
+  color: var(--ok);
+}
+
+.badgeClosed {
+  background: var(--g100);
+  color: var(--g600);
+}

@@ -10,9 +10,14 @@ import { PrismaTutorInterviewRepository } from './repositories/PrismaTutorInterv
 import { PrismaTutorFollowUpRepository } from './repositories/PrismaTutorFollowUpRepository';
 import { PrismaTutoringRequestRepository } from './repositories/PrismaTutoringRequestRepository';
 import { PrismaSessionRepository } from './repositories/PrismaSessionRepository';
+import { PrismaStudentReferralRepository } from './repositories/PrismaStudentReferralRepository';
 import { PrismaSystemParameterRepository } from './repositories/PrismaSystemParameterRepository';
 import { PrismaSupportContactRepository } from './repositories/PrismaSupportContactRepository';
 import { PrismaSchoolRepository } from './repositories/PrismaSchoolRepository';
+import { PrismaNotificationRepository } from './repositories/PrismaNotificationRepository';
+import { PrismaAcademicPeriodRepository } from './repositories/PrismaAcademicPeriodRepository';
+import { PrismaTutorEvaluationRepository } from './repositories/PrismaTutorEvaluationRepository';
+import { PrismaEvaluationWindowRepository } from './repositories/PrismaEvaluationWindowRepository';
 import { BcryptPasswordHasher } from './services/BcryptPasswordHasher';
 import { JwtTokenService } from './services/JwtTokenService';
 import { LocalEvidenceStorage } from './services/LocalEvidenceStorage';
@@ -34,9 +39,14 @@ const tutorInterviewRepository = new PrismaTutorInterviewRepository(prisma);
 const tutorFollowUpRepository = new PrismaTutorFollowUpRepository(prisma);
 const tutoringRequestRepository = new PrismaTutoringRequestRepository(prisma);
 const sessionRepository = new PrismaSessionRepository(prisma);
+const studentReferralRepository = new PrismaStudentReferralRepository(prisma);
 const systemParameterRepository = new PrismaSystemParameterRepository(prisma);
 const supportContactRepository = new PrismaSupportContactRepository(prisma);
 const schoolRepository = new PrismaSchoolRepository(prisma);
+const notificationRepository = new PrismaNotificationRepository(prisma);
+const academicPeriodRepository = new PrismaAcademicPeriodRepository(prisma);
+const tutorEvaluationRepository = new PrismaTutorEvaluationRepository(prisma);
+const evaluationWindowRepository = new PrismaEvaluationWindowRepository(prisma);
 
 const passwordHasher = new BcryptPasswordHasher();
 const tokenService = new JwtTokenService();
@@ -102,6 +112,19 @@ import { GetSessionEvidenceFileUseCase } from '@application/use-cases/sessions/G
 import { ListSchoolsUseCase } from '@application/use-cases/schools/ListSchoolsUseCase';
 import { GetRiskAlertsUseCase } from '@application/use-cases/alerts/GetRiskAlertsUseCase';
 import { GetScheduleAttendanceReportUseCase } from '@application/use-cases/reports/GetScheduleAttendanceReportUseCase';
+import { CreateReferralUseCase } from '@application/use-cases/referrals/CreateReferralUseCase';
+import { GetReferralConstanciaUseCase } from '@application/use-cases/referrals/GetReferralConstanciaUseCase';
+import { GetReferralsUseCase } from '@application/use-cases/referrals/GetReferralsUseCase';
+import { GetReferralByIdUseCase } from '@application/use-cases/referrals/GetReferralByIdUseCase';
+import { UpdateReferralStatusUseCase } from '@application/use-cases/referrals/UpdateReferralStatusUseCase';
+import { GetReferralTrackingUseCase } from '@application/use-cases/referrals/GetReferralTrackingUseCase';
+import { SubmitEvaluationUseCase } from '@application/use-cases/evaluation/SubmitEvaluationUseCase';
+import { GetEvaluationStatusUseCase } from '@application/use-cases/evaluation/GetEvaluationStatusUseCase';
+import { GetEvaluationResultsUseCase } from '@application/use-cases/evaluation/GetEvaluationResultsUseCase';
+import { ListEvaluationWindowsUseCase } from '@application/use-cases/evaluation/ListEvaluationWindowsUseCase';
+import { SetEvaluationWindowUseCase } from '@application/use-cases/evaluation/SetEvaluationWindowUseCase';
+import { GetNotificationsUseCase } from '@application/use-cases/notifications/GetNotificationsUseCase';
+import { MarkNotificationReadUseCase } from '@application/use-cases/notifications/MarkNotificationReadUseCase';
 
 const createUserUseCase = new CreateUserUseCase(userRepository, passwordHasher);
 const updateUserUseCase = new UpdateUserUseCase(userRepository);
@@ -164,11 +187,13 @@ const getStudentRecordUseCase = new GetStudentRecordUseCase(
   studentRepository,
   schoolRepository,
   userRepository,
+  roleRepository,
   tutorInterviewRepository,
   tutorAssignmentHistoryRepository,
   supportContactRepository,
   sessionRepository,
   tutorFollowUpRepository,
+  studentReferralRepository,
 );
 const createTutoringRequestUseCase = new CreateTutoringRequestUseCase(
   tutoringRequestRepository,
@@ -216,6 +241,73 @@ const getScheduleAttendanceReportUseCase = new GetScheduleAttendanceReportUseCas
   sessionRepository,
   studentRepository,
 );
+const createReferralUseCase = new CreateReferralUseCase(
+  studentReferralRepository,
+  studentRepository,
+  userRepository,
+  roleRepository,
+  notificationRepository,
+);
+const getReferralConstanciaUseCase = new GetReferralConstanciaUseCase(
+  studentReferralRepository,
+  studentRepository,
+  userRepository,
+  schoolRepository,
+);
+const getReferralsUseCase = new GetReferralsUseCase(
+  studentReferralRepository,
+  userRepository,
+  roleRepository,
+);
+const getReferralByIdUseCase = new GetReferralByIdUseCase(
+  studentReferralRepository,
+  userRepository,
+  roleRepository,
+);
+const updateReferralStatusUseCase = new UpdateReferralStatusUseCase(
+  studentReferralRepository,
+  notificationRepository,
+);
+const getReferralTrackingUseCase = new GetReferralTrackingUseCase(
+  studentReferralRepository,
+  userRepository,
+  roleRepository,
+  systemParameterRepository,
+);
+const submitEvaluationUseCase = new SubmitEvaluationUseCase(
+  studentRepository,
+  academicPeriodRepository,
+  tutorEvaluationRepository,
+  evaluationWindowRepository,
+);
+const getEvaluationStatusUseCase = new GetEvaluationStatusUseCase(
+  studentRepository,
+  academicPeriodRepository,
+  tutorEvaluationRepository,
+  evaluationWindowRepository,
+);
+const getEvaluationResultsUseCase = new GetEvaluationResultsUseCase(
+  userRepository,
+  roleRepository,
+  academicPeriodRepository,
+  tutorEvaluationRepository,
+);
+const listEvaluationWindowsUseCase = new ListEvaluationWindowsUseCase(
+  userRepository,
+  roleRepository,
+  schoolRepository,
+  academicPeriodRepository,
+  evaluationWindowRepository,
+);
+const setEvaluationWindowUseCase = new SetEvaluationWindowUseCase(
+  userRepository,
+  roleRepository,
+  schoolRepository,
+  academicPeriodRepository,
+  evaluationWindowRepository,
+);
+const getNotificationsUseCase = new GetNotificationsUseCase(notificationRepository);
+const markNotificationReadUseCase = new MarkNotificationReadUseCase(notificationRepository);
 
 export const container = {
   repositories: {
@@ -226,6 +318,7 @@ export const container = {
     passwordResetTokenRepository,
     studentRepository,
     schoolRepository,
+    notificationRepository,
     tutorAssignmentHistoryRepository,
     tutorInterviewRepository,
     tutorFollowUpRepository,
@@ -233,6 +326,10 @@ export const container = {
     tutoringRequestRepository,
     sessionRepository,
     systemParameterRepository,
+    studentReferralRepository,
+    academicPeriodRepository,
+    tutorEvaluationRepository,
+    evaluationWindowRepository,
   },
   services: {
     passwordHasher,
@@ -283,5 +380,18 @@ export const container = {
     listSchoolsUseCase,
     getRiskAlertsUseCase,
     getScheduleAttendanceReportUseCase,
+    createReferralUseCase,
+    getReferralConstanciaUseCase,
+    getReferralsUseCase,
+    getReferralByIdUseCase,
+    updateReferralStatusUseCase,
+    getReferralTrackingUseCase,
+    getNotificationsUseCase,
+    markNotificationReadUseCase,
+    submitEvaluationUseCase,
+    getEvaluationStatusUseCase,
+    getEvaluationResultsUseCase,
+    listEvaluationWindowsUseCase,
+    setEvaluationWindowUseCase,
   },
 } as const;

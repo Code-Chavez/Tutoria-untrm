@@ -1,4 +1,6 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { QueryClientProvider } from '@tanstack/react-query';
+import { queryClient } from '@shared/services/queryClient';
 import { AuthProvider } from '@features/auth/context/AuthProvider';
 import { LoginPage } from '@features/auth/components/LoginPage';
 import { ForgotPasswordPage } from '@features/auth/components/ForgotPasswordPage';
@@ -18,12 +20,17 @@ import { ProfilePage } from '@features/profile/pages/ProfilePage';
 import { MyTutoringRequestPage } from '@features/solicitudes/pages/MyTutoringRequestPage';
 import { SessionsCalendarPage } from '@features/sesiones/pages/SessionsCalendarPage';
 import { ScheduleAttendanceReportPage } from '@features/informes/pages/ScheduleAttendanceReportPage';
+import { ReferralsPage } from '@features/derivaciones/pages/ReferralsPage';
+import { ReferralTrackingPage } from '@features/derivaciones/pages/ReferralTrackingPage';
+import { EvaluationPage } from '@features/evaluacion/pages/EvaluationPage';
+import { EvaluationWindowsPage } from '@features/evaluacion/pages/EvaluationWindowsPage';
 
 export default function App() {
   return (
-    <AuthProvider>
-      <BrowserRouter>
-        <Routes>
+    <QueryClientProvider client={queryClient}>
+      <AuthProvider>
+        <BrowserRouter>
+          <Routes>
           <Route path="/login" element={<LoginPage />} />
           <Route path="/forgot-password" element={<ForgotPasswordPage />} />
           <Route path="/reset-password/:token" element={<ResetPasswordPage />} />
@@ -36,6 +43,14 @@ export default function App() {
                 element={
                   <RequireRole roles={['Administrador DBU']}>
                     <UserManagementPage />
+                  </RequireRole>
+                }
+              />
+              <Route
+                path="evaluacion/configuracion"
+                element={
+                  <RequireRole roles={['Administrador DBU']}>
+                    <EvaluationWindowsPage />
                   </RequireRole>
                 }
               />
@@ -96,12 +111,36 @@ export default function App() {
                 }
               />
               <Route
+                path="evaluar-tutoria"
+                element={
+                  <RequireRole roles={['Tutorado']}>
+                    <EvaluationPage />
+                  </RequireRole>
+                }
+              />
+              <Route
                 path="informes"
                 element={
                   <RequireRole
                     roles={['Docente Tutor', 'Coordinador', 'Administrador DBU', 'Vicerrectorado']}
                   >
                     <ScheduleAttendanceReportPage />
+                  </RequireRole>
+                }
+              />
+              <Route
+                path="derivaciones"
+                element={
+                  <RequireRole roles={['Docente Tutor', 'Profesional de Servicio', 'Administrador DBU', 'Coordinador']}>
+                    <ReferralsPage />
+                  </RequireRole>
+                }
+              />
+              <Route
+                path="derivaciones/seguimiento"
+                element={
+                  <RequireRole roles={['Administrador DBU']}>
+                    <ReferralTrackingPage />
                   </RequireRole>
                 }
               />
@@ -112,7 +151,8 @@ export default function App() {
 
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
-      </BrowserRouter>
-    </AuthProvider>
+        </BrowserRouter>
+      </AuthProvider>
+    </QueryClientProvider>
   );
 }

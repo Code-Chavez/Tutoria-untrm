@@ -1,0 +1,335 @@
+.overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(2px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: var(--s7);
+  animation: fadeIn 0.2s ease-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.dialog {
+  background: var(--blanco);
+  border-radius: var(--r-lg);
+  box-shadow: var(--sombra-md);
+  width: 100%;
+  max-width: 500px;
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+  animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  overflow: hidden;
+}
+
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.header {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--s4);
+  padding: var(--s7);
+  border-bottom: 1px solid var(--g100);
+}
+
+.icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  background: var(--celeste);
+  color: var(--azul-med);
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.headText {
+  flex: 1;
+}
+
+.headText h2 {
+  margin: 0;
+  font-size: var(--fs-h3);
+  font-weight: 600;
+  color: var(--g900);
+}
+
+.headText p {
+  margin: var(--s1) 0 0 0;
+  font-size: var(--fs-sm);
+  color: var(--g500);
+}
+
+.close {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border: none;
+  background: transparent;
+  color: var(--g400);
+  border-radius: var(--r);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.close:hover {
+  background: var(--g100);
+  color: var(--g700);
+}
+
+.body {
+  padding: var(--s7);
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: var(--s6);
+}
+
+.rowGroup {
+  display: flex;
+  gap: var(--s7);
+}
+
+.detailSection {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s1);
+}
+
+.detailLabel {
+  font-size: var(--fs-xs);
+  color: var(--g500);
+  text-transform: uppercase;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+}
+
+.detailValue {
+  font-size: var(--fs-sm);
+  color: var(--g900);
+}
+
+.reasonBox {
+  background-color: var(--g50);
+  border: 1px solid var(--g200);
+  border-radius: var(--r);
+  padding: var(--s4);
+  font-size: var(--fs-sm);
+  line-height: 1.5;
+  color: var(--g700);
+}
+
+.aspectsList {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s1);
+}
+
+.aspectBadge {
+  background-color: var(--g100);
+  color: var(--g700);
+  border: 1px solid var(--g300);
+  padding: 0.25rem 0.6rem;
+  border-radius: 999px;
+  font-size: var(--fs-xs);
+}
+
+.badge {
+  display: inline-block;
+  padding: 0.25rem 0.6rem;
+  border-radius: 999px;
+  font-size: var(--fs-xs);
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.badgeBlue {
+  background-color: var(--celeste);
+  color: var(--azul);
+  border: 1px solid var(--celeste-2);
+  align-self: flex-start;
+}
+
+.badgeStatus {
+  align-self: flex-start;
+}
+
+.status_ENVIADO {
+  background-color: var(--g100);
+  color: var(--g700);
+  border: 1px solid var(--g300);
+}
+
+.status_EN_PROGRESO {
+  background-color: var(--celeste);
+  color: var(--azul-osc);
+  border: 1px solid var(--azul-claro);
+}
+
+.status_ATENDIDO {
+  background-color: var(--ok-bg);
+  color: var(--ok);
+  border: 1px solid var(--ok);
+}
+
+.status_RECHAZADO {
+  background-color: var(--peligro-bg);
+  color: var(--peligro);
+  border: 1px solid var(--peligro);
+}
+
+.historyList {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s2);
+  background-color: var(--g50);
+  padding: var(--s4);
+  border-radius: var(--r);
+  border: 1px solid var(--g200);
+}
+
+.historyItem {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s1);
+  padding-bottom: var(--s2);
+  border-bottom: 1px solid var(--g200);
+}
+
+.historyItem:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.historyHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.historyStatus {
+  font-size: var(--fs-xs);
+  font-weight: 600;
+  color: var(--g700);
+}
+
+.historyDate {
+  font-size: var(--fs-xs);
+  color: var(--g500);
+}
+
+.historyNotes {
+  font-size: var(--fs-sm);
+  color: var(--g700);
+}
+
+.updateSection {
+  margin-top: var(--s4);
+  padding-top: var(--s6);
+  border-top: 1px solid var(--g200);
+}
+
+.updateTitle {
+  font-size: var(--fs-sm);
+  font-weight: 600;
+  color: var(--g700);
+  margin-bottom: var(--s4);
+}
+
+.updateForm {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s4);
+  background-color: var(--g50);
+  padding: var(--s4);
+  border-radius: var(--r);
+  border: 1px solid var(--g200);
+}
+
+.formGroup {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s1);
+}
+
+.formGroup label {
+  font-size: var(--fs-xs);
+  font-weight: 600;
+  color: var(--g700);
+}
+
+.select, .textarea {
+  width: 100%;
+  padding: var(--s2) var(--s4);
+  border: 1px solid var(--g300);
+  border-radius: var(--r);
+  font-family: inherit;
+  font-size: var(--fs-sm);
+  background-color: var(--blanco);
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.select:focus, .textarea:focus {
+  outline: none;
+  border-color: var(--azul-med);
+  box-shadow: 0 0 0 3px var(--celeste-2);
+}
+
+.textarea {
+  resize: vertical;
+  min-height: 80px;
+}
+
+.updateActions {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: var(--s1);
+}
+
+.errorMessage {
+  background-color: var(--peligro-bg);
+  color: var(--peligro);
+  padding: var(--s2);
+  border-radius: var(--r);
+  font-size: var(--fs-sm);
+  margin-bottom: var(--s4);
+  border: 1px solid var(--peligro-bg);
+}
+
+.actions {
+  padding: var(--s7);
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--s4);
+  background: var(--g50);
+  border-top: 1px solid var(--g200);
+}
+
+.closedBanner {
+  background-color: var(--alerta-bg);
+  color: var(--alerta);
+  border: 1px solid var(--alerta);
+  padding: var(--s4);
+  border-radius: var(--r);
+  font-size: var(--fs-sm);
+  line-height: 1.5;
+}
+
+.requiredMark {
+  color: var(--peligro);
+  font-weight: 600;
+}
+

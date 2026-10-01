@@ -69,36 +69,6 @@
   gap: var(--s3);
 }
 
-.bell {
-  position: relative;
-  display: grid;
-  place-items: center;
-  width: 38px;
-  height: 38px;
-  border: 1.5px solid var(--borde);
-  border-radius: var(--r-sm);
-  background: #fff;
-  color: var(--g600);
-  transition: color 0.15s, background 0.15s, border-color 0.15s;
-}
-
-.bell:hover {
-  color: var(--azul);
-  background: var(--celeste);
-  border-color: var(--azul-med);
-}
-
-.bellDot {
-  position: absolute;
-  top: 8px;
-  right: 9px;
-  width: 7px;
-  height: 7px;
-  border-radius: 50%;
-  background: var(--dorado);
-  border: 1.5px solid #fff;
-}
-
 .who {
   display: flex;
   align-items: center;

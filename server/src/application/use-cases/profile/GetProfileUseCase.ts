@@ -25,6 +25,7 @@ export class GetProfileUseCase {
       phone: user.phone ?? null,
       photoUrl: user.photoUrl ?? null,
       role: role?.name ?? 'Desconocido',
+      service: user.service,
     };
   }
 }

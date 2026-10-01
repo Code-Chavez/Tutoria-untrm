@@ -1,8 +1,10 @@
-import { useEffect, useState, type FormEvent } from 'react';
+import { useEffect, useRef, useState, type FormEvent } from 'react';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { getApiErrorMessage } from '@shared/services/apiClient';
 import { profileService } from '../services/profileService';
-import type { UserProfile } from '../types/profile.types';
 import styles from './ProfilePage.module.css';
+
+const PROFILE_QUERY_KEY = ['profile'] as const;
 
 interface Feedback {
   type: 'ok' | 'error';
@@ -14,8 +16,11 @@ function initials(firstName: string, lastName: string): string {
 }
 
 export function ProfilePage() {
-  const [profile, setProfile] = useState<UserProfile | null>(null);
-  const [loading, setLoading] = useState(true);
+  const queryClient = useQueryClient();
+  const { data: profile, isLoading: loading } = useQuery({
+    queryKey: PROFILE_QUERY_KEY,
+    queryFn: () => profileService.get(),
+  });
 
   // Formulario de datos de contacto
   const [phone, setPhone] = useState('');
@@ -30,26 +35,16 @@ export function ProfilePage() {
   const [savingPassword, setSavingPassword] = useState(false);
   const [passwordMsg, setPasswordMsg] = useState<Feedback | null>(null);
 
+  // Sincroniza el formulario solo la primera vez que llegan los datos
+  // (cacheados o recién pedidos), sin pisar lo que el usuario esté editando
+  // si el perfil se revalida en segundo plano.
+  const initialized = useRef(false);
   useEffect(() => {
-    let ignore = false;
-    const fetchProfile = async () => {
-      try {
-        const data = await profileService.get();
-        if (ignore) return;
-        setProfile(data);
-        setPhone(data.phone ?? '');
-        setPhotoUrl(data.photoUrl ?? '');
-      } catch (error) {
-        if (!ignore) setProfileMsg({ type: 'error', text: getApiErrorMessage(error) });
-      } finally {
-        if (!ignore) setLoading(false);
-      }
-    };
-    fetchProfile();
-    return () => {
-      ignore = true;
-    };
-  }, []);
+    if (!profile || initialized.current) return;
+    initialized.current = true;
+    setPhone(profile.phone ?? '');
+    setPhotoUrl(profile.photoUrl ?? '');
+  }, [profile]);
 
   const handleProfileSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -57,7 +52,7 @@ export function ProfilePage() {
     setSavingProfile(true);
     try {
       const updated = await profileService.update({ phone, photoUrl });
-      setProfile(updated);
+      queryClient.setQueryData(PROFILE_QUERY_KEY, updated);
       setProfileMsg({ type: 'ok', text: 'Datos actualizados correctamente.' });
     } catch (error) {
       setProfileMsg({ type: 'error', text: getApiErrorMessage(error) });

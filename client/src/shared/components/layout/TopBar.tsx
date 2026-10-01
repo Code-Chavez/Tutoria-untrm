@@ -1,6 +1,8 @@
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '@features/auth/hooks/useAuth';
-import { BellIcon, MenuIcon, ChevronRightIcon, LogOutIcon } from '@shared/components/icons';
+import { MenuIcon, ChevronRightIcon, LogOutIcon } from '@shared/components/icons';
+import { NotificationBell } from '@features/notificaciones/components/NotificationBell';
+import { getRoleLabel } from '@shared/utils/roleLabel';
 import styles from './TopBar.module.css';
 
 interface TopBarProps {
@@ -43,10 +45,7 @@ export function TopBar({ title, group, onMenu }: TopBarProps) {
       </div>
 
       <div className={styles.right}>
-        <button className={styles.bell} type="button" aria-label="Notificaciones">
-          <BellIcon size={19} />
-          <span className={styles.bellDot} aria-hidden="true" />
-        </button>
+        <NotificationBell />
         {user && (
           <Link className={styles.who} to="/profile" title="Ver mi perfil">
             <div className={styles.avatar}>{getInitials(user.firstName, user.lastName)}</div>
@@ -54,7 +53,7 @@ export function TopBar({ title, group, onMenu }: TopBarProps) {
               <b>
                 {user.firstName} {user.lastName}
               </b>
-              <small>{user.role}</small>
+              <small>{getRoleLabel(user.role, user.service)}</small>
             </div>
           </Link>
         )}

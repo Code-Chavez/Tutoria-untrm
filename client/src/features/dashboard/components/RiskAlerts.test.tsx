@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen } from '@testing-library/react';
+import { QueryClientTestWrapper } from '@shared/test-utils/QueryClientTestWrapper';
 import { RiskAlerts } from './RiskAlerts';
 import { alertService, type StudentAlert } from '../services/alertService';
 
@@ -45,7 +46,11 @@ describe('RiskAlerts', () => {
 
   it('pide las alertas del propio tutor cuando el rol es Docente Tutor', async () => {
     mocked.getAlerts.mockResolvedValue([]);
-    render(<RiskAlerts />);
+    render(
+      <QueryClientTestWrapper>
+        <RiskAlerts />
+      </QueryClientTestWrapper>,
+    );
 
     await screen.findByText(/sin alertas activas/i);
     expect(mocked.getAlerts).toHaveBeenCalledWith(true);
@@ -54,7 +59,11 @@ describe('RiskAlerts', () => {
   it('pide todas las alertas cuando el rol es Coordinador', async () => {
     mockRole = 'Coordinador';
     mocked.getAlerts.mockResolvedValue([]);
-    render(<RiskAlerts />);
+    render(
+      <QueryClientTestWrapper>
+        <RiskAlerts />
+      </QueryClientTestWrapper>,
+    );
 
     await screen.findByText(/sin alertas activas/i);
     expect(mocked.getAlerts).toHaveBeenCalledWith(false);
@@ -62,7 +71,11 @@ describe('RiskAlerts', () => {
 
   it('muestra un tutorado sin sesiones registradas', async () => {
     mocked.getAlerts.mockResolvedValue([noSessionsAlert]);
-    render(<RiskAlerts />);
+    render(
+      <QueryClientTestWrapper>
+        <RiskAlerts />
+      </QueryClientTestWrapper>,
+    );
 
     expect(await screen.findByText(/ana torres/i)).toBeInTheDocument();
     expect(screen.getByText(/sin sesiones registradas/i)).toBeInTheDocument();
@@ -71,7 +84,11 @@ describe('RiskAlerts', () => {
 
   it('muestra un tutorado con inasistencias por encima del umbral', async () => {
     mocked.getAlerts.mockResolvedValue([missedSessionsAlert]);
-    render(<RiskAlerts />);
+    render(
+      <QueryClientTestWrapper>
+        <RiskAlerts />
+      </QueryClientTestWrapper>,
+    );
 
     expect(await screen.findByText(/luis pérez/i)).toBeInTheDocument();
     expect(screen.getByText(/3 sesiones sin asistencia confirmada/i)).toBeInTheDocument();
@@ -79,7 +96,11 @@ describe('RiskAlerts', () => {
 
   it('muestra un estado de sin acceso cuando el rol no tiene permiso (403)', async () => {
     mocked.getAlerts.mockRejectedValue({ response: { status: 403 } });
-    render(<RiskAlerts />);
+    render(
+      <QueryClientTestWrapper>
+        <RiskAlerts />
+      </QueryClientTestWrapper>,
+    );
 
     expect(await screen.findByText(/sin acceso a las alertas/i)).toBeInTheDocument();
   });

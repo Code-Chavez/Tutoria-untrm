@@ -1,6 +1,7 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { studentRecordService, StudentRecord } from '../services/studentRecordService';
+import { useQuery } from '@tanstack/react-query';
+import { studentRecordService } from '../services/studentRecordService';
 import { Timeline } from '../components/Timeline';
 import { PageHeader, Badge, Card, CardHeader, CardBody, EmptyState, Button } from '@shared/components/ui';
 import {
@@ -17,30 +18,12 @@ export const ExpedientePage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
 
-  const [record, setRecord] = useState<StudentRecord | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
-
-  useEffect(() => {
-    if (!id) return;
-    let ignore = false;
-
-    studentRecordService
-      .getStudentRecord(id)
-      .then((data) => {
-        if (!ignore) setRecord(data);
-      })
-      .catch((err) => {
-        if (!ignore) setError(getApiErrorMessage(err));
-      })
-      .finally(() => {
-        if (!ignore) setLoading(false);
-      });
-
-    return () => {
-      ignore = true;
-    };
-  }, [id]);
+  const { data: record, isLoading: loading, error: queryError } = useQuery({
+    queryKey: ['studentRecord', id],
+    queryFn: () => studentRecordService.getStudentRecord(id as string),
+    enabled: !!id,
+  });
+  const error = queryError ? getApiErrorMessage(queryError) : '';
 
   if (loading) {
     return <div className={styles.loading}>Cargando expediente…</div>;

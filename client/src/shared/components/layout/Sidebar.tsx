@@ -20,6 +20,7 @@ import {
   SettingsIcon,
   CloseIcon,
 } from '@shared/components/icons';
+import { getRoleLabel } from '@shared/utils/roleLabel';
 import styles from './Sidebar.module.css';
 
 type RoleCode = 'tutor' | 'coord' | 'dbu' | 'serv' | 'est' | 'vice';
@@ -62,8 +63,9 @@ const NAV: NavGroup[] = [
       { label: 'Seguimiento', Icon: ActivityIcon, roles: ['tutor'] },
       { label: 'Derivar caso', Icon: SendIcon, roles: ['tutor'] },
       { label: 'Solicitar tutoría', Icon: SendIcon, path: '/solicitar-tutoria', roles: ['est'] },
-      { label: 'Casos derivados', Icon: InboxIcon, roles: ['serv', 'dbu'] },
-      { label: 'Evaluar tutoría', Icon: StarIcon, roles: ['est'] },
+      { label: 'Casos derivados', Icon: InboxIcon, path: '/derivaciones', roles: ['tutor', 'coord', 'serv', 'dbu'] },
+      { label: 'Seguimiento DBU', Icon: ReportIcon, path: '/derivaciones/seguimiento', roles: ['dbu'] },
+      { label: 'Evaluar tutoría', Icon: StarIcon, path: '/evaluar-tutoria', roles: ['est'] },
     ],
   },
   {
@@ -73,6 +75,7 @@ const NAV: NavGroup[] = [
       { label: 'Informes', Icon: ReportIcon, path: '/informes', roles: ['tutor', 'coord', 'dbu', 'vice'] },
       { label: 'Indicadores', Icon: PieChartIcon, roles: ['dbu', 'coord', 'vice'] },
       { label: 'Administración', Icon: SettingsIcon, path: '/users', roles: ['dbu'] },
+      { label: 'Evaluación de tutoría', Icon: SettingsIcon, path: '/evaluacion/configuracion', roles: ['dbu'] },
     ],
   },
 ];
@@ -160,7 +163,7 @@ export function Sidebar({ drawerOpen, onClose }: SidebarProps) {
               <b>
                 {user.firstName} {user.lastName}
               </b>
-              <small>{user.role}</small>
+              <small>{getRoleLabel(user.role, user.service)}</small>
             </div>
           </div>
         )}

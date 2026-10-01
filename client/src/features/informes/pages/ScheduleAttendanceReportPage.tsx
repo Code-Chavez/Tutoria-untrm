@@ -1,4 +1,5 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import {
   PageHeader,
   Card,
@@ -20,10 +21,10 @@ import {
   UsersIcon,
 } from '@shared/components/icons';
 import { useAuth } from '@features/auth/hooks/useAuth';
-import { assignmentService, TutorWorkload } from '@features/asignacion/services/assignmentService';
+import { assignmentService } from '@features/asignacion/services/assignmentService';
+import { TUTOR_WORKLOAD_QUERY_KEY } from '@features/tutorados/hooks/useStudents';
 import {
   reportService,
-  ScheduleAttendanceReport,
   ScheduleAttendanceParams,
   ScheduleAttendanceStatus,
 } from '../services/reportService';
@@ -55,48 +56,33 @@ export function ScheduleAttendanceReportPage() {
   const isTutor = user?.role === TUTOR_ROLE;
   const canExport = user ? EXPORT_ROLES.includes(user.role) : false;
 
-  const [tutors, setTutors] = useState<TutorWorkload[]>([]);
   const [tutorId, setTutorId] = useState('');
   const [from, setFrom] = useState('');
   const [to, setTo] = useState('');
-  const [report, setReport] = useState<ScheduleAttendanceReport | null>(null);
-  const [loading, setLoading] = useState(isTutor);
-  const [error, setError] = useState('');
   const [exporting, setExporting] = useState<'pdf' | 'excel' | null>(null);
+  const [exportError, setExportError] = useState('');
 
-  useEffect(() => {
-    if (isTutor) return;
-    let ignore = false;
-    assignmentService
-      .getTutorWorkload()
-      .then((list) => {
-        if (!ignore) setTutors(list);
-      })
-      .catch(() => undefined);
-    return () => {
-      ignore = true;
-    };
-  }, [isTutor]);
+  // El consolidado propio del docente tutor se carga solo, sin esperar un
+  // clic; para el resto de roles, solo tras "Generar consolidado".
+  const [submittedParams, setSubmittedParams] = useState<ScheduleAttendanceParams | null>(
+    isTutor ? { mine: true } : null,
+  );
 
-  // Consolidado propio del docente tutor: se carga solo, sin esperar un clic.
-  useEffect(() => {
-    if (!isTutor) return;
-    let ignore = false;
-    reportService
-      .getScheduleAttendanceReport({ mine: true })
-      .then((r) => {
-        if (!ignore) setReport(r);
-      })
-      .catch((err) => {
-        if (!ignore) setError(getApiErrorMessage(err));
-      })
-      .finally(() => {
-        if (!ignore) setLoading(false);
-      });
-    return () => {
-      ignore = true;
-    };
-  }, [isTutor]);
+  const tutorsQuery = useQuery({
+    queryKey: TUTOR_WORKLOAD_QUERY_KEY,
+    queryFn: () => assignmentService.getTutorWorkload(),
+    enabled: !isTutor,
+  });
+  const tutors = tutorsQuery.data ?? [];
+
+  const reportQuery = useQuery({
+    queryKey: ['scheduleAttendanceReport', submittedParams],
+    queryFn: () => reportService.getScheduleAttendanceReport(submittedParams as ScheduleAttendanceParams),
+    enabled: submittedParams !== null,
+  });
+  const report = reportQuery.data ?? null;
+  const loading = reportQuery.isLoading;
+  const error = reportQuery.isError ? getApiErrorMessage(reportQuery.error) : exportError;
 
   const currentParams = (): ScheduleAttendanceParams => ({
     mine: isTutor || undefined,
@@ -107,23 +93,17 @@ export function ScheduleAttendanceReportPage() {
 
   const handleGenerate = () => {
     if (!isTutor && !tutorId) return;
-    setLoading(true);
-    setError('');
-    reportService
-      .getScheduleAttendanceReport(currentParams())
-      .then(setReport)
-      .catch((err) => setError(getApiErrorMessage(err)))
-      .finally(() => setLoading(false));
+    setSubmittedParams(currentParams());
   };
 
   const handleExport = async (format: 'pdf' | 'excel') => {
     setExporting(format);
-    setError('');
+    setExportError('');
     try {
       if (format === 'pdf') await reportService.downloadScheduleAttendancePdf(currentParams());
       else await reportService.downloadScheduleAttendanceExcel(currentParams());
     } catch (err) {
-      setError(getApiErrorMessage(err));
+      setExportError(getApiErrorMessage(err));
     } finally {
       setExporting(null);
     }

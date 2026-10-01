@@ -1,38 +1,30 @@
-import { useCallback, useEffect, useState } from 'react';
-import { User, userService } from '../services/userService';
-import { Role, roleService } from '../services/roleService';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { userService } from '../services/userService';
+import { roleService } from '../services/roleService';
 
-interface State {
-  users: User[];
-  roles: Role[];
-  loading: boolean;
-  error: boolean;
-}
+const USERS_KEY = ['users'] as const;
+const ROLES_KEY = ['roles'] as const;
 
-/** Carga usuarios y roles. El filtrado se resuelve en el cliente. */
+/** Carga usuarios y roles (cacheados). El filtrado se resuelve en el cliente. */
 export function useUsers() {
-  const [state, setState] = useState<State>({ users: [], roles: [], loading: true, error: false });
-  const [refreshKey, setRefreshKey] = useState(0);
+  const queryClient = useQueryClient();
 
-  const refresh = useCallback(() => setRefreshKey((k) => k + 1), []);
+  const usersQuery = useQuery({ queryKey: USERS_KEY, queryFn: () => userService.getUsers() });
+  const rolesQuery = useQuery({
+    queryKey: ROLES_KEY,
+    queryFn: () => roleService.getRoles().catch(() => []),
+  });
 
-  useEffect(() => {
-    let ignore = false;
+  const refresh = () => {
+    queryClient.invalidateQueries({ queryKey: USERS_KEY });
+    queryClient.invalidateQueries({ queryKey: ROLES_KEY });
+  };
 
-    Promise.all([userService.getUsers(), roleService.getRoles().catch(() => [])])
-      .then(([users, roles]) => {
-        if (ignore) return;
-        setState({ users, roles, loading: false, error: false });
-      })
-      .catch(() => {
-        if (ignore) return;
-        setState({ users: [], roles: [], loading: false, error: true });
-      });
-
-    return () => {
-      ignore = true;
-    };
-  }, [refreshKey]);
-
-  return { ...state, refresh };
+  return {
+    users: usersQuery.data ?? [],
+    roles: rolesQuery.data ?? [],
+    loading: usersQuery.isLoading || rolesQuery.isLoading,
+    error: usersQuery.isError,
+    refresh,
+  };
 }

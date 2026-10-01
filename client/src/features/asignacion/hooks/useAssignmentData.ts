@@ -1,50 +1,46 @@
-import { useCallback, useEffect, useState } from 'react';
-import { Student, studentService } from '@features/tutorados/services/studentService';
-import { School, schoolService } from '@features/tutorados/services/schoolService';
-import { TutorWorkload, assignmentService } from '../services/assignmentService';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { studentService } from '@features/tutorados/services/studentService';
+import { schoolService } from '@features/tutorados/services/schoolService';
+import {
+  STUDENTS_QUERY_KEY,
+  SCHOOLS_QUERY_KEY,
+  TUTOR_WORKLOAD_QUERY_KEY,
+} from '@features/tutorados/hooks/useStudents';
+import { assignmentService } from '../services/assignmentService';
 
-interface State {
-  students: Student[];
-  schools: School[];
-  tutors: TutorWorkload[];
-  loading: boolean;
-  error: boolean;
-}
-
-/** Carga estudiantes, escuelas y la carga de tutores para la vista de asignación. */
+/**
+ * Carga estudiantes, escuelas y la carga de tutores para la vista de
+ * asignación. Usa las mismas query keys que /tutorados, así comparten
+ * caché entre ambas páginas.
+ */
 export function useAssignmentData() {
-  const [state, setState] = useState<State>({
-    students: [],
-    schools: [],
-    tutors: [],
-    loading: true,
-    error: false,
+  const queryClient = useQueryClient();
+
+  const studentsQuery = useQuery({
+    queryKey: STUDENTS_QUERY_KEY,
+    queryFn: () => studentService.getStudents(),
   });
-  const [refreshKey, setRefreshKey] = useState(0);
+  const schoolsQuery = useQuery({
+    queryKey: SCHOOLS_QUERY_KEY,
+    queryFn: () => schoolService.getSchools().catch(() => []),
+  });
+  const tutorsQuery = useQuery({
+    queryKey: TUTOR_WORKLOAD_QUERY_KEY,
+    queryFn: () => assignmentService.getTutorWorkload().catch(() => []),
+  });
 
-  const refresh = useCallback(() => setRefreshKey((k) => k + 1), []);
+  const refresh = () => {
+    queryClient.invalidateQueries({ queryKey: STUDENTS_QUERY_KEY });
+    queryClient.invalidateQueries({ queryKey: SCHOOLS_QUERY_KEY });
+    queryClient.invalidateQueries({ queryKey: TUTOR_WORKLOAD_QUERY_KEY });
+  };
 
-  useEffect(() => {
-    let ignore = false;
-
-    Promise.all([
-      studentService.getStudents(),
-      schoolService.getSchools().catch(() => []),
-      assignmentService.getTutorWorkload().catch(() => []),
-    ])
-      .then(([students, schools, tutors]) => {
-        if (ignore) return;
-        setState({ students, schools, tutors, loading: false, error: false });
-      })
-      .catch(() => {
-        if (ignore) return;
-        setState({ students: [], schools: [], tutors: [], loading: false, error: true });
-      });
-
-    return () => {
-      ignore = true;
-    };
-  }, [refreshKey]);
-
-  return { ...state, refresh };
+  return {
+    students: studentsQuery.data ?? [],
+    schools: schoolsQuery.data ?? [],
+    tutors: tutorsQuery.data ?? [],
+    loading: studentsQuery.isLoading || schoolsQuery.isLoading || tutorsQuery.isLoading,
+    error: studentsQuery.isError,
+    refresh,
+  };
 }

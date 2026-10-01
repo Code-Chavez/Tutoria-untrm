@@ -20,6 +20,8 @@ import { interviewService, CreateInterviewData } from '@features/entrevistas/ser
 import { supportContactService, UpsertSupportContactData } from '@features/entrevistas/services/supportContactService';
 import { FollowUpFormModal } from '@features/seguimiento/components/FollowUpFormModal';
 import { followUpService, CreateFollowUpData } from '@features/seguimiento/services/followUpService';
+import { ReferralFormModal } from '@features/derivaciones/components/ReferralFormModal';
+import { referralService, CreateReferralData } from '@features/derivaciones/services/referralService';
 import { TutoringRequestModal } from '../components/TutoringRequestModal';
 import {
   tutoringRequestService,
@@ -113,6 +115,11 @@ export const StudentsPage: React.FC = () => {
   const [studentForFollowUp, setStudentForFollowUp] = useState<Student | null>(null);
   const [followUpLoading, setFollowUpLoading] = useState(false);
   const [followUpError, setFollowUpError] = useState('');
+
+  // Ficha de derivación (HU-28, Anexo N°6).
+  const [studentForReferral, setStudentForReferral] = useState<Student | null>(null);
+  const [referralLoading, setReferralLoading] = useState(false);
+  const [referralError, setReferralError] = useState('');
 
   // Vinculación de cuenta de portal (autoservicio de solicitud de tutoría).
   const [studentToLink, setStudentToLink] = useState<Student | null>(null);
@@ -368,6 +375,33 @@ export const StudentsPage: React.FC = () => {
     }
   };
 
+  const confirmReferral = async (data: CreateReferralData) => {
+    if (!studentForReferral) return;
+    setReferralLoading(true);
+    setReferralError('');
+    try {
+      const referral = await referralService.createReferral(studentForReferral.id, data);
+      setRequestFeedback(
+        <>
+          Ficha de derivación registrada para {studentForReferral.firstName}{' '}
+          {studentForReferral.lastName}.{' '}
+          <button
+            type="button"
+            className={styles.feedbackLink}
+            onClick={() => referralService.downloadConstancia(referral.id)}
+          >
+            Descargar constancia
+          </button>
+        </>,
+      );
+      setStudentForReferral(null);
+    } catch (err) {
+      setReferralError(getApiErrorMessage(err));
+    } finally {
+      setReferralLoading(false);
+    }
+  };
+
   const confirmLinkAccount = async (userId: string | null) => {
     if (!studentToLink) return;
     setLinkLoading(true);
@@ -503,6 +537,10 @@ export const StudentsPage: React.FC = () => {
                 setFollowUpError('');
                 setStudentForFollowUp(student);
               }}
+              onDeriveCase={(student) => {
+                setReferralError('');
+                setStudentForReferral(student);
+              }}
             />
             <Pagination
               page={page}
@@ -598,6 +636,16 @@ export const StudentsPage: React.FC = () => {
           serverError={followUpError}
           onSubmit={confirmFollowUp}
           onCancel={() => setStudentForFollowUp(null)}
+        />
+      )}
+
+      {studentForReferral && (
+        <ReferralFormModal
+          student={studentForReferral}
+          loading={referralLoading}
+          serverError={referralError}
+          onSubmit={confirmReferral}
+          onCancel={() => setStudentForReferral(null)}
         />
       )}
 

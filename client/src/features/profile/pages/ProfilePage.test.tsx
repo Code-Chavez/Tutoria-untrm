@@ -1,6 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { QueryClientTestWrapper } from '@shared/test-utils/QueryClientTestWrapper';
 import { ProfilePage } from './ProfilePage';
 import { profileService } from '../services/profileService';
 import type { UserProfile } from '../types/profile.types';
@@ -32,7 +33,11 @@ describe('ProfilePage', () => {
   });
 
   it('muestra los datos del perfil tras cargar', async () => {
-    render(<ProfilePage />);
+    render(
+      <QueryClientTestWrapper>
+        <ProfilePage />
+      </QueryClientTestWrapper>,
+    );
 
     expect(await screen.findByText('Juan Pérez')).toBeInTheDocument();
     expect(screen.getByText('tutor@untrm.edu.pe')).toBeInTheDocument();
@@ -43,7 +48,11 @@ describe('ProfilePage', () => {
   it('guarda los cambios de contacto', async () => {
     mocked.update.mockResolvedValue({ ...profile, phone: '999888777' });
     const user = userEvent.setup();
-    render(<ProfilePage />);
+    render(
+      <QueryClientTestWrapper>
+        <ProfilePage />
+      </QueryClientTestWrapper>,
+    );
 
     const phone = await screen.findByLabelText(/teléfono/i);
     await user.clear(phone);
@@ -58,7 +67,11 @@ describe('ProfilePage', () => {
 
   it('no envía el cambio de contraseña si la confirmación no coincide', async () => {
     const user = userEvent.setup();
-    render(<ProfilePage />);
+    render(
+      <QueryClientTestWrapper>
+        <ProfilePage />
+      </QueryClientTestWrapper>,
+    );
 
     await screen.findByText('Juan Pérez');
     await user.type(screen.getByLabelText(/contraseña actual/i), 'Actual123');
@@ -73,7 +86,11 @@ describe('ProfilePage', () => {
   it('cambia la contraseña cuando los datos son válidos', async () => {
     mocked.changePassword.mockResolvedValue(undefined);
     const user = userEvent.setup();
-    render(<ProfilePage />);
+    render(
+      <QueryClientTestWrapper>
+        <ProfilePage />
+      </QueryClientTestWrapper>,
+    );
 
     await screen.findByText('Juan Pérez');
     await user.type(screen.getByLabelText(/contraseña actual/i), 'Actual123');

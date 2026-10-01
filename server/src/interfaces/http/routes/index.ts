@@ -15,6 +15,9 @@ import sessionRoutes from './session.routes';
 import followUpRoutes from './followUp.routes';
 import alertRoutes from './alert.routes';
 import reportRoutes from './report.routes';
+import referralRoutes from './referral.routes';
+import notificationRoutes from './notification.routes';
+import evaluationRoutes from './evaluation.routes';
 
 const router: IRouter = Router();
 
@@ -34,5 +37,8 @@ router.use(sessionRoutes);
 router.use(followUpRoutes);
 router.use(alertRoutes);
 router.use(reportRoutes);
+router.use(referralRoutes);
+router.use(notificationRoutes);
+router.use(evaluationRoutes);
 
 export default router;

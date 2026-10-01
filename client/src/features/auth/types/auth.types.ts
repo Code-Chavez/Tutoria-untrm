@@ -4,6 +4,7 @@ export interface AuthUser {
   firstName: string;
   lastName: string;
   role: string;
+  service?: string | null;
 }
 
 export interface LoginCredentials {
