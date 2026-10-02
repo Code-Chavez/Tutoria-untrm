@@ -44,6 +44,7 @@ describe('GetEvaluationStatusUseCase', () => {
       findByStudentAndPeriod: jest.fn().mockResolvedValue(null),
       findAnonymizedScoresByTutorAndPeriod: jest.fn().mockResolvedValue([]),
       findAnonymizedScoresByPeriod: jest.fn().mockResolvedValue([]),
+      findAnonymizedSuggestionsByPeriod: jest.fn().mockResolvedValue([]),
     };
     windows = {
       findByPeriodAndSchool: jest.fn().mockResolvedValue(openWindow),

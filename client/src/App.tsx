@@ -25,6 +25,7 @@ import { ReferralTrackingPage } from '@features/derivaciones/pages/ReferralTrack
 import { EvaluationPage } from '@features/evaluacion/pages/EvaluationPage';
 import { EvaluationWindowsPage } from '@features/evaluacion/pages/EvaluationWindowsPage';
 import { EvaluationStatisticsPage } from '@features/evaluacion/pages/EvaluationStatisticsPage';
+import { EvaluationSuggestionsPage } from '@features/evaluacion/pages/EvaluationSuggestionsPage';
 
 export default function App() {
   return (
@@ -52,6 +53,14 @@ export default function App() {
                 element={
                   <RequireRole roles={['Administrador DBU']}>
                     <EvaluationWindowsPage />
+                  </RequireRole>
+                }
+              />
+              <Route
+                path="evaluacion/sugerencias"
+                element={
+                  <RequireRole roles={['Administrador DBU', 'Coordinador']}>
+                    <EvaluationSuggestionsPage />
                   </RequireRole>
                 }
               />

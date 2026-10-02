@@ -125,6 +125,7 @@ import { SubmitEvaluationUseCase } from '@application/use-cases/evaluation/Submi
 import { GetEvaluationStatusUseCase } from '@application/use-cases/evaluation/GetEvaluationStatusUseCase';
 import { GetEvaluationResultsUseCase } from '@application/use-cases/evaluation/GetEvaluationResultsUseCase';
 import { GetEvaluationStatisticsUseCase } from '@application/use-cases/evaluation/GetEvaluationStatisticsUseCase';
+import { GetEvaluationSuggestionsUseCase } from '@application/use-cases/evaluation/GetEvaluationSuggestionsUseCase';
 import { ListEvaluationWindowsUseCase } from '@application/use-cases/evaluation/ListEvaluationWindowsUseCase';
 import { SetEvaluationWindowUseCase } from '@application/use-cases/evaluation/SetEvaluationWindowUseCase';
 import { GetNotificationsUseCase } from '@application/use-cases/notifications/GetNotificationsUseCase';
@@ -303,6 +304,12 @@ const getEvaluationStatisticsUseCase = new GetEvaluationStatisticsUseCase(
   academicPeriodRepository,
   tutorEvaluationRepository,
 );
+const getEvaluationSuggestionsUseCase = new GetEvaluationSuggestionsUseCase(
+  userRepository,
+  roleRepository,
+  academicPeriodRepository,
+  tutorEvaluationRepository,
+);
 const listEvaluationWindowsUseCase = new ListEvaluationWindowsUseCase(
   userRepository,
   roleRepository,
@@ -407,5 +414,6 @@ export const container = {
     listEvaluationWindowsUseCase,
     setEvaluationWindowUseCase,
     getEvaluationStatisticsUseCase,
+    getEvaluationSuggestionsUseCase,
   },
 } as const;

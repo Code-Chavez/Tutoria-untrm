@@ -21,6 +21,21 @@ export interface EvaluationStatisticsFilters {
   facultyId?: string;
 }
 
+export interface EvaluationSuggestionsFilters {
+  tutorId?: string;
+  schoolId?: string;
+  facultyId?: string;
+}
+
+// Sugerencias abiertas desvinculadas de la identidad (HU-40): conserva a
+// qué tutor corresponde cada comentario (igual que HU-39), pero nunca el
+// tutorado que lo escribió.
+export interface AnonymizedEvaluationSuggestion {
+  tutorId: string;
+  likes: string | null;
+  dislikes: string | null;
+}
+
 export interface TutorEvaluationRepository {
   create(
     data: Omit<TutorEvaluation, 'id' | 'createdAt'>,
@@ -44,4 +59,14 @@ export interface TutorEvaluationRepository {
     periodId: string,
     filters?: EvaluationStatisticsFilters,
   ): Promise<AnonymizedEvaluationScoresByTutor[]>;
+  /**
+   * Comentarios abiertos ("Me gustaría" / "No me gusta") de las respuestas
+   * del periodo que tengan al menos uno de los dos no vacío, filtrables por
+   * tutor, escuela o facultad (HU-40). Mismo criterio de anonimato que
+   * findAnonymizedScoresByPeriod.
+   */
+  findAnonymizedSuggestionsByPeriod(
+    periodId: string,
+    filters?: EvaluationSuggestionsFilters,
+  ): Promise<AnonymizedEvaluationSuggestion[]>;
 }

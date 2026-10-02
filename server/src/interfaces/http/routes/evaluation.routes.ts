@@ -12,6 +12,7 @@ const evaluationController = new EvaluationController(
   container.useCases.listEvaluationWindowsUseCase,
   container.useCases.setEvaluationWindowUseCase,
   container.useCases.getEvaluationStatisticsUseCase,
+  container.useCases.getEvaluationSuggestionsUseCase,
 );
 
 const requireAuth = authenticate(container.services.tokenService);
@@ -39,6 +40,14 @@ router.get(
   requireAuth,
   authorize(['evaluation:manage']),
   evaluationController.getStatistics,
+);
+
+// Sugerencias abiertas consolidadas del periodo activo (HU-40).
+router.get(
+  '/evaluations/suggestions',
+  requireAuth,
+  authorize(['evaluation:manage']),
+  evaluationController.getSuggestions,
 );
 
 // Resultados agregados y anónimos de un tutor (HU-37): solo para quien

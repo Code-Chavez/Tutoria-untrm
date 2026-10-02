@@ -66,3 +66,18 @@ export interface EvaluationStatisticsReport {
   periodName: string;
   tutors: EvaluationStatisticsTutorRow[];
 }
+
+// Sugerencias abiertas consolidadas (HU-40): "Me gustaría" / "No me gusta"
+// de respuestas que tengan al menos uno de los dos campos, sin ningún dato
+// que permita asociarlas a un tutorado.
+export interface EvaluationSuggestionEntry {
+  tutorId: string;
+  tutorName: string;
+  likes: string | null;
+  dislikes: string | null;
+}
+
+export interface EvaluationSuggestionsReport {
+  periodName: string;
+  suggestions: EvaluationSuggestionEntry[];
+}

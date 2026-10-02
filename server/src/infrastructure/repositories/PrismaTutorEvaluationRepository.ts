@@ -4,7 +4,9 @@ import {
   TutorEvaluationRepository,
   AnonymizedEvaluationScores,
   AnonymizedEvaluationScoresByTutor,
+  AnonymizedEvaluationSuggestion,
   EvaluationStatisticsFilters,
+  EvaluationSuggestionsFilters,
 } from '@domain/repositories/TutorEvaluationRepository';
 
 function toEvaluation(row: unknown): TutorEvaluation {
@@ -80,5 +82,31 @@ export class PrismaTutorEvaluationRepository implements TutorEvaluationRepositor
       select: { tutorId: true, scores: true },
     });
     return rows.map((r) => ({ tutorId: r.tutorId, scores: r.scores as EvaluationScaleCode[] }));
+  }
+
+  // HU-40: mismo criterio de anonimato — el `select` pide tutorId/likes/
+  // dislikes, nunca studentId, con o sin filtro.
+  async findAnonymizedSuggestionsByPeriod(
+    periodId: string,
+    filters?: EvaluationSuggestionsFilters,
+  ): Promise<AnonymizedEvaluationSuggestion[]> {
+    const rows = await this.prisma.tutorEvaluation.findMany({
+      where: {
+        periodId,
+        ...(filters?.tutorId ? { tutorId: filters.tutorId } : {}),
+        OR: [{ likes: { not: null } }, { dislikes: { not: null } }],
+        ...(filters?.schoolId || filters?.facultyId
+          ? {
+              student: {
+                ...(filters.schoolId ? { schoolId: filters.schoolId } : {}),
+                ...(filters.facultyId ? { school: { facultyId: filters.facultyId } } : {}),
+              },
+            }
+          : {}),
+      },
+      select: { tutorId: true, likes: true, dislikes: true },
+      orderBy: { createdAt: 'desc' },
+    });
+    return rows;
   }
 }
