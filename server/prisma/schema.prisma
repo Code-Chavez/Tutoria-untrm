@@ -51,6 +51,7 @@ model User {
   referralStatusChanges  ReferralStatusHistory[] @relation("ReferralStatusChanges")
   notifications          Notification[]
   evaluationsReceived    TutorEvaluation[] @relation("TutorEvaluationsReceived")
+  workPlansAuthored      WorkPlan[]        @relation("WorkPlansAuthored")
 
   @@map("users")
 }
@@ -162,6 +163,7 @@ model School {
   coordinator   User?   @relation("SchoolCoordinator", fields: [coordinatorId], references: [id])
 
   evaluationWindows EvaluationWindow[]
+  workPlans         WorkPlan[]
 
   @@unique([name, facultyId])
   @@map("schools")
@@ -177,6 +179,7 @@ model AcademicPeriod {
 
   evaluations       TutorEvaluation[]
   evaluationWindows EvaluationWindow[]
+  workPlans         WorkPlan[]
 
   @@map("academic_periods")
 }
@@ -605,6 +608,49 @@ model EvaluationWindow {
 
   @@unique([periodId, schoolId])
   @@map("evaluation_windows")
+}
+
+// Plan de trabajo semestral de tutoría (HU-41, Anexo N°8, Art. 17.a): lo
+// elabora el coordinador de tutoría de la escuela, uno por periodo y escuela.
+// Las tablas del anexo (cronograma, recursos, presupuesto) se guardan como Json.
+model WorkPlan {
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  periodId String         @map("period_id")
+  period   AcademicPeriod @relation(fields: [periodId], references: [id])
+
+  schoolId String @map("school_id")
+  school   School @relation(fields: [schoolId], references: [id])
+
+  authorId String @map("author_id")
+  author   User   @relation("WorkPlansAuthored", fields: [authorId], references: [id])
+
+  introduction       String
+  denomination       String
+  eventType          String   @map("event_type")
+  executionDate      String   @map("execution_date")
+  schedule           String
+  place              String
+  modality           String
+  organizers         String
+  supportUnit        String   @map("support_unit")
+  foundation         String
+  generalObjective   String   @map("general_objective")
+  specificObjectives String[] @map("specific_objectives")
+  targetAudience     String   @map("target_audience")
+  methodology        String
+
+  planning              Json
+  programming           Json
+  physicalResources     Json @map("physical_resources")
+  humanResources        Json @map("human_resources")
+  budget                Json
+  operationalActivities Json @map("operational_activities")
+
+  @@unique([periodId, schoolId])
+  @@map("work_plans")
 }
 
 // ─── Parámetros del Sistema ────────────────────────────────────

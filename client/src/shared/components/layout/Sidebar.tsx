@@ -71,7 +71,7 @@ const NAV: NavGroup[] = [
   {
     title: 'Gestión',
     items: [
-      { label: 'Plan semestral', Icon: CalendarRangeIcon, roles: ['coord', 'dbu'] },
+      { label: 'Plan semestral', Icon: CalendarRangeIcon, path: '/plan-semestral', roles: ['coord', 'dbu'] },
       { label: 'Informes', Icon: ReportIcon, path: '/informes', roles: ['tutor', 'coord', 'dbu', 'vice'] },
       { label: 'Indicadores', Icon: PieChartIcon, roles: ['dbu', 'coord', 'vice'] },
       { label: 'Administración', Icon: SettingsIcon, path: '/users', roles: ['dbu'] },

@@ -15,6 +15,7 @@ import { PrismaSystemParameterRepository } from './repositories/PrismaSystemPara
 import { PrismaSupportContactRepository } from './repositories/PrismaSupportContactRepository';
 import { PrismaSchoolRepository } from './repositories/PrismaSchoolRepository';
 import { PrismaFacultyRepository } from './repositories/PrismaFacultyRepository';
+import { PrismaWorkPlanRepository } from './repositories/PrismaWorkPlanRepository';
 import { PrismaNotificationRepository } from './repositories/PrismaNotificationRepository';
 import { PrismaAcademicPeriodRepository } from './repositories/PrismaAcademicPeriodRepository';
 import { PrismaTutorEvaluationRepository } from './repositories/PrismaTutorEvaluationRepository';
@@ -45,6 +46,7 @@ const systemParameterRepository = new PrismaSystemParameterRepository(prisma);
 const supportContactRepository = new PrismaSupportContactRepository(prisma);
 const schoolRepository = new PrismaSchoolRepository(prisma);
 const facultyRepository = new PrismaFacultyRepository(prisma);
+const workPlanRepository = new PrismaWorkPlanRepository(prisma);
 const notificationRepository = new PrismaNotificationRepository(prisma);
 const academicPeriodRepository = new PrismaAcademicPeriodRepository(prisma);
 const tutorEvaluationRepository = new PrismaTutorEvaluationRepository(prisma);
@@ -113,6 +115,9 @@ import { ListSessionEvidenceUseCase } from '@application/use-cases/sessions/List
 import { GetSessionEvidenceFileUseCase } from '@application/use-cases/sessions/GetSessionEvidenceFileUseCase';
 import { ListSchoolsUseCase } from '@application/use-cases/schools/ListSchoolsUseCase';
 import { ListFacultiesUseCase } from '@application/use-cases/faculties/ListFacultiesUseCase';
+import { ListWorkPlansUseCase } from '@application/use-cases/work-plans/ListWorkPlansUseCase';
+import { GetWorkPlanUseCase } from '@application/use-cases/work-plans/GetWorkPlanUseCase';
+import { SaveWorkPlanUseCase } from '@application/use-cases/work-plans/SaveWorkPlanUseCase';
 import { GetRiskAlertsUseCase } from '@application/use-cases/alerts/GetRiskAlertsUseCase';
 import { GetScheduleAttendanceReportUseCase } from '@application/use-cases/reports/GetScheduleAttendanceReportUseCase';
 import { CreateReferralUseCase } from '@application/use-cases/referrals/CreateReferralUseCase';
@@ -235,6 +240,27 @@ const getSessionEvidenceFileUseCase = new GetSessionEvidenceFileUseCase(
 );
 const listSchoolsUseCase = new ListSchoolsUseCase(schoolRepository);
 const listFacultiesUseCase = new ListFacultiesUseCase(facultyRepository);
+const listWorkPlansUseCase = new ListWorkPlansUseCase(
+  userRepository,
+  roleRepository,
+  schoolRepository,
+  academicPeriodRepository,
+  workPlanRepository,
+);
+const getWorkPlanUseCase = new GetWorkPlanUseCase(
+  userRepository,
+  roleRepository,
+  schoolRepository,
+  academicPeriodRepository,
+  workPlanRepository,
+);
+const saveWorkPlanUseCase = new SaveWorkPlanUseCase(
+  userRepository,
+  roleRepository,
+  schoolRepository,
+  academicPeriodRepository,
+  workPlanRepository,
+);
 const getRiskAlertsUseCase = new GetRiskAlertsUseCase(
   studentRepository,
   sessionRepository,
@@ -398,6 +424,9 @@ export const container = {
     getSessionEvidenceFileUseCase,
     listSchoolsUseCase,
     listFacultiesUseCase,
+    listWorkPlansUseCase,
+    getWorkPlanUseCase,
+    saveWorkPlanUseCase,
     getRiskAlertsUseCase,
     getScheduleAttendanceReportUseCase,
     createReferralUseCase,
