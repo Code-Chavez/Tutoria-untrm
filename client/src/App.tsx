@@ -23,6 +23,7 @@ import { ScheduleAttendanceReportPage } from '@features/informes/pages/ScheduleA
 import { ReferralsPage } from '@features/derivaciones/pages/ReferralsPage';
 import { ReferralTrackingPage } from '@features/derivaciones/pages/ReferralTrackingPage';
 import { EvaluationPage } from '@features/evaluacion/pages/EvaluationPage';
+import { WorkPlanPage } from '@features/planificacion/pages/WorkPlanPage';
 import { EvaluationWindowsPage } from '@features/evaluacion/pages/EvaluationWindowsPage';
 import { EvaluationStatisticsPage } from '@features/evaluacion/pages/EvaluationStatisticsPage';
 import { EvaluationSuggestionsPage } from '@features/evaluacion/pages/EvaluationSuggestionsPage';
@@ -45,6 +46,14 @@ export default function App() {
                 element={
                   <RequireRole roles={['Administrador DBU']}>
                     <UserManagementPage />
+                  </RequireRole>
+                }
+              />
+              <Route
+                path="plan-semestral"
+                element={
+                  <RequireRole roles={['Administrador DBU', 'Coordinador']}>
+                    <WorkPlanPage />
                   </RequireRole>
                 }
               />

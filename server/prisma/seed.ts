@@ -36,6 +36,8 @@ async function main() {
     prisma.permission.upsert({ where: { code: 'admin:system' }, update: {}, create: { code: 'admin:system', description: 'Administrar sistema' } }),
     prisma.permission.upsert({ where: { code: 'evaluation:respond' }, update: {}, create: { code: 'evaluation:respond', description: 'Responder evaluación' } }),
     prisma.permission.upsert({ where: { code: 'evaluation:manage' }, update: {}, create: { code: 'evaluation:manage', description: 'Gestionar evaluación' } }),
+    prisma.permission.upsert({ where: { code: 'work-plans:read' }, update: {}, create: { code: 'work-plans:read', description: 'Ver planes de trabajo semestrales' } }),
+    prisma.permission.upsert({ where: { code: 'work-plans:write' }, update: {}, create: { code: 'work-plans:write', description: 'Elaborar planes de trabajo semestrales' } }),
   ]);
 
   const permMap = Object.fromEntries(permissions.map(p => [p.code, p.id]));
@@ -80,7 +82,7 @@ async function main() {
   // Asignar permisos a roles
   const rolePerms: Record<string, string[]> = {
     [adminRole.id]: Object.keys(permMap),
-    [coordRole.id]: ['users:read', 'students:read', 'students:write', 'students:import', 'interviews:read', 'followups:read', 'tutoring-requests:read', 'tutoring-requests:write', 'sessions:read', 'referrals:read', 'reports:read', 'reports:export', 'evaluation:manage'],
+    [coordRole.id]: ['users:read', 'students:read', 'students:write', 'students:import', 'interviews:read', 'followups:read', 'tutoring-requests:read', 'tutoring-requests:write', 'sessions:read', 'referrals:read', 'reports:read', 'reports:export', 'evaluation:manage', 'work-plans:read', 'work-plans:write'],
     [tutorRole.id]: ['students:read', 'interviews:read', 'interviews:write', 'followups:read', 'followups:write', 'support-contacts:read', 'support-contacts:write', 'tutoring-requests:read', 'tutoring-requests:write', 'sessions:read', 'sessions:write', 'referrals:read', 'referrals:write', 'reports:read', 'reports:export'],
     [studentRole.id]: ['sessions:read', 'evaluation:respond', 'tutoring-requests:self'],
     [serviceRole.id]: ['referrals:read', 'referrals:write'],

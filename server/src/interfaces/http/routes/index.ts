@@ -19,6 +19,7 @@ import referralRoutes from './referral.routes';
 import notificationRoutes from './notification.routes';
 import evaluationRoutes from './evaluation.routes';
 import facultyRoutes from './faculty.routes';
+import workPlanRoutes from './workPlan.routes';
 
 const router: IRouter = Router();
 
@@ -42,5 +43,6 @@ router.use(referralRoutes);
 router.use(notificationRoutes);
 router.use(evaluationRoutes);
 router.use(facultyRoutes);
+router.use(workPlanRoutes);
 
 export default router;

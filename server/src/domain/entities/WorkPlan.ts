@@ -1,0 +1,66 @@
+// Plan de trabajo semestral de tutoría (HU-41, Anexo N°8, Art. 17.a).
+export interface WorkPlanPlanningRow {
+  activity: string;
+  startDate: string;
+  endDate: string;
+}
+
+export interface WorkPlanProgrammingRow {
+  date: string;
+  activity: string;
+  time: string;
+  place: string;
+  responsible: string;
+}
+
+export interface WorkPlanResourceRow {
+  quantity: number;
+  resource: string;
+  characteristics: string;
+}
+
+export interface WorkPlanBudgetRow {
+  quantity: number;
+  type: string;
+  resource: string;
+  characteristics: string;
+  unitCost: number;
+}
+
+export interface WorkPlanOperationalActivity {
+  activity: string;
+  date: string;
+}
+
+// Contenido editable del plan, en el orden de secciones del Anexo N°8.
+export interface WorkPlanContent {
+  introduction: string;
+  denomination: string;
+  eventType: string;
+  executionDate: string;
+  schedule: string;
+  place: string;
+  modality: string;
+  organizers: string;
+  supportUnit: string;
+  foundation: string;
+  generalObjective: string;
+  specificObjectives: string[];
+  targetAudience: string;
+  methodology: string;
+  planning: WorkPlanPlanningRow[];
+  programming: WorkPlanProgrammingRow[];
+  physicalResources: WorkPlanResourceRow[];
+  humanResources: WorkPlanResourceRow[];
+  budget: WorkPlanBudgetRow[];
+  operationalActivities: WorkPlanOperationalActivity[];
+}
+
+export interface WorkPlan extends WorkPlanContent {
+  id: string;
+  periodId: string;
+  schoolId: string;
+  authorId: string;
+  createdAt: Date;
+  updatedAt: Date;
+}

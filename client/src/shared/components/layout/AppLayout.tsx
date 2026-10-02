@@ -13,6 +13,7 @@ const ROUTE_META: Record<string, { title: string; group: string }> = {
   '/asignacion': { title: 'Asignación', group: 'Principal' },
   '/expediente': { title: 'Expediente', group: 'Principal' },
   '/users': { title: 'Administración', group: 'Gestión' },
+  '/plan-semestral': { title: 'Plan de trabajo semestral', group: 'Gestión' },
   '/evaluacion/configuracion': { title: 'Evaluación de tutoría', group: 'Gestión' },
   '/evaluacion/resultados': { title: 'Resultados de evaluación', group: 'Gestión' },
   '/evaluacion/sugerencias': { title: 'Sugerencias de estudiantes', group: 'Gestión' },
