@@ -50,6 +50,7 @@ describe('GetEvaluationStatisticsUseCase', () => {
       create: jest.fn(),
       findByStudentAndPeriod: jest.fn(),
       findAnonymizedScoresByTutorAndPeriod: jest.fn(),
+      findAnonymizedSuggestionsByPeriod: jest.fn().mockResolvedValue([]),
       findAnonymizedScoresByPeriod: jest.fn().mockResolvedValue([
         { tutorId: 'tutor-a', scores: allSiempre },
         { tutorId: 'tutor-a', scores: allNunca },

@@ -119,6 +119,25 @@ export interface EvaluationStatisticsFilters {
   facultyId?: string;
 }
 
+// Sugerencias abiertas consolidadas (HU-40).
+export interface EvaluationSuggestionEntry {
+  tutorId: string;
+  tutorName: string;
+  likes: string | null;
+  dislikes: string | null;
+}
+
+export interface EvaluationSuggestionsReport {
+  periodName: string;
+  suggestions: EvaluationSuggestionEntry[];
+}
+
+export interface EvaluationSuggestionsFilters {
+  tutorId?: string;
+  schoolId?: string;
+  facultyId?: string;
+}
+
 export const evaluationService = {
   getStatus: async (): Promise<EvaluationStatus> => {
     const response = await apiClient.get<EvaluationStatus>('/evaluations/status');
@@ -144,6 +163,13 @@ export const evaluationService = {
 
   getStatistics: async (filters?: EvaluationStatisticsFilters): Promise<EvaluationStatisticsReport> => {
     const response = await apiClient.get<EvaluationStatisticsReport>('/evaluations/statistics', {
+      params: filters,
+    });
+    return response.data;
+  },
+
+  getSuggestions: async (filters?: EvaluationSuggestionsFilters): Promise<EvaluationSuggestionsReport> => {
+    const response = await apiClient.get<EvaluationSuggestionsReport>('/evaluations/suggestions', {
       params: filters,
     });
     return response.data;

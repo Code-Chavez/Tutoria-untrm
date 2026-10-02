@@ -77,6 +77,7 @@ const NAV: NavGroup[] = [
       { label: 'Administración', Icon: SettingsIcon, path: '/users', roles: ['dbu'] },
       { label: 'Evaluación de tutoría', Icon: SettingsIcon, path: '/evaluacion/configuracion', roles: ['dbu'] },
       { label: 'Resultados de evaluación', Icon: PieChartIcon, path: '/evaluacion/resultados', roles: ['dbu', 'coord'] },
+      { label: 'Sugerencias de estudiantes', Icon: StarIcon, path: '/evaluacion/sugerencias', roles: ['dbu', 'coord'] },
     ],
   },
 ];
