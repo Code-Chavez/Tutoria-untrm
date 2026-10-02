@@ -1,0 +1,38 @@
+.card {
+  margin-top: var(--s5);
+}
+
+.head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--s3);
+  flex-wrap: wrap;
+  margin-bottom: var(--s3);
+}
+
+.head h3 {
+  margin: 0;
+  font-size: var(--fs-sm);
+  color: var(--g900);
+}
+
+.file,
+.hint {
+  margin: 0 0 var(--s4);
+  font-size: var(--fs-sm);
+  color: var(--g600);
+  word-break: break-word;
+}
+
+.actions {
+  display: flex;
+  gap: var(--s3);
+  flex-wrap: wrap;
+}
+
+.error {
+  margin: var(--s3) 0 0;
+  color: var(--peligro);
+  font-size: var(--fs-sm);
+}

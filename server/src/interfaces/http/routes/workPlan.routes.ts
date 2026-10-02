@@ -1,4 +1,5 @@
 import { Router, type IRouter } from 'express';
+import multer from 'multer';
 import { container } from '../../../infrastructure/container';
 import { WorkPlanController } from '../controllers/WorkPlanController';
 import { authenticate } from '../middleware/authenticate';
@@ -9,7 +10,18 @@ const workPlanController = new WorkPlanController(
   container.useCases.listWorkPlansUseCase,
   container.useCases.getWorkPlanUseCase,
   container.useCases.saveWorkPlanUseCase,
+  container.useCases.uploadWorkPlanResolutionUseCase,
+  container.useCases.getWorkPlanResolutionFileUseCase,
 );
+
+// La resolución de aprobación es un único PDF en memoria (máx. 10 MB).
+const uploadResolution = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 10 * 1024 * 1024, files: 1 },
+  fileFilter: (_req, file, cb) => {
+    cb(null, file.mimetype === 'application/pdf');
+  },
+});
 
 const requireAuth = authenticate(container.services.tokenService);
 
@@ -27,6 +39,20 @@ router.put(
   requireAuth,
   authorize(['work-plans:write']),
   workPlanController.save,
+);
+
+router.post(
+  '/work-plans/:schoolId/resolution',
+  requireAuth,
+  authorize(['work-plans:write']),
+  uploadResolution.single('file'),
+  workPlanController.uploadResolution,
+);
+router.get(
+  '/work-plans/:schoolId/resolution/file',
+  requireAuth,
+  authorize(['work-plans:read']),
+  workPlanController.downloadResolution,
 );
 
 export default router;

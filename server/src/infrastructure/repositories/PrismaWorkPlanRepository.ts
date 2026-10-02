@@ -1,5 +1,5 @@
 import { PrismaClient, Prisma } from '@prisma/client';
-import { WorkPlan, WorkPlanContent } from '@domain/entities/WorkPlan';
+import { WorkPlan, WorkPlanContent, WorkPlanResolutionFile } from '@domain/entities/WorkPlan';
 import { WorkPlanRepository } from '@domain/repositories/WorkPlanRepository';
 
 // Las columnas Json de Prisma llegan como JsonValue; el contrato de forma lo
@@ -47,6 +47,19 @@ export class PrismaWorkPlanRepository implements WorkPlanRepository {
       where: { periodId_schoolId: { periodId, schoolId } },
       update: toPrismaData(content),
       create: { periodId, schoolId, authorId, ...toPrismaData(content) },
+    });
+    return toWorkPlan(row);
+  }
+
+  async setResolution(planId: string, file: WorkPlanResolutionFile): Promise<WorkPlan> {
+    const row = await this.prisma.workPlan.update({
+      where: { id: planId },
+      data: {
+        resolutionFileName: file.fileName,
+        resolutionFileSize: file.fileSize,
+        resolutionStorageKey: file.storageKey,
+        resolutionUploadedAt: new Date(),
+      },
     });
     return toWorkPlan(row);
   }

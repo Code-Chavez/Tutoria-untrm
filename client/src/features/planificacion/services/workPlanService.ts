@@ -1,5 +1,17 @@
 import { apiClient } from '@shared/services/apiClient';
 
+// Dispara la descarga de un blob en el navegador.
+function saveBlob(data: Blob, filename: string): void {
+  const url = window.URL.createObjectURL(data);
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = filename;
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+  window.URL.revokeObjectURL(url);
+}
+
 // Plan de trabajo semestral (HU-41, Anexo N°8 del Protocolo de Tutoría).
 export interface PlanningRow {
   activity: string;
@@ -58,13 +70,16 @@ export interface WorkPlan extends WorkPlanContent {
   periodId: string;
   schoolId: string;
   authorId: string;
+  /** Resolución de aprobación adjunta (HU-42); sin ella el plan no es vigente. */
+  resolution: { fileName: string; fileSize: number; uploadedAt: string } | null;
+  inForce: boolean;
   createdAt: string;
   updatedAt: string;
 }
 
 export interface WorkPlansOverview {
   periodName: string;
-  schools: { schoolId: string; schoolName: string; hasPlan: boolean }[];
+  schools: { schoolId: string; schoolName: string; hasPlan: boolean; inForce: boolean }[];
 }
 
 export interface WorkPlanView {
@@ -101,5 +116,23 @@ export const workPlanService = {
       content,
     );
     return response.data.plan;
+  },
+
+  async uploadResolution(schoolId: string, file: File): Promise<WorkPlan> {
+    const formData = new FormData();
+    formData.append('file', file);
+    const response = await apiClient.post<{ message: string; plan: WorkPlan }>(
+      `/work-plans/${schoolId}/resolution`,
+      formData,
+      { headers: { 'Content-Type': 'multipart/form-data' } },
+    );
+    return response.data.plan;
+  },
+
+  async downloadResolution(schoolId: string, fileName: string): Promise<void> {
+    const response = await apiClient.get(`/work-plans/${schoolId}/resolution/file`, {
+      responseType: 'blob',
+    });
+    saveBlob(response.data as Blob, fileName);
   },
 };

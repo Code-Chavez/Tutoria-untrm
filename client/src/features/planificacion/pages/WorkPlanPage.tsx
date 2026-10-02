@@ -8,6 +8,7 @@ import {
   WorkPlanContent,
   WorkPlan,
 } from '../services/workPlanService';
+import { WorkPlanResolutionCard } from '../components/WorkPlanResolutionCard';
 import styles from './WorkPlanPage.module.css';
 
 // Plan de trabajo semestral de la escuela (HU-41, Anexo N°8, Art. 17.a).
@@ -493,7 +494,7 @@ export function WorkPlanPage() {
                 <option value="">Selecciona una escuela</option>
                 {overview.schools.map((s) => (
                   <option key={s.schoolId} value={s.schoolId}>
-                    {s.schoolName} {s.hasPlan ? '· con plan' : '· sin plan'}
+                    {s.schoolName} {s.inForce ? '· vigente' : s.hasPlan ? '· sin resolución' : '· sin plan'}
                   </option>
                 ))}
               </SelectField>
@@ -504,6 +505,10 @@ export function WorkPlanPage() {
 
           {schoolId && !loadingPlan && view && (
             <WorkPlanEditor key={schoolId} schoolId={schoolId} plan={view.plan} />
+          )}
+
+          {schoolId && !loadingPlan && view?.plan && (
+            <WorkPlanResolutionCard schoolId={schoolId} plan={view.plan} />
           )}
         </>
       )}
