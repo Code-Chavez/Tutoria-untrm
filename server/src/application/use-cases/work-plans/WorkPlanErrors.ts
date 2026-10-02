@@ -4,3 +4,17 @@ export class WorkPlanForbiddenError extends Error {
     this.name = 'WorkPlanForbiddenError';
   }
 }
+
+export class WorkPlanNotFoundError extends Error {
+  constructor() {
+    super('La escuela aún no tiene un plan de trabajo en el periodo activo');
+    this.name = 'WorkPlanNotFoundError';
+  }
+}
+
+export class WorkPlanResolutionNotFoundError extends Error {
+  constructor() {
+    super('El plan de trabajo aún no tiene resolución de aprobación adjunta');
+    this.name = 'WorkPlanResolutionNotFoundError';
+  }
+}

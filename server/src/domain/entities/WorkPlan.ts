@@ -61,6 +61,17 @@ export interface WorkPlan extends WorkPlanContent {
   periodId: string;
   schoolId: string;
   authorId: string;
+  resolutionFileName: string | null;
+  resolutionFileSize: number | null;
+  resolutionStorageKey: string | null;
+  resolutionUploadedAt: Date | null;
   createdAt: Date;
   updatedAt: Date;
+}
+
+/** Datos del PDF de la resolución de aprobación (HU-42). */
+export interface WorkPlanResolutionFile {
+  fileName: string;
+  fileSize: number;
+  storageKey: string;
 }

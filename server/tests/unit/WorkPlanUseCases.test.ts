@@ -41,6 +41,7 @@ describe('Work plan use cases (HU-41)', () => {
       findByPeriodAndSchool: jest.fn().mockResolvedValue(null),
       findAllByPeriod: jest.fn().mockResolvedValue([{ schoolId: 's1' } as WorkPlan]),
       upsert: jest.fn().mockResolvedValue({ id: 'wp1' } as WorkPlan),
+      setResolution: jest.fn(),
     };
   });
 
@@ -50,7 +51,7 @@ describe('Work plan use cases (HU-41)', () => {
 
   it('el Coordinador solo ve sus escuelas y si ya tienen plan', async () => {
     const res = await list().execute('u1');
-    expect(res.schools).toEqual([{ schoolId: 's1', schoolName: 'Sistemas', hasPlan: true }]);
+    expect(res.schools).toEqual([{ schoolId: 's1', schoolName: 'Sistemas', hasPlan: true, inForce: false }]);
   });
 
   it('la DBU ve todas las escuelas', async () => {

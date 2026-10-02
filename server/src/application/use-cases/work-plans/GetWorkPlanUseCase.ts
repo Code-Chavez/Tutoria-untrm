@@ -3,15 +3,15 @@ import { RoleRepository } from '@domain/repositories/RoleRepository';
 import { SchoolRepository } from '@domain/repositories/SchoolRepository';
 import { AcademicPeriodRepository } from '@domain/repositories/AcademicPeriodRepository';
 import { WorkPlanRepository } from '@domain/repositories/WorkPlanRepository';
-import { WorkPlan } from '@domain/entities/WorkPlan';
 import { NoActivePeriodError } from '@application/use-cases/evaluation/EvaluationErrors';
 import { resolveManageableSchools } from './resolveManageableSchools';
 import { WorkPlanForbiddenError } from './WorkPlanErrors';
+import { PublicWorkPlan, toPublicWorkPlan } from './toPublicWorkPlan';
 
 export interface WorkPlanView {
   periodName: string;
   schoolName: string;
-  plan: WorkPlan | null;
+  plan: PublicWorkPlan | null;
 }
 
 /** Plan de trabajo de una escuela en el periodo activo, o null si aún no se elaboró (HU-41). */
@@ -33,6 +33,10 @@ export class GetWorkPlanUseCase {
     if (!period) throw new NoActivePeriodError();
 
     const plan = await this.workPlans.findByPeriodAndSchool(period.id, schoolId);
-    return { periodName: period.name, schoolName: school.name, plan };
+    return {
+      periodName: period.name,
+      schoolName: school.name,
+      plan: plan ? toPublicWorkPlan(plan) : null,
+    };
   }
 }

@@ -39,7 +39,7 @@ describe('WorkPlanPage', () => {
   it('con una sola escuela la carga sola y envía el plan con filas limpias', async () => {
     mocked.getOverview.mockResolvedValue({
       periodName: '2026-II',
-      schools: [{ schoolId: 's1', schoolName: 'Sistemas', hasPlan: false }],
+      schools: [{ schoolId: 's1', schoolName: 'Sistemas', hasPlan: false, inForce: false }],
     });
     mocked.getBySchool.mockResolvedValue({ periodName: '2026-II', schoolName: 'Sistemas', plan: null });
     mocked.save.mockResolvedValue({} as never);

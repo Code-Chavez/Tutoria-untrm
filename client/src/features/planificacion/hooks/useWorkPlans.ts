@@ -34,3 +34,14 @@ export function useSaveWorkPlan(schoolId: string) {
   });
   return mutation;
 }
+
+export function useUploadWorkPlanResolution(schoolId: string) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (file: File) => workPlanService.uploadResolution(schoolId, file),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: planKey(schoolId) });
+      queryClient.invalidateQueries({ queryKey: OVERVIEW_KEY });
+    },
+  });
+}

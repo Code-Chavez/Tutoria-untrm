@@ -8,7 +8,7 @@ import { resolveManageableSchools } from './resolveManageableSchools';
 
 export interface WorkPlansOverview {
   periodName: string;
-  schools: { schoolId: string; schoolName: string; hasPlan: boolean }[];
+  schools: { schoolId: string; schoolName: string; hasPlan: boolean; inForce: boolean }[];
 }
 
 /** Escuelas que el solicitante puede gestionar y si ya tienen plan en el periodo activo (HU-41). */
@@ -28,14 +28,15 @@ export class ListWorkPlansUseCase {
     if (!period) throw new NoActivePeriodError();
 
     const plans = await this.workPlans.findAllByPeriod(period.id);
-    const withPlan = new Set(plans.map((p) => p.schoolId));
+    const bySchool = new Map(plans.map((p) => [p.schoolId, p]));
 
     return {
       periodName: period.name,
       schools: manageable.map((s) => ({
         schoolId: s.id,
         schoolName: s.name,
-        hasPlan: withPlan.has(s.id),
+        hasPlan: bySchool.has(s.id),
+        inForce: !!bySchool.get(s.id)?.resolutionStorageKey,
       })),
     };
   }

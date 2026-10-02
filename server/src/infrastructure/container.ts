@@ -118,6 +118,8 @@ import { ListFacultiesUseCase } from '@application/use-cases/faculties/ListFacul
 import { ListWorkPlansUseCase } from '@application/use-cases/work-plans/ListWorkPlansUseCase';
 import { GetWorkPlanUseCase } from '@application/use-cases/work-plans/GetWorkPlanUseCase';
 import { SaveWorkPlanUseCase } from '@application/use-cases/work-plans/SaveWorkPlanUseCase';
+import { UploadWorkPlanResolutionUseCase } from '@application/use-cases/work-plans/UploadWorkPlanResolutionUseCase';
+import { GetWorkPlanResolutionFileUseCase } from '@application/use-cases/work-plans/GetWorkPlanResolutionFileUseCase';
 import { GetRiskAlertsUseCase } from '@application/use-cases/alerts/GetRiskAlertsUseCase';
 import { GetScheduleAttendanceReportUseCase } from '@application/use-cases/reports/GetScheduleAttendanceReportUseCase';
 import { CreateReferralUseCase } from '@application/use-cases/referrals/CreateReferralUseCase';
@@ -260,6 +262,22 @@ const saveWorkPlanUseCase = new SaveWorkPlanUseCase(
   schoolRepository,
   academicPeriodRepository,
   workPlanRepository,
+);
+const uploadWorkPlanResolutionUseCase = new UploadWorkPlanResolutionUseCase(
+  userRepository,
+  roleRepository,
+  schoolRepository,
+  academicPeriodRepository,
+  workPlanRepository,
+  evidenceStorage,
+);
+const getWorkPlanResolutionFileUseCase = new GetWorkPlanResolutionFileUseCase(
+  userRepository,
+  roleRepository,
+  schoolRepository,
+  academicPeriodRepository,
+  workPlanRepository,
+  evidenceStorage,
 );
 const getRiskAlertsUseCase = new GetRiskAlertsUseCase(
   studentRepository,
@@ -427,6 +445,8 @@ export const container = {
     listWorkPlansUseCase,
     getWorkPlanUseCase,
     saveWorkPlanUseCase,
+    uploadWorkPlanResolutionUseCase,
+    getWorkPlanResolutionFileUseCase,
     getRiskAlertsUseCase,
     getScheduleAttendanceReportUseCase,
     createReferralUseCase,

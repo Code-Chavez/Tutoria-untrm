@@ -649,6 +649,12 @@ model WorkPlan {
   budget                Json
   operationalActivities Json @map("operational_activities")
 
+  // Resolución de aprobación (HU-42): sin ella el plan no es vigente.
+  resolutionFileName   String?   @map("resolution_file_name")
+  resolutionFileSize   Int?      @map("resolution_file_size")
+  resolutionStorageKey String?   @map("resolution_storage_key")
+  resolutionUploadedAt DateTime? @map("resolution_uploaded_at")
+
   @@unique([periodId, schoolId])
   @@map("work_plans")
 }

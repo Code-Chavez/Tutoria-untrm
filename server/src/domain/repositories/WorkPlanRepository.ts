@@ -1,4 +1,4 @@
-import { WorkPlan, WorkPlanContent } from '../entities/WorkPlan';
+import { WorkPlan, WorkPlanContent, WorkPlanResolutionFile } from '../entities/WorkPlan';
 
 export interface WorkPlanRepository {
   findByPeriodAndSchool(periodId: string, schoolId: string): Promise<WorkPlan | null>;
@@ -10,4 +10,6 @@ export interface WorkPlanRepository {
     authorId: string,
     content: WorkPlanContent,
   ): Promise<WorkPlan>;
+  /** Registra (o reemplaza) el PDF de la resolución de aprobación del plan. */
+  setResolution(planId: string, file: WorkPlanResolutionFile): Promise<WorkPlan>;
 }

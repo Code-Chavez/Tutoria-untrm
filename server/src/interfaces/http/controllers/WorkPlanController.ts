@@ -3,7 +3,13 @@ import { z } from 'zod';
 import { ListWorkPlansUseCase } from '@application/use-cases/work-plans/ListWorkPlansUseCase';
 import { GetWorkPlanUseCase } from '@application/use-cases/work-plans/GetWorkPlanUseCase';
 import { SaveWorkPlanUseCase } from '@application/use-cases/work-plans/SaveWorkPlanUseCase';
-import { WorkPlanForbiddenError } from '@application/use-cases/work-plans/WorkPlanErrors';
+import { UploadWorkPlanResolutionUseCase } from '@application/use-cases/work-plans/UploadWorkPlanResolutionUseCase';
+import { GetWorkPlanResolutionFileUseCase } from '@application/use-cases/work-plans/GetWorkPlanResolutionFileUseCase';
+import {
+  WorkPlanForbiddenError,
+  WorkPlanNotFoundError,
+  WorkPlanResolutionNotFoundError,
+} from '@application/use-cases/work-plans/WorkPlanErrors';
 import { NoActivePeriodError } from '@application/use-cases/evaluation/EvaluationErrors';
 import { saveWorkPlanSchema } from '../validators/workPlan.validators';
 
@@ -12,6 +18,8 @@ export class WorkPlanController {
     private readonly listWorkPlansUseCase: ListWorkPlansUseCase,
     private readonly getWorkPlanUseCase: GetWorkPlanUseCase,
     private readonly saveWorkPlanUseCase: SaveWorkPlanUseCase,
+    private readonly uploadWorkPlanResolutionUseCase: UploadWorkPlanResolutionUseCase,
+    private readonly getWorkPlanResolutionFileUseCase: GetWorkPlanResolutionFileUseCase,
   ) {}
 
   private handleError(error: unknown, res: Response) {
@@ -19,6 +27,11 @@ export class WorkPlanController {
       res.status(400).json({ error: 'Datos de entrada inválidos', details: error.errors });
     } else if (error instanceof WorkPlanForbiddenError) {
       res.status(403).json({ error: error.message });
+    } else if (
+      error instanceof WorkPlanNotFoundError ||
+      error instanceof WorkPlanResolutionNotFoundError
+    ) {
+      res.status(404).json({ error: error.message });
     } else if (error instanceof NoActivePeriodError) {
       res.status(409).json({ error: error.message });
     } else {
@@ -57,6 +70,37 @@ export class WorkPlanController {
         content,
       );
       res.status(200).json({ message: 'Plan de trabajo guardado', plan });
+    } catch (error) {
+      this.handleError(error, res);
+    }
+  };
+
+  // Resolución de aprobación del plan (HU-42): sin ella el plan no es vigente.
+  uploadResolution = async (req: Request, res: Response) => {
+    try {
+      const file = req.file;
+      if (!file) {
+        res.status(400).json({ error: 'Debe adjuntar la resolución en PDF en el campo «file»' });
+        return;
+      }
+      const plan = await this.uploadWorkPlanResolutionUseCase.execute(
+        req.auth?.sub as string,
+        req.params.schoolId as string,
+        { fileBuffer: file.buffer, fileName: file.originalname, fileSize: file.size },
+      );
+      res.status(200).json({ message: 'Resolución de aprobación registrada', plan });
+    } catch (error) {
+      this.handleError(error, res);
+    }
+  };
+
+  downloadResolution = async (req: Request, res: Response) => {
+    try {
+      const { fileName, absolutePath } = await this.getWorkPlanResolutionFileUseCase.execute(
+        req.auth?.sub as string,
+        req.params.schoolId as string,
+      );
+      res.download(absolutePath, fileName);
     } catch (error) {
       this.handleError(error, res);
     }
