@@ -20,6 +20,7 @@ import { ProfilePage } from '@features/profile/pages/ProfilePage';
 import { MyTutoringRequestPage } from '@features/solicitudes/pages/MyTutoringRequestPage';
 import { SessionsCalendarPage } from '@features/sesiones/pages/SessionsCalendarPage';
 import { ScheduleAttendanceReportPage } from '@features/informes/pages/ScheduleAttendanceReportPage';
+import { SemesterReportPage } from '@features/informes/pages/SemesterReportPage';
 import { ReferralsPage } from '@features/derivaciones/pages/ReferralsPage';
 import { ReferralTrackingPage } from '@features/derivaciones/pages/ReferralTrackingPage';
 import { EvaluationPage } from '@features/evaluacion/pages/EvaluationPage';
@@ -142,6 +143,14 @@ export default function App() {
                 element={
                   <RequireRole roles={['Tutorado']}>
                     <EvaluationPage />
+                  </RequireRole>
+                }
+              />
+              <Route
+                path="informes/semestral"
+                element={
+                  <RequireRole roles={['Docente Tutor']}>
+                    <SemesterReportPage />
                   </RequireRole>
                 }
               />
