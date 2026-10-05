@@ -52,6 +52,7 @@ model User {
   notifications          Notification[]
   evaluationsReceived    TutorEvaluation[] @relation("TutorEvaluationsReceived")
   workPlansAuthored      WorkPlan[]        @relation("WorkPlansAuthored")
+  semesterReports        TutorSemesterReport[]
 
   @@map("users")
 }
@@ -180,6 +181,7 @@ model AcademicPeriod {
   evaluations       TutorEvaluation[]
   evaluationWindows EvaluationWindow[]
   workPlans         WorkPlan[]
+  tutorSemesterReports TutorSemesterReport[]
 
   @@map("academic_periods")
 }
@@ -668,4 +670,29 @@ model SystemParameter {
   label String
 
   @@map("system_parameters")
+}
+
+// Informe de implementación de la tutoría semestral del tutor (HU-43,
+// Anexo N°9): un informe por tutor y periodo; las tablas se guardan como Json.
+model TutorSemesterReport {
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  periodId String         @map("period_id")
+  period   AcademicPeriod @relation(fields: [periodId], references: [id])
+  tutorId  String         @map("tutor_id")
+  tutor    User           @relation(fields: [tutorId], references: [id])
+
+  programName     String @map("program_name")
+  faculty         String
+  teacherCategory String @map("teacher_category")
+  tutoringCycles  String @map("tutoring_cycles")
+  phone           String
+
+  individual Json
+  group      Json
+
+  @@unique([periodId, tutorId])
+  @@map("tutor_semester_reports")
 }

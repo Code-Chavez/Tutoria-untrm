@@ -16,6 +16,7 @@ import { PrismaSupportContactRepository } from './repositories/PrismaSupportCont
 import { PrismaSchoolRepository } from './repositories/PrismaSchoolRepository';
 import { PrismaFacultyRepository } from './repositories/PrismaFacultyRepository';
 import { PrismaWorkPlanRepository } from './repositories/PrismaWorkPlanRepository';
+import { PrismaTutorSemesterReportRepository } from './repositories/PrismaTutorSemesterReportRepository';
 import { PrismaNotificationRepository } from './repositories/PrismaNotificationRepository';
 import { PrismaAcademicPeriodRepository } from './repositories/PrismaAcademicPeriodRepository';
 import { PrismaTutorEvaluationRepository } from './repositories/PrismaTutorEvaluationRepository';
@@ -47,6 +48,7 @@ const supportContactRepository = new PrismaSupportContactRepository(prisma);
 const schoolRepository = new PrismaSchoolRepository(prisma);
 const facultyRepository = new PrismaFacultyRepository(prisma);
 const workPlanRepository = new PrismaWorkPlanRepository(prisma);
+const tutorSemesterReportRepository = new PrismaTutorSemesterReportRepository(prisma);
 const notificationRepository = new PrismaNotificationRepository(prisma);
 const academicPeriodRepository = new PrismaAcademicPeriodRepository(prisma);
 const tutorEvaluationRepository = new PrismaTutorEvaluationRepository(prisma);
@@ -118,6 +120,9 @@ import { ListFacultiesUseCase } from '@application/use-cases/faculties/ListFacul
 import { ListWorkPlansUseCase } from '@application/use-cases/work-plans/ListWorkPlansUseCase';
 import { GetWorkPlanUseCase } from '@application/use-cases/work-plans/GetWorkPlanUseCase';
 import { SaveWorkPlanUseCase } from '@application/use-cases/work-plans/SaveWorkPlanUseCase';
+import { GetMySemesterReportUseCase } from '@application/use-cases/semester-reports/GetMySemesterReportUseCase';
+import { SaveMySemesterReportUseCase } from '@application/use-cases/semester-reports/SaveMySemesterReportUseCase';
+import { GetSemesterReportForExportUseCase } from '@application/use-cases/semester-reports/GetSemesterReportForExportUseCase';
 import { UploadWorkPlanResolutionUseCase } from '@application/use-cases/work-plans/UploadWorkPlanResolutionUseCase';
 import { GetWorkPlanResolutionFileUseCase } from '@application/use-cases/work-plans/GetWorkPlanResolutionFileUseCase';
 import { GetRiskAlertsUseCase } from '@application/use-cases/alerts/GetRiskAlertsUseCase';
@@ -278,6 +283,29 @@ const getWorkPlanResolutionFileUseCase = new GetWorkPlanResolutionFileUseCase(
   academicPeriodRepository,
   workPlanRepository,
   evidenceStorage,
+);
+const getMySemesterReportUseCase = new GetMySemesterReportUseCase(
+  userRepository,
+  roleRepository,
+  academicPeriodRepository,
+  sessionRepository,
+  studentRepository,
+  schoolRepository,
+  facultyRepository,
+  tutorFollowUpRepository,
+  tutorSemesterReportRepository,
+);
+const saveMySemesterReportUseCase = new SaveMySemesterReportUseCase(
+  userRepository,
+  roleRepository,
+  academicPeriodRepository,
+  tutorSemesterReportRepository,
+);
+const getSemesterReportForExportUseCase = new GetSemesterReportForExportUseCase(
+  userRepository,
+  roleRepository,
+  academicPeriodRepository,
+  tutorSemesterReportRepository,
 );
 const getRiskAlertsUseCase = new GetRiskAlertsUseCase(
   studentRepository,
@@ -447,6 +475,9 @@ export const container = {
     saveWorkPlanUseCase,
     uploadWorkPlanResolutionUseCase,
     getWorkPlanResolutionFileUseCase,
+    getMySemesterReportUseCase,
+    saveMySemesterReportUseCase,
+    getSemesterReportForExportUseCase,
     getRiskAlertsUseCase,
     getScheduleAttendanceReportUseCase,
     createReferralUseCase,

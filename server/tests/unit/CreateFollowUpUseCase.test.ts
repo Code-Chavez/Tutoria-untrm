@@ -25,6 +25,7 @@ describe('CreateFollowUpUseCase', () => {
         ...data,
       })),
       findByStudent: jest.fn(),
+      findByTutorBetween: jest.fn(),
     };
     students = {
       findById: jest.fn().mockResolvedValue({ id: 'student-1' } as Student),

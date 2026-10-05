@@ -123,6 +123,7 @@ describe('GetStudentRecordUseCase', () => {
     followUps = {
       create: jest.fn(),
       findByStudent: jest.fn().mockResolvedValue([]),
+      findByTutorBetween: jest.fn(),
     };
     roles = {
       findById: jest.fn().mockResolvedValue(tutorRole),
