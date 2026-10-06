@@ -1,10 +1,8 @@
-import ExcelJS from 'exceljs';
 import {
   ConsolidatedMetrics,
   ConsolidatedReport,
 } from '@application/use-cases/consolidated-reports/buildConsolidatedReport';
-
-const NAVY = 'FF0B1F3F';
+import { BrandedWorkbook, SheetCell } from '../export/BrandedWorkbook';
 
 export const CONSOLIDATED_COLUMNS: { label: string; value: (m: ConsolidatedMetrics) => number }[] = [
   { label: 'Tutorados', value: (m) => m.activeStudents },
@@ -21,41 +19,37 @@ export const CONSOLIDATED_COLUMNS: { label: string; value: (m: ConsolidatedMetri
   { label: 'Sesiones/tutor', value: (m) => m.avgSessionsPerTutor },
 ];
 
-// Construye el .xlsx del consolidado por escuela y facultad (HU-44). No
-// persiste nada; recibe el reporte ya calculado.
+// Excel del consolidado por escuela y facultad (HU-44) sobre el motor de
+// exportación (HU-46). No persiste nada; recibe el reporte ya calculado.
 export class ConsolidatedReportWorkbook {
-  async build(report: ConsolidatedReport): Promise<Buffer> {
-    const workbook = new ExcelJS.Workbook();
-    workbook.creator = 'SIT UNTRM';
-    workbook.created = report.generatedAt;
-
-    const sheet = workbook.addWorksheet('Consolidado');
-    sheet.addRow([`Informe consolidado de tutoría · ${report.periodName}`]).font = {
-      bold: true,
-      size: 14,
-      color: { argb: NAVY },
-    };
-    sheet.addRow([`Generado: ${report.generatedAt.toLocaleString('es-PE')}`]);
-    sheet.addRow([]);
-
-    const header = sheet.addRow(['Facultad', 'Escuela', ...CONSOLIDATED_COLUMNS.map((c) => c.label)]);
-    header.font = { bold: true, color: { argb: 'FFFFFFFF' } };
-    header.eachCell((cell) => {
-      cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: NAVY } };
-    });
+  build(report: ConsolidatedReport): Promise<Buffer> {
+    const rows: SheetCell[][] = [];
+    const emphasized = new Set<number>();
+    const metrics = (m: ConsolidatedMetrics) => CONSOLIDATED_COLUMNS.map((c) => c.value(m));
 
     for (const faculty of report.faculties) {
       for (const school of faculty.schools) {
-        sheet.addRow([faculty.facultyName, school.schoolName, ...CONSOLIDATED_COLUMNS.map((c) => c.value(school.metrics))]);
+        rows.push([faculty.facultyName, school.schoolName, ...metrics(school.metrics)]);
       }
-      sheet.addRow([faculty.facultyName, 'Total facultad', ...CONSOLIDATED_COLUMNS.map((c) => c.value(faculty.metrics))]).font = { bold: true };
+      emphasized.add(rows.length);
+      rows.push([faculty.facultyName, 'Total facultad', ...metrics(faculty.metrics)]);
     }
-    sheet.addRow(['TOTAL GENERAL', '', ...CONSOLIDATED_COLUMNS.map((c) => c.value(report.totals))]).font = { bold: true };
+    emphasized.add(rows.length);
+    rows.push(['TOTAL GENERAL', '', ...metrics(report.totals)]);
 
-    sheet.getColumn(1).width = 34;
-    sheet.getColumn(2).width = 32;
-    for (let i = 3; i <= 2 + CONSOLIDATED_COLUMNS.length; i++) sheet.getColumn(i).width = 15;
-
-    return Buffer.from(await workbook.xlsx.writeBuffer());
+    return new BrandedWorkbook(report.generatedAt)
+      .addSheet({
+        name: 'Consolidado',
+        title: 'Informe consolidado de tutoría',
+        details: [`Periodo ${report.periodName}`, `Generado: ${report.generatedAt.toLocaleString('es-PE')}`],
+        columns: [
+          { header: 'Facultad', width: 34 },
+          { header: 'Escuela', width: 32 },
+          ...CONSOLIDATED_COLUMNS.map((c) => ({ header: c.label, width: 15 })),
+        ],
+        rows,
+        emphasized,
+      })
+      .toBuffer();
   }
 }

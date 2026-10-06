@@ -1,31 +1,13 @@
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { PageHeader, Card, Button, SelectField, EmptyState, TableSkeleton } from '@shared/components/ui';
-import { PieChartIcon, DownloadIcon } from '@shared/components/icons';
+import { PieChartIcon } from '@shared/components/icons';
+import { ExportButtons } from '@shared/components/ExportButtons';
+import { downloadFile } from '@shared/services/downloadFile';
 import { schoolService } from '@features/tutorados/services/schoolService';
 import { facultyService } from '../services/facultyService';
 import { useEvaluationStatistics } from '../hooks/useEvaluationStatistics';
 import styles from './EvaluationStatisticsPage.module.css';
-
-function toCsv(report: { tutors: { tutorName: string; totalResponses: number; overallAverage: number }[] }): string {
-  const header = 'Tutor,Respuestas,Promedio general\n';
-  const rows = report.tutors
-    .map((t) => `"${t.tutorName}",${t.totalResponses},${t.overallAverage.toFixed(2)}`)
-    .join('\n');
-  return header + rows;
-}
-
-function downloadCsv(filename: string, content: string) {
-  const blob = new Blob(['﻿' + content], { type: 'text/csv;charset=utf-8;' });
-  const url = URL.createObjectURL(blob);
-  const link = document.createElement('a');
-  link.href = url;
-  link.download = filename;
-  document.body.appendChild(link);
-  link.click();
-  document.body.removeChild(link);
-  URL.revokeObjectURL(url);
-}
 
 // Resultados estadísticos de la evaluación de tutoría (HU-39): promedios por
 // tutor e ítem del periodo activo, filtrables por escuela/facultad.
@@ -48,10 +30,12 @@ export function EvaluationStatisticsPage() {
     facultyId: facultyId || undefined,
   });
 
-  const handleExport = () => {
-    if (!report) return;
-    downloadCsv(`evaluacion-${report.periodName}.csv`, toCsv(report));
-  };
+  const handleExport = (format: 'pdf' | 'excel') =>
+    downloadFile(
+      `/evaluations/statistics/${format}`,
+      `evaluacion-tutoria.${format === 'pdf' ? 'pdf' : 'xlsx'}`,
+      { schoolId: schoolId || undefined, facultyId: facultyId || undefined },
+    );
 
   return (
     <div className={styles.page}>
@@ -60,14 +44,7 @@ export function EvaluationStatisticsPage() {
         subtitle="Promedios por tutor e ítem del periodo activo, con resultados agregados y anónimos (Anexo N°7)"
         icon={<PieChartIcon size={22} />}
         actions={
-          <Button
-            variant="secondary"
-            icon={<DownloadIcon size={16} />}
-            onClick={handleExport}
-            disabled={!report || report.tutors.length === 0}
-          >
-            Exportar CSV
-          </Button>
+          <ExportButtons onExport={handleExport} disabled={!report || report.tutors.length === 0} />
         }
       />
 

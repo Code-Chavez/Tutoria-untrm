@@ -140,3 +140,17 @@
   color: var(--peligro);
   font-size: var(--fs-sm);
 }
+
+.exportRow {
+  display: flex;
+  align-items: center;
+  gap: var(--s3);
+  flex-wrap: wrap;
+  margin-top: var(--s4);
+}
+
+.exportHint {
+  margin: 0;
+  font-size: var(--fs-xs);
+  color: var(--g600);
+}

@@ -23,10 +23,12 @@ import workPlanRoutes from './workPlan.routes';
 import semesterReportRoutes from './semesterReport.routes';
 import consolidatedReportRoutes from './consolidatedReport.routes';
 import indicatorsRoutes from './indicators.routes';
+import exportRoutes from './export.routes';
 
 const router: IRouter = Router();
 
 router.use(healthRoutes);
+router.use(exportRoutes);
 router.use(authRoutes);
 router.use(userRoutes);
 router.use(roleRoutes);

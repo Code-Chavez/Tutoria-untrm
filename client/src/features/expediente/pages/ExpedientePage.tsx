@@ -12,6 +12,8 @@ import {
   AlertTriangleIcon,
 } from '@shared/components/icons';
 import { getApiErrorMessage } from '@shared/services/apiClient';
+import { ExportButtons } from '@shared/components/ExportButtons';
+import { downloadFile } from '@shared/services/downloadFile';
 import styles from './ExpedientePage.module.css';
 
 export const ExpedientePage: React.FC = () => {
@@ -72,6 +74,10 @@ export const ExpedientePage: React.FC = () => {
               <Badge tone="neutral">Inactivo</Badge>
             )}
             <Badge tone="info">Tutor: {record.tutorName ?? 'Sin asignar'}</Badge>
+            <ExportButtons
+              formats={['pdf']}
+              onExport={() => downloadFile(`/students/${student.id}/record/pdf`, 'expediente-tutorado.pdf')}
+            />
           </div>
         }
       />

@@ -1,6 +1,8 @@
 import { useState } from 'react';
 import { PageHeader, Card, Button, SelectField, StatCard, EmptyState, TableSkeleton } from '@shared/components/ui';
 import { PieChartIcon, UsersIcon, ActivityIcon, SendIcon, StarIcon } from '@shared/components/icons';
+import { ExportButtons } from '@shared/components/ExportButtons';
+import { downloadFile } from '@shared/services/downloadFile';
 import { useIndicators } from '../hooks/useIndicators';
 import styles from './IndicatorsPage.module.css';
 
@@ -81,6 +83,13 @@ export function IndicatorsPage() {
     tutorId: tutorId || undefined,
   });
 
+  const handleExport = (format: 'pdf' | 'excel') =>
+    downloadFile(`/indicators/${format}`, `indicadores-tutoria.${format === 'pdf' ? 'pdf' : 'xlsx'}`, {
+      facultyId: facultyId || undefined,
+      schoolId: schoolId || undefined,
+      tutorId: tutorId || undefined,
+    });
+
   const options = report?.filterOptions;
   const schoolOptions = (options?.schools ?? []).filter((s) => !facultyId || s.facultyId === facultyId);
 
@@ -94,6 +103,7 @@ export function IndicatorsPage() {
             : 'Indicadores de tutoría para ICACIT / SINEACE'
         }
         icon={<PieChartIcon size={22} />}
+        actions={<ExportButtons onExport={handleExport} disabled={!report} />}
       />
 
       <Card padded className={styles.filters}>
