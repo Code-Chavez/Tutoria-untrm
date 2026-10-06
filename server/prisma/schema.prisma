@@ -696,3 +696,19 @@ model TutorSemesterReport {
   @@unique([periodId, tutorId])
   @@map("tutor_semester_reports")
 }
+
+// Catálogos maestros editables (HU-48): ciclos, servicios y motivos. Las
+// facultades, escuelas y periodos usan sus propias tablas. `code` es el valor
+// que referencian los demás datos (p. ej. Student.cycle o StudentReferral.service),
+// por eso no se edita; `isActive` retira el ítem de las listas sin perder historial.
+model CatalogItem {
+  id        String   @id @default(uuid())
+  catalog   String
+  code      String
+  name      String
+  isActive  Boolean  @default(true) @map("is_active")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@unique([catalog, code])
+  @@map("catalog_items")
+}
