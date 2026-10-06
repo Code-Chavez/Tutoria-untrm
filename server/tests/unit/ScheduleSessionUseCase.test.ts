@@ -59,6 +59,9 @@ describe('ScheduleSessionUseCase', () => {
       countByTutor: jest.fn(),
     };
     systemParameters = {
+      findAll: jest.fn(),
+      create: jest.fn(),
+      update: jest.fn(),
       findByKey: jest
         .fn()
         .mockResolvedValue({ key: 'session_duration_minutes', value: '45' } as SystemParameter),

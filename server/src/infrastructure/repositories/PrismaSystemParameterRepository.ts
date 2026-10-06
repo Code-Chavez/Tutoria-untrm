@@ -8,4 +8,16 @@ export class PrismaSystemParameterRepository implements SystemParameterRepositor
   findByKey(key: string): Promise<SystemParameter | null> {
     return this.prisma.systemParameter.findUnique({ where: { key } });
   }
+
+  findAll(): Promise<SystemParameter[]> {
+    return this.prisma.systemParameter.findMany({ orderBy: { key: 'asc' } });
+  }
+
+  create(data: Omit<SystemParameter, 'id'>): Promise<SystemParameter> {
+    return this.prisma.systemParameter.create({ data });
+  }
+
+  update(key: string, value: string): Promise<SystemParameter> {
+    return this.prisma.systemParameter.update({ where: { key }, data: { value } });
+  }
 }

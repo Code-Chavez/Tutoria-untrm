@@ -128,6 +128,11 @@ import {
   ListCatalogUseCase,
   UpdateCatalogEntryUseCase,
 } from '@application/use-cases/catalogs/CatalogUseCases';
+import {
+  ListSystemParametersUseCase,
+  UpdateSystemParameterUseCase,
+} from '@application/use-cases/system-parameters/SystemParameterUseCases';
+import { GetHomePanelUseCase } from '@application/use-cases/home-panel/GetHomePanelUseCase';
 import { GetReportFilterOptionsUseCase } from '@application/use-cases/report-filters/GetReportFilterOptionsUseCase';
 import { GetIndicatorsUseCase } from '@application/use-cases/indicators/GetIndicatorsUseCase';
 import { GetConsolidatedReportUseCase } from '@application/use-cases/consolidated-reports/GetConsolidatedReportUseCase';
@@ -328,6 +333,8 @@ const getConsolidatedReportUseCase = new GetConsolidatedReportUseCase(
   facultyRepository,
   tutorSemesterReportRepository,
 );
+const listSystemParametersUseCase = new ListSystemParametersUseCase(systemParameterRepository);
+const updateSystemParameterUseCase = new UpdateSystemParameterUseCase(systemParameterRepository, auditLogRepository);
 const listCatalogUseCase = new ListCatalogUseCase(catalogRepository);
 const createCatalogEntryUseCase = new CreateCatalogEntryUseCase(catalogRepository);
 const updateCatalogEntryUseCase = new UpdateCatalogEntryUseCase(catalogRepository);
@@ -445,6 +452,18 @@ const setEvaluationWindowUseCase = new SetEvaluationWindowUseCase(
 const getNotificationsUseCase = new GetNotificationsUseCase(notificationRepository);
 const markNotificationReadUseCase = new MarkNotificationReadUseCase(notificationRepository);
 
+const getHomePanelUseCase = new GetHomePanelUseCase(
+  userRepository,
+  roleRepository,
+  academicPeriodRepository,
+  studentRepository,
+  sessionRepository,
+  studentReferralRepository,
+  getIndicatorsUseCase,
+  getRiskAlertsUseCase,
+  getEvaluationStatusUseCase,
+);
+
 export const container = {
   repositories: {
     userRepository,
@@ -528,6 +547,9 @@ export const container = {
     getIndicatorsUseCase,
     getReportFilterOptionsUseCase,
     listCatalogUseCase,
+    listSystemParametersUseCase,
+    getHomePanelUseCase,
+    updateSystemParameterUseCase,
     createCatalogEntryUseCase,
     updateCatalogEntryUseCase,
     deleteCatalogEntryUseCase,

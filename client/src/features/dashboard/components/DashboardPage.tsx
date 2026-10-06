@@ -1,25 +1,68 @@
 import { useAuth } from '@features/auth/hooks/useAuth';
+import type { ReactNode } from 'react';
+import { Link } from 'react-router-dom';
 import { StatCard, Card, CardHeader, CardBody } from '@shared/components/ui';
 import {
   GraduationCapIcon,
   CheckCircleIcon,
   AlertTriangleIcon,
   CalendarIcon,
+  ActivityIcon,
+  SendIcon,
+  StarIcon,
+  UsersIcon,
+  InboxIcon,
 } from '@shared/components/icons';
-import { useDashboardMetrics } from '../hooks/useDashboardMetrics';
+import { useHomePanel } from '../hooks/useHomePanel';
+import type { HomeKpi } from '../services/homePanelService';
 import { QuickActions } from './QuickActions';
 import { RecentActivity } from './RecentActivity';
 import { RiskAlerts } from './RiskAlerts';
 import styles from './DashboardPage.module.css';
 
+// Icono de cada indicador del panel; los que no figuran usan uno genérico.
+const KPI_ICON: Record<string, ReactNode> = {
+  'my-students': <GraduationCapIcon size={22} />,
+  students: <GraduationCapIcon size={22} />,
+  'upcoming-sessions': <CalendarIcon size={22} />,
+  'next-session': <CalendarIcon size={22} />,
+  coverage: <ActivityIcon size={22} />,
+  alerts: <AlertTriangleIcon size={22} />,
+  risk: <AlertTriangleIcon size={22} />,
+  'open-referrals': <SendIcon size={22} />,
+  referrals: <SendIcon size={22} />,
+  'to-receive': <InboxIcon size={22} />,
+  'in-care': <ActivityIcon size={22} />,
+  attended: <CheckCircleIcon size={22} />,
+  closed: <CheckCircleIcon size={22} />,
+  evaluation: <StarIcon size={22} />,
+  'my-tutor': <UsersIcon size={22} />,
+};
+
+function KpiCard({ kpi }: { kpi: HomeKpi }) {
+  const card = (
+    <StatCard
+      icon={KPI_ICON[kpi.key] ?? <CheckCircleIcon size={22} />}
+      value={kpi.value}
+      label={kpi.label}
+      hint={kpi.hint}
+      tone={kpi.tone}
+    />
+  );
+  return kpi.link ? (
+    <Link to={kpi.link} className={styles.kpiLink} aria-label={`${kpi.label}: ${kpi.value}`}>
+      {card}
+    </Link>
+  ) : (
+    card
+  );
+}
+
 export function DashboardPage() {
   const { user } = useAuth();
-  const { metrics, loading, forbidden } = useDashboardMetrics();
+  const { panel, loading, error } = useHomePanel();
 
   const firstName = user?.firstName ?? '';
-  // Muestra "—" cuando el dato no está disponible para el rol, en vez de inventarlo.
-  const na = forbidden ? '—' : '0';
-  const val = (n?: number) => (metrics ? String(n ?? 0) : na);
 
   return (
     <div>
@@ -29,44 +72,27 @@ export function DashboardPage() {
             Bienvenido{firstName ? `, ${firstName}` : ''}
           </h1>
           <p className={styles.sub}>
-            Resumen general del sistema · Periodo académico 2026-II · FISME
+            Resumen de tu trabajo en el sistema
+            {panel?.periodName ? ` · Periodo académico ${panel.periodName}` : ''}
           </p>
         </div>
         {user && <span className={styles.roleTag}>{user.role}</span>}
       </div>
 
       <div className={styles.kpis}>
-        <StatCard
-          icon={<GraduationCapIcon size={22} />}
-          value={val(metrics?.totalStudents)}
-          label="Total de tutorados"
-          hint="Estudiantes registrados"
-          tone="info"
-          loading={loading}
-        />
-        <StatCard
-          icon={<CheckCircleIcon size={22} />}
-          value={val(metrics?.activeStudents)}
-          label="Tutorados activos"
-          hint="Con matrícula vigente"
-          tone="success"
-          loading={loading}
-        />
-        <StatCard
-          icon={<AlertTriangleIcon size={22} />}
-          value={val(metrics?.atRiskStudents)}
-          label="En riesgo académico"
-          hint="Requieren seguimiento"
-          tone="warning"
-          loading={loading}
-        />
-        <StatCard
-          icon={<CalendarIcon size={22} />}
-          value="—"
-          label="Sesiones programadas"
-          hint="Módulo en desarrollo"
-          tone="neutral"
-        />
+        {loading ? (
+          <>
+            <StatCard icon={<ActivityIcon size={22} />} value="" label="" loading />
+            <StatCard icon={<ActivityIcon size={22} />} value="" label="" loading />
+            <StatCard icon={<ActivityIcon size={22} />} value="" label="" loading />
+          </>
+        ) : error ? (
+          <p role="alert" className={styles.kpiError}>
+            No se pudieron cargar tus indicadores. Recarga la página para intentarlo de nuevo.
+          </p>
+        ) : (
+          (panel?.kpis ?? []).map((kpi) => <KpiCard key={kpi.key} kpi={kpi} />)
+        )}
       </div>
 
       <div className={styles.columns}>

@@ -59,6 +59,9 @@ describe('RegisterAttendanceUseCase', () => {
       findEvidenceById: jest.fn(),
     };
     systemParameters = {
+      findAll: jest.fn(),
+      create: jest.fn(),
+      update: jest.fn(),
       findByKey: jest
         .fn()
         .mockResolvedValue({ key: 'max_sessions_per_semester', value: '8' } as SystemParameter),
