@@ -52,10 +52,13 @@ describe('ScheduleAttendanceReportWorkbook', () => {
     expect(summary).toBeDefined();
     expect(detail).toBeDefined();
 
-    // Encabezado + 2 sesiones.
-    expect(detail?.rowCount).toBe(3);
-    expect(detail?.getRow(2).getCell(2).value).toBe('Reforzamiento');
-    expect(detail?.getRow(2).getCell(5).value).toBe('Ana Torres');
-    expect(detail?.getRow(3).getCell(5).value).toBe('Ana Torres, Luis Pérez');
+    // Bloque de marca (institución, título, 3 líneas de contexto y un espacio),
+    // encabezado de tabla en la fila 7 y las 2 sesiones debajo.
+    expect(detail?.getRow(2).getCell(1).value).toBe('Detalle de sesiones');
+    expect(detail?.getRow(7).getCell(2).value).toBe('Tema');
+    expect(detail?.rowCount).toBe(9);
+    expect(detail?.getRow(8).getCell(2).value).toBe('Reforzamiento');
+    expect(detail?.getRow(8).getCell(5).value).toBe('Ana Torres');
+    expect(detail?.getRow(9).getCell(5).value).toBe('Ana Torres, Luis Pérez');
   });
 });

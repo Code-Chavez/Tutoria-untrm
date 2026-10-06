@@ -8,6 +8,8 @@ import {
   WorkPlanContent,
   WorkPlan,
 } from '../services/workPlanService';
+import { ExportButtons } from '@shared/components/ExportButtons';
+import { downloadFile } from '@shared/services/downloadFile';
 import { WorkPlanResolutionCard } from '../components/WorkPlanResolutionCard';
 import styles from './WorkPlanPage.module.css';
 
@@ -508,7 +510,16 @@ export function WorkPlanPage() {
           )}
 
           {schoolId && !loadingPlan && view?.plan && (
-            <WorkPlanResolutionCard schoolId={schoolId} plan={view.plan} />
+            <>
+              <WorkPlanResolutionCard schoolId={schoolId} plan={view.plan} />
+              <div className={styles.exportRow}>
+                <ExportButtons
+                  formats={['pdf']}
+                  onExport={() => downloadFile(`/work-plans/${schoolId}/pdf`, 'plan-trabajo-semestral.pdf')}
+                />
+                <p className={styles.exportHint}>El PDF refleja la última versión guardada del plan.</p>
+              </div>
+            </>
           )}
         </>
       )}
