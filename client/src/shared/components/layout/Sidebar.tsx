@@ -75,7 +75,7 @@ const NAV: NavGroup[] = [
       { label: 'Informes', Icon: ReportIcon, path: '/informes', roles: ['tutor', 'coord', 'dbu', 'vice'] },
       { label: 'Informe semestral', Icon: ReportIcon, path: '/informes/semestral', roles: ['tutor'] },
       { label: 'Informe consolidado', Icon: ReportIcon, path: '/informes/consolidado', roles: ['dbu', 'vice'] },
-      { label: 'Indicadores', Icon: PieChartIcon, roles: ['dbu', 'coord', 'vice'] },
+      { label: 'Indicadores', Icon: PieChartIcon, path: '/indicadores', roles: ['dbu', 'coord', 'vice'] },
       { label: 'Administración', Icon: SettingsIcon, path: '/users', roles: ['dbu'] },
       { label: 'Evaluación de tutoría', Icon: SettingsIcon, path: '/evaluacion/configuracion', roles: ['dbu'] },
       { label: 'Resultados de evaluación', Icon: PieChartIcon, path: '/evaluacion/resultados', roles: ['dbu', 'coord'] },
