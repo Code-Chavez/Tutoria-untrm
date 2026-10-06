@@ -22,7 +22,8 @@
     "overrides": {
       "deepmerge-ts": ">=8.0.0",
       "qs": ">=6.16.0",
-      "brace-expansion": "^1.1.21 || ^2.1.7"
+      "brace-expansion": "^1.1.21 || ^2.1.7",
+      "proxy-addr": ">=2.0.8"
     },
     "auditConfig": {
       "ignoreGhsas": [
