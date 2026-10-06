@@ -80,6 +80,7 @@ describe('Tutor semester report (HU-43)', () => {
     followUps = { findByTutorBetween: jest.fn().mockResolvedValue([]) } as unknown as jest.Mocked<TutorFollowUpRepository>;
     reports = {
       findByPeriodAndTutor: jest.fn().mockResolvedValue(null),
+      findAllByPeriod: jest.fn(),
       upsert: jest.fn().mockResolvedValue({ id: 'r' } as TutorSemesterReport),
     };
   });

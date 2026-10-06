@@ -21,6 +21,7 @@ import evaluationRoutes from './evaluation.routes';
 import facultyRoutes from './faculty.routes';
 import workPlanRoutes from './workPlan.routes';
 import semesterReportRoutes from './semesterReport.routes';
+import consolidatedReportRoutes from './consolidatedReport.routes';
 
 const router: IRouter = Router();
 
@@ -46,5 +47,6 @@ router.use(evaluationRoutes);
 router.use(facultyRoutes);
 router.use(workPlanRoutes);
 router.use(semesterReportRoutes);
+router.use(consolidatedReportRoutes);
 
 export default router;
