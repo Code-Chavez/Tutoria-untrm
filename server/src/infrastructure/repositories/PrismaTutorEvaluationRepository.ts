@@ -70,11 +70,12 @@ export class PrismaTutorEvaluationRepository implements TutorEvaluationRepositor
     const rows = await this.prisma.tutorEvaluation.findMany({
       where: {
         periodId,
-        ...(filters?.schoolId || filters?.facultyId
+        ...(filters?.schoolId || filters?.facultyId || filters?.cycle !== undefined
           ? {
               student: {
                 ...(filters.schoolId ? { schoolId: filters.schoolId } : {}),
                 ...(filters.facultyId ? { school: { facultyId: filters.facultyId } } : {}),
+                ...(filters.cycle !== undefined ? { cycle: filters.cycle } : {}),
               },
             }
           : {}),

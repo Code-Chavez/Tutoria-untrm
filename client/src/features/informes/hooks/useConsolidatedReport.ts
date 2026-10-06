@@ -4,7 +4,7 @@ import { consolidatedReportService, ConsolidatedFilters } from '../services/cons
 /** Informe consolidado por escuela y facultad del periodo activo (HU-44). */
 export function useConsolidatedReport(filters: ConsolidatedFilters) {
   const query = useQuery({
-    queryKey: ['consolidatedReport', filters.facultyId ?? null, filters.schoolId ?? null],
+    queryKey: ['consolidatedReport', filters],
     queryFn: () => consolidatedReportService.getReport(filters),
   });
   return { report: query.data, loading: query.isLoading, error: query.isError, refresh: query.refetch };

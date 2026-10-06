@@ -31,11 +31,8 @@ export interface IndicatorsReport {
   };
   /** Solo agregados: nunca por tutor ni por tutorado (anonimato, HU-37/39). */
   evaluation: { responses: number; averageScore: number | null };
-  filterOptions: {
-    faculties: { id: string; name: string }[];
-    schools: { id: string; name: string; facultyId: string }[];
-    tutors: { id: string; name: string }[];
-  };
+  /** Filtros aplicados (HU-47), para rotular la pantalla y las exportaciones. */
+  appliedFilters: string[];
 }
 
 export interface IndicatorsInput {
@@ -65,7 +62,7 @@ const countBy = <T>(items: T[], key: (item: T) => string) => {
  */
 export function buildIndicators(
   input: IndicatorsInput,
-): Omit<IndicatorsReport, 'periodName' | 'generatedAt' | 'filterOptions'> {
+): Omit<IndicatorsReport, 'periodName' | 'generatedAt' | 'appliedFilters'> {
   const { students, sessions, referrals, evaluationScores } = input;
   const studentIds = new Set(students.map((s) => s.id));
 

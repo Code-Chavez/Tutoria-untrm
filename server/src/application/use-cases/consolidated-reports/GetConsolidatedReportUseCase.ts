@@ -6,14 +6,11 @@ import { StudentRepository } from '@domain/repositories/StudentRepository';
 import { SchoolRepository } from '@domain/repositories/SchoolRepository';
 import { FacultyRepository } from '@domain/repositories/FacultyRepository';
 import { TutorSemesterReportRepository } from '@domain/repositories/TutorSemesterReportRepository';
-import { NoActivePeriodError } from '@application/use-cases/evaluation/EvaluationErrors';
+import { appliedFilterLabels, ReportFilters, resolveReportPeriod } from '@application/use-cases/report-filters/reportFilters';
 import { buildConsolidatedReport, ConsolidatedReport } from './buildConsolidatedReport';
 import { ConsolidatedReportForbiddenError } from './ConsolidatedReportErrors';
 
-export interface ConsolidatedReportFilters {
-  facultyId?: string;
-  schoolId?: string;
-}
+export type ConsolidatedReportFilters = ReportFilters;
 
 const ALLOWED_ROLES = ['Administrador DBU', 'Vicerrectorado'];
 
@@ -42,10 +39,9 @@ export class GetConsolidatedReportUseCase {
     const role = await this.roles.findById(requester.roleId);
     if (!role || !ALLOWED_ROLES.includes(role.name)) throw new ConsolidatedReportForbiddenError();
 
-    const period = await this.periods.findActive();
-    if (!period) throw new NoActivePeriodError();
+    const period = await resolveReportPeriod(this.periods, filters.periodId);
 
-    const [allSchools, faculties, students, allSessions, periodReports] = await Promise.all([
+    const [allSchools, faculties, allStudents, allSessions, periodReports] = await Promise.all([
       this.schools.findAll(),
       this.faculties.findAll(),
       this.students.findAll({ isActive: true }),
@@ -59,9 +55,15 @@ export class GetConsolidatedReportUseCase {
         (!filters.facultyId || s.facultyId === filters.facultyId) &&
         (!filters.schoolId || s.id === filters.schoolId),
     );
+    const students = allStudents.filter(
+      (s) =>
+        (filters.cycle === undefined || s.cycle === filters.cycle) &&
+        (!filters.tutorId || s.tutorId === filters.tutorId),
+    );
     const sessions = allSessions.filter(
       (s) =>
         !s.cancelledAt &&
+        (!filters.tutorId || s.tutorId === filters.tutorId) &&
         s.scheduledAt >= period.startDate &&
         s.scheduledAt <= period.endDate &&
         s.endsAt <= now,
@@ -74,14 +76,16 @@ export class GetConsolidatedReportUseCase {
       sessions,
       reportTutorIds: new Set(periodReports.map((r) => r.tutorId)),
     });
+    const tutor = filters.tutorId ? await this.users.findById(filters.tutorId) : null;
     return {
       periodName: period.name,
       generatedAt: now,
       ...body,
-      filterOptions: {
-        faculties: faculties.map((f) => ({ id: f.id, name: f.name })),
-        schools: allSchools.map((s) => ({ id: s.id, name: s.name, facultyId: s.facultyId })),
-      },
+      appliedFilters: appliedFilterLabels(filters, {
+        faculty: faculties.find((f) => f.id === filters.facultyId)?.name,
+        school: allSchools.find((s) => s.id === filters.schoolId)?.name,
+        tutor: tutor ? `${tutor.firstName} ${tutor.lastName}` : undefined,
+      }),
     };
   }
 }

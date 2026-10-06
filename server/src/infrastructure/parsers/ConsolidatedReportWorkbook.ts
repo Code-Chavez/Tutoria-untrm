@@ -41,7 +41,11 @@ export class ConsolidatedReportWorkbook {
       .addSheet({
         name: 'Consolidado',
         title: 'Informe consolidado de tutoría',
-        details: [`Periodo ${report.periodName}`, `Generado: ${report.generatedAt.toLocaleString('es-PE')}`],
+        details: [
+          `Periodo ${report.periodName}`,
+          ...(report.appliedFilters.length > 0 ? [`Filtros: ${report.appliedFilters.join(' · ')}`] : []),
+          `Generado: ${report.generatedAt.toLocaleString('es-PE')}`,
+        ],
         columns: [
           { header: 'Facultad', width: 34 },
           { header: 'Escuela', width: 32 },

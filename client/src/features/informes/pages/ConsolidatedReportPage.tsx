@@ -1,6 +1,8 @@
 import { Fragment, useState } from 'react';
 import { getApiErrorMessage } from '@shared/services/apiClient';
-import { PageHeader, Card, Button, SelectField, EmptyState, TableSkeleton } from '@shared/components/ui';
+import { PageHeader, Button, EmptyState, TableSkeleton, Card } from '@shared/components/ui';
+import { ReportFilters } from '@shared/reportFilters/ReportFilters';
+import { EMPTY_REPORT_FILTERS, toFilterParams } from '@shared/reportFilters/reportFilterService';
 import { ReportIcon, DownloadIcon } from '@shared/components/icons';
 import { useConsolidatedReport } from '../hooks/useConsolidatedReport';
 import { consolidatedReportService, ConsolidatedMetrics } from '../services/consolidatedReportService';
@@ -23,16 +25,12 @@ const COLUMNS: { label: string; value: (m: ConsolidatedMetrics) => string }[] = 
 ];
 
 export function ConsolidatedReportPage() {
-  const [facultyId, setFacultyId] = useState('');
-  const [schoolId, setSchoolId] = useState('');
+  const [values, setValues] = useState(EMPTY_REPORT_FILTERS);
   const [exporting, setExporting] = useState<'excel' | 'pdf' | null>(null);
   const [exportError, setExportError] = useState('');
 
-  const filters = { facultyId: facultyId || undefined, schoolId: schoolId || undefined };
+  const filters = toFilterParams(values);
   const { report, loading, error, refresh } = useConsolidatedReport(filters);
-
-  const options = report?.filterOptions;
-  const schoolOptions = (options?.schools ?? []).filter((s) => !facultyId || s.facultyId === facultyId);
 
   const handleExport = async (format: 'excel' | 'pdf') => {
     setExporting(format);
@@ -58,57 +56,28 @@ export function ConsolidatedReportPage() {
         icon={<ReportIcon size={22} />}
       />
 
-      <Card padded className={styles.filters}>
-        <div className={styles.field}>
-          <label htmlFor="cr-faculty">Facultad</label>
-          <SelectField
-            id="cr-faculty"
-            value={facultyId}
-            onChange={(e) => {
-              setFacultyId(e.target.value);
-              setSchoolId('');
-            }}
-          >
-            <option value="">Todas las facultades</option>
-            {(options?.faculties ?? []).map((f) => (
-              <option key={f.id} value={f.id}>
-                {f.name}
-              </option>
-            ))}
-          </SelectField>
-        </div>
-        <div className={styles.field}>
-          <label htmlFor="cr-school">Escuela Profesional</label>
-          <SelectField id="cr-school" value={schoolId} onChange={(e) => setSchoolId(e.target.value)}>
-            <option value="">Todas las escuelas</option>
-            {schoolOptions.map((s) => (
-              <option key={s.id} value={s.id}>
-                {s.name}
-              </option>
-            ))}
-          </SelectField>
-        </div>
-        <div className={styles.exports}>
-          <Button
-            variant="secondary"
-            icon={<DownloadIcon size={16} />}
-            disabled={!report}
-            loading={exporting === 'excel'}
-            onClick={() => handleExport('excel')}
-          >
-            Excel
-          </Button>
-          <Button
-            variant="secondary"
-            icon={<DownloadIcon size={16} />}
-            disabled={!report}
-            loading={exporting === 'pdf'}
-            onClick={() => handleExport('pdf')}
-          >
-            PDF
-          </Button>
-        </div>
-      </Card>
+      <ReportFilters value={values} onChange={setValues} />
+
+      <div className={styles.exports}>
+        <Button
+          variant="secondary"
+          icon={<DownloadIcon size={16} />}
+          disabled={!report}
+          loading={exporting === 'excel'}
+          onClick={() => handleExport('excel')}
+        >
+          Excel
+        </Button>
+        <Button
+          variant="secondary"
+          icon={<DownloadIcon size={16} />}
+          disabled={!report}
+          loading={exporting === 'pdf'}
+          onClick={() => handleExport('pdf')}
+        >
+          PDF
+        </Button>
+      </div>
 
       {exportError && (
         <p role="alert" className={styles.error}>

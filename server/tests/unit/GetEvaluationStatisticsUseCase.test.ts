@@ -3,10 +3,13 @@ import {
   EvaluationResultsForbiddenError,
   NoActivePeriodError,
 } from '@application/use-cases/evaluation/EvaluationErrors';
+import { ReportPeriodNotFoundError } from '@application/use-cases/report-filters/ReportFilterErrors';
 import { UserRepository } from '@domain/repositories/UserRepository';
 import { RoleRepository } from '@domain/repositories/RoleRepository';
 import { AcademicPeriodRepository } from '@domain/repositories/AcademicPeriodRepository';
 import { TutorEvaluationRepository } from '@domain/repositories/TutorEvaluationRepository';
+import { SchoolRepository } from '@domain/repositories/SchoolRepository';
+import { FacultyRepository } from '@domain/repositories/FacultyRepository';
 import { User } from '@domain/entities/User';
 import { Role } from '@domain/entities/Role';
 import { AcademicPeriod } from '@domain/entities/AcademicPeriod';
@@ -17,6 +20,8 @@ describe('GetEvaluationStatisticsUseCase', () => {
   let roles: jest.Mocked<RoleRepository>;
   let periods: jest.Mocked<AcademicPeriodRepository>;
   let evaluations: jest.Mocked<TutorEvaluationRepository>;
+  let schools: jest.Mocked<SchoolRepository>;
+  let faculties: jest.Mocked<FacultyRepository>;
   let useCase: GetEvaluationStatisticsUseCase;
 
   const adminUser = { id: 'admin-1', roleId: 'role-admin' } as User;
@@ -45,6 +50,8 @@ describe('GetEvaluationStatisticsUseCase', () => {
     };
     periods = {
       findActive: jest.fn().mockResolvedValue(activePeriod),
+      findAll: jest.fn(),
+      findById: jest.fn(),
     };
     evaluations = {
       create: jest.fn(),
@@ -57,7 +64,13 @@ describe('GetEvaluationStatisticsUseCase', () => {
         { tutorId: 'tutor-b', scores: allSiempre },
       ]),
     };
-    useCase = new GetEvaluationStatisticsUseCase(users, roles, periods, evaluations);
+    schools = {
+      findAll: jest.fn().mockResolvedValue([{ id: 'school-1', name: 'Sistemas', facultyId: 'faculty-1' }]),
+    } as unknown as jest.Mocked<SchoolRepository>;
+    faculties = {
+      findAll: jest.fn().mockResolvedValue([{ id: 'faculty-1', name: 'Ingeniería' }]),
+    } as unknown as jest.Mocked<FacultyRepository>;
+    useCase = new GetEvaluationStatisticsUseCase(users, roles, periods, evaluations, schools, faculties);
   });
 
   it('agrupa las respuestas por tutor y calcula promedios', async () => {
@@ -83,6 +96,34 @@ describe('GetEvaluationStatisticsUseCase', () => {
       schoolId: 'school-1',
       facultyId: 'faculty-1',
     });
+  });
+
+  it('pasa el ciclo al repositorio y filtra por tutor sin exponer al tutorado (HU-47)', async () => {
+    const report = await useCase.execute('admin-1', { cycle: 3, tutorId: 'tutor-b' });
+
+    expect(evaluations.findAnonymizedScoresByPeriod).toHaveBeenCalledWith('period-1', { cycle: 3 });
+    expect(report.tutors.map((t) => t.tutorId)).toEqual(['tutor-b']);
+  });
+
+  it('consulta el semestre indicado en lugar del activo y falla si no existe', async () => {
+    periods.findById.mockResolvedValueOnce({ ...activePeriod, id: 'period-0', name: '2026-I' });
+    const report = await useCase.execute('admin-1', { periodId: 'period-0' });
+    expect(report.periodName).toBe('2026-I');
+    expect(evaluations.findAnonymizedScoresByPeriod).toHaveBeenCalledWith('period-0', expect.anything());
+
+    periods.findById.mockResolvedValueOnce(null);
+    await expect(useCase.execute('admin-1', { periodId: 'nope' })).rejects.toBeInstanceOf(ReportPeriodNotFoundError);
+  });
+
+  it('describe los filtros aplicados para rotular las exportaciones', async () => {
+    const report = await useCase.execute('admin-1', { schoolId: 'school-1', facultyId: 'faculty-1', cycle: 4, tutorId: 'tutor-a' });
+    expect(report.appliedFilters).toEqual([
+      'Facultad: Ingeniería',
+      'Escuela: Sistemas',
+      'Ciclo: 4',
+      'Tutor: Elena Ramírez',
+    ]);
+    expect((await useCase.execute('admin-1')).appliedFilters).toEqual([]);
   });
 
   it('no incluye tutores sin ninguna respuesta', async () => {

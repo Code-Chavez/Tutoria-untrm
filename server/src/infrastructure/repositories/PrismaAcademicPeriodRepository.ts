@@ -11,4 +11,12 @@ export class PrismaAcademicPeriodRepository implements AcademicPeriodRepository 
       orderBy: { createdAt: 'desc' },
     });
   }
+
+  findAll(): Promise<AcademicPeriod[]> {
+    return this.prisma.academicPeriod.findMany({ orderBy: { startDate: 'desc' } });
+  }
+
+  findById(id: string): Promise<AcademicPeriod | null> {
+    return this.prisma.academicPeriod.findUnique({ where: { id } });
+  }
 }

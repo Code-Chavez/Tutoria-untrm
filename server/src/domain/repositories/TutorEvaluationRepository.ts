@@ -19,6 +19,8 @@ export interface AnonymizedEvaluationScoresByTutor {
 export interface EvaluationStatisticsFilters {
   schoolId?: string;
   facultyId?: string;
+  /** Ciclo del tutorado que respondió (HU-47). */
+  cycle?: number;
 }
 
 export interface EvaluationSuggestionsFilters {

@@ -4,7 +4,7 @@ import { evaluationService, EvaluationStatisticsFilters } from '../services/eval
 /** Estadísticas de evaluación por tutor del periodo activo (HU-39). */
 export function useEvaluationStatistics(filters: EvaluationStatisticsFilters) {
   const query = useQuery({
-    queryKey: ['evaluationStatistics', filters.schoolId ?? null, filters.facultyId ?? null],
+    queryKey: ['evaluationStatistics', filters],
     queryFn: () => evaluationService.getStatistics(filters),
   });
 

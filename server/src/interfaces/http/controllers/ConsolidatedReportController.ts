@@ -4,6 +4,7 @@ import { ConsolidatedReportForbiddenError } from '@application/use-cases/consoli
 import { NoActivePeriodError } from '@application/use-cases/evaluation/EvaluationErrors';
 import { ConsolidatedReportWorkbook } from '../../../infrastructure/parsers/ConsolidatedReportWorkbook';
 import { ConsolidatedReportPdf } from '../../../infrastructure/parsers/ConsolidatedReportPdf';
+import { handleReportFilterError, parseReportFilters } from '../reportFilters';
 
 export class ConsolidatedReportController {
   constructor(
@@ -12,15 +13,8 @@ export class ConsolidatedReportController {
     private readonly pdf: ConsolidatedReportPdf,
   ) {}
 
-  private filters(req: Request) {
-    const { facultyId, schoolId } = req.query;
-    return {
-      facultyId: typeof facultyId === 'string' && facultyId ? facultyId : undefined,
-      schoolId: typeof schoolId === 'string' && schoolId ? schoolId : undefined,
-    };
-  }
-
   private handleError(error: unknown, res: Response) {
+    if (handleReportFilterError(error, res)) return;
     if (error instanceof ConsolidatedReportForbiddenError) {
       res.status(403).json({ error: error.message });
     } else if (error instanceof NoActivePeriodError) {
@@ -35,7 +29,7 @@ export class ConsolidatedReportController {
     try {
       const report = await this.getConsolidatedReportUseCase.execute(
         req.auth?.sub as string,
-        this.filters(req),
+        parseReportFilters(req.query),
       );
       res.status(200).json({ report });
     } catch (error) {
@@ -47,7 +41,7 @@ export class ConsolidatedReportController {
     try {
       const report = await this.getConsolidatedReportUseCase.execute(
         req.auth?.sub as string,
-        this.filters(req),
+        parseReportFilters(req.query),
       );
       const buffer = await this.workbook.build(report);
       res.setHeader(
@@ -65,7 +59,7 @@ export class ConsolidatedReportController {
     try {
       const report = await this.getConsolidatedReportUseCase.execute(
         req.auth?.sub as string,
-        this.filters(req),
+        parseReportFilters(req.query),
       );
       const buffer = await this.pdf.build(report);
       res.setHeader('Content-Type', 'application/pdf');

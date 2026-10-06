@@ -41,11 +41,8 @@ export interface ConsolidatedReport {
   generatedAt: Date;
   totals: ConsolidatedMetrics;
   faculties: ConsolidatedFacultyRow[];
-  /** Todas las facultades y escuelas, para armar los filtros sin otros permisos. */
-  filterOptions: {
-    faculties: { id: string; name: string }[];
-    schools: { id: string; name: string; facultyId: string }[];
-  };
+  /** Filtros aplicados (HU-47), para rotular la pantalla y las exportaciones. */
+  appliedFilters: string[];
 }
 
 export interface ConsolidatedReportInput {
@@ -70,7 +67,7 @@ const avg = (part: number, whole: number) => (whole === 0 ? 0 : round1(part / wh
  */
 export function buildConsolidatedReport(
   input: ConsolidatedReportInput,
-): Omit<ConsolidatedReport, 'periodName' | 'generatedAt' | 'filterOptions'> {
+): Omit<ConsolidatedReport, 'periodName' | 'generatedAt' | 'appliedFilters'> {
   const activeStudents = input.students.filter((s) => s.isActive);
 
   const metricsFor = (schoolIds: Set<string>): ConsolidatedMetrics => {

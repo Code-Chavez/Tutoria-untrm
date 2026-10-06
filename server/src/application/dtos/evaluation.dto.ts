@@ -65,6 +65,8 @@ export interface EvaluationStatisticsTutorRow {
 export interface EvaluationStatisticsReport {
   periodName: string;
   tutors: EvaluationStatisticsTutorRow[];
+  /** Filtros aplicados (HU-47), para rotular la pantalla y las exportaciones. */
+  appliedFilters: string[];
 }
 
 // Sugerencias abiertas consolidadas (HU-40): "Me gustaría" / "No me gusta"

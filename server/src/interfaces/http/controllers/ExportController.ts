@@ -20,9 +20,9 @@ import {
 import { IndicatorsPdf, IndicatorsWorkbook } from '../../../infrastructure/parsers/IndicatorsExports';
 import { WorkPlanPdf } from '../../../infrastructure/parsers/WorkPlanPdf';
 import { StudentRecordPdf } from '../../../infrastructure/parsers/StudentRecordPdf';
+import { handleReportFilterError, parseReportFilters } from '../reportFilters';
 
 const XLSX_MIME = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
-const param = (value: unknown) => (typeof value === 'string' && value ? value : undefined);
 
 type Format = 'pdf' | 'excel';
 
@@ -52,6 +52,7 @@ export class ExportController {
   }
 
   private handleError(error: unknown, res: Response) {
+    if (handleReportFilterError(error, res)) return;
     if (error instanceof EvaluationResultsForbiddenError || error instanceof IndicatorsForbiddenError || error instanceof WorkPlanForbiddenError) {
       res.status(403).json({ error: error.message });
     } else if (error instanceof WorkPlanNotFoundError || error instanceof StudentNotFoundError) {
@@ -65,10 +66,10 @@ export class ExportController {
 
   evaluationStatistics = (format: Format) => async (req: Request, res: Response) => {
     try {
-      const report = await this.getEvaluationStatisticsUseCase.execute(req.auth?.sub as string, {
-        schoolId: param(req.query.schoolId),
-        facultyId: param(req.query.facultyId),
-      });
+      const report = await this.getEvaluationStatisticsUseCase.execute(
+        req.auth?.sub as string,
+        parseReportFilters(req.query),
+      );
       const buffer =
         format === 'pdf' ? await this.evaluationPdf.build(report) : await this.evaluationWorkbook.build(report);
       this.send(res, format, buffer, 'evaluacion-tutoria');
@@ -79,11 +80,10 @@ export class ExportController {
 
   indicators = (format: Format) => async (req: Request, res: Response) => {
     try {
-      const report = await this.getIndicatorsUseCase.execute(req.auth?.sub as string, {
-        facultyId: param(req.query.facultyId),
-        schoolId: param(req.query.schoolId),
-        tutorId: param(req.query.tutorId),
-      });
+      const report = await this.getIndicatorsUseCase.execute(
+        req.auth?.sub as string,
+        parseReportFilters(req.query),
+      );
       const buffer =
         format === 'pdf' ? await this.indicatorsPdf.build(report) : await this.indicatorsWorkbook.build(report);
       this.send(res, format, buffer, 'indicadores-tutoria');

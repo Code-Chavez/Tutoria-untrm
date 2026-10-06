@@ -54,7 +54,7 @@ export class IndicatorsPdf {
     const count = (label: string) => [{ label, weight: 4 }, { label: 'Cantidad', weight: 1, align: 'right' as const }];
     return new BrandedPdf({
       title: 'Tablero de indicadores de tutoría',
-      subtitle: `Periodo ${report.periodName} · ICACIT / SINEACE`,
+      subtitle: [`Periodo ${report.periodName}`, ...report.appliedFilters, 'ICACIT / SINEACE'].join(' · '),
       generatedAt: report.generatedAt,
     })
       .heading('Indicadores clave')
@@ -84,7 +84,11 @@ export class IndicatorsPdf {
 
 export class IndicatorsWorkbook {
   build(report: IndicatorsReport): Promise<Buffer> {
-    const details = [`Periodo ${report.periodName}`, `Generado: ${report.generatedAt.toLocaleString('es-PE')}`];
+    const details = [
+      `Periodo ${report.periodName}`,
+      ...(report.appliedFilters.length > 0 ? [`Filtros: ${report.appliedFilters.join(' · ')}`] : []),
+      `Generado: ${report.generatedAt.toLocaleString('es-PE')}`,
+    ];
     const sheet = (name: string, title: string, columns: { header: string; width?: number }[], rows: SheetCell[][]) => ({
       name,
       title,

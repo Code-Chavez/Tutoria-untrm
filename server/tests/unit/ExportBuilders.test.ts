@@ -22,6 +22,7 @@ const load = async (b: Buffer) => {
 
 const evaluation: EvaluationStatisticsReport = {
   periodName: '2026-II',
+  appliedFilters: [],
   tutors: [
     {
       tutorId: 't1',
@@ -44,7 +45,7 @@ const indicators: IndicatorsReport = {
   sessions: { individual: 12, group: 3, total: 15, studentsServed: 24, coveragePct: 60, byMonth: [{ month: '2026-09', individual: 12, group: 3 }] },
   referrals: { total: 6, byService: [{ service: 'PSICOLOGIA', count: 4 }], byStatus: [{ status: 'ENVIADO', count: 6 }] },
   evaluation: { responses: 9, averageScore: null },
-  filterOptions: { faculties: [], schools: [], tutors: [] },
+  appliedFilters: [],
 };
 
 const metrics = (over: Partial<ConsolidatedMetrics> = {}): ConsolidatedMetrics => ({
@@ -58,7 +59,7 @@ const consolidated: ConsolidatedReport = {
   generatedAt: new Date('2026-10-06T10:00:00Z'),
   totals: metrics({ activeStudents: 99 }),
   faculties: [{ facultyId: 'f1', facultyName: 'Ingeniería', metrics: metrics(), schools: [{ schoolId: 's', schoolName: 'Sistemas', metrics: metrics() }] }],
-  filterOptions: { faculties: [], schools: [] },
+  appliedFilters: [],
 };
 
 describe('Exportadores sobre el motor de marca (HU-46)', () => {

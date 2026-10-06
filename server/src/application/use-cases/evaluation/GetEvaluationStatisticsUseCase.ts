@@ -1,16 +1,16 @@
 import { UserRepository } from '@domain/repositories/UserRepository';
 import { RoleRepository } from '@domain/repositories/RoleRepository';
 import { AcademicPeriodRepository } from '@domain/repositories/AcademicPeriodRepository';
-import {
-  TutorEvaluationRepository,
-  EvaluationStatisticsFilters,
-} from '@domain/repositories/TutorEvaluationRepository';
+import { SchoolRepository } from '@domain/repositories/SchoolRepository';
+import { FacultyRepository } from '@domain/repositories/FacultyRepository';
+import { TutorEvaluationRepository } from '@domain/repositories/TutorEvaluationRepository';
+import { appliedFilterLabels, ReportFilters, resolveReportPeriod } from '@application/use-cases/report-filters/reportFilters';
 import { EVALUATION_ITEMS, EvaluationScaleCode } from '@domain/entities/TutorEvaluation';
 import {
   EvaluationStatisticsReport,
   EvaluationStatisticsTutorRow,
 } from '@application/dtos/evaluation.dto';
-import { EvaluationResultsForbiddenError, NoActivePeriodError } from './EvaluationErrors';
+import { EvaluationResultsForbiddenError } from './EvaluationErrors';
 
 const SCORE_VALUE: Record<EvaluationScaleCode, number> = { N: 1, CN: 2, AV: 3, CS: 4, S: 5 };
 
@@ -27,11 +27,13 @@ export class GetEvaluationStatisticsUseCase {
     private readonly roles: RoleRepository,
     private readonly periods: AcademicPeriodRepository,
     private readonly evaluations: TutorEvaluationRepository,
+    private readonly schools: SchoolRepository,
+    private readonly faculties: FacultyRepository,
   ) {}
 
   async execute(
     requesterId: string,
-    filters?: EvaluationStatisticsFilters,
+    filters: ReportFilters = {},
   ): Promise<EvaluationStatisticsReport> {
     const requester = await this.users.findById(requesterId);
     if (!requester) throw new EvaluationResultsForbiddenError();
@@ -41,10 +43,17 @@ export class GetEvaluationStatisticsUseCase {
       throw new EvaluationResultsForbiddenError();
     }
 
-    const period = await this.periods.findActive();
-    if (!period) throw new NoActivePeriodError();
+    const period = await resolveReportPeriod(this.periods, filters.periodId);
 
-    const responses = await this.evaluations.findAnonymizedScoresByPeriod(period.id, filters);
+    // El tutor se filtra después de la consulta: las puntuaciones llegan por
+    // tutor y nunca llevan al tutorado que respondió (anonimato estructural).
+    const responses = (
+      await this.evaluations.findAnonymizedScoresByPeriod(period.id, {
+        schoolId: filters.schoolId,
+        facultyId: filters.facultyId,
+        cycle: filters.cycle,
+      })
+    ).filter((r) => !filters.tutorId || r.tutorId === filters.tutorId);
 
     const scoresByTutor = new Map<string, EvaluationScaleCode[][]>();
     for (const response of responses) {
@@ -62,7 +71,17 @@ export class GetEvaluationStatisticsUseCase {
 
     const tutors = tutorEntries.sort((a, b) => a.tutorName.localeCompare(b.tutorName));
 
-    return { periodName: period.name, tutors };
+    const [schools, faculties] = await Promise.all([this.schools.findAll(), this.faculties.findAll()]);
+    const tutorFilter = tutors.find((t) => t.tutorId === filters.tutorId);
+    return {
+      periodName: period.name,
+      tutors,
+      appliedFilters: appliedFilterLabels(filters, {
+        faculty: faculties.find((f) => f.id === filters.facultyId)?.name,
+        school: schools.find((sc) => sc.id === filters.schoolId)?.name,
+        tutor: tutorFilter?.tutorName,
+      }),
+    };
   }
 
   private buildTutorRow(

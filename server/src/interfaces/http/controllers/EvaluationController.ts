@@ -7,6 +7,7 @@ import { ListEvaluationWindowsUseCase } from '@application/use-cases/evaluation/
 import { SetEvaluationWindowUseCase } from '@application/use-cases/evaluation/SetEvaluationWindowUseCase';
 import { GetEvaluationStatisticsUseCase } from '@application/use-cases/evaluation/GetEvaluationStatisticsUseCase';
 import { GetEvaluationSuggestionsUseCase } from '@application/use-cases/evaluation/GetEvaluationSuggestionsUseCase';
+import { handleReportFilterError, parseReportFilters } from '../reportFilters';
 import { StudentProfileNotLinkedError } from '@application/use-cases/tutoring-requests/TutoringRequestErrors';
 import {
   NoActivePeriodError,
@@ -129,15 +130,14 @@ export class EvaluationController {
     }
   };
 
-  // Estadísticas por tutor del periodo activo, filtrables por escuela/facultad (HU-39).
+  // Estadísticas por tutor del periodo activo, con los filtros combinados de HU-47 (HU-39).
   getStatistics = async (req: Request, res: Response) => {
     try {
       const requesterId = req.auth?.sub as string;
-      const schoolId = typeof req.query.schoolId === 'string' ? req.query.schoolId : undefined;
-      const facultyId = typeof req.query.facultyId === 'string' ? req.query.facultyId : undefined;
-      const report = await this.getEvaluationStatisticsUseCase.execute(requesterId, { schoolId, facultyId });
+      const report = await this.getEvaluationStatisticsUseCase.execute(requesterId, parseReportFilters(req.query));
       res.status(200).json(report);
     } catch (error) {
+      if (handleReportFilterError(error, res)) return;
       if (error instanceof EvaluationResultsForbiddenError) {
         res.status(403).json({ error: error.message });
       } else if (error instanceof NoActivePeriodError) {
