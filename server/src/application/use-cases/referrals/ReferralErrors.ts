@@ -35,3 +35,27 @@ export class ReferralForbiddenError extends Error {
   }
 }
 
+
+// Gestión del caso (HU-31/32): solo la DBU y el profesional del servicio destino
+// pueden registrar recepción, atención o cierre.
+export class ReferralStatusForbiddenError extends Error {
+  constructor() {
+    super('No autorizado para cambiar el estado de esta derivación');
+    this.name = 'ReferralStatusForbiddenError';
+  }
+}
+
+export class InvalidReferralTransitionError extends Error {
+  constructor(from: string, to: string) {
+    super(`No se puede pasar de '${from}' a '${to}': el estado de una derivación solo avanza`);
+    this.name = 'InvalidReferralTransitionError';
+  }
+}
+
+// Otra petición cambió el estado mientras se procesaba esta (p. ej. un cierre simultáneo).
+export class ReferralConflictError extends Error {
+  constructor() {
+    super('La derivación cambió de estado mientras la actualizabas. Vuelve a abrirla e inténtalo de nuevo');
+    this.name = 'ReferralConflictError';
+  }
+}

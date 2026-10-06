@@ -33,6 +33,12 @@ export function authorize(requiredPermissions: string[]) {
         return;
       }
 
+      // Defensa en profundidad: una cuenta dada de baja no ejerce permisos aunque su token siga vigente.
+      if (user.isActive === false) {
+        next(new AppError(401, 'La cuenta está desactivada'));
+        return;
+      }
+
       const userPermissions = user.role.permissions.map(rp => rp.permission.code);
       req.permissions = userPermissions;
       const hasPermission = requiredPermissions.every(p => userPermissions.includes(p));

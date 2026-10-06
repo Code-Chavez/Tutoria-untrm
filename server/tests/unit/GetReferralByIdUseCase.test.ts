@@ -46,8 +46,10 @@ describe('GetReferralByIdUseCase', () => {
   });
 
   it('lanza ReferralNotFoundError si la derivación no existe', async () => {
+    users.findById.mockResolvedValue({ id: 'admin-1', roleId: 'role-admin' } as User);
+    roles.findById.mockResolvedValue({ id: 'role-admin', name: 'Administrador DBU' } as Role);
     referrals.findById.mockResolvedValue(null);
-    await expect(useCase.execute('missing', 'user-1')).rejects.toThrow(ReferralNotFoundError);
+    await expect(useCase.execute('missing', 'admin-1')).rejects.toThrow(ReferralNotFoundError);
   });
 
   it('permite ver cualquier derivación a Administrador DBU', async () => {

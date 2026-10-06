@@ -392,6 +392,7 @@ const getReferralConstanciaUseCase = new GetReferralConstanciaUseCase(
   studentRepository,
   userRepository,
   schoolRepository,
+  roleRepository,
 );
 const getReferralsUseCase = new GetReferralsUseCase(
   studentReferralRepository,
@@ -406,6 +407,8 @@ const getReferralByIdUseCase = new GetReferralByIdUseCase(
 const updateReferralStatusUseCase = new UpdateReferralStatusUseCase(
   studentReferralRepository,
   notificationRepository,
+  userRepository,
+  roleRepository,
 );
 const getReferralTrackingUseCase = new GetReferralTrackingUseCase(
   studentReferralRepository,
