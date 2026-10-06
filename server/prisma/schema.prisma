@@ -712,3 +712,18 @@ model CatalogItem {
   @@unique([catalog, code])
   @@map("catalog_items")
 }
+
+// Identidad visual institucional configurable (HU-50): una sola fila ("default").
+// Sin fila rige la identidad UNTRM por defecto definida en el código.
+model BrandingSetting {
+  id              String   @id @default("default")
+  institutionName String   @map("institution_name")
+  shortName       String   @map("short_name")
+  primaryColor    String   @map("primary_color")
+  accentColor     String   @map("accent_color")
+  logoStorageKey  String?  @map("logo_storage_key")
+  logoMimeType    String?  @map("logo_mime_type")
+  updatedAt       DateTime @updatedAt @map("updated_at")
+
+  @@map("branding_settings")
+}

@@ -16,6 +16,7 @@ const ROUTE_META: Record<string, { title: string; group: string }> = {
   '/informes/consolidado': { title: 'Informe consolidado', group: 'Gestión' },
   '/informes/semestral': { title: 'Informe semestral de tutoría', group: 'Gestión' },
   '/indicadores': { title: 'Tablero de indicadores', group: 'Gestión' },
+  '/identidad': { title: 'Identidad visual', group: 'Gestión' },
   '/parametros': { title: 'Parámetros del sistema', group: 'Gestión' },
   '/catalogos': { title: 'Catálogos maestros', group: 'Gestión' },
   '/plan-semestral': { title: 'Plan de trabajo semestral', group: 'Gestión' },

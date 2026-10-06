@@ -66,6 +66,7 @@ describe('Work plan approval resolution (HU-42)', () => {
     storage = {
       save: jest.fn().mockResolvedValue('key-1.pdf'),
       resolvePath: jest.fn().mockReturnValue('/data/key-1.pdf'),
+      delete: jest.fn(),
     };
   });
 
