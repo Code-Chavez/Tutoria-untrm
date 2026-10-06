@@ -29,6 +29,11 @@ export class PrismaTutorSemesterReportRepository implements TutorSemesterReportR
     return row ? toReport(row) : null;
   }
 
+  async findAllByPeriod(periodId: string): Promise<TutorSemesterReport[]> {
+    const rows = await this.prisma.tutorSemesterReport.findMany({ where: { periodId } });
+    return rows.map(toReport);
+  }
+
   async upsert(
     periodId: string,
     tutorId: string,
