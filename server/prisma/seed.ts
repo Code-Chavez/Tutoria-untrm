@@ -41,6 +41,7 @@ async function main() {
     prisma.permission.upsert({ where: { code: 'consolidated-reports:read' }, update: {}, create: { code: 'consolidated-reports:read', description: 'Ver el informe consolidado por escuela y facultad' } }),
     prisma.permission.upsert({ where: { code: 'indicators:read' }, update: {}, create: { code: 'indicators:read', description: 'Ver el tablero de indicadores' } }),
     prisma.permission.upsert({ where: { code: 'catalogs:manage' }, update: {}, create: { code: 'catalogs:manage', description: 'Administrar los catálogos maestros' } }),
+    prisma.permission.upsert({ where: { code: 'parameters:manage' }, update: {}, create: { code: 'parameters:manage', description: 'Administrar los parámetros del sistema' } }),
     prisma.permission.upsert({ where: { code: 'work-plans:write' }, update: {}, create: { code: 'work-plans:write', description: 'Elaborar planes de trabajo semestrales' } }),
   ]);
 

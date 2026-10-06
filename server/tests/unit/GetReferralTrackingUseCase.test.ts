@@ -97,6 +97,9 @@ describe('GetReferralTrackingUseCase', () => {
       create: jest.fn(),
     };
     systemParameters = {
+      findAll: jest.fn(),
+      create: jest.fn(),
+      update: jest.fn(),
       findByKey: jest.fn().mockResolvedValue(null),
     };
     useCase = new GetReferralTrackingUseCase(referrals, users, roles, systemParameters);

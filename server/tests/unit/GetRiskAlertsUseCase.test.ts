@@ -92,6 +92,9 @@ describe('GetRiskAlertsUseCase', () => {
       update: jest.fn(),
     };
     systemParameters = {
+      findAll: jest.fn(),
+      create: jest.fn(),
+      update: jest.fn(),
       findByKey: jest
         .fn()
         .mockResolvedValue({ key: 'absence_alert_threshold', value: '2' } as SystemParameter),

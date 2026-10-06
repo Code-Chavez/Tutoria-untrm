@@ -26,6 +26,8 @@ import indicatorsRoutes from './indicators.routes';
 import exportRoutes from './export.routes';
 import reportFilterRoutes from './reportFilter.routes';
 import catalogRoutes from './catalog.routes';
+import systemParameterRoutes from './systemParameter.routes';
+import homePanelRoutes from './homePanel.routes';
 
 const router: IRouter = Router();
 
@@ -33,6 +35,8 @@ router.use(healthRoutes);
 router.use(exportRoutes);
 router.use(reportFilterRoutes);
 router.use(catalogRoutes);
+router.use(systemParameterRoutes);
+router.use(homePanelRoutes);
 router.use(authRoutes);
 router.use(userRoutes);
 router.use(roleRoutes);

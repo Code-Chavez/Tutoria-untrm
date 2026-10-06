@@ -28,6 +28,7 @@ import { EvaluationPage } from '@features/evaluacion/pages/EvaluationPage';
 import { WorkPlanPage } from '@features/planificacion/pages/WorkPlanPage';
 import { IndicatorsPage } from '@features/indicadores/pages/IndicatorsPage';
 import { CatalogsPage } from '@features/catalogos/pages/CatalogsPage';
+import { ParametersPage } from '@features/parametros/pages/ParametersPage';
 import { EvaluationWindowsPage } from '@features/evaluacion/pages/EvaluationWindowsPage';
 import { EvaluationStatisticsPage } from '@features/evaluacion/pages/EvaluationStatisticsPage';
 import { EvaluationSuggestionsPage } from '@features/evaluacion/pages/EvaluationSuggestionsPage';
@@ -58,6 +59,14 @@ export default function App() {
                 element={
                   <RequireRole roles={['Administrador DBU', 'Coordinador', 'Vicerrectorado']}>
                     <IndicatorsPage />
+                  </RequireRole>
+                }
+              />
+              <Route
+                path="parametros"
+                element={
+                  <RequireRole roles={['Administrador DBU']}>
+                    <ParametersPage />
                   </RequireRole>
                 }
               />
