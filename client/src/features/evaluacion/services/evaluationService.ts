@@ -1,4 +1,5 @@
 import { apiClient } from '@shared/services/apiClient';
+import { ReportFilterParams } from '@shared/reportFilters/reportFilterService';
 
 // Cuestionario de evaluación de la función tutorial (HU-36, Anexo N°7).
 export type EvaluationScaleCode = 'N' | 'CN' | 'AV' | 'CS' | 'S';
@@ -112,12 +113,11 @@ export interface EvaluationStatisticsTutorRow {
 export interface EvaluationStatisticsReport {
   periodName: string;
   tutors: EvaluationStatisticsTutorRow[];
+  /** Filtros aplicados (HU-47), p. ej. "Ciclo: 3". */
+  appliedFilters: string[];
 }
 
-export interface EvaluationStatisticsFilters {
-  schoolId?: string;
-  facultyId?: string;
-}
+export type EvaluationStatisticsFilters = ReportFilterParams;
 
 // Sugerencias abiertas consolidadas (HU-40).
 export interface EvaluationSuggestionEntry {

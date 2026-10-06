@@ -1,6 +1,7 @@
 import { GetIndicatorsUseCase } from '@application/use-cases/indicators/GetIndicatorsUseCase';
 import { IndicatorsForbiddenError } from '@application/use-cases/indicators/IndicatorsErrors';
 import { NoActivePeriodError } from '@application/use-cases/evaluation/EvaluationErrors';
+import { ReportFilters } from '@application/use-cases/report-filters/reportFilters';
 import { UserRepository } from '@domain/repositories/UserRepository';
 import { RoleRepository } from '@domain/repositories/RoleRepository';
 import { AcademicPeriodRepository } from '@domain/repositories/AcademicPeriodRepository';
@@ -51,6 +52,8 @@ describe('GetIndicatorsUseCase (HU-45)', () => {
     } as unknown as jest.Mocked<RoleRepository>;
     periods = {
       findActive: jest.fn().mockResolvedValue({ id: 'p1', name: '2026-II', startDate: day('08-01'), endDate: day('12-31') }),
+      findAll: jest.fn(),
+      findById: jest.fn(),
     } as unknown as jest.Mocked<AcademicPeriodRepository>;
     schools = {
       findAll: jest.fn().mockResolvedValue([
@@ -93,7 +96,7 @@ describe('GetIndicatorsUseCase (HU-45)', () => {
     } as unknown as jest.Mocked<TutorEvaluationRepository>;
   });
 
-  const run = (filters?: { facultyId?: string; schoolId?: string; tutorId?: string }) =>
+  const run = (filters?: ReportFilters) =>
     new GetIndicatorsUseCase(users, roles, periods, sessions, students, schools, faculties, referrals, evaluations).execute('me', filters);
 
   it('calcula tutorados, riesgo y cobertura de sesiones', async () => {
@@ -151,14 +154,36 @@ describe('GetIndicatorsUseCase (HU-45)', () => {
     expect(evaluations.findAnonymizedScoresByPeriod).toHaveBeenCalledWith('p1', { schoolId: 'sc2' });
   });
 
-  it('el Coordinador solo ve las escuelas que coordina, también en las opciones de filtro', async () => {
+  it('el Coordinador solo ve las escuelas que coordina', async () => {
     roleName = 'Coordinador';
     const r = await run();
     expect(r.students.active).toBe(3);
     expect(r.referrals.total).toBe(2); // las de a y b
-    expect(r.filterOptions.schools.map((s) => s.id)).toEqual(['sc1']);
-    expect(r.filterOptions.tutors.map((t) => t.id)).toEqual(['t1']);
     expect(evaluations.findAnonymizedScoresByPeriod).toHaveBeenCalledWith('p1', { schoolId: 'sc1' });
+  });
+
+  it('filtra por ciclo: tutorados y evaluaciones de ese ciclo (HU-47)', async () => {
+    students.findAll.mockResolvedValue([
+      { id: 'a', schoolId: 'sc1', tutorId: 't1', isAtRisk: true, isActive: true, cycle: 2 },
+      { id: 'b', schoolId: 'sc1', tutorId: 't1', isAtRisk: false, isActive: true, cycle: 4 },
+    ] as never);
+
+    const r = await run({ cycle: 4 });
+
+    expect(r.students.active).toBe(1);
+    expect(r.risk.atRisk).toBe(0);
+    expect(evaluations.findAnonymizedScoresByPeriod).toHaveBeenCalledWith('p1', { cycle: 4 });
+    expect(r.appliedFilters).toEqual(['Ciclo: 4']);
+  });
+
+  it('un semestre pasado usa su propio rango y no el del periodo activo', async () => {
+    periods.findById.mockResolvedValue({ id: 'p0', name: '2026-I', startDate: day('01-01'), endDate: day('07-31') } as never);
+
+    const r = await run({ periodId: 'p0' });
+
+    expect(r.periodName).toBe('2026-I');
+    expect(r.sessions.total).toBe(0); // todas las sesiones de prueba son de septiembre en adelante
+    expect(evaluations.findAnonymizedScoresByPeriod).toHaveBeenCalledWith('p0');
   });
 
   it('un Coordinador no puede ampliar el alcance con un filtro de otra escuela', async () => {

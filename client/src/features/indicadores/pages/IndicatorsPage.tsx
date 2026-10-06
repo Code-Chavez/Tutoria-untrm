@@ -1,5 +1,7 @@
 import { useState } from 'react';
-import { PageHeader, Card, Button, SelectField, StatCard, EmptyState, TableSkeleton } from '@shared/components/ui';
+import { PageHeader, Card, Button, StatCard, EmptyState, TableSkeleton } from '@shared/components/ui';
+import { ReportFilters } from '@shared/reportFilters/ReportFilters';
+import { EMPTY_REPORT_FILTERS, toFilterParams } from '@shared/reportFilters/reportFilterService';
 import { PieChartIcon, UsersIcon, ActivityIcon, SendIcon, StarIcon } from '@shared/components/icons';
 import { ExportButtons } from '@shared/components/ExportButtons';
 import { downloadFile } from '@shared/services/downloadFile';
@@ -73,25 +75,13 @@ function BarChart({ title, rows, legend }: { title: string; rows: BarRow[]; lege
 }
 
 export function IndicatorsPage() {
-  const [facultyId, setFacultyId] = useState('');
-  const [schoolId, setSchoolId] = useState('');
-  const [tutorId, setTutorId] = useState('');
+  const [values, setValues] = useState(EMPTY_REPORT_FILTERS);
 
-  const { report, loading, error, refresh } = useIndicators({
-    facultyId: facultyId || undefined,
-    schoolId: schoolId || undefined,
-    tutorId: tutorId || undefined,
-  });
+  const filters = toFilterParams(values);
+  const { report, loading, error, refresh } = useIndicators(filters);
 
   const handleExport = (format: 'pdf' | 'excel') =>
-    downloadFile(`/indicators/${format}`, `indicadores-tutoria.${format === 'pdf' ? 'pdf' : 'xlsx'}`, {
-      facultyId: facultyId || undefined,
-      schoolId: schoolId || undefined,
-      tutorId: tutorId || undefined,
-    });
-
-  const options = report?.filterOptions;
-  const schoolOptions = (options?.schools ?? []).filter((s) => !facultyId || s.facultyId === facultyId);
+    downloadFile(`/indicators/${format}`, `indicadores-tutoria.${format === 'pdf' ? 'pdf' : 'xlsx'}`, { ...filters });
 
   return (
     <div className={styles.page}>
@@ -106,48 +96,7 @@ export function IndicatorsPage() {
         actions={<ExportButtons onExport={handleExport} disabled={!report} />}
       />
 
-      <Card padded className={styles.filters}>
-        <div className={styles.field}>
-          <label htmlFor="ind-faculty">Facultad</label>
-          <SelectField
-            id="ind-faculty"
-            value={facultyId}
-            onChange={(e) => {
-              setFacultyId(e.target.value);
-              setSchoolId('');
-            }}
-          >
-            <option value="">Todas las facultades</option>
-            {(options?.faculties ?? []).map((f) => (
-              <option key={f.id} value={f.id}>
-                {f.name}
-              </option>
-            ))}
-          </SelectField>
-        </div>
-        <div className={styles.field}>
-          <label htmlFor="ind-school">Escuela Profesional</label>
-          <SelectField id="ind-school" value={schoolId} onChange={(e) => setSchoolId(e.target.value)}>
-            <option value="">Todas las escuelas</option>
-            {schoolOptions.map((s) => (
-              <option key={s.id} value={s.id}>
-                {s.name}
-              </option>
-            ))}
-          </SelectField>
-        </div>
-        <div className={styles.field}>
-          <label htmlFor="ind-tutor">Tutor</label>
-          <SelectField id="ind-tutor" value={tutorId} onChange={(e) => setTutorId(e.target.value)}>
-            <option value="">Todos los tutores</option>
-            {(options?.tutors ?? []).map((t) => (
-              <option key={t.id} value={t.id}>
-                {t.name}
-              </option>
-            ))}
-          </SelectField>
-        </div>
-      </Card>
+      <ReportFilters value={values} onChange={setValues} />
 
       {loading ? (
         <TableSkeleton rows={6} columns={3} />

@@ -120,6 +120,7 @@ import { ListFacultiesUseCase } from '@application/use-cases/faculties/ListFacul
 import { ListWorkPlansUseCase } from '@application/use-cases/work-plans/ListWorkPlansUseCase';
 import { GetWorkPlanUseCase } from '@application/use-cases/work-plans/GetWorkPlanUseCase';
 import { SaveWorkPlanUseCase } from '@application/use-cases/work-plans/SaveWorkPlanUseCase';
+import { GetReportFilterOptionsUseCase } from '@application/use-cases/report-filters/GetReportFilterOptionsUseCase';
 import { GetIndicatorsUseCase } from '@application/use-cases/indicators/GetIndicatorsUseCase';
 import { GetConsolidatedReportUseCase } from '@application/use-cases/consolidated-reports/GetConsolidatedReportUseCase';
 import { GetMySemesterReportUseCase } from '@application/use-cases/semester-reports/GetMySemesterReportUseCase';
@@ -319,6 +320,14 @@ const getConsolidatedReportUseCase = new GetConsolidatedReportUseCase(
   facultyRepository,
   tutorSemesterReportRepository,
 );
+const getReportFilterOptionsUseCase = new GetReportFilterOptionsUseCase(
+  userRepository,
+  roleRepository,
+  academicPeriodRepository,
+  studentRepository,
+  schoolRepository,
+  facultyRepository,
+);
 const getIndicatorsUseCase = new GetIndicatorsUseCase(
   userRepository,
   roleRepository,
@@ -398,6 +407,8 @@ const getEvaluationStatisticsUseCase = new GetEvaluationStatisticsUseCase(
   roleRepository,
   academicPeriodRepository,
   tutorEvaluationRepository,
+  schoolRepository,
+  facultyRepository,
 );
 const getEvaluationSuggestionsUseCase = new GetEvaluationSuggestionsUseCase(
   userRepository,
@@ -503,6 +514,7 @@ export const container = {
     getSemesterReportForExportUseCase,
     getConsolidatedReportUseCase,
     getIndicatorsUseCase,
+    getReportFilterOptionsUseCase,
     getRiskAlertsUseCase,
     getScheduleAttendanceReportUseCase,
     createReferralUseCase,

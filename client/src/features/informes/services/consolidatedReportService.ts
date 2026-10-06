@@ -1,4 +1,5 @@
 import { apiClient } from '@shared/services/apiClient';
+import { ReportFilterParams } from '@shared/reportFilters/reportFilterService';
 
 // Informe consolidado por escuela y facultad (HU-44).
 export interface ConsolidatedMetrics {
@@ -35,21 +36,17 @@ export interface ConsolidatedReport {
   generatedAt: string;
   totals: ConsolidatedMetrics;
   faculties: ConsolidatedFacultyRow[];
-  filterOptions: {
-    faculties: { id: string; name: string }[];
-    schools: { id: string; name: string; facultyId: string }[];
-  };
+  /** Filtros aplicados (HU-47), p. ej. "Ciclo: 3". */
+  appliedFilters: string[];
 }
 
-export interface ConsolidatedFilters {
-  facultyId?: string;
-  schoolId?: string;
-}
+export type ConsolidatedFilters = ReportFilterParams;
 
 const query = (filters: ConsolidatedFilters) => {
   const params = new URLSearchParams();
-  if (filters.facultyId) params.set('facultyId', filters.facultyId);
-  if (filters.schoolId) params.set('schoolId', filters.schoolId);
+  Object.entries(filters).forEach(([key, value]) => {
+    if (value) params.set(key, value);
+  });
   return params.toString();
 };
 

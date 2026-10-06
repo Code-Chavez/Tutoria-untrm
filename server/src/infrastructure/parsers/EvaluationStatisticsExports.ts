@@ -10,7 +10,7 @@ export class EvaluationStatisticsPdf {
   build(report: EvaluationStatisticsReport): Promise<Buffer> {
     return new BrandedPdf({
       title: 'Resultados de la evaluación de tutoría',
-      subtitle: `Anexo N° 7 · Periodo ${report.periodName} · escala 1 (Nunca) a 5 (Siempre)`,
+      subtitle: [`Anexo N° 7 · Periodo ${report.periodName}`, ...report.appliedFilters, 'escala 1 a 5'].join(' · '),
     })
       .heading('Promedio por tutor')
       .table(
@@ -28,7 +28,11 @@ export class EvaluationStatisticsPdf {
 
 export class EvaluationStatisticsWorkbook {
   build(report: EvaluationStatisticsReport): Promise<Buffer> {
-    const details = [`Periodo ${report.periodName}`, 'Escala 1 (Nunca) a 5 (Siempre)'];
+    const details = [
+      `Periodo ${report.periodName}`,
+      ...(report.appliedFilters.length > 0 ? [`Filtros: ${report.appliedFilters.join(' · ')}`] : []),
+      'Escala 1 (Nunca) a 5 (Siempre)',
+    ];
     const items = report.tutors[0]?.items ?? [];
 
     return new BrandedWorkbook()

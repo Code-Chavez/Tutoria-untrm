@@ -13,6 +13,34 @@ vi.mock('../services/consolidatedReportService', async () => {
   return { ...actual, consolidatedReportService: { getReport: vi.fn(), download: vi.fn() } };
 });
 
+
+vi.mock('@shared/reportFilters/reportFilterService', async () => {
+  const actual = await vi.importActual<typeof import('@shared/reportFilters/reportFilterService')>(
+    '@shared/reportFilters/reportFilterService',
+  );
+  return {
+    ...actual,
+    reportFilterService: {
+      getOptions: vi.fn().mockResolvedValue({
+        periods: [
+          { id: 'p1', name: '2026-II', isActive: true },
+          { id: 'p0', name: '2026-I', isActive: false },
+        ],
+        faculties: [
+          { id: 'f1', name: 'Ingeniería' },
+          { id: 'f2', name: 'Salud' },
+        ],
+        schools: [
+          { id: 'sc1', name: 'Sistemas', facultyId: 'f1' },
+          { id: 'sc3', name: 'Enfermería', facultyId: 'f2' },
+        ],
+        cycles: [1, 3],
+        tutors: [{ id: 't1', name: 'Elena Ramírez' }],
+      }),
+    },
+  };
+});
+
 const mocked = vi.mocked(consolidatedReportService);
 
 const metrics = (over: Partial<ConsolidatedMetrics> = {}): ConsolidatedMetrics => ({
@@ -44,16 +72,7 @@ const report: ConsolidatedReport = {
       schools: [{ schoolId: 'sc1', schoolName: 'Sistemas', metrics: metrics() }],
     },
   ],
-  filterOptions: {
-    faculties: [
-      { id: 'f1', name: 'Ingeniería' },
-      { id: 'f2', name: 'Salud' },
-    ],
-    schools: [
-      { id: 'sc1', name: 'Sistemas', facultyId: 'f1' },
-      { id: 'sc3', name: 'Enfermería', facultyId: 'f2' },
-    ],
-  },
+  appliedFilters: [],
 };
 
 function renderPage() {
@@ -80,17 +99,55 @@ describe('ConsolidatedReportPage', () => {
     expect(screen.getAllByText('80%').length).toBeGreaterThan(0);
   });
 
-  it('al filtrar por facultad consulta con ese filtro y limita las escuelas', async () => {
+  it('al combinar semestre, facultad y ciclo consulta con todos los filtros, sin recargar', async () => {
     const user = userEvent.setup();
     renderPage();
     await screen.findByRole('cell', { name: 'Sistemas' });
 
+    await screen.findByRole('option', { name: 'Ciclo 3' }); // las opciones cargan de forma asíncrona
+    await user.selectOptions(screen.getByLabelText('Semestre'), 'p0');
     await user.selectOptions(screen.getByLabelText('Facultad'), 'f2');
+    await user.selectOptions(screen.getByLabelText('Ciclo'), '3');
 
-    await waitFor(() => expect(mocked.getReport).toHaveBeenLastCalledWith({ facultyId: 'f2', schoolId: undefined }));
+    await waitFor(() =>
+      expect(mocked.getReport).toHaveBeenLastCalledWith({
+        periodId: 'p0',
+        facultyId: 'f2',
+        schoolId: undefined,
+        cycle: '3',
+        tutorId: undefined,
+      }),
+    );
+    // La escuela se limita a la facultad elegida.
     const schoolSelect = screen.getByLabelText('Escuela Profesional');
     expect(schoolSelect).toHaveTextContent('Enfermería');
     expect(schoolSelect).not.toHaveTextContent('Sistemas');
+  });
+
+  it('"Limpiar filtros" restablece todos los controles', async () => {
+    const user = userEvent.setup();
+    renderPage();
+    await screen.findByRole('cell', { name: 'Sistemas' });
+
+    await screen.findByRole('option', { name: 'Ciclo 1' });
+    await user.selectOptions(screen.getByLabelText('Ciclo'), '1');
+    await user.click(screen.getByRole('button', { name: 'Limpiar filtros' }));
+
+    expect(screen.getByLabelText('Ciclo')).toHaveValue('');
+    expect(screen.queryByRole('button', { name: 'Limpiar filtros' })).not.toBeInTheDocument();
+  });
+
+  it('las exportaciones reutilizan los filtros elegidos', async () => {
+    mocked.download.mockResolvedValue();
+    const user = userEvent.setup();
+    renderPage();
+    await screen.findByRole('cell', { name: 'Sistemas' });
+
+    await screen.findByRole('option', { name: 'Ciclo 3' });
+    await user.selectOptions(screen.getByLabelText('Ciclo'), '3');
+    await user.click(screen.getByRole('button', { name: /Excel/ }));
+
+    expect(mocked.download).toHaveBeenCalledWith('excel', expect.objectContaining({ cycle: '3' }));
   });
 
   it('exporta a Excel y PDF con los filtros vigentes', async () => {
@@ -102,7 +159,7 @@ describe('ConsolidatedReportPage', () => {
     await user.click(screen.getByRole('button', { name: /Excel/ }));
     await user.click(screen.getByRole('button', { name: /PDF/ }));
 
-    expect(mocked.download).toHaveBeenNthCalledWith(1, 'excel', { facultyId: undefined, schoolId: undefined });
-    expect(mocked.download).toHaveBeenNthCalledWith(2, 'pdf', { facultyId: undefined, schoolId: undefined });
+    expect(mocked.download).toHaveBeenNthCalledWith(1, 'excel', expect.objectContaining({ cycle: undefined }));
+    expect(mocked.download).toHaveBeenNthCalledWith(2, 'pdf', expect.objectContaining({ cycle: undefined }));
   });
 });

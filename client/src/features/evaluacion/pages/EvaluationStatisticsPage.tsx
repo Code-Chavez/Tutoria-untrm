@@ -1,40 +1,27 @@
 import { useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
-import { PageHeader, Card, Button, SelectField, EmptyState, TableSkeleton } from '@shared/components/ui';
+import { PageHeader, Card, Button, EmptyState, TableSkeleton } from '@shared/components/ui';
+import { ReportFilters } from '@shared/reportFilters/ReportFilters';
+import { EMPTY_REPORT_FILTERS, toFilterParams } from '@shared/reportFilters/reportFilterService';
 import { PieChartIcon } from '@shared/components/icons';
 import { ExportButtons } from '@shared/components/ExportButtons';
 import { downloadFile } from '@shared/services/downloadFile';
-import { schoolService } from '@features/tutorados/services/schoolService';
-import { facultyService } from '../services/facultyService';
 import { useEvaluationStatistics } from '../hooks/useEvaluationStatistics';
 import styles from './EvaluationStatisticsPage.module.css';
 
 // Resultados estadísticos de la evaluación de tutoría (HU-39): promedios por
 // tutor e ítem del periodo activo, filtrables por escuela/facultad.
 export function EvaluationStatisticsPage() {
-  const [schoolId, setSchoolId] = useState('');
-  const [facultyId, setFacultyId] = useState('');
+  const [values, setValues] = useState(EMPTY_REPORT_FILTERS);
   const [expandedTutorId, setExpandedTutorId] = useState<string | null>(null);
 
-  const { data: schools = [] } = useQuery({
-    queryKey: ['schools'],
-    queryFn: () => schoolService.getSchools(),
-  });
-  const { data: faculties = [] } = useQuery({
-    queryKey: ['faculties'],
-    queryFn: () => facultyService.getFaculties(),
-  });
-
-  const { report, loading, error, refresh } = useEvaluationStatistics({
-    schoolId: schoolId || undefined,
-    facultyId: facultyId || undefined,
-  });
+  const filters = toFilterParams(values);
+  const { report, loading, error, refresh } = useEvaluationStatistics(filters);
 
   const handleExport = (format: 'pdf' | 'excel') =>
     downloadFile(
       `/evaluations/statistics/${format}`,
       `evaluacion-tutoria.${format === 'pdf' ? 'pdf' : 'xlsx'}`,
-      { schoolId: schoolId || undefined, facultyId: facultyId || undefined },
+      { ...filters },
     );
 
   return (
@@ -48,30 +35,7 @@ export function EvaluationStatisticsPage() {
         }
       />
 
-      <Card padded className={styles.filters}>
-        <div className={styles.field}>
-          <label>Facultad</label>
-          <SelectField value={facultyId} onChange={(e) => setFacultyId(e.target.value)}>
-            <option value="">Todas las facultades</option>
-            {faculties.map((f) => (
-              <option key={f.id} value={f.id}>
-                {f.name}
-              </option>
-            ))}
-          </SelectField>
-        </div>
-        <div className={styles.field}>
-          <label>Escuela Profesional</label>
-          <SelectField value={schoolId} onChange={(e) => setSchoolId(e.target.value)}>
-            <option value="">Todas las escuelas</option>
-            {schools.map((s) => (
-              <option key={s.id} value={s.id}>
-                {s.name}
-              </option>
-            ))}
-          </SelectField>
-        </div>
-      </Card>
+      <ReportFilters value={values} onChange={setValues} />
 
       {loading ? (
         <TableSkeleton rows={5} columns={3} />

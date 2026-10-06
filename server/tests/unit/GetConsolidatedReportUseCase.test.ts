@@ -1,6 +1,7 @@
 import { GetConsolidatedReportUseCase } from '@application/use-cases/consolidated-reports/GetConsolidatedReportUseCase';
 import { ConsolidatedReportForbiddenError } from '@application/use-cases/consolidated-reports/ConsolidatedReportErrors';
 import { NoActivePeriodError } from '@application/use-cases/evaluation/EvaluationErrors';
+import { ReportFilters } from '@application/use-cases/report-filters/reportFilters';
 import { UserRepository } from '@domain/repositories/UserRepository';
 import { RoleRepository } from '@domain/repositories/RoleRepository';
 import { AcademicPeriodRepository } from '@domain/repositories/AcademicPeriodRepository';
@@ -46,6 +47,8 @@ describe('GetConsolidatedReportUseCase (HU-44)', () => {
     } as unknown as jest.Mocked<RoleRepository>;
     periods = {
       findActive: jest.fn().mockResolvedValue({ id: 'p1', name: '2026-II', startDate: day('08-01'), endDate: day('12-31') }),
+      findAll: jest.fn(),
+      findById: jest.fn(),
     } as unknown as jest.Mocked<AcademicPeriodRepository>;
     schools = {
       findAll: jest.fn().mockResolvedValue([
@@ -87,7 +90,7 @@ describe('GetConsolidatedReportUseCase (HU-44)', () => {
     } as unknown as jest.Mocked<TutorSemesterReportRepository>;
   });
 
-  const run = (filters?: { facultyId?: string; schoolId?: string }) =>
+  const run = (filters?: ReportFilters) =>
     new GetConsolidatedReportUseCase(users, roles, periods, sessions, students, schools, faculties, reports).execute('u', filters);
 
   it('calcula las métricas por escuela', async () => {
@@ -135,10 +138,52 @@ describe('GetConsolidatedReportUseCase (HU-44)', () => {
     expect(bySchool.faculties[0].schools.map((s) => s.schoolName)).toEqual(['Civil']);
   });
 
-  it('expone todas las facultades y escuelas como opciones de filtro, aun con filtro aplicado', async () => {
-    const report = await run({ facultyId: 'f2' });
-    expect(report.filterOptions.faculties.map((f) => f.id)).toEqual(['f1', 'f2']);
-    expect(report.filterOptions.schools).toHaveLength(3);
+  it('filtra por ciclo del tutorado', async () => {
+    students.findAll.mockResolvedValue([
+      { id: 'a', schoolId: 'sc1', tutorId: 't1', isActive: true, cycle: 3 },
+      { id: 'b', schoolId: 'sc1', tutorId: 't1', isActive: true, cycle: 5 },
+    ] as never);
+    sessions.findAll.mockResolvedValue([session('1', ['a']), session('2', ['b'])]);
+
+    const report = await run({ cycle: 5 });
+
+    expect(report.totals.activeStudents).toBe(1);
+    expect(report.totals.sessionsTotal).toBe(1);
+    expect(report.appliedFilters).toEqual(['Ciclo: 5']);
+  });
+
+  it('filtra por tutor: solo sus tutorados y sus sesiones', async () => {
+    sessions.findAll.mockResolvedValue([
+      session('1', ['a'], { tutorId: 't1' } as never),
+      session('2', ['d'], { tutorId: 't2' } as never),
+    ]);
+
+    const report = await run({ tutorId: 't1' });
+
+    expect(report.totals.tutors).toBe(1);
+    expect(report.totals.activeStudents).toBe(3); // a, b y d tienen t1
+    expect(report.totals.sessionsTotal).toBe(1);
+  });
+
+  it('combina filtros y los describe: facultad + escuela + ciclo', async () => {
+    students.findAll.mockResolvedValue([{ id: 'a', schoolId: 'sc1', tutorId: 't1', isActive: true, cycle: 2 }] as never);
+    const report = await run({ facultyId: 'f1', schoolId: 'sc1', cycle: 2 });
+    expect(report.appliedFilters).toEqual(['Facultad: Ingeniería', 'Escuela: Sistemas', 'Ciclo: 2']);
+    expect(report.totals.activeStudents).toBe(1);
+  });
+
+  it('consulta el semestre indicado: sus informes y su rango de fechas', async () => {
+    periods.findById.mockResolvedValue({ id: 'p0', name: '2026-I', startDate: day('01-01'), endDate: day('07-31') } as never);
+    sessions.findAll.mockResolvedValue([
+      session('old', ['a'], { scheduledAt: day('03-10'), endsAt: day('03-10') }),
+      session('new', ['a']),
+    ]);
+
+    const report = await run({ periodId: 'p0' });
+
+    expect(report.periodName).toBe('2026-I');
+    expect(report.totals.sessionsTotal).toBe(1); // solo la de marzo
+    expect(reports.findAllByPeriod).toHaveBeenCalledWith('p0');
   });
 
   it('una escuela sin datos devuelve ceros, no NaN', async () => {

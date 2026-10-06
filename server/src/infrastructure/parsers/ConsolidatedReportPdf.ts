@@ -21,7 +21,7 @@ export class ConsolidatedReportPdf {
 
     const pdf = new BrandedPdf({
       title: 'Informe consolidado de tutoría por escuela y facultad',
-      subtitle: `Periodo ${report.periodName}`,
+      subtitle: [`Periodo ${report.periodName}`, ...report.appliedFilters].join(' · '),
       landscape: true,
       generatedAt: report.generatedAt,
     });

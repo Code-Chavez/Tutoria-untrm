@@ -8,15 +8,11 @@ import { FacultyRepository } from '@domain/repositories/FacultyRepository';
 import { StudentReferralRepository } from '@domain/repositories/StudentReferralRepository';
 import { TutorEvaluationRepository } from '@domain/repositories/TutorEvaluationRepository';
 import { EvaluationScaleCode } from '@domain/entities/TutorEvaluation';
-import { NoActivePeriodError } from '@application/use-cases/evaluation/EvaluationErrors';
+import { appliedFilterLabels, ReportFilters, resolveReportPeriod } from '@application/use-cases/report-filters/reportFilters';
 import { buildIndicators, IndicatorsReport } from './buildIndicators';
 import { IndicatorsForbiddenError } from './IndicatorsErrors';
 
-export interface IndicatorsFilters {
-  facultyId?: string;
-  schoolId?: string;
-  tutorId?: string;
-}
+export type IndicatorsFilters = ReportFilters;
 
 /**
  * Indicadores del tablero (HU-45): DBU y Vicerrectorado ven todas las
@@ -44,8 +40,7 @@ export class GetIndicatorsUseCase {
       throw new IndicatorsForbiddenError();
     }
 
-    const period = await this.periods.findActive();
-    if (!period) throw new NoActivePeriodError();
+    const period = await resolveReportPeriod(this.periods, filters.periodId);
 
     const [allSchools, faculties, allStudents, allSessions, allReferrals] = await Promise.all([
       this.schools.findAll(),
@@ -70,7 +65,8 @@ export class GetIndicatorsUseCase {
     );
     const schoolIds = new Set(schools.map((s) => s.id));
     const students = scopeStudents.filter(
-      (s) => schoolIds.has(s.schoolId) && (!filters.tutorId || s.tutorId === filters.tutorId),
+      (s) => schoolIds.has(s.schoolId) && (!filters.tutorId || s.tutorId === filters.tutorId) &&
+        (filters.cycle === undefined || s.cycle === filters.cycle),
     );
 
     const now = new Date();
@@ -90,23 +86,16 @@ export class GetIndicatorsUseCase {
 
     const body = buildIndicators({ schools, students, sessions, referrals, evaluationScores });
 
-    const tutorIds = [...new Set(scopeStudents.map((s) => s.tutorId).filter((id): id is string => !!id))];
-    const tutors = (await Promise.all(tutorIds.map((id) => this.users.findById(id))))
-      .filter((u): u is NonNullable<typeof u> => !!u)
-      .map((u) => ({ id: u.id, name: `${u.firstName} ${u.lastName}` }))
-      .sort((a, b) => a.name.localeCompare(b.name));
-
+    const tutor = filters.tutorId ? await this.users.findById(filters.tutorId) : null;
     return {
       periodName: period.name,
       generatedAt: now,
       ...body,
-      filterOptions: {
-        faculties: faculties
-          .filter((f) => scopeSchools.some((s) => s.facultyId === f.id))
-          .map((f) => ({ id: f.id, name: f.name })),
-        schools: scopeSchools.map((s) => ({ id: s.id, name: s.name, facultyId: s.facultyId })),
-        tutors,
-      },
+      appliedFilters: appliedFilterLabels(filters, {
+        faculty: faculties.find((f) => f.id === filters.facultyId)?.name,
+        school: allSchools.find((s) => s.id === filters.schoolId)?.name,
+        tutor: tutor ? `${tutor.firstName} ${tutor.lastName}` : undefined,
+      }),
     };
   }
 
@@ -121,10 +110,17 @@ export class GetIndicatorsUseCase {
     // Sin filtro solo si se consultan TODAS las escuelas del sistema; un
     // alcance parcial (Coordinador o filtro) se resuelve escuela por escuela.
     const allSelected = schools.length === allSchools.length;
+    const cycle = filters.cycle === undefined ? {} : { cycle: filters.cycle };
     const batches = allSelected
-      ? [await this.evaluations.findAnonymizedScoresByPeriod(periodId)]
+      ? [
+          await (filters.cycle === undefined
+            ? this.evaluations.findAnonymizedScoresByPeriod(periodId)
+            : this.evaluations.findAnonymizedScoresByPeriod(periodId, cycle)),
+        ]
       : await Promise.all(
-          schools.map((s) => this.evaluations.findAnonymizedScoresByPeriod(periodId, { schoolId: s.id })),
+          schools.map((s) =>
+            this.evaluations.findAnonymizedScoresByPeriod(periodId, { schoolId: s.id, ...cycle }),
+          ),
         );
     return batches
       .flat()

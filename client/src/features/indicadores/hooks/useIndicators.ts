@@ -4,7 +4,7 @@ import { indicatorsService, IndicatorsFilters } from '../services/indicatorsServ
 /** Indicadores del periodo activo, acotados por rol y filtros (HU-45). */
 export function useIndicators(filters: IndicatorsFilters) {
   const query = useQuery({
-    queryKey: ['indicators', filters.facultyId ?? null, filters.schoolId ?? null, filters.tutorId ?? null],
+    queryKey: ['indicators', filters],
     queryFn: () => indicatorsService.getIndicators(filters),
   });
   return { report: query.data, loading: query.isLoading, error: query.isError, refresh: query.refetch };
