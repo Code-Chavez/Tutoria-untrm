@@ -17,6 +17,7 @@ import { PrismaSchoolRepository } from './repositories/PrismaSchoolRepository';
 import { PrismaFacultyRepository } from './repositories/PrismaFacultyRepository';
 import { PrismaWorkPlanRepository } from './repositories/PrismaWorkPlanRepository';
 import { PrismaCatalogRepository } from './repositories/PrismaCatalogRepository';
+import { PrismaBrandingRepository } from './repositories/PrismaBrandingRepository';
 import { PrismaTutorSemesterReportRepository } from './repositories/PrismaTutorSemesterReportRepository';
 import { PrismaNotificationRepository } from './repositories/PrismaNotificationRepository';
 import { PrismaAcademicPeriodRepository } from './repositories/PrismaAcademicPeriodRepository';
@@ -50,6 +51,7 @@ const schoolRepository = new PrismaSchoolRepository(prisma);
 const facultyRepository = new PrismaFacultyRepository(prisma);
 const workPlanRepository = new PrismaWorkPlanRepository(prisma);
 const catalogRepository = new PrismaCatalogRepository(prisma);
+const brandingRepository = new PrismaBrandingRepository(prisma);
 const tutorSemesterReportRepository = new PrismaTutorSemesterReportRepository(prisma);
 const notificationRepository = new PrismaNotificationRepository(prisma);
 const academicPeriodRepository = new PrismaAcademicPeriodRepository(prisma);
@@ -132,6 +134,14 @@ import {
   ListSystemParametersUseCase,
   UpdateSystemParameterUseCase,
 } from '@application/use-cases/system-parameters/SystemParameterUseCases';
+import {
+  GetBrandingLogoFileUseCase,
+  GetBrandingUseCase,
+  RemoveBrandingLogoUseCase,
+  ResetBrandingUseCase,
+  UpdateBrandingUseCase,
+  UploadBrandingLogoUseCase,
+} from '@application/use-cases/branding/BrandingUseCases';
 import { GetHomePanelUseCase } from '@application/use-cases/home-panel/GetHomePanelUseCase';
 import { GetReportFilterOptionsUseCase } from '@application/use-cases/report-filters/GetReportFilterOptionsUseCase';
 import { GetIndicatorsUseCase } from '@application/use-cases/indicators/GetIndicatorsUseCase';
@@ -464,6 +474,13 @@ const getHomePanelUseCase = new GetHomePanelUseCase(
   getEvaluationStatusUseCase,
 );
 
+const getBrandingUseCase = new GetBrandingUseCase(brandingRepository);
+const updateBrandingUseCase = new UpdateBrandingUseCase(brandingRepository, auditLogRepository);
+const uploadBrandingLogoUseCase = new UploadBrandingLogoUseCase(brandingRepository, evidenceStorage, auditLogRepository);
+const removeBrandingLogoUseCase = new RemoveBrandingLogoUseCase(brandingRepository, evidenceStorage, auditLogRepository);
+const resetBrandingUseCase = new ResetBrandingUseCase(brandingRepository, evidenceStorage, auditLogRepository);
+const getBrandingLogoFileUseCase = new GetBrandingLogoFileUseCase(brandingRepository, evidenceStorage);
+
 export const container = {
   repositories: {
     userRepository,
@@ -549,6 +566,12 @@ export const container = {
     listCatalogUseCase,
     listSystemParametersUseCase,
     getHomePanelUseCase,
+    getBrandingUseCase,
+    updateBrandingUseCase,
+    uploadBrandingLogoUseCase,
+    removeBrandingLogoUseCase,
+    resetBrandingUseCase,
+    getBrandingLogoFileUseCase,
     updateSystemParameterUseCase,
     createCatalogEntryUseCase,
     updateCatalogEntryUseCase,

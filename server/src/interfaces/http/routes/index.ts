@@ -28,6 +28,7 @@ import reportFilterRoutes from './reportFilter.routes';
 import catalogRoutes from './catalog.routes';
 import systemParameterRoutes from './systemParameter.routes';
 import homePanelRoutes from './homePanel.routes';
+import brandingRoutes from './branding.routes';
 
 const router: IRouter = Router();
 
@@ -37,6 +38,7 @@ router.use(reportFilterRoutes);
 router.use(catalogRoutes);
 router.use(systemParameterRoutes);
 router.use(homePanelRoutes);
+router.use(brandingRoutes);
 router.use(authRoutes);
 router.use(userRoutes);
 router.use(roleRoutes);

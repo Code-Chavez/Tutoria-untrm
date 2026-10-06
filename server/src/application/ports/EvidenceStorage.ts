@@ -6,4 +6,6 @@ export interface EvidenceStorage {
   save(buffer: Buffer, originalFileName: string): Promise<string>;
   /** Resuelve la ruta absoluta en disco de una clave de almacenamiento. */
   resolvePath(storageKey: string): string;
+  /** Elimina el archivo (p. ej. al reemplazar el logotipo); no falla si ya no existe. */
+  delete(storageKey: string): Promise<void>;
 }

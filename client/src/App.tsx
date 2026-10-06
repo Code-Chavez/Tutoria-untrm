@@ -1,6 +1,7 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { QueryClientProvider } from '@tanstack/react-query';
 import { queryClient } from '@shared/services/queryClient';
+import { BrandingProvider } from '@shared/theme/BrandingProvider';
 import { AuthProvider } from '@features/auth/context/AuthProvider';
 import { LoginPage } from '@features/auth/components/LoginPage';
 import { ForgotPasswordPage } from '@features/auth/components/ForgotPasswordPage';
@@ -29,6 +30,7 @@ import { WorkPlanPage } from '@features/planificacion/pages/WorkPlanPage';
 import { IndicatorsPage } from '@features/indicadores/pages/IndicatorsPage';
 import { CatalogsPage } from '@features/catalogos/pages/CatalogsPage';
 import { ParametersPage } from '@features/parametros/pages/ParametersPage';
+import { BrandingPage } from '@features/identidad/pages/BrandingPage';
 import { EvaluationWindowsPage } from '@features/evaluacion/pages/EvaluationWindowsPage';
 import { EvaluationStatisticsPage } from '@features/evaluacion/pages/EvaluationStatisticsPage';
 import { EvaluationSuggestionsPage } from '@features/evaluacion/pages/EvaluationSuggestionsPage';
@@ -36,6 +38,7 @@ import { EvaluationSuggestionsPage } from '@features/evaluacion/pages/Evaluation
 export default function App() {
   return (
     <QueryClientProvider client={queryClient}>
+      <BrandingProvider>
       <AuthProvider>
         <BrowserRouter>
           <Routes>
@@ -59,6 +62,14 @@ export default function App() {
                 element={
                   <RequireRole roles={['Administrador DBU', 'Coordinador', 'Vicerrectorado']}>
                     <IndicatorsPage />
+                  </RequireRole>
+                }
+              />
+              <Route
+                path="identidad"
+                element={
+                  <RequireRole roles={['Administrador DBU']}>
+                    <BrandingPage />
                   </RequireRole>
                 }
               />
@@ -225,6 +236,7 @@ export default function App() {
         </Routes>
         </BrowserRouter>
       </AuthProvider>
+      </BrandingProvider>
     </QueryClientProvider>
   );
 }

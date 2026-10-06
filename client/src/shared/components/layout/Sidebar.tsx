@@ -1,7 +1,7 @@
 import { type ComponentType } from 'react';
 import { NavLink } from 'react-router-dom';
 import { useAuth } from '@features/auth/hooks/useAuth';
-import logoUntrm from '@assets/logo-untrm.png';
+import { useBranding } from '@shared/theme/BrandingProvider';
 import {
   DashboardIcon,
   GraduationCapIcon,
@@ -79,6 +79,7 @@ const NAV: NavGroup[] = [
       { label: 'Administración', Icon: SettingsIcon, path: '/users', roles: ['dbu'] },
       { label: 'Catálogos', Icon: SettingsIcon, path: '/catalogos', roles: ['dbu'] },
       { label: 'Parámetros', Icon: SettingsIcon, path: '/parametros', roles: ['dbu'] },
+      { label: 'Identidad visual', Icon: SettingsIcon, path: '/identidad', roles: ['dbu'] },
       { label: 'Evaluación de tutoría', Icon: SettingsIcon, path: '/evaluacion/configuracion', roles: ['dbu'] },
       { label: 'Resultados de evaluación', Icon: PieChartIcon, path: '/evaluacion/resultados', roles: ['dbu', 'coord'] },
       { label: 'Sugerencias de estudiantes', Icon: StarIcon, path: '/evaluacion/sugerencias', roles: ['dbu', 'coord'] },
@@ -93,6 +94,7 @@ interface SidebarProps {
 
 export function Sidebar({ drawerOpen, onClose }: SidebarProps) {
   const { user } = useAuth();
+  const { branding, logoSrc } = useBranding();
   const roleCode = user ? ROLE_CODES[user.role] : undefined;
 
   const canSee = (item: NavItem) =>
@@ -107,9 +109,9 @@ export function Sidebar({ drawerOpen, onClose }: SidebarProps) {
       />
       <aside className={`${styles.side} ${drawerOpen ? styles.open : ''}`}>
         <div className={styles.brand}>
-          <img src={logoUntrm} alt="" className={styles.logo} />
+          <img src={logoSrc} alt="" className={styles.logo} />
           <div className={styles.brandText}>
-            <b>SIT · UNTRM</b>
+            <b>{branding.shortName}</b>
             <small>Bienestar Universitario</small>
           </div>
           <button className={styles.closeBtn} onClick={onClose} aria-label="Cerrar menú">

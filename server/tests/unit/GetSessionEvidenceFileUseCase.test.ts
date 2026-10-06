@@ -44,6 +44,7 @@ describe('GetSessionEvidenceFileUseCase', () => {
     storage = {
       save: jest.fn(),
       resolvePath: jest.fn().mockReturnValue('/data/storage/evidence/key-1.pdf'),
+      delete: jest.fn(),
     };
     useCase = new GetSessionEvidenceFileUseCase(sessions, storage);
   });

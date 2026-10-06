@@ -56,6 +56,7 @@ describe('UploadSessionEvidenceUseCase', () => {
     storage = {
       save: jest.fn().mockResolvedValue('generated-key.pdf'),
       resolvePath: jest.fn(),
+      delete: jest.fn(),
     };
     useCase = new UploadSessionEvidenceUseCase(sessions, storage);
   });
