@@ -16,6 +16,7 @@ import { PrismaSupportContactRepository } from './repositories/PrismaSupportCont
 import { PrismaSchoolRepository } from './repositories/PrismaSchoolRepository';
 import { PrismaFacultyRepository } from './repositories/PrismaFacultyRepository';
 import { PrismaWorkPlanRepository } from './repositories/PrismaWorkPlanRepository';
+import { PrismaCatalogRepository } from './repositories/PrismaCatalogRepository';
 import { PrismaTutorSemesterReportRepository } from './repositories/PrismaTutorSemesterReportRepository';
 import { PrismaNotificationRepository } from './repositories/PrismaNotificationRepository';
 import { PrismaAcademicPeriodRepository } from './repositories/PrismaAcademicPeriodRepository';
@@ -48,6 +49,7 @@ const supportContactRepository = new PrismaSupportContactRepository(prisma);
 const schoolRepository = new PrismaSchoolRepository(prisma);
 const facultyRepository = new PrismaFacultyRepository(prisma);
 const workPlanRepository = new PrismaWorkPlanRepository(prisma);
+const catalogRepository = new PrismaCatalogRepository(prisma);
 const tutorSemesterReportRepository = new PrismaTutorSemesterReportRepository(prisma);
 const notificationRepository = new PrismaNotificationRepository(prisma);
 const academicPeriodRepository = new PrismaAcademicPeriodRepository(prisma);
@@ -120,6 +122,12 @@ import { ListFacultiesUseCase } from '@application/use-cases/faculties/ListFacul
 import { ListWorkPlansUseCase } from '@application/use-cases/work-plans/ListWorkPlansUseCase';
 import { GetWorkPlanUseCase } from '@application/use-cases/work-plans/GetWorkPlanUseCase';
 import { SaveWorkPlanUseCase } from '@application/use-cases/work-plans/SaveWorkPlanUseCase';
+import {
+  CreateCatalogEntryUseCase,
+  DeleteCatalogEntryUseCase,
+  ListCatalogUseCase,
+  UpdateCatalogEntryUseCase,
+} from '@application/use-cases/catalogs/CatalogUseCases';
 import { GetReportFilterOptionsUseCase } from '@application/use-cases/report-filters/GetReportFilterOptionsUseCase';
 import { GetIndicatorsUseCase } from '@application/use-cases/indicators/GetIndicatorsUseCase';
 import { GetConsolidatedReportUseCase } from '@application/use-cases/consolidated-reports/GetConsolidatedReportUseCase';
@@ -320,6 +328,10 @@ const getConsolidatedReportUseCase = new GetConsolidatedReportUseCase(
   facultyRepository,
   tutorSemesterReportRepository,
 );
+const listCatalogUseCase = new ListCatalogUseCase(catalogRepository);
+const createCatalogEntryUseCase = new CreateCatalogEntryUseCase(catalogRepository);
+const updateCatalogEntryUseCase = new UpdateCatalogEntryUseCase(catalogRepository);
+const deleteCatalogEntryUseCase = new DeleteCatalogEntryUseCase(catalogRepository);
 const getReportFilterOptionsUseCase = new GetReportFilterOptionsUseCase(
   userRepository,
   roleRepository,
@@ -515,6 +527,10 @@ export const container = {
     getConsolidatedReportUseCase,
     getIndicatorsUseCase,
     getReportFilterOptionsUseCase,
+    listCatalogUseCase,
+    createCatalogEntryUseCase,
+    updateCatalogEntryUseCase,
+    deleteCatalogEntryUseCase,
     getRiskAlertsUseCase,
     getScheduleAttendanceReportUseCase,
     createReferralUseCase,

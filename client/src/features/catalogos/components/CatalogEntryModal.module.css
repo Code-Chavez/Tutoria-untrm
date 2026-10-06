@@ -1,0 +1,106 @@
+.overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(11, 31, 63, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--s4);
+  z-index: 100;
+}
+
+.modal {
+  background: var(--blanco);
+  border-radius: var(--r-lg);
+  width: 100%;
+  max-width: 480px;
+  max-height: 90vh;
+  overflow-y: auto;
+  padding: var(--s5);
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--s4);
+}
+
+.header h2 {
+  margin: 0;
+  font-size: var(--fs-lg);
+  color: var(--azul-osc);
+}
+
+.close {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--g600);
+  padding: var(--s1);
+}
+
+.field {
+  margin-bottom: var(--s4);
+  flex: 1;
+}
+
+.field label {
+  display: block;
+  font-family: var(--ft);
+  font-size: var(--fs-xs);
+  font-weight: 600;
+  color: var(--g900);
+  margin-bottom: var(--s2);
+}
+
+.field input,
+.field select {
+  width: 100%;
+  box-sizing: border-box;
+  padding: var(--s2) var(--s3);
+  border: 1px solid var(--borde);
+  border-radius: var(--r-sm);
+  font-family: var(--ft);
+  font-size: var(--fs-sm);
+  color: var(--g900);
+  background: var(--blanco);
+}
+
+.field input:disabled {
+  background: var(--g100, #eef1f6);
+  color: var(--g600);
+}
+
+.field small {
+  display: block;
+  margin-top: var(--s1);
+  font-size: var(--fs-xs);
+  color: var(--g600);
+}
+
+.row {
+  display: flex;
+  gap: var(--s3);
+}
+
+.check {
+  display: flex;
+  align-items: center;
+  gap: var(--s2);
+  font-size: var(--fs-sm);
+  color: var(--g900);
+  margin-bottom: var(--s4);
+}
+
+.error {
+  margin: 0 0 var(--s3);
+  color: var(--peligro);
+  font-size: var(--fs-sm);
+}
+
+.actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--s3);
+}

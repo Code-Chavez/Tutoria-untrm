@@ -2,7 +2,14 @@
  * Modelos cuyas mutaciones (create/update/delete) se auditan automáticamente.
  * Extensible a medida que aparezcan entidades críticas (derivaciones, fichas…).
  */
-export const CRITICAL_MODELS = new Set<string>(['User']);
+export const CRITICAL_MODELS = new Set<string>([
+  'User',
+  // Catálogos maestros (HU-48): su alta, edición y baja quedan en la bitácora.
+  'Faculty',
+  'School',
+  'AcademicPeriod',
+  'CatalogItem',
+]);
 
 const OPERATION_ACTION: Record<string, string> = {
   create: 'CREATE',

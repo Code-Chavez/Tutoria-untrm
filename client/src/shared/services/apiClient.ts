@@ -36,7 +36,8 @@ const DEFAULT_ERROR = 'No se pudo conectar con el servidor. Intenta nuevamente.'
 /** Extrae el mensaje que envía la API, con un texto de respaldo legible. */
 export function getApiErrorMessage(error: unknown): string {
   if (axios.isAxiosError<ApiError>(error)) {
-    return error.response?.data?.message ?? DEFAULT_ERROR;
+    const data = error.response?.data;
+    return data?.message ?? data?.error ?? DEFAULT_ERROR;
   }
   return DEFAULT_ERROR;
 }
