@@ -333,3 +333,12 @@
   font-weight: 600;
 }
 
+
+.readOnlyNote {
+  margin: var(--s4) 0 0;
+  padding: var(--s3) var(--s4);
+  background: var(--celeste);
+  border-radius: var(--r-sm);
+  font-size: var(--fs-sm);
+  color: var(--azul-osc);
+}

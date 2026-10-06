@@ -2,9 +2,11 @@ import { StudentReferralRepository } from '@domain/repositories/StudentReferralR
 import { StudentRepository } from '@domain/repositories/StudentRepository';
 import { UserRepository } from '@domain/repositories/UserRepository';
 import { SchoolRepository } from '@domain/repositories/SchoolRepository';
+import { RoleRepository } from '@domain/repositories/RoleRepository';
 import { REFERRAL_ASPECTS } from '@domain/entities/StudentReferral';
 import { ReferralConstancia } from '@application/dtos/referral.dto';
-import { ReferralNotFoundError } from './ReferralErrors';
+import { ReferralForbiddenError, ReferralNotFoundError } from './ReferralErrors';
+import { canViewReferral, resolveReferralActor } from './referralAccess';
 
 /** Reúne los datos ya resueltos (nombres) para imprimir la constancia de derivación (HU-28). */
 export class GetReferralConstanciaUseCase {
@@ -13,13 +15,19 @@ export class GetReferralConstanciaUseCase {
     private readonly students: StudentRepository,
     private readonly users: UserRepository,
     private readonly schools: SchoolRepository,
+    private readonly roles: RoleRepository,
   ) {}
 
-  async execute(referralId: string): Promise<ReferralConstancia> {
+  async execute(referralId: string, requesterId: string): Promise<ReferralConstancia> {
+    const actor = await resolveReferralActor(this.users, this.roles, requesterId);
+
     const referral = await this.referrals.findById(referralId);
     if (!referral) {
       throw new ReferralNotFoundError(referralId);
     }
+
+    // La constancia contiene el motivo y los aspectos personales del tutorado: misma regla que el detalle.
+    if (!canViewReferral(actor, referral)) throw new ReferralForbiddenError();
 
     const student = await this.students.findById(referral.studentId);
     const referredBy = await this.users.findById(referral.referredById);

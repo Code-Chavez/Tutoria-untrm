@@ -3,6 +3,10 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { ReferralDetailModal } from './ReferralDetailModal';
 import { StudentReferral, referralService } from '../services/referralService';
 
+// Rol y servicio del usuario autenticado en cada prueba.
+let mockUser: { role: string; service?: string | null } = { role: 'Profesional de Servicio', service: 'PSICOPEDAGOGIA' };
+vi.mock('@features/auth/hooks/useAuth', () => ({ useAuth: () => ({ user: mockUser }) }));
+
 vi.mock('../services/referralService', async (importOriginal) => {
   const actual = await importOriginal<typeof import('../services/referralService')>();
   return {
@@ -38,6 +42,45 @@ describe('ReferralDetailModal (HU-32 - Registro de atención y cierre)', () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
+    mockUser = { role: 'Profesional de Servicio', service: 'PSICOPEDAGOGIA' };
+  });
+
+  describe('quién puede cambiar el estado (A02)', () => {
+    const renderModal = (referral = mockReferral) =>
+      render(<ReferralDetailModal referral={referral} onClose={onCloseMock} onStatusUpdated={onStatusUpdatedMock} />);
+
+    it('el profesional del servicio destino ve el formulario y solo los estados siguientes', () => {
+      renderModal();
+
+      const options = Array.from((screen.getByLabelText(/Nuevo Estado/i) as HTMLSelectElement).options).map((o) => o.value);
+      expect(options).toEqual(['ATENDIDO', 'CERRADO']); // el caso está EN_ATENCION: no se retrocede ni se repite
+    });
+
+    it('la DBU también lo ve', () => {
+      mockUser = { role: 'Administrador DBU' };
+      renderModal();
+      expect(screen.getByLabelText(/Nuevo Estado/i)).toBeDefined();
+    });
+
+    it('el tutor emisor solo consulta: no hay formulario y se le explica por qué', () => {
+      mockUser = { role: 'Docente Tutor' };
+      renderModal();
+
+      expect(screen.queryByLabelText(/Nuevo Estado/i)).toBeNull();
+      expect(screen.getByText(/Solo el servicio al que se derivó el caso y la DBU/i)).toBeDefined();
+    });
+
+    it('un profesional de otro servicio no ve el formulario', () => {
+      mockUser = { role: 'Profesional de Servicio', service: 'SALUD' };
+      renderModal();
+      expect(screen.queryByLabelText(/Nuevo Estado/i)).toBeNull();
+    });
+
+    it('un caso recién enviado ofrece todas las etapas posteriores', () => {
+      renderModal({ ...mockReferral, status: 'ENVIADO' });
+      const options = Array.from((screen.getByLabelText(/Nuevo Estado/i) as HTMLSelectElement).options).map((o) => o.value);
+      expect(options).toEqual(['RECIBIDO', 'EN_ATENCION', 'ATENDIDO', 'CERRADO']);
+    });
   });
 
   it('muestra el banner de caso cerrado y deshabilita edición si el estado es CERRADO', () => {
