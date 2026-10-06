@@ -39,6 +39,7 @@ async function main() {
     prisma.permission.upsert({ where: { code: 'work-plans:read' }, update: {}, create: { code: 'work-plans:read', description: 'Ver planes de trabajo semestrales' } }),
     prisma.permission.upsert({ where: { code: 'semester-reports:write' }, update: {}, create: { code: 'semester-reports:write', description: 'Elaborar el informe semestral de tutoría propio' } }),
     prisma.permission.upsert({ where: { code: 'consolidated-reports:read' }, update: {}, create: { code: 'consolidated-reports:read', description: 'Ver el informe consolidado por escuela y facultad' } }),
+    prisma.permission.upsert({ where: { code: 'indicators:read' }, update: {}, create: { code: 'indicators:read', description: 'Ver el tablero de indicadores' } }),
     prisma.permission.upsert({ where: { code: 'work-plans:write' }, update: {}, create: { code: 'work-plans:write', description: 'Elaborar planes de trabajo semestrales' } }),
   ]);
 
@@ -84,11 +85,11 @@ async function main() {
   // Asignar permisos a roles
   const rolePerms: Record<string, string[]> = {
     [adminRole.id]: Object.keys(permMap),
-    [coordRole.id]: ['users:read', 'students:read', 'students:write', 'students:import', 'interviews:read', 'followups:read', 'tutoring-requests:read', 'tutoring-requests:write', 'sessions:read', 'referrals:read', 'reports:read', 'reports:export', 'evaluation:manage', 'work-plans:read', 'work-plans:write'],
+    [coordRole.id]: ['users:read', 'students:read', 'students:write', 'students:import', 'interviews:read', 'followups:read', 'tutoring-requests:read', 'tutoring-requests:write', 'sessions:read', 'referrals:read', 'reports:read', 'reports:export', 'evaluation:manage', 'work-plans:read', 'work-plans:write', 'indicators:read'],
     [tutorRole.id]: ['students:read', 'interviews:read', 'interviews:write', 'followups:read', 'followups:write', 'support-contacts:read', 'support-contacts:write', 'tutoring-requests:read', 'tutoring-requests:write', 'sessions:read', 'sessions:write', 'referrals:read', 'referrals:write', 'reports:read', 'reports:export', 'semester-reports:write'],
     [studentRole.id]: ['sessions:read', 'evaluation:respond', 'tutoring-requests:self'],
     [serviceRole.id]: ['referrals:read', 'referrals:write'],
-    [viceRole.id]: ['reports:read', 'consolidated-reports:read'],
+    [viceRole.id]: ['reports:read', 'consolidated-reports:read', 'indicators:read'],
   };
 
   for (const [roleId, codes] of Object.entries(rolePerms)) {

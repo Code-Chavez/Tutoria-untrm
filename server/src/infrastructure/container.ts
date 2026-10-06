@@ -120,6 +120,7 @@ import { ListFacultiesUseCase } from '@application/use-cases/faculties/ListFacul
 import { ListWorkPlansUseCase } from '@application/use-cases/work-plans/ListWorkPlansUseCase';
 import { GetWorkPlanUseCase } from '@application/use-cases/work-plans/GetWorkPlanUseCase';
 import { SaveWorkPlanUseCase } from '@application/use-cases/work-plans/SaveWorkPlanUseCase';
+import { GetIndicatorsUseCase } from '@application/use-cases/indicators/GetIndicatorsUseCase';
 import { GetConsolidatedReportUseCase } from '@application/use-cases/consolidated-reports/GetConsolidatedReportUseCase';
 import { GetMySemesterReportUseCase } from '@application/use-cases/semester-reports/GetMySemesterReportUseCase';
 import { SaveMySemesterReportUseCase } from '@application/use-cases/semester-reports/SaveMySemesterReportUseCase';
@@ -318,6 +319,17 @@ const getConsolidatedReportUseCase = new GetConsolidatedReportUseCase(
   facultyRepository,
   tutorSemesterReportRepository,
 );
+const getIndicatorsUseCase = new GetIndicatorsUseCase(
+  userRepository,
+  roleRepository,
+  academicPeriodRepository,
+  sessionRepository,
+  studentRepository,
+  schoolRepository,
+  facultyRepository,
+  studentReferralRepository,
+  tutorEvaluationRepository,
+);
 const getRiskAlertsUseCase = new GetRiskAlertsUseCase(
   studentRepository,
   sessionRepository,
@@ -490,6 +502,7 @@ export const container = {
     saveMySemesterReportUseCase,
     getSemesterReportForExportUseCase,
     getConsolidatedReportUseCase,
+    getIndicatorsUseCase,
     getRiskAlertsUseCase,
     getScheduleAttendanceReportUseCase,
     createReferralUseCase,

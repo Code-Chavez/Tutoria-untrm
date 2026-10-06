@@ -26,6 +26,7 @@ import { ReferralsPage } from '@features/derivaciones/pages/ReferralsPage';
 import { ReferralTrackingPage } from '@features/derivaciones/pages/ReferralTrackingPage';
 import { EvaluationPage } from '@features/evaluacion/pages/EvaluationPage';
 import { WorkPlanPage } from '@features/planificacion/pages/WorkPlanPage';
+import { IndicatorsPage } from '@features/indicadores/pages/IndicatorsPage';
 import { EvaluationWindowsPage } from '@features/evaluacion/pages/EvaluationWindowsPage';
 import { EvaluationStatisticsPage } from '@features/evaluacion/pages/EvaluationStatisticsPage';
 import { EvaluationSuggestionsPage } from '@features/evaluacion/pages/EvaluationSuggestionsPage';
@@ -48,6 +49,14 @@ export default function App() {
                 element={
                   <RequireRole roles={['Administrador DBU']}>
                     <UserManagementPage />
+                  </RequireRole>
+                }
+              />
+              <Route
+                path="indicadores"
+                element={
+                  <RequireRole roles={['Administrador DBU', 'Coordinador', 'Vicerrectorado']}>
+                    <IndicatorsPage />
                   </RequireRole>
                 }
               />
