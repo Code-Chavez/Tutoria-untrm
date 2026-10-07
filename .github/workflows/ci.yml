@@ -20,11 +20,11 @@ jobs:
 
       - uses: pnpm/action-setup@v4
         with:
-          version: 9
+          version: 9.15.9
 
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 20.19.5
           cache: pnpm
           cache-dependency-path: server/pnpm-lock.yaml
 
@@ -44,11 +44,11 @@ jobs:
 
       - uses: pnpm/action-setup@v4
         with:
-          version: 9
+          version: 9.15.9
 
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 20.19.5
           cache: pnpm
           cache-dependency-path: server/pnpm-lock.yaml
 
@@ -86,17 +86,19 @@ jobs:
       DATABASE_URL: postgresql://sit_user:sit_pass@localhost:5432/sit_db_test
       JWT_SECRET: ci-test-secret
       NODE_ENV: test
+      # Las pruebas de acceso por HTTP necesitan la base real: sin ella la suite falla en vez de omitirlas (A18).
+      REQUIRE_DB_TESTS: '1'
 
     steps:
       - uses: actions/checkout@v4
 
       - uses: pnpm/action-setup@v4
         with:
-          version: 9
+          version: 9.15.9
 
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 20.19.5
           cache: pnpm
           cache-dependency-path: server/pnpm-lock.yaml
 
@@ -112,9 +114,13 @@ jobs:
         working-directory: server
         run: pnpm prisma migrate deploy
 
+      - name: Seed database (accounts used by the access-control tests)
+        working-directory: server
+        run: pnpm run seed
+
       - name: Run tests with coverage
         working-directory: server
-        run: pnpm test -- --coverage --coverageReporters=text --coverageReporters=lcov
+        run: pnpm test -- --ci --coverage --coverageReporters=text --coverageReporters=lcov
 
       - name: Upload coverage artifact
         if: always()
@@ -122,22 +128,21 @@ jobs:
         with:
           name: server-coverage
           path: server/coverage/lcov.info
-          retention-days: 7
+          retention-days: 30
 
   server-audit:
     name: Server — Audit
     runs-on: ubuntu-latest
-    continue-on-error: true
     steps:
       - uses: actions/checkout@v4
 
       - uses: pnpm/action-setup@v4
         with:
-          version: 9
+          version: 9.15.9
 
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 20.19.5
           cache: pnpm
           cache-dependency-path: server/pnpm-lock.yaml
 
@@ -158,11 +163,11 @@ jobs:
 
       - uses: pnpm/action-setup@v4
         with:
-          version: 9
+          version: 9.15.9
 
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 20.19.5
           cache: pnpm
           cache-dependency-path: client/pnpm-lock.yaml
 
@@ -174,6 +179,30 @@ jobs:
         working-directory: client
         run: pnpm run lint
 
+  client-audit:
+    name: Client — Audit
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9.15.9
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20.19.5
+          cache: pnpm
+          cache-dependency-path: client/pnpm-lock.yaml
+
+      - name: Install dependencies
+        working-directory: client
+        run: pnpm install --frozen-lockfile
+
+      - name: Audit production dependencies
+        working-directory: client
+        run: pnpm audit --prod
+
   client-test:
     name: Client — Test
     runs-on: ubuntu-latest
@@ -182,11 +211,11 @@ jobs:
 
       - uses: pnpm/action-setup@v4
         with:
-          version: 9
+          version: 9.15.9
 
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 20.19.5
           cache: pnpm
           cache-dependency-path: client/pnpm-lock.yaml
 
@@ -204,7 +233,7 @@ jobs:
         with:
           name: client-coverage
           path: client/coverage/lcov.info
-          retention-days: 7
+          retention-days: 30
 
   client-build:
     name: Client — Type Check & Build
@@ -214,11 +243,11 @@ jobs:
 
       - uses: pnpm/action-setup@v4
         with:
-          version: 9
+          version: 9.15.9
 
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 20.19.5
           cache: pnpm
           cache-dependency-path: client/pnpm-lock.yaml
 
@@ -242,6 +271,8 @@ jobs:
       - server-lint
       - server-build
       - server-test
+      - server-audit
+      - client-audit
       - client-lint
       - client-test
       - client-build
