@@ -6,6 +6,7 @@ import { StudentRepository } from '@domain/repositories/StudentRepository';
 import { Student } from '@domain/entities/Student';
 import { TutorInterview } from '@domain/entities/TutorInterview';
 import { CreateInterviewInput } from '@application/dtos/interview.dto';
+import { allowAllGuard } from '../helpers/studentGuard';
 
 describe('CreateInterviewUseCase', () => {
   let useCase: CreateInterviewUseCase;
@@ -42,7 +43,7 @@ describe('CreateInterviewUseCase', () => {
       assignTutor: jest.fn(),
       countByTutor: jest.fn(),
     };
-    useCase = new CreateInterviewUseCase(interviews, students);
+    useCase = new CreateInterviewUseCase(interviews, allowAllGuard(students));
   });
 
   it('registra la entrevista cuando hay al menos un motivo marcado', async () => {

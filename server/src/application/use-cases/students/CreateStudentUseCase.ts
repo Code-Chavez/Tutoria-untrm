@@ -1,6 +1,7 @@
 import { Student } from '@domain/entities/Student';
 import { StudentRepository } from '@domain/repositories/StudentRepository';
 import { SchoolRepository } from '@domain/repositories/SchoolRepository';
+import { StudentAccessGuard } from '@application/access/StudentAccessGuard';
 import { CreateStudentInput } from '@application/dtos/student.dto';
 import { DuplicateStudentCodeError, SchoolNotFoundError } from './StudentErrors';
 
@@ -8,10 +9,12 @@ export class CreateStudentUseCase {
   constructor(
     private readonly students: StudentRepository,
     private readonly schools: SchoolRepository,
+    private readonly guard: StudentAccessGuard,
   ) {}
 
-  async execute(data: CreateStudentInput): Promise<Student> {
+  async execute(data: CreateStudentInput, requesterId: string): Promise<Student> {
     const code = data.studentCode.trim();
+    await this.guard.assertSchoolAccess(requesterId, data.schoolId);
 
     const school = await this.schools.findById(data.schoolId);
     if (!school) {

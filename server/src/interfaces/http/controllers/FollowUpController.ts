@@ -35,10 +35,14 @@ export class FollowUpController {
   listByStudent = async (req: Request, res: Response) => {
     try {
       const studentId = req.params.id as string;
-      const followUps = await this.listFollowUpsByStudentUseCase.execute(studentId);
+      const followUps = await this.listFollowUpsByStudentUseCase.execute(studentId, req.auth?.sub as string);
       res.status(200).json({ followUps });
-    } catch {
-      res.status(500).json({ error: 'Error interno del servidor' });
+    } catch (error) {
+      if (error instanceof StudentNotFoundError) {
+        res.status(404).json({ error: error.message });
+      } else {
+        res.status(500).json({ error: 'Error interno del servidor' });
+      }
     }
   };
 }

@@ -35,10 +35,14 @@ export class InterviewController {
   listByStudent = async (req: Request, res: Response) => {
     try {
       const studentId = req.params.id as string;
-      const interviews = await this.listInterviewsByStudentUseCase.execute(studentId);
+      const interviews = await this.listInterviewsByStudentUseCase.execute(studentId, req.auth?.sub as string);
       res.status(200).json({ interviews });
-    } catch {
-      res.status(500).json({ error: 'Error interno del servidor' });
+    } catch (error) {
+      if (error instanceof StudentNotFoundError) {
+        res.status(404).json({ error: error.message });
+      } else {
+        res.status(500).json({ error: 'Error interno del servidor' });
+      }
     }
   };
 }

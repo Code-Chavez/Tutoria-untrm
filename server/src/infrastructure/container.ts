@@ -16,6 +16,7 @@ import { PrismaSupportContactRepository } from './repositories/PrismaSupportCont
 import { PrismaSchoolRepository } from './repositories/PrismaSchoolRepository';
 import { PrismaFacultyRepository } from './repositories/PrismaFacultyRepository';
 import { PrismaWorkPlanRepository } from './repositories/PrismaWorkPlanRepository';
+import { StudentAccessGuard } from '@application/access/StudentAccessGuard';
 import { PrismaCatalogRepository } from './repositories/PrismaCatalogRepository';
 import { PrismaBrandingRepository } from './repositories/PrismaBrandingRepository';
 import { PrismaTutorSemesterReportRepository } from './repositories/PrismaTutorSemesterReportRepository';
@@ -61,6 +62,9 @@ const evaluationWindowRepository = new PrismaEvaluationWindowRepository(prisma);
 const passwordHasher = new BcryptPasswordHasher();
 const tokenService = new JwtTokenService();
 const evidenceStorage = new LocalEvidenceStorage();
+
+// Política única de alcance sobre los tutorados (Art. 9.a y 14.c): la usan todos los casos de uso que tocan datos de un estudiante.
+const studentAccessGuard = new StudentAccessGuard(userRepository, roleRepository, schoolRepository, studentRepository);
 
 const loginUseCase = new LoginUseCase(
   userRepository,
@@ -186,20 +190,22 @@ const changePasswordUseCase = new ChangePasswordUseCase(
   passwordHasher,
 );
 
-const createStudentUseCase = new CreateStudentUseCase(studentRepository, schoolRepository);
-const updateStudentUseCase = new UpdateStudentUseCase(studentRepository, schoolRepository);
-const listStudentsUseCase = new ListStudentsUseCase(studentRepository);
-const importStudentsUseCase = new ImportStudentsUseCase(studentRepository, schoolRepository);
-const markStudentRiskUseCase = new MarkStudentRiskUseCase(studentRepository);
+const createStudentUseCase = new CreateStudentUseCase(studentRepository, schoolRepository, studentAccessGuard);
+const updateStudentUseCase = new UpdateStudentUseCase(studentRepository, schoolRepository, studentAccessGuard);
+const listStudentsUseCase = new ListStudentsUseCase(studentRepository, studentAccessGuard);
+const importStudentsUseCase = new ImportStudentsUseCase(studentRepository, schoolRepository, studentAccessGuard);
+const markStudentRiskUseCase = new MarkStudentRiskUseCase(studentRepository, studentAccessGuard);
 const linkStudentPortalAccountUseCase = new LinkStudentPortalAccountUseCase(
   studentRepository,
   userRepository,
   roleRepository,
+  studentAccessGuard,
 );
 const assignStudentsUseCase = new AssignStudentsUseCase(
   studentRepository,
   userRepository,
   roleRepository,
+  studentAccessGuard,
 );
 const getTutorWorkloadUseCase = new GetTutorWorkloadUseCase(
   studentRepository,
@@ -211,21 +217,23 @@ const reassignStudentUseCase = new ReassignStudentUseCase(
   userRepository,
   roleRepository,
   tutorAssignmentHistoryRepository,
+  studentAccessGuard,
 );
 const createInterviewUseCase = new CreateInterviewUseCase(
   tutorInterviewRepository,
-  studentRepository,
+  studentAccessGuard,
 );
 const listInterviewsByStudentUseCase = new ListInterviewsByStudentUseCase(
   tutorInterviewRepository,
+  studentAccessGuard,
 );
-const createFollowUpUseCase = new CreateFollowUpUseCase(tutorFollowUpRepository, studentRepository);
-const listFollowUpsByStudentUseCase = new ListFollowUpsByStudentUseCase(tutorFollowUpRepository);
+const createFollowUpUseCase = new CreateFollowUpUseCase(tutorFollowUpRepository, studentAccessGuard);
+const listFollowUpsByStudentUseCase = new ListFollowUpsByStudentUseCase(tutorFollowUpRepository, studentAccessGuard);
 const upsertSupportContactUseCase = new UpsertSupportContactUseCase(
   supportContactRepository,
-  studentRepository,
+  studentAccessGuard,
 );
-const getSupportContactUseCase = new GetSupportContactUseCase(supportContactRepository);
+const getSupportContactUseCase = new GetSupportContactUseCase(supportContactRepository, studentAccessGuard);
 const getStudentRecordUseCase = new GetStudentRecordUseCase(
   studentRepository,
   schoolRepository,
@@ -237,25 +245,32 @@ const getStudentRecordUseCase = new GetStudentRecordUseCase(
   sessionRepository,
   tutorFollowUpRepository,
   studentReferralRepository,
+  studentAccessGuard,
 );
 const createTutoringRequestUseCase = new CreateTutoringRequestUseCase(
   tutoringRequestRepository,
-  studentRepository,
+  studentAccessGuard,
   schoolRepository,
   userRepository,
   roleRepository,
 );
-const listTutoringRequestsUseCase = new ListTutoringRequestsUseCase(tutoringRequestRepository);
+const listTutoringRequestsUseCase = new ListTutoringRequestsUseCase(tutoringRequestRepository, studentAccessGuard);
 const createOwnTutoringRequestUseCase = new CreateOwnTutoringRequestUseCase(
   studentRepository,
   createTutoringRequestUseCase,
 );
 const scheduleSessionUseCase = new ScheduleSessionUseCase(
   sessionRepository,
-  studentRepository,
+  studentAccessGuard,
   systemParameterRepository,
 );
-const listSessionsUseCase = new ListSessionsUseCase(sessionRepository);
+const listSessionsUseCase = new ListSessionsUseCase(
+  sessionRepository,
+  studentAccessGuard,
+  studentRepository,
+  userRepository,
+  roleRepository,
+);
 const registerAttendanceUseCase = new RegisterAttendanceUseCase(
   sessionRepository,
   systemParameterRepository,
@@ -266,10 +281,11 @@ const uploadSessionEvidenceUseCase = new UploadSessionEvidenceUseCase(
   sessionRepository,
   evidenceStorage,
 );
-const listSessionEvidenceUseCase = new ListSessionEvidenceUseCase(sessionRepository, userRepository);
+const listSessionEvidenceUseCase = new ListSessionEvidenceUseCase(sessionRepository, userRepository, studentAccessGuard);
 const getSessionEvidenceFileUseCase = new GetSessionEvidenceFileUseCase(
   sessionRepository,
   evidenceStorage,
+  studentAccessGuard,
 );
 const listSchoolsUseCase = new ListSchoolsUseCase(schoolRepository);
 const listFacultiesUseCase = new ListFacultiesUseCase(facultyRepository);
@@ -373,16 +389,18 @@ const getRiskAlertsUseCase = new GetRiskAlertsUseCase(
   sessionRepository,
   userRepository,
   systemParameterRepository,
+  studentAccessGuard,
 );
 const getScheduleAttendanceReportUseCase = new GetScheduleAttendanceReportUseCase(
   userRepository,
   roleRepository,
   sessionRepository,
   studentRepository,
+  studentAccessGuard,
 );
 const createReferralUseCase = new CreateReferralUseCase(
   studentReferralRepository,
-  studentRepository,
+  studentAccessGuard,
   userRepository,
   roleRepository,
   notificationRepository,

@@ -1,7 +1,8 @@
 import { Student } from '@domain/entities/Student';
 import { StudentRepository } from '@domain/repositories/StudentRepository';
 import { MarkStudentRiskInput } from '@application/dtos/student.dto';
-import { StudentNotFoundError, RiskReasonRequiredError } from './StudentErrors';
+import { RiskReasonRequiredError } from './StudentErrors';
+import { StudentAccessGuard } from '@application/access/StudentAccessGuard';
 
 /**
  * Marca o quita la condición de "riesgo académico" de un estudiante (HU-11).
@@ -9,13 +10,13 @@ import { StudentNotFoundError, RiskReasonRequiredError } from './StudentErrors';
  * limpian el motivo y la fecha.
  */
 export class MarkStudentRiskUseCase {
-  constructor(private readonly students: StudentRepository) {}
+  constructor(
+    private readonly students: StudentRepository,
+    private readonly guard: StudentAccessGuard,
+  ) {}
 
-  async execute(id: string, input: MarkStudentRiskInput): Promise<Student> {
-    const student = await this.students.findById(id);
-    if (!student) {
-      throw new StudentNotFoundError(id);
-    }
+  async execute(id: string, input: MarkStudentRiskInput, requesterId: string): Promise<Student> {
+    await this.guard.assertAccess(requesterId, id);
 
     if (input.isAtRisk) {
       const reason = input.reason?.trim();

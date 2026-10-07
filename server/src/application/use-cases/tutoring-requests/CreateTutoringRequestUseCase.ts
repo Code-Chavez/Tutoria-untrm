@@ -1,11 +1,10 @@
 import { TutoringRequest } from '@domain/entities/TutoringRequest';
 import { TutoringRequestRepository } from '@domain/repositories/TutoringRequestRepository';
-import { StudentRepository } from '@domain/repositories/StudentRepository';
+import { StudentAccessGuard } from '@application/access/StudentAccessGuard';
 import { SchoolRepository } from '@domain/repositories/SchoolRepository';
 import { UserRepository } from '@domain/repositories/UserRepository';
 import { RoleRepository } from '@domain/repositories/RoleRepository';
 import { CreateTutoringRequestInput } from '@application/dtos/tutoringRequest.dto';
-import { StudentNotFoundError } from '@application/use-cases/students/StudentErrors';
 import { InstructorDetailsRequiredError, NoRoutingTargetError } from './TutoringRequestErrors';
 
 const DBU_ROLE_NAME = 'Administrador DBU';
@@ -20,7 +19,7 @@ const DBU_ROLE_NAME = 'Administrador DBU';
 export class CreateTutoringRequestUseCase {
   constructor(
     private readonly requests: TutoringRequestRepository,
-    private readonly students: StudentRepository,
+    private readonly guard: StudentAccessGuard,
     private readonly schools: SchoolRepository,
     private readonly users: UserRepository,
     private readonly roles: RoleRepository,
@@ -31,10 +30,8 @@ export class CreateTutoringRequestUseCase {
     requestedById: string,
     input: CreateTutoringRequestInput,
   ): Promise<TutoringRequest> {
-    const student = await this.students.findById(studentId);
-    if (!student) {
-      throw new StudentNotFoundError(studentId);
-    }
+    // El tutor registra solicitudes de sus tutorados; el coordinador, de los de sus escuelas.
+    const student = await this.guard.assertAccess(requestedById, studentId);
 
     if (input.source === 'INSTRUCTOR' && (!input.instructorName?.trim() || !input.courseName?.trim())) {
       throw new InstructorDetailsRequiredError();

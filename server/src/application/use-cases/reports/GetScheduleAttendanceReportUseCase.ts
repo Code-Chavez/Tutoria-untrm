@@ -3,6 +3,9 @@ import { RoleRepository } from '@domain/repositories/RoleRepository';
 import { SessionRepository } from '@domain/repositories/SessionRepository';
 import { StudentRepository } from '@domain/repositories/StudentRepository';
 import { SessionWithParticipants } from '@domain/entities/Session';
+import { StudentAccessGuard } from '@application/access/StudentAccessGuard';
+import { TutorNotFoundError } from '@application/use-cases/assignments/AssignmentErrors';
+import { scopeCovers } from '@application/access/StudentAccessGuard';
 import {
   GetScheduleAttendanceReportInput,
   ScheduleAttendanceReport,
@@ -39,9 +42,11 @@ export class GetScheduleAttendanceReportUseCase {
     private readonly roles: RoleRepository,
     private readonly sessions: SessionRepository,
     private readonly students: StudentRepository,
+    private readonly guard: StudentAccessGuard,
   ) {}
 
   async execute(input: GetScheduleAttendanceReportInput): Promise<ScheduleAttendanceReport> {
+    await this.assertCanSeeTutor(input.requesterId, input.tutorId);
     const tutor = await assertActiveTutor(this.users, this.roles, input.tutorId);
 
     const allSessions = await this.sessions.findAll({ tutorId: input.tutorId });
@@ -89,5 +94,21 @@ export class GetScheduleAttendanceReportUseCase {
       attendancePending: inPeriod.filter((s) => isPendingAttendance(s, now)).length,
       sessions: sessionRows,
     };
+  }
+
+  /**
+   * El informe lista tutorados por nombre. La DBU consulta a cualquier tutor; un
+   * tutor, solo el suyo; el coordinador, el de tutores que atienden a tutorados de
+   * sus escuelas. Fuera de eso se responde "tutor no encontrado".
+   */
+  private async assertCanSeeTutor(requesterId: string, tutorId: string): Promise<void> {
+    const scope = await this.guard.scopeFor(requesterId);
+    if (scope.kind === 'ALL') return;
+    if (scope.kind === 'TUTOR' && scope.tutorId === tutorId) return;
+    if (scope.kind === 'SCHOOLS') {
+      const theirs = await this.students.findAll({ tutorId, isActive: true });
+      if (theirs.some((s) => scopeCovers(scope, s))) return;
+    }
+    throw new TutorNotFoundError();
   }
 }

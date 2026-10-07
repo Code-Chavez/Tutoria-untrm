@@ -8,6 +8,7 @@ import { SessionWithParticipants } from '@domain/entities/Session';
 import { User } from '@domain/entities/User';
 import { Role } from '@domain/entities/Role';
 import { Student } from '@domain/entities/Student';
+import { allowAllGuard } from '../helpers/studentGuard';
 
 describe('GetScheduleAttendanceReportUseCase', () => {
   let useCase: GetScheduleAttendanceReportUseCase;
@@ -92,12 +93,12 @@ describe('GetScheduleAttendanceReportUseCase', () => {
       assignTutor: jest.fn(),
       countByTutor: jest.fn(),
     };
-    useCase = new GetScheduleAttendanceReportUseCase(users, roles, sessions, students);
+    useCase = new GetScheduleAttendanceReportUseCase(users, roles, sessions, students, allowAllGuard(students));
   });
 
   it('lanza TutorNotFoundError si el tutor no existe o no es Docente Tutor', async () => {
     users.findById.mockResolvedValue(null);
-    await expect(useCase.execute({ tutorId: 'missing' })).rejects.toThrow(TutorNotFoundError);
+    await expect(useCase.execute({ requesterId: 'admin-1', tutorId: 'missing' })).rejects.toThrow(TutorNotFoundError);
   });
 
   it('calcula los totales del periodo (individuales, grupales, canceladas, asistencia)', async () => {
@@ -118,7 +119,7 @@ describe('GetScheduleAttendanceReportUseCase', () => {
       makeSession({ id: 's5', scheduledAt: futureDate, endsAt: futureDate }), // futura, no pendiente aún
     ]);
 
-    const report = await useCase.execute({ tutorId: 'tutor-1' });
+    const report = await useCase.execute({ requesterId: 'admin-1', tutorId: 'tutor-1' });
 
     expect(report.totalSessions).toBe(5);
     expect(report.individualSessions).toBe(4);
@@ -133,7 +134,7 @@ describe('GetScheduleAttendanceReportUseCase', () => {
       makeSession({ id: 's1', studentIds: ['student-1', 'student-2'] }),
     ]);
 
-    const report = await useCase.execute({ tutorId: 'tutor-1' });
+    const report = await useCase.execute({ requesterId: 'admin-1', tutorId: 'tutor-1' });
 
     expect(report.sessions[0].studentNames).toEqual(['Ana Torres', 'Luis Pérez']);
     expect(report.sessions[0].attendanceConfirmed).toBeNull();
@@ -147,6 +148,7 @@ describe('GetScheduleAttendanceReportUseCase', () => {
     ]);
 
     const report = await useCase.execute({
+      requesterId: 'admin-1',
       tutorId: 'tutor-1',
       from: new Date(Date.now() - 24 * 60 * 60 * 1000),
     });
@@ -161,7 +163,7 @@ describe('GetScheduleAttendanceReportUseCase', () => {
       makeSession({ id: 'reciente', scheduledAt: pastDate }),
     ]);
 
-    const report = await useCase.execute({ tutorId: 'tutor-1' });
+    const report = await useCase.execute({ requesterId: 'admin-1', tutorId: 'tutor-1' });
 
     expect(report.sessions.map((s) => s.id)).toEqual(['reciente', 'antigua']);
   });

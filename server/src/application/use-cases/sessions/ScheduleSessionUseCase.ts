@@ -1,9 +1,8 @@
 import { SessionWithParticipants } from '@domain/entities/Session';
 import { SessionRepository } from '@domain/repositories/SessionRepository';
-import { StudentRepository } from '@domain/repositories/StudentRepository';
+import { StudentAccessGuard } from '@application/access/StudentAccessGuard';
 import { SystemParameterRepository } from '@domain/repositories/SystemParameterRepository';
 import { ScheduleSessionInput } from '@application/dtos/session.dto';
-import { StudentNotFoundError } from '@application/use-cases/students/StudentErrors';
 import {
   TutorScheduleConflictError,
   LocationRequiredError,
@@ -23,17 +22,13 @@ const DURATION_PARAM_KEY = 'session_duration_minutes';
 export class ScheduleSessionUseCase {
   constructor(
     private readonly sessions: SessionRepository,
-    private readonly students: StudentRepository,
+    private readonly guard: StudentAccessGuard,
     private readonly systemParameters: SystemParameterRepository,
   ) {}
 
   async execute(tutorId: string, input: ScheduleSessionInput): Promise<SessionWithParticipants> {
-    for (const studentId of input.studentIds) {
-      const student = await this.students.findById(studentId);
-      if (!student) {
-        throw new StudentNotFoundError(studentId);
-      }
-    }
+    // Un tutor solo programa sesiones con los tutorados que tiene asignados.
+    await this.guard.assertAccessToAll(tutorId, input.studentIds);
 
     if (input.modality === 'PRESENCIAL' && !input.location?.trim()) {
       throw new LocationRequiredError();

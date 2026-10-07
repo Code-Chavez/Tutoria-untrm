@@ -9,7 +9,7 @@ import { SessionRepository } from '@domain/repositories/SessionRepository';
 import { TutorFollowUpRepository } from '@domain/repositories/TutorFollowUpRepository';
 import { StudentReferralRepository } from '@domain/repositories/StudentReferralRepository';
 import { StudentRecord, StudentRecordEvent } from '@application/dtos/studentRecord.dto';
-import { StudentNotFoundError } from '@application/use-cases/students/StudentErrors';
+import { StudentAccessGuard } from '@application/access/StudentAccessGuard';
 
 const MOTIVE_LABELS: { key: 'motiveAcademic' | 'motivePersonalEmotional' | 'motiveVocational'; label: string }[] = [
   { key: 'motiveAcademic', label: 'Académica' },
@@ -35,6 +35,7 @@ export class GetStudentRecordUseCase {
     private readonly sessions: SessionRepository,
     private readonly followUps: TutorFollowUpRepository,
     private readonly referrals: StudentReferralRepository,
+    private readonly guard: StudentAccessGuard,
   ) {}
 
   async execute(
@@ -42,10 +43,8 @@ export class GetStudentRecordUseCase {
     includeSupportContact: boolean,
     requesterId: string,
   ): Promise<StudentRecord> {
-    const student = await this.students.findById(studentId);
-    if (!student) {
-      throw new StudentNotFoundError(studentId);
-    }
+    // El expediente reúne entrevistas, seguimientos y asistencia: solo con alcance sobre el tutorado.
+    const student = await this.guard.assertAccess(requesterId, studentId);
 
     const school = await this.schools.findById(student.schoolId);
     const [interviews, history, sessions, followUps, referrals] = await Promise.all([

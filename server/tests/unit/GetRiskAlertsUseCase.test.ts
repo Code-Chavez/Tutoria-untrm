@@ -7,6 +7,7 @@ import { Student } from '@domain/entities/Student';
 import { SessionWithParticipants } from '@domain/entities/Session';
 import { User } from '@domain/entities/User';
 import { SystemParameter } from '@domain/entities/SystemParameter';
+import { allowAllGuard } from '../helpers/studentGuard';
 
 describe('GetRiskAlertsUseCase', () => {
   let useCase: GetRiskAlertsUseCase;
@@ -99,7 +100,7 @@ describe('GetRiskAlertsUseCase', () => {
         .fn()
         .mockResolvedValue({ key: 'absence_alert_threshold', value: '2' } as SystemParameter),
     };
-    useCase = new GetRiskAlertsUseCase(students, sessions, users, systemParameters);
+    useCase = new GetRiskAlertsUseCase(students, sessions, users, systemParameters, allowAllGuard(students));
   });
 
   it('no genera alertas cuando no hay tutorados en riesgo', async () => {

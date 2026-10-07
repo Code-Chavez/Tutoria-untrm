@@ -10,6 +10,7 @@ import { StudentFilters } from '@domain/repositories/StudentRepository';
 import {
   DuplicateStudentCodeError,
   StudentNotFoundError,
+  StudentAccessDeniedError,
   SchoolNotFoundError,
   RiskReasonRequiredError,
   PortalUserNotFoundError,
@@ -51,7 +52,7 @@ export class StudentController {
     try {
       const id = req.params.id as string;
       const { userId } = linkPortalAccountSchema.parse(req.body);
-      const student = await this.linkStudentPortalAccountUseCase.execute(id, userId);
+      const student = await this.linkStudentPortalAccountUseCase.execute(id, userId, req.auth?.sub as string);
       res.status(200).json({
         message: userId
           ? 'Cuenta de portal vinculada exitosamente'
@@ -82,7 +83,7 @@ export class StudentController {
     try {
       const id = req.params.id as string;
       const data = markStudentRiskSchema.parse(req.body);
-      const student = await this.markStudentRiskUseCase.execute(id, data);
+      const student = await this.markStudentRiskUseCase.execute(id, data, req.auth?.sub as string);
       res.status(200).json({
         message: data.isAtRisk
           ? 'Estudiante marcado en riesgo académico'
@@ -143,7 +144,7 @@ export class StudentController {
         return;
       }
 
-      const report = await this.importStudentsUseCase.execute(rows);
+      const report = await this.importStudentsUseCase.execute(rows, req.auth?.sub as string);
       res.status(200).json({ message: 'Carga masiva procesada', report });
     } catch (error) {
       console.error('Error en carga masiva de estudiantes', error);
@@ -180,7 +181,7 @@ export class StudentController {
       if (isActive !== undefined) filters.isActive = isActive === 'true';
       if (isAtRisk !== undefined) filters.isAtRisk = isAtRisk === 'true';
 
-      const students = await this.listStudentsUseCase.execute(filters);
+      const students = await this.listStudentsUseCase.execute(req.auth?.sub as string, filters);
       res.status(200).json({ students });
     } catch {
       res.status(500).json({ error: 'Error interno del servidor' });
@@ -199,7 +200,7 @@ export class StudentController {
         cycle: body.cycle,
         schoolId: body.schoolId,
       };
-      const student = await this.createStudentUseCase.execute(input);
+      const student = await this.createStudentUseCase.execute(input, req.auth?.sub as string);
       res.status(201).json({ message: 'Estudiante registrado exitosamente', student });
     } catch (error) {
       this.handleError(error, res);
@@ -219,7 +220,7 @@ export class StudentController {
         ...(body.cycle !== undefined && { cycle: body.cycle }),
         ...(body.schoolId !== undefined && { schoolId: body.schoolId }),
       };
-      const student = await this.updateStudentUseCase.execute(id, input);
+      const student = await this.updateStudentUseCase.execute(id, input, req.auth?.sub as string);
       res.status(200).json({ message: 'Estudiante actualizado exitosamente', student });
     } catch (error) {
       this.handleError(error, res);
@@ -233,6 +234,8 @@ export class StudentController {
       res.status(409).json({ error: error.message });
     } else if (error instanceof SchoolNotFoundError || error instanceof StudentNotFoundError) {
       res.status(404).json({ error: error.message });
+    } else if (error instanceof StudentAccessDeniedError) {
+      res.status(403).json({ error: error.message });
     } else {
       res.status(500).json({ error: 'Error interno del servidor' });
     }

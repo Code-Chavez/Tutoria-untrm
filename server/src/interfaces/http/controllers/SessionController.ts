@@ -173,7 +173,7 @@ export class SessionController {
   listEvidence = async (req: Request, res: Response) => {
     try {
       const sessionId = req.params.id as string;
-      const evidences = await this.listSessionEvidenceUseCase.execute(sessionId);
+      const evidences = await this.listSessionEvidenceUseCase.execute(sessionId, req.auth?.sub as string);
       res.status(200).json({ evidences });
     } catch (error) {
       if (error instanceof SessionNotFoundError) {
@@ -193,6 +193,7 @@ export class SessionController {
       const { evidence, absolutePath } = await this.getSessionEvidenceFileUseCase.execute(
         sessionId,
         evidenceId,
+        req.auth?.sub as string,
       );
       res.download(absolutePath, evidence.fileName);
     } catch (error) {
@@ -211,7 +212,7 @@ export class SessionController {
       if (typeof studentId === 'string') filters.studentId = studentId;
       if (mine === 'true') filters.tutorId = req.auth?.sub;
 
-      const sessions = await this.listSessionsUseCase.execute(filters);
+      const sessions = await this.listSessionsUseCase.execute(req.auth?.sub as string, filters);
       res.status(200).json({ sessions });
     } catch {
       res.status(500).json({ error: 'Error interno del servidor' });

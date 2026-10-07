@@ -5,6 +5,7 @@ import {
 } from '@application/use-cases/students/StudentErrors';
 import { StudentRepository } from '@domain/repositories/StudentRepository';
 import { Student } from '@domain/entities/Student';
+import { allowAllGuard } from '../helpers/studentGuard';
 
 describe('MarkStudentRiskUseCase', () => {
   let useCase: MarkStudentRiskUseCase;
@@ -38,11 +39,11 @@ describe('MarkStudentRiskUseCase', () => {
       assignTutor: jest.fn(),
       countByTutor: jest.fn(),
     };
-    useCase = new MarkStudentRiskUseCase(mockStudentRepository);
+    useCase = new MarkStudentRiskUseCase(mockStudentRepository, allowAllGuard(mockStudentRepository));
   });
 
   it('marca en riesgo con motivo y fecha', async () => {
-    const result = await useCase.execute('student-1', { isAtRisk: true, reason: '  Bajo rendimiento  ' });
+    const result = await useCase.execute('student-1', { isAtRisk: true, reason: '  Bajo rendimiento  ' }, 'admin-1');
 
     expect(result.isAtRisk).toBe(true);
     expect(result.riskReason).toBe('Bajo rendimiento');
@@ -53,14 +54,14 @@ describe('MarkStudentRiskUseCase', () => {
   });
 
   it('exige motivo al marcar en riesgo', async () => {
-    await expect(useCase.execute('student-1', { isAtRisk: true, reason: '   ' })).rejects.toThrow(
+    await expect(useCase.execute('student-1', { isAtRisk: true, reason: '   ' }, 'admin-1')).rejects.toThrow(
       RiskReasonRequiredError,
     );
     expect(mockStudentRepository.update).not.toHaveBeenCalled();
   });
 
   it('quita la marca de riesgo limpiando motivo y fecha', async () => {
-    await useCase.execute('student-1', { isAtRisk: false });
+    await useCase.execute('student-1', { isAtRisk: false }, 'admin-1');
 
     const updateArg = mockStudentRepository.update.mock.calls[0][1];
     expect(updateArg).toEqual({ isAtRisk: false, riskReason: null, riskMarkedAt: null });
@@ -69,7 +70,7 @@ describe('MarkStudentRiskUseCase', () => {
   it('lanza StudentNotFoundError si el estudiante no existe', async () => {
     mockStudentRepository.findById.mockResolvedValue(null);
 
-    await expect(useCase.execute('missing', { isAtRisk: true, reason: 'x' })).rejects.toThrow(
+    await expect(useCase.execute('missing', { isAtRisk: true, reason: 'x' }, 'admin-1')).rejects.toThrow(
       StudentNotFoundError,
     );
   });

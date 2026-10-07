@@ -1,6 +1,7 @@
 import { SessionEvidence } from '@domain/entities/Session';
 import { SessionRepository } from '@domain/repositories/SessionRepository';
 import { UserRepository } from '@domain/repositories/UserRepository';
+import { StudentAccessGuard } from '@application/access/StudentAccessGuard';
 import { SessionNotFoundError } from './SessionErrors';
 
 export interface SessionEvidenceWithUploader extends SessionEvidence {
@@ -12,11 +13,13 @@ export class ListSessionEvidenceUseCase {
   constructor(
     private readonly sessions: SessionRepository,
     private readonly users: UserRepository,
+    private readonly guard: StudentAccessGuard,
   ) {}
 
-  async execute(sessionId: string): Promise<SessionEvidenceWithUploader[]> {
+  async execute(sessionId: string, requesterId: string): Promise<SessionEvidenceWithUploader[]> {
     const session = await this.sessions.findById(sessionId);
-    if (!session) {
+    // La evidencia (PDF o imágenes) es del tutor de la sesión, la DBU y el coordinador de la escuela.
+    if (!session || !(await this.guard.canSeeSession(requesterId, session))) {
       throw new SessionNotFoundError(sessionId);
     }
 
