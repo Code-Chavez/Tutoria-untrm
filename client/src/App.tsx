@@ -20,6 +20,7 @@ import { ExpedientePage } from '@features/expediente/pages/ExpedientePage';
 import { ProfilePage } from '@features/profile/pages/ProfilePage';
 import { MyTutoringRequestPage } from '@features/solicitudes/pages/MyTutoringRequestPage';
 import { SessionsCalendarPage } from '@features/sesiones/pages/SessionsCalendarPage';
+import { MySessionsPage } from '@features/sesiones/pages/MySessionsPage';
 import { ScheduleAttendanceReportPage } from '@features/informes/pages/ScheduleAttendanceReportPage';
 import { SemesterReportPage } from '@features/informes/pages/SemesterReportPage';
 import { ConsolidatedReportPage } from '@features/informes/pages/ConsolidatedReportPage';
@@ -170,6 +171,14 @@ export default function App() {
                 }
               />
               <Route
+                path="mis-sesiones"
+                element={
+                  <RequireRole roles={['Tutorado']}>
+                    <MySessionsPage />
+                  </RequireRole>
+                }
+              />
+              <Route
                 path="solicitar-tutoria"
                 element={
                   <RequireRole roles={['Tutorado']}>
@@ -214,7 +223,7 @@ export default function App() {
               <Route
                 path="derivaciones"
                 element={
-                  <RequireRole roles={['Docente Tutor', 'Profesional de Servicio', 'Administrador DBU', 'Coordinador']}>
+                  <RequireRole roles={['Docente Tutor', 'Profesional de Servicio', 'Administrador DBU']}>
                     <ReferralsPage />
                   </RequireRole>
                 }

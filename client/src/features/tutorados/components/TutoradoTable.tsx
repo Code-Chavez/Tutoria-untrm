@@ -1,5 +1,5 @@
 import React from 'react';
-import { Badge, IconButton } from '@shared/components/ui';
+import { Badge, Button, IconButton } from '@shared/components/ui';
 import {
   PencilIcon,
   AlertTriangleIcon,
@@ -21,6 +21,9 @@ interface TutoradoTableProps {
   tutorName: (tutorId?: string | null) => string | null;
   canWrite: boolean;
   canConductInterview: boolean;
+  /** Modo «elegir tutorado» (accesos del menú): muestra este botón por fila y lo dirige a onPick. */
+  pickLabel?: string;
+  onPick?: (student: Student) => void;
   onEdit: (student: Student) => void;
   onMarkRisk: (student: Student) => void;
   onUnmarkRisk: (student: Student) => void;
@@ -40,6 +43,8 @@ export const TutoradoTable: React.FC<TutoradoTableProps> = ({
   tutorName,
   canWrite,
   canConductInterview,
+  pickLabel,
+  onPick,
   onEdit,
   onMarkRisk,
   onUnmarkRisk,
@@ -113,6 +118,11 @@ export const TutoradoTable: React.FC<TutoradoTableProps> = ({
                 {showActions && (
                   <td>
                     <div className={table.actions}>
+                      {onPick && pickLabel && (
+                        <Button size="sm" onClick={() => onPick(student)} aria-label={`${pickLabel}: ${student.firstName} ${student.lastName}`}>
+                          {pickLabel}
+                        </Button>
+                      )}
                       <IconButton label="Ver expediente" onClick={() => onViewRecord(student)}>
                         <FolderIcon size={16} />
                       </IconButton>

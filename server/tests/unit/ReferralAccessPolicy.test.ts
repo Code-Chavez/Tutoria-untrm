@@ -7,6 +7,7 @@ import {
   toReferralView,
   ReferralActor,
 } from '@application/use-cases/referrals/referralAccess';
+import { ReferralListNotAllowedError } from '@application/use-cases/referrals/ReferralErrors';
 import { StudentReferralRepository } from '@domain/repositories/StudentReferralRepository';
 import { UserRepository } from '@domain/repositories/UserRepository';
 import { RoleRepository } from '@domain/repositories/RoleRepository';
@@ -115,19 +116,30 @@ describe('Política de acceso a derivaciones (A01, A02, A06)', () => {
       expect(body).not.toContain(SECRET);
     });
 
-    it('el listado del coordinador, del vicerrectorado y de una cuenta desactivada es vacío o denegado', async () => {
-      roleName = 'Coordinador';
-      expect(await new GetReferralsUseCase(referrals, users, roles).execute('c')).toEqual([]);
+    it.each(['Coordinador', 'Vicerrectorado', 'Tutorado'])(
+      'el listado de %s se deniega con una razón, no como una bandeja vacía (A15)',
+      async (name) => {
+        roleName = name;
+        await expect(new GetReferralsUseCase(referrals, users, roles).execute('x')).rejects.toBeInstanceOf(
+          ReferralListNotAllowedError,
+        );
+        expect(referrals.findMany).not.toHaveBeenCalled();
+      },
+    );
+
+    it('una cuenta desactivada no obtiene el listado', async () => {
 
       roleName = 'Docente Tutor';
       user = { id: 'tutor-1', roleId: 'r', isActive: false };
       await expect(new GetReferralsUseCase(referrals, users, roles).execute('tutor-1')).rejects.toThrow();
     });
 
-    it('un profesional sin servicio no obtiene ningún caso', async () => {
+    it('un profesional sin servicio no obtiene casos y se le explica por qué', async () => {
       roleName = 'Profesional de Servicio';
       user = { id: 'p', roleId: 'r', service: null, isActive: true };
-      expect(await new GetReferralsUseCase(referrals, users, roles).execute('p')).toEqual([]);
+      await expect(new GetReferralsUseCase(referrals, users, roles).execute('p')).rejects.toBeInstanceOf(
+        ReferralListNotAllowedError,
+      );
       expect(referrals.findMany).not.toHaveBeenCalled();
     });
   });

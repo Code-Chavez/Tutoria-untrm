@@ -1,5 +1,5 @@
 import { type ComponentType } from 'react';
-import { NavLink } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '@features/auth/hooks/useAuth';
 import { useBranding } from '@shared/theme/BrandingProvider';
 import {
@@ -38,7 +38,9 @@ const ROLE_CODES: Record<string, RoleCode> = {
 interface NavItem {
   label: string;
   Icon: ComponentType<{ size?: number }>;
-  path?: string; // con path = página existente; sin path = aún no construida
+  path: string;
+  /** Acción que abre la lista de tutorados en modo «elegir estudiante» (?accion=…). */
+  action?: string;
   roles?: RoleCode[]; // sin roles = visible para todos
 }
 
@@ -53,17 +55,17 @@ const NAV: NavGroup[] = [
     title: 'Principal',
     items: [
       { label: 'Panel de inicio', Icon: DashboardIcon, path: '/' },
-      { label: 'Tutorados', Icon: GraduationCapIcon, path: '/tutorados', roles: ['tutor', 'coord', 'dbu'] },
+      { label: 'Tutorados', Icon: GraduationCapIcon, path: '/tutorados', action: '', roles: ['tutor', 'coord', 'dbu'] },
       { label: 'Asignación', Icon: SwitchIcon, path: '/asignacion', roles: ['coord', 'dbu'] },
       { label: 'Carga masiva', Icon: UploadIcon, path: '/carga-masiva', roles: ['coord', 'dbu'] },
-      { label: 'Entrevista inicial', Icon: ClipboardIcon, roles: ['tutor'] },
+      { label: 'Entrevista inicial', Icon: ClipboardIcon, path: '/tutorados', action: 'entrevista', roles: ['tutor'] },
       { label: 'Expediente', Icon: FolderIcon, path: '/expediente', roles: ['tutor', 'coord', 'dbu'] },
       { label: 'Sesiones', Icon: CalendarIcon, path: '/sesiones', roles: ['tutor'] },
-      { label: 'Sesiones', Icon: CalendarIcon, roles: ['est'] },
-      { label: 'Seguimiento', Icon: ActivityIcon, roles: ['tutor'] },
-      { label: 'Derivar caso', Icon: SendIcon, roles: ['tutor'] },
+      { label: 'Mis sesiones', Icon: CalendarIcon, path: '/mis-sesiones', roles: ['est'] },
+      { label: 'Seguimiento', Icon: ActivityIcon, path: '/tutorados', action: 'seguimiento', roles: ['tutor'] },
+      { label: 'Derivar caso', Icon: SendIcon, path: '/tutorados', action: 'derivar', roles: ['tutor'] },
       { label: 'Solicitar tutoría', Icon: SendIcon, path: '/solicitar-tutoria', roles: ['est'] },
-      { label: 'Casos derivados', Icon: InboxIcon, path: '/derivaciones', roles: ['tutor', 'coord', 'serv', 'dbu'] },
+      { label: 'Casos derivados', Icon: InboxIcon, path: '/derivaciones', roles: ['tutor', 'serv', 'dbu'] },
       { label: 'Seguimiento DBU', Icon: ReportIcon, path: '/derivaciones/seguimiento', roles: ['dbu'] },
       { label: 'Evaluar tutoría', Icon: StarIcon, path: '/evaluar-tutoria', roles: ['est'] },
     ],
@@ -97,6 +99,15 @@ export function Sidebar({ drawerOpen, onClose }: SidebarProps) {
   const { branding, logoSrc } = useBranding();
   const roleCode = user ? ROLE_CODES[user.role] : undefined;
 
+  const { pathname, search } = useLocation();
+  const currentAction = new URLSearchParams(search).get('accion') ?? '';
+
+  // Varios accesos comparten /tutorados: se distinguen por la acción de la URL.
+  const isActive = (item: NavItem) => {
+    const onPath = item.path === '/' ? pathname === '/' : pathname === item.path || pathname.startsWith(`${item.path}/`);
+    return onPath && (item.action === undefined || item.action === currentAction);
+  };
+
   const canSee = (item: NavItem) =>
     !item.roles || (roleCode !== undefined && item.roles.includes(roleCode));
 
@@ -127,35 +138,20 @@ export function Sidebar({ drawerOpen, onClose }: SidebarProps) {
             return (
               <div key={group.title} className={styles.navGroup}>
                 <span className={styles.group}>{group.title}</span>
-                {visible.map((item) =>
-                  item.path ? (
-                    <NavLink
-                      key={item.label}
-                      to={item.path}
-                      end={item.path === '/'}
-                      onClick={onClose}
-                      className={({ isActive }) => `${styles.link} ${isActive ? styles.active : ''}`}
-                    >
-                      <span className={styles.icon}>
-                        <item.Icon size={19} />
-                      </span>
-                      {item.label}
-                    </NavLink>
-                  ) : (
-                    <span
-                      key={item.label}
-                      className={`${styles.link} ${styles.disabled}`}
-                      aria-disabled="true"
-                      title="Disponible próximamente"
-                    >
-                      <span className={styles.icon}>
-                        <item.Icon size={19} />
-                      </span>
-                      {item.label}
-                      <span className={styles.soon}>Próx.</span>
+                {visible.map((item) => (
+                  <Link
+                    key={item.label}
+                    to={item.action ? `${item.path}?accion=${item.action}` : item.path}
+                    onClick={onClose}
+                    className={`${styles.link} ${isActive(item) ? styles.active : ''}`}
+                    aria-current={isActive(item) ? 'page' : undefined}
+                  >
+                    <span className={styles.icon}>
+                      <item.Icon size={19} />
                     </span>
-                  ),
-                )}
+                    {item.label}
+                  </Link>
+                ))}
               </div>
             );
           })}

@@ -1,0 +1,56 @@
+.card {
+  margin-bottom: var(--s4);
+}
+
+.section {
+  margin: 0 0 var(--s3);
+  font-size: var(--fs-sm);
+  color: var(--g900);
+}
+
+.empty {
+  margin: 0;
+  font-size: var(--fs-sm);
+  color: var(--g600);
+}
+
+.list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--s3);
+}
+
+.item {
+  border: 1px solid var(--g200);
+  border-radius: var(--r-md, 8px);
+  padding: var(--s3) var(--s4);
+}
+
+.head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--s3);
+  flex-wrap: wrap;
+}
+
+.topic {
+  color: var(--g900);
+  word-break: break-word;
+}
+
+.when,
+.where,
+.cancel {
+  margin: var(--s1) 0 0;
+  font-size: var(--fs-sm);
+  color: var(--g600);
+  word-break: break-word;
+}
+
+.cancel {
+  color: var(--danger, #b42318);
+}

@@ -39,7 +39,7 @@ const MATRIX: { method: string; path: string; allowed: Role[] }[] = [
   { method: 'GET', path: '/api/indicators', allowed: ['admin', 'coordinador', 'vicerrectorado'] },
   { method: 'GET', path: '/api/work-plans', allowed: ['admin', 'coordinador'] },
   { method: 'POST', path: '/api/sessions', allowed: ['admin', 'tutor'] },
-  { method: 'GET', path: '/api/referrals', allowed: ['admin', 'coordinador', 'tutor', 'servicio'] },
+  { method: 'GET', path: '/api/referrals', allowed: ['admin', 'tutor', 'servicio'] },
   { method: 'POST', path: '/api/students/00000000-0000-0000-0000-000000000000/referrals', allowed: ['admin', 'tutor', 'servicio'] },
 ];
 

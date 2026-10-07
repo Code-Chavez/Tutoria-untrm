@@ -136,32 +136,6 @@
   color: var(--dorado);
 }
 
-.disabled {
-  color: rgba(255, 255, 255, 0.4);
-  cursor: not-allowed;
-}
-
-.disabled:hover {
-  background: none;
-  color: rgba(255, 255, 255, 0.4);
-}
-
-.disabled .icon {
-  color: rgba(255, 255, 255, 0.32);
-}
-
-.soon {
-  margin-left: auto;
-  font-size: 9px;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.4px;
-  color: rgba(255, 255, 255, 0.55);
-  background: rgba(255, 255, 255, 0.1);
-  border-radius: 5px;
-  padding: 2px 6px;
-}
-
 /* Pie con usuario */
 .foot {
   display: flex;
