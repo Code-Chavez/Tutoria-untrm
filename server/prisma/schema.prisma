@@ -423,6 +423,10 @@ model SessionParticipant {
   studentId String  @map("student_id")
   student   Student @relation(fields: [studentId], references: [id])
 
+  // Asistencia de este participante (A07): true = asistió, false = no asistió,
+  // null = aún sin registrar. Las métricas cuentan solo a quienes asistieron.
+  attended Boolean?
+
   @@unique([sessionId, studentId])
   @@map("session_participants")
 }

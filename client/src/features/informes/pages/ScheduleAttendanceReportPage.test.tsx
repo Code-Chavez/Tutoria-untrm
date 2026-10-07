@@ -36,6 +36,9 @@ const sampleReport: ScheduleAttendanceReport = {
   individualSessions: 1,
   groupSessions: 1,
   cancelledSessions: 0,
+  heldSessions: 2,
+  noShowSessions: 0,
+  pendingRollSessions: 0,
   attendanceConfirmed: 1,
   attendancePending: 0,
   sessions: [
@@ -48,6 +51,8 @@ const sampleReport: ScheduleAttendanceReport = {
       studentNames: ['Ana Torres'],
       status: 'REALIZADA',
       attendanceConfirmed: true,
+      attendedCount: 1,
+      participantCount: 1,
     },
     {
       id: 's2',
@@ -58,6 +63,8 @@ const sampleReport: ScheduleAttendanceReport = {
       studentNames: ['Ana Torres', 'Luis Pérez'],
       status: 'REALIZADA',
       attendanceConfirmed: null,
+      attendedCount: 1,
+      participantCount: 2,
     },
   ],
 };

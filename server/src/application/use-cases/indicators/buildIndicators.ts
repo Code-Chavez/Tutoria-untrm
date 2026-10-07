@@ -69,9 +69,10 @@ export function buildIndicators(
   const withTutor = students.filter((s) => s.tutorId).length;
   const atRisk = students.filter((s) => s.isAtRisk).length;
 
-  const inScope = sessions.filter((s) => s.studentIds.some((id) => studentIds.has(id)));
+  // Cuentan las sesiones en que asistió alguien del ámbito (A07), no las meramente programadas.
+  const inScope = sessions.filter((s) => s.attendedStudentIds.some((id) => studentIds.has(id)));
   const individual = inScope.filter((s) => s.studentIds.length === 1).length;
-  const served = new Set(inScope.flatMap((s) => s.studentIds).filter((id) => studentIds.has(id)));
+  const served = new Set(inScope.flatMap((s) => s.attendedStudentIds).filter((id) => studentIds.has(id)));
 
   const months = new Map<string, { individual: number; group: number }>();
   for (const s of inScope) {

@@ -6,11 +6,17 @@ const STATUS_LABEL: Record<string, string> = {
   PROXIMA: 'Próxima',
   EN_CURSO: 'En curso',
   REALIZADA: 'Realizada',
+  INASISTENCIA: 'Sin asistentes',
+  POR_REGISTRAR: 'Asistencia por registrar',
 };
 
-function attendanceLabel(confirmed: boolean | null): string {
-  if (confirmed === null) return 'N/A (grupal)';
-  return confirmed ? 'Confirmada' : 'Pendiente';
+// Individual: confirmación del Anexo N°4; grupal: cuántos de los programados asistieron (A07).
+function attendanceLabel(s: ScheduleAttendanceReport['sessions'][number]): string {
+  if (s.participantCount > 1) {
+    return s.attendedCount === null ? 'Sin registrar' : `${s.attendedCount} de ${s.participantCount}`;
+  }
+  if (s.attendanceConfirmed === null) return 'N/A';
+  return s.attendanceConfirmed ? 'Confirmada' : 'Pendiente';
 }
 
 function periodLabel(report: ScheduleAttendanceReport): string {
@@ -40,6 +46,9 @@ export class ScheduleAttendanceReportWorkbook {
           ['Sesiones individuales', report.individualSessions],
           ['Sesiones grupales', report.groupSessions],
           ['Sesiones canceladas', report.cancelledSessions],
+          ['Sesiones realizadas (con asistentes)', report.heldSessions],
+          ['Sesiones sin asistentes', report.noShowSessions],
+          ['Sesiones con asistencia por registrar', report.pendingRollSessions],
           ['Asistencias confirmadas', report.attendanceConfirmed],
           ['Asistencias pendientes', report.attendancePending],
         ],
@@ -64,7 +73,7 @@ export class ScheduleAttendanceReportWorkbook {
           s.modality === 'PRESENCIAL' ? 'Presencial' : 'Virtual',
           s.studentNames.join(', '),
           STATUS_LABEL[s.status] ?? s.status,
-          attendanceLabel(s.attendanceConfirmed),
+          attendanceLabel(s),
         ]),
       })
       .toBuffer();

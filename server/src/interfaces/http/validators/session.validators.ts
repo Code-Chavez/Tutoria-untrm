@@ -35,3 +35,8 @@ export const cancelSessionSchema = z.object({
 
 export type RescheduleSessionBody = z.infer<typeof rescheduleSessionSchema>;
 export type CancelSessionBody = z.infer<typeof cancelSessionSchema>;
+
+// Asistencia por participante (A07): los tutorados que SÍ asistieron; el resto consta como inasistencia.
+export const recordAttendanceSchema = z.object({
+  attendedStudentIds: z.array(z.string().uuid('Cada tutorado debe ser un UUID válido')).max(50),
+});

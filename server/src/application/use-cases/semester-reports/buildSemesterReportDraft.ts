@@ -16,13 +16,13 @@ export interface SemesterReportDraftInput {
 
 const unique = (values: string[]) => [...new Set(values.map((v) => v.trim()).filter(Boolean))];
 
-/** Agrupa las sesiones por tema: una fila por tema con su nº de sesiones y participantes distintos. */
+/** Agrupa las sesiones por tema: una fila por tema con su nº de sesiones y los participantes distintos que asistieron (A07). */
 function rowsFromSessions(sessions: SessionWithParticipants[]): SemesterReportRow[] {
   const byTopic = new Map<string, { count: number; students: Set<string> }>();
   for (const s of sessions) {
     const entry = byTopic.get(s.topic) ?? { count: 0, students: new Set<string>() };
     entry.count += 1;
-    s.studentIds.forEach((id) => entry.students.add(id));
+    s.attendedStudentIds.forEach((id) => entry.students.add(id));
     byTopic.set(s.topic, entry);
   }
   return [...byTopic.entries()].map(([topic, { count, students }]) => ({

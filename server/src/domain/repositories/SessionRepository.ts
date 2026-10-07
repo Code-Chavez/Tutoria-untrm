@@ -41,6 +41,15 @@ export interface SessionRepository {
     sequenceNumber: number,
     confirmedAt: Date,
   ): Promise<SessionAttendance>;
+  /**
+   * Registra quién asistió y quién no entre los participantes de la sesión (A07).
+   * Reemplaza un registro anterior del mismo tutor (corrección).
+   */
+  recordParticipantAttendance(
+    sessionId: string,
+    attendedStudentIds: string[],
+    absentStudentIds: string[],
+  ): Promise<void>;
 
   /** Cambia el horario de la sesión (HU-23); no toca participantes ni modalidad. */
   reschedule(id: string, scheduledAt: Date, endsAt: Date): Promise<SessionWithParticipants>;

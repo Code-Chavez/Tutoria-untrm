@@ -21,7 +21,7 @@ const student = (id: string, schoolId: string, tutorId: string | null, isAtRisk 
   ({ id, schoolId, tutorId, isAtRisk, isActive: true }) as Student;
 
 const session = (id: string, tutorId: string, studentIds: string[], over: Partial<SessionWithParticipants> = {}) =>
-  ({ id, tutorId, studentIds, scheduledAt: day('09-10'), endsAt: day('09-10'), cancelledAt: null, ...over }) as SessionWithParticipants;
+  ({ id, tutorId, studentIds, attendedStudentIds: studentIds, absentStudentIds: [], scheduledAt: day('09-10'), endsAt: day('09-10'), cancelledAt: null, ...over }) as SessionWithParticipants;
 
 const referral = (studentId: string, service: string, status = 'ENVIADO', createdAt = day('09-12')) =>
   ({ studentId, service, status, createdAt }) as unknown as StudentReferral;
@@ -214,5 +214,33 @@ describe('GetIndicatorsUseCase (HU-45)', () => {
   it('exige periodo activo', async () => {
     periods.findActive.mockResolvedValue(null);
     await expect(run()).rejects.toBeInstanceOf(NoActivePeriodError);
+  });
+
+  describe('cobertura basada en la asistencia (A07)', () => {
+    it('programar una sesión no cubre al tutorado: sin asistencia registrada la cobertura es cero', async () => {
+      sessions.findAll.mockResolvedValue([
+        session('1', 't1', ['a'], { attendedStudentIds: [], absentStudentIds: [] }),
+        session('2', 't1', ['b'], { attendedStudentIds: [], absentStudentIds: ['b'] }),
+      ]);
+
+      const r = await run();
+
+      expect(r.sessions.total).toBe(0);
+      expect(r.sessions.studentsServed).toBe(0);
+      expect(r.sessions.coveragePct).toBe(0);
+      expect(r.sessions.byMonth).toEqual([]);
+    });
+
+    it('en una grupal solo se cubre a quienes asistieron', async () => {
+      sessions.findAll.mockResolvedValue([
+        session('g', 't1', ['a', 'b', 'd'], { attendedStudentIds: ['a'], absentStudentIds: ['b', 'd'] }),
+      ]);
+
+      const r = await run();
+
+      expect(r.sessions.group).toBe(1);
+      expect(r.sessions.studentsServed).toBe(1);
+      expect(r.sessions.coveragePct).toBe(25); // 1 de 4 tutorados activos
+    });
   });
 });

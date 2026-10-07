@@ -36,6 +36,8 @@ function toSessionWithParticipants(row: SessionRow): SessionWithParticipants {
     cancelReason: row.cancelReason,
     createdAt: row.createdAt,
     studentIds: row.participants.map((p) => p.studentId),
+    attendedStudentIds: row.participants.filter((p) => p.attended === true).map((p) => p.studentId),
+    absentStudentIds: row.participants.filter((p) => p.attended === false).map((p) => p.studentId),
     attendance: toAttendance(row.attendance),
   };
 }
@@ -111,8 +113,12 @@ export class PrismaSessionRepository implements SessionRepository {
     sequenceNumber: number,
     confirmedAt: Date,
   ): Promise<SessionAttendance> {
-    const row = await this.prisma.sessionAttendance.create({
-      data: { sessionId, sequenceNumber, confirmedAt },
+    // Confirmar la asistencia de una sesión individual (Anexo N°4) es también marcar
+    // al tutorado como asistido: una sola operación, para que ambas cosas no diverjan.
+    const row = await this.prisma.$transaction(async (tx) => {
+      const attendance = await tx.sessionAttendance.create({ data: { sessionId, sequenceNumber, confirmedAt } });
+      await tx.sessionParticipant.updateMany({ where: { sessionId }, data: { attended: true } });
+      return attendance;
     });
     return {
       id: row.id,
@@ -121,6 +127,23 @@ export class PrismaSessionRepository implements SessionRepository {
       confirmedAt: row.confirmedAt,
       createdAt: row.createdAt,
     };
+  }
+
+  async recordParticipantAttendance(
+    sessionId: string,
+    attendedStudentIds: string[],
+    absentStudentIds: string[],
+  ): Promise<void> {
+    await this.prisma.$transaction([
+      this.prisma.sessionParticipant.updateMany({
+        where: { sessionId, studentId: { in: attendedStudentIds } },
+        data: { attended: true },
+      }),
+      this.prisma.sessionParticipant.updateMany({
+        where: { sessionId, studentId: { in: absentStudentIds } },
+        data: { attended: false },
+      }),
+    ]);
   }
 
   async reschedule(id: string, scheduledAt: Date, endsAt: Date): Promise<SessionWithParticipants> {

@@ -27,6 +27,8 @@ const session = (over: Partial<SessionWithParticipants>): SessionWithParticipant
     endsAt: day('09-10'),
     cancelledAt: null,
     studentIds: ['a'],
+    attendedStudentIds: ['a'],
+    absentStudentIds: [],
     attendance: null,
     ...over,
   }) as SessionWithParticipants;
@@ -104,8 +106,8 @@ describe('Tutor semester report (HU-43)', () => {
   it('separa sesiones individuales de grupales y cuenta participantes distintos', async () => {
     sessions.findAll.mockResolvedValue([
       session({ id: '1', studentIds: ['a'] }),
-      session({ id: '2', studentIds: ['b'] }),
-      session({ id: '3', topic: 'Taller de estrés', studentIds: ['a', 'b', 'c'] }),
+      session({ id: '2', studentIds: ['b'], attendedStudentIds: ['b'] }),
+      session({ id: '3', topic: 'Taller de estrés', studentIds: ['a', 'b', 'c'], attendedStudentIds: ['a', 'b', 'c'] }),
     ]);
     const { draft } = await get().execute('t1');
     expect(draft.individual).toEqual([
@@ -176,6 +178,29 @@ describe('Tutor semester report (HU-43)', () => {
       periodName: '2026-II',
       tutorName: 'Elena Ramírez',
       report: saved,
+    });
+  });
+
+  describe('solo cuenta lo que realmente ocurrió (A07)', () => {
+    it('una sesión vencida sin asistencia registrada no es una actividad realizada ni aporta participantes', async () => {
+      sessions.findAll.mockResolvedValue([
+        session({ id: '1', studentIds: ['a'], attendedStudentIds: [], absentStudentIds: [] }), // nadie la registró
+        session({ id: '2', studentIds: ['b'], attendedStudentIds: [], absentStudentIds: ['b'] }), // se registró la inasistencia
+      ]);
+      const { draft } = await get().execute('t1');
+      expect(draft.individual).toEqual([]);
+      expect(draft.group).toEqual([]);
+    });
+
+    it('una grupal con 2 asistentes de 5 aporta 2 participantes, no 5', async () => {
+      sessions.findAll.mockResolvedValue([
+        session({
+          id: 'g', topic: 'Taller', studentIds: ['a', 'b', 'c', 'd', 'e'],
+          attendedStudentIds: ['a', 'b'], absentStudentIds: ['c', 'd', 'e'],
+        }),
+      ]);
+      const { draft } = await get().execute('t1');
+      expect(draft.group).toEqual([expect.objectContaining({ activity: 'Taller (1 sesión)', participants: 2 })]);
     });
   });
 });

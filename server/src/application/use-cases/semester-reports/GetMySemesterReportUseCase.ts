@@ -14,6 +14,7 @@ import {
 import { assertActiveTutor } from '@application/use-cases/assignments/TutorValidation';
 import { NoActivePeriodError } from '@application/use-cases/evaluation/EvaluationErrors';
 import { buildSemesterReportDraft } from './buildSemesterReportDraft';
+import { isHeldSession } from '@application/use-cases/sessions/sessionOutcome';
 
 export interface MySemesterReportView {
   periodName: string;
@@ -46,10 +47,10 @@ export class GetMySemesterReportUseCase {
 
     const now = new Date();
     const allSessions = await this.sessions.findAll({ tutorId });
-    // Solo sesiones ya realizadas dentro del periodo (las canceladas no cuentan).
+    // Solo sesiones realizadas dentro del periodo: con asistentes registrados (A07); las canceladas,
+    // las sin asistencia y las que aún no se registraron no cuentan.
     const sessions = allSessions.filter(
-      (s) =>
-        !s.cancelledAt && s.scheduledAt >= period.startDate && s.scheduledAt <= period.endDate && s.endsAt <= now,
+      (s) => isHeldSession(s, now) && s.scheduledAt >= period.startDate && s.scheduledAt <= period.endDate,
     );
 
     const [followUps, students, schools, faculties, report] = await Promise.all([

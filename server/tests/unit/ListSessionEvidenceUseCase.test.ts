@@ -35,6 +35,7 @@ describe('ListSessionEvidenceUseCase', () => {
       findByStudent: jest.fn(),
       countAttendanceByTutorAndStudent: jest.fn(),
       createAttendance: jest.fn(),
+      recordParticipantAttendance: jest.fn(),
       reschedule: jest.fn(),
       cancel: jest.fn(),
       createChangeHistory: jest.fn(),

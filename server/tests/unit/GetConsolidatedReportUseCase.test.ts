@@ -22,6 +22,8 @@ const session = (id: string, studentIds: string[], over: Partial<SessionWithPart
   ({
     id,
     studentIds,
+    attendedStudentIds: studentIds, // salvo que la prueba diga lo contrario, asistieron todos
+    absentStudentIds: [],
     scheduledAt: day('09-10'),
     endsAt: day('09-10'),
     cancelledAt: null,
@@ -205,5 +207,50 @@ describe('GetConsolidatedReportUseCase (HU-44)', () => {
   it('exige periodo activo', async () => {
     periods.findActive.mockResolvedValue(null);
     await expect(run()).rejects.toBeInstanceOf(NoActivePeriodError);
+  });
+
+  describe('participación basada en la asistencia (A07)', () => {
+    it('una sesión vencida sin asistentes aporta cero sesiones y cero participación', async () => {
+      sessions.findAll.mockResolvedValue([
+        session('sin-registro', ['a'], { attendedStudentIds: [], absentStudentIds: [] }),
+        session('inasistencia', ['b'], { attendedStudentIds: [], absentStudentIds: ['b'] }),
+      ]);
+
+      const { totals } = await run();
+
+      expect(totals.sessionsTotal).toBe(0);
+      expect(totals.participants).toBe(0);
+      expect(totals.participationPct).toBe(0);
+    });
+
+    it('una grupal con 2 asistentes de 5 programados aporta 2 participantes, no 5', async () => {
+      students.findAll.mockResolvedValue(
+        ['a', 'b', 'c', 'd', 'e'].map((id) => ({ id, schoolId: 'sc1', tutorId: 't1', isActive: true, cycle: 1 })) as never,
+      );
+      sessions.findAll.mockResolvedValue([
+        session('g', ['a', 'b', 'c', 'd', 'e'], { attendedStudentIds: ['a', 'b'], absentStudentIds: ['c', 'd', 'e'] }),
+      ]);
+
+      const { totals } = await run();
+
+      expect(totals.sessionsGroup).toBe(1);
+      expect(totals.participants).toBe(2);
+      expect(totals.participationPct).toBe(40); // 2 de 5 tutorados
+    });
+
+    it('solo cuenta a los asistentes de cada escuela cuando la grupal abarca varias', async () => {
+      sessions.findAll.mockResolvedValue([
+        session('g', ['a', 'd'], { attendedStudentIds: ['a'], absentStudentIds: ['d'] }), // a (Sistemas) asistió; d (Civil) no
+      ]);
+
+      const report = await run();
+      const sistemas = report.faculties[0].schools.find((s) => s.schoolName === 'Sistemas')!.metrics;
+      const civil = report.faculties[0].schools.find((s) => s.schoolName === 'Civil')!.metrics;
+
+      expect(sistemas.sessionsTotal).toBe(1);
+      expect(sistemas.participants).toBe(1);
+      expect(civil.sessionsTotal).toBe(0); // la sesión no cuenta para quien no asistió
+      expect(civil.participants).toBe(0);
+    });
   });
 });

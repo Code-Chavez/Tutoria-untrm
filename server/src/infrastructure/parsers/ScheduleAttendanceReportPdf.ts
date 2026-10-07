@@ -6,11 +6,17 @@ const STATUS_LABEL: Record<string, string> = {
   PROXIMA: 'Próxima',
   EN_CURSO: 'En curso',
   REALIZADA: 'Realizada',
+  INASISTENCIA: 'Sin asistentes',
+  POR_REGISTRAR: 'Asistencia por registrar',
 };
 
-function attendanceLabel(confirmed: boolean | null): string {
-  if (confirmed === null) return 'N/A';
-  return confirmed ? 'Confirmada' : 'Pendiente';
+// Individual: confirmación del Anexo N°4; grupal: cuántos de los programados asistieron (A07).
+function attendanceLabel(s: ScheduleAttendanceReport['sessions'][number]): string {
+  if (s.participantCount > 1) {
+    return s.attendedCount === null ? 'Sin registrar' : `${s.attendedCount} de ${s.participantCount}`;
+  }
+  if (s.attendanceConfirmed === null) return 'N/A';
+  return s.attendanceConfirmed ? 'Confirmada' : 'Pendiente';
 }
 
 // PDF del consolidado de horarios y asistencia (HU-27, Art. 15.d) sobre el
@@ -32,6 +38,7 @@ export class ScheduleAttendanceReportPdf {
         ['Tutor', report.tutorName],
         ['Periodo', period],
         ['Total de sesiones', report.totalSessions],
+        ['Realizadas (con asistentes) / sin asistentes / por registrar', `${report.heldSessions} / ${report.noShowSessions} / ${report.pendingRollSessions}`],
         ['Individuales / grupales', `${report.individualSessions} / ${report.groupSessions}`],
         ['Canceladas', report.cancelledSessions],
         ['Asistencias confirmadas / pendientes', `${report.attendanceConfirmed} / ${report.attendancePending}`],
@@ -42,7 +49,7 @@ export class ScheduleAttendanceReportPdf {
           { label: 'Fecha', weight: 2 },
           { label: 'Tema', weight: 3 },
           { label: 'Modalidad', weight: 1.3 },
-          { label: 'Estado', weight: 1.3 },
+          { label: 'Estado', weight: 1.5 },
           { label: 'Asistencia', weight: 1.5 },
         ],
         report.sessions.map((s) => [
@@ -50,7 +57,7 @@ export class ScheduleAttendanceReportPdf {
           s.topic,
           s.modality === 'PRESENCIAL' ? 'Presencial' : 'Virtual',
           STATUS_LABEL[s.status] ?? s.status,
-          attendanceLabel(s.attendanceConfirmed),
+          attendanceLabel(s),
         ]),
       )
       .toBuffer();

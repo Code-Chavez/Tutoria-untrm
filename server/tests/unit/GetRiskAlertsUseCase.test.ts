@@ -52,6 +52,8 @@ describe('GetRiskAlertsUseCase', () => {
       cancelReason: null,
       createdAt: new Date(),
       studentIds: ['student-1'],
+      attendedStudentIds: [],
+      absentStudentIds: [],
       attendance: null,
       ...overrides,
     };
@@ -78,6 +80,7 @@ describe('GetRiskAlertsUseCase', () => {
       findByStudent: jest.fn().mockResolvedValue([]),
       countAttendanceByTutorAndStudent: jest.fn(),
       createAttendance: jest.fn(),
+      recordParticipantAttendance: jest.fn(),
       reschedule: jest.fn(),
       cancel: jest.fn(),
       createChangeHistory: jest.fn(),
