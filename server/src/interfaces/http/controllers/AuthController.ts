@@ -6,16 +6,20 @@ import {
   AccountLockedError,
   AccountInactiveError,
 } from '@application/use-cases/auth/LoginUseCase';
+import { RefreshSessionUseCase, InvalidRefreshTokenError } from '@application/use-cases/auth/RefreshSessionUseCase';
+import { LogoutUseCase } from '@application/use-cases/auth/LogoutUseCase';
 import { RequestPasswordResetUseCase } from '@application/use-cases/auth/RequestPasswordResetUseCase';
 import { ResetPasswordUseCase, InvalidTokenError } from '@application/use-cases/auth/ResetPasswordUseCase';
 import { AppError } from '@infrastructure/middleware/errorHandler';
-import { loginSchema, forgotPasswordSchema, resetPasswordSchema } from '../validators/auth.validators';
+import { loginSchema, refreshSchema, forgotPasswordSchema, resetPasswordSchema } from '../validators/auth.validators';
 
 export class AuthController {
   constructor(
     private readonly loginUseCase: LoginUseCase,
     private readonly requestPasswordResetUseCase: RequestPasswordResetUseCase,
-    private readonly resetPasswordUseCase: ResetPasswordUseCase
+    private readonly resetPasswordUseCase: ResetPasswordUseCase,
+    private readonly refreshSessionUseCase: RefreshSessionUseCase,
+    private readonly logoutUseCase: LogoutUseCase,
   ) {}
 
   login = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
@@ -29,6 +33,26 @@ export class AuthController {
       });
 
       res.status(200).json({ status: 'success', data: result });
+    } catch (err) {
+      next(this.mapError(err));
+    }
+  };
+
+  refresh = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const body = refreshSchema.parse(req.body);
+      const tokens = await this.refreshSessionUseCase.execute(body.refreshToken, req.ip);
+      res.status(200).json({ status: 'success', data: tokens });
+    } catch (err) {
+      next(this.mapError(err));
+    }
+  };
+
+  logout = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const body = refreshSchema.parse(req.body);
+      await this.logoutUseCase.execute(body.refreshToken);
+      res.status(204).send();
     } catch (err) {
       next(this.mapError(err));
     }
@@ -71,6 +95,9 @@ export class AuthController {
   private mapError(err: unknown): Error {
     if (err instanceof ZodError) {
       return new AppError(400, err.errors[0]?.message ?? 'Datos inválidos');
+    }
+    if (err instanceof InvalidRefreshTokenError) {
+      return new AppError(401, err.message);
     }
     if (err instanceof InvalidCredentialsError) {
       return new AppError(401, err.message);

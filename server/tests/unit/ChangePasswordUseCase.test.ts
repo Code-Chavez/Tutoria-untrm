@@ -41,8 +41,8 @@ function buildMocks() {
   };
   const refreshTokens: jest.Mocked<RefreshTokenRepository> = {
     create: jest.fn(),
-    findByToken: jest.fn(),
-    deleteByToken: jest.fn(),
+    findByHash: jest.fn(),
+    revoke: jest.fn(),
     deleteAllForUser: jest.fn(),
   };
   const auditLogs: jest.Mocked<AuditLogRepository> = {

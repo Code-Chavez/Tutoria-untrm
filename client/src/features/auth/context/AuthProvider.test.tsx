@@ -7,7 +7,7 @@ import { AuthProvider } from './AuthProvider';
 import { useAuth } from '../hooks/useAuth';
 import { authService } from '../services/authService';
 
-vi.mock('../services/authService', () => ({ authService: { login: vi.fn() } }));
+vi.mock('../services/authService', () => ({ authService: { login: vi.fn(), logout: vi.fn().mockResolvedValue(undefined) } }));
 
 const mocked = vi.mocked(authService);
 
@@ -104,6 +104,7 @@ describe('AuthProvider: aislamiento de datos entre cuentas (A05)', () => {
     });
 
     expect(tokenStorage.getAccessToken()).toBeNull();
+    expect(mocked.logout).toHaveBeenCalledWith('r'); // el refresh token se revoca en el servidor
     expect(screen.getByTestId('user').textContent).toBe('nadie');
   });
 });

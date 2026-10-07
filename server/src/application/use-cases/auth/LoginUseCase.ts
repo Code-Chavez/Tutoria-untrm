@@ -4,6 +4,7 @@ import { RefreshTokenRepository } from '@domain/repositories/RefreshTokenReposit
 import { AuditLogRepository } from '@domain/repositories/AuditLogRepository';
 import { PasswordHasher } from '@application/ports/PasswordHasher';
 import { TokenService } from '@application/ports/TokenService';
+import { hashRefreshToken } from './refreshTokenHash';
 import { LoginInput, LoginOutput } from '@application/dtos/auth.dto';
 
 export class InvalidCredentialsError extends Error {
@@ -90,7 +91,7 @@ export class LoginUseCase {
 
     const refreshToken = this.tokens.generateRefreshToken();
     await this.refreshTokens.create({
-      token: refreshToken,
+      tokenHash: hashRefreshToken(refreshToken),
       userId: user.id,
       expiresAt: new Date(Date.now() + REFRESH_TOKEN_DAYS * 24 * 60 * 60_000),
     });

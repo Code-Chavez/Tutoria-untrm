@@ -24,6 +24,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     // Los datos en caché son de la persona que sale (derivaciones, expedientes, panel de inicio).
     void queryClient.cancelQueries();
     queryClient.clear();
+    const refreshToken = tokenStorage.getRefreshToken();
+    if (refreshToken) authService.logout(refreshToken).catch(() => undefined);
     tokenStorage.clear();
     setUser(null);
   }, []);

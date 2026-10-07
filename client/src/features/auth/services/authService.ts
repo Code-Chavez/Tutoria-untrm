@@ -11,6 +11,11 @@ export const authService = {
     return data.data;
   },
 
+  /** Revoca el refresh token en el servidor; es de mejor esfuerzo, la sesión local se cierra igual. */
+  async logout(refreshToken: string): Promise<void> {
+    await apiClient.post('/auth/logout', { refreshToken });
+  },
+
   async forgotPassword(email: string): Promise<void> {
     await apiClient.post('/auth/forgot-password', { email });
   },
