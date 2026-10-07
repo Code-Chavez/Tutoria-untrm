@@ -1,7 +1,14 @@
 import { apiClient } from '@shared/services/apiClient';
 
 // Consolidado de horarios y asistencia por tutor (HU-27, Art. 15.d).
-export type ScheduleAttendanceStatus = 'CANCELADA' | 'PROXIMA' | 'EN_CURSO' | 'REALIZADA';
+// REALIZADA exige asistentes registrados (A07); INASISTENCIA = nadie asistió; POR_REGISTRAR = falta registrar la asistencia.
+export type ScheduleAttendanceStatus =
+  | 'CANCELADA'
+  | 'PROXIMA'
+  | 'EN_CURSO'
+  | 'REALIZADA'
+  | 'INASISTENCIA'
+  | 'POR_REGISTRAR';
 
 export interface ScheduleAttendanceSessionRow {
   id: string;
@@ -12,6 +19,9 @@ export interface ScheduleAttendanceSessionRow {
   studentNames: string[];
   status: ScheduleAttendanceStatus;
   attendanceConfirmed: boolean | null;
+  /** Cuántos de los programados asistieron; null si aún no se registró. */
+  attendedCount: number | null;
+  participantCount: number;
 }
 
 export interface ScheduleAttendanceReport {
@@ -24,6 +34,9 @@ export interface ScheduleAttendanceReport {
   individualSessions: number;
   groupSessions: number;
   cancelledSessions: number;
+  heldSessions: number;
+  noShowSessions: number;
+  pendingRollSessions: number;
   attendanceConfirmed: number;
   attendancePending: number;
   sessions: ScheduleAttendanceSessionRow[];

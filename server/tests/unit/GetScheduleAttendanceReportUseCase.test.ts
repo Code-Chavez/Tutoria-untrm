@@ -47,6 +47,8 @@ describe('GetScheduleAttendanceReportUseCase', () => {
       cancelReason: null,
       createdAt: new Date(),
       studentIds: ['student-1'],
+      attendedStudentIds: [],
+      absentStudentIds: [],
       attendance: null,
       ...overrides,
     };
@@ -74,6 +76,7 @@ describe('GetScheduleAttendanceReportUseCase', () => {
       findByStudent: jest.fn(),
       countAttendanceByTutorAndStudent: jest.fn(),
       createAttendance: jest.fn(),
+      recordParticipantAttendance: jest.fn(),
       reschedule: jest.fn(),
       cancel: jest.fn(),
       createChangeHistory: jest.fn(),
@@ -166,5 +169,42 @@ describe('GetScheduleAttendanceReportUseCase', () => {
     const report = await useCase.execute({ requesterId: 'admin-1', tutorId: 'tutor-1' });
 
     expect(report.sessions.map((s) => s.id)).toEqual(['reciente', 'antigua']);
+  });
+
+  describe('estados según la asistencia registrada (A07)', () => {
+    const run = async () => {
+      sessions.findAll.mockResolvedValue([
+        makeSession({ id: 'held', studentIds: ['student-1'], attendedStudentIds: ['student-1'] }),
+        makeSession({ id: 'noshow', studentIds: ['student-2'], absentStudentIds: ['student-2'] }),
+        makeSession({ id: 'pending', studentIds: ['student-1', 'student-2'] }),
+        makeSession({ id: 'group', studentIds: ['student-1', 'student-2'], attendedStudentIds: ['student-2'], absentStudentIds: ['student-1'] }),
+        makeSession({ id: 'cancelled', cancelledAt: new Date() }),
+        makeSession({ id: 'future', scheduledAt: futureDate, endsAt: new Date(futureDate.getTime() + 45 * 60_000) }),
+      ]);
+      return useCase.execute({ requesterId: 'admin-1', tutorId: 'tutor-1' });
+    };
+    const status = (report: Awaited<ReturnType<typeof run>>, id: string) => report.sessions.find((s) => s.id === id)?.status;
+
+    it('una sesión ya pasada no es «realizada» por haber pasado la hora', async () => {
+      const report = await run();
+      expect(status(report, 'held')).toBe('REALIZADA');
+      expect(status(report, 'group')).toBe('REALIZADA');
+      expect(status(report, 'noshow')).toBe('INASISTENCIA');
+      expect(status(report, 'pending')).toBe('POR_REGISTRAR');
+      expect(status(report, 'cancelled')).toBe('CANCELADA');
+      expect(status(report, 'future')).toBe('PROXIMA');
+    });
+
+    it('los totales distinguen realizadas, sin asistentes y por registrar', async () => {
+      const report = await run();
+      expect(report).toMatchObject({ heldSessions: 2, noShowSessions: 1, pendingRollSessions: 1, cancelledSessions: 1 });
+    });
+
+    it('en la grupal indica cuántos de los programados asistieron y deja en blanco la que no se registró', async () => {
+      const report = await run();
+      const row = (id: string) => report.sessions.find((s) => s.id === id)!;
+      expect(row('group')).toMatchObject({ attendedCount: 1, participantCount: 2 });
+      expect(row('pending')).toMatchObject({ attendedCount: null, participantCount: 2 });
+    });
   });
 });

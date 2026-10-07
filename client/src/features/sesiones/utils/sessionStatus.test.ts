@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { getSessionStatus } from './sessionStatus';
+import { getSessionStatus, isModifiable } from './sessionStatus';
 import type { TutoringSession } from '../services/sessionService';
 
 const baseSession: TutoringSession = {
@@ -13,6 +13,8 @@ const baseSession: TutoringSession = {
   location: 'Oficina 204',
   meetingLink: null,
   studentIds: ['a1'],
+  attendedStudentIds: [],
+  absentStudentIds: [],
   attendance: null,
   cancelledAt: null,
   cancelReason: null,
@@ -28,8 +30,32 @@ describe('getSessionStatus', () => {
     expect(getSessionStatus(baseSession, new Date('2026-10-05T15:20:00.000Z'))).toBe('EN_CURSO');
   });
 
-  it('es REALIZADA después del fin', () => {
-    expect(getSessionStatus(baseSession, new Date('2026-10-05T16:00:00.000Z'))).toBe('REALIZADA');
+  describe('después del fin: depende de la asistencia registrada (A07)', () => {
+    const after = new Date('2026-10-05T16:00:00.000Z');
+
+    it('es POR_REGISTRAR si nadie registró la asistencia: haber pasado la hora no la vuelve realizada', () => {
+      expect(getSessionStatus(baseSession, after)).toBe('POR_REGISTRAR');
+    });
+
+    it('es REALIZADA si asistió al menos un participante', () => {
+      expect(getSessionStatus({ ...baseSession, attendedStudentIds: ['a1'] }, after)).toBe('REALIZADA');
+    });
+
+    it('es INASISTENCIA si se registró que nadie asistió', () => {
+      expect(getSessionStatus({ ...baseSession, absentStudentIds: ['a1'] }, after)).toBe('INASISTENCIA');
+    });
+
+    it('es REALIZADA en cuanto hay asistentes, aunque la hora de fin no haya llegado', () => {
+      expect(getSessionStatus({ ...baseSession, attendedStudentIds: ['a1'] }, new Date('2026-10-05T15:20:00.000Z'))).toBe('REALIZADA');
+    });
+
+    it('solo se puede reprogramar o cancelar lo que no empezó o sigue en curso sin asistentes', () => {
+      expect(isModifiable('PROXIMA')).toBe(true);
+      expect(isModifiable('EN_CURSO')).toBe(true);
+      for (const status of ['REALIZADA', 'INASISTENCIA', 'POR_REGISTRAR', 'CANCELADA'] as const) {
+        expect(isModifiable(status)).toBe(false);
+      }
+    });
   });
 
   it('es CANCELADA sin importar la hora, si cancelledAt está definido', () => {

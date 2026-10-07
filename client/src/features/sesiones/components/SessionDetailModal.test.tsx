@@ -33,6 +33,8 @@ function makeSession(overrides: Partial<TutoringSession> = {}): TutoringSession 
     location: 'Oficina 204',
     meetingLink: null,
     studentIds: ['s1'],
+    attendedStudentIds: [],
+    absentStudentIds: [],
     attendance: null,
     cancelledAt: null,
     cancelReason: null,
@@ -228,5 +230,101 @@ describe('SessionDetailModal', () => {
 
     await user.click(screen.getByRole('button', { name: /constancia\.pdf/i }));
     expect(onDownloadEvidence).toHaveBeenCalledWith(evidence);
+  });
+
+  describe('asistencia por participante (A07)', () => {
+    const group = (over: Partial<TutoringSession> = {}) =>
+      makeSession({ studentIds: ['s1', 's2', 's3'], ...over });
+
+    it('en una sesión grupal ya iniciada permite marcar quiénes asistieron y guardarlo', async () => {
+      const onRecordRoll = vi.fn();
+      const session = group();
+      renderModal({ session, allSessions: [session], onRecordRoll });
+
+      expect(screen.getByText(/Asistencia sin registrar/i)).toBeInTheDocument();
+      const boxes = screen.getAllByRole('checkbox');
+      expect(boxes).toHaveLength(3);
+      boxes.forEach((box) => expect(box).not.toBeChecked()); // por defecto nadie: se marca de forma consciente
+
+      await userEvent.click(boxes[0]);
+      await userEvent.click(boxes[2]);
+      await userEvent.click(screen.getByRole('button', { name: /Guardar asistencia/i }));
+
+      expect(onRecordRoll).toHaveBeenCalledWith(['s1', 's3']);
+    });
+
+    it('muestra lo ya registrado y permite corregirlo', async () => {
+      const onRecordRoll = vi.fn();
+      const session = group({ attendedStudentIds: ['s1'], absentStudentIds: ['s2', 's3'] });
+      renderModal({ session, allSessions: [session], onRecordRoll });
+
+      expect(screen.getByText(/Asistieron 1 de 3 tutorados/i)).toBeInTheDocument();
+      const boxes = screen.getAllByRole('checkbox');
+      expect(boxes[0]).toBeChecked();
+      await userEvent.click(boxes[1]);
+      await userEvent.click(screen.getByRole('button', { name: /Guardar asistencia/i }));
+
+      expect(onRecordRoll).toHaveBeenCalledWith(['s1', 's2']);
+    });
+
+    it('antes de que empiece la sesión grupal no se pasa lista', () => {
+      const session = group({
+        scheduledAt: new Date(2026, 9, 10, 15, 0).toISOString(),
+        endsAt: new Date(2026, 9, 10, 15, 45).toISOString(),
+      });
+      renderModal({ session, allSessions: [session], onRecordRoll: vi.fn() });
+
+      expect(screen.queryByRole('button', { name: /Guardar asistencia/i })).not.toBeInTheDocument();
+    });
+
+    it('una sesión grupal cancelada no muestra la lista de asistencia', () => {
+      const session = group({ cancelledAt: new Date(2026, 9, 9).toISOString(), cancelReason: 'x' });
+      renderModal({ session, allSessions: [session], onRecordRoll: vi.fn() });
+
+      expect(screen.queryByRole('button', { name: /Guardar asistencia/i })).not.toBeInTheDocument();
+    });
+
+    it('en una individual sin asistencia se puede marcar la inasistencia', async () => {
+      const onRecordRoll = vi.fn();
+      const session = makeSession();
+      renderModal({ session, allSessions: [session], onRecordRoll });
+
+      await userEvent.click(screen.getByRole('button', { name: /Marcar inasistencia/i }));
+
+      expect(onRecordRoll).toHaveBeenCalledWith([]);
+    });
+
+    it('una individual con inasistencia registrada lo indica y la muestra como «Sin asistentes»', () => {
+      const session = makeSession({ absentStudentIds: ['s1'] });
+      renderModal({ session, allSessions: [session], onRecordRoll: vi.fn() });
+
+      expect(screen.getByText(/Inasistencia registrada/i)).toBeInTheDocument();
+      expect(screen.queryByRole('button', { name: /Marcar inasistencia/i })).not.toBeInTheDocument();
+      expect(screen.getByText('Sin asistentes')).toBeInTheDocument();
+    });
+
+    it('una sesión pasada sin asistentes registrados no se presenta como «Realizada»', () => {
+      const session = makeSession();
+      renderModal({ session, allSessions: [session], onRecordRoll: vi.fn() });
+
+      expect(screen.getByText('Asistencia por registrar')).toBeInTheDocument();
+      expect(screen.queryByText('Realizada')).not.toBeInTheDocument();
+    });
+
+    it('con la asistencia confirmada la sesión figura como «Realizada»', () => {
+      const session = makeSession({
+        attendedStudentIds: ['s1'],
+        attendance: { id: 'a1', sessionId: 'sess-1', sequenceNumber: 1, confirmedAt: new Date(2026, 9, 10, 9, 50).toISOString(), createdAt: new Date(2026, 9, 10, 9, 50).toISOString() },
+      });
+      renderModal({ session, allSessions: [session], onRecordRoll: vi.fn() });
+
+      expect(screen.getByText('Realizada')).toBeInTheDocument();
+    });
+
+    it('muestra el error del servidor al guardar', () => {
+      const session = group();
+      renderModal({ session, allSessions: [session], onRecordRoll: vi.fn(), rollError: 'Solo puedes registrar la asistencia de los tutorados de esta sesión' });
+      expect(screen.getByText(/Solo puedes registrar la asistencia/i)).toBeInTheDocument();
+    });
   });
 });

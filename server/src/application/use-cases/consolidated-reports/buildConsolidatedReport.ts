@@ -76,11 +76,13 @@ export function buildConsolidatedReport(
     const withTutor = students.filter((s) => s.tutorId);
     const tutorIds = new Set(withTutor.map((s) => s.tutorId as string));
 
-    const sessions = input.sessions.filter((s) => s.studentIds.some((id) => studentIds.has(id)));
+    // Una sesión cuenta para este ámbito si asistió alguno de sus tutorados; los participantes
+    // son quienes asistieron, no quienes estaban programados (A07).
+    const sessions = input.sessions.filter((s) => s.attendedStudentIds.some((id) => studentIds.has(id)));
     const sessionsIndividual = sessions.filter((s) => s.studentIds.length === 1).length;
     const sessionsGroup = sessions.length - sessionsIndividual;
     const participants = new Set(
-      sessions.flatMap((s) => s.studentIds).filter((id) => studentIds.has(id)),
+      sessions.flatMap((s) => s.attendedStudentIds).filter((id) => studentIds.has(id)),
     );
     const reportsSubmitted = [...tutorIds].filter((id) => input.reportTutorIds.has(id)).length;
 

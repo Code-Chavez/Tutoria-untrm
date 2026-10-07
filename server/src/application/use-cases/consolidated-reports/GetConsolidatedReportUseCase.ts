@@ -8,6 +8,7 @@ import { FacultyRepository } from '@domain/repositories/FacultyRepository';
 import { TutorSemesterReportRepository } from '@domain/repositories/TutorSemesterReportRepository';
 import { appliedFilterLabels, ReportFilters, resolveReportPeriod } from '@application/use-cases/report-filters/reportFilters';
 import { buildConsolidatedReport, ConsolidatedReport } from './buildConsolidatedReport';
+import { isHeldSession } from '@application/use-cases/sessions/sessionOutcome';
 import { ConsolidatedReportForbiddenError } from './ConsolidatedReportErrors';
 
 export type ConsolidatedReportFilters = ReportFilters;
@@ -61,12 +62,12 @@ export class GetConsolidatedReportUseCase {
         (!filters.tutorId || s.tutorId === filters.tutorId),
     );
     const sessions = allSessions.filter(
+      // «Realizada» = consta que asistió alguien (A07); haber pasado la hora no basta.
       (s) =>
-        !s.cancelledAt &&
+        isHeldSession(s, now) &&
         (!filters.tutorId || s.tutorId === filters.tutorId) &&
         s.scheduledAt >= period.startDate &&
-        s.scheduledAt <= period.endDate &&
-        s.endsAt <= now,
+        s.scheduledAt <= period.endDate,
     );
 
     const body = buildConsolidatedReport({

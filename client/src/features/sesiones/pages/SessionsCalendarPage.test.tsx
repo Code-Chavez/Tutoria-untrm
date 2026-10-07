@@ -13,6 +13,7 @@ vi.mock('../services/sessionService', () => ({
     listEvidence: vi.fn().mockResolvedValue([]),
     uploadEvidence: vi.fn(),
     downloadEvidence: vi.fn(),
+    recordAttendance: vi.fn(),
   },
 }));
 vi.mock('@features/tutorados/services/studentService', () => ({
@@ -59,6 +60,8 @@ const individualSession: TutoringSession = {
   location: null,
   meetingLink: 'https://meet.example.com/abc',
   studentIds: ['s1'],
+  attendedStudentIds: [],
+  absentStudentIds: [],
   attendance: null,
   cancelledAt: null,
   cancelReason: null,
@@ -76,6 +79,8 @@ const groupSession: TutoringSession = {
   location: 'Auditorio principal',
   meetingLink: null,
   studentIds: ['s1', 's2'],
+  attendedStudentIds: [],
+  absentStudentIds: [],
   attendance: null,
   cancelledAt: null,
   cancelReason: null,
@@ -139,5 +144,34 @@ describe('SessionsCalendarPage', () => {
     });
     // La sesión grupal (20 de oct.) cae en la semana siguiente.
     expect(screen.queryByText(/taller de hábitos de estudio/i)).not.toBeInTheDocument();
+  });
+
+  it('registra quiénes asistieron a una sesión grupal ya realizada y actualiza el detalle (A07)', async () => {
+    const pastGroup: TutoringSession = {
+      ...groupSession,
+      id: 'sess-past',
+      topic: 'Taller de estrategias',
+      scheduledAt: new Date(2026, 9, 13, 11, 0).toISOString(),
+      endsAt: new Date(2026, 9, 13, 11, 45).toISOString(),
+    };
+    vi.mocked(sessionService.getMySessions).mockResolvedValue([pastGroup]);
+    vi.mocked(sessionService.recordAttendance).mockResolvedValue({
+      ...pastGroup,
+      attendedStudentIds: ['s1'],
+      absentStudentIds: ['s2'],
+    });
+    const user = userEvent.setup();
+    render(
+      <QueryClientTestWrapper>
+        <SessionsCalendarPage />
+      </QueryClientTestWrapper>,
+    );
+
+    await user.click(await screen.findByText(/taller de estrategias/i));
+    await user.click(await screen.findByLabelText(/ana torres · 20191234/i));
+    await user.click(screen.getByRole('button', { name: /guardar asistencia/i }));
+
+    await waitFor(() => expect(sessionService.recordAttendance).toHaveBeenCalledWith('sess-past', ['s1']));
+    expect(await screen.findByText(/asistieron 1 de 2 tutorados/i)).toBeInTheDocument();
   });
 });

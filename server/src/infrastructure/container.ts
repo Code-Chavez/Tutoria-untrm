@@ -146,6 +146,7 @@ import {
   UpdateBrandingUseCase,
   UploadBrandingLogoUseCase,
 } from '@application/use-cases/branding/BrandingUseCases';
+import { RecordSessionAttendanceUseCase } from '@application/use-cases/sessions/RecordSessionAttendanceUseCase';
 import { GetHomePanelUseCase } from '@application/use-cases/home-panel/GetHomePanelUseCase';
 import { GetReportFilterOptionsUseCase } from '@application/use-cases/report-filters/GetReportFilterOptionsUseCase';
 import { GetIndicatorsUseCase } from '@application/use-cases/indicators/GetIndicatorsUseCase';
@@ -502,6 +503,8 @@ const removeBrandingLogoUseCase = new RemoveBrandingLogoUseCase(brandingReposito
 const resetBrandingUseCase = new ResetBrandingUseCase(brandingRepository, evidenceStorage, auditLogRepository);
 const getBrandingLogoFileUseCase = new GetBrandingLogoFileUseCase(brandingRepository, evidenceStorage);
 
+const recordSessionAttendanceUseCase = new RecordSessionAttendanceUseCase(sessionRepository);
+
 export const container = {
   repositories: {
     userRepository,
@@ -587,6 +590,7 @@ export const container = {
     listCatalogUseCase,
     listSystemParametersUseCase,
     getHomePanelUseCase,
+    recordSessionAttendanceUseCase,
     getBrandingUseCase,
     updateBrandingUseCase,
     uploadBrandingLogoUseCase,

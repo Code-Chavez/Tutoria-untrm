@@ -43,6 +43,7 @@ describe('CancelSessionUseCase', () => {
       findByStudent: jest.fn(),
       countAttendanceByTutorAndStudent: jest.fn(),
       createAttendance: jest.fn(),
+      recordParticipantAttendance: jest.fn(),
       reschedule: jest.fn(),
       cancel: jest.fn().mockImplementation(async (id, cancelledAt, reason) => ({
         ...baseSession,

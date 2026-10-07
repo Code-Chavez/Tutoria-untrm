@@ -44,6 +44,7 @@ describe('RegisterAttendanceUseCase', () => {
       findAll: jest.fn(),
       findByStudent: jest.fn(),
       countAttendanceByTutorAndStudent: jest.fn().mockResolvedValue(0),
+      recordParticipantAttendance: jest.fn(),
       createAttendance: jest.fn().mockImplementation(async (sessionId, sequenceNumber, confirmedAt) => ({
         id: 'att-1',
         sessionId,

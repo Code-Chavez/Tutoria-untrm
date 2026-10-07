@@ -15,6 +15,7 @@ const sessionController = new SessionController(
   container.useCases.uploadSessionEvidenceUseCase,
   container.useCases.listSessionEvidenceUseCase,
   container.useCases.getSessionEvidenceFileUseCase,
+  container.useCases.recordSessionAttendanceUseCase,
 );
 
 // Evidencias de sesión (HU-25): PDF o imagen, en memoria hasta guardarse en
@@ -38,6 +39,13 @@ router.post('/sessions', requireAuth, authorize(['sessions:write']), sessionCont
 router.get('/sessions', requireAuth, authorize(['sessions:read']), sessionController.list);
 
 // Registrar la asistencia de una sesión individual (HU-22, Anexo N°4).
+// Asistencia por participante, también en sesiones grupales (A07).
+router.put(
+  '/sessions/:id/attendance-roll',
+  requireAuth,
+  authorize(['sessions:write']),
+  sessionController.recordAttendance,
+);
 router.post(
   '/sessions/:id/attendance',
   requireAuth,

@@ -14,6 +14,9 @@ describe('ScheduleAttendanceReportPdf', () => {
     individualSessions: 1,
     groupSessions: 0,
     cancelledSessions: 0,
+    heldSessions: 1,
+    noShowSessions: 0,
+    pendingRollSessions: 0,
     attendanceConfirmed: 1,
     attendancePending: 0,
     sessions: [
@@ -26,6 +29,8 @@ describe('ScheduleAttendanceReportPdf', () => {
         studentNames: ['Ana Torres'],
         status: 'REALIZADA',
         attendanceConfirmed: true,
+        attendedCount: 1,
+        participantCount: 1,
       },
     ],
   };

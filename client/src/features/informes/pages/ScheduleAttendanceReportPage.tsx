@@ -40,13 +40,17 @@ const STATUS_LABEL: Record<ScheduleAttendanceStatus, string> = {
   PROXIMA: 'Próxima',
   EN_CURSO: 'En curso',
   REALIZADA: 'Realizada',
+  INASISTENCIA: 'Sin asistentes',
+  POR_REGISTRAR: 'Asistencia por registrar',
 };
 
-const STATUS_TONE: Record<ScheduleAttendanceStatus, 'danger' | 'info' | 'success' | 'neutral'> = {
+const STATUS_TONE: Record<ScheduleAttendanceStatus, 'danger' | 'info' | 'success' | 'neutral' | 'warning'> = {
   CANCELADA: 'danger',
   PROXIMA: 'info',
-  EN_CURSO: 'success',
-  REALIZADA: 'neutral',
+  EN_CURSO: 'info',
+  REALIZADA: 'success',
+  INASISTENCIA: 'danger',
+  POR_REGISTRAR: 'warning',
 };
 
 // Consolidado de horarios y asistencia por tutor (HU-27, Art. 15.d): resume
@@ -197,6 +201,13 @@ export function ScheduleAttendanceReportPage() {
             />
             <StatCard
               icon={<CheckCircleIcon size={20} />}
+              value={report.heldSessions}
+              label="Sesiones realizadas"
+              hint={`${report.noShowSessions} sin asistentes · ${report.pendingRollSessions} por registrar`}
+              tone="success"
+            />
+            <StatCard
+              icon={<CheckCircleIcon size={20} />}
               value={report.attendanceConfirmed}
               label="Asistencias confirmadas"
               tone="success"
@@ -258,11 +269,15 @@ export function ScheduleAttendanceReportPage() {
                         <Badge tone={STATUS_TONE[s.status]}>{STATUS_LABEL[s.status]}</Badge>
                       </td>
                       <td>
-                        {s.attendanceConfirmed === null
-                          ? 'N/A'
-                          : s.attendanceConfirmed
-                            ? 'Confirmada'
-                            : 'Pendiente'}
+                        {s.participantCount > 1
+                          ? s.attendedCount === null
+                            ? 'Sin registrar'
+                            : `${s.attendedCount} de ${s.participantCount}`
+                          : s.attendanceConfirmed === null
+                            ? 'N/A'
+                            : s.attendanceConfirmed
+                              ? 'Confirmada'
+                              : 'Pendiente'}
                       </td>
                     </tr>
                   ))}

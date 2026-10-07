@@ -10,6 +10,7 @@ import { TutorEvaluationRepository } from '@domain/repositories/TutorEvaluationR
 import { EvaluationScaleCode } from '@domain/entities/TutorEvaluation';
 import { appliedFilterLabels, ReportFilters, resolveReportPeriod } from '@application/use-cases/report-filters/reportFilters';
 import { buildIndicators, IndicatorsReport } from './buildIndicators';
+import { isHeldSession } from '@application/use-cases/sessions/sessionOutcome';
 import { IndicatorsForbiddenError } from './IndicatorsErrors';
 
 export type IndicatorsFilters = ReportFilters;
@@ -72,10 +73,9 @@ export class GetIndicatorsUseCase {
     const now = new Date();
     const sessions = allSessions.filter(
       (s) =>
-        !s.cancelledAt &&
+        isHeldSession(s, now) &&
         s.scheduledAt >= period.startDate &&
         s.scheduledAt <= period.endDate &&
-        s.endsAt <= now &&
         (!filters.tutorId || s.tutorId === filters.tutorId),
     );
     const referrals = allReferrals.filter(
