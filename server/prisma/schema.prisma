@@ -185,6 +185,7 @@ model AcademicPeriod {
   evaluationWindows EvaluationWindow[]
   workPlans         WorkPlan[]
   tutorSemesterReports TutorSemesterReport[]
+  studentSnapshots     StudentPeriodSnapshot[]
 
   @@map("academic_periods")
 }
@@ -219,6 +220,7 @@ model Student {
   portalUser User?     @relation("StudentPortalUser", fields: [userId], references: [id])
 
   assignmentHistory TutorAssignmentHistory[]
+  periodSnapshots   StudentPeriodSnapshot[]
   interviews        TutorInterview[]
   followUps         TutorFollowUp[]
   supportContact    SupportContact?
@@ -757,4 +759,27 @@ model BrandingSetting {
   updatedAt       DateTime @updatedAt @map("updated_at")
 
   @@map("branding_settings")
+}
+
+// Corte de la matrícula de un semestre (A17): escuela, ciclo, tutor y estado de cada
+// tutorado tal como estaban al cerrarse el periodo. Los informes de un semestre
+// cerrado leen este corte, así que reasignar o desactivar después no cambia sus cifras.
+model StudentPeriodSnapshot {
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now()) @map("created_at")
+
+  periodId String           @map("period_id")
+  period   AcademicPeriod   @relation(fields: [periodId], references: [id], onDelete: Cascade)
+  studentId String          @map("student_id")
+  student   Student         @relation(fields: [studentId], references: [id], onDelete: Cascade)
+
+  schoolId String  @map("school_id")
+  cycle    Int
+  tutorId  String? @map("tutor_id")
+  isActive Boolean @map("is_active")
+  isAtRisk Boolean @map("is_at_risk")
+
+  @@unique([periodId, studentId])
+  @@index([periodId])
+  @@map("student_period_snapshots")
 }

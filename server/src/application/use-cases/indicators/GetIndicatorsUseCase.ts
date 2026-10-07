@@ -7,6 +7,7 @@ import { SchoolRepository } from '@domain/repositories/SchoolRepository';
 import { FacultyRepository } from '@domain/repositories/FacultyRepository';
 import { StudentReferralRepository } from '@domain/repositories/StudentReferralRepository';
 import { TutorEvaluationRepository } from '@domain/repositories/TutorEvaluationRepository';
+import { PeriodRosterRepository } from '@domain/repositories/PeriodRosterRepository';
 import { EvaluationScaleCode } from '@domain/entities/TutorEvaluation';
 import { appliedFilterLabels, ReportFilters, resolveReportPeriod } from '@application/use-cases/report-filters/reportFilters';
 import { buildIndicators, IndicatorsReport } from './buildIndicators';
@@ -31,6 +32,7 @@ export class GetIndicatorsUseCase {
     private readonly faculties: FacultyRepository,
     private readonly referrals: StudentReferralRepository,
     private readonly evaluations: TutorEvaluationRepository,
+    private readonly rosters: PeriodRosterRepository,
   ) {}
 
   async execute(requesterId: string, filters: IndicatorsFilters = {}): Promise<IndicatorsReport> {
@@ -46,7 +48,8 @@ export class GetIndicatorsUseCase {
     const [allSchools, faculties, allStudents, allSessions, allReferrals] = await Promise.all([
       this.schools.findAll(),
       this.faculties.findAll(),
-      this.students.findAll({ isActive: true }),
+      // Un semestre cerrado se lee de su corte; el vigente, de la matrícula actual (A17).
+      this.rosters.findByPeriod(period.id).then((roster) => roster ?? this.students.findAll({ isActive: true })),
       this.sessions.findAll(),
       this.referrals.findMany({}),
     ]);
@@ -57,7 +60,7 @@ export class GetIndicatorsUseCase {
         ? allSchools.filter((s) => s.coordinatorId === requesterId)
         : allSchools;
     const scopeIds = new Set(scopeSchools.map((s) => s.id));
-    const scopeStudents = allStudents.filter((s) => scopeIds.has(s.schoolId));
+    const scopeStudents = allStudents.filter((s) => s.isActive && scopeIds.has(s.schoolId));
 
     const schools = scopeSchools.filter(
       (s) =>

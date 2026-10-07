@@ -6,6 +6,7 @@ import { StudentRepository } from '@domain/repositories/StudentRepository';
 import { SchoolRepository } from '@domain/repositories/SchoolRepository';
 import { FacultyRepository } from '@domain/repositories/FacultyRepository';
 import { TutorSemesterReportRepository } from '@domain/repositories/TutorSemesterReportRepository';
+import { PeriodRosterRepository } from '@domain/repositories/PeriodRosterRepository';
 import { appliedFilterLabels, ReportFilters, resolveReportPeriod } from '@application/use-cases/report-filters/reportFilters';
 import { buildConsolidatedReport, ConsolidatedReport } from './buildConsolidatedReport';
 import { isHeldSession } from '@application/use-cases/sessions/sessionOutcome';
@@ -29,6 +30,7 @@ export class GetConsolidatedReportUseCase {
     private readonly schools: SchoolRepository,
     private readonly faculties: FacultyRepository,
     private readonly reports: TutorSemesterReportRepository,
+    private readonly rosters: PeriodRosterRepository,
   ) {}
 
   async execute(
@@ -45,7 +47,8 @@ export class GetConsolidatedReportUseCase {
     const [allSchools, faculties, allStudents, allSessions, periodReports] = await Promise.all([
       this.schools.findAll(),
       this.faculties.findAll(),
-      this.students.findAll({ isActive: true }),
+      // Un semestre cerrado se lee de su corte; el vigente, de la matrícula actual (A17).
+      this.rosters.findByPeriod(period.id).then((roster) => roster ?? this.students.findAll({ isActive: true })),
       this.sessions.findAll(),
       this.reports.findAllByPeriod(period.id),
     ]);
@@ -58,6 +61,7 @@ export class GetConsolidatedReportUseCase {
     );
     const students = allStudents.filter(
       (s) =>
+        s.isActive &&
         (filters.cycle === undefined || s.cycle === filters.cycle) &&
         (!filters.tutorId || s.tutorId === filters.tutorId),
     );

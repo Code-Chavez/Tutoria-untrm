@@ -11,6 +11,7 @@ import { SchoolRepository } from '@domain/repositories/SchoolRepository';
 import { FacultyRepository } from '@domain/repositories/FacultyRepository';
 import { StudentReferralRepository } from '@domain/repositories/StudentReferralRepository';
 import { TutorEvaluationRepository } from '@domain/repositories/TutorEvaluationRepository';
+import { PeriodRosterRepository } from '@domain/repositories/PeriodRosterRepository';
 import { SessionWithParticipants } from '@domain/entities/Session';
 import { Student } from '@domain/entities/Student';
 import { StudentReferral } from '@domain/entities/StudentReferral';
@@ -36,10 +37,12 @@ describe('GetIndicatorsUseCase (HU-45)', () => {
   let faculties: jest.Mocked<FacultyRepository>;
   let referrals: jest.Mocked<StudentReferralRepository>;
   let evaluations: jest.Mocked<TutorEvaluationRepository>;
+  let roster: Student[] | null;
   let roleName: string;
 
   beforeEach(() => {
     roleName = 'Administrador DBU';
+    roster = null; // sin corte: semestre vigente
     users = {
       findById: jest.fn().mockImplementation(async (id: string) =>
         id === 'me'
@@ -97,7 +100,21 @@ describe('GetIndicatorsUseCase (HU-45)', () => {
   });
 
   const run = (filters?: ReportFilters) =>
-    new GetIndicatorsUseCase(users, roles, periods, sessions, students, schools, faculties, referrals, evaluations).execute('me', filters);
+    new GetIndicatorsUseCase(users, roles, periods, sessions, students, schools, faculties, referrals, evaluations, {
+      findByPeriod: jest.fn().mockImplementation(async () => roster),
+    } as unknown as PeriodRosterRepository).execute('me', filters);
+
+  it('un semestre cerrado conserva sus indicadores aunque luego se reasigne o desactive (A17)', async () => {
+    const before = await run();
+    roster = (await students.findAll()).map((s) => ({ ...s }));
+    students.findAll.mockResolvedValue([student('a', 'sc2', null, false), student('b', 'sc2', null, false)]);
+
+    const after = await run();
+
+    expect(after.students).toEqual(before.students);
+    expect(after.risk).toEqual(before.risk);
+    expect(after.sessions).toEqual(before.sessions);
+  });
 
   it('calcula tutorados, riesgo y cobertura de sesiones', async () => {
     const r = await run();

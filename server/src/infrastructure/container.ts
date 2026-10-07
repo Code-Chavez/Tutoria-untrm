@@ -2,6 +2,7 @@ import { prisma } from './database/prisma';
 import { PrismaUserRepository } from './repositories/PrismaUserRepository';
 import { PrismaRoleRepository } from './repositories/PrismaRoleRepository';
 import { PrismaRefreshTokenRepository } from './repositories/PrismaRefreshTokenRepository';
+import { PrismaPeriodRosterRepository } from './repositories/PrismaPeriodRosterRepository';
 import { PrismaAuditLogRepository } from './repositories/PrismaAuditLogRepository';
 import { PrismaPasswordResetTokenRepository } from './repositories/PrismaPasswordResetTokenRepository';
 import { PrismaStudentRepository } from './repositories/PrismaStudentRepository';
@@ -39,6 +40,7 @@ import { ResetPasswordUseCase } from '@application/use-cases/auth/ResetPasswordU
 const userRepository = new PrismaUserRepository(prisma);
 const roleRepository = new PrismaRoleRepository(prisma);
 const refreshTokenRepository = new PrismaRefreshTokenRepository(prisma);
+const periodRosterRepository = new PrismaPeriodRosterRepository(prisma);
 const auditLogRepository = new PrismaAuditLogRepository(prisma);
 const passwordResetTokenRepository = new PrismaPasswordResetTokenRepository(prisma);
 const studentRepository = new PrismaStudentRepository(prisma);
@@ -397,6 +399,7 @@ const getConsolidatedReportUseCase = new GetConsolidatedReportUseCase(
   schoolRepository,
   facultyRepository,
   tutorSemesterReportRepository,
+  periodRosterRepository,
 );
 const listSystemParametersUseCase = new ListSystemParametersUseCase(systemParameterRepository);
 const updateSystemParameterUseCase = new UpdateSystemParameterUseCase(systemParameterRepository, auditLogRepository);
@@ -422,6 +425,7 @@ const getIndicatorsUseCase = new GetIndicatorsUseCase(
   facultyRepository,
   studentReferralRepository,
   tutorEvaluationRepository,
+  periodRosterRepository,
 );
 const getRiskAlertsUseCase = new GetRiskAlertsUseCase(
   studentRepository,
