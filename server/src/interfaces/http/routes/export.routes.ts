@@ -16,6 +16,7 @@ const controller = new ExportController(
   container.useCases.getEvaluationStatisticsUseCase,
   container.useCases.getIndicatorsUseCase,
   container.useCases.getWorkPlanUseCase,
+  container.useCases.getWorkPlanVersionUseCase,
   container.useCases.getStudentRecordUseCase,
   new EvaluationStatisticsPdf(),
   new EvaluationStatisticsWorkbook(),

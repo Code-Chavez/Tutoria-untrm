@@ -156,6 +156,11 @@ import { SaveMySemesterReportUseCase } from '@application/use-cases/semester-rep
 import { GetSemesterReportForExportUseCase } from '@application/use-cases/semester-reports/GetSemesterReportForExportUseCase';
 import { UploadWorkPlanResolutionUseCase } from '@application/use-cases/work-plans/UploadWorkPlanResolutionUseCase';
 import { GetWorkPlanResolutionFileUseCase } from '@application/use-cases/work-plans/GetWorkPlanResolutionFileUseCase';
+import {
+  ListWorkPlanVersionsUseCase,
+  GetWorkPlanVersionUseCase,
+  GetWorkPlanVersionResolutionFileUseCase,
+} from '@application/use-cases/work-plans/WorkPlanVersionUseCases';
 import { GetRiskAlertsUseCase } from '@application/use-cases/alerts/GetRiskAlertsUseCase';
 import { GetScheduleAttendanceReportUseCase } from '@application/use-cases/reports/GetScheduleAttendanceReportUseCase';
 import { CreateReferralUseCase } from '@application/use-cases/referrals/CreateReferralUseCase';
@@ -320,6 +325,28 @@ const uploadWorkPlanResolutionUseCase = new UploadWorkPlanResolutionUseCase(
   evidenceStorage,
 );
 const getWorkPlanResolutionFileUseCase = new GetWorkPlanResolutionFileUseCase(
+  userRepository,
+  roleRepository,
+  schoolRepository,
+  academicPeriodRepository,
+  workPlanRepository,
+  evidenceStorage,
+);
+const listWorkPlanVersionsUseCase = new ListWorkPlanVersionsUseCase(
+  userRepository,
+  roleRepository,
+  schoolRepository,
+  academicPeriodRepository,
+  workPlanRepository,
+);
+const getWorkPlanVersionUseCase = new GetWorkPlanVersionUseCase(
+  userRepository,
+  roleRepository,
+  schoolRepository,
+  academicPeriodRepository,
+  workPlanRepository,
+);
+const getWorkPlanVersionResolutionFileUseCase = new GetWorkPlanVersionResolutionFileUseCase(
   userRepository,
   roleRepository,
   schoolRepository,
@@ -581,6 +608,9 @@ export const container = {
     saveWorkPlanUseCase,
     uploadWorkPlanResolutionUseCase,
     getWorkPlanResolutionFileUseCase,
+    listWorkPlanVersionsUseCase,
+    getWorkPlanVersionUseCase,
+    getWorkPlanVersionResolutionFileUseCase,
     getMySemesterReportUseCase,
     saveMySemesterReportUseCase,
     getSemesterReportForExportUseCase,

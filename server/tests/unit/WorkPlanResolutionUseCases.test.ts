@@ -34,6 +34,8 @@ describe('Work plan approval resolution (HU-42)', () => {
       resolutionFileSize: null,
       resolutionStorageKey: null,
       resolutionUploadedAt: null,
+      revision: 1,
+      lastApprovedRevision: null,
       ...extra,
     }) as WorkPlan;
 
@@ -53,7 +55,9 @@ describe('Work plan approval resolution (HU-42)', () => {
     workPlans = {
       findByPeriodAndSchool: jest.fn().mockResolvedValue(plan()),
       findAllByPeriod: jest.fn().mockResolvedValue([]),
-      upsert: jest.fn(),
+      saveContent: jest.fn(),
+      findVersions: jest.fn(),
+      findVersion: jest.fn(),
       setResolution: jest.fn().mockResolvedValue(
         plan({
           resolutionFileName: 'RD-123.pdf',

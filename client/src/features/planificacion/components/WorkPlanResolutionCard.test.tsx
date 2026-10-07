@@ -12,16 +12,22 @@ vi.mock('../services/workPlanService', async () => {
   );
   return {
     ...actual,
-    workPlanService: { uploadResolution: vi.fn(), downloadResolution: vi.fn() },
+    workPlanService: {
+      uploadResolution: vi.fn(),
+      downloadResolution: vi.fn(),
+      getVersions: vi.fn().mockResolvedValue([]),
+      downloadVersionResolution: vi.fn(),
+    },
   };
 });
 
 const mocked = vi.mocked(workPlanService);
 
-const basePlan = { id: 'wp1', inForce: false, resolution: null } as unknown as WorkPlan;
+const basePlan = { id: 'wp1', inForce: false, status: 'BORRADOR', revision: 1, resolution: null } as unknown as WorkPlan;
 const approvedPlan = {
   ...basePlan,
   inForce: true,
+  status: 'APROBADO',
   resolution: { fileName: 'RD-123.pdf', fileSize: 2048, uploadedAt: '2026-10-03T10:00:00Z' },
 } as unknown as WorkPlan;
 
@@ -43,6 +49,18 @@ describe('WorkPlanResolutionCard', () => {
     expect(screen.getByText('Plan no vigente')).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /Adjuntar resolución/ })).toBeInTheDocument();
     expect(screen.queryByRole('button', { name: /Descargar/ })).not.toBeInTheDocument();
+  });
+
+  it('muestra la revisión pendiente de resolución y lista la versión aprobada anterior (A12)', async () => {
+    mocked.getVersions.mockResolvedValue([
+      { revision: 1, approvedAt: '2026-09-01T10:00:00Z', resolution: { fileName: 'RD-1.pdf', fileSize: 10 } },
+    ]);
+    renderCard({ ...basePlan, inForce: true, status: 'EN_REVISION', revision: 2 } as unknown as WorkPlan);
+    expect(screen.getByText('Revisión pendiente de resolución')).toBeInTheDocument();
+    expect(await screen.findByText(/Revisión 1 · aprobada el/)).toBeInTheDocument();
+    const user = userEvent.setup();
+    await user.click(screen.getByRole('button', { name: 'Resolución' }));
+    expect(mocked.downloadVersionResolution).toHaveBeenCalledWith('s1', 1, 'RD-1.pdf');
   });
 
   it('sube el PDF seleccionado', async () => {

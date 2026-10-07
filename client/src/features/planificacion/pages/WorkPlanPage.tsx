@@ -1,10 +1,11 @@
 import { useState } from 'react';
 import { getApiErrorMessage } from '@shared/services/apiClient';
-import { PageHeader, Card, Button, SelectField, EmptyState, TableSkeleton } from '@shared/components/ui';
+import { PageHeader, Card, Button, ConfirmDialog, SelectField, EmptyState, TableSkeleton } from '@shared/components/ui';
 import { CalendarRangeIcon, PlusIcon, TrashIcon } from '@shared/components/icons';
 import { useWorkPlan, useWorkPlansOverview, useSaveWorkPlan } from '../hooks/useWorkPlans';
 import {
   DEFAULT_OPERATIONAL_ACTIVITIES,
+  WORK_PLAN_STATUS_LABEL,
   WorkPlanContent,
   WorkPlan,
 } from '../services/workPlanService';
@@ -187,6 +188,10 @@ function WorkPlanEditor({ schoolId, plan }: { schoolId: string; plan: WorkPlan |
   const [message, setMessage] = useState<{ type: 'ok' | 'error'; text: string } | null>(null);
 
   const save = useSaveWorkPlan(schoolId);
+  const [confirmRevision, setConfirmRevision] = useState(false);
+
+  // Editar un plan con resolución abre una nueva revisión que debe aprobarse otra vez (A12).
+  const approved = plan?.status === 'APROBADO';
 
   const setText = (key: TextKey, value: string) => setForm((f) => ({ ...f, [key]: value }));
 
@@ -204,10 +209,16 @@ function WorkPlanEditor({ schoolId, plan }: { schoolId: string; plan: WorkPlan |
     setForm((f) => ({ ...f, [table]: f[table].filter((_, idx) => idx !== i) }));
 
   const handleSave = async () => {
+    setConfirmRevision(false);
     setMessage(null);
     try {
       await save.mutateAsync(toContent(form));
-      setMessage({ type: 'ok', text: 'Plan de trabajo guardado correctamente.' });
+      setMessage({
+        type: 'ok',
+        text: approved
+          ? 'Cambios guardados como nueva revisión. Adjunta la resolución que la apruebe; mientras tanto sigue vigente la versión aprobada.'
+          : 'Plan de trabajo guardado correctamente.',
+      });
     } catch (err) {
       setMessage({ type: 'error', text: getApiErrorMessage(err) });
     }
@@ -432,10 +443,19 @@ function WorkPlanEditor({ schoolId, plan }: { schoolId: string; plan: WorkPlan |
                 </p>
               )}
               <div className={styles.actions}>
-                <Button onClick={handleSave} loading={save.isPending}>
-                  Guardar plan
+                <Button onClick={approved ? () => setConfirmRevision(true) : handleSave} loading={save.isPending}>
+                  {approved ? 'Guardar como nueva revisión' : 'Guardar plan'}
                 </Button>
               </div>
+              <ConfirmDialog
+                open={confirmRevision}
+                title="Crear una nueva revisión"
+                message="Este plan tiene una resolución de aprobación. Al guardar, la versión aprobada se conserva y los cambios quedan como una nueva revisión que necesita su propia resolución."
+                confirmLabel="Guardar revisión"
+                loading={save.isPending}
+                onConfirm={handleSave}
+                onCancel={() => setConfirmRevision(false)}
+              />
             </Card>
   );
 }
@@ -496,7 +516,7 @@ export function WorkPlanPage() {
                 <option value="">Selecciona una escuela</option>
                 {overview.schools.map((s) => (
                   <option key={s.schoolId} value={s.schoolId}>
-                    {s.schoolName} {s.inForce ? '· vigente' : s.hasPlan ? '· sin resolución' : '· sin plan'}
+                    {s.schoolName} {s.status ? `· ${WORK_PLAN_STATUS_LABEL[s.status]}` : '· sin plan'}
                   </option>
                 ))}
               </SelectField>

@@ -2,7 +2,8 @@ import { useRef, useState } from 'react';
 import { getApiErrorMessage } from '@shared/services/apiClient';
 import { Badge, Button, Card } from '@shared/components/ui';
 import { DownloadIcon, UploadIcon } from '@shared/components/icons';
-import { useUploadWorkPlanResolution } from '../hooks/useWorkPlans';
+import { useUploadWorkPlanResolution, useWorkPlanVersions } from '../hooks/useWorkPlans';
+import { downloadFile } from '@shared/services/downloadFile';
 import { WorkPlan, workPlanService } from '../services/workPlanService';
 import styles from './WorkPlanResolutionCard.module.css';
 
@@ -17,6 +18,7 @@ export function WorkPlanResolutionCard({ schoolId, plan }: { schoolId: string; p
   const upload = useUploadWorkPlanResolution(schoolId);
   const inputRef = useRef<HTMLInputElement>(null);
   const [error, setError] = useState('');
+  const { versions } = useWorkPlanVersions(schoolId, plan.revision > 1);
 
   const handleFile = async (file: File | undefined) => {
     if (!file) return;
@@ -38,6 +40,15 @@ export function WorkPlanResolutionCard({ schoolId, plan }: { schoolId: string; p
     }
   };
 
+  const downloadVersion = async (revision: number, fileName: string) => {
+    setError('');
+    try {
+      await workPlanService.downloadVersionResolution(schoolId, revision, fileName);
+    } catch (err) {
+      setError(getApiErrorMessage(err));
+    }
+  };
+
   const handleDownload = async () => {
     if (!plan.resolution) return;
     setError('');
@@ -52,8 +63,12 @@ export function WorkPlanResolutionCard({ schoolId, plan }: { schoolId: string; p
     <Card padded className={styles.card}>
       <div className={styles.head}>
         <h3>Resolución de aprobación</h3>
-        <Badge tone={plan.inForce ? 'success' : 'warning'}>
-          {plan.inForce ? 'Plan vigente' : 'Plan no vigente'}
+        <Badge tone={plan.status === 'APROBADO' ? 'success' : 'warning'}>
+          {plan.status === 'APROBADO'
+            ? 'Plan vigente'
+            : plan.status === 'EN_REVISION'
+              ? 'Revisión pendiente de resolución'
+              : 'Plan no vigente'}
         </Badge>
       </div>
 
@@ -61,6 +76,11 @@ export function WorkPlanResolutionCard({ schoolId, plan }: { schoolId: string; p
         <p className={styles.file}>
           {plan.resolution.fileName} · {formatSize(plan.resolution.fileSize)} · cargada el{' '}
           {new Date(plan.resolution.uploadedAt).toLocaleDateString('es-PE')}
+        </p>
+      ) : plan.status === 'EN_REVISION' ? (
+        <p className={styles.hint}>
+          Los cambios guardados son la revisión {plan.revision} y aún no tienen resolución. Mientras tanto
+          sigue vigente la versión aprobada anterior; adjunta la resolución que apruebe esta revisión.
         </p>
       ) : (
         <p className={styles.hint}>
@@ -91,6 +111,32 @@ export function WorkPlanResolutionCard({ schoolId, plan }: { schoolId: string; p
           </Button>
         )}
       </div>
+
+      {versions.length > 0 && (
+        <div className={styles.versions}>
+          <h4>Versiones aprobadas anteriores</h4>
+          <ul>
+            {versions.map((v) => (
+              <li key={v.revision}>
+                <span>
+                  Revisión {v.revision} · aprobada el {new Date(v.approvedAt).toLocaleDateString('es-PE')}
+                </span>
+                <Button variant="ghost" onClick={() => downloadVersion(v.revision, v.resolution.fileName)}>
+                  Resolución
+                </Button>
+                <Button
+                  variant="ghost"
+                  onClick={() =>
+                    downloadFile(`/work-plans/${schoolId}/pdf?revision=${v.revision}`, `plan-trabajo-revision-${v.revision}.pdf`)
+                  }
+                >
+                  Plan en PDF
+                </Button>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
 
       {error && (
         <p role="alert" className={styles.error}>

@@ -23,12 +23,23 @@ export function useWorkPlan(schoolId: string) {
   return { view: query.data, loading: query.isLoading, error: query.isError, refresh: query.refetch };
 }
 
+/** Versiones aprobadas archivadas del plan (se piden solo si las hay). */
+export function useWorkPlanVersions(schoolId: string, enabled: boolean) {
+  const query = useQuery({
+    queryKey: ['workPlanVersions', schoolId],
+    queryFn: () => workPlanService.getVersions(schoolId),
+    enabled: enabled && !!schoolId,
+  });
+  return { versions: query.data ?? [] };
+}
+
 export function useSaveWorkPlan(schoolId: string) {
   const queryClient = useQueryClient();
   const mutation = useMutation({
     mutationFn: (content: WorkPlanContent) => workPlanService.save(schoolId, content),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: planKey(schoolId) });
+      queryClient.invalidateQueries({ queryKey: ['workPlanVersions', schoolId] });
       queryClient.invalidateQueries({ queryKey: OVERVIEW_KEY });
     },
   });
