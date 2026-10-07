@@ -10,6 +10,7 @@ import { StudentRepository } from '@domain/repositories/StudentRepository';
 import { SchoolRepository } from '@domain/repositories/SchoolRepository';
 import { FacultyRepository } from '@domain/repositories/FacultyRepository';
 import { TutorSemesterReportRepository } from '@domain/repositories/TutorSemesterReportRepository';
+import { PeriodRosterRepository } from '@domain/repositories/PeriodRosterRepository';
 import { SessionWithParticipants } from '@domain/entities/Session';
 import { Student } from '@domain/entities/Student';
 
@@ -40,9 +41,11 @@ describe('GetConsolidatedReportUseCase (HU-44)', () => {
   let faculties: jest.Mocked<FacultyRepository>;
   let reports: jest.Mocked<TutorSemesterReportRepository>;
   let roleName: string;
+  let roster: Student[] | null;
 
   beforeEach(() => {
     roleName = 'Administrador DBU';
+    roster = null; // sin corte: semestre vigente
     users = { findById: jest.fn().mockResolvedValue({ id: 'u', roleId: 'r' }) } as unknown as jest.Mocked<UserRepository>;
     roles = {
       findById: jest.fn().mockImplementation(async () => ({ id: 'r', name: roleName })),
@@ -92,8 +95,38 @@ describe('GetConsolidatedReportUseCase (HU-44)', () => {
     } as unknown as jest.Mocked<TutorSemesterReportRepository>;
   });
 
+  const rosters = () =>
+    ({ findByPeriod: jest.fn().mockImplementation(async () => roster) }) as unknown as PeriodRosterRepository;
+
   const run = (filters?: ReportFilters) =>
-    new GetConsolidatedReportUseCase(users, roles, periods, sessions, students, schools, faculties, reports).execute('u', filters);
+    new GetConsolidatedReportUseCase(users, roles, periods, sessions, students, schools, faculties, reports, rosters()).execute('u', filters);
+
+  it('un semestre cerrado conserva sus cifras aunque luego se reasigne o desactive (A17)', async () => {
+    const before = await run();
+    // Corte del semestre tal como estaba al cerrarse.
+    roster = (await students.findAll()).map((s) => ({ ...s }));
+    // Después: se reasignan tutorados a otro tutor/escuela y se desactiva a otros.
+    students.findAll.mockResolvedValue([
+      student('a', 'sc3', 't2'),
+      student('b', 'sc1', null),
+      student('c', 'sc1', null, false),
+      student('d', 'sc2', 't1', false),
+      student('e', 'sc3', 't2', false),
+    ]);
+
+    const after = await run();
+
+    expect(after.totals).toEqual(before.totals);
+    expect(after.faculties).toEqual(before.faculties);
+  });
+
+  it('sin corte (semestre vigente) refleja la matrícula actual', async () => {
+    const before = await run();
+    students.findAll.mockResolvedValue([student('a', 'sc1', 't1')]);
+    const after = await run();
+    expect(after.totals.activeStudents).not.toBe(before.totals.activeStudents);
+    expect(after.totals.activeStudents).toBe(1);
+  });
 
   it('calcula las métricas por escuela', async () => {
     const report = await run();

@@ -1,6 +1,7 @@
 import { PrismaClient } from '@prisma/client';
 import { CatalogEntry, CatalogInput, CatalogKind } from '@domain/entities/Catalog';
 import { CatalogRepository } from '@domain/repositories/CatalogRepository';
+import { captureRosterSnapshot } from './PrismaPeriodRosterRepository';
 
 // Tipos que viven en la tabla genérica catalog_items.
 const ITEM_CATALOG: Partial<Record<CatalogKind, string>> = {
@@ -165,13 +166,20 @@ export class PrismaCatalogRepository implements CatalogRepository {
         });
         break;
       case 'periods':
-        await this.prisma.academicPeriod.update({
-          where: { id },
-          data: {
-            ...common,
-            ...(input.startDate !== undefined && { startDate: input.startDate }),
-            ...(input.endDate !== undefined && { endDate: input.endDate }),
-          },
+        await this.prisma.$transaction(async (tx) => {
+          // Desactivar el semestre vigente lo cierra: se congela su matrícula antes de cualquier cambio posterior (A17).
+          if (input.isActive === false) {
+            const current = await tx.academicPeriod.findUnique({ where: { id } });
+            if (current?.isActive) await captureRosterSnapshot(tx, id);
+          }
+          await tx.academicPeriod.update({
+            where: { id },
+            data: {
+              ...common,
+              ...(input.startDate !== undefined && { startDate: input.startDate }),
+              ...(input.endDate !== undefined && { endDate: input.endDate }),
+            },
+          });
         });
         break;
       default:
@@ -230,9 +238,12 @@ export class PrismaCatalogRepository implements CatalogRepository {
   }
 
   async activateOnlyPeriod(id: string): Promise<void> {
-    await this.prisma.$transaction([
-      this.prisma.academicPeriod.updateMany({ where: { id: { not: id } }, data: { isActive: false } }),
-      this.prisma.academicPeriod.update({ where: { id }, data: { isActive: true } }),
-    ]);
+    await this.prisma.$transaction(async (tx) => {
+      // Los semestres que dejan de estar vigentes se cierran: se congela su matrícula (A17).
+      const closing = await tx.academicPeriod.findMany({ where: { id: { not: id }, isActive: true }, select: { id: true } });
+      for (const period of closing) await captureRosterSnapshot(tx, period.id);
+      await tx.academicPeriod.updateMany({ where: { id: { not: id } }, data: { isActive: false } });
+      await tx.academicPeriod.update({ where: { id }, data: { isActive: true } });
+    });
   }
 }
