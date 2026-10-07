@@ -11,6 +11,12 @@ export const loginSchema = z.object({
 
 export type LoginBody = z.infer<typeof loginSchema>;
 
+export const refreshSchema = z.object({
+  refreshToken: z
+    .string({ required_error: 'El refresh token es obligatorio' })
+    .min(1, 'El refresh token es obligatorio'),
+});
+
 export const forgotPasswordSchema = z.object({
   email: z
     .string({ required_error: 'El email es obligatorio' })

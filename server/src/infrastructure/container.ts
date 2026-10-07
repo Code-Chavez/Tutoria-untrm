@@ -28,6 +28,8 @@ import { BcryptPasswordHasher } from './services/BcryptPasswordHasher';
 import { JwtTokenService } from './services/JwtTokenService';
 import { LocalEvidenceStorage } from './services/LocalEvidenceStorage';
 import { LoginUseCase } from '@application/use-cases/auth/LoginUseCase';
+import { RefreshSessionUseCase } from '@application/use-cases/auth/RefreshSessionUseCase';
+import { LogoutUseCase } from '@application/use-cases/auth/LogoutUseCase';
 import { RequestPasswordResetUseCase } from '@application/use-cases/auth/RequestPasswordResetUseCase';
 import { ResetPasswordUseCase } from '@application/use-cases/auth/ResetPasswordUseCase';
 
@@ -74,6 +76,15 @@ const loginUseCase = new LoginUseCase(
   passwordHasher,
   tokenService,
 );
+
+const refreshSessionUseCase = new RefreshSessionUseCase(
+  userRepository,
+  roleRepository,
+  refreshTokenRepository,
+  auditLogRepository,
+  tokenService,
+);
+const logoutUseCase = new LogoutUseCase(refreshTokenRepository);
 
 const requestPasswordResetUseCase = new RequestPasswordResetUseCase(
   userRepository,
@@ -562,6 +573,8 @@ export const container = {
   },
   useCases: {
     loginUseCase,
+    refreshSessionUseCase,
+    logoutUseCase,
     requestPasswordResetUseCase,
     resetPasswordUseCase,
     createUserUseCase,

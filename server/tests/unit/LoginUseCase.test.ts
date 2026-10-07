@@ -8,6 +8,7 @@ import {
 import { User } from '@domain/entities/User';
 import { UserRepository } from '@domain/repositories/UserRepository';
 import { RoleRepository } from '@domain/repositories/RoleRepository';
+import { hashRefreshToken } from '@application/use-cases/auth/refreshTokenHash';
 import { RefreshTokenRepository } from '@domain/repositories/RefreshTokenRepository';
 import { AuditLogRepository } from '@domain/repositories/AuditLogRepository';
 import { PasswordHasher } from '@application/ports/PasswordHasher';
@@ -54,13 +55,14 @@ function buildMocks() {
   const refreshTokens: jest.Mocked<RefreshTokenRepository> = {
     create: jest.fn().mockResolvedValue({
       id: 'rt-1',
-      token: 'refresh-token',
+      tokenHash: 'hash',
+      revokedAt: null,
       userId: 'user-1',
       expiresAt: new Date(),
       createdAt: new Date(),
     }),
-    findByToken: jest.fn(),
-    deleteByToken: jest.fn(),
+    findByHash: jest.fn(),
+    revoke: jest.fn(),
     deleteAllForUser: jest.fn(),
   };
   const auditLogs: jest.Mocked<AuditLogRepository> = {
@@ -113,7 +115,7 @@ describe('LoginUseCase', () => {
       role: 'Docente Tutor',
     });
     expect(refreshTokens.create).toHaveBeenCalledWith(
-      expect.objectContaining({ token: 'refresh-token', userId: 'user-1' }),
+      expect.objectContaining({ tokenHash: hashRefreshToken('refresh-token'), userId: 'user-1' }),
     );
     expect(auditLogs.create).toHaveBeenCalledWith(
       expect.objectContaining({ action: 'LOGIN', ipAddress: '10.0.0.1' }),
