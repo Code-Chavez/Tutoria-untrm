@@ -2,11 +2,13 @@ import { Request, Response } from 'express';
 import { GetEvaluationStatisticsUseCase } from '@application/use-cases/evaluation/GetEvaluationStatisticsUseCase';
 import { GetIndicatorsUseCase } from '@application/use-cases/indicators/GetIndicatorsUseCase';
 import { GetWorkPlanUseCase } from '@application/use-cases/work-plans/GetWorkPlanUseCase';
+import { GetWorkPlanVersionUseCase } from '@application/use-cases/work-plans/WorkPlanVersionUseCases';
 import { GetStudentRecordUseCase } from '@application/use-cases/student-record/GetStudentRecordUseCase';
 import { IndicatorsForbiddenError } from '@application/use-cases/indicators/IndicatorsErrors';
 import {
   WorkPlanForbiddenError,
   WorkPlanNotFoundError,
+  WorkPlanVersionNotFoundError,
 } from '@application/use-cases/work-plans/WorkPlanErrors';
 import { StudentNotFoundError } from '@application/use-cases/students/StudentErrors';
 import {
@@ -36,6 +38,7 @@ export class ExportController {
     private readonly getEvaluationStatisticsUseCase: GetEvaluationStatisticsUseCase,
     private readonly getIndicatorsUseCase: GetIndicatorsUseCase,
     private readonly getWorkPlanUseCase: GetWorkPlanUseCase,
+    private readonly getWorkPlanVersionUseCase: GetWorkPlanVersionUseCase,
     private readonly getStudentRecordUseCase: GetStudentRecordUseCase,
     private readonly evaluationPdf: EvaluationStatisticsPdf,
     private readonly evaluationWorkbook: EvaluationStatisticsWorkbook,
@@ -55,7 +58,7 @@ export class ExportController {
     if (handleReportFilterError(error, res)) return;
     if (error instanceof EvaluationResultsForbiddenError || error instanceof IndicatorsForbiddenError || error instanceof WorkPlanForbiddenError) {
       res.status(403).json({ error: error.message });
-    } else if (error instanceof WorkPlanNotFoundError || error instanceof StudentNotFoundError) {
+    } else if (error instanceof WorkPlanNotFoundError || error instanceof WorkPlanVersionNotFoundError || error instanceof StudentNotFoundError) {
       res.status(404).json({ error: error.message });
     } else if (error instanceof NoActivePeriodError) {
       res.status(409).json({ error: error.message });
@@ -94,7 +97,15 @@ export class ExportController {
 
   workPlan = async (req: Request, res: Response) => {
     try {
-      const view = await this.getWorkPlanUseCase.execute(req.auth?.sub as string, req.params.schoolId as string);
+      // ?revision=N exporta la versión aprobada archivada tal como se aprobó (A12).
+      const revision = req.query.revision === undefined ? null : Number(req.query.revision);
+      if (revision !== null && (!Number.isInteger(revision) || revision < 1)) throw new WorkPlanNotFoundError();
+      const requesterId = req.auth?.sub as string;
+      const schoolId = req.params.schoolId as string;
+      const view =
+        revision === null
+          ? await this.getWorkPlanUseCase.execute(requesterId, schoolId)
+          : await this.getWorkPlanVersionUseCase.execute(requesterId, schoolId, revision);
       if (!view.plan) throw new WorkPlanNotFoundError();
       const buffer = await this.workPlanPdf.build({ ...view, plan: view.plan });
       this.send(res, 'pdf', buffer, 'plan-trabajo-semestral');

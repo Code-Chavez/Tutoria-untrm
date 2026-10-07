@@ -661,8 +661,32 @@ model WorkPlan {
   resolutionStorageKey String?   @map("resolution_storage_key")
   resolutionUploadedAt DateTime? @map("resolution_uploaded_at")
 
+  // Revisión vigente del contenido (A12): al editar un plan ya aprobado se archiva la
+  // versión aprobada y el contenido pasa a una nueva revisión que requiere su propia resolución.
+  revision Int                @default(1)
+  versions WorkPlanVersion[]
+
   @@unique([periodId, schoolId])
   @@map("work_plans")
+}
+
+// Versión aprobada de un plan (A12): el contenido tal como lo aprobó la resolución adjunta, inalterable.
+model WorkPlanVersion {
+  id         String   @id @default(uuid())
+  createdAt  DateTime @default(now()) @map("created_at")
+  workPlanId String   @map("work_plan_id")
+  workPlan   WorkPlan @relation(fields: [workPlanId], references: [id], onDelete: Cascade)
+  revision   Int
+  authorId   String   @map("author_id")
+  content    Json
+
+  resolutionFileName   String   @map("resolution_file_name")
+  resolutionFileSize   Int      @map("resolution_file_size")
+  resolutionStorageKey String   @map("resolution_storage_key")
+  resolutionUploadedAt DateTime @map("resolution_uploaded_at")
+
+  @@unique([workPlanId, revision])
+  @@map("work_plan_versions")
 }
 
 // ─── Parámetros del Sistema ────────────────────────────────────

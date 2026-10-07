@@ -5,10 +5,11 @@ import { AcademicPeriodRepository } from '@domain/repositories/AcademicPeriodRep
 import { WorkPlanRepository } from '@domain/repositories/WorkPlanRepository';
 import { NoActivePeriodError } from '@application/use-cases/evaluation/EvaluationErrors';
 import { resolveManageableSchools } from './resolveManageableSchools';
+import { WorkPlanStatus, workPlanStatus } from './toPublicWorkPlan';
 
 export interface WorkPlansOverview {
   periodName: string;
-  schools: { schoolId: string; schoolName: string; hasPlan: boolean; inForce: boolean }[];
+  schools: { schoolId: string; schoolName: string; hasPlan: boolean; inForce: boolean; status: WorkPlanStatus | null }[];
 }
 
 /** Escuelas que el solicitante puede gestionar y si ya tienen plan en el periodo activo (HU-41). */
@@ -36,7 +37,8 @@ export class ListWorkPlansUseCase {
         schoolId: s.id,
         schoolName: s.name,
         hasPlan: bySchool.has(s.id),
-        inForce: !!bySchool.get(s.id)?.resolutionStorageKey,
+        inForce: !!bySchool.get(s.id) && workPlanStatus(bySchool.get(s.id)!) !== 'BORRADOR',
+        status: bySchool.get(s.id) ? workPlanStatus(bySchool.get(s.id)!) : null,
       })),
     };
   }

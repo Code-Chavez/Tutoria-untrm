@@ -39,9 +39,11 @@ describe('Work plan use cases (HU-41)', () => {
     } as unknown as jest.Mocked<AcademicPeriodRepository>;
     workPlans = {
       findByPeriodAndSchool: jest.fn().mockResolvedValue(null),
-      findAllByPeriod: jest.fn().mockResolvedValue([{ schoolId: 's1' } as WorkPlan]),
-      upsert: jest.fn().mockResolvedValue({ id: 'wp1' } as WorkPlan),
+      findAllByPeriod: jest.fn().mockResolvedValue([{ schoolId: 's1', resolutionStorageKey: null, lastApprovedRevision: null } as WorkPlan]),
+      saveContent: jest.fn().mockResolvedValue({ id: 'wp1', resolutionStorageKey: null, lastApprovedRevision: null } as WorkPlan),
       setResolution: jest.fn(),
+      findVersions: jest.fn(),
+      findVersion: jest.fn(),
     };
   });
 
@@ -51,7 +53,7 @@ describe('Work plan use cases (HU-41)', () => {
 
   it('el Coordinador solo ve sus escuelas y si ya tienen plan', async () => {
     const res = await list().execute('u1');
-    expect(res.schools).toEqual([{ schoolId: 's1', schoolName: 'Sistemas', hasPlan: true, inForce: false }]);
+    expect(res.schools).toEqual([{ schoolId: 's1', schoolName: 'Sistemas', hasPlan: true, inForce: false, status: 'BORRADOR' }]);
   });
 
   it('la DBU ve todas las escuelas', async () => {
@@ -69,7 +71,7 @@ describe('Work plan use cases (HU-41)', () => {
   it('rechaza la escuela de otro coordinador', async () => {
     await expect(get().execute('u1', 's2')).rejects.toBeInstanceOf(WorkPlanForbiddenError);
     await expect(save().execute('u1', 's2', content)).rejects.toBeInstanceOf(WorkPlanForbiddenError);
-    expect(workPlans.upsert).not.toHaveBeenCalled();
+    expect(workPlans.saveContent).not.toHaveBeenCalled();
   });
 
   it('get devuelve null cuando aún no hay plan', async () => {
@@ -85,6 +87,6 @@ describe('Work plan use cases (HU-41)', () => {
 
   it('save hace upsert en el periodo activo con el autor', async () => {
     await save().execute('u1', 's1', content);
-    expect(workPlans.upsert).toHaveBeenCalledWith('p1', 's1', 'u1', content);
+    expect(workPlans.saveContent).toHaveBeenCalledWith('p1', 's1', 'u1', content);
   });
 });

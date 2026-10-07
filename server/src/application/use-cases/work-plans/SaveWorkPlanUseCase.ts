@@ -12,7 +12,9 @@ import { PublicWorkPlan, toPublicWorkPlan } from './toPublicWorkPlan';
 /**
  * Elabora o actualiza el plan de trabajo semestral de una escuela en el
  * periodo activo (HU-41, Art. 17.a). Solo el coordinador de esa escuela o la
- * DBU. La aprobación por resolución y su adjunto son HU-42.
+ * DBU. Editar un plan ya aprobado no altera la versión aprobada: esta se
+ * archiva y el cambio queda como una nueva revisión que necesita su propia
+ * resolución (A12).
  */
 export class SaveWorkPlanUseCase {
   constructor(
@@ -30,7 +32,7 @@ export class SaveWorkPlanUseCase {
     const period = await this.periods.findActive();
     if (!period) throw new NoActivePeriodError();
 
-    const plan = await this.workPlans.upsert(period.id, schoolId, requesterId, content);
+    const plan = await this.workPlans.saveContent(period.id, schoolId, requesterId, content);
     return toPublicWorkPlan(plan);
   }
 }

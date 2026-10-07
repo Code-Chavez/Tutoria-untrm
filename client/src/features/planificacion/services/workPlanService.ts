@@ -65,6 +65,21 @@ export interface WorkPlanContent {
   operationalActivities: OperationalActivity[];
 }
 
+/** BORRADOR: nunca aprobado · APROBADO: con la resolución de su contenido · EN_REVISION: cambios pendientes de resolución. */
+export type WorkPlanStatus = 'BORRADOR' | 'APROBADO' | 'EN_REVISION';
+
+export const WORK_PLAN_STATUS_LABEL: Record<WorkPlanStatus, string> = {
+  BORRADOR: 'sin resolución',
+  APROBADO: 'vigente',
+  EN_REVISION: 'en revisión',
+};
+
+export interface WorkPlanVersionSummary {
+  revision: number;
+  approvedAt: string;
+  resolution: { fileName: string; fileSize: number };
+}
+
 export interface WorkPlan extends WorkPlanContent {
   id: string;
   periodId: string;
@@ -72,6 +87,8 @@ export interface WorkPlan extends WorkPlanContent {
   authorId: string;
   /** Resolución de aprobación adjunta (HU-42); sin ella el plan no es vigente. */
   resolution: { fileName: string; fileSize: number; uploadedAt: string } | null;
+  status: WorkPlanStatus;
+  revision: number;
   inForce: boolean;
   createdAt: string;
   updatedAt: string;
@@ -79,7 +96,7 @@ export interface WorkPlan extends WorkPlanContent {
 
 export interface WorkPlansOverview {
   periodName: string;
-  schools: { schoolId: string; schoolName: string; hasPlan: boolean; inForce: boolean }[];
+  schools: { schoolId: string; schoolName: string; hasPlan: boolean; inForce: boolean; status: WorkPlanStatus | null }[];
 }
 
 export interface WorkPlanView {
@@ -127,6 +144,18 @@ export const workPlanService = {
       { headers: { 'Content-Type': 'multipart/form-data' } },
     );
     return response.data.plan;
+  },
+
+  async getVersions(schoolId: string): Promise<WorkPlanVersionSummary[]> {
+    const response = await apiClient.get<WorkPlanVersionSummary[]>(`/work-plans/${schoolId}/versions`);
+    return response.data;
+  },
+
+  async downloadVersionResolution(schoolId: string, revision: number, fileName: string): Promise<void> {
+    const response = await apiClient.get(`/work-plans/${schoolId}/versions/${revision}/resolution/file`, {
+      responseType: 'blob',
+    });
+    saveBlob(response.data as Blob, fileName);
   },
 
   async downloadResolution(schoolId: string, fileName: string): Promise<void> {

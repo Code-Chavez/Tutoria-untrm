@@ -6,9 +6,14 @@ import { SaveWorkPlanUseCase } from '@application/use-cases/work-plans/SaveWorkP
 import { UploadWorkPlanResolutionUseCase } from '@application/use-cases/work-plans/UploadWorkPlanResolutionUseCase';
 import { GetWorkPlanResolutionFileUseCase } from '@application/use-cases/work-plans/GetWorkPlanResolutionFileUseCase';
 import {
+  ListWorkPlanVersionsUseCase,
+  GetWorkPlanVersionResolutionFileUseCase,
+} from '@application/use-cases/work-plans/WorkPlanVersionUseCases';
+import {
   WorkPlanForbiddenError,
   WorkPlanNotFoundError,
   WorkPlanResolutionNotFoundError,
+  WorkPlanVersionNotFoundError,
 } from '@application/use-cases/work-plans/WorkPlanErrors';
 import { NoActivePeriodError } from '@application/use-cases/evaluation/EvaluationErrors';
 import { saveWorkPlanSchema } from '../validators/workPlan.validators';
@@ -20,6 +25,8 @@ export class WorkPlanController {
     private readonly saveWorkPlanUseCase: SaveWorkPlanUseCase,
     private readonly uploadWorkPlanResolutionUseCase: UploadWorkPlanResolutionUseCase,
     private readonly getWorkPlanResolutionFileUseCase: GetWorkPlanResolutionFileUseCase,
+    private readonly listWorkPlanVersionsUseCase: ListWorkPlanVersionsUseCase,
+    private readonly getWorkPlanVersionResolutionFileUseCase: GetWorkPlanVersionResolutionFileUseCase,
   ) {}
 
   private handleError(error: unknown, res: Response) {
@@ -29,7 +36,8 @@ export class WorkPlanController {
       res.status(403).json({ error: error.message });
     } else if (
       error instanceof WorkPlanNotFoundError ||
-      error instanceof WorkPlanResolutionNotFoundError
+      error instanceof WorkPlanResolutionNotFoundError ||
+      error instanceof WorkPlanVersionNotFoundError
     ) {
       res.status(404).json({ error: error.message });
     } else if (error instanceof NoActivePeriodError) {
@@ -99,6 +107,34 @@ export class WorkPlanController {
       const { fileName, absolutePath } = await this.getWorkPlanResolutionFileUseCase.execute(
         req.auth?.sub as string,
         req.params.schoolId as string,
+      );
+      res.download(absolutePath, fileName);
+    } catch (error) {
+      this.handleError(error, res);
+    }
+  };
+
+  // Versiones aprobadas archivadas al revisar un plan ya aprobado (A12).
+  listVersions = async (req: Request, res: Response) => {
+    try {
+      const versions = await this.listWorkPlanVersionsUseCase.execute(
+        req.auth?.sub as string,
+        req.params.schoolId as string,
+      );
+      res.json(versions);
+    } catch (error) {
+      this.handleError(error, res);
+    }
+  };
+
+  downloadVersionResolution = async (req: Request, res: Response) => {
+    try {
+      const revision = Number(req.params.revision);
+      if (!Number.isInteger(revision) || revision < 1) throw new WorkPlanVersionNotFoundError();
+      const { fileName, absolutePath } = await this.getWorkPlanVersionResolutionFileUseCase.execute(
+        req.auth?.sub as string,
+        req.params.schoolId as string,
+        revision,
       );
       res.download(absolutePath, fileName);
     } catch (error) {

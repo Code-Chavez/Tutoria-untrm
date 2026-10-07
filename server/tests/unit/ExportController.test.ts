@@ -24,7 +24,7 @@ describe('ExportController (HU-46)', () => {
   const recordPdf = { build: jest.fn() };
 
   const controller = new ExportController(
-    evaluationUc as never, indicatorsUc as never, workPlanUc as never, recordUc as never,
+    evaluationUc as never, indicatorsUc as never, workPlanUc as never, {} as never, recordUc as never,
     evaluationPdf as never, evaluationXlsx as never, indicatorsPdf as never, indicatorsXlsx as never,
     workPlanPdf as never, recordPdf as never,
   );

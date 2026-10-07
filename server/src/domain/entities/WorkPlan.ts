@@ -65,6 +65,10 @@ export interface WorkPlan extends WorkPlanContent {
   resolutionFileSize: number | null;
   resolutionStorageKey: string | null;
   resolutionUploadedAt: Date | null;
+  /** Revisión del contenido actual (empieza en 1; sube al editar un plan ya aprobado). */
+  revision: number;
+  /** Revisión de la última versión aprobada archivada, o null si nunca se aprobó una anterior. */
+  lastApprovedRevision: number | null;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -74,4 +78,18 @@ export interface WorkPlanResolutionFile {
   fileName: string;
   fileSize: number;
   storageKey: string;
+}
+
+/** Versión aprobada de un plan, archivada al revisarlo (A12): contenido y resolución tal como se aprobaron. */
+export interface WorkPlanVersion {
+  id: string;
+  workPlanId: string;
+  revision: number;
+  authorId: string;
+  content: WorkPlanContent;
+  resolutionFileName: string;
+  resolutionFileSize: number;
+  resolutionStorageKey: string;
+  resolutionUploadedAt: Date;
+  createdAt: Date;
 }

@@ -18,3 +18,10 @@ export class WorkPlanResolutionNotFoundError extends Error {
     this.name = 'WorkPlanResolutionNotFoundError';
   }
 }
+
+export class WorkPlanVersionNotFoundError extends Error {
+  constructor() {
+    super('No existe esa versión aprobada del plan de trabajo');
+    this.name = 'WorkPlanVersionNotFoundError';
+  }
+}

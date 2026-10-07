@@ -12,6 +12,8 @@ const workPlanController = new WorkPlanController(
   container.useCases.saveWorkPlanUseCase,
   container.useCases.uploadWorkPlanResolutionUseCase,
   container.useCases.getWorkPlanResolutionFileUseCase,
+  container.useCases.listWorkPlanVersionsUseCase,
+  container.useCases.getWorkPlanVersionResolutionFileUseCase,
 );
 
 // La resolución de aprobación es un único PDF en memoria (máx. 10 MB).
@@ -53,6 +55,18 @@ router.get(
   requireAuth,
   authorize(['work-plans:read']),
   workPlanController.downloadResolution,
+);
+router.get(
+  '/work-plans/:schoolId/versions',
+  requireAuth,
+  authorize(['work-plans:read']),
+  workPlanController.listVersions,
+);
+router.get(
+  '/work-plans/:schoolId/versions/:revision/resolution/file',
+  requireAuth,
+  authorize(['work-plans:read']),
+  workPlanController.downloadVersionResolution,
 );
 
 export default router;

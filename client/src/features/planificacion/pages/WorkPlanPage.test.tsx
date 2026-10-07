@@ -39,7 +39,7 @@ describe('WorkPlanPage', () => {
   it('con una sola escuela la carga sola y envía el plan con filas limpias', async () => {
     mocked.getOverview.mockResolvedValue({
       periodName: '2026-II',
-      schools: [{ schoolId: 's1', schoolName: 'Sistemas', hasPlan: false, inForce: false }],
+      schools: [{ schoolId: 's1', schoolName: 'Sistemas', hasPlan: false, inForce: false, status: null }],
     });
     mocked.getBySchool.mockResolvedValue({ periodName: '2026-II', schoolName: 'Sistemas', plan: null });
     mocked.save.mockResolvedValue({} as never);
@@ -63,5 +63,39 @@ describe('WorkPlanPage', () => {
     expect(content.denomination).toBe('Taller de inducción');
     expect(content.budget).toEqual([{ quantity: 2, type: '', resource: '', characteristics: '', unitCost: 10 }]);
     expect(content.operationalActivities).toHaveLength(7);
+  });
+
+  it('editar un plan aprobado pide confirmar y lo guarda como nueva revisión (A12)', async () => {
+    mocked.getOverview.mockResolvedValue({
+      periodName: '2026-II',
+      schools: [{ schoolId: 's1', schoolName: 'Sistemas', hasPlan: true, inForce: true, status: 'APROBADO' }],
+    });
+    mocked.getBySchool.mockResolvedValue({
+      periodName: '2026-II',
+      schoolName: 'Sistemas',
+      plan: {
+        id: 'wp1',
+        status: 'APROBADO',
+        revision: 1,
+        inForce: true,
+        resolution: { fileName: 'RD.pdf', fileSize: 1, uploadedAt: '2026-10-03T10:00:00Z' },
+        denomination: 'Taller aprobado',
+        specificObjectives: [],
+        planning: [],
+        programming: [],
+        physicalResources: [],
+        humanResources: [],
+        budget: [],
+        operationalActivities: [],
+      } as never,
+    });
+    mocked.save.mockResolvedValue({} as never);
+    const user = userEvent.setup();
+    renderPage();
+
+    await user.click(await screen.findByRole('button', { name: 'Guardar como nueva revisión' }));
+    expect(mocked.save).not.toHaveBeenCalled();
+    await user.click(await screen.findByRole('button', { name: 'Guardar revisión' }));
+    await waitFor(() => expect(mocked.save).toHaveBeenCalled());
   });
 });

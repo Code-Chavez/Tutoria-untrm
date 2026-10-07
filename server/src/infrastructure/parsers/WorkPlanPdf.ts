@@ -1,6 +1,13 @@
 import { WorkPlanView } from '@application/use-cases/work-plans/GetWorkPlanUseCase';
 import { BrandedPdf } from '../export/BrandedPdf';
 
+const planLabel = (plan: { status: string; revision: number }) =>
+  plan.status === 'APROBADO'
+    ? ` · Aprobado (revisión ${plan.revision})`
+    : plan.status === 'EN_REVISION'
+      ? ` · Borrador de revisión ${plan.revision}, pendiente de resolución`
+      : ' · Borrador sin resolución de aprobación';
+
 const money = (n: number) => n.toFixed(2);
 
 // Plan de trabajo semestral (HU-41, Anexo N° 8) sobre el motor de exportación
@@ -12,7 +19,7 @@ export class WorkPlanPdf {
 
     const pdf = new BrandedPdf({
       title: 'Plan de trabajo para la implementación de la tutoría semestral',
-      subtitle: `Anexo N° 8 · ${view.schoolName} · Periodo ${view.periodName}${plan.inForce ? ' · Vigente' : ' · Sin resolución de aprobación'}`,
+      subtitle: `Anexo N° 8 · ${view.schoolName} · Periodo ${view.periodName}${planLabel(plan)}`,
       generatedAt: plan.updatedAt,
     })
       .heading('I. Introducción')
