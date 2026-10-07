@@ -59,3 +59,12 @@ export class ReferralConflictError extends Error {
     this.name = 'ReferralConflictError';
   }
 }
+
+// El listado de casos no está disponible para este rol o cuenta. Se responde con la
+// razón (403) en vez de una bandeja vacía que parezca "no hay casos" (A15).
+export class ReferralListNotAllowedError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = 'ReferralListNotAllowedError';
+  }
+}

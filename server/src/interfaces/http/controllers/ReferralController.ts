@@ -13,6 +13,7 @@ import {
   ClosureNotesRequiredError,
   InvalidReferralStatusError,
   ReferralForbiddenError,
+  ReferralListNotAllowedError,
   ReferralStatusForbiddenError,
   ReferralConflictError,
   InvalidReferralTransitionError,
@@ -75,8 +76,12 @@ export class ReferralController {
       const userId = req.auth?.sub as string;
       const referrals = await this.getReferralsUseCase.execute(userId);
       res.status(200).json(referrals);
-    } catch {
-      res.status(500).json({ error: 'Error interno del servidor' });
+    } catch (error) {
+      if (error instanceof ReferralListNotAllowedError || error instanceof ReferralForbiddenError) {
+        res.status(403).json({ error: error.message });
+      } else {
+        res.status(500).json({ error: 'Error interno del servidor' });
+      }
     }
   };
 

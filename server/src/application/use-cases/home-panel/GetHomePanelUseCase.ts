@@ -160,7 +160,7 @@ export class GetHomePanelUseCase {
 
     return [
       { key: 'my-tutor', label: 'Mi tutor', value: tutor ? `${tutor.firstName} ${tutor.lastName}` : 'Sin asignar', tone: 'info' },
-      { key: 'next-session', label: 'Próxima sesión', value: next ? formatDateTime(next.scheduledAt) : '—', hint: next ? next.topic : 'No tienes sesiones programadas', tone: 'success' },
+      { key: 'next-session', label: 'Próxima sesión', value: next ? formatDateTime(next.scheduledAt) : '—', hint: next ? next.topic : 'No tienes sesiones programadas', tone: 'success', link: '/mis-sesiones' },
       { key: 'evaluation', label: 'Evaluación de mi tutor', ...evaluation, link: status?.canRespond && !status.alreadyResponded ? '/evaluar-tutoria' : undefined },
     ];
   }

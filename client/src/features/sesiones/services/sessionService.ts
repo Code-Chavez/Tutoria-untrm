@@ -92,6 +92,12 @@ export const sessionService = {
     return response.data.sessions;
   },
 
+  // Agenda del propio tutorado: sin `mine`, el servidor devuelve solo sus sesiones.
+  getOwnSessions: async (): Promise<TutoringSession[]> => {
+    const response = await apiClient.get<{ sessions: TutoringSession[] }>('/sessions');
+    return response.data.sessions;
+  },
+
   // Registra la asistencia de una sesión individual (HU-22, Anexo N°4).
   registerAttendance: async (sessionId: string): Promise<TutoringSession> => {
     const response = await apiClient.post<{ message: string; session: TutoringSession }>(

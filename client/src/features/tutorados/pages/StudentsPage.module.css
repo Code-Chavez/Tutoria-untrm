@@ -29,6 +29,21 @@
   cursor: pointer;
 }
 
+.pickBanner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--s3);
+  flex-wrap: wrap;
+  font-size: var(--fs-sm);
+  color: var(--azul);
+  background: var(--info-bg, #eef4ff);
+  border: 1px solid var(--borde);
+  border-radius: var(--r-sm);
+  padding: var(--s3) var(--s4);
+  margin-bottom: var(--s4);
+}
+
 .tableCard {
   background: #fff;
   border: 1px solid var(--borde);
