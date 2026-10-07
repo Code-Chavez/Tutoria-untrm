@@ -205,7 +205,7 @@ export default function App() {
                 path="informes"
                 element={
                   <RequireRole
-                    roles={['Docente Tutor', 'Coordinador', 'Administrador DBU', 'Vicerrectorado']}
+                    roles={['Docente Tutor', 'Coordinador', 'Administrador DBU']}
                   >
                     <ScheduleAttendanceReportPage />
                   </RequireRole>

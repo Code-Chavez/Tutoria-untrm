@@ -1,5 +1,6 @@
 import { StudentRepository } from '@domain/repositories/StudentRepository';
 import { SchoolRepository } from '@domain/repositories/SchoolRepository';
+import { StudentAccessGuard } from '@application/access/StudentAccessGuard';
 import {
   ImportStudentRow,
   ImportReport,
@@ -22,10 +23,16 @@ export class ImportStudentsUseCase {
   constructor(
     private readonly students: StudentRepository,
     private readonly schools: SchoolRepository,
+    private readonly guard: StudentAccessGuard,
   ) {}
 
-  async execute(rows: ImportStudentRow[]): Promise<ImportReport> {
-    const schools = await this.schools.findAll();
+  async execute(rows: ImportStudentRow[], requesterId: string): Promise<ImportReport> {
+    const scope = await this.guard.scopeFor(requesterId);
+    const allSchools = await this.schools.findAll();
+    // El coordinador solo carga tutorados de las escuelas que coordina; la DBU, de cualquiera.
+    const inScope = (schoolId: string) =>
+      scope.kind === 'ALL' || (scope.kind === 'SCHOOLS' && scope.schoolIds.includes(schoolId));
+    const schools = allSchools;
     const schoolByName = new Map(schools.map((s) => [normalize(s.name), s.id]));
 
     const errors: ImportRowError[] = [];
@@ -58,6 +65,8 @@ export class ImportStudentsUseCase {
         rowErrors.push('La escuela profesional es obligatoria');
       } else if (!schoolId) {
         rowErrors.push(`No se encontró la escuela «${row.school.trim()}»`);
+      } else if (!inScope(schoolId)) {
+        rowErrors.push(`No tienes acceso a la escuela «${row.school.trim()}»`);
       }
 
       if (CODE_PATTERN.test(code) && seenCodes.has(code)) {

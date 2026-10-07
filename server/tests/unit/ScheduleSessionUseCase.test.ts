@@ -12,6 +12,7 @@ import { Student } from '@domain/entities/Student';
 import { Session, SessionWithParticipants } from '@domain/entities/Session';
 import { SystemParameter } from '@domain/entities/SystemParameter';
 import { ScheduleSessionInput } from '@application/dtos/session.dto';
+import { allowAllGuard } from '../helpers/studentGuard';
 
 describe('ScheduleSessionUseCase', () => {
   let useCase: ScheduleSessionUseCase;
@@ -66,7 +67,7 @@ describe('ScheduleSessionUseCase', () => {
         .fn()
         .mockResolvedValue({ key: 'session_duration_minutes', value: '45' } as SystemParameter),
     };
-    useCase = new ScheduleSessionUseCase(sessions, students, systemParameters);
+    useCase = new ScheduleSessionUseCase(sessions, allowAllGuard(students), systemParameters);
   });
 
   it('programa la sesión con la duración configurada (45 min) y calcula el fin', async () => {

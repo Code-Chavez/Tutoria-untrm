@@ -5,6 +5,7 @@ import { StudentRepository } from '@domain/repositories/StudentRepository';
 import { Student } from '@domain/entities/Student';
 import { SupportContact } from '@domain/entities/SupportContact';
 import { UpsertSupportContactInput } from '@application/dtos/supportContact.dto';
+import { allowAllGuard } from '../helpers/studentGuard';
 
 describe('UpsertSupportContactUseCase', () => {
   let useCase: UpsertSupportContactUseCase;
@@ -42,11 +43,11 @@ describe('UpsertSupportContactUseCase', () => {
       assignTutor: jest.fn(),
       countByTutor: jest.fn(),
     };
-    useCase = new UpsertSupportContactUseCase(contacts, students);
+    useCase = new UpsertSupportContactUseCase(contacts, allowAllGuard(students));
   });
 
   it('registra el contacto de red de apoyo', async () => {
-    const result = await useCase.execute('student-1', baseInput);
+    const result = await useCase.execute('student-1', baseInput, 'admin-1');
 
     expect(result.id).toBe('contact-1');
     expect(contacts.upsert).toHaveBeenCalledWith('student-1', {
@@ -59,13 +60,13 @@ describe('UpsertSupportContactUseCase', () => {
   });
 
   it('normaliza la ocupación vacía a null', async () => {
-    const result = await useCase.execute('student-1', { ...baseInput, occupation: '   ' });
+    const result = await useCase.execute('student-1', { ...baseInput, occupation: '   ' }, 'admin-1');
     expect(result.occupation).toBeNull();
   });
 
   it('lanza StudentNotFoundError si el estudiante no existe', async () => {
     students.findById.mockResolvedValue(null);
-    await expect(useCase.execute('missing', baseInput)).rejects.toThrow(StudentNotFoundError);
+    await expect(useCase.execute('missing', baseInput, 'admin-1')).rejects.toThrow(StudentNotFoundError);
     expect(contacts.upsert).not.toHaveBeenCalled();
   });
 });

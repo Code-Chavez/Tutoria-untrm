@@ -1,8 +1,9 @@
 import { StudentRepository } from '@domain/repositories/StudentRepository';
 import { UserRepository } from '@domain/repositories/UserRepository';
 import { RoleRepository } from '@domain/repositories/RoleRepository';
+import { StudentAccessGuard } from '@application/access/StudentAccessGuard';
 import { AssignStudentsInput, AssignStudentsResult } from '@application/dtos/assignment.dto';
-import { NoStudentsSelectedError } from './AssignmentErrors';
+import { NoStudentsSelectedError, StudentsAlreadyAssignedError } from './AssignmentErrors';
 import { assertActiveTutor } from './TutorValidation';
 
 /**
@@ -14,13 +15,19 @@ export class AssignStudentsUseCase {
     private readonly students: StudentRepository,
     private readonly users: UserRepository,
     private readonly roles: RoleRepository,
+    private readonly guard: StudentAccessGuard,
   ) {}
 
-  async execute(input: AssignStudentsInput): Promise<AssignStudentsResult> {
+  async execute(input: AssignStudentsInput, requesterId: string): Promise<AssignStudentsResult> {
     const studentIds = [...new Set(input.studentIds ?? [])].filter(Boolean);
     if (studentIds.length === 0) {
       throw new NoStudentsSelectedError();
     }
+
+    // El coordinador solo asigna a los tutorados de sus escuelas y solo a quienes aún no tienen tutor.
+    const targets = await this.guard.assertAccessToAll(requesterId, studentIds);
+    const alreadyAssigned = targets.filter((s) => s.tutorId).length;
+    if (alreadyAssigned > 0) throw new StudentsAlreadyAssignedError(alreadyAssigned);
 
     const tutor = await assertActiveTutor(this.users, this.roles, input.tutorId);
 

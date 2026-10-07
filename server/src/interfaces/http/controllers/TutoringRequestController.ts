@@ -74,7 +74,7 @@ export class TutoringRequestController {
       if (typeof studentId === 'string') filters.studentId = studentId;
       if (mine === 'true') filters.routedToId = req.auth?.sub;
 
-      const requests = await this.listTutoringRequestsUseCase.execute(filters);
+      const requests = await this.listTutoringRequestsUseCase.execute(req.auth?.sub as string, filters);
       res.status(200).json({ requests });
     } catch {
       res.status(500).json({ error: 'Error interno del servidor' });

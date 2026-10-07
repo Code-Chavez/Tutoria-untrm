@@ -14,6 +14,7 @@ import { School } from '@domain/entities/School';
 import { User } from '@domain/entities/User';
 import { Role } from '@domain/entities/Role';
 import { CreateTutoringRequestInput } from '@application/dtos/tutoringRequest.dto';
+import { allowAllGuard } from '../helpers/studentGuard';
 
 describe('CreateTutoringRequestUseCase', () => {
   let useCase: CreateTutoringRequestUseCase;
@@ -61,7 +62,7 @@ describe('CreateTutoringRequestUseCase', () => {
       findAll: jest.fn(),
       create: jest.fn(),
     };
-    useCase = new CreateTutoringRequestUseCase(requests, students, schools, users, roles);
+    useCase = new CreateTutoringRequestUseCase(requests, allowAllGuard(students), schools, users, roles);
   });
 
   it('enruta al tutor cuando el estudiante ya tiene uno asignado', async () => {

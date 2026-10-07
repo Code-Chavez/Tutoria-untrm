@@ -19,7 +19,7 @@ export class ReportController {
     if (!tutorId) return null;
     const from = typeof req.query.from === 'string' ? new Date(req.query.from) : undefined;
     const to = typeof req.query.to === 'string' ? new Date(req.query.to) : undefined;
-    return { tutorId, from, to };
+    return { requesterId: req.auth?.sub as string, tutorId, from, to };
   }
 
   getReport = async (req: Request, res: Response) => {

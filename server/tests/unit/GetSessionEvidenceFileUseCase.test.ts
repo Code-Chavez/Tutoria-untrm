@@ -6,6 +6,7 @@ import {
 import { EvidenceStorage } from '@application/ports/EvidenceStorage';
 import { SessionRepository } from '@domain/repositories/SessionRepository';
 import { SessionEvidence, SessionWithParticipants } from '@domain/entities/Session';
+import { allowAllGuard } from '../helpers/studentGuard';
 
 describe('GetSessionEvidenceFileUseCase', () => {
   let useCase: GetSessionEvidenceFileUseCase;
@@ -46,11 +47,11 @@ describe('GetSessionEvidenceFileUseCase', () => {
       resolvePath: jest.fn().mockReturnValue('/data/storage/evidence/key-1.pdf'),
       delete: jest.fn(),
     };
-    useCase = new GetSessionEvidenceFileUseCase(sessions, storage);
+    useCase = new GetSessionEvidenceFileUseCase(sessions, storage, allowAllGuard({ findById: jest.fn() }));
   });
 
   it('devuelve la evidencia y la ruta absoluta del archivo', async () => {
-    const result = await useCase.execute('session-1', 'evidence-1');
+    const result = await useCase.execute('session-1', 'evidence-1', 'admin-1');
 
     expect(storage.resolvePath).toHaveBeenCalledWith('key-1.pdf');
     expect(result).toEqual({ evidence, absolutePath: '/data/storage/evidence/key-1.pdf' });
@@ -58,19 +59,19 @@ describe('GetSessionEvidenceFileUseCase', () => {
 
   it('lanza SessionNotFoundError si la sesión no existe', async () => {
     sessions.findById.mockResolvedValue(null);
-    await expect(useCase.execute('missing', 'evidence-1')).rejects.toThrow(SessionNotFoundError);
+    await expect(useCase.execute('missing', 'evidence-1', 'admin-1')).rejects.toThrow(SessionNotFoundError);
   });
 
   it('lanza SessionEvidenceNotFoundError si la evidencia no existe', async () => {
     sessions.findEvidenceById.mockResolvedValue(null);
-    await expect(useCase.execute('session-1', 'missing')).rejects.toThrow(
+    await expect(useCase.execute('session-1', 'missing', 'admin-1')).rejects.toThrow(
       SessionEvidenceNotFoundError,
     );
   });
 
   it('lanza SessionEvidenceNotFoundError si la evidencia pertenece a otra sesión', async () => {
     sessions.findEvidenceById.mockResolvedValue({ ...evidence, sessionId: 'other-session' });
-    await expect(useCase.execute('session-1', 'evidence-1')).rejects.toThrow(
+    await expect(useCase.execute('session-1', 'evidence-1', 'admin-1')).rejects.toThrow(
       SessionEvidenceNotFoundError,
     );
   });

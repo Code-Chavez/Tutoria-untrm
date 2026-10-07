@@ -2,6 +2,7 @@ import { StudentRepository } from '@domain/repositories/StudentRepository';
 import { SessionRepository } from '@domain/repositories/SessionRepository';
 import { UserRepository } from '@domain/repositories/UserRepository';
 import { SystemParameterRepository } from '@domain/repositories/SystemParameterRepository';
+import { StudentAccessGuard } from '@application/access/StudentAccessGuard';
 import { StudentAlert } from '@application/dtos/alert.dto';
 
 const DEFAULT_THRESHOLD = 2; // Valor sembrado por defecto para absence_alert_threshold.
@@ -10,6 +11,8 @@ const THRESHOLD_PARAM_KEY = 'absence_alert_threshold';
 export interface GetRiskAlertsFilters {
   /** Solo las alertas de los tutorados de este tutor (panel del Docente Tutor). */
   tutorId?: string;
+  /** Solo los tutorados de estas escuelas (panel del Coordinador). */
+  schoolIds?: string[];
 }
 
 /**
@@ -26,14 +29,25 @@ export class GetRiskAlertsUseCase {
     private readonly sessions: SessionRepository,
     private readonly users: UserRepository,
     private readonly systemParameters: SystemParameterRepository,
+    private readonly guard: StudentAccessGuard,
   ) {}
 
+  /** Alertas que le corresponden al solicitante según su alcance: el tutor, las de sus tutorados; el coordinador, las de sus escuelas; la DBU, todas. */
+  async executeFor(requesterId: string): Promise<StudentAlert[]> {
+    const scope = await this.guard.scopeFor(requesterId);
+    if (scope.kind === 'NONE') return [];
+    if (scope.kind === 'TUTOR') return this.execute({ tutorId: scope.tutorId });
+    if (scope.kind === 'SCHOOLS') return this.execute({ schoolIds: scope.schoolIds });
+    return this.execute();
+  }
+
   async execute(filters?: GetRiskAlertsFilters): Promise<StudentAlert[]> {
-    const atRiskStudents = await this.students.findAll({
+    const found = await this.students.findAll({
       isAtRisk: true,
       isActive: true,
       tutorId: filters?.tutorId,
     });
+    const atRiskStudents = filters?.schoolIds ? found.filter((s) => filters.schoolIds!.includes(s.schoolId)) : found;
     if (atRiskStudents.length === 0) return [];
 
     const threshold = await this.resolveThreshold();

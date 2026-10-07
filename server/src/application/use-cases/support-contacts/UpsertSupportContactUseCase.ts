@@ -1,8 +1,7 @@
 import { SupportContact } from '@domain/entities/SupportContact';
 import { SupportContactRepository } from '@domain/repositories/SupportContactRepository';
-import { StudentRepository } from '@domain/repositories/StudentRepository';
+import { StudentAccessGuard } from '@application/access/StudentAccessGuard';
 import { UpsertSupportContactInput } from '@application/dtos/supportContact.dto';
-import { StudentNotFoundError } from '@application/use-cases/students/StudentErrors';
 
 /**
  * Registra o actualiza la persona de red de apoyo de un estudiante
@@ -11,14 +10,15 @@ import { StudentNotFoundError } from '@application/use-cases/students/StudentErr
 export class UpsertSupportContactUseCase {
   constructor(
     private readonly contacts: SupportContactRepository,
-    private readonly students: StudentRepository,
+    private readonly guard: StudentAccessGuard,
   ) {}
 
-  async execute(studentId: string, input: UpsertSupportContactInput): Promise<SupportContact> {
-    const student = await this.students.findById(studentId);
-    if (!student) {
-      throw new StudentNotFoundError(studentId);
-    }
+  async execute(
+    studentId: string,
+    input: UpsertSupportContactInput,
+    requesterId: string,
+  ): Promise<SupportContact> {
+    await this.guard.assertAccess(requesterId, studentId);
 
     return this.contacts.upsert(studentId, {
       fullName: input.fullName.trim(),

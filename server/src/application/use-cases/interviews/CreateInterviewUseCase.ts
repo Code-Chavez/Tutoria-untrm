@@ -1,8 +1,7 @@
 import { TutorInterview } from '@domain/entities/TutorInterview';
 import { TutorInterviewRepository } from '@domain/repositories/TutorInterviewRepository';
-import { StudentRepository } from '@domain/repositories/StudentRepository';
+import { StudentAccessGuard } from '@application/access/StudentAccessGuard';
 import { CreateInterviewInput } from '@application/dtos/interview.dto';
-import { StudentNotFoundError } from '@application/use-cases/students/StudentErrors';
 import { InterviewMotiveRequiredError } from './InterviewErrors';
 
 /**
@@ -13,7 +12,7 @@ import { InterviewMotiveRequiredError } from './InterviewErrors';
 export class CreateInterviewUseCase {
   constructor(
     private readonly interviews: TutorInterviewRepository,
-    private readonly students: StudentRepository,
+    private readonly guard: StudentAccessGuard,
   ) {}
 
   async execute(
@@ -21,10 +20,8 @@ export class CreateInterviewUseCase {
     conductedById: string,
     input: CreateInterviewInput,
   ): Promise<TutorInterview> {
-    const student = await this.students.findById(studentId);
-    if (!student) {
-      throw new StudentNotFoundError(studentId);
-    }
+    // Solo con alcance sobre el tutorado (el tutor, sobre los suyos); no basta con que exista.
+    await this.guard.assertAccess(conductedById, studentId);
 
     if (!input.motiveAcademic && !input.motivePersonalEmotional && !input.motiveVocational) {
       throw new InterviewMotiveRequiredError();

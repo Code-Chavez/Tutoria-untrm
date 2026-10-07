@@ -1,8 +1,7 @@
 import { TutorFollowUp } from '@domain/entities/TutorFollowUp';
 import { TutorFollowUpRepository } from '@domain/repositories/TutorFollowUpRepository';
-import { StudentRepository } from '@domain/repositories/StudentRepository';
+import { StudentAccessGuard } from '@application/access/StudentAccessGuard';
 import { CreateFollowUpInput } from '@application/dtos/followUp.dto';
-import { StudentNotFoundError } from '@application/use-cases/students/StudentErrors';
 import { FollowUpInstructorDetailsRequiredError } from './FollowUpErrors';
 
 /**
@@ -13,7 +12,7 @@ import { FollowUpInstructorDetailsRequiredError } from './FollowUpErrors';
 export class CreateFollowUpUseCase {
   constructor(
     private readonly followUps: TutorFollowUpRepository,
-    private readonly students: StudentRepository,
+    private readonly guard: StudentAccessGuard,
   ) {}
 
   async execute(
@@ -21,10 +20,7 @@ export class CreateFollowUpUseCase {
     conductedById: string,
     input: CreateFollowUpInput,
   ): Promise<TutorFollowUp> {
-    const student = await this.students.findById(studentId);
-    if (!student) {
-      throw new StudentNotFoundError(studentId);
-    }
+    await this.guard.assertAccess(conductedById, studentId);
 
     if (
       input.withInstructor &&

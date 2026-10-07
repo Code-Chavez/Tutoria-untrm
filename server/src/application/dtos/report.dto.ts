@@ -33,6 +33,8 @@ export interface ScheduleAttendanceReport {
 }
 
 export interface GetScheduleAttendanceReportInput {
+  /** Quien pide el informe; decide a qué tutores puede consultar. */
+  requesterId: string;
   tutorId: string;
   from?: Date;
   to?: Date;

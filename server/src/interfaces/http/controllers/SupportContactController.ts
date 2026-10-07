@@ -15,7 +15,7 @@ export class SupportContactController {
     try {
       const studentId = req.params.id as string;
       const data = upsertSupportContactSchema.parse(req.body);
-      const contact = await this.upsertSupportContactUseCase.execute(studentId, data);
+      const contact = await this.upsertSupportContactUseCase.execute(studentId, data, req.auth?.sub as string);
       res.status(200).json({ message: 'Persona de red de apoyo registrada exitosamente', contact });
     } catch (error) {
       if (error instanceof z.ZodError) {
@@ -31,10 +31,14 @@ export class SupportContactController {
   getByStudent = async (req: Request, res: Response) => {
     try {
       const studentId = req.params.id as string;
-      const contact = await this.getSupportContactUseCase.execute(studentId);
+      const contact = await this.getSupportContactUseCase.execute(studentId, req.auth?.sub as string);
       res.status(200).json({ contact });
-    } catch {
-      res.status(500).json({ error: 'Error interno del servidor' });
+    } catch (error) {
+      if (error instanceof StudentNotFoundError) {
+        res.status(404).json({ error: error.message });
+      } else {
+        res.status(500).json({ error: 'Error interno del servidor' });
+      }
     }
   };
 }

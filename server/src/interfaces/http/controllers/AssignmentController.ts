@@ -6,6 +6,7 @@ import { ReassignStudentUseCase } from '@application/use-cases/assignments/Reass
 import {
   TutorNotFoundError,
   NoStudentsSelectedError,
+  StudentsAlreadyAssignedError,
   ReassignReasonRequiredError,
   SameTutorAssignmentError,
 } from '@application/use-cases/assignments/AssignmentErrors';
@@ -31,7 +32,7 @@ export class AssignmentController {
   assign = async (req: Request, res: Response) => {
     try {
       const data = assignSchema.parse(req.body);
-      const result = await this.assignStudentsUseCase.execute(data);
+      const result = await this.assignStudentsUseCase.execute(data, req.auth?.sub as string);
       res.status(200).json({
         message: `Se asignaron ${result.assigned} estudiante(s) al tutor`,
         ...result,
@@ -41,8 +42,10 @@ export class AssignmentController {
         res.status(400).json({ error: 'Datos de entrada inválidos', details: error.errors });
       } else if (error instanceof NoStudentsSelectedError) {
         res.status(400).json({ error: error.message });
-      } else if (error instanceof TutorNotFoundError) {
+      } else if (error instanceof TutorNotFoundError || error instanceof StudentNotFoundError) {
         res.status(404).json({ error: error.message });
+      } else if (error instanceof StudentsAlreadyAssignedError) {
+        res.status(409).json({ error: error.message });
       } else {
         res.status(500).json({ error: 'Error interno del servidor' });
       }

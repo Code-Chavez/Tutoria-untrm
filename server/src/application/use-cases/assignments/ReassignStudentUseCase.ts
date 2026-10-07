@@ -2,9 +2,9 @@ import { Student } from '@domain/entities/Student';
 import { StudentRepository } from '@domain/repositories/StudentRepository';
 import { UserRepository } from '@domain/repositories/UserRepository';
 import { RoleRepository } from '@domain/repositories/RoleRepository';
+import { StudentAccessGuard } from '@application/access/StudentAccessGuard';
 import { TutorAssignmentHistoryRepository } from '@domain/repositories/TutorAssignmentHistoryRepository';
 import { ReassignStudentInput } from '@application/dtos/assignment.dto';
-import { StudentNotFoundError } from '@application/use-cases/students/StudentErrors';
 import { ReassignReasonRequiredError, SameTutorAssignmentError } from './AssignmentErrors';
 import { assertActiveTutor } from './TutorValidation';
 
@@ -22,6 +22,7 @@ export class ReassignStudentUseCase {
     private readonly users: UserRepository,
     private readonly roles: RoleRepository,
     private readonly history: TutorAssignmentHistoryRepository,
+    private readonly guard: StudentAccessGuard,
   ) {}
 
   async execute(
@@ -29,10 +30,7 @@ export class ReassignStudentUseCase {
     actingUserId: string,
     input: ReassignStudentInput,
   ): Promise<Student> {
-    const student = await this.students.findById(studentId);
-    if (!student) {
-      throw new StudentNotFoundError(studentId);
-    }
+    const student = await this.guard.assertAccess(actingUserId, studentId);
 
     const reason = input.reason?.trim();
     if (!reason) {

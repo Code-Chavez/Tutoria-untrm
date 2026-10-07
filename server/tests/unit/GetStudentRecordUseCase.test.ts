@@ -19,6 +19,7 @@ import { TutorAssignmentHistory } from '@domain/entities/TutorAssignmentHistory'
 import { SupportContact } from '@domain/entities/SupportContact';
 import { SessionWithParticipants } from '@domain/entities/Session';
 import { StudentReferral } from '@domain/entities/StudentReferral';
+import { allowAllGuard } from '../helpers/studentGuard';
 
 describe('GetStudentRecordUseCase', () => {
   let useCase: GetStudentRecordUseCase;
@@ -148,6 +149,7 @@ describe('GetStudentRecordUseCase', () => {
       sessions,
       followUps,
       referrals,
+      allowAllGuard(students),
     );
   });
 

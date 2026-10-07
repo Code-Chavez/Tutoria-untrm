@@ -2,6 +2,7 @@ import React, { useMemo, useState } from 'react';
 import styles from './AssignmentPage.module.css';
 import { useAssignmentData } from '../hooks/useAssignmentData';
 import { assignmentService } from '../services/assignmentService';
+import { getApiErrorMessage } from '@shared/services/apiClient';
 import { StudentSelectList, AssignFilterValues } from '../components/StudentSelectList';
 import { TutorWorkloadPanel } from '../components/TutorWorkloadPanel';
 import {
@@ -67,7 +68,7 @@ export const AssignmentPage: React.FC = () => {
   const toggleAllVisible = (checked: boolean) => {
     setSelectedIds((prev) => {
       const next = new Set(prev);
-      visible.forEach((s) => (checked ? next.add(s.id) : next.delete(s.id)));
+      visible.filter((s) => !s.tutorId).forEach((s) => (checked ? next.add(s.id) : next.delete(s.id)));
       return next;
     });
   };
@@ -87,8 +88,8 @@ export const AssignmentPage: React.FC = () => {
       setSelectedIds(new Set());
       setSelectedTutorId(null);
       refresh();
-    } catch {
-      setFeedback({ ok: false, text: 'No se pudo completar la asignación. Intenta nuevamente.' });
+    } catch (err) {
+      setFeedback({ ok: false, text: getApiErrorMessage(err) });
     } finally {
       setAssigning(false);
     }
