@@ -1,13 +1,11 @@
 import app from './app';
 import { env } from './infrastructure/config/env';
 import { prisma } from './infrastructure/database/prisma';
+import { assertProductionConfig } from './infrastructure/config/productionConfig';
 
 async function main() {
-  // En producción un servidor sin correo aparentaría enviar recuperaciones que nadie recibe (A09).
-  if (env.NODE_ENV === 'production' && !env.SMTP_HOST) {
-    console.error('SMTP_HOST es obligatorio en producción: sin servidor de correo no se pueden enviar recuperaciones de contraseña.');
-    process.exit(1);
-  }
+  // En producción no se arranca con secretos de ejemplo ni sin correo, URL pública https o base propia (A11).
+  assertProductionConfig();
 
   try {
     await prisma.$connect();

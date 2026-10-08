@@ -12,6 +12,9 @@ export const env = {
   CORS_ORIGIN: process.env.CORS_ORIGIN || 'http://localhost:5173',
   // Carpeta donde se guardan las evidencias de sesión (HU-25), fuera del
   // repositorio de código.
+  // Saltos de proxy inverso delante del servidor (0 = ninguno). Con proxy, la IP real de los registros y
+  // de los límites de solicitudes sale de X-Forwarded-For; sin esto todas serían la IP del proxy.
+  TRUST_PROXY: parseInt(process.env.TRUST_PROXY || '0', 10),
   EVIDENCE_STORAGE_DIR: process.env.EVIDENCE_STORAGE_DIR || 'storage/evidence',
   // URL pública del cliente: con ella se arman los enlaces de los correos.
   PUBLIC_APP_URL: (process.env.PUBLIC_APP_URL || 'http://localhost:5173').replace(/\/+$/, ''),

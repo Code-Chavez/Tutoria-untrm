@@ -1,0 +1,100 @@
+# Despliegue de PRODUCCIÓN en un servidor con Docker (A11). Uso:
+#   cp .env.production.example .env.production   # y complete TODOS los valores
+#   docker compose -f docker-compose.prod.yml --env-file .env.production up -d --build
+# Ver deploy/README.md. Los valores obligatorios usan ${VAR:?}: si faltan, compose no arranca.
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-sit_db}
+      POSTGRES_USER: ${POSTGRES_USER:?defina POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?defina POSTGRES_PASSWORD}
+    # Sin "ports": la base solo es alcanzable desde la red interna de los contenedores.
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+    networks: [sit-net]
+
+  server:
+    build:
+      context: ./server
+      dockerfile: Dockerfile.prod
+    environment:
+      NODE_ENV: production
+      PORT: 3000
+      DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-sit_db}
+      JWT_SECRET: ${JWT_SECRET:?defina JWT_SECRET (openssl rand -hex 48)}
+      CORS_ORIGIN: https://${DOMAIN:?defina DOMAIN}
+      PUBLIC_APP_URL: https://${DOMAIN}
+      TRUST_PROXY: 1
+      SMTP_HOST: ${SMTP_HOST:?defina SMTP_HOST}
+      SMTP_PORT: ${SMTP_PORT:-587}
+      SMTP_SECURE: ${SMTP_SECURE:-false}
+      SMTP_USER: ${SMTP_USER:-}
+      SMTP_PASS: ${SMTP_PASS:-}
+      MAIL_FROM: ${MAIL_FROM:?defina MAIL_FROM}
+      ADMIN_EMAIL: ${ADMIN_EMAIL:?defina ADMIN_EMAIL}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD:?defina ADMIN_PASSWORD (mínimo 12 caracteres)}
+    volumes:
+      - storage_data:/app/storage
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: unless-stopped
+    networks: [sit-net]
+
+  web:
+    build:
+      context: ./client
+      dockerfile: Dockerfile.prod
+    environment:
+      SITE_ADDRESS: ${SITE_ADDRESS:-${DOMAIN}}
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - caddy_data:/data
+    depends_on:
+      - server
+    restart: unless-stopped
+    networks: [sit-net]
+
+  backup:
+    build:
+      context: ./backup
+      dockerfile: Dockerfile
+    environment:
+      PGHOST: postgres
+      PGPORT: 5432
+      PGUSER: ${POSTGRES_USER}
+      PGPASSWORD: ${POSTGRES_PASSWORD}
+      PGDATABASE: ${POSTGRES_DB:-sit_db}
+      BACKUP_CRON: "0 2 * * *"
+      BACKUP_KEEP: "14"
+      BACKUP_STORAGE_DIR: /data/storage
+      # Copia FUERA del servidor (ver backup/README.md): defina al menos una.
+      BACKUP_OFFSITE_DIR: ${BACKUP_OFFSITE_DIR:-}
+      BACKUP_UPLOAD_CMD: ${BACKUP_UPLOAD_CMD:-}
+    volumes:
+      - backup_data:/backups
+      - storage_data:/data/storage:ro
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: unless-stopped
+    networks: [sit-net]
+
+volumes:
+  pgdata:
+  storage_data:
+  backup_data:
+  caddy_data:
+
+networks:
+  sit-net:
+    driver: bridge

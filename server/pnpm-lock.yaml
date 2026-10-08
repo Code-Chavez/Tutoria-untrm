@@ -47,6 +47,9 @@ importers:
       pdfkit:
         specifier: ^0.20.2
         version: 0.20.2
+      prisma:
+        specifier: ^6.9.0
+        version: 6.19.3(typescript@5.9.3)
       zod:
         specifier: ^3.24.2
         version: 3.25.76
@@ -93,9 +96,6 @@ importers:
       jest:
         specifier: ^29.7.0
         version: 29.7.0(@types/node@22.20.1)(ts-node@10.9.2(@types/node@22.20.1)(typescript@5.9.3))
-      prisma:
-        specifier: ^6.9.0
-        version: 6.19.3(typescript@5.9.3)
       smtp-server:
         specifier: ^3.19.18
         version: 3.19.18
