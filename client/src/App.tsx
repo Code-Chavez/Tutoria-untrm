@@ -20,6 +20,7 @@ import { ExpedientePage } from '@features/expediente/pages/ExpedientePage';
 import { ProfilePage } from '@features/profile/pages/ProfilePage';
 import { MyTutoringRequestPage } from '@features/solicitudes/pages/MyTutoringRequestPage';
 import { SessionsCalendarPage } from '@features/sesiones/pages/SessionsCalendarPage';
+import { AuditLogPage } from '@features/auditoria/pages/AuditLogPage';
 import { MySessionsPage } from '@features/sesiones/pages/MySessionsPage';
 import { ScheduleAttendanceReportPage } from '@features/informes/pages/ScheduleAttendanceReportPage';
 import { SemesterReportPage } from '@features/informes/pages/SemesterReportPage';
@@ -63,6 +64,14 @@ export default function App() {
                 element={
                   <RequireRole roles={['Administrador DBU', 'Coordinador', 'Vicerrectorado']}>
                     <IndicatorsPage />
+                  </RequireRole>
+                }
+              />
+              <Route
+                path="auditoria"
+                element={
+                  <RequireRole roles={['Administrador DBU']}>
+                    <AuditLogPage />
                   </RequireRole>
                 }
               />
