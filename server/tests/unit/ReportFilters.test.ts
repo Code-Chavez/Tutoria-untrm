@@ -66,7 +66,7 @@ describe('Filtros combinados de reportes (HU-47)', () => {
   });
 
   describe('resolveReportPeriod', () => {
-    const periods = { findActive: jest.fn(), findAll: jest.fn(), findById: jest.fn() } as jest.Mocked<AcademicPeriodRepository>;
+    const periods = { findActive: jest.fn(), findAll: jest.fn(), findById: jest.fn(), findByDate: jest.fn() } as jest.Mocked<AcademicPeriodRepository>;
     beforeEach(() => jest.clearAllMocks());
 
     it('usa el semestre indicado y, si no, el periodo activo', async () => {

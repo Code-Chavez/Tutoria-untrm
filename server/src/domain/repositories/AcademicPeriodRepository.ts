@@ -6,4 +6,6 @@ export interface AcademicPeriodRepository {
   /** Todos los semestres, el más reciente primero (filtro de reportes, HU-47). */
   findAll(): Promise<AcademicPeriod[]>;
   findById(id: string): Promise<AcademicPeriod | null>;
+  /** El periodo que contiene la fecha (el día final entra completo), o null si ninguno la cubre. */
+  findByDate(date: Date): Promise<AcademicPeriod | null>;
 }

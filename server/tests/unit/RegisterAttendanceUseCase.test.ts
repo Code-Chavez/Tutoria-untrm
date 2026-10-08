@@ -6,10 +6,13 @@ import {
   SessionNotStartedError,
   AttendanceAlreadyRegisteredError,
   AttendanceLimitReachedError,
+  AttendanceNumberTakenError,
+  SessionOutsidePeriodError,
   SessionAlreadyCancelledError,
 } from '@application/use-cases/sessions/SessionErrors';
 import { SessionRepository } from '@domain/repositories/SessionRepository';
 import { SystemParameterRepository } from '@domain/repositories/SystemParameterRepository';
+import { AcademicPeriodRepository } from '@domain/repositories/AcademicPeriodRepository';
 import { SessionWithParticipants } from '@domain/entities/Session';
 import { SystemParameter } from '@domain/entities/SystemParameter';
 
@@ -17,6 +20,7 @@ describe('RegisterAttendanceUseCase', () => {
   let useCase: RegisterAttendanceUseCase;
   let sessions: jest.Mocked<SessionRepository>;
   let systemParameters: jest.Mocked<SystemParameterRepository>;
+  let periods: jest.Mocked<AcademicPeriodRepository>;
 
   const pastDate = new Date(Date.now() - 60 * 60 * 1000); // hace 1 hora
   const futureDate = new Date(Date.now() + 60 * 60 * 1000); // en 1 hora
@@ -67,7 +71,13 @@ describe('RegisterAttendanceUseCase', () => {
         .fn()
         .mockResolvedValue({ key: 'max_sessions_per_semester', value: '8' } as SystemParameter),
     };
-    useCase = new RegisterAttendanceUseCase(sessions, systemParameters);
+    periods = {
+      findActive: jest.fn(),
+      findAll: jest.fn(),
+      findById: jest.fn(),
+      findByDate: jest.fn().mockResolvedValue({ id: 'period-A', name: '2026-I' }),
+    } as unknown as jest.Mocked<AcademicPeriodRepository>;
+    useCase = new RegisterAttendanceUseCase(sessions, systemParameters, periods);
   });
 
   it('registra la asistencia con el número de sesión siguiente', async () => {
@@ -75,7 +85,54 @@ describe('RegisterAttendanceUseCase', () => {
 
     await useCase.execute('session-1', 'tutor-1');
 
-    expect(sessions.createAttendance).toHaveBeenCalledWith('session-1', 3, expect.any(Date));
+    expect(sessions.createAttendance).toHaveBeenCalledWith('session-1', 3, expect.any(Date), {
+      tutorId: 'tutor-1',
+      studentId: 'student-1',
+      periodId: 'period-A',
+    });
+  });
+
+  it('cuenta dentro del semestre de la sesión, no en todo el historial (A08)', async () => {
+    await useCase.execute('session-1', 'tutor-1');
+
+    expect(periods.findByDate).toHaveBeenCalledWith(baseSession.scheduledAt);
+    expect(sessions.countAttendanceByTutorAndStudent).toHaveBeenCalledWith('tutor-1', 'student-1', 'period-A');
+  });
+
+  it('con ocho asistencias en el semestre A, la primera del semestre B se numera 1 (A08)', async () => {
+    periods.findByDate.mockResolvedValue({ id: 'period-B' } as never);
+    sessions.countAttendanceByTutorAndStudent.mockImplementation(async (_t, _s, periodId) => (periodId === 'period-A' ? 8 : 0));
+
+    await useCase.execute('session-1', 'tutor-1');
+
+    expect(sessions.createAttendance).toHaveBeenCalledWith('session-1', 1, expect.any(Date), expect.objectContaining({ periodId: 'period-B' }));
+  });
+
+  it('lanza SessionOutsidePeriodError si la fecha no cae en ningún periodo', async () => {
+    periods.findByDate.mockResolvedValue(null);
+    await expect(useCase.execute('session-1', 'tutor-1')).rejects.toThrow(SessionOutsidePeriodError);
+    expect(sessions.createAttendance).not.toHaveBeenCalled();
+  });
+
+  it('si otra confirmación simultánea toma el número, recuenta y reintenta', async () => {
+    sessions.countAttendanceByTutorAndStudent.mockResolvedValueOnce(2).mockResolvedValueOnce(3);
+    sessions.createAttendance.mockRejectedValueOnce(new AttendanceNumberTakenError());
+
+    await useCase.execute('session-1', 'tutor-1');
+
+    expect(sessions.createAttendance).toHaveBeenNthCalledWith(1, 'session-1', 3, expect.any(Date), expect.anything());
+    expect(sessions.createAttendance).toHaveBeenNthCalledWith(2, 'session-1', 4, expect.any(Date), expect.anything());
+  });
+
+  it('si el número sigue ocupado tras varios intentos informa el conflicto', async () => {
+    sessions.createAttendance.mockRejectedValue(new AttendanceNumberTakenError());
+    await expect(useCase.execute('session-1', 'tutor-1')).rejects.toThrow(AttendanceNumberTakenError);
+  });
+
+  it('un tope alcanzado a mitad de los reintentos detiene la confirmación', async () => {
+    sessions.countAttendanceByTutorAndStudent.mockResolvedValueOnce(7).mockResolvedValueOnce(8);
+    sessions.createAttendance.mockRejectedValueOnce(new AttendanceNumberTakenError());
+    await expect(useCase.execute('session-1', 'tutor-1')).rejects.toThrow(AttendanceLimitReachedError);
   });
 
   it('devuelve la sesión actualizada con la asistencia', async () => {
