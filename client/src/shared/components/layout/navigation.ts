@@ -22,6 +22,7 @@ import {
   BarChartIcon,
   ClockIcon,
   FileSpreadsheetIcon,
+  ShieldCheckIcon,
 } from '@shared/components/icons';
 
 export type RoleCode = 'tutor' | 'coord' | 'dbu' | 'serv' | 'est' | 'vice';
@@ -98,6 +99,7 @@ export const NAV: NavGroup[] = [
       { label: 'Catálogos', Icon: LayersIcon, path: '/catalogos', roles: ['dbu'] },
       { label: 'Parámetros', Icon: SlidersIcon, path: '/parametros', roles: ['dbu'] },
       { label: 'Identidad visual', Icon: PaletteIcon, path: '/identidad', roles: ['dbu'] },
+      { label: 'Bitácora de auditoría', Icon: ShieldCheckIcon, path: '/auditoria', roles: ['dbu'] },
       { label: 'Evaluación de tutoría', Icon: ListChecksIcon, path: '/evaluacion/configuracion', roles: ['dbu'] },
       { label: 'Resultados de evaluación', Icon: BarChartIcon, path: '/evaluacion/resultados', roles: ['dbu', 'coord'] },
       { label: 'Sugerencias de estudiantes', Icon: StarIcon, path: '/evaluacion/sugerencias', roles: ['dbu', 'coord'] },

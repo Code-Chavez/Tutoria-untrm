@@ -35,6 +35,8 @@ const MATRIX: { method: string; path: string; allowed: Role[] }[] = [
   { method: 'POST', path: '/api/users', allowed: ['admin'] },
   { method: 'GET', path: '/api/catalogs/faculties', allowed: ['admin'] },
   { method: 'GET', path: '/api/system-parameters', allowed: ['admin'] },
+  { method: 'GET', path: '/api/audit', allowed: ['admin'] },
+  { method: 'GET', path: '/api/audit/options', allowed: ['admin'] },
   { method: 'GET', path: '/api/consolidated-reports', allowed: ['admin', 'vicerrectorado'] },
   { method: 'GET', path: '/api/indicators', allowed: ['admin', 'coordinador', 'vicerrectorado'] },
   { method: 'GET', path: '/api/work-plans', allowed: ['admin', 'coordinador'] },
@@ -143,5 +145,21 @@ describe('matriz de acceso HTTP (A18)', () => {
     // El token nuevo sigue siendo válido (la reutilización inmediata cae en la ventana de gracia).
     const next = await post('/api/auth/refresh', { refreshToken: data.refreshToken });
     expect(next.status).toBe(200);
+  });
+
+  it('una operación conocida aparece en la bitácora con su autor y su fecha (UI-09)', async () => {
+    if (!dbUp) return;
+    await login('tutor'); // registra un LOGIN de elena.ramirez
+    const res = await call('GET', '/api/audit?action=LOGIN&actor=elena.ramirez&pageSize=5', tokens.admin.access);
+    expect(res.status).toBe(200);
+    const body = (await res.json()) as {
+      total: number;
+      items: { action: string; actorEmail: string; actorName: string; createdAt: string; entity: string }[];
+    };
+    expect(body.total).toBeGreaterThan(0);
+    const latest = body.items[0];
+    expect(latest).toMatchObject({ action: 'LOGIN', actorEmail: ACCOUNTS.tutor.email, entity: 'User' });
+    expect(latest.actorName).toContain('Elena');
+    expect(Date.now() - new Date(latest.createdAt).getTime()).toBeLessThan(5 * 60_000);
   });
 });

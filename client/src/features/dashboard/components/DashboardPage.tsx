@@ -106,10 +106,13 @@ export function DashboardPage() {
           </CardBody>
         </Card>
 
-        <Card>
-          <CardHeader title="Actividad reciente" description="Últimos movimientos del sistema" />
-          <RecentActivity />
-        </Card>
+        {/* La bitácora solo la consulta la DBU: para el resto no se muestra un bloque vacío. */}
+        {user?.role === 'Administrador DBU' && (
+          <Card>
+            <CardHeader title="Actividad reciente" description="Últimos movimientos del sistema" />
+            <RecentActivity />
+          </Card>
+        )}
       </div>
 
       <Card>
