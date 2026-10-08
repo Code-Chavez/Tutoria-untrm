@@ -263,6 +263,38 @@ jobs:
         working-directory: client
         run: pnpm run build
 
+  # ── Respaldo ─────────────────────────────────────────────
+  backup-drill:
+    name: Backup — Restore drill
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_DB: postgres
+          POSTGRES_USER: sit_user
+          POSTGRES_PASSWORD: sit_pass
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U sit_user"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build backup image
+        run: docker build -t sit-backup ./backup
+
+      # Ensayo aislado (A10): respaldo normal, fallo de conexión, restauración con adjuntos y rechazo de
+      # respaldos alterados. Si el respaldo aparentara éxito donde falló, este job falla.
+      - name: Backup and restore drill
+        run: >-
+          docker run --rm --network host
+          -e PGHOST=127.0.0.1 -e PGUSER=sit_user -e PGPASSWORD=sit_pass -e PGDATABASE=postgres
+          --entrypoint /usr/local/bin/test-backup.sh sit-backup
+
   # ── Docker ───────────────────────────────────────────────
   docker-build:
     name: Docker — Build Images
@@ -276,6 +308,7 @@ jobs:
       - client-lint
       - client-test
       - client-build
+      - backup-drill
     if: github.event_name == 'push'
 
     steps:

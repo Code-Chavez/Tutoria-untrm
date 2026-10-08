@@ -86,11 +86,17 @@ services:
       PGUSER: sit_user
       PGPASSWORD: sit_pass
       PGDATABASE: sit_db
-      # Volcado diario a las 02:00; conservar los últimos 7.
+      # Respaldo diario a las 02:00 de la base y de los adjuntos; conservar los últimos 7.
       BACKUP_CRON: "0 2 * * *"
       BACKUP_KEEP: "7"
+      BACKUP_STORAGE_DIR: /data/storage
+      # Copia FUERA de este equipo (obligatoria en producción): una carpeta montada de otro disco o
+      # servidor (BACKUP_OFFSITE_DIR) y/o un comando propio que recibe $BACKUP_FILE (BACKUP_UPLOAD_CMD,
+      # p. ej. rclone copy "$BACKUP_FILE" remoto:sit). Sin ninguno, el respaldo avisa que es solo local.
+      # BACKUP_OFFSITE_DIR: /offsite
     volumes:
       - backup_data:/backups
+      - ./server/storage:/data/storage:ro
     depends_on:
       postgres:
         condition: service_healthy
