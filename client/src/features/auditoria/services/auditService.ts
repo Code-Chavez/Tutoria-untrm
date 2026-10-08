@@ -41,6 +41,8 @@ export const ACTION_LABEL: Record<string, string> = {
   DELETE: 'Eliminación',
   LOGIN: 'Inicio de sesión',
   REFRESH_TOKEN_REUSE: 'Sesión cerrada por reutilización de token',
+  PASSWORD_RESET_REQUEST: 'Solicitud de recuperación de contraseña',
+  PASSWORD_RESET: 'Contraseña restablecida',
 };
 
 export const ENTITY_LABEL: Record<string, string> = {

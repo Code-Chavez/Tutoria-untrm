@@ -1,6 +1,8 @@
-import { UserRepository, PasswordResetTokenRepository } from '../../../domain/repositories';
+import { PasswordResetTokenRepository } from '@domain/repositories/PasswordResetTokenRepository';
+import { AuditLogRepository } from '@domain/repositories/AuditLogRepository';
 import { PasswordHasher } from '../../ports/PasswordHasher';
 import { ResetPasswordInput } from '../../dtos/auth.dto';
+import { hashSecretToken } from './secretToken';
 
 export class InvalidTokenError extends Error {
   constructor() {
@@ -9,28 +11,30 @@ export class InvalidTokenError extends Error {
   }
 }
 
+/**
+ * Restablece la contraseña con el enlace del correo (A09). El canje es atómico y de un solo uso:
+ * dos peticiones con el mismo enlace no pueden ganar a la vez, y al cambiar la contraseña se
+ * invalidan los demás enlaces pendientes y se cierran todas las sesiones de la persona.
+ */
 export class ResetPasswordUseCase {
   constructor(
-    private readonly userRepository: UserRepository,
-    private readonly tokenRepository: PasswordResetTokenRepository,
-    private readonly hasher: PasswordHasher
+    private readonly tokens: PasswordResetTokenRepository,
+    private readonly hasher: PasswordHasher,
+    private readonly auditLogs: AuditLogRepository,
   ) {}
 
-  async execute(input: ResetPasswordInput): Promise<void> {
-    const record = await this.tokenRepository.findByToken(input.token);
-
-    if (!record || record.used || record.expiresAt < new Date()) {
-      throw new InvalidTokenError();
-    }
-
+  async execute(input: ResetPasswordInput, ipAddress?: string): Promise<void> {
     const passwordHash = await this.hasher.hash(input.newPassword);
+    const userId = await this.tokens.redeem(hashSecretToken(input.token), passwordHash, new Date());
+    if (!userId) throw new InvalidTokenError();
 
-    await this.userRepository.update(record.userId, {
-      passwordHash,
-      failedLoginAttempts: 0,
-      lockedUntil: null,
+    await this.auditLogs.create({
+      userId,
+      action: 'PASSWORD_RESET',
+      entity: 'User',
+      entityId: userId,
+      details: 'Contraseña restablecida con enlace de recuperación; se cerraron todas las sesiones.',
+      ipAddress: ipAddress ?? null,
     });
-
-    await this.tokenRepository.markAsUsed(record.id);
   }
 }

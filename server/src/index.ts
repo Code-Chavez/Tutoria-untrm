@@ -3,6 +3,12 @@ import { env } from './infrastructure/config/env';
 import { prisma } from './infrastructure/database/prisma';
 
 async function main() {
+  // En producción un servidor sin correo aparentaría enviar recuperaciones que nadie recibe (A09).
+  if (env.NODE_ENV === 'production' && !env.SMTP_HOST) {
+    console.error('SMTP_HOST es obligatorio en producción: sin servidor de correo no se pueden enviar recuperaciones de contraseña.');
+    process.exit(1);
+  }
+
   try {
     await prisma.$connect();
     console.log('Base de datos conectada');

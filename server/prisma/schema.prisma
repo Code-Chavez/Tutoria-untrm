@@ -109,7 +109,8 @@ model RefreshToken {
 
 model PasswordResetToken {
   id        String   @id @default(uuid())
-  token     String   @unique
+  // Hash SHA-256 del token enviado por correo: la base nunca guarda el enlace utilizable (A09).
+  tokenHash String   @unique @map("token_hash")
   userId    String   @map("user_id")
   expiresAt DateTime @map("expires_at")
   used      Boolean  @default(false)
