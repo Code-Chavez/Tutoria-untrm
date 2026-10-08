@@ -41,4 +41,4 @@ tmp/
 doc/
 
 # Evidencias de sesión (HU-25): archivos subidos, no versionados
-server/storage/
+server/storage/.env.production

@@ -1,0 +1,14 @@
+# Imagen de PRODUCCIÓN del cliente: compila la aplicación y la sirve con Caddy, que además obtiene el
+# certificado HTTPS automáticamente (con un dominio público) y reenvía /api al servidor.
+FROM node:20-alpine AS build
+RUN corepack enable && corepack prepare pnpm@9.15.9 --activate
+WORKDIR /app
+COPY package.json pnpm-lock.yaml ./
+RUN pnpm install --frozen-lockfile
+COPY . .
+RUN pnpm run build
+
+FROM caddy:2-alpine
+COPY --from=build /app/dist /srv
+COPY Caddyfile /etc/caddy/Caddyfile
+EXPOSE 80 443
