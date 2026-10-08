@@ -1,6 +1,9 @@
 import { prisma } from './database/prisma';
 import { PrismaUserRepository } from './repositories/PrismaUserRepository';
 import { PrismaRoleRepository } from './repositories/PrismaRoleRepository';
+import { SmtpMailer, UnconfiguredMailer } from './services/SmtpMailer';
+import { Mailer } from '@application/ports/Mailer';
+import { env } from './config/env';
 import { PrismaRefreshTokenRepository } from './repositories/PrismaRefreshTokenRepository';
 import { PrismaPeriodRosterRepository } from './repositories/PrismaPeriodRosterRepository';
 import { PrismaAuditLogRepository } from './repositories/PrismaAuditLogRepository';
@@ -30,6 +33,7 @@ import { JwtTokenService } from './services/JwtTokenService';
 import { LocalEvidenceStorage } from './services/LocalEvidenceStorage';
 import { LoginUseCase } from '@application/use-cases/auth/LoginUseCase';
 import { ListAuditLogUseCase, GetAuditLogOptionsUseCase } from '@application/use-cases/audit/AuditLogUseCases';
+import { DEFAULT_PASSWORD_RESET_CONFIG } from '@application/use-cases/auth/RequestPasswordResetUseCase';
 import { RefreshSessionUseCase } from '@application/use-cases/auth/RefreshSessionUseCase';
 import { LogoutUseCase } from '@application/use-cases/auth/LogoutUseCase';
 import { RequestPasswordResetUseCase } from '@application/use-cases/auth/RequestPasswordResetUseCase';
@@ -91,16 +95,26 @@ const refreshSessionUseCase = new RefreshSessionUseCase(
 );
 const logoutUseCase = new LogoutUseCase(refreshTokenRepository);
 
+const mailer: Mailer = env.SMTP_HOST
+  ? new SmtpMailer({
+      host: env.SMTP_HOST,
+      port: env.SMTP_PORT,
+      secure: env.SMTP_SECURE,
+      user: env.SMTP_USER || undefined,
+      pass: env.SMTP_PASS || undefined,
+      from: env.MAIL_FROM,
+    })
+  : new UnconfiguredMailer();
+
 const requestPasswordResetUseCase = new RequestPasswordResetUseCase(
   userRepository,
-  passwordResetTokenRepository
+  passwordResetTokenRepository,
+  mailer,
+  auditLogRepository,
+  { ...DEFAULT_PASSWORD_RESET_CONFIG, publicUrl: env.PUBLIC_APP_URL, ttlMinutes: env.PASSWORD_RESET_TTL_MINUTES },
 );
 
-const resetPasswordUseCase = new ResetPasswordUseCase(
-  userRepository,
-  passwordResetTokenRepository,
-  passwordHasher
-);
+const resetPasswordUseCase = new ResetPasswordUseCase(passwordResetTokenRepository, passwordHasher, auditLogRepository);
 
 import { CreateUserUseCase } from '@application/use-cases/users/CreateUserUseCase';
 import { UpdateUserUseCase } from '@application/use-cases/users/UpdateUserUseCase';

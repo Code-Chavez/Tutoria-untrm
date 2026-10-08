@@ -62,7 +62,7 @@ export class AuthController {
     try {
       const body = forgotPasswordSchema.parse(req.body);
       
-      await this.requestPasswordResetUseCase.execute(body.email);
+      await this.requestPasswordResetUseCase.execute(body.email, req.ip);
 
       // Siempre devolvemos éxito para evitar enumeración de usuarios
       res.status(200).json({ 
@@ -78,10 +78,13 @@ export class AuthController {
     try {
       const body = resetPasswordSchema.parse(req.body);
 
-      await this.resetPasswordUseCase.execute({
-        token: body.token,
-        newPassword: body.newPassword,
-      });
+      await this.resetPasswordUseCase.execute(
+        {
+          token: body.token,
+          newPassword: body.newPassword,
+        },
+        req.ip,
+      );
 
       res.status(200).json({ 
         status: 'success', 

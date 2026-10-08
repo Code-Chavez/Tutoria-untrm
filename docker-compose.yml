@@ -29,6 +29,11 @@ services:
       DATABASE_URL: postgresql://sit_user:sit_pass@postgres:5432/sit_db
       JWT_SECRET: dev-secret-change-in-production
       CORS_ORIGIN: http://localhost:5173
+      # Correo de desarrollo: Mailpit recibe los mensajes (bandeja en http://localhost:8025).
+      PUBLIC_APP_URL: http://localhost:5173
+      SMTP_HOST: mailpit
+      SMTP_PORT: 1025
+      MAIL_FROM: SIT UNTRM <no-reply@untrm.edu.pe>
       # Sin sondeo, los cambios en el host no disparan recarga dentro del contenedor.
       CHOKIDAR_USEPOLLING: "true"
       CHOKIDAR_INTERVAL: "300"
@@ -41,6 +46,14 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
+    networks:
+      - sit-net
+
+  mailpit:
+    image: axllent/mailpit:v1.21
+    container_name: sit-mailpit
+    ports:
+      - "8025:8025"
     networks:
       - sit-net
 
