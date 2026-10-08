@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { useDialogFocus } from '@shared/hooks/useDialog';
 import { Button, SelectField } from '@shared/components/ui';
 import { SwitchIcon, CloseIcon } from '@shared/components/icons';
 import { Student } from '../services/studentService';
@@ -32,6 +33,7 @@ export const ReassignModal: React.FC<ReassignModalProps> = ({
   const [reason, setReason] = useState('');
   const [error, setError] = useState('');
 
+  const dialogRef = useDialogFocus();
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (e.key === 'Escape') onCancel();
@@ -57,6 +59,8 @@ export const ReassignModal: React.FC<ReassignModalProps> = ({
       <div
         className={styles.dialog}
         role="dialog"
+        ref={dialogRef}
+        tabIndex={-1}
         aria-modal="true"
         aria-label="Reasignar tutorado"
         onClick={(e) => e.stopPropagation()}

@@ -1,93 +1,10 @@
-import { type ComponentType } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '@features/auth/hooks/useAuth';
 import { useBranding } from '@shared/theme/BrandingProvider';
-import {
-  DashboardIcon,
-  GraduationCapIcon,
-  SwitchIcon,
-  UploadIcon,
-  ClipboardIcon,
-  FolderIcon,
-  CalendarIcon,
-  ActivityIcon,
-  SendIcon,
-  InboxIcon,
-  StarIcon,
-  CalendarRangeIcon,
-  ReportIcon,
-  PieChartIcon,
-  SettingsIcon,
-  CloseIcon,
-} from '@shared/components/icons';
+import { CloseIcon } from '@shared/components/icons';
 import { getRoleLabel } from '@shared/utils/roleLabel';
+import { findActiveItem, NAV, ROLE_CODES, type NavItem } from './navigation';
 import styles from './Sidebar.module.css';
-
-type RoleCode = 'tutor' | 'coord' | 'dbu' | 'serv' | 'est' | 'vice';
-
-// El JWT trae el nombre del rol; lo traducimos al código con que se filtra el menú.
-const ROLE_CODES: Record<string, RoleCode> = {
-  'Administrador DBU': 'dbu',
-  Coordinador: 'coord',
-  'Docente Tutor': 'tutor',
-  Tutorado: 'est',
-  'Profesional de Servicio': 'serv',
-  Vicerrectorado: 'vice',
-};
-
-interface NavItem {
-  label: string;
-  Icon: ComponentType<{ size?: number }>;
-  path: string;
-  /** Acción que abre la lista de tutorados en modo «elegir estudiante» (?accion=…). */
-  action?: string;
-  roles?: RoleCode[]; // sin roles = visible para todos
-}
-
-interface NavGroup {
-  title: string;
-  items: NavItem[];
-}
-
-// Estructura tomada del mockup (grupos Principal y Gestión) con su visibilidad por rol.
-const NAV: NavGroup[] = [
-  {
-    title: 'Principal',
-    items: [
-      { label: 'Panel de inicio', Icon: DashboardIcon, path: '/' },
-      { label: 'Tutorados', Icon: GraduationCapIcon, path: '/tutorados', action: '', roles: ['tutor', 'coord', 'dbu'] },
-      { label: 'Asignación', Icon: SwitchIcon, path: '/asignacion', roles: ['coord', 'dbu'] },
-      { label: 'Carga masiva', Icon: UploadIcon, path: '/carga-masiva', roles: ['coord', 'dbu'] },
-      { label: 'Entrevista inicial', Icon: ClipboardIcon, path: '/tutorados', action: 'entrevista', roles: ['tutor'] },
-      { label: 'Expediente', Icon: FolderIcon, path: '/expediente', roles: ['tutor', 'coord', 'dbu'] },
-      { label: 'Sesiones', Icon: CalendarIcon, path: '/sesiones', roles: ['tutor'] },
-      { label: 'Mis sesiones', Icon: CalendarIcon, path: '/mis-sesiones', roles: ['est'] },
-      { label: 'Seguimiento', Icon: ActivityIcon, path: '/tutorados', action: 'seguimiento', roles: ['tutor'] },
-      { label: 'Derivar caso', Icon: SendIcon, path: '/tutorados', action: 'derivar', roles: ['tutor'] },
-      { label: 'Solicitar tutoría', Icon: SendIcon, path: '/solicitar-tutoria', roles: ['est'] },
-      { label: 'Casos derivados', Icon: InboxIcon, path: '/derivaciones', roles: ['tutor', 'serv', 'dbu'] },
-      { label: 'Seguimiento DBU', Icon: ReportIcon, path: '/derivaciones/seguimiento', roles: ['dbu'] },
-      { label: 'Evaluar tutoría', Icon: StarIcon, path: '/evaluar-tutoria', roles: ['est'] },
-    ],
-  },
-  {
-    title: 'Gestión',
-    items: [
-      { label: 'Plan semestral', Icon: CalendarRangeIcon, path: '/plan-semestral', roles: ['coord', 'dbu'] },
-      { label: 'Informes', Icon: ReportIcon, path: '/informes', roles: ['tutor', 'coord', 'dbu'] },
-      { label: 'Informe semestral', Icon: ReportIcon, path: '/informes/semestral', roles: ['tutor'] },
-      { label: 'Informe consolidado', Icon: ReportIcon, path: '/informes/consolidado', roles: ['dbu', 'vice'] },
-      { label: 'Indicadores', Icon: PieChartIcon, path: '/indicadores', roles: ['dbu', 'coord', 'vice'] },
-      { label: 'Administración', Icon: SettingsIcon, path: '/users', roles: ['dbu'] },
-      { label: 'Catálogos', Icon: SettingsIcon, path: '/catalogos', roles: ['dbu'] },
-      { label: 'Parámetros', Icon: SettingsIcon, path: '/parametros', roles: ['dbu'] },
-      { label: 'Identidad visual', Icon: SettingsIcon, path: '/identidad', roles: ['dbu'] },
-      { label: 'Evaluación de tutoría', Icon: SettingsIcon, path: '/evaluacion/configuracion', roles: ['dbu'] },
-      { label: 'Resultados de evaluación', Icon: PieChartIcon, path: '/evaluacion/resultados', roles: ['dbu', 'coord'] },
-      { label: 'Sugerencias de estudiantes', Icon: StarIcon, path: '/evaluacion/sugerencias', roles: ['dbu', 'coord'] },
-    ],
-  },
-];
 
 interface SidebarProps {
   drawerOpen: boolean;
@@ -102,14 +19,13 @@ export function Sidebar({ drawerOpen, onClose }: SidebarProps) {
   const { pathname, search } = useLocation();
   const currentAction = new URLSearchParams(search).get('accion') ?? '';
 
-  // Varios accesos comparten /tutorados: se distinguen por la acción de la URL.
-  const isActive = (item: NavItem) => {
-    const onPath = item.path === '/' ? pathname === '/' : pathname === item.path || pathname.startsWith(`${item.path}/`);
-    return onPath && (item.action === undefined || item.action === currentAction);
-  };
-
   const canSee = (item: NavItem) =>
     !item.roles || (roleCode !== undefined && item.roles.includes(roleCode));
+
+  // Una sola entrada activa: la más específica entre las visibles para este rol.
+  const visibleItems = NAV.flatMap((group) => group.items.filter(canSee));
+  const activeItem = findActiveItem(visibleItems, pathname, currentAction);
+  const isActive = (item: NavItem) => item === activeItem;
 
   return (
     <>

@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { useDialogFocus } from '@shared/hooks/useDialog';
 import { Badge, Button } from '@shared/components/ui';
 import {
   CalendarIcon,
@@ -80,6 +81,7 @@ export const SessionDetailModal: React.FC<SessionDetailModalProps> = ({
   evidenceError,
   onDownloadEvidence,
 }) => {
+  const dialogRef = useDialogFocus();
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (e.key === 'Escape') onClose();
@@ -127,6 +129,8 @@ export const SessionDetailModal: React.FC<SessionDetailModalProps> = ({
       <div
         className={styles.dialog}
         role="dialog"
+        ref={dialogRef}
+        tabIndex={-1}
         aria-modal="true"
         aria-label="Detalle de la sesión"
         onClick={(e) => e.stopPropagation()}

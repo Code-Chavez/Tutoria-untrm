@@ -65,7 +65,7 @@ export function CatalogsPage() {
         icon={<SettingsIcon size={22} />}
         actions={
           <Button icon={<PlusIcon size={16} />} onClick={() => setCreating(true)}>
-            Nuevo {definition.singular}
+            {definition.newLabel}
           </Button>
         }
       />
@@ -105,7 +105,7 @@ export function CatalogsPage() {
         <EmptyState
           icon={<SettingsIcon size={26} />}
           title={`Sin ${definition.label.toLowerCase()}`}
-          description={`Aún no hay elementos en este catálogo. Crea el primero con «Nuevo ${definition.singular}».`}
+          description={`Aún no hay elementos en este catálogo. Crea el primero con «${definition.newLabel}».`}
         />
       ) : (
         <Card>

@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Button } from '@shared/components/ui';
+import { useDialog } from '@shared/hooks/useDialog';
 import { CloseIcon } from '@shared/components/icons';
 import { getApiErrorMessage } from '@shared/services/apiClient';
 import { useCatalog } from '../hooks/useCatalog';
@@ -56,11 +57,21 @@ export function CatalogEntryModal({ definition, entry, onClose, onSubmit }: Cata
     }
   };
 
-  const title = `${editing ? 'Editar' : 'Nuevo'} ${definition.singular}`;
+  const dialogRef = useDialog(onClose);
+
+  const title = editing ? `Editar ${definition.singular}` : definition.newLabel;
 
   return (
     <div className={styles.overlay} onClick={onClose}>
-      <div className={styles.modal} role="dialog" aria-modal="true" aria-label={title} onClick={(e) => e.stopPropagation()}>
+      <div
+        className={styles.modal}
+        role="dialog"
+        aria-modal="true"
+        aria-label={title}
+        ref={dialogRef}
+        tabIndex={-1}
+        onClick={(e) => e.stopPropagation()}
+      >
         <div className={styles.header}>
           <h2>{title}</h2>
           <button type="button" className={styles.close} onClick={onClose} aria-label="Cerrar">

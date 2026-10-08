@@ -22,7 +22,7 @@ const ACTIONS: Action[] = [
   {
     label: 'Registrar tutorado',
     description: 'Alta individual de un estudiante',
-    to: '/tutorados',
+    to: '/tutorados?accion=nuevo',
     Icon: UserPlusIcon,
     roles: ['Coordinador', 'Administrador DBU'],
   },
@@ -41,8 +41,8 @@ const ACTIONS: Action[] = [
     roles: ['Docente Tutor', 'Coordinador', 'Administrador DBU'],
   },
   {
-    label: 'Administración',
-    description: 'Usuarios, roles y parámetros',
+    label: 'Usuarios y roles',
+    description: 'Cuentas del sistema y permisos',
     to: '/users',
     Icon: SettingsIcon,
     roles: ['Administrador DBU'],
