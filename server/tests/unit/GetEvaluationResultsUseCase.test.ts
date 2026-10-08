@@ -47,6 +47,7 @@ describe('GetEvaluationResultsUseCase', () => {
       findActive: jest.fn().mockResolvedValue(activePeriod),
       findAll: jest.fn(),
       findById: jest.fn(),
+      findByDate: jest.fn(),
     };
     evaluations = {
       create: jest.fn(),

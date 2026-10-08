@@ -296,6 +296,7 @@ const listSessionsUseCase = new ListSessionsUseCase(
 const registerAttendanceUseCase = new RegisterAttendanceUseCase(
   sessionRepository,
   systemParameterRepository,
+  academicPeriodRepository,
 );
 const rescheduleSessionUseCase = new RescheduleSessionUseCase(sessionRepository);
 const cancelSessionUseCase = new CancelSessionUseCase(sessionRepository);

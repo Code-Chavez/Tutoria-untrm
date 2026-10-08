@@ -1,6 +1,7 @@
 import { SessionWithParticipants } from '@domain/entities/Session';
 import { SessionRepository } from '@domain/repositories/SessionRepository';
 import { SystemParameterRepository } from '@domain/repositories/SystemParameterRepository';
+import { AcademicPeriodRepository } from '@domain/repositories/AcademicPeriodRepository';
 import {
   SessionNotFoundError,
   NotSessionTutorError,
@@ -8,22 +9,28 @@ import {
   SessionNotStartedError,
   AttendanceAlreadyRegisteredError,
   AttendanceLimitReachedError,
+  AttendanceNumberTakenError,
   SessionAlreadyCancelledError,
+  SessionOutsidePeriodError,
 } from './SessionErrors';
 
-const DEFAULT_MAX_SESSIONS = 8; // Anexo N°4: 8 filas por tutoría individual.
+const DEFAULT_MAX_SESSIONS = 8; // Anexo N°4: 8 filas por tutoría individual y semestre.
 const MAX_SESSIONS_PARAM_KEY = 'max_sessions_per_semester';
+// Intentos de numerar cuando otra confirmación simultánea se queda con el mismo número.
+const NUMBERING_ATTEMPTS = 10;
 
 /**
  * Registra la asistencia de una sesión individual (HU-22, Anexo N°4): el
  * tutor la confirma en el momento (reemplazando la firma del tutorado por
- * una confirmación digital) y el número de sesión (1-8) se calcula solo,
- * contando cuántas ya lleva confirmadas ese mismo par tutor-tutorado.
+ * una confirmación digital) y el número de sesión se calcula solo, contando
+ * las ya confirmadas de ese par tutor-tutorado **dentro del semestre de la
+ * sesión** (A08): ocho en un semestre no impiden la primera del siguiente.
  */
 export class RegisterAttendanceUseCase {
   constructor(
     private readonly sessions: SessionRepository,
     private readonly systemParameters: SystemParameterRepository,
+    private readonly periods: AcademicPeriodRepository,
   ) {}
 
   async execute(sessionId: string, tutorId: string): Promise<SessionWithParticipants> {
@@ -47,17 +54,33 @@ export class RegisterAttendanceUseCase {
       throw new AttendanceAlreadyRegisteredError();
     }
 
-    const maxSessions = await this.resolveMaxSessions();
-    const alreadyRegistered = await this.sessions.countAttendanceByTutorAndStudent(
-      tutorId,
-      session.studentIds[0],
-    );
-    if (alreadyRegistered >= maxSessions) {
-      throw new AttendanceLimitReachedError(maxSessions);
+    const period = await this.periods.findByDate(session.scheduledAt);
+    if (!period) {
+      throw new SessionOutsidePeriodError();
     }
 
-    await this.sessions.createAttendance(sessionId, alreadyRegistered + 1, new Date());
-    return (await this.sessions.findById(sessionId)) as SessionWithParticipants;
+    const maxSessions = await this.resolveMaxSessions();
+    const scope = { tutorId, studentId: session.studentIds[0], periodId: period.id };
+
+    // El recuento y la creación no son atómicos: la restricción única del número detecta la
+    // carrera entre dos confirmaciones y aquí se recuenta y se reintenta.
+    for (let attempt = 0; attempt < NUMBERING_ATTEMPTS; attempt++) {
+      const alreadyRegistered = await this.sessions.countAttendanceByTutorAndStudent(
+        tutorId,
+        scope.studentId,
+        scope.periodId,
+      );
+      if (alreadyRegistered >= maxSessions) {
+        throw new AttendanceLimitReachedError(maxSessions);
+      }
+      try {
+        await this.sessions.createAttendance(sessionId, alreadyRegistered + 1, new Date(), scope);
+        return (await this.sessions.findById(sessionId)) as SessionWithParticipants;
+      } catch (error) {
+        if (!(error instanceof AttendanceNumberTakenError)) throw error;
+      }
+    }
+    throw new AttendanceNumberTakenError();
   }
 
   private async resolveMaxSessions(): Promise<number> {

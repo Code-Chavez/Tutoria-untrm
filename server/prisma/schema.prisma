@@ -450,6 +450,14 @@ model SessionAttendance {
   confirmedAt    DateTime @map("confirmed_at")
   createdAt      DateTime @default(now()) @map("created_at")
 
+  // Ámbito de la numeración (A08): el número del Anexo N°4 corre por tutor, tutorado y semestre.
+  // Nulos solo en registros anteriores cuya sesión no cae en ningún periodo registrado.
+  tutorId   String? @map("tutor_id")
+  studentId String? @map("student_id")
+  periodId  String? @map("period_id")
+
+  // Dos confirmaciones simultáneas no pueden quedarse con el mismo número.
+  @@unique([tutorId, studentId, periodId, sequenceNumber])
   @@map("session_attendances")
 }
 

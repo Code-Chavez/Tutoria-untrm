@@ -19,6 +19,8 @@ import {
   SessionNotStartedError,
   AttendanceAlreadyRegisteredError,
   AttendanceLimitReachedError,
+  AttendanceNumberTakenError,
+  SessionOutsidePeriodError,
   SessionAlreadyCancelledError,
   SessionAlreadyCompletedError,
   ChangeReasonRequiredError,
@@ -67,6 +69,8 @@ export class SessionController {
       } else if (
         error instanceof AttendanceAlreadyRegisteredError ||
         error instanceof AttendanceLimitReachedError ||
+        error instanceof AttendanceNumberTakenError ||
+        error instanceof SessionOutsidePeriodError ||
         error instanceof SessionAlreadyCancelledError
       ) {
         res.status(409).json({ error: error.message });

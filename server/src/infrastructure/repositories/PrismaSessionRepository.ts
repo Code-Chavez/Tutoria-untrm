@@ -6,7 +6,11 @@ import {
   SessionEvidence,
   SessionWithParticipants,
 } from '@domain/entities/Session';
-import { SessionRepository, SessionFilters } from '@domain/repositories/SessionRepository';
+import { SessionRepository, SessionFilters, AttendanceScope } from '@domain/repositories/SessionRepository';
+import {
+  AttendanceAlreadyRegisteredError,
+  AttendanceNumberTakenError,
+} from '@application/use-cases/sessions/SessionErrors';
 
 type SessionRow = Prisma.SessionGetPayload<{ include: { participants: true; attendance: true } }>;
 
@@ -102,23 +106,31 @@ export class PrismaSessionRepository implements SessionRepository {
     return this.findAll({ studentId });
   }
 
-  async countAttendanceByTutorAndStudent(tutorId: string, studentId: string): Promise<number> {
-    return this.prisma.sessionAttendance.count({
-      where: { session: { tutorId, participants: { some: { studentId } } } },
-    });
+  async countAttendanceByTutorAndStudent(tutorId: string, studentId: string, periodId: string): Promise<number> {
+    return this.prisma.sessionAttendance.count({ where: { tutorId, studentId, periodId } });
   }
 
   async createAttendance(
     sessionId: string,
     sequenceNumber: number,
     confirmedAt: Date,
+    scope: AttendanceScope,
   ): Promise<SessionAttendance> {
     // Confirmar la asistencia de una sesión individual (Anexo N°4) es también marcar
     // al tutorado como asistido: una sola operación, para que ambas cosas no diverjan.
     const row = await this.prisma.$transaction(async (tx) => {
-      const attendance = await tx.sessionAttendance.create({ data: { sessionId, sequenceNumber, confirmedAt } });
+      const attendance = await tx.sessionAttendance.create({ data: { sessionId, sequenceNumber, confirmedAt, ...scope } });
       await tx.sessionParticipant.updateMany({ where: { sessionId }, data: { attended: true } });
       return attendance;
+    }).catch((error: unknown) => {
+      if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2002') {
+        const target = String(error.meta?.target ?? '');
+        // La restricción de session_id: la sesión ya tenía asistencia; la otra: número tomado en simultáneo.
+        throw target.includes('session_id') || target.includes('sessionId')
+          ? new AttendanceAlreadyRegisteredError()
+          : new AttendanceNumberTakenError();
+      }
+      throw error;
     });
     return {
       id: row.id,
