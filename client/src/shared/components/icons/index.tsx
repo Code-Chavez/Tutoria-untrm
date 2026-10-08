@@ -452,3 +452,13 @@ export function ShieldCheckIcon({ size = 18, className }: IconProps) {
     </svg>
   );
 }
+
+export function MoreHorizontalIcon({ size = 18, className }: IconProps) {
+  return (
+    <svg {...baseProps(size)} className={className} aria-hidden="true">
+      <circle cx="5" cy="12" r="1.5" />
+      <circle cx="12" cy="12" r="1.5" />
+      <circle cx="19" cy="12" r="1.5" />
+    </svg>
+  );
+}

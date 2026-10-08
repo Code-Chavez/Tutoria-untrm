@@ -6,6 +6,7 @@ export { PageHeader } from './PageHeader';
 export { EmptyState } from './EmptyState';
 export { TableSkeleton } from './TableSkeleton';
 export { IconButton } from './IconButton';
+export { ActionMenu, type ActionMenuItem } from './ActionMenu';
 export { ConfirmDialog } from './ConfirmDialog';
 export { Pagination } from './Pagination';
 export { SearchField, SelectField } from './Field';
