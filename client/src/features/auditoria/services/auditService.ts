@@ -43,6 +43,7 @@ export const ACTION_LABEL: Record<string, string> = {
   REFRESH_TOKEN_REUSE: 'Sesión cerrada por reutilización de token',
   PASSWORD_RESET_REQUEST: 'Solicitud de recuperación de contraseña',
   PASSWORD_RESET: 'Contraseña restablecida',
+  SIGNED_DOCUMENT_ATTACHED: 'Documento firmado adjuntado',
 };
 
 export const ENTITY_LABEL: Record<string, string> = {
@@ -51,6 +52,8 @@ export const ENTITY_LABEL: Record<string, string> = {
   School: 'Escuela profesional',
   AcademicPeriod: 'Periodo académico',
   CatalogItem: 'Elemento de catálogo',
+  StudentReferral: 'Derivación',
+  Student: 'Tutorado',
 };
 
 export const actionLabel = (action: string) => ACTION_LABEL[action] ?? action;

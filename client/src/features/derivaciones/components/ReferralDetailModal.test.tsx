@@ -7,6 +7,11 @@ import { StudentReferral, referralService } from '../services/referralService';
 let mockUser: { role: string; service?: string | null } = { role: 'Profesional de Servicio', service: 'PSICOPEDAGOGIA' };
 vi.mock('@features/auth/hooks/useAuth', () => ({ useAuth: () => ({ user: mockUser }) }));
 
+// El panel de documentos firmados tiene sus propias pruebas.
+vi.mock('@features/firmados/hooks/useSignedDocuments', () => ({
+  useReferralSignedDocuments: () => ({ documents: [], loading: false, attach: vi.fn() }),
+}));
+
 vi.mock('../services/referralService', async (importOriginal) => {
   const actual = await importOriginal<typeof import('../services/referralService')>();
   return {

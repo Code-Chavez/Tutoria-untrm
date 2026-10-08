@@ -1,6 +1,17 @@
 import { prisma } from './database/prisma';
 import { PrismaUserRepository } from './repositories/PrismaUserRepository';
 import { PrismaRoleRepository } from './repositories/PrismaRoleRepository';
+import { PrismaSignedDocumentRepository } from './repositories/PrismaSignedDocumentRepository';
+import {
+  AttachReferralSignedDocumentUseCase,
+  ListReferralSignedDocumentsUseCase,
+} from '@application/use-cases/signed-documents/ReferralSignedDocumentUseCases';
+import {
+  AttachAttendanceSheetSignedDocumentUseCase,
+  GetAttendanceSheetUseCase,
+  ListAttendanceSheetSignedDocumentsUseCase,
+} from '@application/use-cases/signed-documents/AttendanceSheetUseCases';
+import { GetSignedDocumentFileUseCase } from '@application/use-cases/signed-documents/GetSignedDocumentFileUseCase';
 import { SmtpMailer, UnconfiguredMailer } from './services/SmtpMailer';
 import { Mailer } from '@application/ports/Mailer';
 import { env } from './config/env';
@@ -86,6 +97,51 @@ const loginUseCase = new LoginUseCase(
 
 const listAuditLogUseCase = new ListAuditLogUseCase(auditLogRepository, userRepository, roleRepository);
 const getAuditLogOptionsUseCase = new GetAuditLogOptionsUseCase(auditLogRepository, userRepository, roleRepository);
+const signedDocumentRepository = new PrismaSignedDocumentRepository(prisma);
+const attachReferralSignedDocumentUseCase = new AttachReferralSignedDocumentUseCase(
+  studentReferralRepository,
+  signedDocumentRepository,
+  userRepository,
+  roleRepository,
+  evidenceStorage,
+  auditLogRepository,
+);
+const listReferralSignedDocumentsUseCase = new ListReferralSignedDocumentsUseCase(
+  studentReferralRepository,
+  signedDocumentRepository,
+  userRepository,
+  roleRepository,
+);
+const getAttendanceSheetUseCase = new GetAttendanceSheetUseCase(
+  studentAccessGuard,
+  sessionRepository,
+  userRepository,
+  schoolRepository,
+  facultyRepository,
+  academicPeriodRepository,
+);
+const attachAttendanceSheetSignedDocumentUseCase = new AttachAttendanceSheetSignedDocumentUseCase(
+  studentAccessGuard,
+  academicPeriodRepository,
+  signedDocumentRepository,
+  userRepository,
+  evidenceStorage,
+  auditLogRepository,
+);
+const listAttendanceSheetSignedDocumentsUseCase = new ListAttendanceSheetSignedDocumentsUseCase(
+  studentAccessGuard,
+  academicPeriodRepository,
+  signedDocumentRepository,
+  userRepository,
+);
+const getSignedDocumentFileUseCase = new GetSignedDocumentFileUseCase(
+  signedDocumentRepository,
+  studentReferralRepository,
+  userRepository,
+  roleRepository,
+  studentAccessGuard,
+  evidenceStorage,
+);
 const refreshSessionUseCase = new RefreshSessionUseCase(
   userRepository,
   roleRepository,
@@ -472,6 +528,7 @@ const getReferralConstanciaUseCase = new GetReferralConstanciaUseCase(
   userRepository,
   schoolRepository,
   roleRepository,
+  facultyRepository,
 );
 const getReferralsUseCase = new GetReferralsUseCase(
   studentReferralRepository,
@@ -596,6 +653,12 @@ export const container = {
   useCases: {
     loginUseCase,
     refreshSessionUseCase,
+    attachReferralSignedDocumentUseCase,
+    listReferralSignedDocumentsUseCase,
+    getAttendanceSheetUseCase,
+    attachAttendanceSheetSignedDocumentUseCase,
+    listAttendanceSheetSignedDocumentsUseCase,
+    getSignedDocumentFileUseCase,
     listAuditLogUseCase,
     getAuditLogOptionsUseCase,
     logoutUseCase,

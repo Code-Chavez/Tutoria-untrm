@@ -2,6 +2,7 @@ import { StudentReferralRepository } from '@domain/repositories/StudentReferralR
 import { StudentRepository } from '@domain/repositories/StudentRepository';
 import { UserRepository } from '@domain/repositories/UserRepository';
 import { SchoolRepository } from '@domain/repositories/SchoolRepository';
+import { FacultyRepository } from '@domain/repositories/FacultyRepository';
 import { RoleRepository } from '@domain/repositories/RoleRepository';
 import { REFERRAL_ASPECTS } from '@domain/entities/StudentReferral';
 import { ReferralConstancia } from '@application/dtos/referral.dto';
@@ -16,6 +17,7 @@ export class GetReferralConstanciaUseCase {
     private readonly users: UserRepository,
     private readonly schools: SchoolRepository,
     private readonly roles: RoleRepository,
+    private readonly faculties: FacultyRepository,
   ) {}
 
   async execute(referralId: string, requesterId: string): Promise<ReferralConstancia> {
@@ -32,6 +34,8 @@ export class GetReferralConstanciaUseCase {
     const student = await this.students.findById(referral.studentId);
     const referredBy = await this.users.findById(referral.referredById);
     const school = student ? await this.schools.findById(student.schoolId) : null;
+    const faculty = school ? (await this.faculties.findAll()).find((f) => f.id === school.facultyId) : undefined;
+    const tutor = student?.tutorId ? await this.users.findById(student.tutorId) : null;
 
     const aspectByCode = new Map(REFERRAL_ASPECTS.map((a) => [a.code, a]));
     const aspects = referral.checkedAspects.map((code) => {
@@ -43,9 +47,15 @@ export class GetReferralConstanciaUseCase {
       referralId: referral.id,
       studentName: student ? `${student.firstName} ${student.lastName}` : 'Desconocido',
       studentCode: student?.studentCode ?? '—',
+      studentEmail: student?.email ?? null,
+      studentPhone: student?.phone ?? null,
       cycle: student?.cycle ?? 0,
       schoolName: school?.name ?? 'Sin escuela',
+      facultyName: faculty?.name ?? '—',
+      tutorName: tutor ? `${tutor.firstName} ${tutor.lastName}` : 'Sin tutor asignado',
       referredByName: referredBy ? `${referredBy.firstName} ${referredBy.lastName}` : 'Desconocido',
+      referredByEmail: referredBy?.email ?? null,
+      status: referral.status,
       reason: referral.reason,
       service: referral.service,
       receivingInstance: referral.receivingInstance,
