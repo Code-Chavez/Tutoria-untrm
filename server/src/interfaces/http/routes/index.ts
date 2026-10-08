@@ -30,6 +30,7 @@ import systemParameterRoutes from './systemParameter.routes';
 import homePanelRoutes from './homePanel.routes';
 import brandingRoutes from './branding.routes';
 import auditRoutes from './audit.routes';
+import signedDocumentRoutes from './signedDocument.routes';
 
 const router: IRouter = Router();
 
@@ -41,6 +42,7 @@ router.use(systemParameterRoutes);
 router.use(homePanelRoutes);
 router.use(brandingRoutes);
 router.use(auditRoutes);
+router.use(signedDocumentRoutes);
 router.use(authRoutes);
 router.use(userRoutes);
 router.use(roleRoutes);

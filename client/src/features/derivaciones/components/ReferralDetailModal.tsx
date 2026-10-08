@@ -5,6 +5,8 @@ import { SearchIcon, CloseIcon } from '@shared/components/icons';
 import { StudentReferral, REFERRAL_SERVICE_LABEL, ReferralStatus, REFERRAL_STATUS_LABEL, referralService } from '../services/referralService';
 import { getApiErrorMessage } from '@shared/services/apiClient';
 import { useAuth } from '@features/auth/hooks/useAuth';
+import { SignedDocumentsPanel } from '@features/firmados/components/SignedDocumentsPanel';
+import { useReferralSignedDocuments } from '@features/firmados/hooks/useSignedDocuments';
 import styles from './ReferralDetailModal.module.css';
 
 interface ReferralDetailModalProps {
@@ -28,6 +30,7 @@ export const ReferralDetailModal: React.FC<ReferralDetailModalProps> = ({ referr
   const [newStatus, setNewStatus] = useState<ReferralStatus>(nextStatuses[0] ?? referral.status);
   const [notes, setNotes] = useState('');
   const [error, setError] = useState('');
+  const signed = useReferralSignedDocuments(referral.id);
 
   const dialogRef = useDialogFocus();
   useEffect(() => {
@@ -147,6 +150,20 @@ export const ReferralDetailModal: React.FC<ReferralDetailModalProps> = ({ referr
               </div>
             </div>
           )}
+
+          <SignedDocumentsPanel
+            title="Constancia firmada (Anexo N° 6)"
+            hint="Imprima la constancia, fírmela el profesional que deriva y quien recibe, y adjunte el escaneo. El registro en pantalla no reemplaza las firmas."
+            documents={signed.documents}
+            loading={signed.loading}
+            canUpload
+            onUpload={signed.attach}
+            actions={
+              <Button variant="secondary" size="sm" onClick={() => referralService.downloadConstancia(referral.id)}>
+                Descargar constancia para imprimir
+              </Button>
+            }
+          />
 
           {referral.status === 'CERRADO' ? (
             <div className={styles.closedBanner}>

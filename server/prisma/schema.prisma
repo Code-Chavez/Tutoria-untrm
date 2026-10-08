@@ -47,6 +47,7 @@ model User {
   sessionsAsTutor      Session[]                @relation("SessionsAsTutor")
   sessionChangesMade   SessionChangeHistory[]   @relation("SessionChangesMade")
   sessionEvidenceUploads SessionEvidence[]      @relation("SessionEvidenceUploads")
+  signedDocumentsUploaded SignedDocument[]     @relation("SignedDocumentUploads")
   referralsCreated       StudentReferral[]      @relation("ReferralsCreated")
   referralStatusChanges  ReferralStatusHistory[] @relation("ReferralStatusChanges")
   notifications          Notification[]
@@ -187,6 +188,7 @@ model AcademicPeriod {
   workPlans         WorkPlan[]
   tutorSemesterReports TutorSemesterReport[]
   studentSnapshots     StudentPeriodSnapshot[]
+  signedDocuments      SignedDocument[]
 
   @@map("academic_periods")
 }
@@ -221,6 +223,7 @@ model Student {
   portalUser User?     @relation("StudentPortalUser", fields: [userId], references: [id])
 
   assignmentHistory TutorAssignmentHistory[]
+  signedDocuments   SignedDocument[]
   periodSnapshots   StudentPeriodSnapshot[]
   interviews        TutorInterview[]
   followUps         TutorFollowUp[]
@@ -517,6 +520,8 @@ model StudentReferral {
   id        String   @id @default(uuid())
   createdAt DateTime @default(now()) @map("created_at")
 
+  signedDocuments SignedDocument[]
+
   studentId String  @map("student_id")
   student   Student @relation(fields: [studentId], references: [id])
 
@@ -791,4 +796,35 @@ model StudentPeriodSnapshot {
   @@unique([periodId, studentId])
   @@index([periodId])
   @@map("student_period_snapshots")
+}
+
+// Documento firmado y escaneado (A14): el formato impreso (constancia de derivación, hoja de asistencia)
+// se firma a mano y se adjunta aquí. El sistema no equipara un clic con una firma: guarda el archivo, quién
+// lo adjuntó, cuándo y su huella SHA-256 para identificar la evidencia de conformidad.
+model SignedDocument {
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now()) @map("created_at")
+
+  // REFERRAL_CONSTANCIA (Anexo N°6) o ATTENDANCE_SHEET (Anexo N°4).
+  kind String
+
+  referralId String?          @map("referral_id")
+  referral   StudentReferral? @relation(fields: [referralId], references: [id], onDelete: Cascade)
+  studentId  String?          @map("student_id")
+  student    Student?         @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  periodId   String?          @map("period_id")
+  period     AcademicPeriod?  @relation(fields: [periodId], references: [id], onDelete: Cascade)
+
+  fileName   String @map("file_name")
+  mimeType   String @map("mime_type")
+  fileSize   Int    @map("file_size")
+  storageKey String @map("storage_key")
+  sha256     String
+
+  uploadedById String @map("uploaded_by_id")
+  uploadedBy   User   @relation("SignedDocumentUploads", fields: [uploadedById], references: [id])
+
+  @@index([referralId])
+  @@index([studentId, periodId])
+  @@map("signed_documents")
 }

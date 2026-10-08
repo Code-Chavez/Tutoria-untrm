@@ -4,6 +4,7 @@ import { StudentReferralRepository } from '@domain/repositories/StudentReferralR
 import { StudentRepository } from '@domain/repositories/StudentRepository';
 import { UserRepository } from '@domain/repositories/UserRepository';
 import { RoleRepository } from '@domain/repositories/RoleRepository';
+import { FacultyRepository } from '@domain/repositories/FacultyRepository';
 import { SchoolRepository } from '@domain/repositories/SchoolRepository';
 import { StudentReferral } from '@domain/entities/StudentReferral';
 import { Student } from '@domain/entities/Student';
@@ -42,7 +43,7 @@ describe('GetReferralConstanciaUseCase', () => {
   } as Student;
 
   const tutor = { id: 'tutor-1', roleId: 'r-tutor', firstName: 'Elena', lastName: 'Ramírez' } as User;
-  const school = { id: 'school-1', name: 'Ingeniería de Sistemas' } as School;
+  const school = { id: 'school-1', name: 'Ingeniería de Sistemas', facultyId: 'f1' } as School;
 
   beforeEach(() => {
     referrals = {
@@ -78,7 +79,8 @@ describe('GetReferralConstanciaUseCase', () => {
       findAll: jest.fn(),
       findById: jest.fn().mockResolvedValue(school),
     };
-    useCase = new GetReferralConstanciaUseCase(referrals, students, users, schools, roles);
+    const faculties = { findAll: jest.fn().mockResolvedValue([{ id: 'f1', name: 'Facultad de Ingeniería' }]) } as unknown as FacultyRepository;
+    useCase = new GetReferralConstanciaUseCase(referrals, students, users, schools, roles, faculties);
   });
 
   it('resuelve nombres y etiquetas de los aspectos marcados', async () => {
@@ -88,6 +90,11 @@ describe('GetReferralConstanciaUseCase', () => {
     expect(result.studentCode).toBe('20191234');
     expect(result.schoolName).toBe('Ingeniería de Sistemas');
     expect(result.referredByName).toBe('Elena Ramírez');
+    // Filiación completa para el formato impreso (A14).
+    expect(result.facultyName).toBe('Facultad de Ingeniería');
+    expect(result.status).toBeDefined();
+    expect(result).toHaveProperty('tutorName');
+    expect(result).toHaveProperty('studentEmail');
     expect(result.service).toBe('PSICOLOGIA');
     expect(result.receivingInstance).toBe('Psicóloga Ana García');
     expect(result.aspects).toEqual([
