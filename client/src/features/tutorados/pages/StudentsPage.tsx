@@ -95,6 +95,9 @@ export const StudentsPage: React.FC = () => {
       : null;
   const clearPickAction = () => setSearchParams({});
 
+  // «Registrar tutorado» del panel de inicio llega con ?accion=nuevo y abre directamente el alta.
+  const wantsNewStudent = canWrite && requestedAction === 'nuevo';
+
   const [filters, setFilters] = useState<StudentFilterValues>(EMPTY_FILTERS);
   const [page, setPage] = useState(1);
 
@@ -218,6 +221,7 @@ export const StudentsPage: React.FC = () => {
   const handleCloseModal = () => {
     setIsModalOpen(false);
     setStudentToEdit(null);
+    if (wantsNewStudent) setSearchParams({}, { replace: true });
   };
 
   const handleSubmit = async (data: CreateStudentData | UpdateStudentData) => {
@@ -600,7 +604,7 @@ export const StudentsPage: React.FC = () => {
         )}
       </div>
 
-      {isModalOpen && (
+      {(isModalOpen || wantsNewStudent) && (
         <StudentFormModal
           key={studentToEdit?.id ?? 'new'}
           onClose={handleCloseModal}

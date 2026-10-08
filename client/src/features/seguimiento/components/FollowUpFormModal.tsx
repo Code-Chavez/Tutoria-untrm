@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { useDialogFocus } from '@shared/hooks/useDialog';
 import { Button } from '@shared/components/ui';
 import { ActivityIcon, CloseIcon, InfoIcon } from '@shared/components/icons';
 import { Student } from '@features/tutorados/services/studentService';
@@ -31,6 +32,7 @@ export const FollowUpFormModal: React.FC<FollowUpFormModalProps> = ({
   const [courseCycle, setCourseCycle] = useState('');
   const [error, setError] = useState('');
 
+  const dialogRef = useDialogFocus();
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (e.key === 'Escape') onCancel();
@@ -67,6 +69,8 @@ export const FollowUpFormModal: React.FC<FollowUpFormModalProps> = ({
       <div
         className={styles.dialog}
         role="dialog"
+        ref={dialogRef}
+        tabIndex={-1}
         aria-modal="true"
         aria-label="Ficha de seguimiento"
         onClick={(e) => e.stopPropagation()}

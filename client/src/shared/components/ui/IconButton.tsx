@@ -25,7 +25,8 @@ export const IconButton: React.FC<IconButtonProps> = ({
     >
       {children}
     </button>
-    <span className={styles.tooltip} role="tooltip">
+    {/* El botón ya tiene aria-label; el tooltip es solo ayuda visual y no se anuncia dos veces. */}
+    <span className={styles.tooltip} aria-hidden="true">
       {label}
     </span>
   </span>

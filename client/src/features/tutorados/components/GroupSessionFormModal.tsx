@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
+import { useDialogFocus } from '@shared/hooks/useDialog';
 import { Button } from '@shared/components/ui';
 import { CalendarIcon, CloseIcon, InfoIcon } from '@shared/components/icons';
 import { Student } from '../services/studentService';
@@ -50,6 +51,7 @@ export const GroupSessionFormModal: React.FC<GroupSessionFormModalProps> = ({
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [error, setError] = useState('');
 
+  const dialogRef = useDialogFocus();
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (e.key === 'Escape') onCancel();
@@ -136,6 +138,8 @@ export const GroupSessionFormModal: React.FC<GroupSessionFormModalProps> = ({
       <div
         className={styles.dialog}
         role="dialog"
+        ref={dialogRef}
+        tabIndex={-1}
         aria-modal="true"
         aria-label="Programar sesión grupal"
         onClick={(e) => e.stopPropagation()}

@@ -2,40 +2,9 @@ import { useState } from 'react';
 import { Outlet, useLocation } from 'react-router-dom';
 import { Sidebar } from './Sidebar';
 import { TopBar } from './TopBar';
+import { resolveMeta } from './navigation';
 import { SessionTimeout } from '@features/auth/components/SessionTimeout';
 import styles from './AppLayout.module.css';
-
-// Metadatos de ruta para el breadcrumb y el título de sección del TopBar.
-const ROUTE_META: Record<string, { title: string; group: string }> = {
-  '/': { title: 'Panel de inicio', group: 'Principal' },
-  '/tutorados': { title: 'Tutorados', group: 'Principal' },
-  '/carga-masiva': { title: 'Carga masiva', group: 'Principal' },
-  '/asignacion': { title: 'Asignación', group: 'Principal' },
-  '/expediente': { title: 'Expediente', group: 'Principal' },
-  '/users': { title: 'Administración', group: 'Gestión' },
-  '/informes/consolidado': { title: 'Informe consolidado', group: 'Gestión' },
-  '/informes/semestral': { title: 'Informe semestral de tutoría', group: 'Gestión' },
-  '/indicadores': { title: 'Tablero de indicadores', group: 'Gestión' },
-  '/identidad': { title: 'Identidad visual', group: 'Gestión' },
-  '/parametros': { title: 'Parámetros del sistema', group: 'Gestión' },
-  '/catalogos': { title: 'Catálogos maestros', group: 'Gestión' },
-  '/plan-semestral': { title: 'Plan de trabajo semestral', group: 'Gestión' },
-  '/evaluacion/configuracion': { title: 'Evaluación de tutoría', group: 'Gestión' },
-  '/evaluacion/resultados': { title: 'Resultados de evaluación', group: 'Gestión' },
-  '/evaluacion/sugerencias': { title: 'Sugerencias de estudiantes', group: 'Gestión' },
-  '/profile': { title: 'Mi perfil', group: 'Cuenta' },
-  '/derivaciones': { title: 'Casos derivados', group: 'Principal' },
-  '/mis-sesiones': { title: 'Mis sesiones', group: 'Principal' },
-  '/evaluar-tutoria': { title: 'Evaluar tutoría', group: 'Principal' },
-  '/unauthorized': { title: 'Acceso denegado', group: '' },
-};
-
-// Rutas con parámetro (p. ej. /expediente/:id) comparten el título de su base.
-function resolveMeta(pathname: string) {
-  if (ROUTE_META[pathname]) return ROUTE_META[pathname];
-  const base = '/' + pathname.split('/')[1];
-  return ROUTE_META[base] ?? { title: 'Panel de inicio', group: 'Principal' };
-}
 
 export function AppLayout() {
   const { pathname } = useLocation();

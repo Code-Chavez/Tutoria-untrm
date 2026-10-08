@@ -91,7 +91,7 @@ describe('CatalogsPage', () => {
     renderPage();
     await screen.findByText('Ingeniería');
 
-    await user.click(screen.getByRole('button', { name: /Nuevo facultad/ }));
+    await user.click(screen.getByRole('button', { name: /Nueva facultad/ }));
     await user.type(screen.getByLabelText('Nombre'), 'Ciencias');
     await user.click(screen.getByRole('button', { name: 'Crear' }));
 
@@ -106,7 +106,7 @@ describe('CatalogsPage', () => {
     renderPage();
     await screen.findByText('Ingeniería');
 
-    await user.click(screen.getByRole('button', { name: /Nuevo facultad/ }));
+    await user.click(screen.getByRole('button', { name: /Nueva facultad/ }));
     await user.type(screen.getByLabelText('Nombre'), 'Salud');
     await user.click(screen.getByRole('button', { name: 'Crear' }));
 
@@ -127,5 +127,15 @@ describe('CatalogsPage', () => {
 
     expect(screen.getByLabelText('Número de ciclo')).toBeDisabled();
     expect(screen.getByLabelText('Número de ciclo')).toHaveValue('3');
+  });
+
+  it('los botones de alta respetan el género de cada catálogo (UI-08)', async () => {
+    const user = userEvent.setup();
+    renderPage();
+    expect(await screen.findByRole('button', { name: 'Nueva facultad' })).toBeInTheDocument();
+    await user.click(screen.getByRole('tab', { name: 'Escuelas' }));
+    expect(await screen.findByRole('button', { name: 'Nueva escuela profesional' })).toBeInTheDocument();
+    await user.click(screen.getByRole('tab', { name: 'Periodos' }));
+    expect(await screen.findByRole('button', { name: 'Nuevo periodo académico' })).toBeInTheDocument();
   });
 });

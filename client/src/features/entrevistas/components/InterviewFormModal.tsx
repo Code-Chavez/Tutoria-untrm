@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { useDialogFocus } from '@shared/hooks/useDialog';
 import { Button, Stepper } from '@shared/components/ui';
 import { ClipboardIcon, CloseIcon, CheckCircleIcon } from '@shared/components/icons';
 import { useAuth } from '@features/auth/hooks/useAuth';
@@ -77,6 +78,7 @@ export const InterviewFormModal: React.FC<InterviewFormModalProps> = ({
   const [form, setForm] = useState<FormState>(EMPTY_FORM);
   const [error, setError] = useState('');
 
+  const dialogRef = useDialogFocus();
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (e.key === 'Escape') onCancel();
@@ -161,6 +163,8 @@ export const InterviewFormModal: React.FC<InterviewFormModalProps> = ({
       <div
         className={styles.dialog}
         role="dialog"
+        ref={dialogRef}
+        tabIndex={-1}
         aria-modal="true"
         aria-label="Entrevista inicial tutorial"
         onClick={(e) => e.stopPropagation()}

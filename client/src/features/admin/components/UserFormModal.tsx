@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useDialog } from '@shared/hooks/useDialog';
 import styles from './UserFormModal.module.css';
 import { User, CreateUserData, UpdateUserData } from '../services/userService';
 import { Role } from '../services/roleService';
@@ -37,6 +38,8 @@ export const UserFormModal: React.FC<UserFormModalProps> = ({
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
+  const dialogRef = useDialog(onClose);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
@@ -54,9 +57,17 @@ export const UserFormModal: React.FC<UserFormModalProps> = ({
 
   return (
     <div className={styles.modalOverlay} onClick={onClose}>
-      <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
+      <div
+        className={styles.modalContent}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="user-form-title"
+        ref={dialogRef}
+        tabIndex={-1}
+        onClick={(e) => e.stopPropagation()}
+      >
         <div className={styles.modalHeader}>
-          <h2>{userToEdit ? 'Editar Usuario' : 'Nuevo Usuario'}</h2>
+          <h2 id="user-form-title">{userToEdit ? 'Editar Usuario' : 'Nuevo Usuario'}</h2>
           <button className={styles.closeButton} onClick={onClose} aria-label="Cerrar">
             <CloseIcon size={18} />
           </button>

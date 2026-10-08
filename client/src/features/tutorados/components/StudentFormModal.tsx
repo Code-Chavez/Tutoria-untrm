@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useDialog } from '@shared/hooks/useDialog';
 import styles from './StudentFormModal.module.css';
 import { Student, CreateStudentData, UpdateStudentData } from '../services/studentService';
 import { School } from '../services/schoolService';
@@ -89,6 +90,8 @@ export const StudentFormModal: React.FC<StudentFormModalProps> = ({
     return Object.keys(next).length === 0;
   };
 
+  const dialogRef = useDialog(onClose);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!validate()) return;
@@ -117,9 +120,17 @@ export const StudentFormModal: React.FC<StudentFormModalProps> = ({
 
   return (
     <div className={styles.modalOverlay} onClick={onClose}>
-      <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
+      <div
+        className={styles.modalContent}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="student-form-title"
+        ref={dialogRef}
+        tabIndex={-1}
+        onClick={(e) => e.stopPropagation()}
+      >
         <div className={styles.modalHeader}>
-          <h2>{studentToEdit ? 'Editar tutorado' : 'Nuevo tutorado'}</h2>
+          <h2 id="student-form-title">{studentToEdit ? 'Editar tutorado' : 'Nuevo tutorado'}</h2>
           <button className={styles.closeButton} onClick={onClose} aria-label="Cerrar">
             <CloseIcon size={18} />
           </button>

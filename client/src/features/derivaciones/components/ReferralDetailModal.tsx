@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { useDialogFocus } from '@shared/hooks/useDialog';
 import { Button } from '@shared/components/ui';
 import { SearchIcon, CloseIcon } from '@shared/components/icons';
 import { StudentReferral, REFERRAL_SERVICE_LABEL, ReferralStatus, REFERRAL_STATUS_LABEL, referralService } from '../services/referralService';
@@ -28,6 +29,7 @@ export const ReferralDetailModal: React.FC<ReferralDetailModalProps> = ({ referr
   const [notes, setNotes] = useState('');
   const [error, setError] = useState('');
 
+  const dialogRef = useDialogFocus();
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (e.key === 'Escape') onClose();
@@ -55,6 +57,8 @@ export const ReferralDetailModal: React.FC<ReferralDetailModalProps> = ({ referr
       <div
         className={styles.dialog}
         role="dialog"
+        ref={dialogRef}
+        tabIndex={-1}
         aria-modal="true"
         aria-label="Detalle de derivación"
         onClick={(e) => e.stopPropagation()}

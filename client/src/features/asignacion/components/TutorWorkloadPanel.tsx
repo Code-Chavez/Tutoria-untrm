@@ -20,7 +20,7 @@ export const TutorWorkloadPanel: React.FC<TutorWorkloadPanelProps> = ({
     return (
       <div className={styles.empty}>
         <UsersIcon size={26} />
-        <p>No hay Docentes Tutores activos. Regístralos en Administración para poder asignar.</p>
+        <p>No hay Docentes Tutores activos. Regístralos en Usuarios y roles para poder asignar.</p>
       </div>
     );
   }

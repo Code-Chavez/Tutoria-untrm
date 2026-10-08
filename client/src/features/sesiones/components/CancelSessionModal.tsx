@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { useDialogFocus } from '@shared/hooks/useDialog';
 import { Button } from '@shared/components/ui';
 import { AlertTriangleIcon, CloseIcon } from '@shared/components/icons';
 import { TutoringSession } from '../services/sessionService';
@@ -24,6 +25,7 @@ export const CancelSessionModal: React.FC<CancelSessionModalProps> = ({
   const [reason, setReason] = useState('');
   const [error, setError] = useState('');
 
+  const dialogRef = useDialogFocus();
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (e.key === 'Escape') onCancel();
@@ -45,6 +47,8 @@ export const CancelSessionModal: React.FC<CancelSessionModalProps> = ({
       <div
         className={styles.dialog}
         role="dialog"
+        ref={dialogRef}
+        tabIndex={-1}
         aria-modal="true"
         aria-label="Cancelar sesión"
         onClick={(e) => e.stopPropagation()}

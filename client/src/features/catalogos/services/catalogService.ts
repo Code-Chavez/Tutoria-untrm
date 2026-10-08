@@ -32,6 +32,8 @@ export interface CatalogDefinition {
   label: string;
   /** Para los mensajes ("Nueva facultad"). */
   singular: string;
+  /** Texto del botón de alta, con el género correcto. */
+  newLabel: string;
   /** Campo clave que identifica al elemento junto al nombre y no se edita. */
   hasCode: boolean;
   codeLabel?: string;
@@ -39,14 +41,15 @@ export interface CatalogDefinition {
 }
 
 export const CATALOGS: CatalogDefinition[] = [
-  { kind: 'faculties', label: 'Facultades', singular: 'facultad', hasCode: false },
-  { kind: 'schools', label: 'Escuelas', singular: 'escuela profesional', hasCode: false },
-  { kind: 'periods', label: 'Periodos', singular: 'periodo académico', hasCode: false },
-  { kind: 'cycles', label: 'Ciclos', singular: 'ciclo', hasCode: true, codeLabel: 'Número de ciclo', codeHint: 'Del 1 al 14' },
+  { kind: 'faculties', label: 'Facultades', singular: 'facultad', newLabel: 'Nueva facultad', hasCode: false },
+  { kind: 'schools', label: 'Escuelas', singular: 'escuela profesional', newLabel: 'Nueva escuela profesional', hasCode: false },
+  { kind: 'periods', label: 'Periodos', singular: 'periodo académico', newLabel: 'Nuevo periodo académico', hasCode: false },
+  { kind: 'cycles', label: 'Ciclos', singular: 'ciclo', newLabel: 'Nuevo ciclo', hasCode: true, codeLabel: 'Número de ciclo', codeHint: 'Del 1 al 14' },
   {
     kind: 'services',
     label: 'Servicios',
     singular: 'servicio',
+    newLabel: 'Nuevo servicio',
     hasCode: true,
     codeLabel: 'Código',
     codeHint: 'MAYÚSCULAS y guiones bajos, p. ej. ASISTENCIA_SOCIAL',
@@ -55,6 +58,7 @@ export const CATALOGS: CatalogDefinition[] = [
     kind: 'motives',
     label: 'Motivos',
     singular: 'motivo',
+    newLabel: 'Nuevo motivo',
     hasCode: true,
     codeLabel: 'Código',
     codeHint: 'MAYÚSCULAS y guiones bajos, p. ej. PERSONAL_EMOTIONAL',
