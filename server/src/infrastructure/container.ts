@@ -267,6 +267,7 @@ import { GetEvaluationSuggestionsUseCase } from '@application/use-cases/evaluati
 import { ListEvaluationWindowsUseCase } from '@application/use-cases/evaluation/ListEvaluationWindowsUseCase';
 import { SetEvaluationWindowUseCase } from '@application/use-cases/evaluation/SetEvaluationWindowUseCase';
 import { GetNotificationsUseCase } from '@application/use-cases/notifications/GetNotificationsUseCase';
+import { MarkAllNotificationsReadUseCase } from '@application/use-cases/notifications/MarkAllNotificationsReadUseCase';
 import { MarkNotificationReadUseCase } from '@application/use-cases/notifications/MarkNotificationReadUseCase';
 
 const createUserUseCase = new CreateUserUseCase(userRepository, passwordHasher);
@@ -625,6 +626,7 @@ const setEvaluationWindowUseCase = new SetEvaluationWindowUseCase(
 );
 const getNotificationsUseCase = new GetNotificationsUseCase(notificationRepository);
 const markNotificationReadUseCase = new MarkNotificationReadUseCase(notificationRepository);
+const markAllNotificationsReadUseCase = new MarkAllNotificationsReadUseCase(notificationRepository);
 
 const getHomePanelUseCase = new GetHomePanelUseCase(
   userRepository,
@@ -768,6 +770,7 @@ export const container = {
     getReferralTrackingUseCase,
     getNotificationsUseCase,
     markNotificationReadUseCase,
+    markAllNotificationsReadUseCase,
     submitEvaluationUseCase,
     getEvaluationStatusUseCase,
     getEvaluationResultsUseCase,

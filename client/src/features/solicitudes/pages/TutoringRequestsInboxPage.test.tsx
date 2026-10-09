@@ -1,6 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { MemoryRouter } from 'react-router-dom';
 import { QueryClientTestWrapper } from '@shared/test-utils/QueryClientTestWrapper';
 import { TutoringRequestsInboxPage } from './TutoringRequestsInboxPage';
 import { tutoringRequestService } from '../services/tutoringRequestService';
@@ -32,11 +33,13 @@ const request = (over: Partial<TutoringRequestView> = {}): TutoringRequestView =
   ...over,
 });
 
-const renderPage = () =>
+const renderPage = (url = '/solicitudes') =>
   render(
-    <QueryClientTestWrapper>
-      <TutoringRequestsInboxPage />
-    </QueryClientTestWrapper>,
+    <MemoryRouter initialEntries={[url]}>
+      <QueryClientTestWrapper>
+        <TutoringRequestsInboxPage />
+      </QueryClientTestWrapper>
+    </MemoryRouter>,
   );
 
 describe('TutoringRequestsInboxPage (R01)', () => {
@@ -100,5 +103,17 @@ describe('TutoringRequestsInboxPage (R01)', () => {
     mocked.getInbox.mockResolvedValue([]);
     renderPage();
     expect(await screen.findByText('Aún no hay solicitudes')).toBeInTheDocument();
+  });
+
+  it('con ?solicitud=<id> (desde un aviso) abre esa solicitud', async () => {
+    renderPage('/solicitudes?solicitud=r1');
+    expect(await screen.findByRole('dialog', { name: 'Atender solicitud de tutoría' })).toBeInTheDocument();
+    expect(screen.getByText('Solicitud de Ana Torres')).toBeInTheDocument();
+  });
+
+  it('si la solicitud del aviso ya no está disponible, lo explica', async () => {
+    renderPage('/solicitudes?solicitud=otra');
+    expect(await screen.findByRole('status')).toHaveTextContent('ya no está disponible para tu cuenta');
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
   });
 });

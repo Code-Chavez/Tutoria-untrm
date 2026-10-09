@@ -24,6 +24,11 @@ export const notificationService = {
     return response.data;
   },
 
+  markAllAsRead: async (): Promise<number> => {
+    const response = await apiClient.patch<{ updated: number }>('/notifications/read-all');
+    return response.data.updated;
+  },
+
   markAsRead: async (id: string): Promise<AppNotification> => {
     const response = await apiClient.patch<AppNotification>(`/notifications/${id}/read`);
     return response.data;

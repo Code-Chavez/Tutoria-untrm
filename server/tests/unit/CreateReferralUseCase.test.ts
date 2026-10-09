@@ -67,6 +67,7 @@ describe('CreateReferralUseCase', () => {
       create: jest.fn(),
       findByUser: jest.fn(),
       markRead: jest.fn(),
+      markAllRead: jest.fn(),
     };
     useCase = new CreateReferralUseCase(referrals, allowAllGuard(students), users, roles, notifications);
   });

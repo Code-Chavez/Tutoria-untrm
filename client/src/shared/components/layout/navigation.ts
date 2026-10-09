@@ -24,6 +24,7 @@ import {
   FileSpreadsheetIcon,
   ShieldCheckIcon,
   MessageSquareIcon,
+  FileTextIcon,
 } from '@shared/components/icons';
 
 export type RoleCode = 'tutor' | 'coord' | 'dbu' | 'serv' | 'est' | 'vice';
@@ -94,7 +95,7 @@ export const NAV: NavGroup[] = [
         path: '/informes',
         roles: ['tutor', 'coord', 'dbu'],
       },
-      { label: 'Informe semestral', Icon: ReportIcon, path: '/informes/semestral', roles: ['tutor'] },
+      { label: 'Informe semestral', Icon: FileTextIcon, path: '/informes/semestral', roles: ['tutor'] },
       { label: 'Informe consolidado', Icon: FileSpreadsheetIcon, path: '/informes/consolidado', roles: ['dbu', 'vice'] },
       { label: 'Indicadores', Icon: PieChartIcon, path: '/indicadores', roles: ['dbu', 'coord', 'vice'] },
       { label: 'Usuarios y roles', Icon: UsersIcon, path: '/users', roles: ['dbu'] },

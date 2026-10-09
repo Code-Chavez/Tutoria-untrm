@@ -152,3 +152,29 @@
   color: var(--peligro);
   border: 1px solid var(--peligro);
 }
+
+.notice {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--s3);
+  flex-wrap: wrap;
+  font-size: var(--fs-sm);
+  color: var(--g900);
+  background: var(--warn-bg, #fff6e5);
+  border: 1px solid var(--borde);
+  border-radius: var(--r-sm);
+  padding: var(--s3) var(--s4);
+  margin-bottom: var(--s4);
+}
+
+.noticeClose {
+  background: none;
+  border: none;
+  padding: 0;
+  font: inherit;
+  font-weight: 600;
+  color: var(--azul-med);
+  text-decoration: underline;
+  cursor: pointer;
+}

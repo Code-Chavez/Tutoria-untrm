@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@features/auth/hooks/useAuth';
 import { BellIcon } from '@shared/components/icons';
-import { useNotifications, useMarkNotificationRead } from '../hooks/useNotifications';
+import { useNotifications, useMarkNotificationRead, useMarkAllNotificationsRead } from '../hooks/useNotifications';
 import type { AppNotification } from '../services/notificationService';
 import styles from './NotificationBell.module.css';
 
@@ -36,6 +36,7 @@ export function NotificationBell() {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, [open]);
 
+  const markAllAsRead = useMarkAllNotificationsRead();
   const unreadCount = notifications.filter((n) => !n.read).length;
 
   const handleSelect = async (notification: AppNotification) => {
@@ -43,11 +44,12 @@ export function NotificationBell() {
     if (!notification.read) {
       await markAsRead(notification);
     }
+    // Cada aviso abre el caso concreto; si ya no está disponible para esta cuenta, la pantalla lo explica.
     if (notification.referralId) {
-      navigate('/derivaciones');
+      navigate(`/derivaciones?caso=${notification.referralId}`);
     } else if (notification.tutoringRequestId) {
-      // El estudiante revisa su historial; el personal, la bandeja de solicitudes.
-      navigate(user?.role === 'Tutorado' ? '/solicitar-tutoria' : '/solicitudes');
+      // El estudiante revisa su historial; el personal abre la solicitud en la bandeja.
+      navigate(user?.role === 'Tutorado' ? '/solicitar-tutoria' : `/solicitudes?solicitud=${notification.tutoringRequestId}`);
     }
   };
 
@@ -71,7 +73,14 @@ export function NotificationBell() {
         <div className={styles.panel} role="menu">
           <div className={styles.panelHeader}>
             <span>Notificaciones</span>
-            {unreadCount > 0 && <span className={styles.unreadLabel}>{unreadCount} sin leer</span>}
+            {unreadCount > 0 && (
+              <>
+                <span className={styles.unreadLabel}>{unreadCount} sin leer</span>
+                <button type="button" className={styles.markAll} onClick={() => markAllAsRead()}>
+                  Marcar todas como leídas
+                </button>
+              </>
+            )}
           </div>
           <div className={styles.panelList}>
             {notifications.length === 0 ? (

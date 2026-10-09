@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { getApiErrorMessage } from '@shared/services/apiClient';
 import { Badge, Button, Card, EmptyState, PageHeader, SelectField, TableSkeleton } from '@shared/components/ui';
 import { InboxIcon, XCircleIcon } from '@shared/components/icons';
@@ -113,6 +114,13 @@ export function TutoringRequestsInboxPage() {
   const [status, setStatus] = useState<TutoringRequestStatus | ''>('');
   const { requests, loading, error, refresh } = useTutoringRequestsInbox(status || undefined);
   const [selected, setSelected] = useState<TutoringRequestView | null>(null);
+  // Un aviso llega con ?solicitud=<id>: se abre esa solicitud, o se explica que ya no está disponible (R03).
+  const [searchParams, setSearchParams] = useSearchParams();
+  const requestedId = searchParams.get('solicitud');
+  const requested = requestedId ? requests.find((r) => r.id === requestedId) ?? null : null;
+  const unavailable = !!requestedId && !loading && !error && !requested;
+  const clearRequested = () => setSearchParams({}, { replace: true });
+  const open = selected ?? requested;
 
   return (
     <div>
@@ -121,6 +129,15 @@ export function TutoringRequestsInboxPage() {
         subtitle="Las solicitudes de tus tutorados (o de tu escuela) y las que se te enrutaron, con su estado de atención"
         icon={<InboxIcon size={24} />}
       />
+
+      {unavailable && (
+        <div className={styles.notice} role="status">
+          <span>Esa solicitud ya no está disponible para tu cuenta: fue eliminada, se atendió en otro filtro o dejó de estar a tu cargo.</span>
+          <button type="button" className={styles.noticeClose} onClick={clearRequested}>
+            Cerrar
+          </button>
+        </div>
+      )}
 
       <Card>
         <div className={styles.bar}>
@@ -195,7 +212,16 @@ export function TutoringRequestsInboxPage() {
         )}
       </Card>
 
-      {selected && <AttendModal key={selected.id} request={selected} onClose={() => setSelected(null)} />}
+      {open && (
+        <AttendModal
+          key={open.id}
+          request={open}
+          onClose={() => {
+            setSelected(null);
+            if (requestedId) clearRequested();
+          }}
+        />
+      )}
     </div>
   );
 }

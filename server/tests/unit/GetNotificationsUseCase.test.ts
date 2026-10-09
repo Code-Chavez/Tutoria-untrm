@@ -19,6 +19,7 @@ describe('GetNotificationsUseCase', () => {
       create: jest.fn(),
       findByUser: jest.fn().mockResolvedValue(notifications),
       markRead: jest.fn(),
+      markAllRead: jest.fn(),
     };
 
     const useCase = new GetNotificationsUseCase(repository);
