@@ -122,13 +122,15 @@ Repetir para **cada servicio**: Escuela, Psicopedagogía, Psicología, Asistenci
 
 | # | Paso | Resultado esperado | Estado |
 |---|---|---|---|
-| 7.1 | `docker compose exec backup backup.sh` | termina sin error; hay `sit_backup_*.tar` y `/backups/last_status` dice `OK` | |
-| 7.2 | Restaurar ese respaldo en **otra** base (ver `backup/README.md`) con la carpeta de adjuntos | la base y las evidencias/resoluciones se recuperan; el PDF de una resolución se abre | |
-| 7.3 | Forzar un fallo de conexión del respaldo | termina con error y no borra respaldos válidos | |
-| 7.4 | Configurar la copia **fuera del equipo** (`BACKUP_OFFSITE_DIR` o `BACKUP_UPLOAD_CMD`) | el respaldo verifica la copia; sin ella avisa que es solo local | |
-| 7.5 | Sobre una **copia de los datos de la versión anterior (v0.3.0)**, ejecutar `prisma migrate deploy` | todas las migraciones aplican sin error y los datos previos siguen consultables | |
-| 7.6 | Probar el arranque de **producción** (ver `deploy/README.md`) sobre una base vacía, con secretos de prueba | arranca solo con configuración segura; crea un único administrador y ninguna cuenta demo | |
-| 7.7 | Plan de reversión | definir y ensayar: restaurar el respaldo previo a la migración y volver a la imagen anterior | |
+| 7.1 | `docker compose exec backup backup.sh` | termina sin error; hay `sit_backup_*.tar` y `/backups/last_status` dice `OK` | OK 09/10/2026 |
+| 7.2 | Restaurar ese respaldo en **otra** base (ver `backup/README.md`) con la carpeta de adjuntos | la base y las evidencias/resoluciones se recuperan; el PDF de una resolución se abre | OK 09/10/2026 |
+| 7.3 | Forzar un fallo de conexión del respaldo | termina con error y no borra respaldos válidos | OK 09/10/2026 |
+| 7.4 | Configurar la copia **fuera del equipo** (`BACKUP_OFFSITE_DIR` o `BACKUP_UPLOAD_CMD`) | el respaldo verifica la copia; sin ella avisa que es solo local | OK (mecanismo) 09/10/2026 — falta el destino real |
+| 7.5 | Sobre una **copia de los datos de la versión anterior (v0.3.0)**, ejecutar `prisma migrate deploy` | todas las migraciones aplican sin error y los datos previos siguen consultables | OK 09/10/2026 |
+| 7.6 | Probar el arranque de **producción** (ver `deploy/README.md`) sobre una base vacía, con secretos de prueba | arranca solo con configuración segura; crea un único administrador y ninguna cuenta demo | OK 09/10/2026 |
+| 7.7 | Plan de reversión | definir y ensayar: restaurar el respaldo previo a la migración y volver a la imagen anterior | OK 09/10/2026 (ensayo) |
+
+> **Sección 7 ejecutada el 09/10/2026:** el detalle y las salidas están en `docs/ACEPTACION_SECCION7_2026-10-09.md`.
 
 ## 8. Cierre
 
