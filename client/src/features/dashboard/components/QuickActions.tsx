@@ -1,57 +1,12 @@
-import { type ComponentType } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '@features/auth/hooks/useAuth';
-import {
-  UserPlusIcon,
-  UploadIcon,
-  GraduationCapIcon,
-  SettingsIcon,
-  ChevronRightIcon,
-} from '@shared/components/icons';
+import { ChevronRightIcon } from '@shared/components/icons';
+import { quickActionsFor } from './homeAccess';
 import styles from './QuickActions.module.css';
-
-interface Action {
-  label: string;
-  description: string;
-  to: string;
-  Icon: ComponentType<{ size?: number }>;
-  roles?: string[]; // nombres de rol; sin roles = todos
-}
-
-const ACTIONS: Action[] = [
-  {
-    label: 'Registrar tutorado',
-    description: 'Alta individual de un estudiante',
-    to: '/tutorados?accion=nuevo',
-    Icon: UserPlusIcon,
-    roles: ['Coordinador', 'Administrador DBU'],
-  },
-  {
-    label: 'Carga masiva',
-    description: 'Importar estudiantes desde Excel',
-    to: '/carga-masiva',
-    Icon: UploadIcon,
-    roles: ['Coordinador', 'Administrador DBU'],
-  },
-  {
-    label: 'Ver tutorados',
-    description: 'Consultar y filtrar estudiantes',
-    to: '/tutorados',
-    Icon: GraduationCapIcon,
-    roles: ['Docente Tutor', 'Coordinador', 'Administrador DBU'],
-  },
-  {
-    label: 'Usuarios y roles',
-    description: 'Cuentas del sistema y permisos',
-    to: '/users',
-    Icon: SettingsIcon,
-    roles: ['Administrador DBU'],
-  },
-];
 
 export function QuickActions() {
   const { user } = useAuth();
-  const actions = ACTIONS.filter((a) => !a.roles || (user && a.roles.includes(user.role)));
+  const actions = quickActionsFor(user?.role);
 
   if (actions.length === 0) return null;
 
