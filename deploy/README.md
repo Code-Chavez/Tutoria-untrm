@@ -59,6 +59,27 @@ docker compose -f docker-compose.prod.yml --env-file .env.production up -d --bui
 Las migraciones se aplican solas al arrancar. **Haga un respaldo antes** (`docker compose -f docker-compose.prod.yml exec backup backup.sh`)
 y confirme que terminó sin error.
 
+## Reversión (si una actualización sale mal)
+
+La reversión se apoya en el respaldo que se toma **antes** de actualizar (paso anterior). Ensayada el 09/10/2026
+(`docs/ACEPTACION_SECCION7_2026-10-09.md`).
+
+1. **Detener** el servidor para que nadie escriba durante la reversión:
+   `docker compose -f docker-compose.prod.yml --env-file .env.production stop server web`
+2. **Restaurar** el respaldo previo (reemplaza la base y devuelve los adjuntos; pide confirmación explícita):
+   ```sh
+   docker compose -f docker-compose.prod.yml --env-file .env.production exec backup sh -c      'RESTORE_CONFIRM=yes restore.sh /backups/sit_backup_AAAAMMDD_HHMMSS.tar /data/restore'
+   ```
+   Copie `/data/restore` al volumen de adjuntos si desea volver también a los archivos de ese momento.
+3. **Volver al código anterior**: `git checkout vX.Y.Z` (la versión que funcionaba, p. ej. `v0.3.0`) y
+   `docker compose -f docker-compose.prod.yml --env-file .env.production up -d --build`.
+   El esquema restaurado es el de esa versión, así que `migrate deploy` no aplica nada nuevo.
+4. **Comprobar:** `GET /api/health`, un inicio de sesión y que un adjunto antiguo se abre.
+
+Qué se pierde: lo registrado **después** del respaldo. Por eso el respaldo se toma justo antes de actualizar y se verifica
+que terminó en `OK` antes de continuar. Las migraciones de v0.4.0 cierran las sesiones abiertas y los enlaces de recuperación
+pendientes: tras actualizar o revertir, todos deben iniciar sesión de nuevo.
+
 ## Pendiente de acuerdo institucional
 
 - Dominio, certificado y dónde se aloja el servidor.
