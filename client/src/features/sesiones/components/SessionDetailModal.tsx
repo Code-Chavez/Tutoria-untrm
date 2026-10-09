@@ -167,10 +167,12 @@ export const SessionDetailModal: React.FC<SessionDetailModalProps> = ({
             {session.modality === 'VIRTUAL' ? (
               <>
                 <LinkIcon size={16} />
-                {session.meetingLink ? (
+                {session.meetingLink && /^https?:\/\//i.test(session.meetingLink) ? (
                   <a href={session.meetingLink} target="_blank" rel="noreferrer">
                     {session.meetingLink}
                   </a>
+                ) : session.meetingLink ? (
+                  <span>{session.meetingLink}</span>
                 ) : (
                   <span>Sin enlace registrado</span>
                 )}
