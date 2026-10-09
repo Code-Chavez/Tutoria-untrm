@@ -9,6 +9,9 @@ import { StudentProfileNotLinkedError } from './TutoringRequestErrors';
  * registra desde su cuenta, sin que el personal la registre en su nombre.
  * Resuelve el estudiante a partir de la cuenta autenticada en vez de recibir
  * el studentId del cliente, y delega el enrutamiento al caso de uso existente.
+ *
+ * No pasa por el alcance del personal (un tutorado no tiene alcance sobre otros): la identidad
+ * del estudiante sale de su cuenta, nunca de la petición.
  */
 export class CreateOwnTutoringRequestUseCase {
   constructor(
@@ -22,7 +25,7 @@ export class CreateOwnTutoringRequestUseCase {
       throw new StudentProfileNotLinkedError();
     }
 
-    return this.createTutoringRequestUseCase.execute(student.id, userId, {
+    return this.createTutoringRequestUseCase.registerFor(student, userId, {
       source: 'STUDENT',
       caseType: input.caseType,
       reason: input.reason,

@@ -114,3 +114,8 @@
   color: var(--g500);
   margin-top: var(--s2);
 }
+
+.tutoringRequest {
+  background: var(--celeste);
+  color: var(--azul-med);
+}

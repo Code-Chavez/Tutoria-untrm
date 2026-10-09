@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '@features/auth/hooks/useAuth';
 import { BellIcon } from '@shared/components/icons';
 import { useNotifications, useMarkNotificationRead } from '../hooks/useNotifications';
 import type { AppNotification } from '../services/notificationService';
@@ -22,6 +23,7 @@ export function NotificationBell() {
   const [open, setOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
+  const { user } = useAuth();
 
   useEffect(() => {
     if (!open) return;
@@ -43,6 +45,9 @@ export function NotificationBell() {
     }
     if (notification.referralId) {
       navigate('/derivaciones');
+    } else if (notification.tutoringRequestId) {
+      // El estudiante revisa su historial; el personal, la bandeja de solicitudes.
+      navigate(user?.role === 'Tutorado' ? '/solicitar-tutoria' : '/solicitudes');
     }
   };
 

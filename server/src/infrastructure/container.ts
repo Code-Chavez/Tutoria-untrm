@@ -200,7 +200,11 @@ import { GetSupportContactUseCase } from '@application/use-cases/support-contact
 import { GetStudentRecordUseCase } from '@application/use-cases/student-record/GetStudentRecordUseCase';
 import { CreateTutoringRequestUseCase } from '@application/use-cases/tutoring-requests/CreateTutoringRequestUseCase';
 import { CreateOwnTutoringRequestUseCase } from '@application/use-cases/tutoring-requests/CreateOwnTutoringRequestUseCase';
-import { ListTutoringRequestsUseCase } from '@application/use-cases/tutoring-requests/ListTutoringRequestsUseCase';
+import {
+  ListTutoringRequestsUseCase,
+  ListOwnTutoringRequestsUseCase,
+} from '@application/use-cases/tutoring-requests/ListTutoringRequestsUseCase';
+import { UpdateTutoringRequestStatusUseCase } from '@application/use-cases/tutoring-requests/UpdateTutoringRequestStatusUseCase';
 import { ScheduleSessionUseCase } from '@application/use-cases/sessions/ScheduleSessionUseCase';
 import { ListSessionsUseCase } from '@application/use-cases/sessions/ListSessionsUseCase';
 import { RegisterAttendanceUseCase } from '@application/use-cases/sessions/RegisterAttendanceUseCase';
@@ -338,6 +342,7 @@ const getStudentRecordUseCase = new GetStudentRecordUseCase(
   tutorFollowUpRepository,
   studentReferralRepository,
   studentAccessGuard,
+  tutoringRequestRepository,
 );
 const createTutoringRequestUseCase = new CreateTutoringRequestUseCase(
   tutoringRequestRepository,
@@ -345,8 +350,28 @@ const createTutoringRequestUseCase = new CreateTutoringRequestUseCase(
   schoolRepository,
   userRepository,
   roleRepository,
+  notificationRepository,
 );
-const listTutoringRequestsUseCase = new ListTutoringRequestsUseCase(tutoringRequestRepository, studentAccessGuard);
+const listTutoringRequestsUseCase = new ListTutoringRequestsUseCase(
+  tutoringRequestRepository,
+  studentAccessGuard,
+  studentRepository,
+  userRepository,
+);
+const listOwnTutoringRequestsUseCase = new ListOwnTutoringRequestsUseCase(
+  tutoringRequestRepository,
+  studentRepository,
+  userRepository,
+);
+const updateTutoringRequestStatusUseCase = new UpdateTutoringRequestStatusUseCase(
+  tutoringRequestRepository,
+  studentAccessGuard,
+  studentRepository,
+  userRepository,
+  sessionRepository,
+  notificationRepository,
+  auditLogRepository,
+);
 const createOwnTutoringRequestUseCase = new CreateOwnTutoringRequestUseCase(
   studentRepository,
   createTutoringRequestUseCase,
@@ -693,6 +718,8 @@ export const container = {
     createTutoringRequestUseCase,
     createOwnTutoringRequestUseCase,
     listTutoringRequestsUseCase,
+    listOwnTutoringRequestsUseCase,
+    updateTutoringRequestStatusUseCase,
     scheduleSessionUseCase,
     listSessionsUseCase,
     registerAttendanceUseCase,

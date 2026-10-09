@@ -151,6 +151,7 @@ describe('GetStudentRecordUseCase', () => {
       followUps,
       referrals,
       allowAllGuard(students),
+      { findByStudent: jest.fn().mockResolvedValue([]) } as never,
     );
   });
 
