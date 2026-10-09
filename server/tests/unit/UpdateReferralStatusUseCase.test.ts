@@ -40,7 +40,7 @@ describe('UpdateReferralStatusUseCase (HU-32)', () => {
     roleName = 'Profesional de Servicio';
     actor = { id: 'prof-1', roleId: 'r', service: 'PSICOLOGIA', isActive: true };
     repository = { create: jest.fn(), findById: jest.fn(), findMany: jest.fn(), updateStatus: jest.fn() };
-    notifications = { create: jest.fn(), findByUser: jest.fn(), markRead: jest.fn() };
+    notifications = { create: jest.fn(), findByUser: jest.fn(), markRead: jest.fn(), markAllRead: jest.fn() };
     users = { findById: jest.fn().mockImplementation(async () => actor) } as unknown as jest.Mocked<UserRepository>;
     roles = { findById: jest.fn().mockImplementation(async () => ({ id: 'r', name: roleName })) } as unknown as jest.Mocked<RoleRepository>;
     useCase = new UpdateReferralStatusUseCase(repository, notifications, users, roles);

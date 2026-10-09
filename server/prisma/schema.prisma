@@ -382,6 +382,8 @@ model TutoringRequest {
   routedTo     User   @relation("RequestsRouted", fields: [routedToId], references: [id])
   routedToRole String @map("routed_to_role") // 'tutor' | 'coordinator'
 
+  notifications Notification[]
+
   // Atención (R01): 'PENDIENTE' → 'EN_ATENCION' → 'ATENDIDA'. Solo avanza.
   status       String    @default("PENDIENTE")
   // Respuesta que ve el estudiante al atenderse (obligatoria al marcarla atendida).
@@ -530,6 +532,7 @@ model StudentReferral {
   createdAt DateTime @default(now()) @map("created_at")
 
   signedDocuments SignedDocument[]
+  notifications   Notification[]
 
   studentId String  @map("student_id")
   student   Student @relation(fields: [studentId], references: [id])
@@ -590,9 +593,13 @@ model Notification {
   type    String
   message String
 
-  referralId String? @map("referral_id")
+  // El caso al que se refiere el aviso. Si el caso se elimina, el aviso también (R03): nunca queda
+  // un aviso que apunte a algo que ya no existe.
+  referralId String?          @map("referral_id")
+  referral   StudentReferral? @relation(fields: [referralId], references: [id], onDelete: Cascade)
   // Solicitud de tutoría a la que se refiere el aviso (R01).
-  tutoringRequestId String? @map("tutoring_request_id")
+  tutoringRequestId String?          @map("tutoring_request_id")
+  tutoringRequest   TutoringRequest? @relation(fields: [tutoringRequestId], references: [id], onDelete: Cascade)
 
   read Boolean @default(false)
 

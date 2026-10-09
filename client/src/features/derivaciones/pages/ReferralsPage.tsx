@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { PageHeader, EmptyState, TableSkeleton, Button } from '@shared/components/ui';
 import { SendIcon, InboxIcon, SearchIcon } from '@shared/components/icons';
 import { referralService, StudentReferral, REFERRAL_SERVICE_LABEL, REFERRAL_STATUS_LABEL } from '../services/referralService';
@@ -11,6 +12,12 @@ export function ReferralsPage() {
   const updateReferralInCache = useUpdateReferralInCache();
   const [selectedReferral, setSelectedReferral] = useState<StudentReferral | null>(null);
   const [downloading, setDownloading] = useState<string | null>(null);
+  // Un aviso llega con ?caso=<id>: se abre ese caso, o se explica que ya no está disponible para esta cuenta (R03).
+  const [searchParams, setSearchParams] = useSearchParams();
+  const requestedId = searchParams.get('caso');
+  const requested = requestedId ? referrals.find((r) => r.id === requestedId) ?? null : null;
+  const unavailable = !!requestedId && !loading && !error && !requested;
+  const clearRequested = () => setSearchParams({}, { replace: true });
 
   const handleDownload = async (id: string) => {
     try {
@@ -29,6 +36,7 @@ export function ReferralsPage() {
 
   const closeDetails = () => {
     setSelectedReferral(null);
+    if (requestedId) clearRequested();
   };
 
   return (
@@ -38,6 +46,15 @@ export function ReferralsPage() {
         subtitle="Visualización y seguimiento de casos derivados"
         icon={<InboxIcon size={24} />}
       />
+
+      {unavailable && (
+        <div className={styles.notice} role="status">
+          <span>Ese caso ya no está disponible para tu cuenta: fue eliminado o dejó de estar a tu cargo.</span>
+          <button type="button" className={styles.noticeClose} onClick={clearRequested}>
+            Cerrar
+          </button>
+        </div>
+      )}
 
       <div className={styles.tableCard}>
         {loading ? (
@@ -116,9 +133,9 @@ export function ReferralsPage() {
         )}
       </div>
 
-      {selectedReferral && (
+      {(selectedReferral ?? requested) && (
         <ReferralDetailModal
-          referral={selectedReferral}
+          referral={(selectedReferral ?? requested) as StudentReferral}
           onClose={closeDetails}
           onStatusUpdated={(updatedRef) => {
             updateReferralInCache(updatedRef);

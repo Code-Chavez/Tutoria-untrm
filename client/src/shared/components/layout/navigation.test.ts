@@ -56,4 +56,14 @@ describe('navegación (UI-01, UI-04, UI-07)', () => {
     }
     expect(NAV.length).toBeGreaterThan(0);
   });
+
+  it('dentro del menú de un mismo rol, cada función tiene su propio icono (R04)', () => {
+    for (const role of Object.keys(ROLE_CODES)) {
+      const seen = new Map<unknown, string>();
+      for (const item of visibleFor(role)) {
+        expect(seen.get(item.Icon), `${role}: «${item.label}» repite el icono de «${seen.get(item.Icon)}»`).toBeUndefined();
+        seen.set(item.Icon, item.label);
+      }
+    }
+  });
 });

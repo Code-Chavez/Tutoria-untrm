@@ -22,6 +22,7 @@ describe('MarkNotificationReadUseCase', () => {
       create: jest.fn(),
       findByUser: jest.fn(),
       markRead: jest.fn(),
+      markAllRead: jest.fn(),
     };
     useCase = new MarkNotificationReadUseCase(repository);
   });
