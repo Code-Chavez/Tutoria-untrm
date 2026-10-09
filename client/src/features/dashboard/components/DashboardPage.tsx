@@ -16,6 +16,7 @@ import {
 import { useHomePanel } from '../hooks/useHomePanel';
 import type { HomeKpi } from '../services/homePanelService';
 import { QuickActions } from './QuickActions';
+import { ALERT_ROLES, quickActionsFor } from './homeAccess';
 import { RecentActivity } from './RecentActivity';
 import { RiskAlerts } from './RiskAlerts';
 import styles from './DashboardPage.module.css';
@@ -63,6 +64,10 @@ export function DashboardPage() {
   const { panel, loading, error } = useHomePanel();
 
   const firstName = user?.firstName ?? '';
+  // Solo se muestra lo que la persona puede usar: sin tarjetas vacías ni «sin acceso» (R02).
+  const hasQuickActions = quickActionsFor(user?.role).length > 0;
+  const canSeeAlerts = !!user && ALERT_ROLES.includes(user.role);
+  const canSeeActivity = user?.role === 'Administrador DBU';
 
   return (
     <div>
@@ -96,18 +101,20 @@ export function DashboardPage() {
       </div>
 
       <div className={styles.columns}>
-        <Card>
-          <CardHeader
-            title="Acciones rápidas"
-            description="Accesos directos a las tareas frecuentes"
-          />
-          <CardBody>
-            <QuickActions />
-          </CardBody>
-        </Card>
+        {hasQuickActions && (
+          <Card>
+            <CardHeader
+              title="Acciones rápidas"
+              description="Accesos directos a las tareas frecuentes"
+            />
+            <CardBody>
+              <QuickActions />
+            </CardBody>
+          </Card>
+        )}
 
-        {/* La bitácora solo la consulta la DBU: para el resto no se muestra un bloque vacío. */}
-        {user?.role === 'Administrador DBU' && (
+        {/* La bitácora solo la consulta la DBU. */}
+        {canSeeActivity && (
           <Card>
             <CardHeader title="Actividad reciente" description="Últimos movimientos del sistema" />
             <RecentActivity />
@@ -115,13 +122,15 @@ export function DashboardPage() {
         )}
       </div>
 
-      <Card>
-        <CardHeader
-          title="Alertas de inasistencia y riesgo"
-          description="Tutorados en riesgo sin sesiones o con inasistencias por encima del umbral"
-        />
-        <RiskAlerts />
-      </Card>
+      {canSeeAlerts && (
+        <Card>
+          <CardHeader
+            title="Alertas de inasistencia y riesgo"
+            description="Tutorados en riesgo sin sesiones o con inasistencias por encima del umbral"
+          />
+          <RiskAlerts />
+        </Card>
+      )}
     </div>
   );
 }
