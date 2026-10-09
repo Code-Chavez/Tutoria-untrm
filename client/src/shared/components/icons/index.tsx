@@ -392,3 +392,92 @@ export function LinkIcon({ size = 18, className }: IconProps) {
     </svg>
   );
 }
+
+export function SlidersIcon({ size = 18, className }: IconProps) {
+  return (
+    <svg {...baseProps(size)} className={className} aria-hidden="true">
+      <line x1="4" y1="21" x2="4" y2="14" />
+      <line x1="4" y1="10" x2="4" y2="3" />
+      <line x1="12" y1="21" x2="12" y2="12" />
+      <line x1="12" y1="8" x2="12" y2="3" />
+      <line x1="20" y1="21" x2="20" y2="16" />
+      <line x1="20" y1="12" x2="20" y2="3" />
+      <line x1="1" y1="14" x2="7" y2="14" />
+      <line x1="9" y1="8" x2="15" y2="8" />
+      <line x1="17" y1="16" x2="23" y2="16" />
+    </svg>
+  );
+}
+
+export function PaletteIcon({ size = 18, className }: IconProps) {
+  return (
+    <svg {...baseProps(size)} className={className} aria-hidden="true">
+      <path d="M12 22a10 10 0 1 1 10-10c0 3-2 4-4 4h-2a2 2 0 0 0-1.4 3.4A2 2 0 0 1 12 22Z" />
+      <circle cx="7.5" cy="11" r="1" />
+      <circle cx="10.5" cy="7" r="1" />
+      <circle cx="15.5" cy="7.5" r="1" />
+    </svg>
+  );
+}
+
+export function ListChecksIcon({ size = 18, className }: IconProps) {
+  return (
+    <svg {...baseProps(size)} className={className} aria-hidden="true">
+      <path d="m3 6 1.5 1.5L7 5" />
+      <path d="m3 12 1.5 1.5L7 11" />
+      <path d="m3 18 1.5 1.5L7 17" />
+      <line x1="11" y1="6" x2="21" y2="6" />
+      <line x1="11" y1="12" x2="21" y2="12" />
+      <line x1="11" y1="18" x2="21" y2="18" />
+    </svg>
+  );
+}
+
+export function BarChartIcon({ size = 18, className }: IconProps) {
+  return (
+    <svg {...baseProps(size)} className={className} aria-hidden="true">
+      <line x1="18" y1="20" x2="18" y2="10" />
+      <line x1="12" y1="20" x2="12" y2="4" />
+      <line x1="6" y1="20" x2="6" y2="14" />
+      <line x1="3" y1="20" x2="21" y2="20" />
+    </svg>
+  );
+}
+
+export function ShieldCheckIcon({ size = 18, className }: IconProps) {
+  return (
+    <svg {...baseProps(size)} className={className} aria-hidden="true">
+      <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10Z" />
+      <path d="m9 12 2 2 4-4" />
+    </svg>
+  );
+}
+
+export function MoreHorizontalIcon({ size = 18, className }: IconProps) {
+  return (
+    <svg {...baseProps(size)} className={className} aria-hidden="true">
+      <circle cx="5" cy="12" r="1.5" />
+      <circle cx="12" cy="12" r="1.5" />
+      <circle cx="19" cy="12" r="1.5" />
+    </svg>
+  );
+}
+
+export function MessageSquareIcon({ size = 18, className }: IconProps) {
+  return (
+    <svg {...baseProps(size)} className={className} aria-hidden="true">
+      <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2Z" />
+    </svg>
+  );
+}
+
+export function FileTextIcon({ size = 18, className }: IconProps) {
+  return (
+    <svg {...baseProps(size)} className={className} aria-hidden="true">
+      <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z" />
+      <path d="M14 2v6h6" />
+      <line x1="8" y1="13" x2="16" y2="13" />
+      <line x1="8" y1="17" x2="16" y2="17" />
+    </svg>
+  );
+}

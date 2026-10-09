@@ -4,6 +4,7 @@ import { SessionRepository } from '@domain/repositories/SessionRepository';
 import { UserRepository } from '@domain/repositories/UserRepository';
 import { SessionEvidence, SessionWithParticipants } from '@domain/entities/Session';
 import { User } from '@domain/entities/User';
+import { allowAllGuard } from '../helpers/studentGuard';
 
 describe('ListSessionEvidenceUseCase', () => {
   let useCase: ListSessionEvidenceUseCase;
@@ -34,6 +35,7 @@ describe('ListSessionEvidenceUseCase', () => {
       findByStudent: jest.fn(),
       countAttendanceByTutorAndStudent: jest.fn(),
       createAttendance: jest.fn(),
+      recordParticipantAttendance: jest.fn(),
       reschedule: jest.fn(),
       cancel: jest.fn(),
       createChangeHistory: jest.fn(),
@@ -48,11 +50,11 @@ describe('ListSessionEvidenceUseCase', () => {
       create: jest.fn(),
       update: jest.fn(),
     };
-    useCase = new ListSessionEvidenceUseCase(sessions, users);
+    useCase = new ListSessionEvidenceUseCase(sessions, users, allowAllGuard({ findById: jest.fn() }));
   });
 
   it('devuelve las evidencias con el nombre de quien las subió', async () => {
-    const result = await useCase.execute('session-1');
+    const result = await useCase.execute('session-1', 'admin-1');
 
     expect(result).toEqual([{ ...evidence, uploadedByName: 'Elena Ramírez' }]);
   });
@@ -60,13 +62,13 @@ describe('ListSessionEvidenceUseCase', () => {
   it('usa «Desconocido» si el usuario que subió la evidencia ya no existe', async () => {
     users.findById.mockResolvedValue(null);
 
-    const result = await useCase.execute('session-1');
+    const result = await useCase.execute('session-1', 'admin-1');
 
     expect(result[0].uploadedByName).toBe('Desconocido');
   });
 
   it('lanza SessionNotFoundError si la sesión no existe', async () => {
     sessions.findById.mockResolvedValue(null);
-    await expect(useCase.execute('missing')).rejects.toThrow(SessionNotFoundError);
+    await expect(useCase.execute('missing', 'admin-1')).rejects.toThrow(SessionNotFoundError);
   });
 });

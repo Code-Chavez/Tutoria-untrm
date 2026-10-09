@@ -4,6 +4,7 @@ import { SchoolRepository } from '@domain/repositories/SchoolRepository';
 import { Student } from '@domain/entities/Student';
 import { School } from '@domain/entities/School';
 import { ImportStudentRow } from '@application/dtos/studentImport.dto';
+import { allowAllGuard } from '../helpers/studentGuard';
 
 describe('ImportStudentsUseCase', () => {
   let useCase: ImportStudentsUseCase;
@@ -45,14 +46,14 @@ describe('ImportStudentsUseCase', () => {
       findAll: jest.fn().mockResolvedValue([school]),
       findById: jest.fn(),
     };
-    useCase = new ImportStudentsUseCase(mockStudentRepository, mockSchoolRepository);
+    useCase = new ImportStudentsUseCase(mockStudentRepository, mockSchoolRepository, allowAllGuard(mockStudentRepository));
   });
 
   it('crea las filas válidas y resuelve la escuela por nombre (sin distinguir acentos/mayúsculas)', async () => {
     const report = await useCase.execute([
       row(2),
       row(3, { studentCode: '20195678', school: 'INGENIERIA DE SISTEMAS' }),
-    ]);
+    ], 'admin-1');
 
     expect(report.created).toBe(2);
     expect(report.skipped).toBe(0);
@@ -66,7 +67,7 @@ describe('ImportStudentsUseCase', () => {
   });
 
   it('reporta el código con formato inválido sin crearlo', async () => {
-    const report = await useCase.execute([row(2, { studentCode: '123' })]);
+    const report = await useCase.execute([row(2, { studentCode: '123' })], 'admin-1');
 
     expect(report.created).toBe(0);
     expect(report.skipped).toBe(1);
@@ -76,14 +77,14 @@ describe('ImportStudentsUseCase', () => {
   });
 
   it('reporta la escuela inexistente', async () => {
-    const report = await useCase.execute([row(2, { school: 'Escuela Fantasma' })]);
+    const report = await useCase.execute([row(2, { school: 'Escuela Fantasma' })], 'admin-1');
 
     expect(report.created).toBe(0);
     expect(report.errors[0].message).toMatch(/no se encontró la escuela/i);
   });
 
   it('detecta duplicados dentro del mismo archivo', async () => {
-    const report = await useCase.execute([row(2), row(3)]); // mismo código
+    const report = await useCase.execute([row(2), row(3)], 'admin-1'); // mismo código
 
     expect(report.created).toBe(1);
     expect(report.skipped).toBe(1);
@@ -94,7 +95,7 @@ describe('ImportStudentsUseCase', () => {
   it('detecta duplicados contra la base de datos', async () => {
     mockStudentRepository.findByCode.mockResolvedValue({ id: 'x', studentCode: '20191234' } as Student);
 
-    const report = await useCase.execute([row(2)]);
+    const report = await useCase.execute([row(2)], 'admin-1');
 
     expect(report.created).toBe(0);
     expect(report.errors[0].message).toMatch(/ya existe/i);

@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { useDialogFocus } from '@shared/hooks/useDialog';
 import { Button } from '@shared/components/ui';
 import { CalendarIcon, CloseIcon, InfoIcon } from '@shared/components/icons';
 import { Student } from '../services/studentService';
@@ -30,6 +31,7 @@ export const SessionFormModal: React.FC<SessionFormModalProps> = ({
   const [meetingLink, setMeetingLink] = useState('');
   const [error, setError] = useState('');
 
+  const dialogRef = useDialogFocus();
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (e.key === 'Escape') onCancel();
@@ -75,6 +77,8 @@ export const SessionFormModal: React.FC<SessionFormModalProps> = ({
       <div
         className={styles.dialog}
         role="dialog"
+        ref={dialogRef}
+        tabIndex={-1}
         aria-modal="true"
         aria-label="Programar sesión de tutoría"
         onClick={(e) => e.stopPropagation()}

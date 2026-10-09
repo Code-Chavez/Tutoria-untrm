@@ -19,6 +19,7 @@ import { TutorAssignmentHistory } from '@domain/entities/TutorAssignmentHistory'
 import { SupportContact } from '@domain/entities/SupportContact';
 import { SessionWithParticipants } from '@domain/entities/Session';
 import { StudentReferral } from '@domain/entities/StudentReferral';
+import { allowAllGuard } from '../helpers/studentGuard';
 
 describe('GetStudentRecordUseCase', () => {
   let useCase: GetStudentRecordUseCase;
@@ -113,6 +114,7 @@ describe('GetStudentRecordUseCase', () => {
       findByStudent: jest.fn().mockResolvedValue([]),
       countAttendanceByTutorAndStudent: jest.fn(),
       createAttendance: jest.fn(),
+      recordParticipantAttendance: jest.fn(),
       reschedule: jest.fn(),
       cancel: jest.fn(),
       createChangeHistory: jest.fn(),
@@ -123,6 +125,7 @@ describe('GetStudentRecordUseCase', () => {
     followUps = {
       create: jest.fn(),
       findByStudent: jest.fn().mockResolvedValue([]),
+      findByTutorBetween: jest.fn(),
     };
     roles = {
       findById: jest.fn().mockResolvedValue(tutorRole),
@@ -147,6 +150,8 @@ describe('GetStudentRecordUseCase', () => {
       sessions,
       followUps,
       referrals,
+      allowAllGuard(students),
+      { findByStudent: jest.fn().mockResolvedValue([]) } as never,
     );
   });
 

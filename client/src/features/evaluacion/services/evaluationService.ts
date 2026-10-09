@@ -1,4 +1,5 @@
 import { apiClient } from '@shared/services/apiClient';
+import { ReportFilterParams } from '@shared/reportFilters/reportFilterService';
 
 // Cuestionario de evaluación de la función tutorial (HU-36, Anexo N°7).
 export type EvaluationScaleCode = 'N' | 'CN' | 'AV' | 'CS' | 'S';
@@ -94,6 +95,49 @@ export interface EvaluationWindowsOverview {
   schools: EvaluationWindowSchoolState[];
 }
 
+// Estadísticas de evaluación por tutor (HU-39).
+export interface EvaluationStatisticsItemAverage {
+  code: string;
+  label: string;
+  average: number;
+}
+
+export interface EvaluationStatisticsTutorRow {
+  tutorId: string;
+  tutorName: string;
+  totalResponses: number;
+  overallAverage: number;
+  items: EvaluationStatisticsItemAverage[];
+}
+
+export interface EvaluationStatisticsReport {
+  periodName: string;
+  tutors: EvaluationStatisticsTutorRow[];
+  /** Filtros aplicados (HU-47), p. ej. "Ciclo: 3". */
+  appliedFilters: string[];
+}
+
+export type EvaluationStatisticsFilters = ReportFilterParams;
+
+// Sugerencias abiertas consolidadas (HU-40).
+export interface EvaluationSuggestionEntry {
+  tutorId: string;
+  tutorName: string;
+  likes: string | null;
+  dislikes: string | null;
+}
+
+export interface EvaluationSuggestionsReport {
+  periodName: string;
+  suggestions: EvaluationSuggestionEntry[];
+}
+
+export interface EvaluationSuggestionsFilters {
+  tutorId?: string;
+  schoolId?: string;
+  facultyId?: string;
+}
+
 export const evaluationService = {
   getStatus: async (): Promise<EvaluationStatus> => {
     const response = await apiClient.get<EvaluationStatus>('/evaluations/status');
@@ -115,5 +159,19 @@ export const evaluationService = {
 
   submit: async (data: SubmitEvaluationData): Promise<void> => {
     await apiClient.post('/evaluations', data);
+  },
+
+  getStatistics: async (filters?: EvaluationStatisticsFilters): Promise<EvaluationStatisticsReport> => {
+    const response = await apiClient.get<EvaluationStatisticsReport>('/evaluations/statistics', {
+      params: filters,
+    });
+    return response.data;
+  },
+
+  getSuggestions: async (filters?: EvaluationSuggestionsFilters): Promise<EvaluationSuggestionsReport> => {
+    const response = await apiClient.get<EvaluationSuggestionsReport>('/evaluations/suggestions', {
+      params: filters,
+    });
+    return response.data;
   },
 };

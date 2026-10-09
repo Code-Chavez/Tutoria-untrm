@@ -3,6 +3,7 @@ import { StudentReferralRepository } from '@domain/repositories/StudentReferralR
 import { UserRepository } from '@domain/repositories/UserRepository';
 import { RoleRepository } from '@domain/repositories/RoleRepository';
 import { ReferralNotFoundError, ReferralForbiddenError } from './ReferralErrors';
+import { canViewReferral, resolveReferralActor, toReferralView } from './referralAccess';
 
 export class GetReferralByIdUseCase {
   constructor(
@@ -12,36 +13,16 @@ export class GetReferralByIdUseCase {
   ) {}
 
   async execute(referralId: string, userId: string): Promise<StudentReferral> {
+    const actor = await resolveReferralActor(this.users, this.roles, userId);
+
     const referral = await this.referrals.findById(referralId);
     if (!referral) {
       throw new ReferralNotFoundError(referralId);
     }
 
-    const user = await this.users.findById(userId);
-    if (!user) throw new Error('Usuario no encontrado');
+    // Validación de visibilidad (HU-30), compartida con la constancia y el cambio de estado.
+    if (!canViewReferral(actor, referral)) throw new ReferralForbiddenError();
 
-    const role = await this.roles.findById(user.roleId);
-    if (!role) throw new Error('Rol no encontrado');
-
-    // Validación de visibilidad (HU-30)
-    if (role.name === 'Administrador DBU') {
-      return referral;
-    }
-
-    if (role.name === 'Docente Tutor') {
-      if (referral.referredById !== userId) {
-        throw new ReferralForbiddenError();
-      }
-      return referral;
-    }
-
-    if (role.name === 'Profesional de Servicio') {
-      if (referral.service !== user.service) {
-        throw new ReferralForbiddenError();
-      }
-      return referral;
-    }
-
-    throw new ReferralForbiddenError();
+    return toReferralView(referral, actor);
   }
 }

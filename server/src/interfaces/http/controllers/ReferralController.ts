@@ -13,6 +13,10 @@ import {
   ClosureNotesRequiredError,
   InvalidReferralStatusError,
   ReferralForbiddenError,
+  ReferralListNotAllowedError,
+  ReferralStatusForbiddenError,
+  ReferralConflictError,
+  InvalidReferralTransitionError,
 } from '@application/use-cases/referrals/ReferralErrors';
 import { StudentNotFoundError } from '@application/use-cases/students/StudentErrors';
 import { createReferralSchema } from '../validators/referral.validators';
@@ -51,7 +55,7 @@ export class ReferralController {
   downloadConstancia = async (req: Request, res: Response) => {
     try {
       const referralId = req.params.id as string;
-      const data = await this.getReferralConstanciaUseCase.execute(referralId);
+      const data = await this.getReferralConstanciaUseCase.execute(referralId, req.auth?.sub as string);
       const buffer = await this.constanciaPdf.build(data);
       res.setHeader('Content-Type', 'application/pdf');
       res.setHeader('Content-Disposition', 'attachment; filename="constancia-derivacion.pdf"');
@@ -59,6 +63,8 @@ export class ReferralController {
     } catch (error) {
       if (error instanceof ReferralNotFoundError) {
         res.status(404).json({ error: error.message });
+      } else if (error instanceof ReferralForbiddenError) {
+        res.status(403).json({ error: error.message });
       } else {
         res.status(500).json({ error: 'Error interno del servidor' });
       }
@@ -70,8 +76,12 @@ export class ReferralController {
       const userId = req.auth?.sub as string;
       const referrals = await this.getReferralsUseCase.execute(userId);
       res.status(200).json(referrals);
-    } catch {
-      res.status(500).json({ error: 'Error interno del servidor' });
+    } catch (error) {
+      if (error instanceof ReferralListNotAllowedError || error instanceof ReferralForbiddenError) {
+        res.status(403).json({ error: error.message });
+      } else {
+        res.status(500).json({ error: 'Error interno del servidor' });
+      }
     }
   };
 
@@ -110,10 +120,15 @@ export class ReferralController {
     } catch (error) {
       if (error instanceof ReferralNotFoundError) {
         res.status(404).json({ error: error.message });
+      } else if (error instanceof ReferralForbiddenError || error instanceof ReferralStatusForbiddenError) {
+        res.status(403).json({ error: error.message });
+      } else if (error instanceof ReferralConflictError) {
+        res.status(409).json({ error: error.message });
       } else if (
         error instanceof ReferralClosedError ||
         error instanceof ClosureNotesRequiredError ||
-        error instanceof InvalidReferralStatusError
+        error instanceof InvalidReferralStatusError ||
+        error instanceof InvalidReferralTransitionError
       ) {
         res.status(400).json({ error: error.message });
       } else {

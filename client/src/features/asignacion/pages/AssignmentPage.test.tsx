@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, waitFor } from '@testing-library/react';
+import { AxiosError } from 'axios';
 import userEvent from '@testing-library/user-event';
 import { QueryClientTestWrapper } from '@shared/test-utils/QueryClientTestWrapper';
 import { AssignmentPage } from './AssignmentPage';
@@ -74,5 +75,47 @@ describe('AssignmentPage', () => {
     );
     const button = await screen.findByRole('button', { name: /asignar/i });
     expect(button).toBeDisabled();
+  });
+
+  it('no deja seleccionar a quien ya tiene tutor: se reasigna desde Tutorados, con motivo', async () => {
+    vi.mocked(studentService.getStudents).mockResolvedValue([
+      student,
+      { ...student, id: 'stu-2', firstName: 'Luis', lastName: 'Pérez', tutorId: 'tutor-9' },
+    ]);
+    const user = userEvent.setup();
+    render(
+      <QueryClientTestWrapper>
+        <AssignmentPage />
+      </QueryClientTestWrapper>,
+    );
+
+    const assigned = await screen.findByLabelText(/seleccionar luis pérez/i);
+    expect(assigned).toBeDisabled();
+    expect(screen.getByLabelText(/seleccionar ana torres/i)).toBeEnabled();
+
+    // «Seleccionar todos» solo marca a quienes no tienen tutor.
+    await user.click(screen.getByLabelText(/seleccionar todos los visibles/i));
+    expect(screen.getByLabelText(/seleccionar ana torres/i)).toBeChecked();
+    expect(assigned).not.toBeChecked();
+  });
+
+  it('muestra el motivo real del servidor cuando la asignación es rechazada', async () => {
+    vi.mocked(assignmentService.assignStudents).mockRejectedValue(
+      Object.assign(new AxiosError('conflict'), {
+        response: { status: 409, data: { error: '1 tutorado(s) ya tienen tutor. Para cambiarlo usa la reasignación' } },
+      }),
+    );
+    const user = userEvent.setup();
+    render(
+      <QueryClientTestWrapper>
+        <AssignmentPage />
+      </QueryClientTestWrapper>,
+    );
+
+    await user.click(await screen.findByLabelText(/seleccionar ana torres/i));
+    await user.click(screen.getByRole('radio', { name: /juan pérez/i }));
+    await user.click(screen.getByRole('button', { name: /asignar/i }));
+
+    expect(await screen.findByText(/ya tienen tutor/i)).toBeInTheDocument();
   });
 });

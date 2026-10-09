@@ -21,4 +21,8 @@ export class LocalEvidenceStorage implements EvidenceStorage {
   resolvePath(storageKey: string): string {
     return path.join(this.baseDir, storageKey);
   }
+
+  async delete(storageKey: string): Promise<void> {
+    await fs.rm(path.join(this.baseDir, path.basename(storageKey)), { force: true });
+  }
 }

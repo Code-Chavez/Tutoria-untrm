@@ -29,6 +29,11 @@ services:
       DATABASE_URL: postgresql://sit_user:sit_pass@postgres:5432/sit_db
       JWT_SECRET: dev-secret-change-in-production
       CORS_ORIGIN: http://localhost:5173
+      # Correo de desarrollo: Mailpit recibe los mensajes (bandeja en http://localhost:8025).
+      PUBLIC_APP_URL: http://localhost:5173
+      SMTP_HOST: mailpit
+      SMTP_PORT: 1025
+      MAIL_FROM: SIT UNTRM <no-reply@untrm.edu.pe>
       # Sin sondeo, los cambios en el host no disparan recarga dentro del contenedor.
       CHOKIDAR_USEPOLLING: "true"
       CHOKIDAR_INTERVAL: "300"
@@ -41,6 +46,14 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
+    networks:
+      - sit-net
+
+  mailpit:
+    image: axllent/mailpit:v1.21
+    container_name: sit-mailpit
+    ports:
+      - "8025:8025"
     networks:
       - sit-net
 
@@ -73,11 +86,17 @@ services:
       PGUSER: sit_user
       PGPASSWORD: sit_pass
       PGDATABASE: sit_db
-      # Volcado diario a las 02:00; conservar los últimos 7.
+      # Respaldo diario a las 02:00 de la base y de los adjuntos; conservar los últimos 7.
       BACKUP_CRON: "0 2 * * *"
       BACKUP_KEEP: "7"
+      BACKUP_STORAGE_DIR: /data/storage
+      # Copia FUERA de este equipo (obligatoria en producción): una carpeta montada de otro disco o
+      # servidor (BACKUP_OFFSITE_DIR) y/o un comando propio que recibe $BACKUP_FILE (BACKUP_UPLOAD_CMD,
+      # p. ej. rclone copy "$BACKUP_FILE" remoto:sit). Sin ninguno, el respaldo avisa que es solo local.
+      # BACKUP_OFFSITE_DIR: /offsite
     volumes:
       - backup_data:/backups
+      - ./server/storage:/data/storage:ro
     depends_on:
       postgres:
         condition: service_healthy

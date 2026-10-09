@@ -29,3 +29,17 @@ export function useMarkNotificationRead() {
     }
   };
 }
+
+/** Marca todos los avisos como leídos (en el caché de inmediato y luego en el servidor). */
+export function useMarkAllNotificationsRead() {
+  const queryClient = useQueryClient();
+
+  return async () => {
+    queryClient.setQueryData<AppNotification[]>(NOTIFICATIONS_QUERY_KEY, (prev) => prev?.map((n) => ({ ...n, read: true })));
+    try {
+      await notificationService.markAllAsRead();
+    } catch {
+      queryClient.invalidateQueries({ queryKey: NOTIFICATIONS_QUERY_KEY });
+    }
+  };
+}

@@ -7,6 +7,7 @@ import { StudentRepository } from '@domain/repositories/StudentRepository';
 import { SchoolRepository } from '@domain/repositories/SchoolRepository';
 import { Student } from '@domain/entities/Student';
 import { School } from '@domain/entities/School';
+import { allowAllGuard } from '../helpers/studentGuard';
 
 describe('CreateStudentUseCase', () => {
   let useCase: CreateStudentUseCase;
@@ -48,7 +49,7 @@ describe('CreateStudentUseCase', () => {
       findById: jest.fn(),
     };
 
-    useCase = new CreateStudentUseCase(mockStudentRepository, mockSchoolRepository);
+    useCase = new CreateStudentUseCase(mockStudentRepository, mockSchoolRepository, allowAllGuard(mockStudentRepository));
   });
 
   it('debería registrar un estudiante exitosamente', async () => {
@@ -61,7 +62,7 @@ describe('CreateStudentUseCase', () => {
       ...data,
     } as Student));
 
-    const result = await useCase.execute(validInput);
+    const result = await useCase.execute(validInput, 'admin-1');
 
     expect(mockSchoolRepository.findById).toHaveBeenCalledWith('school-123');
     expect(mockStudentRepository.findByCode).toHaveBeenCalledWith('20191234');
@@ -74,7 +75,7 @@ describe('CreateStudentUseCase', () => {
   it('debería lanzar SchoolNotFoundError si la escuela no existe', async () => {
     mockSchoolRepository.findById.mockResolvedValue(null);
 
-    await expect(useCase.execute(validInput)).rejects.toThrow(SchoolNotFoundError);
+    await expect(useCase.execute(validInput, 'admin-1')).rejects.toThrow(SchoolNotFoundError);
     expect(mockStudentRepository.create).not.toHaveBeenCalled();
   });
 
@@ -85,7 +86,7 @@ describe('CreateStudentUseCase', () => {
       studentCode: '20191234',
     } as Student);
 
-    await expect(useCase.execute(validInput)).rejects.toThrow(DuplicateStudentCodeError);
+    await expect(useCase.execute(validInput, 'admin-1')).rejects.toThrow(DuplicateStudentCodeError);
     expect(mockStudentRepository.create).not.toHaveBeenCalled();
   });
 });

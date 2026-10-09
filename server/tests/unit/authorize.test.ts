@@ -57,4 +57,16 @@ describe('authorize middleware (requirePermission)', () => {
     const error = next.mock.calls[0][0];
     expect(error.statusCode).toBe(401);
   });
+
+  it('responde 401 si la cuenta fue desactivada, aunque su rol tenga el permiso y el token siga vigente (A04)', async () => {
+    findUnique.mockResolvedValue({ ...userWithPermissions(['admin:system']), isActive: false });
+
+    const { promise, next } = runMiddleware(['admin:system'], auth);
+    await promise;
+
+    const error = next.mock.calls[0][0];
+    expect(error).toBeInstanceOf(AppError);
+    expect(error.statusCode).toBe(401);
+    expect(error.message).toMatch(/desactivada/);
+  });
 });

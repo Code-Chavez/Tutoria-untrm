@@ -42,6 +42,7 @@ describe('UploadSessionEvidenceUseCase', () => {
       findByStudent: jest.fn(),
       countAttendanceByTutorAndStudent: jest.fn(),
       createAttendance: jest.fn(),
+      recordParticipantAttendance: jest.fn(),
       reschedule: jest.fn(),
       cancel: jest.fn(),
       createChangeHistory: jest.fn(),
@@ -56,6 +57,7 @@ describe('UploadSessionEvidenceUseCase', () => {
     storage = {
       save: jest.fn().mockResolvedValue('generated-key.pdf'),
       resolvePath: jest.fn(),
+      delete: jest.fn(),
     };
     useCase = new UploadSessionEvidenceUseCase(sessions, storage);
   });

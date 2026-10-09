@@ -1,9 +1,9 @@
 import { Student } from '@domain/entities/Student';
 import { StudentRepository } from '@domain/repositories/StudentRepository';
 import { SchoolRepository } from '@domain/repositories/SchoolRepository';
+import { StudentAccessGuard } from '@application/access/StudentAccessGuard';
 import { UpdateStudentInput } from '@application/dtos/student.dto';
 import {
-  StudentNotFoundError,
   DuplicateStudentCodeError,
   SchoolNotFoundError,
 } from './StudentErrors';
@@ -12,12 +12,14 @@ export class UpdateStudentUseCase {
   constructor(
     private readonly students: StudentRepository,
     private readonly schools: SchoolRepository,
+    private readonly guard: StudentAccessGuard,
   ) {}
 
-  async execute(id: string, data: UpdateStudentInput): Promise<Student> {
-    const existing = await this.students.findById(id);
-    if (!existing) {
-      throw new StudentNotFoundError(id);
+  async execute(id: string, data: UpdateStudentInput, requesterId: string): Promise<Student> {
+    const existing = await this.guard.assertAccess(requesterId, id);
+    // Mover al estudiante a otra escuela exige tener alcance también sobre la de destino.
+    if (data.schoolId && data.schoolId !== existing.schoolId) {
+      await this.guard.assertSchoolAccess(requesterId, data.schoolId);
     }
 
     if (data.schoolId && data.schoolId !== existing.schoolId) {

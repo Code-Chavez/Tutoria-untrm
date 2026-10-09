@@ -1,5 +1,5 @@
 import React from 'react';
-import { Badge, IconButton } from '@shared/components/ui';
+import { ActionMenu, Badge, Button, IconButton, type ActionMenuItem } from '@shared/components/ui';
 import {
   PencilIcon,
   AlertTriangleIcon,
@@ -21,6 +21,9 @@ interface TutoradoTableProps {
   tutorName: (tutorId?: string | null) => string | null;
   canWrite: boolean;
   canConductInterview: boolean;
+  /** Modo «elegir tutorado» (accesos del menú): muestra este botón por fila y lo dirige a onPick. */
+  pickLabel?: string;
+  onPick?: (student: Student) => void;
   onEdit: (student: Student) => void;
   onMarkRisk: (student: Student) => void;
   onUnmarkRisk: (student: Student) => void;
@@ -40,6 +43,8 @@ export const TutoradoTable: React.FC<TutoradoTableProps> = ({
   tutorName,
   canWrite,
   canConductInterview,
+  pickLabel,
+  onPick,
   onEdit,
   onMarkRisk,
   onUnmarkRisk,
@@ -55,6 +60,42 @@ export const TutoradoTable: React.FC<TutoradoTableProps> = ({
   // El expediente solo requiere students:read, así que se muestra a
   // cualquier rol que pueda ver esta tabla.
   const showActions = true;
+
+  // sessions:write, followups:write, interviews:write y referrals:write son del tutor (y la DBU);
+  // reasignar, vincular cuenta, riesgo y editar son de coordinación y DBU (students:write).
+  const menuItems = (student: Student): ActionMenuItem[] => {
+    const items: ActionMenuItem[] = [
+      { group: 'Acompañamiento', label: 'Solicitar tutoría', icon: <SendIcon size={16} />, onSelect: () => onRequestTutoring(student) },
+    ];
+    if (canConductInterview) {
+      items.push(
+        { group: 'Acompañamiento', label: 'Registrar entrevista inicial', icon: <ClipboardIcon size={16} />, onSelect: () => onRegisterInterview(student) },
+        { group: 'Acompañamiento', label: 'Registrar seguimiento', icon: <ActivityIcon size={16} />, onSelect: () => onRegisterFollowUp(student) },
+        { group: 'Acompañamiento', label: 'Derivar caso', icon: <SendIcon size={16} />, onSelect: () => onDeriveCase(student) },
+      );
+    }
+    if (canWrite) {
+      // El tutor ya tiene «Programar sesión» a la vista; quien edita (coordinación/DBU) puede ser también tutor.
+      if (canConductInterview) {
+        items.push({ group: 'Gestión', label: 'Editar tutorado', icon: <PencilIcon size={16} />, onSelect: () => onEdit(student) });
+      }
+      if (student.tutorId) {
+        items.push({ group: 'Gestión', label: 'Reasignar tutor', icon: <SwitchIcon size={16} />, onSelect: () => onReassign(student) });
+      }
+      items.push({
+        group: 'Gestión',
+        label: student.userId ? 'Cambiar cuenta de portal' : 'Vincular cuenta',
+        icon: <LinkIcon size={16} />,
+        onSelect: () => onLinkAccount(student),
+      });
+      items.push(
+        student.isAtRisk
+          ? { group: 'Gestión', label: 'Quitar riesgo', tone: 'success', icon: <CheckCircleIcon size={16} />, onSelect: () => onUnmarkRisk(student) }
+          : { group: 'Gestión', label: 'Marcar en riesgo', tone: 'danger', icon: <AlertTriangleIcon size={16} />, onSelect: () => onMarkRisk(student) },
+      );
+    }
+    return items;
+  };
 
   return (
     <div className={table.scroll}>
@@ -113,82 +154,30 @@ export const TutoradoTable: React.FC<TutoradoTableProps> = ({
                 {showActions && (
                   <td>
                     <div className={table.actions}>
+                      {onPick && pickLabel && (
+                        <Button size="sm" onClick={() => onPick(student)} aria-label={`${pickLabel}: ${student.firstName} ${student.lastName}`}>
+                          {pickLabel}
+                        </Button>
+                      )}
+                      {/* Las dos acciones más frecuentes quedan a la vista; el resto, con etiqueta, en «Más». */}
                       <IconButton label="Ver expediente" onClick={() => onViewRecord(student)}>
                         <FolderIcon size={16} />
                       </IconButton>
-                      <IconButton
-                        label="Solicitar tutoría"
-                        onClick={() => onRequestTutoring(student)}
-                      >
-                        <SendIcon size={16} />
-                      </IconButton>
-                      {canConductInterview && (
-                        <IconButton
-                          label="Registrar entrevista inicial"
-                          onClick={() => onRegisterInterview(student)}
-                        >
-                          <ClipboardIcon size={16} />
-                        </IconButton>
-                      )}
-                      {/* sessions:write y followups:write son exclusivos de Docente Tutor, igual que interviews:write. */}
-                      {canConductInterview && (
-                        <IconButton
-                          label="Programar sesión"
-                          onClick={() => onScheduleSession(student)}
-                        >
+                      {canConductInterview ? (
+                        <IconButton label="Programar sesión" onClick={() => onScheduleSession(student)}>
                           <CalendarIcon size={16} />
                         </IconButton>
-                      )}
-                      {canConductInterview && (
-                        <IconButton
-                          label="Registrar seguimiento"
-                          onClick={() => onRegisterFollowUp(student)}
-                        >
-                          <ActivityIcon size={16} />
-                        </IconButton>
-                      )}
-                      {/* referrals:write también es exclusivo de Docente Tutor. */}
-                      {canConductInterview && (
-                        <IconButton label="Derivar caso" onClick={() => onDeriveCase(student)}>
-                          <SendIcon size={16} />
-                        </IconButton>
-                      )}
-                      {canWrite && student.tutorId && (
-                        <IconButton label="Reasignar tutor" onClick={() => onReassign(student)}>
-                          <SwitchIcon size={16} />
-                        </IconButton>
-                      )}
-                      {canWrite && (
-                        <IconButton
-                          label={student.userId ? 'Cambiar cuenta de portal' : 'Vincular cuenta'}
-                          onClick={() => onLinkAccount(student)}
-                        >
-                          <LinkIcon size={16} />
-                        </IconButton>
-                      )}
-                      {canWrite &&
-                        (student.isAtRisk ? (
-                          <IconButton
-                            label="Quitar riesgo"
-                            tone="success"
-                            onClick={() => onUnmarkRisk(student)}
-                          >
-                            <CheckCircleIcon size={16} />
+                      ) : (
+                        canWrite && (
+                          <IconButton label="Editar tutorado" onClick={() => onEdit(student)}>
+                            <PencilIcon size={16} />
                           </IconButton>
-                        ) : (
-                          <IconButton
-                            label="Marcar en riesgo"
-                            tone="danger"
-                            onClick={() => onMarkRisk(student)}
-                          >
-                            <AlertTriangleIcon size={16} />
-                          </IconButton>
-                        ))}
-                      {canWrite && (
-                        <IconButton label="Editar tutorado" onClick={() => onEdit(student)}>
-                          <PencilIcon size={16} />
-                        </IconButton>
+                        )
                       )}
+                      <ActionMenu
+                        label={`Más acciones de ${student.firstName} ${student.lastName}`}
+                        items={menuItems(student)}
+                      />
                     </div>
                   </td>
                 )}

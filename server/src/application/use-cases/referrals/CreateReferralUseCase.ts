@@ -1,11 +1,10 @@
 import { StudentReferral } from '@domain/entities/StudentReferral';
 import { StudentReferralRepository } from '@domain/repositories/StudentReferralRepository';
-import { StudentRepository } from '@domain/repositories/StudentRepository';
+import { StudentAccessGuard } from '@application/access/StudentAccessGuard';
 import { UserRepository } from '@domain/repositories/UserRepository';
 import { RoleRepository } from '@domain/repositories/RoleRepository';
 import { NotificationRepository } from '@domain/repositories/NotificationRepository';
 import { CreateReferralInput } from '@application/dtos/referral.dto';
-import { StudentNotFoundError } from '@application/use-cases/students/StudentErrors';
 
 const SERVICE_LABEL: Record<string, string> = {
   ESCUELA: 'Escuela Profesional',
@@ -29,7 +28,7 @@ const SERVICE_LABEL: Record<string, string> = {
 export class CreateReferralUseCase {
   constructor(
     private readonly referrals: StudentReferralRepository,
-    private readonly students: StudentRepository,
+    private readonly guard: StudentAccessGuard,
     private readonly users: UserRepository,
     private readonly roles: RoleRepository,
     private readonly notifications: NotificationRepository,
@@ -40,10 +39,7 @@ export class CreateReferralUseCase {
     referredById: string,
     input: CreateReferralInput,
   ): Promise<StudentReferral> {
-    const student = await this.students.findById(studentId);
-    if (!student) {
-      throw new StudentNotFoundError(studentId);
-    }
+    await this.guard.assertAccess(referredById, studentId);
 
     const referral = await this.referrals.create({
       studentId,

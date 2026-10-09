@@ -6,6 +6,10 @@ import {
   tutoringRequestService,
   CreateOwnTutoringRequestData,
 } from '../services/tutoringRequestService';
+import { Badge } from '@shared/components/ui';
+import { useQueryClient } from '@tanstack/react-query';
+import { OWN_REQUESTS_KEY, useOwnTutoringRequests } from '../hooks/useTutoringRequests';
+import { CASE_TYPE_LABEL, REQUEST_STATUS_LABEL, type TutoringRequestStatus } from '../services/tutoringRequestService';
 import styles from './MyTutoringRequestPage.module.css';
 
 interface Feedback {
@@ -22,7 +26,15 @@ const CASE_TYPES: { value: CreateOwnTutoringRequestData['caseType']; label: stri
 ];
 
 // Autoservicio (Art. 19.b): el propio tutorado solicita tutoría desde su cuenta.
+const STATUS_TONE: Record<TutoringRequestStatus, 'warning' | 'info' | 'success'> = {
+  PENDIENTE: 'warning',
+  EN_ATENCION: 'info',
+  ATENDIDA: 'success',
+};
+
 export function MyTutoringRequestPage() {
+  const queryClient = useQueryClient();
+  const history = useOwnTutoringRequests();
   const [caseType, setCaseType] = useState<CreateOwnTutoringRequestData['caseType']>('ACADEMIC');
   const [reason, setReason] = useState('');
   const [submitting, setSubmitting] = useState(false);
@@ -48,6 +60,7 @@ export function MyTutoringRequestPage() {
         text: `Solicitud registrada y enrutada a ${request.routedToRole === 'tutor' ? 'tu tutor' : 'el coordinador de tu escuela'}.`,
       });
       setReason('');
+      await queryClient.invalidateQueries({ queryKey: OWN_REQUESTS_KEY });
     } catch (error) {
       setFeedback({ type: 'error', text: getApiErrorMessage(error) });
     } finally {
@@ -111,6 +124,43 @@ export function MyTutoringRequestPage() {
               Registrar solicitud
             </Button>
           </form>
+        </div>
+      </div>
+
+      <div className={styles.panel} style={{ marginTop: 18 }}>
+        <div className={styles.panelHead}>
+          <h3>Mis solicitudes</h3>
+        </div>
+        <div className={styles.panelBody}>
+          {history.loading ? (
+            <p className={styles.historyEmpty}>Cargando…</p>
+          ) : history.error ? (
+            <p className={styles.error} role="alert">
+              No se pudo cargar tu historial. Recarga la página.
+            </p>
+          ) : history.requests.length === 0 ? (
+            <p className={styles.historyEmpty}>Aún no has registrado solicitudes.</p>
+          ) : (
+            <ul className={styles.history}>
+              {history.requests.map((r) => (
+                <li key={r.id} className={styles.historyItem}>
+                  <div className={styles.historyHead}>
+                    <b>{CASE_TYPE_LABEL[r.caseType]}</b>
+                    <Badge tone={STATUS_TONE[r.status]}>{REQUEST_STATUS_LABEL[r.status]}</Badge>
+                  </div>
+                  <p className={styles.historyReason}>{r.reason}</p>
+                  <span className={styles.historyMeta}>
+                    Enviada el {new Date(r.createdAt).toLocaleDateString('es-PE')} a {r.routedToName}
+                  </span>
+                  {r.responseNote && (
+                    <p className={styles.historyResponse}>
+                      <b>Respuesta{r.handledByName ? ` de ${r.handledByName}` : ''}:</b> {r.responseNote}
+                    </p>
+                  )}
+                </li>
+              ))}
+            </ul>
+          )}
         </div>
       </div>
     </div>

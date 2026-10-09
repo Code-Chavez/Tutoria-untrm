@@ -9,6 +9,13 @@ vi.mock('../services/studentRecordService', () => ({
   studentRecordService: { getStudentRecord: vi.fn() },
 }));
 
+// La hoja de asistencia firmada (A14) tiene sus propias pruebas.
+let mockRole = 'Docente Tutor';
+vi.mock('@features/auth/hooks/useAuth', () => ({ useAuth: () => ({ user: { role: mockRole } }) }));
+vi.mock('@features/firmados/hooks/useSignedDocuments', () => ({
+  useAttendanceSheetDocuments: () => ({ period: { id: 'p1', name: '2026-II' }, documents: [], loading: false, attach: vi.fn() }),
+}));
+
 const mocked = vi.mocked(studentRecordService);
 
 const baseRecord: StudentRecord = {
@@ -136,6 +143,50 @@ describe('ExpedientePage', () => {
     expect(screen.getByText(/seguimiento al acuerdo de reforzamiento/i)).toBeInTheDocument();
     expect(screen.getByText(/prof\. juan pérez/i)).toBeInTheDocument();
     expect(screen.getByText(/cálculo i · ciclo/i)).toBeInTheDocument();
+  });
+
+  it('ofrece la hoja de asistencia (Anexo N° 4) para imprimir y adjuntar firmada, según el rol (A14)', async () => {
+    mocked.getStudentRecord.mockResolvedValue(baseRecord);
+    mockRole = 'Docente Tutor';
+    const { unmount } = renderPage();
+    expect(await screen.findByText('Hoja de asistencia (Anexo N° 4)')).toBeInTheDocument();
+    expect(screen.getByText('Periodo 2026-II')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /Descargar hoja para imprimir/ })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /Adjuntar documento firmado/ })).toBeInTheDocument();
+    unmount();
+
+    // Coordinación consulta, pero no adjunta.
+    mockRole = 'Coordinador';
+    renderPage();
+    await screen.findByText('Hoja de asistencia (Anexo N° 4)');
+    expect(screen.queryByRole('button', { name: /Adjuntar documento firmado/ })).not.toBeInTheDocument();
+  });
+
+  it('incorpora la solicitud de tutoría al expediente, con su estado y la respuesta (R01)', async () => {
+    mocked.getStudentRecord.mockResolvedValue({
+      ...baseRecord,
+      timeline: [
+        {
+          type: 'tutoringRequest',
+          id: 'r1',
+          date: '2026-10-02T00:00:00.000Z',
+          caseType: 'ACADEMIC',
+          source: 'STUDENT',
+          reason: 'Necesito apoyo en Cálculo',
+          status: 'ATENDIDA',
+          routedToName: 'Elena Ramírez',
+          responseNote: 'Te espero el jueves.',
+          handledByName: 'Elena Ramírez',
+          handledAt: '2026-10-03T00:00:00.000Z',
+        },
+      ],
+    });
+    renderPage();
+
+    expect(await screen.findByText('Solicitud de tutoría')).toBeInTheDocument();
+    expect(screen.getByText('Atendida')).toBeInTheDocument();
+    expect(screen.getByText(/Necesito apoyo en Cálculo/)).toBeInTheDocument();
+    expect(screen.getByText(/Te espero el jueves\./)).toBeInTheDocument();
   });
 
   it('muestra un estado vacío cuando no hay eventos', async () => {

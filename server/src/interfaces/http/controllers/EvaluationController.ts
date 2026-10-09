@@ -5,6 +5,9 @@ import { GetEvaluationStatusUseCase } from '@application/use-cases/evaluation/Ge
 import { GetEvaluationResultsUseCase } from '@application/use-cases/evaluation/GetEvaluationResultsUseCase';
 import { ListEvaluationWindowsUseCase } from '@application/use-cases/evaluation/ListEvaluationWindowsUseCase';
 import { SetEvaluationWindowUseCase } from '@application/use-cases/evaluation/SetEvaluationWindowUseCase';
+import { GetEvaluationStatisticsUseCase } from '@application/use-cases/evaluation/GetEvaluationStatisticsUseCase';
+import { GetEvaluationSuggestionsUseCase } from '@application/use-cases/evaluation/GetEvaluationSuggestionsUseCase';
+import { handleReportFilterError, parseReportFilters } from '../reportFilters';
 import { StudentProfileNotLinkedError } from '@application/use-cases/tutoring-requests/TutoringRequestErrors';
 import {
   NoActivePeriodError,
@@ -26,6 +29,8 @@ export class EvaluationController {
     private readonly getEvaluationResultsUseCase: GetEvaluationResultsUseCase,
     private readonly listEvaluationWindowsUseCase: ListEvaluationWindowsUseCase,
     private readonly setEvaluationWindowUseCase: SetEvaluationWindowUseCase,
+    private readonly getEvaluationStatisticsUseCase: GetEvaluationStatisticsUseCase,
+    private readonly getEvaluationSuggestionsUseCase: GetEvaluationSuggestionsUseCase,
   ) {}
 
   // Cuestionario de evaluación de la función tutorial (HU-36, Anexo N°7).
@@ -117,6 +122,48 @@ export class EvaluationController {
         res.status(403).json({ error: error.message });
       } else if (error instanceof SchoolNotFoundError) {
         res.status(404).json({ error: error.message });
+      } else if (error instanceof NoActivePeriodError) {
+        res.status(409).json({ error: error.message });
+      } else {
+        res.status(500).json({ error: 'Error interno del servidor' });
+      }
+    }
+  };
+
+  // Estadísticas por tutor del periodo activo, con los filtros combinados de HU-47 (HU-39).
+  getStatistics = async (req: Request, res: Response) => {
+    try {
+      const requesterId = req.auth?.sub as string;
+      const report = await this.getEvaluationStatisticsUseCase.execute(requesterId, parseReportFilters(req.query));
+      res.status(200).json(report);
+    } catch (error) {
+      if (handleReportFilterError(error, res)) return;
+      if (error instanceof EvaluationResultsForbiddenError) {
+        res.status(403).json({ error: error.message });
+      } else if (error instanceof NoActivePeriodError) {
+        res.status(409).json({ error: error.message });
+      } else {
+        res.status(500).json({ error: 'Error interno del servidor' });
+      }
+    }
+  };
+
+  // Sugerencias abiertas consolidadas del periodo activo (HU-40).
+  getSuggestions = async (req: Request, res: Response) => {
+    try {
+      const requesterId = req.auth?.sub as string;
+      const tutorId = typeof req.query.tutorId === 'string' ? req.query.tutorId : undefined;
+      const schoolId = typeof req.query.schoolId === 'string' ? req.query.schoolId : undefined;
+      const facultyId = typeof req.query.facultyId === 'string' ? req.query.facultyId : undefined;
+      const report = await this.getEvaluationSuggestionsUseCase.execute(requesterId, {
+        tutorId,
+        schoolId,
+        facultyId,
+      });
+      res.status(200).json(report);
+    } catch (error) {
+      if (error instanceof EvaluationResultsForbiddenError) {
+        res.status(403).json({ error: error.message });
       } else if (error instanceof NoActivePeriodError) {
         res.status(409).json({ error: error.message });
       } else {

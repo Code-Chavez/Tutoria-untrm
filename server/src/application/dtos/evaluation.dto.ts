@@ -44,3 +44,42 @@ export interface EvaluationWindowsOverview {
   periodName: string;
   schools: EvaluationWindowSchoolState[];
 }
+
+// Estadísticas de evaluación por tutor (HU-39): promedios por ítem y por
+// tutor, filtrables por escuela/facultad. Solo incluye tutores con al menos
+// una respuesta — nunca expone al tutorado que respondió.
+export interface EvaluationStatisticsItemAverage {
+  code: string;
+  label: string;
+  average: number;
+}
+
+export interface EvaluationStatisticsTutorRow {
+  tutorId: string;
+  tutorName: string;
+  totalResponses: number;
+  overallAverage: number;
+  items: EvaluationStatisticsItemAverage[];
+}
+
+export interface EvaluationStatisticsReport {
+  periodName: string;
+  tutors: EvaluationStatisticsTutorRow[];
+  /** Filtros aplicados (HU-47), para rotular la pantalla y las exportaciones. */
+  appliedFilters: string[];
+}
+
+// Sugerencias abiertas consolidadas (HU-40): "Me gustaría" / "No me gusta"
+// de respuestas que tengan al menos uno de los dos campos, sin ningún dato
+// que permita asociarlas a un tutorado.
+export interface EvaluationSuggestionEntry {
+  tutorId: string;
+  tutorName: string;
+  likes: string | null;
+  dislikes: string | null;
+}
+
+export interface EvaluationSuggestionsReport {
+  periodName: string;
+  suggestions: EvaluationSuggestionEntry[];
+}

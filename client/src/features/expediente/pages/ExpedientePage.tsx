@@ -12,11 +12,21 @@ import {
   AlertTriangleIcon,
 } from '@shared/components/icons';
 import { getApiErrorMessage } from '@shared/services/apiClient';
+import { ExportButtons } from '@shared/components/ExportButtons';
+import { downloadFile } from '@shared/services/downloadFile';
+import { useAuth } from '@features/auth/hooks/useAuth';
+import { SignedDocumentsPanel } from '@features/firmados/components/SignedDocumentsPanel';
+import { useAttendanceSheetDocuments } from '@features/firmados/hooks/useSignedDocuments';
 import styles from './ExpedientePage.module.css';
+
+// Quienes registran asistencias (sessions:write) pueden adjuntar la hoja firmada; el resto solo la consulta.
+const SHEET_UPLOAD_ROLES = ['Docente Tutor', 'Administrador DBU'];
 
 export const ExpedientePage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const { user } = useAuth();
+  const sheet = useAttendanceSheetDocuments(id as string);
 
   const { data: record, isLoading: loading, error: queryError } = useQuery({
     queryKey: ['studentRecord', id],
@@ -72,6 +82,10 @@ export const ExpedientePage: React.FC = () => {
               <Badge tone="neutral">Inactivo</Badge>
             )}
             <Badge tone="info">Tutor: {record.tutorName ?? 'Sin asignar'}</Badge>
+            <ExportButtons
+              formats={['pdf']}
+              onExport={() => downloadFile(`/students/${student.id}/record/pdf`, 'expediente-tutorado.pdf')}
+            />
           </div>
         }
       />
@@ -84,6 +98,29 @@ export const ExpedientePage: React.FC = () => {
           />
           <CardBody>
             <Timeline events={record.timeline} />
+          </CardBody>
+        </Card>
+
+        <Card className={styles.sideCard}>
+          <CardHeader title="Hoja de asistencia (Anexo N° 4)" description={sheet.period ? `Periodo ${sheet.period.name}` : undefined} />
+          <CardBody>
+            <SignedDocumentsPanel
+              title="Hoja firmada del semestre"
+              hint="Imprima la hoja, haga que el tutorado firme cada sesión junto con el docente tutor, y adjunte el escaneo. La asistencia confirmada en el sistema no reemplaza la firma del estudiante."
+              documents={sheet.documents}
+              loading={sheet.loading}
+              canUpload={!!user && SHEET_UPLOAD_ROLES.includes(user.role)}
+              onUpload={sheet.attach}
+              actions={
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  onClick={() => downloadFile(`/students/${student.id}/attendance-sheet/pdf`, 'hoja-asistencia-anexo-4.pdf')}
+                >
+                  Descargar hoja para imprimir
+                </Button>
+              }
+            />
           </CardBody>
         </Card>
 

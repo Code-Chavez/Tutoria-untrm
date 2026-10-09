@@ -46,3 +46,11 @@ export class PortalUserAlreadyLinkedError extends Error {
     this.name = 'PortalUserAlreadyLinkedError';
   }
 }
+
+// El solicitante no tiene alcance sobre la escuela o el tutorado indicados (Art. 9.a y 14.c).
+export class StudentAccessDeniedError extends Error {
+  constructor() {
+    super('No tienes acceso a los tutorados de esa escuela');
+    this.name = 'StudentAccessDeniedError';
+  }
+}

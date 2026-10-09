@@ -7,6 +7,7 @@ import { Student } from '@domain/entities/Student';
 import { SessionWithParticipants } from '@domain/entities/Session';
 import { User } from '@domain/entities/User';
 import { SystemParameter } from '@domain/entities/SystemParameter';
+import { allowAllGuard } from '../helpers/studentGuard';
 
 describe('GetRiskAlertsUseCase', () => {
   let useCase: GetRiskAlertsUseCase;
@@ -51,6 +52,8 @@ describe('GetRiskAlertsUseCase', () => {
       cancelReason: null,
       createdAt: new Date(),
       studentIds: ['student-1'],
+      attendedStudentIds: [],
+      absentStudentIds: [],
       attendance: null,
       ...overrides,
     };
@@ -77,6 +80,7 @@ describe('GetRiskAlertsUseCase', () => {
       findByStudent: jest.fn().mockResolvedValue([]),
       countAttendanceByTutorAndStudent: jest.fn(),
       createAttendance: jest.fn(),
+      recordParticipantAttendance: jest.fn(),
       reschedule: jest.fn(),
       cancel: jest.fn(),
       createChangeHistory: jest.fn(),
@@ -92,11 +96,14 @@ describe('GetRiskAlertsUseCase', () => {
       update: jest.fn(),
     };
     systemParameters = {
+      findAll: jest.fn(),
+      create: jest.fn(),
+      update: jest.fn(),
       findByKey: jest
         .fn()
         .mockResolvedValue({ key: 'absence_alert_threshold', value: '2' } as SystemParameter),
     };
-    useCase = new GetRiskAlertsUseCase(students, sessions, users, systemParameters);
+    useCase = new GetRiskAlertsUseCase(students, sessions, users, systemParameters, allowAllGuard(students));
   });
 
   it('no genera alertas cuando no hay tutorados en riesgo', async () => {

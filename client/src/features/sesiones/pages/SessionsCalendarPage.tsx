@@ -49,6 +49,8 @@ export const SessionsCalendarPage: React.FC = () => {
   const [selectedSession, setSelectedSession] = useState<TutoringSession | null>(null);
   const [registeringAttendance, setRegisteringAttendance] = useState(false);
   const [attendanceError, setAttendanceError] = useState('');
+  const [recordingRoll, setRecordingRoll] = useState(false);
+  const [rollError, setRollError] = useState('');
   const [rescheduleOpen, setRescheduleOpen] = useState(false);
   const [cancelOpen, setCancelOpen] = useState(false);
   const [changeLoading, setChangeLoading] = useState(false);
@@ -78,6 +80,22 @@ export const SessionsCalendarPage: React.FC = () => {
       setAttendanceError(getApiErrorMessage(err));
     } finally {
       setRegisteringAttendance(false);
+    }
+  };
+
+  // Asistencia por participante (A07): grupal, quiénes asistieron; individual, inasistencia.
+  const handleRecordRoll = async (attendedStudentIds: string[]) => {
+    if (!selectedSession) return;
+    setRecordingRoll(true);
+    setRollError('');
+    try {
+      const updated = await sessionService.recordAttendance(selectedSession.id, attendedStudentIds);
+      setSelectedSession(updated);
+      refresh();
+    } catch (err) {
+      setRollError(getApiErrorMessage(err));
+    } finally {
+      setRecordingRoll(false);
     }
   };
 
@@ -337,6 +355,9 @@ export const SessionsCalendarPage: React.FC = () => {
           onRegisterAttendance={handleRegisterAttendance}
           registeringAttendance={registeringAttendance}
           attendanceError={attendanceError}
+          onRecordRoll={handleRecordRoll}
+          recordingRoll={recordingRoll}
+          rollError={rollError}
           onReschedule={() => {
             setChangeError('');
             setRescheduleOpen(true);

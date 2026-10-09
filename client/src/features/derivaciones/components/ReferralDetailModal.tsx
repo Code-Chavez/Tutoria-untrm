@@ -1,8 +1,12 @@
 import React, { useEffect, useState } from 'react';
+import { useDialogFocus } from '@shared/hooks/useDialog';
 import { Button } from '@shared/components/ui';
 import { SearchIcon, CloseIcon } from '@shared/components/icons';
 import { StudentReferral, REFERRAL_SERVICE_LABEL, ReferralStatus, REFERRAL_STATUS_LABEL, referralService } from '../services/referralService';
 import { getApiErrorMessage } from '@shared/services/apiClient';
+import { useAuth } from '@features/auth/hooks/useAuth';
+import { SignedDocumentsPanel } from '@features/firmados/components/SignedDocumentsPanel';
+import { useReferralSignedDocuments } from '@features/firmados/hooks/useSignedDocuments';
 import styles from './ReferralDetailModal.module.css';
 
 interface ReferralDetailModalProps {
@@ -11,12 +15,24 @@ interface ReferralDetailModalProps {
   onStatusUpdated?: (referral: StudentReferral) => void;
 }
 
+// El estado solo avanza (el servidor rechaza retroceder o repetir), así que solo se ofrecen los siguientes.
+const STATUS_ORDER: ReferralStatus[] = ['ENVIADO', 'RECIBIDO', 'EN_ATENCION', 'ATENDIDO', 'CERRADO'];
+
 export const ReferralDetailModal: React.FC<ReferralDetailModalProps> = ({ referral, onClose, onStatusUpdated }) => {
+  const { user } = useAuth();
+  // Registran recepción, atención y cierre la DBU y el profesional del servicio destino; el tutor emisor solo consulta.
+  const canManage =
+    user?.role === 'Administrador DBU' ||
+    (user?.role === 'Profesional de Servicio' && user.service === referral.service);
+  const nextStatuses = STATUS_ORDER.slice(STATUS_ORDER.indexOf(referral.status) + 1);
+
   const [updating, setUpdating] = useState(false);
-  const [newStatus, setNewStatus] = useState<ReferralStatus>(referral.status);
+  const [newStatus, setNewStatus] = useState<ReferralStatus>(nextStatuses[0] ?? referral.status);
   const [notes, setNotes] = useState('');
   const [error, setError] = useState('');
+  const signed = useReferralSignedDocuments(referral.id);
 
+  const dialogRef = useDialogFocus();
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (e.key === 'Escape') onClose();
@@ -26,7 +42,6 @@ export const ReferralDetailModal: React.FC<ReferralDetailModalProps> = ({ referr
   }, [onClose]);
 
   const handleUpdateStatus = async () => {
-    if (newStatus === referral.status && !notes.trim()) return;
     try {
       setUpdating(true);
       setError('');
@@ -45,6 +60,8 @@ export const ReferralDetailModal: React.FC<ReferralDetailModalProps> = ({ referr
       <div
         className={styles.dialog}
         role="dialog"
+        ref={dialogRef}
+        tabIndex={-1}
         aria-modal="true"
         aria-label="Detalle de derivación"
         onClick={(e) => e.stopPropagation()}
@@ -134,10 +151,29 @@ export const ReferralDetailModal: React.FC<ReferralDetailModalProps> = ({ referr
             </div>
           )}
 
+          <SignedDocumentsPanel
+            title="Constancia firmada (Anexo N° 6)"
+            hint="Imprima la constancia, fírmela el profesional que deriva y quien recibe, y adjunte el escaneo. El registro en pantalla no reemplaza las firmas."
+            documents={signed.documents}
+            loading={signed.loading}
+            canUpload
+            onUpload={signed.attach}
+            actions={
+              <Button variant="secondary" size="sm" onClick={() => referralService.downloadConstancia(referral.id)}>
+                Descargar constancia para imprimir
+              </Button>
+            }
+          />
+
           {referral.status === 'CERRADO' ? (
             <div className={styles.closedBanner}>
               🔒 <strong>Caso Cerrado:</strong> Esta derivación se encuentra archivada y cerrada. No admite modificaciones ulteriores.
             </div>
+          ) : !canManage ? (
+            <p className={styles.readOnlyNote}>
+              Solo el servicio al que se derivó el caso y la DBU registran la recepción, la atención y el cierre.
+              Aquí puedes seguir el estado del caso.
+            </p>
           ) : (
             <div className={styles.updateSection}>
               <h3 className={styles.updateTitle}>Registrar Atención y Cambio de Estado (HU-32)</h3>
@@ -152,8 +188,8 @@ export const ReferralDetailModal: React.FC<ReferralDetailModalProps> = ({ referr
                     onChange={(e) => setNewStatus(e.target.value as ReferralStatus)}
                     disabled={updating}
                   >
-                    {Object.entries(REFERRAL_STATUS_LABEL).map(([val, label]) => (
-                      <option key={val} value={val}>{label}</option>
+                    {nextStatuses.map((val) => (
+                      <option key={val} value={val}>{REFERRAL_STATUS_LABEL[val]}</option>
                     ))}
                   </select>
                 </div>
@@ -185,7 +221,6 @@ export const ReferralDetailModal: React.FC<ReferralDetailModalProps> = ({ referr
                     onClick={handleUpdateStatus}
                     disabled={
                       updating ||
-                      (newStatus === referral.status && !notes.trim()) ||
                       ((newStatus === 'ATENDIDO' || newStatus === 'CERRADO') && !notes.trim())
                     }
                   >

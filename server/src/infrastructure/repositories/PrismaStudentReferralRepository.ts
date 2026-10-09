@@ -63,21 +63,28 @@ export class PrismaStudentReferralRepository implements StudentReferralRepositor
     return rows.map(toReferral);
   }
 
-  async updateStatus(referralId: string, status: string, changedById: string, notes?: string): Promise<StudentReferral> {
-    const row = await this.prisma.studentReferral.update({
-      where: { id: referralId },
-      data: {
-        status,
-        statusHistory: {
-          create: {
-            status,
-            notes,
-            changedById,
-          },
-        },
-      },
-      include: { statusHistory: { orderBy: { createdAt: 'desc' } } },
+  async updateStatus(
+    referralId: string,
+    status: string,
+    changedById: string,
+    notes: string | undefined,
+    expectedStatus: string,
+  ): Promise<StudentReferral | null> {
+    // El estado solo cambia si sigue siendo el que vio quien lo actualiza: dos
+    // peticiones simultáneas no se pisan (p. ej. un cierre no se sobrescribe).
+    const row = await this.prisma.$transaction(async (tx) => {
+      const { count } = await tx.studentReferral.updateMany({
+        where: { id: referralId, status: expectedStatus },
+        data: { status },
+      });
+      if (count === 0) return null;
+
+      await tx.referralStatusHistory.create({ data: { referralId, status, notes, changedById } });
+      return tx.studentReferral.findUnique({
+        where: { id: referralId },
+        include: { statusHistory: { orderBy: { createdAt: 'desc' } } },
+      });
     });
-    return toReferral(row);
+    return row ? toReferral(row) : null;
   }
 }

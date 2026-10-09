@@ -12,6 +12,7 @@ import { TutorAssignmentHistoryRepository } from '@domain/repositories/TutorAssi
 import { Student } from '@domain/entities/Student';
 import { User } from '@domain/entities/User';
 import { Role } from '@domain/entities/Role';
+import { allowAllGuard } from '../helpers/studentGuard';
 
 describe('ReassignStudentUseCase', () => {
   let useCase: ReassignStudentUseCase;
@@ -54,7 +55,7 @@ describe('ReassignStudentUseCase', () => {
       create: jest.fn().mockImplementation(async (data) => ({ id: 'hist-1', createdAt: new Date(), ...data })),
       findByStudent: jest.fn(),
     };
-    useCase = new ReassignStudentUseCase(students, users, roles, history);
+    useCase = new ReassignStudentUseCase(students, users, roles, history, allowAllGuard(students));
   });
 
   it('reasigna al nuevo tutor y conserva el historial con el tutor anterior', async () => {

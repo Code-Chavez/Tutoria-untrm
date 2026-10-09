@@ -1,0 +1,81 @@
+.page {
+  padding-bottom: var(--s8);
+}
+
+.filters {
+  display: flex;
+  gap: var(--s4);
+  flex-wrap: wrap;
+  align-items: flex-end;
+  margin-bottom: var(--s5);
+}
+
+.field {
+  flex: 1;
+  min-width: 220px;
+}
+
+.field label {
+  display: block;
+  font-family: var(--ft);
+  font-size: var(--fs-xs);
+  font-weight: 600;
+  color: var(--g900);
+  margin-bottom: var(--s2);
+}
+
+.exports {
+  display: flex;
+  gap: var(--s2);
+  justify-content: flex-end;
+  margin: calc(var(--s3) * -1) 0 var(--s4);
+}
+
+.tableWrap {
+  overflow-x: auto;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--fs-sm);
+  color: var(--g900);
+}
+
+.table th {
+  text-align: left;
+  font-size: var(--fs-xs);
+  color: var(--g600);
+  padding: var(--s3);
+  white-space: nowrap;
+  border-bottom: 1px solid var(--borde);
+}
+
+.table td {
+  padding: var(--s2) var(--s3);
+  border-bottom: 1px solid var(--borde);
+}
+
+.table th.num,
+.table td.num {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.subtotal td {
+  font-weight: 600;
+  background: var(--g50, #f7f9fc);
+}
+
+.table tfoot td {
+  font-weight: 700;
+  color: var(--azul);
+  border-top: 2px solid var(--azul);
+}
+
+.error {
+  color: var(--peligro);
+  font-size: var(--fs-sm);
+  margin: 0 0 var(--s4);
+}

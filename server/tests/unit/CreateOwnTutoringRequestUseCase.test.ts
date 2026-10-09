@@ -9,7 +9,7 @@ import { CreateOwnTutoringRequestInput } from '@application/dtos/tutoringRequest
 describe('CreateOwnTutoringRequestUseCase', () => {
   let useCase: CreateOwnTutoringRequestUseCase;
   let students: jest.Mocked<StudentRepository>;
-  let createTutoringRequestUseCase: jest.Mocked<Pick<CreateTutoringRequestUseCase, 'execute'>>;
+  let createTutoringRequestUseCase: jest.Mocked<Pick<CreateTutoringRequestUseCase, 'execute' | 'registerFor'>>;
 
   const linkedStudent = { id: 'student-1', userId: 'user-1' } as Student;
   const baseInput: CreateOwnTutoringRequestInput = {
@@ -30,6 +30,7 @@ describe('CreateOwnTutoringRequestUseCase', () => {
     };
     createTutoringRequestUseCase = {
       execute: jest.fn().mockResolvedValue({ id: 'req-1' } as TutoringRequest),
+      registerFor: jest.fn().mockResolvedValue({ id: 'req-1' } as TutoringRequest),
     };
 
     useCase = new CreateOwnTutoringRequestUseCase(
@@ -42,7 +43,9 @@ describe('CreateOwnTutoringRequestUseCase', () => {
     await useCase.execute('user-1', baseInput);
 
     expect(students.findByUserId).toHaveBeenCalledWith('user-1');
-    expect(createTutoringRequestUseCase.execute).toHaveBeenCalledWith('student-1', 'user-1', {
+    // El tutorado no tiene alcance de personal sobre ningún estudiante: no pasa por StudentAccessGuard (R01).
+    expect(createTutoringRequestUseCase.execute).not.toHaveBeenCalled();
+    expect(createTutoringRequestUseCase.registerFor).toHaveBeenCalledWith(linkedStudent, 'user-1', {
       source: 'STUDENT',
       caseType: 'ACADEMIC',
       reason: 'Dificultad en el curso de Cálculo',
@@ -55,6 +58,6 @@ describe('CreateOwnTutoringRequestUseCase', () => {
     await expect(useCase.execute('user-sin-vinculo', baseInput)).rejects.toThrow(
       StudentProfileNotLinkedError,
     );
-    expect(createTutoringRequestUseCase.execute).not.toHaveBeenCalled();
+    expect(createTutoringRequestUseCase.registerFor).not.toHaveBeenCalled();
   });
 });

@@ -5,6 +5,7 @@ import { TutorFollowUpRepository } from '@domain/repositories/TutorFollowUpRepos
 import { StudentRepository } from '@domain/repositories/StudentRepository';
 import { Student } from '@domain/entities/Student';
 import { CreateFollowUpInput } from '@application/dtos/followUp.dto';
+import { allowAllGuard } from '../helpers/studentGuard';
 
 describe('CreateFollowUpUseCase', () => {
   let useCase: CreateFollowUpUseCase;
@@ -25,6 +26,7 @@ describe('CreateFollowUpUseCase', () => {
         ...data,
       })),
       findByStudent: jest.fn(),
+      findByTutorBetween: jest.fn(),
     };
     students = {
       findById: jest.fn().mockResolvedValue({ id: 'student-1' } as Student),
@@ -36,7 +38,7 @@ describe('CreateFollowUpUseCase', () => {
       assignTutor: jest.fn(),
       countByTutor: jest.fn(),
     };
-    useCase = new CreateFollowUpUseCase(followUps, students);
+    useCase = new CreateFollowUpUseCase(followUps, allowAllGuard(students));
   });
 
   it('registra el seguimiento con el propio tutorado (sin datos de docente)', async () => {

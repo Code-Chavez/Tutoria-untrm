@@ -15,4 +15,11 @@ export class PrismaTutorFollowUpRepository implements TutorFollowUpRepository {
       orderBy: { createdAt: 'desc' },
     });
   }
+
+  findByTutorBetween(tutorId: string, from: Date, to: Date): Promise<TutorFollowUp[]> {
+    return this.prisma.tutorFollowUp.findMany({
+      where: { conductedById: tutorId, createdAt: { gte: from, lte: to } },
+      orderBy: { createdAt: 'asc' },
+    });
+  }
 }

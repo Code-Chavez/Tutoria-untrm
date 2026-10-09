@@ -18,3 +18,17 @@ export class StudentProfileNotLinkedError extends Error {
     this.name = 'StudentProfileNotLinkedError';
   }
 }
+
+export class TutoringRequestNotFoundError extends Error {
+  constructor() {
+    super('No se encontró la solicitud de tutoría');
+    this.name = 'TutoringRequestNotFoundError';
+  }
+}
+
+export class InvalidTutoringRequestStatusError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = 'InvalidTutoringRequestStatusError';
+  }
+}

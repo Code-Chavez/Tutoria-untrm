@@ -15,6 +15,8 @@ const session: TutoringSession = {
   location: 'Oficina 204',
   meetingLink: null,
   studentIds: ['s1'],
+  attendedStudentIds: [],
+  absentStudentIds: [],
   attendance: null,
   cancelledAt: null,
   cancelReason: null,

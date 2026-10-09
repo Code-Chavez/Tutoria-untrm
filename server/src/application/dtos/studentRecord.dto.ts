@@ -1,8 +1,9 @@
 import { SupportContact } from '@domain/entities/SupportContact';
 import { ReferralService, ReferralStatus } from '@domain/entities/StudentReferral';
+import { TutoringCaseType, TutoringRequestSource, TutoringRequestStatus } from '@domain/entities/TutoringRequest';
 
 // Un evento del expediente (HU-16).
-export type StudentRecordEventType = 'interview' | 'assignment' | 'attendance' | 'followUp' | 'referral';
+export type StudentRecordEventType = 'interview' | 'assignment' | 'attendance' | 'followUp' | 'referral' | 'tutoringRequest';
 
 export interface InterviewRecordEvent {
   type: 'interview';
@@ -59,12 +60,28 @@ export interface ReferralRecordEvent {
   receivingInstance: string | null;
 }
 
+// Solicitud de tutoría (R01): quién la pidió, su tipo, a quién se enrutó y cómo se atendió.
+export interface TutoringRequestRecordEvent {
+  type: 'tutoringRequest';
+  id: string;
+  date: Date;
+  caseType: TutoringCaseType;
+  source: TutoringRequestSource;
+  reason: string;
+  status: TutoringRequestStatus;
+  routedToName: string;
+  responseNote: string | null;
+  handledByName: string | null;
+  handledAt: Date | null;
+}
+
 export type StudentRecordEvent =
   | InterviewRecordEvent
   | AssignmentRecordEvent
   | AttendanceRecordEvent
   | FollowUpRecordEvent
-  | ReferralRecordEvent;
+  | ReferralRecordEvent
+  | TutoringRequestRecordEvent;
 
 export interface StudentRecord {
   student: {

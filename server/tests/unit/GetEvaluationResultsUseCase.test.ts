@@ -45,6 +45,9 @@ describe('GetEvaluationResultsUseCase', () => {
     };
     periods = {
       findActive: jest.fn().mockResolvedValue(activePeriod),
+      findAll: jest.fn(),
+      findById: jest.fn(),
+      findByDate: jest.fn(),
     };
     evaluations = {
       create: jest.fn(),
@@ -52,6 +55,8 @@ describe('GetEvaluationResultsUseCase', () => {
       findAnonymizedScoresByTutorAndPeriod: jest
         .fn()
         .mockResolvedValue([{ scores: allSiempre }, { scores: allNunca }]),
+      findAnonymizedScoresByPeriod: jest.fn().mockResolvedValue([]),
+      findAnonymizedSuggestionsByPeriod: jest.fn().mockResolvedValue([]),
     };
     useCase = new GetEvaluationResultsUseCase(users, roles, periods, evaluations);
   });

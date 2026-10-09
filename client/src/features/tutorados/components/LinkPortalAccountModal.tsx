@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { useDialogFocus } from '@shared/hooks/useDialog';
 import { Button, SelectField } from '@shared/components/ui';
 import { LinkIcon, CloseIcon } from '@shared/components/icons';
 import { Student } from '../services/studentService';
@@ -31,6 +32,7 @@ export const LinkPortalAccountModal: React.FC<LinkPortalAccountModalProps> = ({
 }) => {
   const [userId, setUserId] = useState(student.userId ?? '');
 
+  const dialogRef = useDialogFocus();
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (e.key === 'Escape') onCancel();
@@ -44,6 +46,8 @@ export const LinkPortalAccountModal: React.FC<LinkPortalAccountModalProps> = ({
       <div
         className={styles.dialog}
         role="dialog"
+        ref={dialogRef}
+        tabIndex={-1}
         aria-modal="true"
         aria-label="Vincular cuenta de portal"
         onClick={(e) => e.stopPropagation()}

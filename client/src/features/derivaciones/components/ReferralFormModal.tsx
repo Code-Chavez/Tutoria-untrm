@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
+import { useDialogFocus } from '@shared/hooks/useDialog';
 import { Button, SelectField } from '@shared/components/ui';
 import { SendIcon, CloseIcon, InfoIcon } from '@shared/components/icons';
 import { Student } from '@features/tutorados/services/studentService';
@@ -53,6 +54,7 @@ export const ReferralFormModal: React.FC<ReferralFormModalProps> = ({
   const suggestedService = useMemo(() => suggestReferralService([...checked]), [checked]);
   const effectiveService = manualService || suggestedService || '';
 
+  const dialogRef = useDialogFocus();
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (e.key === 'Escape') onCancel();
@@ -97,6 +99,8 @@ export const ReferralFormModal: React.FC<ReferralFormModalProps> = ({
       <div
         className={styles.dialog}
         role="dialog"
+        ref={dialogRef}
+        tabIndex={-1}
         aria-modal="true"
         aria-label="Ficha de derivación"
         onClick={(e) => e.stopPropagation()}

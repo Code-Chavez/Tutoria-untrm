@@ -36,7 +36,9 @@ export const StudentSelectList: React.FC<StudentSelectListProps> = ({
   onToggleAllVisible,
 }) => {
   const set = (patch: Partial<AssignFilterValues>) => onFilterChange({ ...filters, ...patch });
-  const allVisibleSelected = students.length > 0 && students.every((s) => selectedIds.has(s.id));
+  // La asignación inicial es solo para quien aún no tiene tutor; cambiar de tutor se hace desde «Tutorados», con motivo.
+  const selectable = students.filter((s) => !s.tutorId);
+  const allVisibleSelected = selectable.length > 0 && selectable.every((s) => selectedIds.has(s.id));
 
   return (
     <div>
@@ -94,7 +96,7 @@ export const StudentSelectList: React.FC<StudentSelectListProps> = ({
                   checked={allVisibleSelected}
                   onChange={(e) => onToggleAllVisible(e.target.checked)}
                   aria-label="Seleccionar todos los visibles"
-                  disabled={students.length === 0}
+                  disabled={selectable.length === 0}
                 />
               </th>
               <th>Código</th>
@@ -110,7 +112,9 @@ export const StudentSelectList: React.FC<StudentSelectListProps> = ({
                 <tr
                   key={student.id}
                   className={selectedIds.has(student.id) ? styles.rowSelected : ''}
-                  onClick={() => onToggle(student.id)}
+                  onClick={() => {
+                    if (!student.tutorId) onToggle(student.id);
+                  }}
                 >
                   <td className={styles.checkCol}>
                     <input
@@ -118,6 +122,8 @@ export const StudentSelectList: React.FC<StudentSelectListProps> = ({
                       checked={selectedIds.has(student.id)}
                       onChange={() => onToggle(student.id)}
                       onClick={(e) => e.stopPropagation()}
+                      disabled={Boolean(student.tutorId)}
+                      title={student.tutorId ? 'Ya tiene tutor: para cambiarlo usa «Reasignar» en Tutorados' : undefined}
                       aria-label={`Seleccionar ${student.firstName} ${student.lastName}`}
                     />
                   </td>

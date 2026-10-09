@@ -11,6 +11,8 @@ const evaluationController = new EvaluationController(
   container.useCases.getEvaluationResultsUseCase,
   container.useCases.listEvaluationWindowsUseCase,
   container.useCases.setEvaluationWindowUseCase,
+  container.useCases.getEvaluationStatisticsUseCase,
+  container.useCases.getEvaluationSuggestionsUseCase,
 );
 
 const requireAuth = authenticate(container.services.tokenService);
@@ -29,6 +31,23 @@ router.post(
   requireAuth,
   authorize(['evaluation:respond']),
   evaluationController.submit,
+);
+
+// Estadísticas por tutor del periodo activo (HU-39), antes de la ruta con
+// :tutorId para que "statistics" no se interprete como un ID de tutor.
+router.get(
+  '/evaluations/statistics',
+  requireAuth,
+  authorize(['evaluation:manage']),
+  evaluationController.getStatistics,
+);
+
+// Sugerencias abiertas consolidadas del periodo activo (HU-40).
+router.get(
+  '/evaluations/suggestions',
+  requireAuth,
+  authorize(['evaluation:manage']),
+  evaluationController.getSuggestions,
 );
 
 // Resultados agregados y anónimos de un tutor (HU-37): solo para quien

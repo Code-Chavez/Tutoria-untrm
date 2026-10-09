@@ -47,10 +47,13 @@ model User {
   sessionsAsTutor      Session[]                @relation("SessionsAsTutor")
   sessionChangesMade   SessionChangeHistory[]   @relation("SessionChangesMade")
   sessionEvidenceUploads SessionEvidence[]      @relation("SessionEvidenceUploads")
+  signedDocumentsUploaded SignedDocument[]     @relation("SignedDocumentUploads")
   referralsCreated       StudentReferral[]      @relation("ReferralsCreated")
   referralStatusChanges  ReferralStatusHistory[] @relation("ReferralStatusChanges")
   notifications          Notification[]
   evaluationsReceived    TutorEvaluation[] @relation("TutorEvaluationsReceived")
+  workPlansAuthored      WorkPlan[]        @relation("WorkPlansAuthored")
+  semesterReports        TutorSemesterReport[]
 
   @@map("users")
 }
@@ -90,10 +93,13 @@ model RolePermission {
 
 model RefreshToken {
   id        String   @id @default(uuid())
-  token     String   @unique
-  userId    String   @map("user_id")
-  expiresAt DateTime @map("expires_at")
-  createdAt DateTime @default(now()) @map("created_at")
+  // Hash SHA-256 del token: la base nunca guarda el valor que usa el cliente (A16).
+  tokenHash String    @unique @map("token_hash")
+  userId    String    @map("user_id")
+  expiresAt DateTime  @map("expires_at")
+  // Un token rotado queda revocado; presentarlo otra vez indica robo o reutilización.
+  revokedAt DateTime? @map("revoked_at")
+  createdAt DateTime  @default(now()) @map("created_at")
 
   user User @relation(fields: [userId], references: [id])
 
@@ -104,7 +110,8 @@ model RefreshToken {
 
 model PasswordResetToken {
   id        String   @id @default(uuid())
-  token     String   @unique
+  // Hash SHA-256 del token enviado por correo: la base nunca guarda el enlace utilizable (A09).
+  tokenHash String   @unique @map("token_hash")
   userId    String   @map("user_id")
   expiresAt DateTime @map("expires_at")
   used      Boolean  @default(false)
@@ -162,6 +169,7 @@ model School {
   coordinator   User?   @relation("SchoolCoordinator", fields: [coordinatorId], references: [id])
 
   evaluationWindows EvaluationWindow[]
+  workPlans         WorkPlan[]
 
   @@unique([name, facultyId])
   @@map("schools")
@@ -177,6 +185,10 @@ model AcademicPeriod {
 
   evaluations       TutorEvaluation[]
   evaluationWindows EvaluationWindow[]
+  workPlans         WorkPlan[]
+  tutorSemesterReports TutorSemesterReport[]
+  studentSnapshots     StudentPeriodSnapshot[]
+  signedDocuments      SignedDocument[]
 
   @@map("academic_periods")
 }
@@ -211,6 +223,8 @@ model Student {
   portalUser User?     @relation("StudentPortalUser", fields: [userId], references: [id])
 
   assignmentHistory TutorAssignmentHistory[]
+  signedDocuments   SignedDocument[]
+  periodSnapshots   StudentPeriodSnapshot[]
   interviews        TutorInterview[]
   followUps         TutorFollowUp[]
   supportContact    SupportContact?
@@ -368,6 +382,17 @@ model TutoringRequest {
   routedTo     User   @relation("RequestsRouted", fields: [routedToId], references: [id])
   routedToRole String @map("routed_to_role") // 'tutor' | 'coordinator'
 
+  notifications Notification[]
+
+  // Atención (R01): 'PENDIENTE' → 'EN_ATENCION' → 'ATENDIDA'. Solo avanza.
+  status       String    @default("PENDIENTE")
+  // Respuesta que ve el estudiante al atenderse (obligatoria al marcarla atendida).
+  responseNote String?   @map("response_note")
+  handledById  String?   @map("handled_by_id")
+  handledAt    DateTime? @map("handled_at")
+  // Sesión en la que se atendió (opcional).
+  sessionId    String?   @map("session_id")
+
   @@index([studentId])
   @@index([routedToId])
   @@map("tutoring_requests")
@@ -418,6 +443,10 @@ model SessionParticipant {
   studentId String  @map("student_id")
   student   Student @relation(fields: [studentId], references: [id])
 
+  // Asistencia de este participante (A07): true = asistió, false = no asistió,
+  // null = aún sin registrar. Las métricas cuentan solo a quienes asistieron.
+  attended Boolean?
+
   @@unique([sessionId, studentId])
   @@map("session_participants")
 }
@@ -436,6 +465,14 @@ model SessionAttendance {
   confirmedAt    DateTime @map("confirmed_at")
   createdAt      DateTime @default(now()) @map("created_at")
 
+  // Ámbito de la numeración (A08): el número del Anexo N°4 corre por tutor, tutorado y semestre.
+  // Nulos solo en registros anteriores cuya sesión no cae en ningún periodo registrado.
+  tutorId   String? @map("tutor_id")
+  studentId String? @map("student_id")
+  periodId  String? @map("period_id")
+
+  // Dos confirmaciones simultáneas no pueden quedarse con el mismo número.
+  @@unique([tutorId, studentId, periodId, sequenceNumber])
   @@map("session_attendances")
 }
 
@@ -494,6 +531,9 @@ model StudentReferral {
   id        String   @id @default(uuid())
   createdAt DateTime @default(now()) @map("created_at")
 
+  signedDocuments SignedDocument[]
+  notifications   Notification[]
+
   studentId String  @map("student_id")
   student   Student @relation(fields: [studentId], references: [id])
 
@@ -549,11 +589,17 @@ model Notification {
   userId String @map("user_id")
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  // 'REFERRAL_CREATED' | 'REFERRAL_STATUS_CHANGED'
+  // 'REFERRAL_CREATED' | 'REFERRAL_STATUS_CHANGED' | 'TUTORING_REQUEST_CREATED' | 'TUTORING_REQUEST_UPDATED'
   type    String
   message String
 
-  referralId String? @map("referral_id")
+  // El caso al que se refiere el aviso. Si el caso se elimina, el aviso también (R03): nunca queda
+  // un aviso que apunte a algo que ya no existe.
+  referralId String?          @map("referral_id")
+  referral   StudentReferral? @relation(fields: [referralId], references: [id], onDelete: Cascade)
+  // Solicitud de tutoría a la que se refiere el aviso (R01).
+  tutoringRequestId String?          @map("tutoring_request_id")
+  tutoringRequest   TutoringRequest? @relation(fields: [tutoringRequestId], references: [id], onDelete: Cascade)
 
   read Boolean @default(false)
 
@@ -607,6 +653,79 @@ model EvaluationWindow {
   @@map("evaluation_windows")
 }
 
+// Plan de trabajo semestral de tutoría (HU-41, Anexo N°8, Art. 17.a): lo
+// elabora el coordinador de tutoría de la escuela, uno por periodo y escuela.
+// Las tablas del anexo (cronograma, recursos, presupuesto) se guardan como Json.
+model WorkPlan {
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  periodId String         @map("period_id")
+  period   AcademicPeriod @relation(fields: [periodId], references: [id])
+
+  schoolId String @map("school_id")
+  school   School @relation(fields: [schoolId], references: [id])
+
+  authorId String @map("author_id")
+  author   User   @relation("WorkPlansAuthored", fields: [authorId], references: [id])
+
+  introduction       String
+  denomination       String
+  eventType          String   @map("event_type")
+  executionDate      String   @map("execution_date")
+  schedule           String
+  place              String
+  modality           String
+  organizers         String
+  supportUnit        String   @map("support_unit")
+  foundation         String
+  generalObjective   String   @map("general_objective")
+  specificObjectives String[] @map("specific_objectives")
+  targetAudience     String   @map("target_audience")
+  methodology        String
+
+  planning              Json
+  programming           Json
+  physicalResources     Json @map("physical_resources")
+  humanResources        Json @map("human_resources")
+  budget                Json
+  operationalActivities Json @map("operational_activities")
+
+  // Resolución de aprobación (HU-42): sin ella el plan no es vigente.
+  resolutionFileName   String?   @map("resolution_file_name")
+  resolutionFileSize   Int?      @map("resolution_file_size")
+  resolutionStorageKey String?   @map("resolution_storage_key")
+  resolutionUploadedAt DateTime? @map("resolution_uploaded_at")
+
+  // Revisión vigente del contenido (A12): al editar un plan ya aprobado se archiva la
+  // versión aprobada y el contenido pasa a una nueva revisión que requiere su propia resolución.
+  revision Int                @default(1)
+  versions WorkPlanVersion[]
+
+  @@unique([periodId, schoolId])
+  @@map("work_plans")
+}
+
+// Versión aprobada de un plan (A12): el contenido tal como lo aprobó la resolución adjunta, inalterable.
+model WorkPlanVersion {
+  id         String   @id @default(uuid())
+  createdAt  DateTime @default(now()) @map("created_at")
+  workPlanId String   @map("work_plan_id")
+  workPlan   WorkPlan @relation(fields: [workPlanId], references: [id], onDelete: Cascade)
+  revision   Int
+  authorId   String   @map("author_id")
+  content    Json
+
+  resolutionFileName   String   @map("resolution_file_name")
+  resolutionFileSize   Int      @map("resolution_file_size")
+  resolutionStorageKey String   @map("resolution_storage_key")
+  resolutionUploadedAt DateTime @map("resolution_uploaded_at")
+
+  @@unique([workPlanId, revision])
+  @@map("work_plan_versions")
+}
+
 // ─── Parámetros del Sistema ────────────────────────────────────
 
 model SystemParameter {
@@ -616,4 +735,114 @@ model SystemParameter {
   label String
 
   @@map("system_parameters")
+}
+
+// Informe de implementación de la tutoría semestral del tutor (HU-43,
+// Anexo N°9): un informe por tutor y periodo; las tablas se guardan como Json.
+model TutorSemesterReport {
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  periodId String         @map("period_id")
+  period   AcademicPeriod @relation(fields: [periodId], references: [id])
+  tutorId  String         @map("tutor_id")
+  tutor    User           @relation(fields: [tutorId], references: [id])
+
+  programName     String @map("program_name")
+  faculty         String
+  teacherCategory String @map("teacher_category")
+  tutoringCycles  String @map("tutoring_cycles")
+  phone           String
+
+  individual Json
+  group      Json
+
+  @@unique([periodId, tutorId])
+  @@map("tutor_semester_reports")
+}
+
+// Catálogos maestros editables (HU-48): ciclos, servicios y motivos. Las
+// facultades, escuelas y periodos usan sus propias tablas. `code` es el valor
+// que referencian los demás datos (p. ej. Student.cycle o StudentReferral.service),
+// por eso no se edita; `isActive` retira el ítem de las listas sin perder historial.
+model CatalogItem {
+  id        String   @id @default(uuid())
+  catalog   String
+  code      String
+  name      String
+  isActive  Boolean  @default(true) @map("is_active")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@unique([catalog, code])
+  @@map("catalog_items")
+}
+
+// Identidad visual institucional configurable (HU-50): una sola fila ("default").
+// Sin fila rige la identidad UNTRM por defecto definida en el código.
+model BrandingSetting {
+  id              String   @id @default("default")
+  institutionName String   @map("institution_name")
+  shortName       String   @map("short_name")
+  primaryColor    String   @map("primary_color")
+  accentColor     String   @map("accent_color")
+  logoStorageKey  String?  @map("logo_storage_key")
+  logoMimeType    String?  @map("logo_mime_type")
+  updatedAt       DateTime @updatedAt @map("updated_at")
+
+  @@map("branding_settings")
+}
+
+// Corte de la matrícula de un semestre (A17): escuela, ciclo, tutor y estado de cada
+// tutorado tal como estaban al cerrarse el periodo. Los informes de un semestre
+// cerrado leen este corte, así que reasignar o desactivar después no cambia sus cifras.
+model StudentPeriodSnapshot {
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now()) @map("created_at")
+
+  periodId String           @map("period_id")
+  period   AcademicPeriod   @relation(fields: [periodId], references: [id], onDelete: Cascade)
+  studentId String          @map("student_id")
+  student   Student         @relation(fields: [studentId], references: [id], onDelete: Cascade)
+
+  schoolId String  @map("school_id")
+  cycle    Int
+  tutorId  String? @map("tutor_id")
+  isActive Boolean @map("is_active")
+  isAtRisk Boolean @map("is_at_risk")
+
+  @@unique([periodId, studentId])
+  @@index([periodId])
+  @@map("student_period_snapshots")
+}
+
+// Documento firmado y escaneado (A14): el formato impreso (constancia de derivación, hoja de asistencia)
+// se firma a mano y se adjunta aquí. El sistema no equipara un clic con una firma: guarda el archivo, quién
+// lo adjuntó, cuándo y su huella SHA-256 para identificar la evidencia de conformidad.
+model SignedDocument {
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now()) @map("created_at")
+
+  // REFERRAL_CONSTANCIA (Anexo N°6) o ATTENDANCE_SHEET (Anexo N°4).
+  kind String
+
+  referralId String?          @map("referral_id")
+  referral   StudentReferral? @relation(fields: [referralId], references: [id], onDelete: Cascade)
+  studentId  String?          @map("student_id")
+  student    Student?         @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  periodId   String?          @map("period_id")
+  period     AcademicPeriod?  @relation(fields: [periodId], references: [id], onDelete: Cascade)
+
+  fileName   String @map("file_name")
+  mimeType   String @map("mime_type")
+  fileSize   Int    @map("file_size")
+  storageKey String @map("storage_key")
+  sha256     String
+
+  uploadedById String @map("uploaded_by_id")
+  uploadedBy   User   @relation("SignedDocumentUploads", fields: [uploadedById], references: [id])
+
+  @@index([referralId])
+  @@index([studentId, periodId])
+  @@map("signed_documents")
 }

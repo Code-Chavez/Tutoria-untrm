@@ -8,12 +8,14 @@ import { TutoringRequestRepository } from '@domain/repositories/TutoringRequestR
 import { StudentRepository } from '@domain/repositories/StudentRepository';
 import { SchoolRepository } from '@domain/repositories/SchoolRepository';
 import { UserRepository } from '@domain/repositories/UserRepository';
+import { NotificationRepository } from '@domain/repositories/NotificationRepository';
 import { RoleRepository } from '@domain/repositories/RoleRepository';
 import { Student } from '@domain/entities/Student';
 import { School } from '@domain/entities/School';
 import { User } from '@domain/entities/User';
 import { Role } from '@domain/entities/Role';
 import { CreateTutoringRequestInput } from '@application/dtos/tutoringRequest.dto';
+import { allowAllGuard } from '../helpers/studentGuard';
 
 describe('CreateTutoringRequestUseCase', () => {
   let useCase: CreateTutoringRequestUseCase;
@@ -22,6 +24,7 @@ describe('CreateTutoringRequestUseCase', () => {
   let schools: jest.Mocked<SchoolRepository>;
   let users: jest.Mocked<UserRepository>;
   let roles: jest.Mocked<RoleRepository>;
+  let notifications: jest.Mocked<NotificationRepository>;
 
   const baseInput: CreateTutoringRequestInput = {
     source: 'STUDENT',
@@ -34,8 +37,10 @@ describe('CreateTutoringRequestUseCase', () => {
   beforeEach(() => {
     requests = {
       create: jest.fn().mockImplementation(async (data) => ({ id: 'req-1', createdAt: new Date(), ...data })),
+      findById: jest.fn(),
       findAll: jest.fn(),
       findByStudent: jest.fn(),
+      updateAttention: jest.fn(),
     };
     students = {
       findById: jest.fn().mockResolvedValue({ id: 'student-1', tutorId: 'tutor-1', schoolId: 'school-1' } as Student),
@@ -61,7 +66,19 @@ describe('CreateTutoringRequestUseCase', () => {
       findAll: jest.fn(),
       create: jest.fn(),
     };
-    useCase = new CreateTutoringRequestUseCase(requests, students, schools, users, roles);
+    notifications = { create: jest.fn(), findByUser: jest.fn(), markRead: jest.fn() } as unknown as jest.Mocked<NotificationRepository>;
+    useCase = new CreateTutoringRequestUseCase(requests, allowAllGuard(students), schools, users, roles, notifications);
+  });
+
+  it('avisa a quien recibe la solicitud, salvo que la haya registrado esa misma persona (R01)', async () => {
+    await useCase.execute('student-1', 'user-actor', baseInput);
+    expect(notifications.create).toHaveBeenCalledWith(
+      expect.objectContaining({ userId: 'tutor-1', type: 'TUTORING_REQUEST_CREATED', tutoringRequestId: expect.anything() }),
+    );
+
+    notifications.create.mockClear();
+    await useCase.execute('student-1', 'tutor-1', baseInput);
+    expect(notifications.create).not.toHaveBeenCalled();
   });
 
   it('enruta al tutor cuando el estudiante ya tiene uno asignado', async () => {

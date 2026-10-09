@@ -38,11 +38,16 @@ describe('GetEvaluationStatusUseCase', () => {
     };
     periods = {
       findActive: jest.fn().mockResolvedValue(activePeriod),
+      findAll: jest.fn(),
+      findById: jest.fn(),
+      findByDate: jest.fn(),
     };
     evaluations = {
       create: jest.fn(),
       findByStudentAndPeriod: jest.fn().mockResolvedValue(null),
       findAnonymizedScoresByTutorAndPeriod: jest.fn().mockResolvedValue([]),
+      findAnonymizedScoresByPeriod: jest.fn().mockResolvedValue([]),
+      findAnonymizedSuggestionsByPeriod: jest.fn().mockResolvedValue([]),
     };
     windows = {
       findByPeriodAndSchool: jest.fn().mockResolvedValue(openWindow),

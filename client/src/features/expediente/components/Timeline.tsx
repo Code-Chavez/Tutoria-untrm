@@ -13,6 +13,7 @@ import {
   REFERRAL_STATUS_LABEL,
 } from '@features/derivaciones/services/referralService';
 import { StudentRecordEvent } from '../services/studentRecordService';
+import { CASE_TYPE_LABEL, REQUEST_STATUS_LABEL } from '@features/solicitudes/services/tutoringRequestService';
 import styles from './Timeline.module.css';
 
 interface TimelineProps {
@@ -33,6 +34,7 @@ const EVENT_TITLES: Record<StudentRecordEvent['type'], string> = {
   attendance: 'Asistencia a sesión',
   followUp: 'Ficha de seguimiento',
   referral: 'Derivación a servicio',
+  tutoringRequest: 'Solicitud de tutoría',
 };
 
 function EventIcon({ type }: { type: StudentRecordEvent['type'] }) {
@@ -44,6 +46,7 @@ function EventIcon({ type }: { type: StudentRecordEvent['type'] }) {
     case 'followUp':
       return <ActivityIcon size={16} />;
     case 'referral':
+    case 'tutoringRequest':
       return <SendIcon size={16} />;
     default:
       return <CheckCircleIcon size={16} />;
@@ -134,6 +137,24 @@ export const Timeline: React.FC<TimelineProps> = ({ events }) => {
                   </p>
                 )}
                 <span className={styles.meta}>Registrada por {event.conductedByName}</span>
+              </div>
+            )}
+
+            {event.type === 'tutoringRequest' && (
+              <div className={styles.cardBody}>
+                <div className={styles.motives}>
+                  <Badge tone="info">{CASE_TYPE_LABEL[event.caseType]}</Badge>
+                  <Badge tone="neutral">{REQUEST_STATUS_LABEL[event.status]}</Badge>
+                </div>
+                <p>
+                  <b>Motivo:</b> {event.reason}
+                </p>
+                {event.responseNote && (
+                  <p>
+                    <b>Respuesta{event.handledByName ? ` de ${event.handledByName}` : ''}:</b> {event.responseNote}
+                  </p>
+                )}
+                <span className={styles.meta}>Enrutada a {event.routedToName}</span>
               </div>
             )}
 

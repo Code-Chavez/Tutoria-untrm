@@ -3,6 +3,9 @@ import { RoleRepository } from '@domain/repositories/RoleRepository';
 import { SessionRepository } from '@domain/repositories/SessionRepository';
 import { StudentRepository } from '@domain/repositories/StudentRepository';
 import { SessionWithParticipants } from '@domain/entities/Session';
+import { StudentAccessGuard } from '@application/access/StudentAccessGuard';
+import { TutorNotFoundError } from '@application/use-cases/assignments/AssignmentErrors';
+import { scopeCovers } from '@application/access/StudentAccessGuard';
 import {
   GetScheduleAttendanceReportInput,
   ScheduleAttendanceReport,
@@ -10,13 +13,11 @@ import {
   ScheduleAttendanceStatus,
 } from '@application/dtos/report.dto';
 import { assertActiveTutor } from '@application/use-cases/assignments/TutorValidation';
+import { sessionOutcome } from '@application/use-cases/sessions/sessionOutcome';
 
-function deriveStatus(session: SessionWithParticipants, now: Date): ScheduleAttendanceStatus {
-  if (session.cancelledAt) return 'CANCELADA';
-  if (now < session.scheduledAt) return 'PROXIMA';
-  if (now > session.endsAt) return 'REALIZADA';
-  return 'EN_CURSO';
-}
+// El estado sale de la asistencia registrada, no solo de la hora (A07).
+const deriveStatus = (session: SessionWithParticipants, now: Date): ScheduleAttendanceStatus =>
+  sessionOutcome(session, now);
 
 /** Una sesión pasada, individual, no cancelada y sin asistencia confirmada. */
 function isPendingAttendance(session: SessionWithParticipants, now: Date): boolean {
@@ -39,9 +40,11 @@ export class GetScheduleAttendanceReportUseCase {
     private readonly roles: RoleRepository,
     private readonly sessions: SessionRepository,
     private readonly students: StudentRepository,
+    private readonly guard: StudentAccessGuard,
   ) {}
 
   async execute(input: GetScheduleAttendanceReportInput): Promise<ScheduleAttendanceReport> {
+    await this.assertCanSeeTutor(input.requesterId, input.tutorId);
     const tutor = await assertActiveTutor(this.users, this.roles, input.tutorId);
 
     const allSessions = await this.sessions.findAll({ tutorId: input.tutorId });
@@ -72,6 +75,8 @@ export class GetScheduleAttendanceReportUseCase {
         studentNames: s.studentIds.map(studentName),
         status: deriveStatus(s, now),
         attendanceConfirmed: s.studentIds.length === 1 ? Boolean(s.attendance) : null,
+        attendedCount: s.attendedStudentIds.length + s.absentStudentIds.length > 0 ? s.attendedStudentIds.length : null,
+        participantCount: s.studentIds.length,
       }))
       .sort((a, b) => b.scheduledAt.getTime() - a.scheduledAt.getTime());
 
@@ -85,9 +90,28 @@ export class GetScheduleAttendanceReportUseCase {
       individualSessions: inPeriod.filter((s) => s.studentIds.length === 1).length,
       groupSessions: inPeriod.filter((s) => s.studentIds.length > 1).length,
       cancelledSessions: inPeriod.filter((s) => s.cancelledAt).length,
+      heldSessions: inPeriod.filter((s) => deriveStatus(s, now) === 'REALIZADA').length,
+      noShowSessions: inPeriod.filter((s) => deriveStatus(s, now) === 'INASISTENCIA').length,
+      pendingRollSessions: inPeriod.filter((s) => deriveStatus(s, now) === 'POR_REGISTRAR').length,
       attendanceConfirmed: inPeriod.filter((s) => s.studentIds.length === 1 && s.attendance).length,
       attendancePending: inPeriod.filter((s) => isPendingAttendance(s, now)).length,
       sessions: sessionRows,
     };
+  }
+
+  /**
+   * El informe lista tutorados por nombre. La DBU consulta a cualquier tutor; un
+   * tutor, solo el suyo; el coordinador, el de tutores que atienden a tutorados de
+   * sus escuelas. Fuera de eso se responde "tutor no encontrado".
+   */
+  private async assertCanSeeTutor(requesterId: string, tutorId: string): Promise<void> {
+    const scope = await this.guard.scopeFor(requesterId);
+    if (scope.kind === 'ALL') return;
+    if (scope.kind === 'TUTOR' && scope.tutorId === tutorId) return;
+    if (scope.kind === 'SCHOOLS') {
+      const theirs = await this.students.findAll({ tutorId, isActive: true });
+      if (theirs.some((s) => scopeCovers(scope, s))) return;
+    }
+    throw new TutorNotFoundError();
   }
 }

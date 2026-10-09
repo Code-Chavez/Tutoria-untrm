@@ -9,6 +9,7 @@ import { Student } from '@domain/entities/Student';
 import { User } from '@domain/entities/User';
 import { Role } from '@domain/entities/Role';
 import { CreateReferralInput } from '@application/dtos/referral.dto';
+import { allowAllGuard } from '../helpers/studentGuard';
 
 describe('CreateReferralUseCase', () => {
   let useCase: CreateReferralUseCase;
@@ -66,8 +67,9 @@ describe('CreateReferralUseCase', () => {
       create: jest.fn(),
       findByUser: jest.fn(),
       markRead: jest.fn(),
+      markAllRead: jest.fn(),
     };
-    useCase = new CreateReferralUseCase(referrals, students, users, roles, notifications);
+    useCase = new CreateReferralUseCase(referrals, allowAllGuard(students), users, roles, notifications);
   });
 
   it('crea la derivación con el checklist, motivo y servicio elegidos', async () => {

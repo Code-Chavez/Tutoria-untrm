@@ -47,6 +47,7 @@ describe('RescheduleSessionUseCase', () => {
       findByStudent: jest.fn(),
       countAttendanceByTutorAndStudent: jest.fn(),
       createAttendance: jest.fn(),
+      recordParticipantAttendance: jest.fn(),
       reschedule: jest.fn().mockImplementation(async (id, scheduledAt, endsAt) => ({
         ...baseSession,
         scheduledAt,

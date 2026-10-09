@@ -1,12 +1,14 @@
 import { Request, Response } from 'express';
 import { GetNotificationsUseCase } from '@application/use-cases/notifications/GetNotificationsUseCase';
 import { MarkNotificationReadUseCase } from '@application/use-cases/notifications/MarkNotificationReadUseCase';
+import { MarkAllNotificationsReadUseCase } from '@application/use-cases/notifications/MarkAllNotificationsReadUseCase';
 import { NotificationNotFoundError } from '@application/use-cases/notifications/NotificationErrors';
 
 export class NotificationController {
   constructor(
     private readonly getNotificationsUseCase: GetNotificationsUseCase,
     private readonly markNotificationReadUseCase: MarkNotificationReadUseCase,
+    private readonly markAllNotificationsReadUseCase: MarkAllNotificationsReadUseCase,
   ) {}
 
   // Bandeja de notificaciones del usuario autenticado (HU-33)
@@ -15,6 +17,15 @@ export class NotificationController {
       const userId = req.auth?.sub as string;
       const notifications = await this.getNotificationsUseCase.execute(userId);
       res.status(200).json(notifications);
+    } catch {
+      res.status(500).json({ error: 'Error interno del servidor' });
+    }
+  };
+
+  markAllRead = async (req: Request, res: Response) => {
+    try {
+      const updated = await this.markAllNotificationsReadUseCase.execute(req.auth?.sub as string);
+      res.status(200).json({ updated });
     } catch {
       res.status(500).json({ error: 'Error interno del servidor' });
     }

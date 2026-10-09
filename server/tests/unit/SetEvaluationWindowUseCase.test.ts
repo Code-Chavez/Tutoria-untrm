@@ -47,6 +47,9 @@ describe('SetEvaluationWindowUseCase', () => {
     };
     periods = {
       findActive: jest.fn().mockResolvedValue(activePeriod),
+      findAll: jest.fn(),
+      findById: jest.fn(),
+      findByDate: jest.fn(),
     };
     windows = {
       findByPeriodAndSchool: jest.fn(),

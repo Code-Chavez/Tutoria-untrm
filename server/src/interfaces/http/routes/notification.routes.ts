@@ -6,6 +6,7 @@ import { container } from '@infrastructure/container';
 const controller = new NotificationController(
   container.useCases.getNotificationsUseCase,
   container.useCases.markNotificationReadUseCase,
+  container.useCases.markAllNotificationsReadUseCase,
 );
 
 const router: IRouter = Router();
@@ -14,6 +15,7 @@ const router: IRouter = Router();
 router.use('/notifications', authenticate(container.services.tokenService));
 
 router.get('/notifications', controller.getAll);
+router.patch('/notifications/read-all', controller.markAllRead);
 router.patch('/notifications/:id/read', controller.markRead);
 
 export default router;

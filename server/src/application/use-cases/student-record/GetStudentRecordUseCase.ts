@@ -8,8 +8,9 @@ import { SupportContactRepository } from '@domain/repositories/SupportContactRep
 import { SessionRepository } from '@domain/repositories/SessionRepository';
 import { TutorFollowUpRepository } from '@domain/repositories/TutorFollowUpRepository';
 import { StudentReferralRepository } from '@domain/repositories/StudentReferralRepository';
+import { TutoringRequestRepository } from '@domain/repositories/TutoringRequestRepository';
 import { StudentRecord, StudentRecordEvent } from '@application/dtos/studentRecord.dto';
-import { StudentNotFoundError } from '@application/use-cases/students/StudentErrors';
+import { StudentAccessGuard } from '@application/access/StudentAccessGuard';
 
 const MOTIVE_LABELS: { key: 'motiveAcademic' | 'motivePersonalEmotional' | 'motiveVocational'; label: string }[] = [
   { key: 'motiveAcademic', label: 'Académica' },
@@ -35,6 +36,8 @@ export class GetStudentRecordUseCase {
     private readonly sessions: SessionRepository,
     private readonly followUps: TutorFollowUpRepository,
     private readonly referrals: StudentReferralRepository,
+    private readonly guard: StudentAccessGuard,
+    private readonly tutoringRequests: TutoringRequestRepository,
   ) {}
 
   async execute(
@@ -42,18 +45,17 @@ export class GetStudentRecordUseCase {
     includeSupportContact: boolean,
     requesterId: string,
   ): Promise<StudentRecord> {
-    const student = await this.students.findById(studentId);
-    if (!student) {
-      throw new StudentNotFoundError(studentId);
-    }
+    // El expediente reúne entrevistas, seguimientos y asistencia: solo con alcance sobre el tutorado.
+    const student = await this.guard.assertAccess(requesterId, studentId);
 
     const school = await this.schools.findById(student.schoolId);
-    const [interviews, history, sessions, followUps, referrals] = await Promise.all([
+    const [interviews, history, sessions, followUps, referrals, requests] = await Promise.all([
       this.interviews.findByStudent(studentId),
       this.assignmentHistory.findByStudent(studentId),
       this.sessions.findByStudent(studentId),
       this.followUps.findByStudent(studentId),
       this.visibleReferrals(studentId, requesterId),
+      this.tutoringRequests.findByStudent(studentId),
     ]);
     const attendedSessions = sessions.filter((s) => s.attendance);
 
@@ -68,6 +70,10 @@ export class GetStudentRecordUseCase {
     });
     attendedSessions.forEach((s) => userIds.add(s.tutorId));
     followUps.forEach((f) => userIds.add(f.conductedById));
+    requests.forEach((r) => {
+      userIds.add(r.routedToId);
+      if (r.handledById) userIds.add(r.handledById);
+    });
 
     const userEntries = await Promise.all(
       [...userIds].map(async (id) => [id, await this.users.findById(id)] as const),
@@ -128,12 +134,27 @@ export class GetStudentRecordUseCase {
       receivingInstance: r.receivingInstance,
     }));
 
+    const requestEvents: StudentRecordEvent[] = requests.map((r) => ({
+      type: 'tutoringRequest',
+      id: r.id,
+      date: r.createdAt,
+      caseType: r.caseType,
+      source: r.source,
+      reason: r.reason,
+      status: r.status,
+      routedToName: userName(r.routedToId) ?? 'Desconocido',
+      responseNote: r.responseNote,
+      handledByName: userName(r.handledById),
+      handledAt: r.handledAt,
+    }));
+
     const timeline = [
       ...interviewEvents,
       ...assignmentEvents,
       ...attendanceEvents,
       ...followUpEvents,
       ...referralEvents,
+      ...requestEvents,
     ].sort((a, b) => b.date.getTime() - a.date.getTime());
 
     const record: StudentRecord = {

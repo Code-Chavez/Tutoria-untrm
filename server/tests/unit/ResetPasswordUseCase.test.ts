@@ -1,92 +1,47 @@
 import { ResetPasswordUseCase, InvalidTokenError } from '@application/use-cases/auth/ResetPasswordUseCase';
-import { UserRepository } from '@domain/repositories/UserRepository';
+import { hashSecretToken } from '@application/use-cases/auth/secretToken';
 import { PasswordResetTokenRepository } from '@domain/repositories/PasswordResetTokenRepository';
+import { AuditLogRepository } from '@domain/repositories/AuditLogRepository';
 import { PasswordHasher } from '@application/ports/PasswordHasher';
-import { PasswordResetToken } from '@domain/entities/PasswordResetToken';
 
-describe('ResetPasswordUseCase', () => {
+describe('ResetPasswordUseCase (A09)', () => {
+  let tokens: jest.Mocked<PasswordResetTokenRepository>;
+  let hasher: jest.Mocked<PasswordHasher>;
+  let auditLogs: jest.Mocked<AuditLogRepository>;
   let useCase: ResetPasswordUseCase;
-  let mockUserRepository: jest.Mocked<UserRepository>;
-  let mockTokenRepository: jest.Mocked<PasswordResetTokenRepository>;
-  let mockHasher: jest.Mocked<PasswordHasher>;
-
-  const mockTokenRecord: PasswordResetToken = {
-    id: 'token-123',
-    token: 'valid-token',
-    userId: 'user-123',
-    expiresAt: new Date(Date.now() + 10000), // Expira en el futuro
-    used: false,
-    createdAt: new Date(),
-  };
 
   beforeEach(() => {
-    mockUserRepository = {
-      findByEmail: jest.fn(),
-      findById: jest.fn(),
-      findAll: jest.fn(),
+    tokens = {
       create: jest.fn(),
-      update: jest.fn(),
+      invalidatePendingForUser: jest.fn(),
+      countCreatedSince: jest.fn(),
+      redeem: jest.fn().mockResolvedValue('user-123'),
     };
-
-    mockTokenRepository = {
-      create: jest.fn(),
-      findByToken: jest.fn(),
-      markAsUsed: jest.fn(),
-    };
-
-    mockHasher = {
-      hash: jest.fn(),
-      compare: jest.fn(),
-    };
-
-    useCase = new ResetPasswordUseCase(mockUserRepository, mockTokenRepository, mockHasher);
+    hasher = { hash: jest.fn().mockResolvedValue('nuevo-hash'), compare: jest.fn() };
+    auditLogs = { create: jest.fn(), findAll: jest.fn() } as unknown as jest.Mocked<AuditLogRepository>;
+    useCase = new ResetPasswordUseCase(tokens, hasher, auditLogs);
   });
 
-  it('debe restablecer la contraseña si el token es valido', async () => {
-    mockTokenRepository.findByToken.mockResolvedValue(mockTokenRecord);
-    mockHasher.hash.mockResolvedValue('new_hashed_password');
+  it('canjea el hash del token (no el token) con la contraseña ya hasheada y lo deja en la bitácora', async () => {
+    await useCase.execute({ token: 'abc123', newPassword: 'Nueva2026!' }, '10.0.0.9');
 
-    await useCase.execute({
-      token: 'valid-token',
-      newPassword: 'newpassword123',
-    });
-
-    expect(mockHasher.hash).toHaveBeenCalledWith('newpassword123');
-    expect(mockUserRepository.update).toHaveBeenCalledWith('user-123', {
-      passwordHash: 'new_hashed_password',
-      failedLoginAttempts: 0,
-      lockedUntil: null,
-    });
-    expect(mockTokenRepository.markAsUsed).toHaveBeenCalledWith('token-123');
+    expect(hasher.hash).toHaveBeenCalledWith('Nueva2026!');
+    expect(tokens.redeem).toHaveBeenCalledWith(hashSecretToken('abc123'), 'nuevo-hash', expect.any(Date));
+    expect(JSON.stringify(tokens.redeem.mock.calls)).not.toContain('"abc123"');
+    expect(auditLogs.create).toHaveBeenCalledWith(
+      expect.objectContaining({ userId: 'user-123', action: 'PASSWORD_RESET', ipAddress: '10.0.0.9' }),
+    );
   });
 
-  it('debe lanzar error si el token es invalido o no existe', async () => {
-    mockTokenRepository.findByToken.mockResolvedValue(null);
-
-    await expect(
-      useCase.execute({ token: 'invalid', newPassword: '123' })
-    ).rejects.toThrow(InvalidTokenError);
+  it('un token inexistente, usado o vencido se rechaza sin tocar la bitácora', async () => {
+    tokens.redeem.mockResolvedValue(null);
+    await expect(useCase.execute({ token: 'malo', newPassword: 'Nueva2026!' })).rejects.toBeInstanceOf(InvalidTokenError);
+    expect(auditLogs.create).not.toHaveBeenCalled();
   });
 
-  it('debe lanzar error si el token ya fue usado', async () => {
-    mockTokenRepository.findByToken.mockResolvedValue({
-      ...mockTokenRecord,
-      used: true,
-    });
-
-    await expect(
-      useCase.execute({ token: 'used-token', newPassword: '123' })
-    ).rejects.toThrow(InvalidTokenError);
-  });
-
-  it('debe lanzar error si el token ha expirado', async () => {
-    mockTokenRepository.findByToken.mockResolvedValue({
-      ...mockTokenRecord,
-      expiresAt: new Date(Date.now() - 10000), // Expira en el pasado
-    });
-
-    await expect(
-      useCase.execute({ token: 'expired-token', newPassword: '123' })
-    ).rejects.toThrow(InvalidTokenError);
+  it('el segundo uso del mismo enlace se rechaza (un solo uso)', async () => {
+    tokens.redeem.mockResolvedValueOnce('user-123').mockResolvedValueOnce(null);
+    await useCase.execute({ token: 'abc123', newPassword: 'Nueva2026!' });
+    await expect(useCase.execute({ token: 'abc123', newPassword: 'Otra2026!' })).rejects.toBeInstanceOf(InvalidTokenError);
   });
 });

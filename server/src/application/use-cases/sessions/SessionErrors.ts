@@ -56,7 +56,7 @@ export class AttendanceAlreadyRegisteredError extends Error {
 
 export class AttendanceLimitReachedError extends Error {
   constructor(limit: number) {
-    super(`Se alcanzó el máximo de ${limit} sesiones registradas para esta tutoría individual`);
+    super(`Se alcanzó el máximo de ${limit} sesiones registradas en este semestre para esta tutoría individual`);
     this.name = 'AttendanceLimitReachedError';
   }
 }
@@ -86,5 +86,37 @@ export class SessionEvidenceNotFoundError extends Error {
   constructor(id: string) {
     super(`No se encontró la evidencia con ID ${id}`);
     this.name = 'SessionEvidenceNotFoundError';
+  }
+}
+
+// Asistencia por participante (A07): solo pueden marcarse quienes están en la sesión.
+export class InvalidAttendeesError extends Error {
+  constructor() {
+    super('Solo puedes registrar la asistencia de los tutorados de esta sesión');
+    this.name = 'InvalidAttendeesError';
+  }
+}
+
+// En una sesión individual la asistencia se confirma con el número del Anexo N°4; aquí solo se registra la inasistencia.
+export class IndividualAttendanceViaConfirmationError extends Error {
+  constructor() {
+    super('En una sesión individual confirma la asistencia con su número de sesión (Anexo N°4); aquí solo puedes marcar la inasistencia');
+    this.name = 'IndividualAttendanceViaConfirmationError';
+  }
+}
+
+/** Otra confirmación simultánea tomó el mismo número de sesión; se recuenta y se reintenta. */
+export class AttendanceNumberTakenError extends Error {
+  constructor() {
+    super('El número de sesión ya fue tomado por otra confirmación simultánea');
+    this.name = 'AttendanceNumberTakenError';
+  }
+}
+
+/** La sesión no cae en ningún periodo académico registrado: no hay semestre en el que numerarla. */
+export class SessionOutsidePeriodError extends Error {
+  constructor() {
+    super('La fecha de la sesión no pertenece a ningún periodo académico registrado. Pide a la DBU que registre el periodo en Catálogos.');
+    this.name = 'SessionOutsidePeriodError';
   }
 }

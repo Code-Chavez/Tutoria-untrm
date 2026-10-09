@@ -52,6 +52,10 @@ export interface SessionAttendance {
 // Sesión con sus participantes, para exponer al cliente en una sola pieza.
 export interface SessionWithParticipants extends Session {
   studentIds: string[];
+  /** Participantes con asistencia registrada como «asistió» (A07). */
+  attendedStudentIds: string[];
+  /** Participantes con asistencia registrada como «no asistió». */
+  absentStudentIds: string[];
   attendance: SessionAttendance | null;
 }
 

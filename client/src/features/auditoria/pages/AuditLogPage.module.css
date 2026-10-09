@@ -1,0 +1,53 @@
+.bar {
+  display: flex;
+  align-items: flex-end;
+  gap: var(--s3);
+  padding: var(--s4) var(--s5);
+  border-bottom: 1px solid var(--borde);
+  flex-wrap: wrap;
+}
+
+.date {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: var(--fs-xs);
+  color: var(--g600);
+}
+
+.date input {
+  height: 40px;
+  padding: 0 var(--s3);
+  border: 1.5px solid var(--borde-fuerte);
+  border-radius: var(--r-sm);
+  background: #fff;
+  color: var(--g900);
+  font: inherit;
+}
+
+.date input:focus {
+  outline: 2px solid var(--azul-med);
+  outline-offset: 1px;
+}
+
+.search {
+  flex: 2 1 240px;
+}
+
+.select {
+  flex: 1 1 180px;
+  min-width: 170px;
+}
+
+.details {
+  max-width: 280px;
+  word-break: break-word;
+  color: var(--g600);
+}
+
+@media (max-width: 640px) {
+  .search,
+  .select {
+    flex: 1 1 100%;
+  }
+}

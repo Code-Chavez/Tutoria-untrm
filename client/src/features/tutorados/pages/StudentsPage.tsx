@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import styles from './StudentsPage.module.css';
 import {
   Student,
@@ -70,13 +70,33 @@ const PAGE_SIZE = 10;
 
 const EMPTY_FILTERS: StudentFilterValues = { search: '', schoolId: '', cycle: '', status: '' };
 
+// Accesos del menú del tutor (Entrevista inicial, Seguimiento, Derivar caso): abren esta lista en modo
+// «elegir tutorado» para que cada acceso conduzca a su formulario real (A15).
+type PickAction = 'entrevista' | 'seguimiento' | 'derivar';
+const PICK_TEXT: Record<PickAction, { button: string; help: string }> = {
+  entrevista: { button: 'Registrar entrevista', help: 'Elige al tutorado a quien le harás la entrevista inicial.' },
+  seguimiento: { button: 'Registrar seguimiento', help: 'Elige al tutorado para registrar su ficha de seguimiento.' },
+  derivar: { button: 'Derivar caso', help: 'Elige al tutorado cuyo caso vas a derivar a un servicio.' },
+};
+
 export const StudentsPage: React.FC = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
   const canWrite = user ? WRITE_ROLES.includes(user.role) : false;
   const canConductInterview = user ? INTERVIEW_ROLES.includes(user.role) : false;
 
   const { students, schools, tutors, loading, error, refresh } = useStudents();
+
+  const requestedAction = searchParams.get('accion');
+  const pickAction: PickAction | null =
+    canConductInterview && (requestedAction === 'entrevista' || requestedAction === 'seguimiento' || requestedAction === 'derivar')
+      ? requestedAction
+      : null;
+  const clearPickAction = () => setSearchParams({});
+
+  // «Registrar tutorado» del panel de inicio llega con ?accion=nuevo y abre directamente el alta.
+  const wantsNewStudent = canWrite && requestedAction === 'nuevo';
 
   const [filters, setFilters] = useState<StudentFilterValues>(EMPTY_FILTERS);
   const [page, setPage] = useState(1);
@@ -201,6 +221,7 @@ export const StudentsPage: React.FC = () => {
   const handleCloseModal = () => {
     setIsModalOpen(false);
     setStudentToEdit(null);
+    if (wantsNewStudent) setSearchParams({}, { replace: true });
   };
 
   const handleSubmit = async (data: CreateStudentData | UpdateStudentData) => {
@@ -465,6 +486,15 @@ export const StudentsPage: React.FC = () => {
         <StatCard icon={<BanIcon size={22} />} value={String(inactive)} label="Inactivos" hint="Sin matrícula vigente" tone="neutral" loading={loading} />
       </div>
 
+      {pickAction && (
+        <div className={styles.pickBanner} role="status">
+          <span>{PICK_TEXT[pickAction].help}</span>
+          <Button variant="ghost" size="sm" onClick={clearPickAction}>
+            Cancelar
+          </Button>
+        </div>
+      )}
+
       <div className={styles.tableCard}>
         <TutoradoFilters
           values={filters}
@@ -509,6 +539,28 @@ export const StudentsPage: React.FC = () => {
               tutorName={tutorName}
               canWrite={canWrite}
               canConductInterview={canConductInterview}
+              pickLabel={pickAction ? PICK_TEXT[pickAction].button : undefined}
+              onPick={
+                pickAction === 'entrevista'
+                  ? (student) => {
+                      setInterviewError('');
+                      setStudentForInterview(student);
+                      clearPickAction();
+                    }
+                  : pickAction === 'seguimiento'
+                    ? (student) => {
+                        setFollowUpError('');
+                        setStudentForFollowUp(student);
+                        clearPickAction();
+                      }
+                    : pickAction === 'derivar'
+                      ? (student) => {
+                          setReferralError('');
+                          setStudentForReferral(student);
+                          clearPickAction();
+                        }
+                      : undefined
+              }
               onEdit={handleOpenModal}
               onMarkRisk={setStudentToMark}
               onUnmarkRisk={setStudentToUnmark}
@@ -552,7 +604,7 @@ export const StudentsPage: React.FC = () => {
         )}
       </div>
 
-      {isModalOpen && (
+      {(isModalOpen || wantsNewStudent) && (
         <StudentFormModal
           key={studentToEdit?.id ?? 'new'}
           onClose={handleCloseModal}

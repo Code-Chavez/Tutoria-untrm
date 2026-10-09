@@ -8,6 +8,7 @@ import { CancelSessionUseCase } from '@application/use-cases/sessions/CancelSess
 import { UploadSessionEvidenceUseCase } from '@application/use-cases/sessions/UploadSessionEvidenceUseCase';
 import { ListSessionEvidenceUseCase } from '@application/use-cases/sessions/ListSessionEvidenceUseCase';
 import { GetSessionEvidenceFileUseCase } from '@application/use-cases/sessions/GetSessionEvidenceFileUseCase';
+import { RecordSessionAttendanceUseCase } from '@application/use-cases/sessions/RecordSessionAttendanceUseCase';
 import {
   TutorScheduleConflictError,
   LocationRequiredError,
@@ -18,16 +19,21 @@ import {
   SessionNotStartedError,
   AttendanceAlreadyRegisteredError,
   AttendanceLimitReachedError,
+  AttendanceNumberTakenError,
+  SessionOutsidePeriodError,
   SessionAlreadyCancelledError,
   SessionAlreadyCompletedError,
   ChangeReasonRequiredError,
   SessionEvidenceNotFoundError,
+  InvalidAttendeesError,
+  IndividualAttendanceViaConfirmationError,
 } from '@application/use-cases/sessions/SessionErrors';
 import { StudentNotFoundError } from '@application/use-cases/students/StudentErrors';
 import {
   scheduleSessionSchema,
   rescheduleSessionSchema,
   cancelSessionSchema,
+  recordAttendanceSchema,
 } from '../validators/session.validators';
 
 export class SessionController {
@@ -40,6 +46,7 @@ export class SessionController {
     private readonly uploadSessionEvidenceUseCase: UploadSessionEvidenceUseCase,
     private readonly listSessionEvidenceUseCase: ListSessionEvidenceUseCase,
     private readonly getSessionEvidenceFileUseCase: GetSessionEvidenceFileUseCase,
+    private readonly recordSessionAttendanceUseCase: RecordSessionAttendanceUseCase,
   ) {}
 
   // Registra la asistencia de una sesión individual (HU-22, Anexo N°4).
@@ -62,8 +69,41 @@ export class SessionController {
       } else if (
         error instanceof AttendanceAlreadyRegisteredError ||
         error instanceof AttendanceLimitReachedError ||
+        error instanceof AttendanceNumberTakenError ||
+        error instanceof SessionOutsidePeriodError ||
         error instanceof SessionAlreadyCancelledError
       ) {
+        res.status(409).json({ error: error.message });
+      } else {
+        res.status(500).json({ error: 'Error interno del servidor' });
+      }
+    }
+  };
+
+  // Registra quién asistió a una sesión, grupal o individual (A07).
+  recordAttendance = async (req: Request, res: Response) => {
+    try {
+      const { attendedStudentIds } = recordAttendanceSchema.parse(req.body);
+      const session = await this.recordSessionAttendanceUseCase.execute(
+        req.params.id as string,
+        req.auth?.sub as string,
+        attendedStudentIds,
+      );
+      res.status(200).json({ message: 'Asistencia de la sesión registrada', session });
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        res.status(400).json({ error: 'Datos de entrada inválidos', details: error.errors });
+      } else if (error instanceof SessionNotFoundError) {
+        res.status(404).json({ error: error.message });
+      } else if (error instanceof NotSessionTutorError) {
+        res.status(403).json({ error: error.message });
+      } else if (
+        error instanceof SessionNotStartedError ||
+        error instanceof InvalidAttendeesError ||
+        error instanceof IndividualAttendanceViaConfirmationError
+      ) {
+        res.status(400).json({ error: error.message });
+      } else if (error instanceof AttendanceAlreadyRegisteredError || error instanceof SessionAlreadyCancelledError) {
         res.status(409).json({ error: error.message });
       } else {
         res.status(500).json({ error: 'Error interno del servidor' });
@@ -173,7 +213,7 @@ export class SessionController {
   listEvidence = async (req: Request, res: Response) => {
     try {
       const sessionId = req.params.id as string;
-      const evidences = await this.listSessionEvidenceUseCase.execute(sessionId);
+      const evidences = await this.listSessionEvidenceUseCase.execute(sessionId, req.auth?.sub as string);
       res.status(200).json({ evidences });
     } catch (error) {
       if (error instanceof SessionNotFoundError) {
@@ -193,6 +233,7 @@ export class SessionController {
       const { evidence, absolutePath } = await this.getSessionEvidenceFileUseCase.execute(
         sessionId,
         evidenceId,
+        req.auth?.sub as string,
       );
       res.download(absolutePath, evidence.fileName);
     } catch (error) {
@@ -211,7 +252,7 @@ export class SessionController {
       if (typeof studentId === 'string') filters.studentId = studentId;
       if (mine === 'true') filters.tutorId = req.auth?.sub;
 
-      const sessions = await this.listSessionsUseCase.execute(filters);
+      const sessions = await this.listSessionsUseCase.execute(req.auth?.sub as string, filters);
       res.status(200).json({ sessions });
     } catch {
       res.status(500).json({ error: 'Error interno del servidor' });

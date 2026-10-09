@@ -37,6 +37,9 @@ export interface TutoringSession {
   location: string | null;
   meetingLink: string | null;
   studentIds: string[];
+  // Asistencia por participante (A07): solo cuenta como realizada la sesión a la que asistió alguien.
+  attendedStudentIds: string[];
+  absentStudentIds: string[];
   attendance: SessionAttendance | null;
   // Cancelación (HU-23): no nulo = cancelada. La sesión se conserva (trazabilidad).
   cancelledAt: string | null;
@@ -89,10 +92,25 @@ export const sessionService = {
     return response.data.sessions;
   },
 
+  // Agenda del propio tutorado: sin `mine`, el servidor devuelve solo sus sesiones.
+  getOwnSessions: async (): Promise<TutoringSession[]> => {
+    const response = await apiClient.get<{ sessions: TutoringSession[] }>('/sessions');
+    return response.data.sessions;
+  },
+
   // Registra la asistencia de una sesión individual (HU-22, Anexo N°4).
   registerAttendance: async (sessionId: string): Promise<TutoringSession> => {
     const response = await apiClient.post<{ message: string; session: TutoringSession }>(
       `/sessions/${sessionId}/attendance`,
+    );
+    return response.data.session;
+  },
+
+  // Registra quién asistió a la sesión (A07); quienes no se listan constan como inasistencia.
+  recordAttendance: async (sessionId: string, attendedStudentIds: string[]): Promise<TutoringSession> => {
+    const response = await apiClient.put<{ message: string; session: TutoringSession }>(
+      `/sessions/${sessionId}/attendance-roll`,
+      { attendedStudentIds },
     );
     return response.data.session;
   },

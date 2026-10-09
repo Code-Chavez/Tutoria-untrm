@@ -15,6 +15,9 @@ describe('ScheduleAttendanceReportWorkbook', () => {
     individualSessions: 1,
     groupSessions: 1,
     cancelledSessions: 0,
+    heldSessions: 1,
+    noShowSessions: 0,
+    pendingRollSessions: 0,
     attendanceConfirmed: 1,
     attendancePending: 0,
     sessions: [
@@ -27,6 +30,8 @@ describe('ScheduleAttendanceReportWorkbook', () => {
         studentNames: ['Ana Torres'],
         status: 'REALIZADA',
         attendanceConfirmed: true,
+        attendedCount: 1,
+        participantCount: 1,
       },
       {
         id: 's2',
@@ -37,6 +42,8 @@ describe('ScheduleAttendanceReportWorkbook', () => {
         studentNames: ['Ana Torres', 'Luis Pérez'],
         status: 'REALIZADA',
         attendanceConfirmed: null,
+        attendedCount: 1,
+        participantCount: 2,
       },
     ],
   };
@@ -52,10 +59,13 @@ describe('ScheduleAttendanceReportWorkbook', () => {
     expect(summary).toBeDefined();
     expect(detail).toBeDefined();
 
-    // Encabezado + 2 sesiones.
-    expect(detail?.rowCount).toBe(3);
-    expect(detail?.getRow(2).getCell(2).value).toBe('Reforzamiento');
-    expect(detail?.getRow(2).getCell(5).value).toBe('Ana Torres');
-    expect(detail?.getRow(3).getCell(5).value).toBe('Ana Torres, Luis Pérez');
+    // Bloque de marca (institución, título, 3 líneas de contexto y un espacio),
+    // encabezado de tabla en la fila 7 y las 2 sesiones debajo.
+    expect(detail?.getRow(2).getCell(1).value).toBe('Detalle de sesiones');
+    expect(detail?.getRow(7).getCell(2).value).toBe('Tema');
+    expect(detail?.rowCount).toBe(9);
+    expect(detail?.getRow(8).getCell(2).value).toBe('Reforzamiento');
+    expect(detail?.getRow(8).getCell(5).value).toBe('Ana Torres');
+    expect(detail?.getRow(9).getCell(5).value).toBe('Ana Torres, Luis Pérez');
   });
 });

@@ -1,6 +1,7 @@
 import { SessionEvidence } from '@domain/entities/Session';
 import { SessionRepository } from '@domain/repositories/SessionRepository';
 import { EvidenceStorage } from '@application/ports/EvidenceStorage';
+import { StudentAccessGuard } from '@application/access/StudentAccessGuard';
 import { SessionNotFoundError, SessionEvidenceNotFoundError } from './SessionErrors';
 
 export interface SessionEvidenceFile {
@@ -13,11 +14,12 @@ export class GetSessionEvidenceFileUseCase {
   constructor(
     private readonly sessions: SessionRepository,
     private readonly storage: EvidenceStorage,
+    private readonly guard: StudentAccessGuard,
   ) {}
 
-  async execute(sessionId: string, evidenceId: string): Promise<SessionEvidenceFile> {
+  async execute(sessionId: string, evidenceId: string, requesterId: string): Promise<SessionEvidenceFile> {
     const session = await this.sessions.findById(sessionId);
-    if (!session) {
+    if (!session || !(await this.guard.canSeeSession(requesterId, session))) {
       throw new SessionNotFoundError(sessionId);
     }
 

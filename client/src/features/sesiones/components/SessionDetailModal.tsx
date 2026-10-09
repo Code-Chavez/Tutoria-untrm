@@ -1,4 +1,5 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
+import { useDialogFocus } from '@shared/hooks/useDialog';
 import { Badge, Button } from '@shared/components/ui';
 import {
   CalendarIcon,
@@ -13,7 +14,7 @@ import {
   DownloadIcon,
 } from '@shared/components/icons';
 import { TutoringSession, SessionEvidence } from '../services/sessionService';
-import { getSessionStatus, SESSION_STATUS_LABEL } from '../utils/sessionStatus';
+import { getSessionStatus, isModifiable, SESSION_STATUS_LABEL } from '../utils/sessionStatus';
 import type { Student } from '@features/tutorados/services/studentService';
 import styles from './SessionDetailModal.module.css';
 
@@ -35,6 +36,10 @@ interface SessionDetailModalProps {
   onRegisterAttendance: () => void;
   registeringAttendance?: boolean;
   attendanceError?: string;
+  // Asistencia por participante (A07): grupal con lista de asistentes; individual, inasistencia.
+  onRecordRoll?: (attendedStudentIds: string[]) => void;
+  recordingRoll?: boolean;
+  rollError?: string;
   onReschedule: () => void;
   onCancelSession: () => void;
   // Repositorio de evidencias (HU-25): PDF o imagen que respalda la sesión.
@@ -50,7 +55,9 @@ const STATUS_TONE = {
   CANCELADA: 'danger',
   PROXIMA: 'info',
   EN_CURSO: 'success',
-  REALIZADA: 'neutral',
+  REALIZADA: 'success',
+  INASISTENCIA: 'danger',
+  POR_REGISTRAR: 'warning',
 } as const;
 
 // Detalle de una sesión abierto desde el calendario (HU-21).
@@ -62,6 +69,9 @@ export const SessionDetailModal: React.FC<SessionDetailModalProps> = ({
   onRegisterAttendance,
   registeringAttendance,
   attendanceError,
+  onRecordRoll,
+  recordingRoll,
+  rollError,
   onReschedule,
   onCancelSession,
   evidences = [],
@@ -71,6 +81,7 @@ export const SessionDetailModal: React.FC<SessionDetailModalProps> = ({
   evidenceError,
   onDownloadEvidence,
 }) => {
+  const dialogRef = useDialogFocus();
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (e.key === 'Escape') onClose();
@@ -79,6 +90,7 @@ export const SessionDetailModal: React.FC<SessionDetailModalProps> = ({
     return () => window.removeEventListener('keydown', onKey);
   }, [onClose]);
 
+  const [checked, setChecked] = useState<Set<string>>(() => new Set(session.attendedStudentIds ?? []));
   const start = new Date(session.scheduledAt);
   const end = new Date(session.endsAt);
   const status = getSessionStatus(session);
@@ -110,13 +122,15 @@ export const SessionDetailModal: React.FC<SessionDetailModalProps> = ({
     status !== 'CANCELADA' &&
     !limitReached;
   // No tiene sentido reprogramar/cancelar algo que ya pasó o que ya está cancelado.
-  const canModify = status !== 'REALIZADA' && status !== 'CANCELADA';
+  const canModify = isModifiable(status);
 
   return (
     <div className={styles.overlay} onClick={onClose}>
       <div
         className={styles.dialog}
         role="dialog"
+        ref={dialogRef}
+        tabIndex={-1}
         aria-modal="true"
         aria-label="Detalle de la sesión"
         onClick={(e) => e.stopPropagation()}
@@ -231,7 +245,56 @@ export const SessionDetailModal: React.FC<SessionDetailModalProps> = ({
                   Registrar asistencia
                 </Button>
               )}
+              {!isGroup && !session.attendance && status !== 'PROXIMA' && onRecordRoll && (
+                (session.absentStudentIds ?? []).length > 0 ? (
+                  <span className={styles.meta}>Inasistencia registrada.</span>
+                ) : (
+                  <Button size="sm" variant="ghost" loading={recordingRoll} onClick={() => onRecordRoll([])}>
+                    Marcar inasistencia
+                  </Button>
+                )
+              )}
+              {rollError && !isGroup && <span className={styles.error}>{rollError}</span>}
               {attendanceError && <span className={styles.error}>{attendanceError}</span>}
+            </div>
+          )}
+
+
+          {isGroup && !session.cancelledAt && status !== 'PROXIMA' && onRecordRoll && (
+            <div className={styles.attendance} aria-label="Asistencia de los tutorados">
+              <div className={styles.row}>
+                <CheckCircleIcon size={16} />
+                <span>
+                  {(session.attendedStudentIds ?? []).length + (session.absentStudentIds ?? []).length === 0
+                    ? 'Asistencia sin registrar: marca quiénes asistieron.'
+                    : `Asistieron ${(session.attendedStudentIds ?? []).length} de ${session.studentIds.length} tutorados.`}
+                </span>
+              </div>
+              <ul className={styles.rollList}>
+                {session.studentIds.map((id, i) => (
+                  <li key={id}>
+                    <label>
+                      <input
+                        type="checkbox"
+                        checked={checked.has(id)}
+                        onChange={(e) =>
+                          setChecked((prev) => {
+                            const next = new Set(prev);
+                            if (e.target.checked) next.add(id);
+                            else next.delete(id);
+                            return next;
+                          })
+                        }
+                      />
+                      {participants[i]}
+                    </label>
+                  </li>
+                ))}
+              </ul>
+              <Button size="sm" loading={recordingRoll} onClick={() => onRecordRoll([...checked])}>
+                Guardar asistencia
+              </Button>
+              {rollError && <span className={styles.error}>{rollError}</span>}
             </div>
           )}
 

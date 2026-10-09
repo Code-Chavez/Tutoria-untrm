@@ -1,0 +1,132 @@
+.bar {
+  display: flex;
+  gap: var(--s3);
+  padding: var(--s4) var(--s5);
+  border-bottom: 1px solid var(--borde);
+}
+
+.filter {
+  min-width: 200px;
+}
+
+.reasonCell {
+  max-width: 320px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 30, 60, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--s4);
+  z-index: 50;
+}
+
+.dialog {
+  background: #fff;
+  border-radius: var(--r-lg);
+  width: min(560px, 100%);
+  max-height: 90vh;
+  overflow-y: auto;
+  padding: var(--s5);
+  box-shadow: 0 20px 48px rgba(15, 30, 60, 0.25);
+}
+
+.title {
+  margin: 0;
+  font-size: var(--fs-lg, 18px);
+  color: var(--azul);
+}
+
+.sub {
+  margin: var(--s1) 0 0;
+  font-size: var(--fs-sm);
+  color: var(--g600);
+}
+
+.reason {
+  margin: var(--s3) 0;
+  padding: var(--s3);
+  background: var(--g50, #f6f8fb);
+  border-radius: var(--r-sm);
+  font-size: var(--fs-sm);
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.label {
+  display: block;
+  margin-bottom: 6px;
+  font-size: var(--fs-xs);
+  font-weight: 600;
+  color: var(--g900);
+}
+
+.textarea {
+  width: 100%;
+  font: inherit;
+  font-size: var(--fs-sm);
+  padding: 9px 11px;
+  border: 1.5px solid var(--borde-fuerte);
+  border-radius: var(--r-sm);
+  resize: vertical;
+}
+
+.textarea:focus {
+  outline: 2px solid var(--azul-med);
+  outline-offset: 1px;
+}
+
+.done {
+  margin: 0;
+  padding: var(--s3);
+  background: var(--ok-bg, #eef8f1);
+  border-radius: var(--r-sm);
+  font-size: var(--fs-sm);
+  word-break: break-word;
+}
+
+.error {
+  margin: var(--s2) 0 0;
+  font-size: var(--fs-sm);
+  color: var(--peligro);
+}
+
+.actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--s2);
+  flex-wrap: wrap;
+  margin-top: var(--s4);
+}
+
+.notice {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--s3);
+  flex-wrap: wrap;
+  font-size: var(--fs-sm);
+  color: var(--g900);
+  background: var(--warn-bg, #fff6e5);
+  border: 1px solid var(--borde);
+  border-radius: var(--r-sm);
+  padding: var(--s3) var(--s4);
+  margin-bottom: var(--s4);
+}
+
+.noticeClose {
+  background: none;
+  border: none;
+  padding: 0;
+  font: inherit;
+  font-weight: 600;
+  color: var(--azul-med);
+  text-decoration: underline;
+  cursor: pointer;
+}

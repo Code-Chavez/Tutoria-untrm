@@ -11,6 +11,7 @@ import { RoleRepository } from '@domain/repositories/RoleRepository';
 import { Student } from '@domain/entities/Student';
 import { User } from '@domain/entities/User';
 import { Role } from '@domain/entities/Role';
+import { allowAllGuard } from '../helpers/studentGuard';
 
 describe('LinkStudentPortalAccountUseCase', () => {
   let useCase: LinkStudentPortalAccountUseCase;
@@ -84,18 +85,19 @@ describe('LinkStudentPortalAccountUseCase', () => {
       mockStudentRepository,
       mockUserRepository,
       mockRoleRepository,
+      allowAllGuard(mockStudentRepository),
     );
   });
 
   it('vincula la cuenta cuando el usuario existe, tiene rol Tutorado y no está vinculado a otro estudiante', async () => {
-    const result = await useCase.execute('student-1', 'user-1');
+    const result = await useCase.execute('student-1', 'user-1', 'admin-1');
 
     expect(result.userId).toBe('user-1');
     expect(mockStudentRepository.update).toHaveBeenCalledWith('student-1', { userId: 'user-1' });
   });
 
   it('desvincula la cuenta cuando userId es null, sin validar rol', async () => {
-    await useCase.execute('student-1', null);
+    await useCase.execute('student-1', null, 'admin-1');
 
     expect(mockStudentRepository.update).toHaveBeenCalledWith('student-1', { userId: null });
     expect(mockUserRepository.findById).not.toHaveBeenCalled();
@@ -104,19 +106,19 @@ describe('LinkStudentPortalAccountUseCase', () => {
   it('lanza StudentNotFoundError si el estudiante no existe', async () => {
     mockStudentRepository.findById.mockResolvedValue(null);
 
-    await expect(useCase.execute('missing', 'user-1')).rejects.toThrow(StudentNotFoundError);
+    await expect(useCase.execute('missing', 'user-1', 'admin-1')).rejects.toThrow(StudentNotFoundError);
   });
 
   it('lanza PortalUserNotFoundError si la cuenta no existe', async () => {
     mockUserRepository.findById.mockResolvedValue(null);
 
-    await expect(useCase.execute('student-1', 'missing')).rejects.toThrow(PortalUserNotFoundError);
+    await expect(useCase.execute('student-1', 'missing', 'admin-1')).rejects.toThrow(PortalUserNotFoundError);
   });
 
   it('lanza PortalUserRoleMismatchError si la cuenta no tiene rol Tutorado', async () => {
     mockRoleRepository.findById.mockResolvedValue({ ...studentRole, name: 'Coordinador' });
 
-    await expect(useCase.execute('student-1', 'user-1')).rejects.toThrow(
+    await expect(useCase.execute('student-1', 'user-1', 'admin-1')).rejects.toThrow(
       PortalUserRoleMismatchError,
     );
   });
@@ -124,7 +126,7 @@ describe('LinkStudentPortalAccountUseCase', () => {
   it('lanza PortalUserAlreadyLinkedError si la cuenta ya está vinculada a otro estudiante', async () => {
     mockStudentRepository.findByUserId.mockResolvedValue({ ...baseStudent, id: 'student-2' });
 
-    await expect(useCase.execute('student-1', 'user-1')).rejects.toThrow(
+    await expect(useCase.execute('student-1', 'user-1', 'admin-1')).rejects.toThrow(
       PortalUserAlreadyLinkedError,
     );
   });
@@ -132,6 +134,6 @@ describe('LinkStudentPortalAccountUseCase', () => {
   it('permite re-vincular la misma cuenta al mismo estudiante', async () => {
     mockStudentRepository.findByUserId.mockResolvedValue({ ...baseStudent, id: 'student-1' });
 
-    await expect(useCase.execute('student-1', 'user-1')).resolves.not.toThrow();
+    await expect(useCase.execute('student-1', 'user-1', 'admin-1')).resolves.not.toThrow();
   });
 });

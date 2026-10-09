@@ -1,6 +1,7 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { QueryClientProvider } from '@tanstack/react-query';
 import { queryClient } from '@shared/services/queryClient';
+import { BrandingProvider } from '@shared/theme/BrandingProvider';
 import { AuthProvider } from '@features/auth/context/AuthProvider';
 import { LoginPage } from '@features/auth/components/LoginPage';
 import { ForgotPasswordPage } from '@features/auth/components/ForgotPasswordPage';
@@ -19,15 +20,28 @@ import { ExpedientePage } from '@features/expediente/pages/ExpedientePage';
 import { ProfilePage } from '@features/profile/pages/ProfilePage';
 import { MyTutoringRequestPage } from '@features/solicitudes/pages/MyTutoringRequestPage';
 import { SessionsCalendarPage } from '@features/sesiones/pages/SessionsCalendarPage';
+import { AuditLogPage } from '@features/auditoria/pages/AuditLogPage';
+import { TutoringRequestsInboxPage } from '@features/solicitudes/pages/TutoringRequestsInboxPage';
+import { MySessionsPage } from '@features/sesiones/pages/MySessionsPage';
 import { ScheduleAttendanceReportPage } from '@features/informes/pages/ScheduleAttendanceReportPage';
+import { SemesterReportPage } from '@features/informes/pages/SemesterReportPage';
+import { ConsolidatedReportPage } from '@features/informes/pages/ConsolidatedReportPage';
 import { ReferralsPage } from '@features/derivaciones/pages/ReferralsPage';
 import { ReferralTrackingPage } from '@features/derivaciones/pages/ReferralTrackingPage';
 import { EvaluationPage } from '@features/evaluacion/pages/EvaluationPage';
+import { WorkPlanPage } from '@features/planificacion/pages/WorkPlanPage';
+import { IndicatorsPage } from '@features/indicadores/pages/IndicatorsPage';
+import { CatalogsPage } from '@features/catalogos/pages/CatalogsPage';
+import { ParametersPage } from '@features/parametros/pages/ParametersPage';
+import { BrandingPage } from '@features/identidad/pages/BrandingPage';
 import { EvaluationWindowsPage } from '@features/evaluacion/pages/EvaluationWindowsPage';
+import { EvaluationStatisticsPage } from '@features/evaluacion/pages/EvaluationStatisticsPage';
+import { EvaluationSuggestionsPage } from '@features/evaluacion/pages/EvaluationSuggestionsPage';
 
 export default function App() {
   return (
     <QueryClientProvider client={queryClient}>
+      <BrandingProvider>
       <AuthProvider>
         <BrowserRouter>
           <Routes>
@@ -47,10 +61,74 @@ export default function App() {
                 }
               />
               <Route
+                path="indicadores"
+                element={
+                  <RequireRole roles={['Administrador DBU', 'Coordinador', 'Vicerrectorado']}>
+                    <IndicatorsPage />
+                  </RequireRole>
+                }
+              />
+              <Route
+                path="auditoria"
+                element={
+                  <RequireRole roles={['Administrador DBU']}>
+                    <AuditLogPage />
+                  </RequireRole>
+                }
+              />
+              <Route
+                path="identidad"
+                element={
+                  <RequireRole roles={['Administrador DBU']}>
+                    <BrandingPage />
+                  </RequireRole>
+                }
+              />
+              <Route
+                path="parametros"
+                element={
+                  <RequireRole roles={['Administrador DBU']}>
+                    <ParametersPage />
+                  </RequireRole>
+                }
+              />
+              <Route
+                path="catalogos"
+                element={
+                  <RequireRole roles={['Administrador DBU']}>
+                    <CatalogsPage />
+                  </RequireRole>
+                }
+              />
+              <Route
+                path="plan-semestral"
+                element={
+                  <RequireRole roles={['Administrador DBU', 'Coordinador']}>
+                    <WorkPlanPage />
+                  </RequireRole>
+                }
+              />
+              <Route
                 path="evaluacion/configuracion"
                 element={
                   <RequireRole roles={['Administrador DBU']}>
                     <EvaluationWindowsPage />
+                  </RequireRole>
+                }
+              />
+              <Route
+                path="evaluacion/sugerencias"
+                element={
+                  <RequireRole roles={['Administrador DBU', 'Coordinador']}>
+                    <EvaluationSuggestionsPage />
+                  </RequireRole>
+                }
+              />
+              <Route
+                path="evaluacion/resultados"
+                element={
+                  <RequireRole roles={['Administrador DBU', 'Coordinador']}>
+                    <EvaluationStatisticsPage />
                   </RequireRole>
                 }
               />
@@ -103,6 +181,22 @@ export default function App() {
                 }
               />
               <Route
+                path="solicitudes"
+                element={
+                  <RequireRole roles={['Docente Tutor', 'Coordinador', 'Administrador DBU']}>
+                    <TutoringRequestsInboxPage />
+                  </RequireRole>
+                }
+              />
+              <Route
+                path="mis-sesiones"
+                element={
+                  <RequireRole roles={['Tutorado']}>
+                    <MySessionsPage />
+                  </RequireRole>
+                }
+              />
+              <Route
                 path="solicitar-tutoria"
                 element={
                   <RequireRole roles={['Tutorado']}>
@@ -119,10 +213,26 @@ export default function App() {
                 }
               />
               <Route
+                path="informes/consolidado"
+                element={
+                  <RequireRole roles={['Administrador DBU', 'Vicerrectorado']}>
+                    <ConsolidatedReportPage />
+                  </RequireRole>
+                }
+              />
+              <Route
+                path="informes/semestral"
+                element={
+                  <RequireRole roles={['Docente Tutor']}>
+                    <SemesterReportPage />
+                  </RequireRole>
+                }
+              />
+              <Route
                 path="informes"
                 element={
                   <RequireRole
-                    roles={['Docente Tutor', 'Coordinador', 'Administrador DBU', 'Vicerrectorado']}
+                    roles={['Docente Tutor', 'Coordinador', 'Administrador DBU']}
                   >
                     <ScheduleAttendanceReportPage />
                   </RequireRole>
@@ -131,7 +241,7 @@ export default function App() {
               <Route
                 path="derivaciones"
                 element={
-                  <RequireRole roles={['Docente Tutor', 'Profesional de Servicio', 'Administrador DBU', 'Coordinador']}>
+                  <RequireRole roles={['Docente Tutor', 'Profesional de Servicio', 'Administrador DBU']}>
                     <ReferralsPage />
                   </RequireRole>
                 }
@@ -153,6 +263,7 @@ export default function App() {
         </Routes>
         </BrowserRouter>
       </AuthProvider>
+      </BrandingProvider>
     </QueryClientProvider>
   );
 }

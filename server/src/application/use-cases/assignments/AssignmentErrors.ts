@@ -25,3 +25,11 @@ export class SameTutorAssignmentError extends Error {
     this.name = 'SameTutorAssignmentError';
   }
 }
+
+// La asignación inicial es solo para tutorados sin tutor: cambiar de tutor exige la reasignación con motivo e historial.
+export class StudentsAlreadyAssignedError extends Error {
+  constructor(public readonly count: number) {
+    super(`${count} tutorado(s) ya tienen tutor. Para cambiarlo usa la reasignación, que exige un motivo y deja historial`);
+    this.name = 'StudentsAlreadyAssignedError';
+  }
+}

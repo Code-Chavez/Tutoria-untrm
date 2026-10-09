@@ -1,7 +1,11 @@
 import { apiClient } from '@shared/services/apiClient';
 
 // Bandeja de notificaciones (HU-33): derivaciones nuevas y cambios de estado.
-export type NotificationType = 'REFERRAL_CREATED' | 'REFERRAL_STATUS_CHANGED';
+export type NotificationType =
+  | 'REFERRAL_CREATED'
+  | 'REFERRAL_STATUS_CHANGED'
+  | 'TUTORING_REQUEST_CREATED'
+  | 'TUTORING_REQUEST_UPDATED';
 
 export interface AppNotification {
   id: string;
@@ -9,6 +13,7 @@ export interface AppNotification {
   type: NotificationType;
   message: string;
   referralId?: string | null;
+  tutoringRequestId?: string | null;
   read: boolean;
   createdAt: string;
 }
@@ -17,6 +22,11 @@ export const notificationService = {
   getNotifications: async (): Promise<AppNotification[]> => {
     const response = await apiClient.get<AppNotification[]>('/notifications');
     return response.data;
+  },
+
+  markAllAsRead: async (): Promise<number> => {
+    const response = await apiClient.patch<{ updated: number }>('/notifications/read-all');
+    return response.data.updated;
   },
 
   markAsRead: async (id: string): Promise<AppNotification> => {

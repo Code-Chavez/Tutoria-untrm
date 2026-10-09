@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { useDialogFocus } from '@shared/hooks/useDialog';
 import { Button } from '@shared/components/ui';
 import { AlertTriangleIcon, CloseIcon } from '@shared/components/icons';
 import { Student } from '../services/studentService';
@@ -15,6 +16,7 @@ export const RiskModal: React.FC<RiskModalProps> = ({ student, loading, onConfir
   const [reason, setReason] = useState(student.riskReason ?? '');
   const [error, setError] = useState('');
 
+  const dialogRef = useDialogFocus();
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (e.key === 'Escape') onCancel();
@@ -36,6 +38,8 @@ export const RiskModal: React.FC<RiskModalProps> = ({ student, loading, onConfir
       <div
         className={styles.dialog}
         role="dialog"
+        ref={dialogRef}
+        tabIndex={-1}
         aria-modal="true"
         aria-label="Marcar en riesgo académico"
         onClick={(e) => e.stopPropagation()}

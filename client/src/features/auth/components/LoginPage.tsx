@@ -2,7 +2,7 @@ import { useState, type FormEvent } from 'react';
 import { Navigate, useLocation, useNavigate, Link } from 'react-router-dom';
 import { getApiErrorMessage } from '@shared/services/apiClient';
 import { useAuth } from '../hooks/useAuth';
-import logoUntrm from '@assets/logo-untrm.png';
+import { useBranding } from '@shared/theme/BrandingProvider';
 import styles from './LoginPage.module.css';
 
 interface LocationState {
@@ -11,6 +11,7 @@ interface LocationState {
 
 export function LoginPage() {
   const { isAuthenticated, login } = useAuth();
+  const { branding, logoSrc } = useBranding();
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -46,8 +47,8 @@ export function LoginPage() {
       <main className={styles.card}>
         <div className={styles.brand}>
           <img
-            src={logoUntrm}
-            alt="Universidad Nacional Toribio Rodríguez de Mendoza de Amazonas"
+            src={logoSrc}
+            alt={branding.institutionName}
             className={styles.logo}
           />
           <h1 className={styles.title}>Bienvenido de nuevo</h1>

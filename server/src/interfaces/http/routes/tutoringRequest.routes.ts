@@ -9,6 +9,8 @@ const tutoringRequestController = new TutoringRequestController(
   container.useCases.createTutoringRequestUseCase,
   container.useCases.listTutoringRequestsUseCase,
   container.useCases.createOwnTutoringRequestUseCase,
+  container.useCases.listOwnTutoringRequestsUseCase,
+  container.useCases.updateTutoringRequestStatusUseCase,
 );
 
 const requireAuth = authenticate(container.services.tokenService);
@@ -29,7 +31,23 @@ router.post(
   tutoringRequestController.createOwn,
 );
 
-// Listar solicitudes (propias con ?mine=true, o de un estudiante con ?studentId=).
+// Historial propio del tutorado (estado y respuesta). Antes de /:id para que «mine» no se tome por un identificador.
+router.get(
+  '/tutoring-requests/mine',
+  requireAuth,
+  authorize(['tutoring-requests:self']),
+  tutoringRequestController.listOwn,
+);
+
+// Seguimiento de una solicitud: en atención / atendida con respuesta (R01).
+router.patch(
+  '/tutoring-requests/:id/status',
+  requireAuth,
+  authorize(['tutoring-requests:write']),
+  tutoringRequestController.updateStatus,
+);
+
+// Bandeja: solicitudes recibidas (?mine=true), de un estudiante (?studentId=) o por estado (?status=).
 router.get(
   '/tutoring-requests',
   requireAuth,
