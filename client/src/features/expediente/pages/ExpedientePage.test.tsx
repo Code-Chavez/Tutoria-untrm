@@ -162,6 +162,33 @@ describe('ExpedientePage', () => {
     expect(screen.queryByRole('button', { name: /Adjuntar documento firmado/ })).not.toBeInTheDocument();
   });
 
+  it('incorpora la solicitud de tutoría al expediente, con su estado y la respuesta (R01)', async () => {
+    mocked.getStudentRecord.mockResolvedValue({
+      ...baseRecord,
+      timeline: [
+        {
+          type: 'tutoringRequest',
+          id: 'r1',
+          date: '2026-10-02T00:00:00.000Z',
+          caseType: 'ACADEMIC',
+          source: 'STUDENT',
+          reason: 'Necesito apoyo en Cálculo',
+          status: 'ATENDIDA',
+          routedToName: 'Elena Ramírez',
+          responseNote: 'Te espero el jueves.',
+          handledByName: 'Elena Ramírez',
+          handledAt: '2026-10-03T00:00:00.000Z',
+        },
+      ],
+    });
+    renderPage();
+
+    expect(await screen.findByText('Solicitud de tutoría')).toBeInTheDocument();
+    expect(screen.getByText('Atendida')).toBeInTheDocument();
+    expect(screen.getByText(/Necesito apoyo en Cálculo/)).toBeInTheDocument();
+    expect(screen.getByText(/Te espero el jueves\./)).toBeInTheDocument();
+  });
+
   it('muestra un estado vacío cuando no hay eventos', async () => {
     mocked.getStudentRecord.mockResolvedValue({ ...baseRecord, timeline: [] });
     renderPage();

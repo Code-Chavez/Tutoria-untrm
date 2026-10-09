@@ -18,4 +18,17 @@ export const createOwnTutoringRequestSchema = z.object({
   reason: z.string().trim().min(3, 'Describa el motivo de la solicitud').max(1000),
 });
 
+// Seguimiento de una solicitud (R01).
+export const updateTutoringRequestStatusSchema = z.object({
+  status: z.enum(['EN_ATENCION', 'ATENDIDA']),
+  note: z.string().trim().max(1000).optional(),
+  sessionId: z.string().uuid().optional(),
+});
+
+export const listTutoringRequestsQuerySchema = z.object({
+  studentId: z.string().uuid().optional(),
+  mine: z.enum(['true', 'false']).optional(),
+  status: z.enum(['PENDIENTE', 'EN_ATENCION', 'ATENDIDA']).optional(),
+});
+
 export type CreateOwnTutoringRequestBody = z.infer<typeof createOwnTutoringRequestSchema>;

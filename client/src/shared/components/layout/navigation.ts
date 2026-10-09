@@ -23,6 +23,7 @@ import {
   ClockIcon,
   FileSpreadsheetIcon,
   ShieldCheckIcon,
+  MessageSquareIcon,
 } from '@shared/components/icons';
 
 export type RoleCode = 'tutor' | 'coord' | 'dbu' | 'serv' | 'est' | 'vice';
@@ -70,6 +71,7 @@ export const NAV: NavGroup[] = [
       { label: 'Seguimiento', Icon: ActivityIcon, path: '/tutorados', action: 'seguimiento', roles: ['tutor'] },
       { label: 'Derivar caso', Icon: SendIcon, path: '/tutorados', action: 'derivar', roles: ['tutor'] },
       { label: 'Solicitar tutoría', Icon: SendIcon, path: '/solicitar-tutoria', roles: ['est'] },
+      { label: 'Solicitudes de tutoría', Icon: MessageSquareIcon, path: '/solicitudes', roles: ['tutor', 'coord', 'dbu'] },
       { label: 'Casos derivados', Icon: InboxIcon, path: '/derivaciones', roles: ['tutor', 'serv', 'dbu'] },
       {
         label: 'Seguimiento DBU',

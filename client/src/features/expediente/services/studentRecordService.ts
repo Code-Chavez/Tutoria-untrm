@@ -53,12 +53,28 @@ interface ReferralRecordEvent {
   receivingInstance: string | null;
 }
 
+// Solicitud de tutoría (R01).
+interface TutoringRequestRecordEvent {
+  type: 'tutoringRequest';
+  id: string;
+  date: string;
+  caseType: 'ACADEMIC' | 'PSYCHOLOGICAL' | 'SOCIAL' | 'HEALTH';
+  source: 'STUDENT' | 'INSTRUCTOR';
+  reason: string;
+  status: 'PENDIENTE' | 'EN_ATENCION' | 'ATENDIDA';
+  routedToName: string;
+  responseNote: string | null;
+  handledByName: string | null;
+  handledAt: string | null;
+}
+
 export type StudentRecordEvent =
   | InterviewRecordEvent
   | AssignmentRecordEvent
   | AttendanceRecordEvent
   | FollowUpRecordEvent
-  | ReferralRecordEvent;
+  | ReferralRecordEvent
+  | TutoringRequestRecordEvent;
 
 export interface SupportContactRecord {
   fullName: string;

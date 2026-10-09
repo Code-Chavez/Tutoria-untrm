@@ -21,6 +21,7 @@ import { ProfilePage } from '@features/profile/pages/ProfilePage';
 import { MyTutoringRequestPage } from '@features/solicitudes/pages/MyTutoringRequestPage';
 import { SessionsCalendarPage } from '@features/sesiones/pages/SessionsCalendarPage';
 import { AuditLogPage } from '@features/auditoria/pages/AuditLogPage';
+import { TutoringRequestsInboxPage } from '@features/solicitudes/pages/TutoringRequestsInboxPage';
 import { MySessionsPage } from '@features/sesiones/pages/MySessionsPage';
 import { ScheduleAttendanceReportPage } from '@features/informes/pages/ScheduleAttendanceReportPage';
 import { SemesterReportPage } from '@features/informes/pages/SemesterReportPage';
@@ -176,6 +177,14 @@ export default function App() {
                 element={
                   <RequireRole roles={['Docente Tutor']}>
                     <SessionsCalendarPage />
+                  </RequireRole>
+                }
+              />
+              <Route
+                path="solicitudes"
+                element={
+                  <RequireRole roles={['Docente Tutor', 'Coordinador', 'Administrador DBU']}>
+                    <TutoringRequestsInboxPage />
                   </RequireRole>
                 }
               />

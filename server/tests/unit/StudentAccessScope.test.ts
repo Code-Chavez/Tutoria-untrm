@@ -231,6 +231,7 @@ describe('Alcance sobre los tutorados con la política real (A03, Art. 9.a y 14.
         w.students, w.schools, w.users, w.roles,
         empty as never, empty as never, { findByStudent: jest.fn(async () => null) } as never,
         empty as never, empty as never, { findMany: jest.fn(async () => []) } as never, w.guard,
+        empty as never,
       );
       await expect(record.execute('a1', false, 'tutorA2')).rejects.toBeInstanceOf(StudentNotFoundError);
       expect(empty.findByStudent).not.toHaveBeenCalled(); // no se tocó ningún dato del tutorado
@@ -357,7 +358,7 @@ describe('Alcance sobre los tutorados con la política real (A03, Art. 9.a y 14.
     };
 
     it('listar: cada quien ve las enrutadas a él o las de su alcance', async () => {
-      const list = (who: string) => new ListTutoringRequestsUseCase(requestsRepo(), w.guard).execute(who);
+      const list = (who: string) => new ListTutoringRequestsUseCase(requestsRepo(), w.guard, w.students, w.users).execute(who);
       expect(ids(await list('dbu'))).toEqual(['r1', 'r2', 'r3', 'r4']);
       expect(ids(await list('tutorA1'))).toEqual(['r1']);
       expect(ids(await list('coordA'))).toEqual(['r1', 'r2', 'r4']);
@@ -367,7 +368,7 @@ describe('Alcance sobre los tutorados con la política real (A03, Art. 9.a y 14.
 
     it('registrar una solicitud: solo sobre tutorados del alcance', async () => {
       const create = (who: string, studentId: string) =>
-        new CreateTutoringRequestUseCase(requestsRepo(), w.guard, w.schools, w.users, w.roles).execute(studentId, who, {
+        new CreateTutoringRequestUseCase(requestsRepo(), w.guard, w.schools, w.users, w.roles, { create: jest.fn() } as never).execute(studentId, who, {
           source: 'STUDENT', caseType: 'ACADEMIC', reason: 'x',
         } as never);
 

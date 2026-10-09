@@ -23,7 +23,11 @@ const TYPE_LABEL: Record<StudentRecordEvent['type'], string> = {
   attendance: 'Asistencia (Anexo 4)',
   followUp: 'Seguimiento (Anexo 5)',
   referral: 'Derivación (Anexo 6)',
+  tutoringRequest: 'Solicitud de tutoría',
 };
+
+const CASE_LABEL: Record<string, string> = { ACADEMIC: 'Académico', PSYCHOLOGICAL: 'Psicológico', SOCIAL: 'Social', HEALTH: 'Salud' };
+const REQUEST_STATUS_LABEL: Record<string, string> = { PENDIENTE: 'Pendiente', EN_ATENCION: 'En atención', ATENDIDA: 'Atendida' };
 
 function detail(event: StudentRecordEvent): string {
   switch (event.type) {
@@ -45,6 +49,12 @@ function detail(event: StudentRecordEvent): string {
           : 'Acuerdo con el tutorado';
       return `Motivo: ${event.reason}\n${agreement}: ${event.agreements}\nTutor: ${event.conductedByName}`;
     }
+    case 'tutoringRequest':
+      return [
+        `${CASE_LABEL[event.caseType] ?? event.caseType} · ${REQUEST_STATUS_LABEL[event.status] ?? event.status} · enrutada a ${event.routedToName}`,
+        `Motivo: ${event.reason}`,
+        ...(event.responseNote ? [`Respuesta${event.handledByName ? ` de ${event.handledByName}` : ''}: ${event.responseNote}`] : []),
+      ].join('\n');
     case 'referral':
       return `${SERVICE_LABEL[event.service] ?? event.service} · ${STATUS_LABEL[event.status] ?? event.status}${event.receivingInstance ? ` · ${event.receivingInstance}` : ''}`;
   }

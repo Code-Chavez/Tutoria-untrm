@@ -462,3 +462,11 @@ export function MoreHorizontalIcon({ size = 18, className }: IconProps) {
     </svg>
   );
 }
+
+export function MessageSquareIcon({ size = 18, className }: IconProps) {
+  return (
+    <svg {...baseProps(size)} className={className} aria-hidden="true">
+      <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2Z" />
+    </svg>
+  );
+}
