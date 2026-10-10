@@ -14,3 +14,12 @@ export const queryClient = new QueryClient({
     },
   },
 });
+
+/**
+ * Descarta todo lo que dependa de la persona que entra o sale (paneles, expedientes, derivaciones).
+ * La identidad visual no es de nadie: si se borrara con el resto, el proveedor de identidad quedaría
+ * observando una consulta ya eliminada y no vería los cambios que luego guarde la DBU hasta recargar.
+ */
+export function clearSessionData(): void {
+  queryClient.removeQueries({ predicate: (query) => query.queryKey[0] !== 'branding' });
+}
