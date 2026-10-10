@@ -1,0 +1,17 @@
+{
+  "name": "sit-e2e",
+  "version": "0.4.1",
+  "private": true,
+  "description": "Pruebas de extremo a extremo del SIT (Playwright) contra el stack de docker compose",
+  "scripts": {
+    "test": "playwright test",
+    "test:headed": "playwright test --headed",
+    "typecheck": "tsc --noEmit",
+    "report": "playwright show-report"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.49.1",
+    "@types/node": "^22.10.0",
+    "typescript": "^5.7.2"
+  }
+}

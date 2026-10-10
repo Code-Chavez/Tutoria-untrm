@@ -70,7 +70,9 @@ cuando cambia una HU o una prueba.
 **Trabajo transversal (no es una HU):** auditoría (`AuditLogUseCases`, `auditEntry`; cliente `AuditLogPage`), configuración de producción
 (`productionConfig`), respaldo y restauración (CI «Backup — Restore drill»; aceptación 7.1–7.7).
 
-## Recorridos E2E (planificados)
+## Recorridos E2E
+
+Escritos: **E2E-01** y **E2E-02** (`e2e/tests/`). El resto sigue planificado.
 
 | Id | Recorrido | HU |
 |---|---|---|
