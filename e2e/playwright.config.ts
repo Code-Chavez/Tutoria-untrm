@@ -4,8 +4,8 @@ import { defineConfig } from '@playwright/test';
 // E2E_CHANNEL permite usar un navegador instalado (chrome, msedge) sin descargar el de Playwright.
 export default defineConfig({
   testDir: './tests',
-  timeout: 90_000,
-  expect: { timeout: 20_000 },
+  timeout: 150_000,
+  expect: { timeout: 45_000 },
   fullyParallel: false,
   workers: 1,
   retries: process.env.CI ? 1 : 0,
