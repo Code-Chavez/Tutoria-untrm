@@ -72,7 +72,7 @@ cuando cambia una HU o una prueba.
 
 ## Recorridos E2E
 
-Escritos: **E2E-01** y **E2E-02** (`e2e/tests/`). El resto sigue planificado.
+Escritos: **E2E-01**, **E2E-02**, **E2E-03**, **E2E-05** y **E2E-06** (`e2e/tests/`). El resto sigue planificado.
 
 | Id | Recorrido | HU |
 |---|---|---|

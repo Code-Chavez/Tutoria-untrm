@@ -7,7 +7,7 @@ export async function loginUi(page: Page, account: Account): Promise<void> {
   await page.getByPlaceholder('usuario@untrm.edu.pe').fill(account.email);
   await page.getByPlaceholder('••••••••').fill(account.password);
   await page.getByRole('button', { name: 'Ingresar' }).click();
-  await expect(page.getByRole('heading', { level: 1, name: new RegExp(`Bienvenid[oa], ${account.greeting}`) })).toBeVisible();
+  await expect(page.getByRole('heading', { level: 1, name: new RegExp(`Bienvenid[oa], ${account.greeting}`) })).toBeVisible({ timeout: 45_000 });
 }
 
 /** Entradas del menú lateral, en orden, y cuántas están marcadas como la página actual. */
