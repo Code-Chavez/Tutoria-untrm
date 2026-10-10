@@ -50,7 +50,7 @@ la hora. Un `FALLA` bloquea el release hasta corregirlo o aceptarlo por escrito.
 | 1.8 | Tutorado Ana | Campana y *Mis solicitudes* | → aviso de cambio; ve estado **Atendida** y la respuesta  OK (API) 09/10/2026 |
 | 1.9 | Tutorado Ana | Expediente propio no existe; menú | → solo ve su inicio, *Mis sesiones*, *Solicitar* y *Evaluar*  OK (API y menú) 09/10/2026 |
 | 1.10 | Tutor Elena | Expediente de Ana | → la solicitud aparece en la línea de tiempo con su estado y la respuesta  OK (API) 09/10/2026 |
-| 1.11 | Prueba límite | Estudiante **sin tutor** y estudiante de escuela **sin coordinador** | → enruta al coordinador / a la DBU, nunca se pierde  Pendiente: solo cubierto por pruebas automáticas |
+| 1.11 | Prueba límite | Estudiante **sin tutor** y estudiante de escuela **sin coordinador** | → enruta al coordinador / a la DBU, nunca se pierde  OK 10/10/2026: sin tutor → coordinadora Rosa; sin tutor ni coordinador → administrador DBU |
 
 ## 2. Entrevista, sesiones, asistencia y seguimiento
 
