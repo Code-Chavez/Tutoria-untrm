@@ -88,6 +88,21 @@ describe('ReferralDetailModal (HU-32 - Registro de atención y cierre)', () => {
     });
   });
 
+  it('tras avanzar el caso, la lista y el estado que se enviaría vuelven a coincidir', async () => {
+    const received = { ...mockReferral, status: 'RECIBIDO' as const };
+    const { rerender } = render(<ReferralDetailModal referral={received} onClose={onCloseMock} onStatusUpdated={onStatusUpdatedMock} />);
+    expect((screen.getByLabelText(/Nuevo Estado/i) as HTMLSelectElement).value).toBe('EN_ATENCION');
+
+    // Lo que ocurre al guardar: el padre entrega el caso ya avanzado.
+    rerender(<ReferralDetailModal referral={{ ...received, status: 'EN_ATENCION' }} onClose={onCloseMock} onStatusUpdated={onStatusUpdatedMock} />);
+    expect((screen.getByLabelText(/Nuevo Estado/i) as HTMLSelectElement).value).toBe('ATENDIDO');
+
+    vi.mocked(referralService.updateStatus).mockResolvedValue({ ...received, status: 'ATENDIDO' });
+    fireEvent.change(screen.getByRole('textbox'), { target: { value: 'Atendido' } });
+    fireEvent.click(screen.getByRole('button', { name: /Registrar Atención/i }));
+    await waitFor(() => expect(referralService.updateStatus).toHaveBeenCalledWith('ref-1', 'ATENDIDO', 'Atendido'));
+  });
+
   it('muestra el banner de caso cerrado y deshabilita edición si el estado es CERRADO', () => {
     const closedReferral = { ...mockReferral, status: 'CERRADO' as const };
 

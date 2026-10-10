@@ -32,6 +32,12 @@ export const ReferralDetailModal: React.FC<ReferralDetailModalProps> = ({ referr
   const [error, setError] = useState('');
   const signed = useReferralSignedDocuments(referral.id);
 
+  // Tras guardar un estado el caso avanza y las opciones cambian: el valor elegido debe seguir a la lista,
+  // o se reenviaría el estado que ya se guardó (el servidor lo rechaza porque solo se avanza).
+  useEffect(() => {
+    setNewStatus(STATUS_ORDER[STATUS_ORDER.indexOf(referral.status) + 1] ?? referral.status);
+  }, [referral.status]);
+
   const dialogRef = useDialogFocus();
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
