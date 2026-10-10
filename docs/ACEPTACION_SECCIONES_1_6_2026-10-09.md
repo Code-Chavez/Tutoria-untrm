@@ -18,7 +18,7 @@ la sesión y hacer clic en los avisos en pantalla. Esos pasos están marcados co
 
 | Sección | Resultado |
 |---|---|
-| 1. Solicitud de tutoría (R01) | **Todo OK** salvo 1.11 (estudiante sin tutor / escuela sin coordinador: solo pruebas automáticas, sin cuenta de prueba para ejercitarlo). |
+| 1. Solicitud de tutoría (R01) | **Todo OK.** 1.11 se ejercitó después (10/10/2026) quitando el tutor de Ana y luego el coordinador de su escuela: la solicitud llegó a la coordinadora y, sin ella, al administrador DBU. |
 | 2. Entrevista, sesiones, asistencia | **OK.** 2.3 reveló un fallo real (abajo), corregido en el PR #88. |
 | 3. Derivación y cinco servicios | **OK en los cinco servicios** (Escuela, Psicopedagogía, Psicología, Asistencia Social, Salud): aviso al servicio correcto, otro servicio y tutor no emisor reciben 403/404, coordinador recibe 403 con explicación, flujo solo hacia delante, notas internas ocultas al tutor, constancia PDF, adjunto firmado visible solo para emisor, servicio y DBU, bitácora con `SIGNED_DOCUMENT_ATTACHED`. |
 | 4. Plan, evaluación, recuperación | **OK.** |
@@ -58,5 +58,4 @@ la sesión y hacer clic en los avisos en pantalla. Esos pasos están marcados co
 
 ## Pendiente de una persona
 
-Pasos con lectura visual (2.11, 3.7, 5.1, 5.2, 5.5), clic en avisos (3.2), espera real de 15 min (4.8), 1.11 con cuentas de prueba para
-estudiante sin tutor / escuela sin coordinador, y los roles Salud y Asistencia Social en pantalla (6.5, 6.6).
+Pasos con lectura visual (2.11, 3.7, 5.1, 5.2, 5.5), clic en avisos (3.2), espera real de 15 min (4.8), y los roles Salud y Asistencia Social en pantalla (6.5, 6.6).
