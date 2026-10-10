@@ -72,7 +72,7 @@ cuando cambia una HU o una prueba.
 
 ## Recorridos E2E
 
-Escritos: **E2E-01**, **E2E-02**, **E2E-03**, **E2E-05** y **E2E-06** (`e2e/tests/`). El resto sigue planificado.
+Escritos los ocho: **E2E-01** a **E2E-08** (`e2e/tests/`). E2E-08 cubre de la carga masiva (HU-08, HU-09) y de la asignación y reasignación (HU-12, HU-13) solo lo que ya cubre la API; esos cuatro puntos siguen sin recorrido por pantalla.
 
 | Id | Recorrido | HU |
 |---|---|---|

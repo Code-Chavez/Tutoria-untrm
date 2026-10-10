@@ -8,10 +8,11 @@ Recorridos de extremo a extremo con [Playwright](https://playwright.dev) sobre l
 | E2E-01 Acceso, menú y panel por rol | `tests/e2e-01-acceso-y-menu.spec.ts` | escrito |
 | E2E-02 Solicitud de tutoría | `tests/e2e-02-solicitud-de-tutoria.spec.ts` | escrito |
 | E2E-03 Sesiones y asistencia | `tests/e2e-03-sesiones-y-asistencia.spec.ts` | escrito |
-| E2E-04 Derivación a un servicio | — | pendiente (requiere #98) |
+| E2E-04 Derivación a un servicio | `tests/e2e-04-derivacion-a-servicio.spec.ts` | escrito |
 | E2E-05 Informes y exportaciones | `tests/e2e-05-informes-y-exportaciones.spec.ts` | escrito |
 | E2E-06 Plan semestral | `tests/e2e-06-plan-semestral.spec.ts` | escrito |
-| E2E-07, E2E-08 | — | pendientes |
+| E2E-07 Evaluación de tutoría | `tests/e2e-07-evaluacion-de-tutoria.spec.ts` | escrito |
+| E2E-08 Administración | `tests/e2e-08-administracion.spec.ts` | escrito (la prueba de identidad visual requiere el arreglo de #100) |
 
 ## Cómo correrlas
 

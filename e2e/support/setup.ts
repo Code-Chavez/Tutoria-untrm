@@ -62,3 +62,35 @@ export function dateInput(d: Date): string {
   const p = (n: number) => String(n).padStart(2, '0');
   return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}`;
 }
+
+/**
+ * Crea un tutorado nuevo con cuenta de portal (rol Tutorado), asignado a Elena.
+ * La cuenta usa la contraseña inicial por defecto del sistema.
+ */
+export async function createPortalStudent(adminToken: string, elenaId: string): Promise<{ id: string; email: string; password: string; greeting: string }> {
+  const student = await createStudentForElena(adminToken, elenaId);
+  const roles = await api<{ roles: { id: string; name: string }[] } | { id: string; name: string }[]>(adminToken, 'GET', '/roles');
+  const roleList = Array.isArray(roles.body) ? roles.body : roles.body.roles;
+  const role = roleList.find((r) => r.name === 'Tutorado');
+  expect(role, 'rol Tutorado').toBeTruthy();
+  const email = `prueba.${student.fullName.split(' ').pop()}@untrm.edu.pe`;
+  const user = await api<{ user: { id: string } }>(adminToken, 'POST', '/users', {
+    email,
+    firstName: 'Prueba',
+    lastName: student.fullName.replace('Prueba ', ''),
+    roleId: role!.id,
+  });
+  expect(user.status).toBe(201);
+  const linked = await api(adminToken, 'PATCH', `/students/${student.id}/portal-account`, { userId: user.body.user.id });
+  expect(linked.status).toBe(200);
+  return { id: student.id, email, password: 'Tutor2026!', greeting: 'Prueba' };
+}
+
+/** Abre o cierra la evaluación de la escuela de Sistemas. */
+export async function setSistemasEvaluationWindow(adminToken: string, isOpen: boolean): Promise<void> {
+  const schools = await api<{ schools: { id: string; name: string }[] } | { id: string; name: string }[]>(adminToken, 'GET', '/schools');
+  const list = Array.isArray(schools.body) ? schools.body : schools.body.schools;
+  const school = list.find((s) => /Sistemas/.test(s.name));
+  const res = await api(adminToken, 'PATCH', `/evaluation-windows/${school!.id}`, { isOpen });
+  expect(res.status).toBe(200);
+}
