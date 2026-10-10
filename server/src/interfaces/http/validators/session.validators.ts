@@ -17,7 +17,13 @@ export const scheduleSessionSchema = z.object({
   // instructorName/courseName en tutoring-requests).
   modality: z.enum(['PRESENCIAL', 'VIRTUAL']),
   location: z.string().trim().max(200).optional(),
-  meetingLink: z.string().trim().max(500).optional(),
+  // Solo http(s): un esquema como javascript: no debe llegar a un enlace clicable.
+  meetingLink: z
+    .string()
+    .trim()
+    .max(500)
+    .refine((v) => v === '' || /^https?:\/\/\S+$/i.test(v), 'El enlace debe empezar con http:// o https://')
+    .optional(),
 });
 
 export type ScheduleSessionBody = z.infer<typeof scheduleSessionSchema>;

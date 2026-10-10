@@ -69,6 +69,18 @@ describe('SessionDetailModal', () => {
     vi.useRealTimers();
   });
 
+  it('enlaza la sesión virtual solo si el enlace es http(s)', () => {
+    const ok = makeSession({ modality: 'VIRTUAL', location: null, meetingLink: 'https://meet.example.com/abc' });
+    const { unmount } = renderModal({ session: ok, allSessions: [ok] });
+    expect(screen.getByRole('link', { name: 'https://meet.example.com/abc' })).toHaveAttribute('href', 'https://meet.example.com/abc');
+    unmount();
+
+    const bad = makeSession({ modality: 'VIRTUAL', location: null, meetingLink: 'javascript:alert(1)' });
+    renderModal({ session: bad, allSessions: [bad] });
+    expect(screen.queryByRole('link', { name: /javascript/i })).not.toBeInTheDocument();
+    expect(screen.getByText('javascript:alert(1)')).toBeInTheDocument();
+  });
+
   it('no permite registrar asistencia antes de que empiece la sesión', () => {
     const future = makeSession({ scheduledAt: new Date(2026, 9, 15, 9, 0).toISOString() });
     renderModal({ session: future, allSessions: [future] });
