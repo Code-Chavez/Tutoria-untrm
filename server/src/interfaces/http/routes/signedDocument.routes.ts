@@ -5,6 +5,7 @@ import { SignedDocumentController } from '../controllers/SignedDocumentControlle
 import { AttendanceSheetPdf } from '../../../infrastructure/parsers/AttendanceSheetPdf';
 import { authenticate } from '../middleware/authenticate';
 import { authorize } from '../middleware/authorize';
+import { requireFileSignature } from '../middleware/fileSignature';
 
 const router: IRouter = Router();
 const controller = new SignedDocumentController(
@@ -31,12 +32,12 @@ const requireAuth = authenticate(container.services.tokenService);
 
 // Constancia de derivación firmada (Anexo N°6): mismas reglas de visibilidad que la derivación.
 router.get('/referrals/:id/signed-documents', requireAuth, authorize(['referrals:read']), controller.listForReferral);
-router.post('/referrals/:id/signed-documents', requireAuth, authorize(['referrals:write']), upload.single('file'), controller.attachToReferral);
+router.post('/referrals/:id/signed-documents', requireAuth, authorize(['referrals:write']), upload.single('file'), requireFileSignature(['pdf', 'png', 'jpeg']), controller.attachToReferral);
 
 // Hoja de asistencia a la tutoría individual (Anexo N°4): PDF imprimible y documentos firmados.
 router.get('/students/:id/attendance-sheet/pdf', requireAuth, authorize(['sessions:read']), controller.attendanceSheetPdf);
 router.get('/students/:id/attendance-sheet/signed-documents', requireAuth, authorize(['sessions:read']), controller.listForAttendanceSheet);
-router.post('/students/:id/attendance-sheet/signed-documents', requireAuth, authorize(['sessions:write']), upload.single('file'), controller.attachToAttendanceSheet);
+router.post('/students/:id/attendance-sheet/signed-documents', requireAuth, authorize(['sessions:write']), upload.single('file'), requireFileSignature(['pdf', 'png', 'jpeg']), controller.attachToAttendanceSheet);
 
 // Descarga de cualquier documento firmado: la regla de acceso depende del caso al que pertenece.
 router.get('/signed-documents/:docId/file', requireAuth, controller.download);

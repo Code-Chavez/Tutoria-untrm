@@ -4,6 +4,7 @@ import { container } from '../../../infrastructure/container';
 import { WorkPlanController } from '../controllers/WorkPlanController';
 import { authenticate } from '../middleware/authenticate';
 import { authorize } from '../middleware/authorize';
+import { requireFileSignature } from '../middleware/fileSignature';
 
 const router: IRouter = Router();
 const workPlanController = new WorkPlanController(
@@ -48,6 +49,7 @@ router.post(
   requireAuth,
   authorize(['work-plans:write']),
   uploadResolution.single('file'),
+  requireFileSignature(['pdf']),
   workPlanController.uploadResolution,
 );
 router.get(
