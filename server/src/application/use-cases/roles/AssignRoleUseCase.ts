@@ -3,6 +3,7 @@ import { UserRepository } from '@domain/repositories/UserRepository';
 import { RoleRepository } from '@domain/repositories/RoleRepository';
 import { AuditLogRepository } from '@domain/repositories/AuditLogRepository';
 import { RoleNotFoundError, RoleTargetUserNotFoundError } from './RoleErrors';
+import { resolveService } from '../users/serviceAssignment';
 
 /**
  * Asigna un rol a un usuario. El modelo es de un rol por usuario (la relación
@@ -15,7 +16,7 @@ export class AssignRoleUseCase {
     private readonly auditLogs: AuditLogRepository,
   ) {}
 
-  async execute(userId: string, roleId: string): Promise<Omit<User, 'passwordHash'>> {
+  async execute(userId: string, roleId: string, service?: string | null): Promise<Omit<User, 'passwordHash'>> {
     const user = await this.users.findById(userId);
     if (!user) {
       throw new RoleTargetUserNotFoundError(userId);
@@ -26,14 +27,18 @@ export class AssignRoleUseCase {
       throw new RoleNotFoundError(roleId);
     }
 
-    const updated = await this.users.update(userId, { roleId });
+    // Al pasar a Profesional de Servicio hay que indicar el servicio; al salir de ese rol, se descarta.
+    const updated = await this.users.update(userId, {
+      roleId,
+      service: resolveService(role.name, service !== undefined ? service : user.service),
+    });
 
     await this.auditLogs.create({
       userId,
       action: 'ASSIGN_ROLE',
       entity: 'User',
       entityId: userId,
-      details: `role=${role.name}`,
+      details: `role=${role.name}${updated.service ? ` service=${updated.service}` : ''}`,
       ipAddress: null,
     });
 

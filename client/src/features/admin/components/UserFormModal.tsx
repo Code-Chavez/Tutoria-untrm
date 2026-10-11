@@ -4,6 +4,11 @@ import styles from './UserFormModal.module.css';
 import { User, CreateUserData, UpdateUserData } from '../services/userService';
 import { Role } from '../services/roleService';
 import { CloseIcon } from '@shared/components/icons';
+import { REFERRAL_SERVICE_LABEL, type ReferralService } from '@features/derivaciones/services/referralService';
+
+// Un Profesional de Servicio solo ve y recibe los casos derivados a su servicio: sin él no recibiría ninguno.
+const SERVICE_ROLE_NAME = 'Profesional de Servicio';
+const SERVICES = Object.keys(REFERRAL_SERVICE_LABEL) as ReferralService[];
 
 interface UserFormModalProps {
   onClose: () => void;
@@ -28,8 +33,9 @@ export const UserFormModal: React.FC<UserFormModalProps> = ({
           lastName: userToEdit.lastName,
           roleId: userToEdit.roleId,
           phone: userToEdit.phone || '',
+          service: userToEdit.service ?? '',
         }
-      : { email: '', firstName: '', lastName: '', roleId: '', phone: '' },
+      : { email: '', firstName: '', lastName: '', roleId: '', phone: '', service: '' },
   );
   const [loading, setLoading] = useState(false);
 
@@ -39,12 +45,13 @@ export const UserFormModal: React.FC<UserFormModalProps> = ({
   };
 
   const dialogRef = useDialog(onClose);
+  const isServiceRole = roles.find((r) => r.id === formData.roleId)?.name === SERVICE_ROLE_NAME;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
       setLoading(true);
-      await onSubmit(formData);
+      await onSubmit({ ...formData, service: isServiceRole ? formData.service || null : null });
       onClose();
     } catch (error) {
       console.error('Error submitting form', error);
@@ -143,6 +150,27 @@ export const UserFormModal: React.FC<UserFormModalProps> = ({
               ))}
             </select>
           </div>
+
+          {isServiceRole && (
+            <div className={styles.formGroup}>
+              <label htmlFor="service">Servicio al que pertenece</label>
+              <select
+                id="service"
+                name="service"
+                className={styles.select}
+                value={formData.service ?? ''}
+                onChange={handleChange}
+                required
+              >
+                <option value="">Seleccione un servicio...</option>
+                {SERVICES.map((s) => (
+                  <option key={s} value={s}>
+                    {REFERRAL_SERVICE_LABEL[s]}
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
 
           <div className={styles.formActions}>
             <button type="button" className={styles.cancelButton} onClick={onClose}>
