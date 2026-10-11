@@ -560,11 +560,13 @@ const getReferralsUseCase = new GetReferralsUseCase(
   studentReferralRepository,
   userRepository,
   roleRepository,
+  studentRepository,
 );
 const getReferralByIdUseCase = new GetReferralByIdUseCase(
   studentReferralRepository,
   userRepository,
   roleRepository,
+  studentRepository,
 );
 const updateReferralStatusUseCase = new UpdateReferralStatusUseCase(
   studentReferralRepository,
