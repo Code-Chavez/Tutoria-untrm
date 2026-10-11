@@ -241,6 +241,7 @@ Procedimiento, variables y ensayo: **`backup/README.md`**. Reversión de una act
 | `deploy/README.md` · `backup/README.md` | Despliegue en producción, respaldo, restauración y reversión |
 | `docs/MATRIZ_TRAZABILIDAD_PRUEBAS.md` · `e2e/README.md` | Pruebas y su trazabilidad |
 | `docs/ACEPTACION_*.md` · `docs/INFORME_SEGURIDAD_*.md` | Evidencia de aceptación y de seguridad |
+| `docs/GUIA_PILOTO.md` · `docs/piloto/` | Preparación, ejecución y registro del piloto con usuarios |
 
 ## Licencia
 
