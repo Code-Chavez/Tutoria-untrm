@@ -4,7 +4,7 @@
 Universidad Nacional Toribio Rodríguez de Mendoza de Amazonas · Dirección de Bienestar Universitario (DBU)
 Versión del documento: 1.0 (octubre de 2026) · Software: 0.4.1
 
-Este manual explica, para cada tipo de persona que usa el sistema, **qué puede hacer y cómo hacerlo**. Los nombres entre comillas o en *cursiva*
+Este manual explica, para cada tipo de persona que usa el sistema, **qué puede hacer y cómo hacerlo**. Las imágenes son del sistema con datos de demostración (personas y casos ficticios). Los nombres entre comillas o en *cursiva*
 son los que aparecen en pantalla. Si necesita instalar o mantener el sistema, vea `docs/MANUAL_TECNICO.md`.
 
 ## Contenido
@@ -37,6 +37,9 @@ que otro compañero sí tiene: depende de su rol.
 
 ### 1.2 Entrar al sistema
 
+![Pantalla de ingreso](manual/img/01-ingreso.jpg)
+*Figura: Pantalla de ingreso.*
+
 1. Abra la dirección del sistema que le indicó la DBU.
 2. Escriba su **correo institucional** y su **contraseña**, y pulse *Ingresar*.
 3. Llegará a su *Panel de inicio*, con un resumen de su trabajo y accesos rápidos a las tareas más frecuentes.
@@ -44,6 +47,9 @@ que otro compañero sí tiene: depende de su rol.
 Tras **5 intentos fallidos** la cuenta se bloquea 15 minutos. Si la cuenta fue desactivada, pida a la DBU que la reactive.
 
 ### 1.3 Olvidé mi contraseña
+
+![Pantalla para recuperar la contraseña](manual/img/02-recuperar-contrasena.jpg)
+*Figura: Pantalla para recuperar la contraseña.*
 
 1. En la pantalla de ingreso pulse *¿Olvidaste tu contraseña?* y escriba su correo.
 2. Recibirá un mensaje con un enlace. **El enlace sirve una sola vez** y vence en 60 minutos.
@@ -73,7 +79,13 @@ involucradas en el proceso.
 
 ## 2. Tutorado (estudiante)
 
+![Panel de inicio del tutorado](manual/img/03-inicio-tutorado.jpg)
+*Figura: Panel de inicio del tutorado.*
+
 ### 2.1 Ver mis sesiones
+
+![«Mis sesiones»: fecha, modalidad y lugar o enlace](manual/img/04-mis-sesiones.jpg)
+*Figura: «Mis sesiones»: fecha, modalidad y lugar o enlace.*
 
 *Mis sesiones* lista las sesiones de tutoría programadas por su tutor, con **fecha, modalidad y lugar o enlace**. Cada una muestra su estado:
 *Próxima*, *Cancelada* (con el motivo) o realizada. Si la sesión es virtual, el enlace aparece como vínculo solo cuando empieza con `https://` o `http://`.
@@ -81,6 +93,9 @@ involucradas en el proceso.
 En una sesión grupal usted ve únicamente su propia participación, no la de sus compañeros.
 
 ### 2.2 Solicitar tutoría
+
+![«Solicitar tutoría» y el historial «Mis solicitudes»](manual/img/05-solicitar-tutoria.jpg)
+*Figura: «Solicitar tutoría» y el historial «Mis solicitudes».*
 
 1. Entre a *Solicitar tutoría*.
 2. En *Motivo (Art. 20)* elija el tipo: **Académico, Psicológico, Social o Salud**.
@@ -91,6 +106,9 @@ Debajo, en *Mis solicitudes*, ve el historial con el estado de cada una: **Pendi
 verá también **su respuesta** (por ejemplo, fecha y lugar de la sesión) y recibirá un aviso en la campana.
 
 ### 2.3 Evaluar a mi tutor
+
+![Cuestionario de evaluación de la tutoría](manual/img/06-evaluar-tutoria.jpg)
+*Figura: Cuestionario de evaluación de la tutoría.*
 
 La evaluación está disponible solo cuando la DBU la habilita para su escuela.
 
@@ -104,7 +122,13 @@ Solo se puede responder **una vez por periodo**. Sus respuestas son **anónimas*
 
 ## 3. Docente tutor
 
+![Panel de inicio del docente tutor](manual/img/07-inicio-tutor.jpg)
+*Figura: Panel de inicio del docente tutor.*
+
 ### 3.1 Mis tutorados
+
+![Lista de tutorados con sus acciones](manual/img/08-tutorados.jpg)
+*Figura: Lista de tutorados con sus acciones.*
 
 *Tutorados* muestra a los estudiantes que usted tiene asignados, con su código, escuela, ciclo y estado. Puede buscar por código, nombre o apellido y filtrar por
 escuela, ciclo y estado. En cada fila:
@@ -123,6 +147,15 @@ Usted solo ve a **sus** tutorados; no puede abrir el expediente de un estudiante
 
 ### 3.3 Programar sesiones
 
+![Formulario «Programar sesión de tutoría»](manual/img/09-programar-sesion.jpg)
+*Figura: Formulario «Programar sesión de tutoría».*
+
+![Calendario mensual de «Sesiones»](manual/img/10-calendario-sesiones.jpg)
+*Figura: Calendario mensual de «Sesiones».*
+
+![Detalle de una sesión](manual/img/11-detalle-sesion.jpg)
+*Figura: Detalle de una sesión.*
+
 1. En *Tutorados*, pulse **Programar sesión** en la fila del estudiante (sesión individual), o *Sesión grupal* en la parte superior para varios tutorados.
 2. Indique **fecha, hora y tema**, y la modalidad:
    - **Presencial**: escriba el *Lugar*.
@@ -135,6 +168,9 @@ La duración es de 45 minutos (la DBU puede ajustarla). *Sesiones* muestra su **
 estudiante lo ve.
 
 ### 3.4 Registrar la asistencia (Anexo 4)
+
+![Expediente del tutorado, con la hoja de asistencia (Anexo N.° 4)](manual/img/12-expediente.jpg)
+*Figura: Expediente del tutorado, con la hoja de asistencia (Anexo N.° 4).*
 
 Cuando la sesión **ya empezó**, ábrala desde *Sesiones*:
 
@@ -153,6 +189,12 @@ el estudiante y usted la firmen, y **adjunte el escaneo** en *Hoja firmada del s
 
 ### 3.6 Derivar un caso a un servicio (Anexo 6)
 
+![Ficha de derivación](manual/img/13-ficha-derivacion.jpg)
+*Figura: Ficha de derivación.*
+
+![«Casos derivados» del tutor](manual/img/16-casos-derivados-tutor.jpg)
+*Figura: «Casos derivados» del tutor.*
+
 1. Menú *Derivar caso* → pulse **Derivar caso: [nombre]** en el estudiante.
 2. En la *Ficha de derivación* marque los **aspectos observados** (académicos, sociales, apariencia, salud mental), escriba el *motivo* y elija el
    **servicio**: Escuela Profesional, Psicopedagogía, Psicología, Asistencia Social o Salud. El sistema **sugiere un servicio** según los aspectos marcados.
@@ -169,6 +211,12 @@ La ven usted, el servicio de destino y la DBU, nadie más.
 
 ### 3.7 Solicitudes de tutoría
 
+![Bandeja de «Solicitudes de tutoría»](manual/img/14-solicitudes-bandeja.jpg)
+*Figura: Bandeja de «Solicitudes de tutoría».*
+
+![Cuadro «Atender solicitud de tutoría»](manual/img/15-atender-solicitud.jpg)
+*Figura: Cuadro «Atender solicitud de tutoría».*
+
 *Solicitudes de tutoría* lista las solicitudes de sus tutorados. Para atender una:
 
 1. Pulse *Atender* en su fila. Se abre la solicitud.
@@ -180,19 +228,31 @@ El estudiante ve la respuesta y recibe un aviso.
 
 ### 3.8 Horarios y asistencia (Art. 15.d)
 
+![Consolidado de «Horarios y asistencia»](manual/img/17-horarios-asistencia.jpg)
+*Figura: Consolidado de «Horarios y asistencia».*
+
 *Horarios y asistencia* genera su consolidado de sesiones (programadas, realizadas, canceladas, asistencias confirmadas y pendientes). Puede acotar por fechas
 con *Generar consolidado* y exportarlo con los botones **PDF** o **Excel**.
 
 ### 3.9 Informe semestral (Anexo 9)
+
+![Informe semestral autollenado](manual/img/18-informe-semestral.jpg)
+*Figura: Informe semestral autollenado.*
 
 *Informe semestral* trae un **borrador autollenado** con sus sesiones y seguimientos del periodo. Revíselo, complete logros, dificultades y sugerencias, y pulse
 *Guardar informe*; después *Exportar PDF*. Con *Volver a autollenar* recupera el borrador del sistema.
 
 ## 4. Coordinador de escuela
 
+![Panel de inicio del coordinador](manual/img/19-inicio-coordinador.jpg)
+*Figura: Panel de inicio del coordinador.*
+
 Además de ver los tutorados **de su escuela** (nunca de otras), el coordinador:
 
 ### 4.1 Asignar tutores
+
+![Asignación de tutorados](manual/img/20-asignacion.jpg)
+*Figura: Asignación de tutorados.*
 
 - *Asignación*: elija a los estudiantes sin tutor (paso 1) y el docente tutor (paso 2; la lista se ordena de menor a mayor carga) para asignarlos en grupo.
 - **Reasignación individual:** en *Tutorados*, menú *Más* → *Reasignar tutor*; indique el motivo. Queda en el historial de asignaciones.
@@ -210,6 +270,9 @@ Se atienden igual que el tutor (sección 3.7). Si la escuela no tuviera coordina
 
 ### 4.4 Plan de trabajo semestral (Anexo 8)
 
+![Plan semestral y resolución de aprobación](manual/img/21-plan-semestral.jpg)
+*Figura: Plan semestral y resolución de aprobación.*
+
 1. *Plan semestral* muestra el plan de **su escuela** (si tuviera varias, elija en el selector).
 2. Complete las secciones (datos generales, objetivos, metodología, programación, recursos, presupuesto, actividades operativas) y pulse *Guardar plan*. Queda como **Borrador**.
 3. En *Resolución de aprobación* pulse *Adjuntar resolución* y suba el **PDF de la resolución**. El plan pasa a **Plan vigente**.
@@ -218,20 +281,32 @@ Se atienden igual que el tutor (sección 3.7). Si la escuela no tuviera coordina
 
 ### 4.5 Indicadores, resultados y exportaciones
 
+![Tablero de indicadores](manual/img/22-indicadores.jpg)
+*Figura: Tablero de indicadores.*
+
 - *Indicadores*: tablero de cobertura, riesgo, sesiones por mes y derivaciones por servicio de su escuela, con botones **PDF** y **Excel**.
 - *Resultados de evaluación* y *Sugerencias de estudiantes*: promedios por tutor e ítem y comentarios abiertos, **siempre agregados y anónimos**.
 - *Horarios y asistencia*: consolidado de un tutor de su escuela (elija el tutor); exportable en PDF y Excel.
 
 ## 5. Profesional de servicio
 
+![Panel de inicio del profesional de servicio](manual/img/23-inicio-servicio.jpg)
+*Figura: Panel de inicio del profesional de servicio.*
+
 Aplica a Psicología, Psicopedagogía, Asistencia Social, Salud y Escuela Profesional. Usted ve **solo los casos derivados a su servicio**.
 
 ### 5.1 Recibir y abrir un caso
+
+![Bandeja de «Casos derivados» del servicio](manual/img/24-bandeja-servicio.jpg)
+*Figura: Bandeja de «Casos derivados» del servicio.*
 
 Cuando un tutor deriva un caso a su servicio, aparece un aviso en la campana: *Nueva derivación recibida*. Al pulsarlo se abre **ese caso**. También puede entrar por
 *Casos derivados*, donde ve la bandeja con fecha, estado, servicio e instancia receptora.
 
 ### 5.2 Atender el caso
+
+![Detalle de la derivación y registro de atención](manual/img/25-detalle-derivacion.jpg)
+*Figura: Detalle de la derivación y registro de atención.*
 
 En el detalle del caso, la sección *Registrar Atención y Cambio de Estado* permite avanzar el estado:
 
@@ -251,6 +326,9 @@ Desde el detalle puede descargar la constancia (Anexo N.° 6) y **adjuntar el es
 
 ## 6. Vicerrectorado
 
+![Informe consolidado por escuela y facultad](manual/img/26-informe-consolidado.jpg)
+*Figura: Informe consolidado por escuela y facultad.*
+
 Perfil de **solo lectura**.
 
 - *Informe consolidado*: cifras por escuela y facultad (tutorados, con tutor, cobertura, tutores, sesiones individuales y grupales, participantes, informes). Filtros por *Semestre,
@@ -263,9 +341,18 @@ Las cifras del consolidado, del tablero y del panel de inicio coinciden entre s�
 
 ## 7. Administrador DBU
 
+![Panel de inicio del administrador](manual/img/27-inicio-administrador.jpg)
+*Figura: Panel de inicio del administrador.*
+
 El administrador tiene acceso a todo. Además de lo descrito para los demás roles (sección 3 a 6), administra:
 
 ### 7.1 Usuarios y roles
+
+![Lista de usuarios](manual/img/28-usuarios.jpg)
+*Figura: Lista de usuarios.*
+
+![Alta de un Profesional de Servicio: el servicio es obligatorio](manual/img/29-usuario-nuevo-servicio.jpg)
+*Figura: Alta de un Profesional de Servicio: el servicio es obligatorio.*
 *Usuarios y roles*: alta de cuentas (*Nuevo Usuario*: nombre, apellido, correo, teléfono y rol), cambio de rol y **activar/desactivar** (una persona desactivada pierde el acceso de inmediato, aunque tenga la sesión abierta).
 
 **Profesionales de servicio:** al elegir el rol *Profesional de Servicio* aparece el campo obligatorio *Servicio al que pertenece* (Escuela Profesional, Psicopedagogía, Psicología, Asistencia Social o Salud). **De ese servicio depende qué casos derivados ve y recibe**: sin él no vería ninguno, por eso el sistema no deja guardar sin elegirlo. En la tabla de usuarios aparece junto al rol (por ejemplo, «Profesional de Servicio · Psicología»).
@@ -273,20 +360,38 @@ El administrador tiene acceso a todo. Además de lo descrito para los demás rol
 Una cuenta nueva recibe la **contraseña inicial por defecto del sistema**: entréguesela a la persona por un medio seguro y pídale que la cambie en su primer ingreso (*Mi perfil*).
 
 ### 7.2 Catálogos maestros
+
+![Catálogos maestros](manual/img/30-catalogos.jpg)
+*Figura: Catálogos maestros.*
 *Catálogos*: pestañas **Facultades, Escuelas, Periodos, Ciclos, Servicios y Motivos**. Use *Nueva …* → *Crear*; *Editar*; *Desactivar/Activar*; *Eliminar* (con confirmación; lo que ya está en uso solo se puede desactivar).
 El **periodo académico activo** determina el semestre en curso para reportes y numeración de asistencias; al activar otro, el anterior queda **cerrado** con su corte de matrícula.
 
 ### 7.3 Parámetros del sistema
+
+![Parámetros del sistema](manual/img/31-parametros.jpg)
+*Figura: Parámetros del sistema.*
 *Parámetros*: duración de la sesión (45 min), número de sesiones por semestre (8), umbral de alerta por inasistencias (2) y plazo de atención de derivaciones (48 h). Los cambios rigen de inmediato y quedan en la bitácora.
 
 ### 7.4 Identidad visual
+
+![Identidad visual](manual/img/32-identidad-visual.jpg)
+*Figura: Identidad visual.*
 *Identidad visual*: nombre de la institución, **nombre corto** (barra lateral y título del navegador), colores y logotipo (PNG, JPEG o WEBP de hasta 1 MB). *Guardar cambios* lo aplica a todo el sistema;
 *Restablecer identidad UNTRM* vuelve a la original.
 
 ### 7.5 Evaluación de tutoría
+
+![Habilitación de la evaluación por escuela](manual/img/33-evaluacion-habilitacion.jpg)
+*Figura: Habilitación de la evaluación por escuela.*
 *Evaluación de tutoría* lista las escuelas con su estado (*Habilitada* / *Cerrada*). Pulse *Habilitar* o *Cerrar* para abrir o cerrar la evaluación a los estudiantes de esa escuela.
 
 ### 7.6 Seguimiento DBU y Bitácora
+
+![Seguimiento de derivaciones por la DBU](manual/img/34-seguimiento-dbu.jpg)
+*Figura: Seguimiento de derivaciones por la DBU.*
+
+![Bitácora de auditoría](manual/img/35-bitacora.jpg)
+*Figura: Bitácora de auditoría.*
 - *Seguimiento DBU*: todos los casos derivados por servicio y estado, con el plazo de atención.
 - *Bitácora de auditoría*: registro de las operaciones críticas (inicios de sesión, cambios de usuarios y catálogos, adjuntos, cambios de estado). Se puede filtrar y no se puede modificar.
 
