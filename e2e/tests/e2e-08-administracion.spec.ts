@@ -43,7 +43,9 @@ test('la DBU registra un tutorado nuevo y aparece en la lista', async ({ page })
   await page.getByLabel('Escuela profesional', { exact: true }).selectOption({ label: 'Ingeniería de Sistemas' });
   await page.getByRole('button', { name: 'Guardar' }).click();
 
-  await expect(page.getByText(code).first()).toBeVisible();
+  // La lista crece con cada corrida: se busca por el código en vez de depender de la posición.
+  await page.getByLabel('Buscar tutorado').fill(code);
+  await expect(page.getByRole('row', { name: new RegExp(code) })).toBeVisible();
 });
 
 test('un tutorado cambia su propia contraseña y entra con la nueva', async ({ page, browser }) => {
