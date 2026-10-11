@@ -8,6 +8,7 @@ import { Role } from '@domain/entities/Role';
 import { UserRepository } from '@domain/repositories/UserRepository';
 import { RoleRepository } from '@domain/repositories/RoleRepository';
 import { AuditLogRepository } from '@domain/repositories/AuditLogRepository';
+import { ServiceRequiredError } from '@application/use-cases/users/serviceAssignment';
 
 function buildUser(overrides: Partial<User> = {}): User {
   return {
@@ -66,7 +67,7 @@ describe('AssignRoleUseCase', () => {
 
     const result = await useCase.execute('user-1', 'role-new');
 
-    expect(users.update).toHaveBeenCalledWith('user-1', { roleId: 'role-new' });
+    expect(users.update).toHaveBeenCalledWith('user-1', { roleId: 'role-new', service: null });
     expect(auditLogs.create).toHaveBeenCalledWith(
       expect.objectContaining({ action: 'ASSIGN_ROLE', entityId: 'user-1' }),
     );
@@ -88,5 +89,38 @@ describe('AssignRoleUseCase', () => {
 
     await expect(useCase.execute('user-1', 'ghost-role')).rejects.toThrow(RoleNotFoundError);
     expect(users.update).not.toHaveBeenCalled();
+  });
+
+  describe('servicio del Profesional de Servicio', () => {
+    const serviceRole: Role = { ...targetRole, id: 'role-service', name: 'Profesional de Servicio' };
+
+    it('pasar a Profesional de Servicio exige indicar el servicio', async () => {
+      const { useCase, users, roles } = buildMocks();
+      users.findById.mockResolvedValue(buildUser());
+      roles.findById.mockResolvedValue(serviceRole);
+
+      await expect(useCase.execute('user-1', 'role-service')).rejects.toThrow(ServiceRequiredError);
+      expect(users.update).not.toHaveBeenCalled();
+    });
+
+    it('guarda el servicio al asignar el rol', async () => {
+      const { useCase, users, roles } = buildMocks();
+      users.findById.mockResolvedValue(buildUser());
+      roles.findById.mockResolvedValue(serviceRole);
+
+      await useCase.execute('user-1', 'role-service', 'SALUD');
+
+      expect(users.update).toHaveBeenCalledWith('user-1', { roleId: 'role-service', service: 'SALUD' });
+    });
+
+    it('al salir de ese rol se descarta el servicio', async () => {
+      const { useCase, users, roles } = buildMocks();
+      users.findById.mockResolvedValue(buildUser({ roleId: 'role-service', service: 'SALUD' }));
+      roles.findById.mockResolvedValue(targetRole);
+
+      await useCase.execute('user-1', 'role-new');
+
+      expect(users.update).toHaveBeenCalledWith('user-1', { roleId: 'role-new', service: null });
+    });
   });
 });

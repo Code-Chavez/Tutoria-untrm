@@ -2,11 +2,16 @@ import { CreateUserUseCase, DuplicateEmailError } from '@application/use-cases/u
 import { UserRepository } from '@domain/repositories/UserRepository';
 import { PasswordHasher } from '@application/ports/PasswordHasher';
 import { User } from '@domain/entities/User';
+import { RoleRepository } from '@domain/repositories/RoleRepository';
+import { Role } from '@domain/entities/Role';
+import { ServiceRequiredError } from '@application/use-cases/users/serviceAssignment';
 
 describe('CreateUserUseCase', () => {
   let useCase: CreateUserUseCase;
   let mockUserRepository: jest.Mocked<UserRepository>;
   let mockPasswordHasher: jest.Mocked<PasswordHasher>;
+  let mockRoles: jest.Mocked<RoleRepository>;
+  const roleNamed = (name: string) => ({ id: 'role-123', name, description: '', permissions: [], createdAt: new Date() }) as Role;
 
   beforeEach(() => {
     mockUserRepository = {
@@ -22,7 +27,10 @@ describe('CreateUserUseCase', () => {
       compare: jest.fn(),
     };
 
-    useCase = new CreateUserUseCase(mockUserRepository, mockPasswordHasher);
+    mockRoles = { findById: jest.fn().mockResolvedValue(roleNamed('Docente Tutor')), findByName: jest.fn(), findAll: jest.fn(), create: jest.fn() };
+    mockUserRepository.create.mockImplementation(async (data) => ({ id: 'u1', createdAt: new Date(), updatedAt: new Date(), ...data }) as User);
+
+    useCase = new CreateUserUseCase(mockUserRepository, mockPasswordHasher, mockRoles);
   });
 
   it('debería crear un usuario exitosamente', async () => {
@@ -72,5 +80,37 @@ describe('CreateUserUseCase', () => {
 
     expect(mockUserRepository.findByEmail).toHaveBeenCalledWith('test@untrm.edu.pe');
     expect(mockUserRepository.create).not.toHaveBeenCalled();
+  });
+
+  describe('servicio del Profesional de Servicio', () => {
+    const base = { email: 'psi@untrm.edu.pe', firstName: 'Lucía', lastName: 'Flores', roleId: 'role-123' };
+
+    it('exige el servicio: sin él no vería ni recibiría ninguna derivación', async () => {
+      mockUserRepository.findByEmail.mockResolvedValue(null);
+      mockRoles.findById.mockResolvedValue(roleNamed('Profesional de Servicio'));
+
+      await expect(useCase.execute(base)).rejects.toThrow(ServiceRequiredError);
+      await expect(useCase.execute({ ...base, service: 'OTRO' })).rejects.toThrow(ServiceRequiredError);
+      expect(mockUserRepository.create).not.toHaveBeenCalled();
+    });
+
+    it('guarda el servicio indicado', async () => {
+      mockUserRepository.findByEmail.mockResolvedValue(null);
+      mockRoles.findById.mockResolvedValue(roleNamed('Profesional de Servicio'));
+
+      const result = await useCase.execute({ ...base, service: 'PSICOLOGIA' });
+
+      expect(mockUserRepository.create).toHaveBeenCalledWith(expect.objectContaining({ service: 'PSICOLOGIA' }));
+      expect(result.service).toBe('PSICOLOGIA');
+    });
+
+    it('en cualquier otro rol descarta el servicio', async () => {
+      mockUserRepository.findByEmail.mockResolvedValue(null);
+
+      const result = await useCase.execute({ ...base, service: 'SALUD' });
+
+      expect(mockUserRepository.create).toHaveBeenCalledWith(expect.objectContaining({ service: null }));
+      expect(result.service).toBeNull();
+    });
   });
 });

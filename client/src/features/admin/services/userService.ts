@@ -8,6 +8,8 @@ export interface User {
   roleId: string;
   phone?: string;
   photoUrl?: string;
+  /** Servicio al que pertenece un Profesional de Servicio; nulo en los demás roles. */
+  service?: string | null;
   isActive: boolean;
 }
 
@@ -17,6 +19,7 @@ export interface CreateUserData {
   lastName: string;
   roleId: string;
   phone?: string;
+  service?: string | null;
 }
 
 export interface UpdateUserData {
@@ -25,6 +28,7 @@ export interface UpdateUserData {
   lastName?: string;
   roleId?: string;
   phone?: string;
+  service?: string | null;
 }
 
 export const userService = {

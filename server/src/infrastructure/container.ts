@@ -270,8 +270,8 @@ import { GetNotificationsUseCase } from '@application/use-cases/notifications/Ge
 import { MarkAllNotificationsReadUseCase } from '@application/use-cases/notifications/MarkAllNotificationsReadUseCase';
 import { MarkNotificationReadUseCase } from '@application/use-cases/notifications/MarkNotificationReadUseCase';
 
-const createUserUseCase = new CreateUserUseCase(userRepository, passwordHasher);
-const updateUserUseCase = new UpdateUserUseCase(userRepository);
+const createUserUseCase = new CreateUserUseCase(userRepository, passwordHasher, roleRepository);
+const updateUserUseCase = new UpdateUserUseCase(userRepository, roleRepository);
 const toggleUserStatusUseCase = new ToggleUserStatusUseCase(userRepository);
 const listUsersUseCase = new ListUsersUseCase(userRepository);
 const listRolesUseCase = new ListRolesUseCase(roleRepository);
