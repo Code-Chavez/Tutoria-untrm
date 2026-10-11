@@ -4,6 +4,7 @@ import { container } from '../../../infrastructure/container';
 import { BrandingController } from '../controllers/BrandingController';
 import { authenticate } from '../middleware/authenticate';
 import { authorize } from '../middleware/authorize';
+import { requireFileSignature } from '../middleware/fileSignature';
 
 const router: IRouter = Router();
 const controller = new BrandingController(
@@ -25,7 +26,7 @@ const canManage = authorize(['branding:manage']);
 router.get('/branding', controller.get);
 router.get('/branding/logo', controller.logo);
 router.put('/branding', requireAuth, canManage, controller.update);
-router.post('/branding/logo', requireAuth, canManage, uploadLogo.single('file'), controller.uploadLogo);
+router.post('/branding/logo', requireAuth, canManage, uploadLogo.single('file'), requireFileSignature(['png', 'jpeg', 'webp']), controller.uploadLogo);
 router.delete('/branding/logo', requireAuth, canManage, controller.removeLogo);
 router.post('/branding/reset', requireAuth, canManage, controller.reset);
 

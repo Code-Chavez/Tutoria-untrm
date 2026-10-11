@@ -45,9 +45,9 @@ describe('documentos firmados (A14)', () => {
       body: body ? JSON.stringify(body) : undefined,
     });
 
-  const upload = (path: string, token: string, mime = 'application/pdf') => {
+  const upload = (path: string, token: string, mime = 'application/pdf', content: Buffer = SIGNED) => {
     const form = new FormData();
-    form.append('file', new Blob([SIGNED], { type: mime }), 'firmado.pdf');
+    form.append('file', new Blob([content], { type: mime }), 'firmado.pdf');
     return fetch(`${baseUrl}${path}`, { method: 'POST', headers: { Authorization: `Bearer ${token}` }, body: form });
   };
 
@@ -156,6 +156,16 @@ describe('documentos firmados (A14)', () => {
       if (!dbUp) return;
       const res = await upload(`/api/referrals/${referralId}/signed-documents`, tokens.tutor, 'text/html');
       expect(res.status).toBe(400);
+    });
+
+    it('un archivo que dice ser PDF pero cuyo contenido no lo es se rechaza y no se guarda', async () => {
+      if (!dbUp) return;
+      const before = await (await call('GET', `/api/referrals/${referralId}/signed-documents`, tokens.tutor)).json() as { documents: unknown[] };
+      const html = Buffer.from('<html><script>alert(document.domain)</script></html>');
+      const res = await upload(`/api/referrals/${referralId}/signed-documents`, tokens.tutor, 'application/pdf', html);
+      expect(res.status).toBe(400);
+      const after = await (await call('GET', `/api/referrals/${referralId}/signed-documents`, tokens.tutor)).json() as { documents: unknown[] };
+      expect(after.documents).toHaveLength(before.documents.length);
     });
   });
 

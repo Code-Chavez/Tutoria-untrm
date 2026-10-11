@@ -33,6 +33,9 @@ export const LOCK_DURATION_MINUTES = 15;
 export const REFRESH_TOKEN_DAYS = 7;
 
 export class LoginUseCase {
+  // Hash falso con el mismo costo que los reales: permite gastar el mismo tiempo cuando el correo no existe.
+  private dummyHash: Promise<string> | undefined;
+
   constructor(
     private readonly users: UserRepository,
     private readonly roles: RoleRepository,
@@ -46,11 +49,10 @@ export class LoginUseCase {
     const user = await this.users.findByEmail(input.email.toLowerCase().trim());
 
     if (!user) {
+      // Sin esto, responder en milisegundos delata que el correo no está registrado (A07).
+      this.dummyHash ??= this.hasher.hash('clave-que-nadie-usa');
+      await this.hasher.compare(input.password, await this.dummyHash);
       throw new InvalidCredentialsError();
-    }
-
-    if (!user.isActive) {
-      throw new AccountInactiveError();
     }
 
     if (user.lockedUntil && user.lockedUntil > new Date()) {
@@ -71,6 +73,11 @@ export class LoginUseCase {
       });
 
       throw new InvalidCredentialsError();
+    }
+
+    // El estado de la cuenta solo se revela a quien conoce su contraseña: antes bastaba con el correo.
+    if (!user.isActive) {
+      throw new AccountInactiveError();
     }
 
     if (user.failedLoginAttempts > 0 || user.lockedUntil) {

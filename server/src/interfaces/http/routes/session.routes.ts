@@ -4,6 +4,7 @@ import { container } from '../../../infrastructure/container';
 import { SessionController } from '../controllers/SessionController';
 import { authenticate } from '../middleware/authenticate';
 import { authorize } from '../middleware/authorize';
+import { requireFileSignature } from '../middleware/fileSignature';
 
 const router: IRouter = Router();
 const sessionController = new SessionController(
@@ -74,6 +75,7 @@ router.post(
   requireAuth,
   authorize(['sessions:write']),
   uploadEvidence.single('file'),
+  requireFileSignature(['pdf', 'png', 'jpeg']),
   sessionController.uploadEvidence,
 );
 router.get(

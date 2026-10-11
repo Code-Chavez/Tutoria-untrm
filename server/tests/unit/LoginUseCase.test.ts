@@ -206,13 +206,36 @@ describe('LoginUseCase', () => {
     });
   });
 
-  it('lanza AccountInactiveError si la cuenta está desactivada', async () => {
-    const { useCase, users } = buildMocks();
+  it('lanza AccountInactiveError si la cuenta está desactivada y la contraseña es correcta', async () => {
+    const { useCase, users, hasher } = buildMocks();
     users.findByEmail.mockResolvedValue(buildUser({ isActive: false }));
+    hasher.compare.mockResolvedValue(true);
 
     await expect(
       useCase.execute({ email: 'tutor@untrm.edu.pe', password: 'Password123!' }),
     ).rejects.toThrow(AccountInactiveError);
+  });
+
+  it('con la contraseña incorrecta no revela que la cuenta está desactivada', async () => {
+    const { useCase, users, hasher } = buildMocks();
+    users.findByEmail.mockResolvedValue(buildUser({ isActive: false }));
+    hasher.compare.mockResolvedValue(false);
+
+    await expect(
+      useCase.execute({ email: 'tutor@untrm.edu.pe', password: 'incorrecta1' }),
+    ).rejects.toThrow(InvalidCredentialsError);
+  });
+
+  it('con un correo inexistente también gasta una comparación de contraseña (mismo tiempo de respuesta)', async () => {
+    const { useCase, users, hasher } = buildMocks();
+    users.findByEmail.mockResolvedValue(null);
+    hasher.hash.mockResolvedValue('hash-falso');
+    hasher.compare.mockResolvedValue(false);
+
+    await expect(
+      useCase.execute({ email: 'nadie@untrm.edu.pe', password: 'incorrecta1' }),
+    ).rejects.toThrow(InvalidCredentialsError);
+    expect(hasher.compare).toHaveBeenCalledTimes(1);
   });
 
   it('no registra audit log ni refresh token cuando el login falla', async () => {
