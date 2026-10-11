@@ -14,7 +14,7 @@ de desarrollo y están descritos abajo.
 |---|---|---|
 | Alta | 0 | — |
 | Media | 1 | Corregido en esta rama |
-| Baja | 5 | Corregidos en esta rama (4) y documentado (1) |
+| Baja | 6 | Corregidos en esta rama (5) y documentado (1) |
 | Informativa | 3 | Sin acción |
 
 No se encontró forma de leer datos de otra persona, saltarse el control de roles ni inyectar código. Los hallazgos son de endurecimiento.
