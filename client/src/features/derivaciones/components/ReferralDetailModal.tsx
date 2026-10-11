@@ -77,7 +77,9 @@ export const ReferralDetailModal: React.FC<ReferralDetailModalProps> = ({ referr
           <div className={styles.headText}>
             <h2>Detalle de derivación</h2>
             <p>
-              Tutorado ID: {referral.studentId.slice(0, 8).toUpperCase()}...
+              {referral.studentName
+                ? `Tutorado: ${referral.studentName}${referral.studentCode ? ` · ${referral.studentCode}` : ''}`
+                : `Tutorado ID: ${referral.studentId.slice(0, 8).toUpperCase()}...`}
             </p>
           </div>
           <button className={styles.close} onClick={onClose} aria-label="Cerrar">
