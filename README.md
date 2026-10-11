@@ -47,7 +47,7 @@ Los servicios estarán disponibles en:
 - **Server API**: http://localhost:3000/api/health
 - **PostgreSQL**: localhost:5432
 
-Credenciales por defecto: `admin@untrm.edu.pe` / `Admin2026!`
+Credenciales de desarrollo: `7183255722@untrm.edu.pe` / `Admin2026!` (y las demás cuentas de demostración, en `docs/ACEPTACION_RELEASE_v0.4.0.md`).
 
 > Si editas `vite.config.ts`, `package.json` o un `Dockerfile`, vuelve a levantar
 > con `--build`: solo `src/` y `prisma/` están montados como volumen.
@@ -222,36 +222,25 @@ Se ejecuta en cada Pull Request:
 | Profesional de Servicio | Psicología, Asistencia Social, etc. |
 | Vicerrectorado | Solo lectura de reportes |
 
-## Usuario por defecto
+## Usuario administrador
 
-```
-Email:    admin@untrm.edu.pe
-Password: Admin2026!
-```
+- **Desarrollo:** `7183255722@untrm.edu.pe` / `Admin2026!` (datos de demostración; nunca en producción).
+- **Producción:** no hay cuentas de demostración; el primer administrador se crea con `ADMIN_EMAIL` y `ADMIN_PASSWORD` (ver `deploy/README.md`).
 
 ## Respaldos automáticos (RSK-001)
 
-El servicio `backup` (Alpine + `pg_dump` + cron) genera un volcado comprimido de
-la base de datos según la expresión cron configurada y conserva los últimos N en
-un volumen aislado (`backup_data`).
+El servicio `backup` guarda en un único paquete verificado la base de datos y los adjuntos, con copia fuera del servidor y restauración con confirmación.
+Procedimiento, variables y ensayo: **`backup/README.md`**. Reversión de una actualización: **`deploy/README.md`**.
 
-| Variable | Por defecto | Descripción |
-|----------|-------------|-------------|
-| `BACKUP_CRON` | `0 2 * * *` | Programación del volcado (diario a las 02:00) |
-| `BACKUP_KEEP` | `7` | Cantidad de volcados a conservar |
+## Documentación
 
-Al arrancar ejecuta un volcado inicial. Comandos útiles:
-
-```bash
-# Lanzar un respaldo manual
-docker exec sit-backup /usr/local/bin/backup.sh
-
-# Listar los respaldos
-docker exec sit-backup ls -lh /backups
-
-# Restaurar un volcado
-docker exec -i sit-postgres sh -c 'zcat | psql -U sit_user -d sit_db' < backup.sql.gz
-```
+| Documento | Para quién |
+|---|---|
+| `docs/MANUAL_USUARIO.md` | Quien usa el sistema (por rol) |
+| `docs/MANUAL_TECNICO.md` | Quien lo instala, opera y mantiene |
+| `deploy/README.md` · `backup/README.md` | Despliegue en producción, respaldo, restauración y reversión |
+| `docs/MATRIZ_TRAZABILIDAD_PRUEBAS.md` · `e2e/README.md` | Pruebas y su trazabilidad |
+| `docs/ACEPTACION_*.md` · `docs/INFORME_SEGURIDAD_*.md` | Evidencia de aceptación y de seguridad |
 
 ## Licencia
 
