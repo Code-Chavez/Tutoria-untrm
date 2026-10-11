@@ -265,6 +265,8 @@ nada a medias**, no borra los respaldos existentes y marca `FAIL` (el contenedor
 | Tipos y estilo | TypeScript estricto, ESLint | `npx tsc --noEmit` y `pnpm lint` en `server/` y `client/` |
 | Dependencias | `pnpm audit --prod` | en `server/` y `client/` |
 
+Las **capturas del manual de usuario** (`docs/manual/img/`) se regeneran con `cd e2e && npx playwright test -c playwright.manual.config.ts`, sobre un entorno recién sembrado (`docker compose down -v && docker compose up -d --build`) y con datos de demostración realistas; no forman parte de la suite de pruebas.
+
 La trazabilidad entre historias de usuario y pruebas está en `docs/MATRIZ_TRAZABILIDAD_PRUEBAS.md`. La aceptación manual con evidencia está en
 `docs/ACEPTACION_*.md`.
 

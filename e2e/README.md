@@ -37,3 +37,13 @@ Variables opcionales: `E2E_BASE_URL` (por defecto `http://localhost:5173`) y `E2
 - La preparación de datos usa la API con la cuenta de administración; el flujo que se verifica va siempre por la pantalla.
 - Los tiempos de espera son holgados (45 s por verificación, 150 s por prueba) porque en un equipo cargado el ingreso tarda varios segundos.
 - Hay que evitar el rol `menuitem` en los avisos: hoy son botones dentro de un contenedor `menu`.
+
+## Capturas del manual de usuario
+
+`playwright.manual.config.ts` y `manual/capturas.spec.ts` generan las imágenes de `docs/manual/img/` que ilustran `docs/MANUAL_USUARIO.md` (no forman parte de `npx playwright test`).
+Úselas sobre un entorno recién sembrado para que solo aparezcan datos de demostración:
+
+```bash
+docker compose down -v && docker compose up -d --build
+cd e2e && E2E_CHANNEL=chrome npx playwright test -c playwright.manual.config.ts
+```
