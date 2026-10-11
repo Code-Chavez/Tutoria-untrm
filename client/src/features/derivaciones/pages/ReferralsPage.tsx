@@ -79,7 +79,7 @@ export function ReferralsPage() {
               <tr>
                 <th>Fecha</th>
                 <th>Estado</th>
-                <th>ID Tutorado</th>
+                <th>Tutorado</th>
                 <th>Servicio Destino</th>
                 <th>Instancia Receptora</th>
                 <th>Acciones</th>
@@ -100,7 +100,16 @@ export function ReferralsPage() {
                       {REFERRAL_STATUS_LABEL[ref.status]}
                     </span>
                   </td>
-                  <td>{ref.studentId.slice(0, 8).toUpperCase()}...</td>
+                  <td>
+                    {ref.studentName ? (
+                      <>
+                        <div>{ref.studentName}</div>
+                        {ref.studentCode && <small>{ref.studentCode}</small>}
+                      </>
+                    ) : (
+                      <>{ref.studentId.slice(0, 8).toUpperCase()}...</>
+                    )}
+                  </td>
                   <td>
                     <span className={`${styles.badge} ${styles.badgeBlue}`}>
                       {REFERRAL_SERVICE_LABEL[ref.service]}

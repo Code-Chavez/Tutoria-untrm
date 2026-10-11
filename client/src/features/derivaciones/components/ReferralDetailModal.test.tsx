@@ -103,6 +103,18 @@ describe('ReferralDetailModal (HU-32 - Registro de atención y cierre)', () => {
     await waitFor(() => expect(referralService.updateStatus).toHaveBeenCalledWith('ref-1', 'ATENDIDO', 'Atendido'));
   });
 
+  it('dice de quién es el caso: nombre y código del tutorado, no solo un fragmento del identificador', () => {
+    render(
+      <ReferralDetailModal
+        referral={{ ...mockReferral, studentName: 'Ana Torres Ramos', studentCode: '20191234' }}
+        onClose={onCloseMock}
+        onStatusUpdated={onStatusUpdatedMock}
+      />,
+    );
+    expect(screen.getByText('Tutorado: Ana Torres Ramos · 20191234')).toBeDefined();
+    expect(screen.queryByText(/Tutorado ID/)).toBeNull();
+  });
+
   it('muestra el banner de caso cerrado y deshabilita edición si el estado es CERRADO', () => {
     const closedReferral = { ...mockReferral, status: 'CERRADO' as const };
 

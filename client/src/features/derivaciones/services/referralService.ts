@@ -77,6 +77,9 @@ export interface ReferralStatusHistory {
 export interface StudentReferral {
   id: string;
   studentId: string;
+  /** Nombre y código del tutorado, para saber de quién es el caso (el identificador interno no sirve para eso). */
+  studentName?: string;
+  studentCode?: string;
   referredById: string;
   checkedAspects: ReferralAspectCode[];
   reason: string;

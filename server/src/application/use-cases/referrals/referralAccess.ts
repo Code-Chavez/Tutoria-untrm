@@ -2,6 +2,7 @@ import { ReferralStatus, StudentReferral } from '@domain/entities/StudentReferra
 import { UserRepository } from '@domain/repositories/UserRepository';
 import { RoleRepository } from '@domain/repositories/RoleRepository';
 import { ReferralForbiddenError } from './ReferralErrors';
+import { StudentRepository } from '@domain/repositories/StudentRepository';
 
 /**
  * Política única de acceso a una derivación (Art. 9.a, 14.c y 22 del
@@ -66,4 +67,22 @@ export function toReferralView(referral: StudentReferral, actor: ReferralActor):
     ...referral,
     statusHistory: referral.statusHistory?.map((entry) => ({ ...entry, notes: null })),
   };
+}
+
+
+/** La derivación tal como se muestra: con quién es el caso (nombre y código), no solo su identificador interno. */
+export type ReferralView = StudentReferral & { studentName?: string; studentCode?: string };
+
+/**
+ * Agrega el nombre y el código del tutorado. Quien puede ver el caso ya tiene derecho a saber de quién es (la constancia
+ * lleva toda la filiación); sin el nombre la bandeja del servicio mostraba solo un fragmento del identificador.
+ */
+export async function withStudent(students: StudentRepository | undefined, referrals: StudentReferral[]): Promise<ReferralView[]> {
+  if (!students) return referrals;
+  const ids = [...new Set(referrals.map((r) => r.studentId))];
+  const found = new Map((await Promise.all(ids.map((id) => students.findById(id)))).filter((s) => s !== null).map((s) => [s!.id, s!]));
+  return referrals.map((r) => {
+    const student = found.get(r.studentId);
+    return student ? { ...r, studentName: `${student.firstName} ${student.lastName}`, studentCode: student.studentCode } : r;
+  });
 }

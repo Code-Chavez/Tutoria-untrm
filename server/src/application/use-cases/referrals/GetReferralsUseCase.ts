@@ -2,7 +2,8 @@ import { StudentReferral } from '@domain/entities/StudentReferral';
 import { StudentReferralRepository } from '@domain/repositories/StudentReferralRepository';
 import { UserRepository } from '@domain/repositories/UserRepository';
 import { RoleRepository } from '@domain/repositories/RoleRepository';
-import { resolveReferralActor, toReferralView } from './referralAccess';
+import { StudentRepository } from '@domain/repositories/StudentRepository';
+import { ReferralView, resolveReferralActor, toReferralView, withStudent } from './referralAccess';
 import { ReferralListNotAllowedError } from './ReferralErrors';
 
 export class GetReferralsUseCase {
@@ -10,9 +11,10 @@ export class GetReferralsUseCase {
     private readonly referrals: StudentReferralRepository,
     private readonly users: UserRepository,
     private readonly roles: RoleRepository,
+    private readonly students?: StudentRepository,
   ) {}
 
-  async execute(userId: string): Promise<StudentReferral[]> {
+  async execute(userId: string): Promise<ReferralView[]> {
     const actor = await resolveReferralActor(this.users, this.roles, userId);
 
     // HU-30: visibilidad restringida del caso.
@@ -38,6 +40,6 @@ export class GetReferralsUseCase {
     }
 
     // Las notas internas de atención no salen en la respuesta para quien no gestiona el caso.
-    return visible.map((referral) => toReferralView(referral, actor));
+    return withStudent(this.students, visible.map((referral) => toReferralView(referral, actor)));
   }
 }
