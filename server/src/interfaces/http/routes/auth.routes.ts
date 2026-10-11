@@ -13,7 +13,14 @@ const controller = new AuthController(
 
 const router: IRouter = Router();
 
-router.post('/auth/login', controller.login);
+// Inicio de sesión: además del bloqueo por cuenta, un tope por IP frena la prueba masiva de contraseñas
+// y el bloqueo deliberado de cuentas ajenas con intentos fallidos. Holgado para uso normal (una oficina tras un mismo NAT).
+const loginLimiter = rateLimit({
+  windowMs: 5 * 60_000,
+  max: 100,
+  message: 'Demasiados intentos de inicio de sesión desde esta red. Espera unos minutos e inténtalo de nuevo.',
+});
+router.post('/auth/login', loginLimiter, controller.login);
 router.post('/auth/refresh', controller.refresh);
 router.post('/auth/logout', controller.logout);
 // Recuperación de contraseña (A09): se limita por IP para que no sirva de disparador de correos ni de sondeo de enlaces.

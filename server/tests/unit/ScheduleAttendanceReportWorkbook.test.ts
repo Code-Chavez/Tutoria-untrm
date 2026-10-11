@@ -68,4 +68,18 @@ describe('ScheduleAttendanceReportWorkbook', () => {
     expect(detail?.getRow(8).getCell(5).value).toBe('Ana Torres');
     expect(detail?.getRow(9).getCell(5).value).toBe('Ana Torres, Luis Pérez');
   });
+
+  it('una sesión cancelada no figura con asistencia pendiente', async () => {
+    const cancelled: ScheduleAttendanceReport = {
+      ...report,
+      sessions: [{ ...report.sessions[0]!, status: 'CANCELADA', attendanceConfirmed: false }],
+    };
+    const workbook = new ExcelJS.Workbook();
+    await workbook.xlsx.load((await builder.build(cancelled)) as unknown as Parameters<typeof workbook.xlsx.load>[0]);
+    const values: unknown[] = [];
+    workbook.getWorksheet('Sesiones')!.eachRow((row) => values.push(...(row.values as unknown[])));
+
+    expect(values).toContain('N/A');
+    expect(values).not.toContain('Pendiente');
+  });
 });

@@ -7,6 +7,7 @@ export const createRoleSchema = z.object({
 
 export const assignRoleSchema = z.object({
   roleId: z.string().uuid('El ID de rol debe ser un UUID válido'),
+  service: z.enum(['ESCUELA', 'PSICOPEDAGOGIA', 'PSICOLOGIA', 'ASISTENCIA_SOCIAL', 'SALUD']).nullable().optional(),
 });
 
 export type CreateRoleBody = z.infer<typeof createRoleSchema>;

@@ -6,6 +6,7 @@ import { ExcelStudentParser } from '../../../infrastructure/parsers/ExcelStudent
 import { ImportReportWorkbook } from '../../../infrastructure/parsers/ImportReportWorkbook';
 import { authenticate } from '../middleware/authenticate';
 import { authorize } from '../middleware/authorize';
+import { requireFileSignature } from '../middleware/fileSignature';
 
 const XLSX_MIME = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
 
@@ -45,6 +46,7 @@ router.post(
   '/students/import',
   authorize(['students:import']),
   upload.single('file'),
+  requireFileSignature(['xlsx']),
   studentController.bulkImport,
 );
 

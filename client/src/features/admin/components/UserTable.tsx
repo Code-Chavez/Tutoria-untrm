@@ -3,6 +3,7 @@ import { Badge, IconButton } from '@shared/components/ui';
 import { PencilIcon, BanIcon, CheckCircleIcon } from '@shared/components/icons';
 import { User } from '../services/userService';
 import table from '@shared/components/ui/DataTable.module.css';
+import { REFERRAL_SERVICE_LABEL, type ReferralService } from '@features/derivaciones/services/referralService';
 
 interface UserTableProps {
   users: User[];
@@ -47,7 +48,10 @@ export const UserTable: React.FC<UserTableProps> = ({
               </div>
             </td>
             <td>
-              <Badge tone="info">{roleName(user.roleId)}</Badge>
+              <Badge tone="info">
+                {roleName(user.roleId)}
+                {user.service ? ` · ${REFERRAL_SERVICE_LABEL[user.service as ReferralService] ?? user.service}` : ''}
+              </Badge>
             </td>
             <td>
               {user.isActive ? (

@@ -269,7 +269,9 @@ export function ScheduleAttendanceReportPage() {
                         <Badge tone={STATUS_TONE[s.status]}>{STATUS_LABEL[s.status]}</Badge>
                       </td>
                       <td>
-                        {s.participantCount > 1
+                        {s.status === 'CANCELADA'
+                          ? 'N/A'
+                          : s.participantCount > 1
                           ? s.attendedCount === null
                             ? 'Sin registrar'
                             : `${s.attendedCount} de ${s.participantCount}`

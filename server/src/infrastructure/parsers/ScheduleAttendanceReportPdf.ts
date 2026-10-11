@@ -12,6 +12,7 @@ const STATUS_LABEL: Record<string, string> = {
 
 // Individual: confirmación del Anexo N°4; grupal: cuántos de los programados asistieron (A07).
 function attendanceLabel(s: ScheduleAttendanceReport['sessions'][number]): string {
+  if (s.status === 'CANCELADA') return 'N/A';
   if (s.participantCount > 1) {
     return s.attendedCount === null ? 'Sin registrar' : `${s.attendedCount} de ${s.participantCount}`;
   }

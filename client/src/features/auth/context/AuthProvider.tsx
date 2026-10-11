@@ -1,6 +1,6 @@
 import { useCallback, useMemo, useState, type ReactNode } from 'react';
 import { tokenStorage } from '@shared/services/tokenStorage';
-import { queryClient } from '@shared/services/queryClient';
+import { clearSessionData, queryClient } from '@shared/services/queryClient';
 import { authService } from '../services/authService';
 import type { AuthUser, LoginCredentials } from '../types/auth.types';
 import { AuthContext, type AuthContextValue } from './AuthContext';
@@ -15,7 +15,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const result = await authService.login(credentials);
     // Nada de la sesión anterior debe sobrevivir a un cambio de cuenta: ni datos en caché ni consultas en vuelo.
     await queryClient.cancelQueries();
-    queryClient.clear();
+    clearSessionData();
     tokenStorage.save(result.accessToken, result.refreshToken, result.user);
     setUser(result.user);
   }, []);
@@ -23,7 +23,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const logout = useCallback(() => {
     // Los datos en caché son de la persona que sale (derivaciones, expedientes, panel de inicio).
     void queryClient.cancelQueries();
-    queryClient.clear();
+    clearSessionData();
     const refreshToken = tokenStorage.getRefreshToken();
     if (refreshToken) authService.logout(refreshToken).catch(() => undefined);
     tokenStorage.clear();

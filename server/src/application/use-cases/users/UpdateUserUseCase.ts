@@ -1,5 +1,8 @@
 import { UserRepository } from '@domain/repositories/UserRepository';
 import { User } from '@domain/entities/User';
+import { RoleRepository } from '@domain/repositories/RoleRepository';
+import { RoleNotFoundError } from '@application/use-cases/roles/RoleErrors';
+import { resolveService } from './serviceAssignment';
 
 export class UserNotFoundError extends Error {
   constructor(id: string) {
@@ -16,7 +19,10 @@ export class DuplicateEmailError extends Error {
 }
 
 export class UpdateUserUseCase {
-  constructor(private readonly userRepository: UserRepository) {}
+  constructor(
+    private readonly userRepository: UserRepository,
+    private readonly roles: RoleRepository,
+  ) {}
 
   async execute(id: string, data: Partial<Omit<User, 'id' | 'createdAt' | 'updatedAt' | 'passwordHash'>>): Promise<Omit<User, 'passwordHash'>> {
     // 1. Validar que el usuario exista
@@ -33,10 +39,19 @@ export class UpdateUserUseCase {
       }
     }
 
-    // 3. Actualizar el usuario
-    const updatedUser = await this.userRepository.update(id, data);
+    // 3. Si cambia el rol o el servicio, el par queda coherente (servicio solo para Profesional de Servicio)
+    const changes = { ...data };
+    if (data.roleId !== undefined || data.service !== undefined) {
+      const roleId = data.roleId ?? existingUser.roleId;
+      const role = await this.roles.findById(roleId);
+      if (!role) throw new RoleNotFoundError(roleId);
+      changes.service = resolveService(role.name, data.service !== undefined ? data.service : existingUser.service);
+    }
 
-    // 4. Retornar el usuario sin exponer el hash de contraseña
+    // 4. Actualizar el usuario
+    const updatedUser = await this.userRepository.update(id, changes);
+
+    // 5. Retornar el usuario sin exponer el hash de contraseña
     const { passwordHash: _, ...userWithoutPassword } = updatedUser;
     return userWithoutPassword;
   }

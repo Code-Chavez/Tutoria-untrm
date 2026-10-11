@@ -27,7 +27,11 @@ export const ReferralDetailModal: React.FC<ReferralDetailModalProps> = ({ referr
   const nextStatuses = STATUS_ORDER.slice(STATUS_ORDER.indexOf(referral.status) + 1);
 
   const [updating, setUpdating] = useState(false);
-  const [newStatus, setNewStatus] = useState<ReferralStatus>(nextStatuses[0] ?? referral.status);
+  // Tras guardar, el caso avanza y la lista cambia: la elección solo vale mientras siga en la lista; si no, se ofrece
+  // la siguiente etapa. Así nunca se reenvía el estado que ya se guardó (el servidor solo admite avanzar).
+  const [chosenStatus, setChosenStatus] = useState<ReferralStatus | null>(null);
+  const newStatus: ReferralStatus =
+    chosenStatus && nextStatuses.includes(chosenStatus) ? chosenStatus : (nextStatuses[0] ?? referral.status);
   const [notes, setNotes] = useState('');
   const [error, setError] = useState('');
   const signed = useReferralSignedDocuments(referral.id);
@@ -185,7 +189,7 @@ export const ReferralDetailModal: React.FC<ReferralDetailModalProps> = ({ referr
                     id="statusSelect"
                     className={styles.select}
                     value={newStatus}
-                    onChange={(e) => setNewStatus(e.target.value as ReferralStatus)}
+                    onChange={(e) => setChosenStatus(e.target.value as ReferralStatus)}
                     disabled={updating}
                   >
                     {nextStatuses.map((val) => (

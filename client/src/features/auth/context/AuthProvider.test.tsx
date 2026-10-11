@@ -65,6 +65,21 @@ describe('AuthProvider: aislamiento de datos entre cuentas (A05)', () => {
     expect(queryClient.getQueryCache().getAll()).toHaveLength(0);
   });
 
+  it('la identidad visual sobrevive al cambio de sesión: su consulta sigue siendo la misma y no queda sin observar', async () => {
+    queryClient.setQueryData(['branding'], { shortName: 'SIT · UNTRM' });
+    queryClient.setQueryData(['homePanel'], { role: 'Docente Tutor' });
+    const before = queryClient.getQueryCache().find({ queryKey: ['branding'] });
+    renderProvider();
+
+    await act(async () => {
+      screen.getByText('salir').click();
+    });
+
+    expect(queryClient.getQueryData(['homePanel'])).toBeUndefined();
+    // Si se borrara, el proveedor de identidad quedaría atado a una consulta eliminada y no vería los cambios guardados después.
+    expect(queryClient.getQueryCache().find({ queryKey: ['branding'] })).toBe(before);
+  });
+
   it('al entrar con otra cuenta no queda nada de la sesión anterior, aunque no se haya cerrado bien (token vencido)', async () => {
     queryClient.setQueryData(['homePanel'], { role: 'Docente Tutor' });
     mocked.login.mockResolvedValue({

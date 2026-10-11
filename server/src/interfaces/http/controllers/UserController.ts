@@ -6,6 +6,7 @@ import { ListUsersUseCase } from '@application/use-cases/users/ListUsersUseCase'
 import { AssignRoleUseCase } from '@application/use-cases/roles/AssignRoleUseCase';
 import { RoleNotFoundError, RoleTargetUserNotFoundError } from '@application/use-cases/roles/RoleErrors';
 import { assignRoleSchema } from '../validators/role.validators';
+import { ServiceRequiredError } from '@application/use-cases/users/serviceAssignment';
 import { z } from 'zod';
 
 const createUserSchema = z.object({
@@ -15,6 +16,8 @@ const createUserSchema = z.object({
   roleId: z.string().uuid('El ID de rol debe ser un UUID válido'),
   phone: z.string().optional(),
   photoUrl: z.string().url('URL inválida').optional(),
+  // Solo para el rol Profesional de Servicio: decide qué casos derivados ve y recibe.
+  service: z.enum(['ESCUELA', 'PSICOPEDAGOGIA', 'PSICOLOGIA', 'ASISTENCIA_SOCIAL', 'SALUD']).nullable().optional(),
 });
 
 const updateUserSchema = createUserSchema.partial();
@@ -31,8 +34,8 @@ export class UserController {
   assignRole = async (req: Request, res: Response) => {
     try {
       const id = req.params.id as string;
-      const { roleId } = assignRoleSchema.parse(req.body);
-      const user = await this.assignRoleUseCase.execute(id, roleId);
+      const { roleId, service } = assignRoleSchema.parse(req.body);
+      const user = await this.assignRoleUseCase.execute(id, roleId, service);
       res.status(200).json({ message: 'Rol asignado exitosamente', user });
     } catch (error) {
       if (error instanceof z.ZodError) {
@@ -42,6 +45,8 @@ export class UserController {
         error instanceof RoleNotFoundError
       ) {
         res.status(404).json({ error: error.message });
+      } else if (error instanceof ServiceRequiredError) {
+        res.status(400).json({ error: error.message });
       } else {
         res.status(500).json({ error: 'Error interno del servidor' });
       }
@@ -56,8 +61,10 @@ export class UserController {
     } catch (error) {
       if (error instanceof z.ZodError) {
         res.status(400).json({ error: 'Datos de entrada inválidos', details: error.errors });
-      } else if (error instanceof DuplicateEmailError) {
+      } else if (error instanceof DuplicateEmailError || error instanceof ServiceRequiredError) {
         res.status(400).json({ error: error.message });
+      } else if (error instanceof RoleNotFoundError) {
+        res.status(404).json({ error: error.message });
       } else {
         res.status(500).json({ error: 'Error interno del servidor' });
       }
@@ -75,8 +82,10 @@ export class UserController {
         res.status(400).json({ error: 'Datos de entrada inválidos', details: error.errors });
       } else if (error instanceof UserNotFoundError) {
         res.status(404).json({ error: error.message });
-      } else if (error instanceof DuplicateEmailError) {
+      } else if (error instanceof DuplicateEmailError || error instanceof ServiceRequiredError) {
         res.status(400).json({ error: error.message });
+      } else if (error instanceof RoleNotFoundError) {
+        res.status(404).json({ error: error.message });
       } else {
         res.status(500).json({ error: 'Error interno del servidor' });
       }
