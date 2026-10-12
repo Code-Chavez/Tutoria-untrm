@@ -26,4 +26,6 @@ export const env = {
   SMTP_PASS: process.env.SMTP_PASS || '',
   MAIL_FROM: process.env.MAIL_FROM || 'SIT UNTRM <no-reply@untrm.edu.pe>',
   PASSWORD_RESET_TTL_MINUTES: parseInt(process.env.PASSWORD_RESET_TTL_MINUTES || '60', 10),
+  // Cada aviso de la aplicación también se envía al correo institucional (requiere SMTP_HOST). `false` lo desactiva.
+  EMAIL_NOTIFICATIONS: process.env.EMAIL_NOTIFICATIONS !== 'false',
 } as const;

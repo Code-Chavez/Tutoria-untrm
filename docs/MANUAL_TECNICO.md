@@ -193,6 +193,7 @@ Variables del servidor (`server/.env.example`, `.env.production.example`; los va
 | `PUBLIC_APP_URL` | `http://localhost:5173` | URL pública del cliente: se usa en los enlaces de los correos (en producción, `https://`). |
 | `SMTP_HOST`, `SMTP_PORT`, `SMTP_SECURE`, `SMTP_USER`, `SMTP_PASS`, `MAIL_FROM` | — | Correo saliente. En producción `SMTP_HOST` es obligatorio. |
 | `PASSWORD_RESET_TTL_MINUTES` | `60` | Vigencia del enlace de recuperación. |
+| `EMAIL_NOTIFICATIONS` | `true` | Envía cada aviso de la aplicación (nueva solicitud, derivación, cambio de estado) al correo institucional de la persona. Necesita `SMTP_HOST`; `false` lo desactiva. |
 | `ADMIN_EMAIL`, `ADMIN_PASSWORD` | — | Solo para crear el primer administrador (contraseña de ≥ 12 caracteres, no de ejemplo). |
 | `BACKUP_CRON`, `BACKUP_KEEP`, `BACKUP_OFFSITE_DIR`, `BACKUP_UPLOAD_CMD` | `0 2 * * *`; conserva 7 (desarrollo) o 14 (producción) | Respaldos (ver sección 9). |
 
@@ -203,6 +204,12 @@ de sesión por inactividad.
 alerta por inasistencias (2) y plazo de atención de derivaciones (48 h).
 
 **Identidad visual** (*Identidad visual*): nombre de la institución, nombre corto (barra lateral y título del navegador), colores y logotipo.
+
+### 6.1 Avisos por correo
+
+Cada aviso nuevo de la campana se envía también por correo al correo institucional de la persona (la dirección de su cuenta). Es un complemento de mejor esfuerzo: si el SMTP falla, el aviso interno se crea igual, la operación no se retrasa ni falla y el error queda en el registro del servidor. El mensaje **no incluye el texto del aviso ni datos de la persona atendida**: solo dice que hay algo nuevo y trae el enlace directo al caso o a la solicitud, donde hay que iniciar sesión (confidencialidad, Ley N.° 29733). Se envía únicamente a cuentas activas. No hay resúmenes ni preferencias por persona: una por aviso. En desarrollo, los correos se ven en Mailpit (puerto 8025).
+
+Implementación: `server/src/infrastructure/repositories/EmailNotificationRepository.ts` envuelve al repositorio de avisos (los casos de uso no cambian) y `server/src/application/services/notificationEmail.ts` arma el mensaje.
 
 ## 7. Base de datos
 
