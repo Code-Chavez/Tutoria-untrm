@@ -3,7 +3,8 @@ export type NotificationType =
   | 'REFERRAL_CREATED'
   | 'REFERRAL_STATUS_CHANGED'
   | 'TUTORING_REQUEST_CREATED'
-  | 'TUTORING_REQUEST_UPDATED';
+  | 'TUTORING_REQUEST_UPDATED'
+  | 'TUTORING_REQUEST_RECEIVED';
 
 export interface Notification {
   id: string;

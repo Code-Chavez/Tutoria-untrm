@@ -74,6 +74,20 @@ export class CreateTutoringRequestUseCase {
         tutoringRequestId: request.id,
       });
     }
+
+    // Constancia para el tutorado: quedó registrada, la haya hecho él o su tutor a su nombre. Sin esto solo se enteraba cuando
+    // alguien la atendía. Se avisa a su cuenta de portal, si la tiene vinculada.
+    if (student.userId && student.userId !== routedToId) {
+      await this.notifications.create({
+        userId: student.userId,
+        type: 'TUTORING_REQUEST_RECEIVED',
+        message:
+          student.userId === requestedById
+            ? 'Recibimos tu solicitud de tutoría y se envió a quien la atenderá'
+            : 'Se registró una solicitud de tutoría a tu nombre',
+        tutoringRequestId: request.id,
+      });
+    }
     return request;
   }
 

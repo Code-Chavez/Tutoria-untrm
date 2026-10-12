@@ -81,6 +81,35 @@ describe('CreateTutoringRequestUseCase', () => {
     expect(notifications.create).not.toHaveBeenCalled();
   });
 
+  describe('constancia para el tutorado', () => {
+    it('si el tutorado tiene cuenta, recibe un aviso de que su solicitud quedó registrada (por él o por su tutor)', async () => {
+      students.findById.mockResolvedValue({ id: 'student-1', tutorId: 'tutor-1', schoolId: 'school-1', userId: 'user-student' } as Student);
+
+      // La registra el tutor a su nombre: el tutor no se avisa a sí mismo, pero el tutorado sí recibe constancia.
+      await useCase.execute('student-1', 'tutor-1', baseInput);
+      expect(notifications.create).toHaveBeenCalledTimes(1);
+      expect(notifications.create).toHaveBeenCalledWith(
+        expect.objectContaining({ userId: 'user-student', type: 'TUTORING_REQUEST_RECEIVED', message: 'Se registró una solicitud de tutoría a tu nombre' }),
+      );
+
+      // La registra el propio tutorado: el tutor es avisado y el tutorado recibe su acuse.
+      notifications.create.mockClear();
+      const student = { id: 'student-1', tutorId: 'tutor-1', schoolId: 'school-1', userId: 'user-student' } as Student;
+      await useCase.registerFor(student, 'user-student', baseInput);
+      expect(notifications.create).toHaveBeenCalledTimes(2);
+      expect(notifications.create).toHaveBeenCalledWith(expect.objectContaining({ userId: 'tutor-1', type: 'TUTORING_REQUEST_CREATED' }));
+      expect(notifications.create).toHaveBeenCalledWith(
+        expect.objectContaining({ userId: 'user-student', type: 'TUTORING_REQUEST_RECEIVED', message: expect.stringContaining('Recibimos tu solicitud') }),
+      );
+    });
+
+    it('si el tutorado no tiene cuenta vinculada, no hay a quién avisar', async () => {
+      await useCase.execute('student-1', 'user-actor', baseInput);
+      expect(notifications.create).toHaveBeenCalledTimes(1);
+      expect(notifications.create).not.toHaveBeenCalledWith(expect.objectContaining({ type: 'TUTORING_REQUEST_RECEIVED' }));
+    });
+  });
+
   it('enruta al tutor cuando el estudiante ya tiene uno asignado', async () => {
     const result = await useCase.execute('student-1', 'user-actor', baseInput);
 

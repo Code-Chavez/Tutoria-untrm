@@ -67,7 +67,7 @@ cambiar su clave con *Actualizar contraseña*. Al cambiarla se cierran sus otras
 La campana de la parte superior muestra sus avisos (nueva solicitud, cambio de estado de un caso, nueva derivación…). Pulsar un aviso **abre directamente**
 el caso o la solicitud correspondiente. *Marcar todas como leídas* limpia la lista.
 
-**También le llegan por correo.** Cada aviso nuevo se envía además a su **correo institucional**, para que no tenga que estar dentro del sistema para enterarse. El correo es solo un aviso: **no trae datos del caso ni de la persona atendida** (por confidencialidad); trae un enlace que abre el sistema, donde debe iniciar sesión para ver el detalle. Si no esperaba el mensaje, puede ignorarlo; no responda al correo (es automático). Si no le llegan, revise la carpeta de correo no deseado y avise a la DBU.
+**También le llegan por correo.** Cada aviso nuevo se envía además a su **correo institucional**, para que no tenga que estar dentro del sistema para enterarse. Al registrar una solicitud de tutoría, **quien la pide recibe además una constancia** (en la campana y por correo) de que quedó registrada, aunque la haya registrado su tutor a su nombre. El correo es solo un aviso: **no trae datos del caso ni de la persona atendida** (por confidencialidad); trae un enlace que abre el sistema, donde debe iniciar sesión para ver el detalle. Si no esperaba el mensaje, puede ignorarlo; no responda al correo (es automático). Si no le llegan, revise la carpeta de correo no deseado y avise a la DBU.
 
 ### 1.6 Cierre de sesión por inactividad
 

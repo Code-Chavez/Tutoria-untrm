@@ -7,7 +7,7 @@ import { Mailer } from '@application/ports/Mailer';
 import { User } from '@domain/entities/User';
 
 const APP = 'https://sit.ejemplo.edu.pe/';
-const recipient = { email: 'elena.ramirez@untrm.edu.pe', firstName: 'Elena' };
+const recipient = { email: 'elena.ramirez@untrm.edu.pe', firstName: 'Elena', lastName: 'Ramírez Chávez' };
 
 const notification = (over: Partial<Notification> = {}): Notification => ({
   id: 'n1',
@@ -30,7 +30,7 @@ describe('buildNotificationEmail', () => {
       'https://sit.ejemplo.edu.pe/derivaciones?caso=ref-1',
     );
     expect(buildNotificationEmail(notification({ type: 'REFERRAL_STATUS_CHANGED', referralId: 'ref-1', tutoringRequestId: null }), recipient, APP).subject).toBe(
-      'Cambió el estado de una derivación — SIT UNTRM',
+      'Actualización del estado de una derivación — SIT UNTRM',
     );
   });
 
@@ -38,8 +38,32 @@ describe('buildNotificationEmail', () => {
     const mail = buildNotificationEmail(notification(), recipient, APP);
     expect(mail.to).toBe('elena.ramirez@untrm.edu.pe');
     expect(`${mail.subject}\n${mail.text}`).not.toMatch(/Ana|Torres|Académico/);
-    expect(mail.text).toContain('Hola Elena');
-    expect(mail.text).toMatch(/no se envía por correo/);
+    expect(mail.text).toContain('Estimado(a) Elena Ramírez Chávez:');
+    expect(mail.text).toMatch(/no se envía por correo electrónico/);
+  });
+
+  it('es un correo formal: saludo, firma institucional, aviso de mensaje automático y versión HTML', () => {
+    const mail = buildNotificationEmail(notification(), recipient, APP);
+    expect(mail.text).toContain('Atentamente,');
+    expect(mail.text).toContain('Dirección de Bienestar Universitario');
+    expect(mail.text).toContain('Universidad Nacional Toribio Rodríguez de Mendoza de Amazonas');
+    expect(mail.text).toMatch(/mensaje automático/);
+    expect(mail.html).toContain('href="https://sit.ejemplo.edu.pe/solicitudes?solicitud=req-1"');
+    expect(mail.html).toContain('Ingresar al sistema');
+    expect(mail.html).not.toMatch(/Ana|Torres|Académico/);
+  });
+
+  it('en el HTML escapa el nombre de la persona', () => {
+    const mail = buildNotificationEmail(notification(), { email: 'x@untrm.edu.pe', firstName: '<b>Elena</b>', lastName: '"O\'Brien" & Co' }, APP);
+    expect(mail.html).toContain('&lt;b&gt;Elena&lt;/b&gt;');
+    expect(mail.html).not.toContain('<b>Elena</b>');
+  });
+
+  it('la constancia de la solicitud registrada confirma al tutorado y lo lleva a «Solicitar tutoría»', () => {
+    const mail = buildNotificationEmail(notification({ type: 'TUTORING_REQUEST_RECEIVED' }), recipient, APP);
+    expect(mail.subject).toBe('Solicitud de tutoría registrada — SIT UNTRM');
+    expect(mail.text).toMatch(/ha sido registrada en el sistema/);
+    expect(mail.text).toContain('https://sit.ejemplo.edu.pe/solicitar-tutoria');
   });
 });
 
