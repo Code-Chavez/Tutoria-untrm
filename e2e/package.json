@@ -12,6 +12,14 @@
   "devDependencies": {
     "@playwright/test": "1.56.1",
     "@types/node": "^22.10.0",
+    "exceljs": "4.4.0",
     "typescript": "^5.7.2"
+  },
+  "pnpm": {
+    "auditConfig": {
+      "ignoreGhsas": [
+        "GHSA-w5hq-g745-h8pq"
+      ]
+    }
   }
 }
