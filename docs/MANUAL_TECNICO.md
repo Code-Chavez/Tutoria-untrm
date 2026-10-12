@@ -316,5 +316,4 @@ incluye el DoD (DoD-SIT-001). Detalle en `README.md`.
 - El tope de intentos por IP es un contador **en memoria** de una sola instancia del servidor.
 - Los parámetros `inactivity_timeout_minutes`, `login_max_attempts` y `login_lockout_minutes` existen en la base pero **no se usan**: la inactividad
   (15 min) se fija en el cliente y el bloqueo (5 intentos, 15 min) en el servidor.
-- La carga masiva por Excel, la asignación masiva y la reasignación individual no tienen recorrido E2E automatizado.
 - Falta ejecutar un escáner dinámico (OWASP ZAP) y el ensayo completo de instalación en el servidor real con el dominio definitivo.

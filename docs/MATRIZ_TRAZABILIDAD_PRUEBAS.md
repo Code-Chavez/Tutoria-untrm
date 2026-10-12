@@ -23,12 +23,12 @@ cuando cambia una HU o una prueba.
 | HU-05 Información confidencial | `StudentAccessScope`, `ReferralAccessPolicy`, `accessMatrix` (int.) | — | 3.3–3.5, 6.1, 6.2 | E2E-04 |
 | HU-06 Perfil y cambio de contraseña | `ChangePasswordUseCase` | `ProfilePage` | — | E2E-08 |
 | HU-07 Expiración por inactividad | — | `useIdleTimer`, `apiClient` | 4.8 | E2E-01 |
-| HU-08 Carga masiva desde Excel | `ExcelStudentParser`, `ImportStudentsUseCase` | `BulkImportPage` | — | E2E-08 |
-| HU-09 Reporte de la carga | `ImportReportWorkbook` | `BulkImportPage` | — | E2E-08 |
+| HU-08 Carga masiva desde Excel | `ExcelStudentParser`, `ImportStudentsUseCase` | `BulkImportPage` | — | E2E-09 |
+| HU-09 Reporte de la carga | `ImportReportWorkbook` | `BulkImportPage` | — | E2E-09 |
 | HU-10 Alta y edición de estudiantes | `CreateStudentUseCase`, `LinkStudentPortalAccountUseCase` | `StudentFormModal`, `TutoradoTable`, `LinkPortalAccountModal` | — | E2E-08 |
 | HU-11 Estudiantes en riesgo | `MarkStudentRiskUseCase` | `RiskModal` | — | E2E-03 |
-| HU-12 Asignación masiva | `AssignStudentsUseCase`, `GetTutorWorkloadUseCase` | `AssignmentPage` | — | E2E-08 |
-| HU-13 Reasignación individual | `ReassignStudentUseCase` | `ReassignModal` | 5.4 | E2E-08 |
+| HU-12 Asignación masiva | `AssignStudentsUseCase`, `GetTutorWorkloadUseCase` | `AssignmentPage` | — | E2E-09 |
+| HU-13 Reasignación individual | `ReassignStudentUseCase` | `ReassignModal` | 5.4 | E2E-09 |
 | HU-14 Entrevista inicial (Anexo 3) | `CreateInterviewUseCase` | `InterviewFormModal` | 2.1 | E2E-03 |
 | HU-15 Red de apoyo | `UpsertSupportContactUseCase` | `ExpedientePage` | — | E2E-03 |
 | HU-16 Expediente del tutorado | `GetStudentRecordUseCase` | `ExpedientePage` | 1.10, 5.5 | E2E-03 |
@@ -72,7 +72,7 @@ cuando cambia una HU o una prueba.
 
 ## Recorridos E2E
 
-Escritos los ocho: **E2E-01** a **E2E-08** (`e2e/tests/`). E2E-08 cubre de la carga masiva (HU-08, HU-09) y de la asignación y reasignación (HU-12, HU-13) solo lo que ya cubre la API; esos cuatro puntos siguen sin recorrido por pantalla.
+Escritos los nueve: **E2E-01** a **E2E-09** (`e2e/tests/`).
 
 | Id | Recorrido | HU |
 |---|---|---|
@@ -83,7 +83,8 @@ Escritos los ocho: **E2E-01** a **E2E-08** (`e2e/tests/`). E2E-08 cubre de la ca
 | E2E-05 | Informe semestral, consolidado, indicadores y exportaciones | 27, 43–47 |
 | E2E-06 | Plan semestral → resolución → revisión del plan aprobado | 41, 42 |
 | E2E-07 | Habilitar evaluación → responder → resultados anónimos | 36–40 |
-| E2E-08 | Administración: usuarios, catálogos, carga masiva, asignación, identidad visual, perfil | 03, 06, 08–10, 12, 13, 48, 50 |
+| E2E-08 | Administración: usuarios, catálogos, registro de tutorados, identidad visual, cambio de contraseña | 03, 06, 10, 48, 50 |
+| E2E-09 | Carga masiva desde Excel (con fila errónea), asignación en bloque, reasignación individual y alcance por tutor | 08, 09, 12, 13 |
 
 ## Huecos detectados al armar la matriz
 
