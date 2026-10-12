@@ -84,4 +84,4 @@ pendientes: tras actualizar o revertir, todos deben iniciar sesión de nuevo.
 
 - Dominio, certificado y dónde se aloja el servidor.
 - Destino de la copia de respaldo fuera del servidor y un ensayo de restauración completo en otro equipo.
-- Cuenta de correo (SMTP) desde la que se envían las recuperaciones de contraseña.
+- Cuenta de correo (SMTP) desde la que se envían las recuperaciones de contraseña **y los avisos por correo** al correo institucional (`EMAIL_NOTIFICATIONS`, activado por defecto).
