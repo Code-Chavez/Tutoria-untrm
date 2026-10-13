@@ -82,6 +82,9 @@ const DEFAULT_ERROR = 'No se pudo conectar con el servidor. Intenta nuevamente.'
 export function getApiErrorMessage(error: unknown): string {
   if (axios.isAxiosError<ApiError>(error)) {
     const data = error.response?.data;
+    // Un 400 de validación trae el motivo por campo en `details`: se muestra eso, no solo «Datos de entrada inválidos».
+    const reasons = [...new Set((data?.details ?? []).map((d) => d.message).filter((m): m is string => !!m))];
+    if (reasons.length > 0) return reasons.slice(0, 3).join('. ');
     return data?.message ?? data?.error ?? DEFAULT_ERROR;
   }
   return DEFAULT_ERROR;

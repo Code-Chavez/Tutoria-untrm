@@ -9,4 +9,6 @@ export interface ApiError {
   status?: 'error';
   message?: string;
   error?: string;
+  /** Errores de validación por campo (400 «Datos de entrada inválidos»). */
+  details?: { message?: string }[];
 }

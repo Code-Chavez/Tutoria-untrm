@@ -27,6 +27,15 @@ describe('getApiErrorMessage', () => {
     expect(getApiErrorMessage(apiError({ message: 'A', error: 'B' }))).toBe('A');
   });
 
+  it('muestra el motivo por campo de un error de validación en vez del aviso genérico', () => {
+    const data = {
+      error: 'Datos de entrada inválidos',
+      details: [{ message: 'La fecha de nacimiento no puede ser futura' }, { message: 'La edad no coincide con la fecha de nacimiento' }, { message: 'La fecha de nacimiento no puede ser futura' }],
+    };
+
+    expect(getApiErrorMessage(apiError(data))).toBe('La fecha de nacimiento no puede ser futura. La edad no coincide con la fecha de nacimiento');
+  });
+
   it('usa el texto de respaldo sin respuesta del servidor o con un error ajeno a la API', () => {
     expect(getApiErrorMessage(new Error('x'))).toMatch(/No se pudo conectar/);
     expect(getApiErrorMessage(apiError({}))).toMatch(/No se pudo conectar/);

@@ -1,12 +1,8 @@
 import { z } from 'zod';
+import { optionalPhone } from './fields';
 
 export const updateProfileSchema = z.object({
-  phone: z
-    .string()
-    .trim()
-    .max(20, 'El teléfono no puede exceder los 20 caracteres')
-    .optional()
-    .or(z.literal('')),
+  phone: optionalPhone(),
   photoUrl: z
     .string()
     .trim()
