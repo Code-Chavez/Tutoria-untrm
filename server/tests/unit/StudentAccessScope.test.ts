@@ -231,7 +231,7 @@ describe('Alcance sobre los tutorados con la política real (A03, Art. 9.a y 14.
         w.students, w.schools, w.users, w.roles,
         empty as never, empty as never, { findByStudent: jest.fn(async () => null) } as never,
         empty as never, empty as never, { findMany: jest.fn(async () => []) } as never, w.guard,
-        empty as never,
+        empty as never, { findNamesByIds: jest.fn(async () => new Map()) } as never,
       );
       await expect(record.execute('a1', false, 'tutorA2')).rejects.toBeInstanceOf(StudentNotFoundError);
       expect(empty.findByStudent).not.toHaveBeenCalled(); // no se tocó ningún dato del tutorado

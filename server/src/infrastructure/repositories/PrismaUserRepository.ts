@@ -1,9 +1,10 @@
 import { Prisma, PrismaClient } from '@prisma/client';
 import { User } from '@domain/entities/User';
 import { UserRepository } from '@domain/repositories/UserRepository';
+import { UserNameLookup } from '@domain/repositories/UserNameLookup';
 import { DuplicateEmailError } from '@application/use-cases/users/UserErrors';
 
-export class PrismaUserRepository implements UserRepository {
+export class PrismaUserRepository implements UserRepository, UserNameLookup {
   constructor(private readonly prisma: PrismaClient) {}
 
   findById(id: string): Promise<User | null> {
@@ -13,6 +14,12 @@ export class PrismaUserRepository implements UserRepository {
   findByEmail(email: string): Promise<User | null> {
     // Sin distinguir mayúsculas: cubre cuentas guardadas antes de normalizar el correo.
     return this.prisma.user.findFirst({ where: { email: { equals: email, mode: 'insensitive' } } });
+  }
+
+  async findNamesByIds(ids: string[]): Promise<Map<string, string>> {
+    if (ids.length === 0) return new Map();
+    const rows = await this.prisma.user.findMany({ where: { id: { in: ids } }, select: { id: true, firstName: true, lastName: true } });
+    return new Map(rows.map((u) => [u.id, `${u.firstName} ${u.lastName}`]));
   }
 
   findAll(filters?: { isActive?: boolean; roleId?: string; service?: string }): Promise<User[]> {

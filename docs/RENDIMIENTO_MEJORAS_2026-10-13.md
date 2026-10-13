@@ -39,3 +39,23 @@ Mi propia repetición del guion antes de los cambios dio valores equivalentes a 
 - **Estudiantes**: la primera ráfaga aún pasa de 3 s. Falta paginar en el servidor y resolver el alcance del coordinador en SQL (hoy se filtra en memoria después de leer). Paginar exige cambiar la pantalla de tutorados, que filtra y pagina en el cliente.
 - El entorno de desarrollo ejecuta TypeScript con `ts-node-dev` y el generador de carga comparte la CPU: en el servidor de destino (JavaScript compilado, equipo propio) los números serán otros, a medir.
 - Sin tocar todavía: importación por lotes de 2000 filas (RNF-PERF-02) e índices (a partir de planes reales).
+
+## Segunda ronda — expediente y cliente de base de datos
+
+Con el perfil de CPU del expediente bajo carga apareció otro consumo grande: **`@prisma/client` capturaba y analizaba la traza de la pila en cada consulta** solo para dar formato a sus mensajes de error (3.1 s de 20.6 s de CPU en 300 peticiones; con `ts-node` y mapas de fuentes es especialmente caro). Con `errorFormat: 'minimal'` esa función desaparece del perfil y la CPU total baja a 15.1 s.
+
+| Cambio | Efecto |
+|---|---|
+| `errorFormat: 'minimal'` en el cliente de Prisma | −27 % de CPU en el expediente (perfil); los errores pierden el recuadro de código, no el código ni el mensaje |
+| Expediente: nombres de todas las personas en **una** consulta (`UserNameLookup`) en vez de una por persona | Menos consultas cuanto más historial tenga el tutorado |
+| Expediente: escuela y persona de red de apoyo se leen a la vez que el resto, no en etapas encadenadas | Dos idas y vueltas menos |
+
+Medición externa (mismo guion, p95 de cada ráfaga de 100, dos corridas seguidas tras el cambio):
+
+| Consulta | Primera ronda | Segunda ronda (corrida 1 / 2) |
+|---|---|---|
+| Estudiantes | 3145 / 2842 / 2353 | 3405 / 2645 / 2199 · 2825 / 2366 / 2202 |
+| Sesiones | 1833 / 1775 / 1794 | 2247 / 1924 / 1647 · 1839 / 1872 / 1882 |
+| Expediente | 4345 / 4026 / 4463 | 3997 / 3770 / 3962 · 4353 / 4258 / 3658 |
+
+**Lectura honesta:** la variación entre corridas (±10–15 %) es del mismo orden que la mejora medida desde fuera; el perfil de CPU sí muestra la reducción, pero el expediente **sigue en ~3.7–4.3 s** en este entorno y no cumple ≤ 3 s. Con un expediente pequeño hace unas 13 consultas encadenadas; reducirlas más exige reestructurar lecturas (p. ej. una consulta por entrevista/sesión/seguimiento con sus nombres incluidos) y medir en el servidor de destino con JavaScript compilado.

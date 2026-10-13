@@ -5,6 +5,8 @@ import { auditExtension } from './auditExtension';
 // PRISMA_LOG_QUERIES=1, para depurar. Por defecto, solo errores y avisos.
 const logQueries = process.env.PRISMA_LOG_QUERIES === '1';
 const base = new PrismaClient({
+  // «minimal» evita que Prisma capture y analice la traza de la pila en cada consulta solo para adornar sus mensajes de error.
+  errorFormat: 'minimal',
   log: logQueries ? ['query', 'error', 'warn'] : process.env.NODE_ENV === 'development' ? ['error', 'warn'] : ['error'],
 });
 
