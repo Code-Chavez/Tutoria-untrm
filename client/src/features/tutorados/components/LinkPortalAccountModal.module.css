@@ -121,3 +121,14 @@
     opacity: 0;
   }
 }
+
+.empty {
+  font-size: var(--fs-xs);
+  color: var(--g700);
+  background: var(--g50);
+  border: 1px solid var(--borde);
+  border-radius: var(--r-sm);
+  padding: var(--s3) var(--s4);
+  line-height: 1.5;
+  margin: var(--s3) 0 0;
+}
