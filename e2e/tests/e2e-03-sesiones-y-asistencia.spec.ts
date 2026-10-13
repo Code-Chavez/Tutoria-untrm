@@ -25,6 +25,8 @@ test.beforeAll(async () => {
 test('la tutora programa una sesión individual presencial para Ana', async ({ page }) => {
   await loginUi(page, accounts.tutor);
   await goToMenu(page, 'Tutorados');
+  // La lista está paginada y crece con cada corrida de pruebas: se busca a Ana en vez de depender de su posición.
+  await page.getByLabel('Buscar tutorado').fill('20191234');
   await page.getByRole('row', { name: /20191234/ }).getByRole('button', { name: 'Programar sesión' }).click();
 
   const dialog = page.getByRole('dialog', { name: 'Programar sesión de tutoría' });
