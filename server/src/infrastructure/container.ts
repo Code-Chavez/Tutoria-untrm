@@ -605,6 +605,7 @@ const getEvaluationResultsUseCase = new GetEvaluationResultsUseCase(
   roleRepository,
   academicPeriodRepository,
   tutorEvaluationRepository,
+  schoolRepository,
 );
 const getEvaluationStatisticsUseCase = new GetEvaluationStatisticsUseCase(
   userRepository,
@@ -619,6 +620,7 @@ const getEvaluationSuggestionsUseCase = new GetEvaluationSuggestionsUseCase(
   roleRepository,
   academicPeriodRepository,
   tutorEvaluationRepository,
+  schoolRepository,
 );
 const listEvaluationWindowsUseCase = new ListEvaluationWindowsUseCase(
   userRepository,
