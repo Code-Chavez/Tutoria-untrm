@@ -37,7 +37,7 @@ Marcar cada punto con fecha y responsable. Propuesta: **9 al 12 de noviembre** (
 ### 2.1 Entorno
 
 - [ ] Instalación de la versión candidata en un entorno **distinto del de desarrollo**, accesible para los participantes. Ver `docs/MANUAL_TECNICO.md` (sección 5) y `deploy/README.md`.
-- [ ] Prueba de humo: `/api/health` responde, un administrador entra y la recuperación de contraseña envía un correo real (confirma el SMTP).
+- [ ] Prueba de humo: `/api/health` responde, un administrador entra y la recuperación de contraseña envía un correo real (confirma el SMTP). Guía y script de prueba: `docs/GUIA_SMTP.md`.
 - [ ] Respaldo de la base **antes** de cargar datos y un respaldo después de la preparación (`backup.sh`), para poder volver al punto de partida entre sesiones.
 - [ ] Navegador y equipo de las personas participantes probados (el sistema se probó automáticamente en Chrome; anotar cualquier otro).
 - [ ] Un canal para reportar problemas durante la sesión (persona de contacto y teléfono o mensajería).
