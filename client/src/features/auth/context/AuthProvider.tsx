@@ -16,8 +16,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     // Nada de la sesión anterior debe sobrevivir a un cambio de cuenta: ni datos en caché ni consultas en vuelo.
     await queryClient.cancelQueries();
     clearSessionData();
-    tokenStorage.save(result.accessToken, result.refreshToken, result.user);
-    setUser(result.user);
+    const sessionUser = { ...result.user, idleTimeoutMinutes: result.sessionPolicy?.idleTimeoutMinutes };
+    tokenStorage.save(result.accessToken, result.refreshToken, sessionUser);
+    setUser(sessionUser);
   }, []);
 
   const logout = useCallback(() => {

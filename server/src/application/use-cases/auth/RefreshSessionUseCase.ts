@@ -5,6 +5,8 @@ import { AuditLogRepository } from '@domain/repositories/AuditLogRepository';
 import { TokenService } from '@application/ports/TokenService';
 import { REFRESH_TOKEN_DAYS } from './LoginUseCase';
 import { hashRefreshToken } from './refreshTokenHash';
+import { SystemParameterRepository } from '@domain/repositories/SystemParameterRepository';
+import { loadSecurityPolicy } from '@application/use-cases/system-parameters/securityPolicy';
 
 export class InvalidRefreshTokenError extends Error {
   constructor() {
@@ -36,6 +38,9 @@ export class RefreshSessionUseCase {
     private readonly refreshTokens: RefreshTokenRepository,
     private readonly auditLogs: AuditLogRepository,
     private readonly tokens: TokenService,
+    private readonly parameters: SystemParameterRepository,
+    /** Vida del access token: una persona activa renueva como mucho cada tanto, así que ese margen no es inactividad. */
+    private readonly accessTokenMinutes: number,
   ) {}
 
   async execute(refreshToken: string, ipAddress?: string): Promise<SessionTokens> {
@@ -58,6 +63,16 @@ export class RefreshSessionUseCase {
     }
 
     if (stored.expiresAt <= new Date()) throw new InvalidRefreshTokenError();
+
+    // Inactividad hecha valer en el servidor (RF-07, A08): cada renovación entrega un token nuevo, así que la edad de este
+    // es el tiempo desde la última actividad renovada. Si pasó más que el plazo configurado (más la vida del access token),
+    // la sesión terminó aunque el cliente no la haya cerrado.
+    const policy = await loadSecurityPolicy(this.parameters);
+    const idleLimitMs = (policy.idleTimeoutMinutes + this.accessTokenMinutes) * 60_000;
+    if (Date.now() - stored.createdAt.getTime() > idleLimitMs) {
+      await this.refreshTokens.deleteAllForUser(stored.userId);
+      throw new InvalidRefreshTokenError();
+    }
 
     const user = await this.users.findById(stored.userId);
     if (!user || !user.isActive) {

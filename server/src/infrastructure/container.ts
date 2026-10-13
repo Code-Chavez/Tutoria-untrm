@@ -96,6 +96,7 @@ const loginUseCase = new LoginUseCase(
   auditLogRepository,
   passwordHasher,
   tokenService,
+  systemParameterRepository,
 );
 
 const listAuditLogUseCase = new ListAuditLogUseCase(auditLogRepository, userRepository, roleRepository);
@@ -151,6 +152,8 @@ const refreshSessionUseCase = new RefreshSessionUseCase(
   refreshTokenRepository,
   auditLogRepository,
   tokenService,
+  systemParameterRepository,
+  env.JWT_EXPIRES_MINUTES,
 );
 const logoutUseCase = new LogoutUseCase(refreshTokenRepository);
 

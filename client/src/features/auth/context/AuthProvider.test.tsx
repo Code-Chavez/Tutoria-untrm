@@ -123,3 +123,28 @@ describe('AuthProvider: aislamiento de datos entre cuentas (A05)', () => {
     expect(screen.getByTestId('user').textContent).toBe('nadie');
   });
 });
+
+describe('AuthProvider: política de sesión (A08)', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    localStorage.clear();
+    queryClient.clear();
+  });
+
+  it('guarda con la sesión el plazo de inactividad que fijó la DBU', async () => {
+    mocked.login.mockResolvedValue({
+      accessToken: 'a',
+      refreshToken: 'r',
+      sessionPolicy: { idleTimeoutMinutes: 25 },
+      user: { id: 'u1', email: 'b@untrm.edu.pe', firstName: 'Beto', lastName: 'Paz', role: 'Docente Tutor' },
+    });
+    renderProvider();
+
+    await act(async () => {
+      screen.getByText('entrar').click();
+    });
+
+    expect(tokenStorage.getUser<{ idleTimeoutMinutes?: number }>()?.idleTimeoutMinutes).toBe(25);
+  });
+});
+

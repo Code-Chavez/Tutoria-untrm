@@ -1,3 +1,4 @@
+import { SystemParameterRepository } from '@domain/repositories/SystemParameterRepository';
 import {
   LoginUseCase,
   InvalidCredentialsError,
@@ -89,9 +90,10 @@ function buildMocks() {
     verifyAccessToken: jest.fn(),
   };
 
-  const useCase = new LoginUseCase(users, roles, refreshTokens, auditLogs, hasher, tokens);
+  const parameters = { findByKey: jest.fn(), findAll: jest.fn().mockResolvedValue([]), create: jest.fn(), update: jest.fn() } as unknown as jest.Mocked<SystemParameterRepository>;
+  const useCase = new LoginUseCase(users, roles, refreshTokens, auditLogs, hasher, tokens, parameters);
 
-  return { useCase, users, roles, refreshTokens, auditLogs, hasher, tokens };
+  return { useCase, users, roles, refreshTokens, auditLogs, hasher, tokens, parameters };
 }
 
 describe('LoginUseCase', () => {
@@ -108,6 +110,7 @@ describe('LoginUseCase', () => {
 
     expect(result.accessToken).toBe('access-token');
     expect(result.refreshToken).toBe('refresh-token');
+    expect(result.sessionPolicy).toEqual({ idleTimeoutMinutes: 15 });
     expect(result.user).toEqual({
       id: 'user-1',
       email: 'tutor@untrm.edu.pe',
@@ -261,5 +264,59 @@ describe('LoginUseCase', () => {
 
     expect(auditLogs.create).not.toHaveBeenCalled();
     expect(refreshTokens.create).not.toHaveBeenCalled();
+  });
+
+  describe('política de acceso desde los parámetros del sistema (A08)', () => {
+    const stored = (entries: Record<string, string>) => Object.entries(entries).map(([key, value]) => ({ id: key, key, value, label: key }));
+
+    it('bloquea al llegar al número de intentos configurado, no a uno fijo', async () => {
+      const { useCase, users, hasher, parameters } = buildMocks();
+      parameters.findAll.mockResolvedValue(stored({ login_max_attempts: '3', login_lockout_minutes: '30' }));
+      users.findByEmail.mockResolvedValue(buildUser({ failedLoginAttempts: 2 }));
+      hasher.compare.mockResolvedValue(false);
+
+      await expect(useCase.execute({ email: 'tutor@untrm.edu.pe', password: 'incorrecta1' })).rejects.toThrow(InvalidCredentialsError);
+
+      const update = users.update.mock.calls[0][1];
+      expect(update.failedLoginAttempts).toBe(0);
+      const minutes = ((update.lockedUntil as Date).getTime() - Date.now()) / 60_000;
+      expect(minutes).toBeGreaterThan(29);
+      expect(minutes).toBeLessThanOrEqual(30);
+    });
+
+    it('con un límite mayor no bloquea antes de tiempo', async () => {
+      const { useCase, users, hasher, parameters } = buildMocks();
+      parameters.findAll.mockResolvedValue(stored({ login_max_attempts: '8' }));
+      users.findByEmail.mockResolvedValue(buildUser({ failedLoginAttempts: 5 }));
+      hasher.compare.mockResolvedValue(false);
+
+      await expect(useCase.execute({ email: 'tutor@untrm.edu.pe', password: 'incorrecta1' })).rejects.toThrow(InvalidCredentialsError);
+
+      expect(users.update.mock.calls[0][1]).toEqual({ failedLoginAttempts: 6, lockedUntil: null });
+    });
+
+    it('un valor mal guardado (fuera de rango o no numérico) no desactiva el control: rige el predeterminado', async () => {
+      const { useCase, users, hasher, parameters } = buildMocks();
+      parameters.findAll.mockResolvedValue(stored({ login_max_attempts: '9999', login_lockout_minutes: 'abc' }));
+      users.findByEmail.mockResolvedValue(buildUser({ failedLoginAttempts: MAX_FAILED_ATTEMPTS - 1 }));
+      hasher.compare.mockResolvedValue(false);
+
+      await expect(useCase.execute({ email: 'tutor@untrm.edu.pe', password: 'incorrecta1' })).rejects.toThrow(InvalidCredentialsError);
+
+      const update = users.update.mock.calls[0][1];
+      expect(update.failedLoginAttempts).toBe(0);
+      expect((update.lockedUntil as Date).getTime()).toBeGreaterThan(Date.now());
+    });
+
+    it('entrega al cliente el plazo de inactividad configurado', async () => {
+      const { useCase, users, hasher, parameters } = buildMocks();
+      parameters.findAll.mockResolvedValue(stored({ inactivity_timeout_minutes: '45' }));
+      users.findByEmail.mockResolvedValue(buildUser());
+      hasher.compare.mockResolvedValue(true);
+
+      const result = await useCase.execute({ email: 'tutor@untrm.edu.pe', password: 'Password123!' });
+
+      expect(result.sessionPolicy).toEqual({ idleTimeoutMinutes: 45 });
+    });
   });
 });

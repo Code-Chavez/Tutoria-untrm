@@ -7,6 +7,7 @@ export interface LoginInput {
 export interface LoginOutput {
   accessToken: string;
   refreshToken: string;
+  sessionPolicy: { idleTimeoutMinutes: number };
   user: {
     id: string;
     email: string;
