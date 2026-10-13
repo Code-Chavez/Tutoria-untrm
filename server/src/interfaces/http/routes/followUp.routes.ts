@@ -1,4 +1,5 @@
 import { Router, type IRouter } from 'express';
+import { auditAccess, byParam } from '../middleware/auditAccess';
 import { container } from '../../../infrastructure/container';
 import { FollowUpController } from '../controllers/FollowUpController';
 import { authenticate } from '../middleware/authenticate';
@@ -24,6 +25,7 @@ router.post(
 router.get(
   '/students/:id/follow-ups',
   requireAuth,
+  auditAccess('FollowUp', 'READ', byParam('id')),
   authorize(['followups:read']),
   followUpController.listByStudent,
 );

@@ -395,7 +395,7 @@ El **periodo académico activo** determina el semestre en curso para reportes y 
 ![Bitácora de auditoría](manual/img/35-bitacora.jpg)
 *Figura: Bitácora de auditoría.*
 - *Seguimiento DBU*: todos los casos derivados por servicio y estado, con el plazo de atención.
-- *Bitácora de auditoría*: registro de las operaciones críticas (inicios de sesión, cambios de usuarios y catálogos, adjuntos, cambios de estado). Se puede filtrar y no se puede modificar.
+- *Bitácora de auditoría*: registro de las operaciones críticas (inicios de sesión, cambios de usuarios y catálogos, adjuntos, cambios de estado) y de los **accesos a información sensible**: quién consultó o descargó un expediente, entrevistas, seguimientos, red de apoyo, derivaciones y documentos firmados, cuándo y desde qué IP, incluidos los intentos rechazados. La bitácora no guarda el contenido consultado. Se puede filtrar y no se puede modificar desde el sistema.
 
 ### 7.7 Cerrar un semestre
 Active el nuevo periodo en *Catálogos → Periodos*. Los informes del semestre anterior conservan sus cifras; la numeración de asistencias reinicia en 1 en el semestre nuevo.

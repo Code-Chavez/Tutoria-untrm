@@ -1,4 +1,5 @@
 import { Router, type IRouter } from 'express';
+import { auditAccess, byParam } from '../middleware/auditAccess';
 import { container } from '../../../infrastructure/container';
 import { SupportContactController } from '../controllers/SupportContactController';
 import { authenticate } from '../middleware/authenticate';
@@ -24,6 +25,7 @@ router.put(
 router.get(
   '/students/:id/support-contact',
   requireAuth,
+  auditAccess('SupportContact', 'READ', byParam('id')),
   authorize(['support-contacts:read']),
   supportContactController.getByStudent,
 );

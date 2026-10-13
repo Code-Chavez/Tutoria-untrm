@@ -1,4 +1,5 @@
 import { Router, type IRouter } from 'express';
+import { auditAccess, byParam } from '../middleware/auditAccess';
 import multer from 'multer';
 import { container } from '../../../infrastructure/container';
 import { SignedDocumentController } from '../controllers/SignedDocumentController';
@@ -35,11 +36,11 @@ router.get('/referrals/:id/signed-documents', requireAuth, authorize(['referrals
 router.post('/referrals/:id/signed-documents', requireAuth, authorize(['referrals:write']), upload.single('file'), requireFileSignature(['pdf', 'png', 'jpeg']), controller.attachToReferral);
 
 // Hoja de asistencia a la tutoría individual (Anexo N°4): PDF imprimible y documentos firmados.
-router.get('/students/:id/attendance-sheet/pdf', requireAuth, authorize(['sessions:read']), controller.attendanceSheetPdf);
+router.get('/students/:id/attendance-sheet/pdf', requireAuth, auditAccess('AttendanceSheet', 'DOWNLOAD', byParam('id')), authorize(['sessions:read']), controller.attendanceSheetPdf);
 router.get('/students/:id/attendance-sheet/signed-documents', requireAuth, authorize(['sessions:read']), controller.listForAttendanceSheet);
 router.post('/students/:id/attendance-sheet/signed-documents', requireAuth, authorize(['sessions:write']), upload.single('file'), requireFileSignature(['pdf', 'png', 'jpeg']), controller.attachToAttendanceSheet);
 
 // Descarga de cualquier documento firmado: la regla de acceso depende del caso al que pertenece.
-router.get('/signed-documents/:docId/file', requireAuth, controller.download);
+router.get('/signed-documents/:docId/file', requireAuth, auditAccess('SignedDocument', 'DOWNLOAD', byParam('docId')), controller.download);
 
 export default router;

@@ -1,4 +1,5 @@
 import { Router, type IRouter } from 'express';
+import { auditAccess, byParam } from '../middleware/auditAccess';
 import { container } from '../../../infrastructure/container';
 import { StudentRecordController } from '../controllers/StudentRecordController';
 import { authenticate } from '../middleware/authenticate';
@@ -15,6 +16,7 @@ const studentRecordController = new StudentRecordController(
 router.get(
   '/students/:id/record',
   authenticate(container.services.tokenService),
+  auditAccess('StudentRecord', 'READ', byParam('id')),
   authorize(['students:read']),
   studentRecordController.get,
 );

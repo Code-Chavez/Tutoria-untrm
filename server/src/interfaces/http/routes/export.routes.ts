@@ -1,4 +1,5 @@
 import { Router, type IRouter } from 'express';
+import { auditAccess, byParam } from '../middleware/auditAccess';
 import { container } from '../../../infrastructure/container';
 import { ExportController } from '../controllers/ExportController';
 import {
@@ -34,6 +35,6 @@ router.get('/evaluations/statistics/excel', requireAuth, authorize(['evaluation:
 router.get('/indicators/pdf', requireAuth, authorize(['indicators:read']), controller.indicators('pdf'));
 router.get('/indicators/excel', requireAuth, authorize(['indicators:read']), controller.indicators('excel'));
 router.get('/work-plans/:schoolId/pdf', requireAuth, authorize(['work-plans:read']), controller.workPlan);
-router.get('/students/:id/record/pdf', requireAuth, authorize(['students:read']), controller.studentRecord);
+router.get('/students/:id/record/pdf', requireAuth, auditAccess('StudentRecord', 'DOWNLOAD', byParam('id')), authorize(['students:read']), controller.studentRecord);
 
 export default router;
