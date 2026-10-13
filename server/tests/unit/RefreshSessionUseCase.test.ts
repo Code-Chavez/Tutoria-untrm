@@ -1,3 +1,4 @@
+import { SystemParameterRepository } from '@domain/repositories/SystemParameterRepository';
 import {
   RefreshSessionUseCase,
   InvalidRefreshTokenError,
@@ -38,8 +39,9 @@ function build(token: RefreshToken | null, userExtra: Record<string, unknown> = 
     generateAccessToken: jest.fn().mockReturnValue('new-access'),
     generateRefreshToken: jest.fn().mockReturnValue('new-refresh'),
   } as unknown as jest.Mocked<TokenService>;
-  const useCase = new RefreshSessionUseCase(users, roles, refreshTokens, auditLogs, tokens);
-  return { useCase, refreshTokens, auditLogs, tokens };
+  const parameters = { findByKey: jest.fn(), findAll: jest.fn().mockResolvedValue([]), create: jest.fn(), update: jest.fn() } as unknown as jest.Mocked<SystemParameterRepository>;
+  const useCase = new RefreshSessionUseCase(users, roles, refreshTokens, auditLogs, tokens, parameters, 15);
+  return { useCase, refreshTokens, auditLogs, tokens, parameters };
 }
 
 describe('RefreshSessionUseCase (A16)', () => {
@@ -119,5 +121,31 @@ describe('LogoutUseCase (A16)', () => {
     await new LogoutUseCase(revoked).execute('old-token');
     expect(unknown.revoke).not.toHaveBeenCalled();
     expect(revoked.revoke).not.toHaveBeenCalled();
+  });
+
+  describe('inactividad hecha valer en el servidor (A08)', () => {
+    const minutesAgo = (minutes: number) => new Date(Date.now() - minutes * 60_000);
+
+    it('renueva si la última renovación está dentro del plazo de inactividad más la vida del access token', async () => {
+      const { useCase } = build(stored({ createdAt: minutesAgo(29) })); // 15 de inactividad + 15 del access token
+
+      await expect(useCase.execute('old-token')).resolves.toMatchObject({ refreshToken: 'new-refresh' });
+    });
+
+    it('rechaza una sesión inactiva más allá del plazo y cierra todas las sesiones de la persona', async () => {
+      const { useCase, refreshTokens } = build(stored({ createdAt: minutesAgo(31) }));
+
+      await expect(useCase.execute('old-token')).rejects.toThrow(InvalidRefreshTokenError);
+
+      expect(refreshTokens.deleteAllForUser).toHaveBeenCalledWith('u1');
+      expect(refreshTokens.revoke).not.toHaveBeenCalled();
+    });
+
+    it('respeta el plazo que configuró la DBU', async () => {
+      const { useCase, parameters } = build(stored({ createdAt: minutesAgo(40) }));
+      parameters.findAll.mockResolvedValue([{ id: 'p', key: 'inactivity_timeout_minutes', value: '60', label: 'x' }]);
+
+      await expect(useCase.execute('old-token')).resolves.toMatchObject({ refreshToken: 'new-refresh' });
+    });
   });
 });

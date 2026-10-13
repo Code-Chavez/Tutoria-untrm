@@ -372,7 +372,7 @@ El **periodo académico activo** determina el semestre en curso para reportes y 
 
 ![Parámetros del sistema](manual/img/31-parametros.jpg)
 *Figura: Parámetros del sistema.*
-*Parámetros*: duración de la sesión (45 min), número de sesiones por semestre (8), umbral de alerta por inasistencias (2) y plazo de atención de derivaciones (48 h). Los cambios rigen de inmediato y quedan en la bitácora.
+*Parámetros*: duración de la sesión (45 min), número de sesiones por semestre (8), umbral de alerta por inasistencias (2) y plazo de atención de derivaciones (48 h). En el grupo *Seguridad de acceso*: cierre de sesión por inactividad (15 min), intentos fallidos antes del bloqueo (5) y duración del bloqueo (15 min); el plazo de inactividad rige desde el siguiente inicio de sesión de cada persona y el servidor lo hace valer también al renovar la sesión. Los cambios rigen de inmediato (salvo lo indicado) y quedan en la bitácora.
 
 ### 7.4 Identidad visual
 

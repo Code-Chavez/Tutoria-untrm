@@ -11,7 +11,9 @@ import styles from './SessionTimeout.module.css';
  * sesión y devuelve al login.
  */
 export function SessionTimeout() {
-  const { logout } = useAuth();
+  const { logout, user } = useAuth();
+  // El plazo lo fija la DBU (parámetro de seguridad) y llega al iniciar sesión; sin él rige el predeterminado del entorno.
+  const idleMs = user?.idleTimeoutMinutes ? user.idleTimeoutMinutes * 60_000 : IDLE_TIMEOUT_MS;
   const navigate = useNavigate();
 
   const expire = useCallback(() => {
@@ -20,7 +22,7 @@ export function SessionTimeout() {
   }, [logout, navigate]);
 
   const { isWarning, remainingMs, stayActive } = useIdleTimer({
-    idleMs: IDLE_TIMEOUT_MS,
+    idleMs,
     warningMs: IDLE_WARNING_MS,
     onExpire: expire,
   });
