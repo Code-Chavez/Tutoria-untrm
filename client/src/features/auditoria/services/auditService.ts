@@ -44,6 +44,8 @@ export const ACTION_LABEL: Record<string, string> = {
   PASSWORD_RESET_REQUEST: 'Solicitud de recuperación de contraseña',
   PASSWORD_RESET: 'Contraseña restablecida',
   SIGNED_DOCUMENT_ATTACHED: 'Documento firmado adjuntado',
+  READ: 'Consulta de información sensible',
+  DOWNLOAD: 'Descarga de documento',
 };
 
 export const ENTITY_LABEL: Record<string, string> = {
@@ -54,6 +56,14 @@ export const ENTITY_LABEL: Record<string, string> = {
   CatalogItem: 'Elemento de catálogo',
   StudentReferral: 'Derivación',
   Student: 'Tutorado',
+  StudentRecord: 'Expediente del tutorado',
+  Interview: 'Entrevistas del tutorado',
+  FollowUp: 'Seguimientos del tutorado',
+  SupportContact: 'Red de apoyo del tutorado',
+  Referral: 'Derivación',
+  SignedDocument: 'Documento firmado',
+  SessionEvidence: 'Evidencia de sesión',
+  AttendanceSheet: 'Hoja de asistencia',
 };
 
 export const actionLabel = (action: string) => ACTION_LABEL[action] ?? action;
