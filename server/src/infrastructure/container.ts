@@ -1,5 +1,6 @@
 import { prisma } from './database/prisma';
 import { PrismaUserRepository } from './repositories/PrismaUserRepository';
+import { CachedRoleRepository } from '@infrastructure/repositories/CachedRoleRepository';
 import { PrismaRoleRepository } from './repositories/PrismaRoleRepository';
 import { PrismaSignedDocumentRepository } from './repositories/PrismaSignedDocumentRepository';
 import {
@@ -56,7 +57,7 @@ import { ResetPasswordUseCase } from '@application/use-cases/auth/ResetPasswordU
 // El dominio y la aplicación solo ven interfaces (puertos).
 
 const userRepository = new PrismaUserRepository(prisma);
-const roleRepository = new PrismaRoleRepository(prisma);
+const roleRepository = new CachedRoleRepository(new PrismaRoleRepository(prisma));
 const refreshTokenRepository = new PrismaRefreshTokenRepository(prisma);
 const periodRosterRepository = new PrismaPeriodRosterRepository(prisma);
 const auditLogRepository = new PrismaAuditLogRepository(prisma);

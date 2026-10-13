@@ -27,13 +27,14 @@ describe('authenticate middleware (A04)', () => {
   });
 
   it('con token válido y cuenta activa deja pasar y expone la identidad', async () => {
-    findUnique.mockResolvedValue({ isActive: true });
+    findUnique.mockResolvedValue({ isActive: true, roleId: 'role-1' });
     const { req, promise, next } = run('Bearer abc', validTokens);
     await promise;
 
     expect(next).toHaveBeenCalledWith();
     expect(req.auth).toEqual(payload);
-    expect(findUnique).toHaveBeenCalledWith({ where: { id: 'user-1' }, select: { isActive: true, mustChangePassword: true } });
+    expect(req.accountRoleId).toBe('role-1');
+    expect(findUnique).toHaveBeenCalledWith({ where: { id: 'user-1' }, select: { isActive: true, mustChangePassword: true, roleId: true } });
   });
 
   it('con clave temporal pendiente bloquea todo salvo el perfil y el cambio de clave (A01)', async () => {
