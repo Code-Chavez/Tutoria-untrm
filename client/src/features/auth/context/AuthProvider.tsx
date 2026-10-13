@@ -30,9 +30,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setUser(null);
   }, []);
 
+  const markPasswordChanged = useCallback(() => {
+    setUser((current) => {
+      if (!current) return current;
+      const updated = { ...current, mustChangePassword: false };
+      tokenStorage.saveUser(updated);
+      return updated;
+    });
+  }, []);
+
   const value = useMemo<AuthContextValue>(
-    () => ({ user, isAuthenticated: user !== null, login, logout }),
-    [user, login, logout],
+    () => ({ user, isAuthenticated: user !== null, login, logout, markPasswordChanged }),
+    [user, login, logout, markPasswordChanged],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

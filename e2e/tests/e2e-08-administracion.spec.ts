@@ -48,18 +48,30 @@ test('la DBU registra un tutorado nuevo y aparece en la lista', async ({ page })
   await expect(page.getByRole('row', { name: new RegExp(code) })).toBeVisible();
 });
 
-test('un tutorado cambia su propia contraseña y entra con la nueva', async ({ page, browser }) => {
+test('un tutorado con clave temporal solo puede cambiarla y luego entra con la nueva (A01)', async ({ page, browser }) => {
   const { adminToken, elenaId } = await ensureAnaWithElena();
-  const student = await createPortalStudent(adminToken, elenaId);
+  const student = await createPortalStudent(adminToken, elenaId, { keepTemporary: true });
   const newPassword = `Nueva${Date.now().toString(36)}!`;
 
-  await loginUi(page, { ...student, role: 'Tutorado' });
-  await page.goto('/profile');
+  await page.goto('/login');
+  await page.getByPlaceholder('usuario@untrm.edu.pe').fill(student.email);
+  await page.getByPlaceholder('••••••••').fill(student.password);
+  await page.getByRole('button', { name: 'Ingresar' }).click();
+
+  // Con la clave temporal solo se abre el perfil: cualquier otra página lo devuelve allí.
+  await expect(page.getByRole('alert').filter({ hasText: /clave temporal/ })).toBeVisible({ timeout: 45_000 });
+  await page.goto('/');
+  await expect(page.getByRole('heading', { level: 1, name: 'Mi perfil' })).toBeVisible();
+
   await page.getByLabel('Contraseña actual').fill(student.password);
   await page.getByLabel('Nueva contraseña', { exact: true }).fill(newPassword);
   await page.getByLabel('Confirmar nueva contraseña').fill(newPassword);
   await page.getByRole('button', { name: 'Actualizar contraseña' }).click();
   await expect(page.getByText(/Contraseña actualizada/)).toBeVisible();
+
+  // Ya sin la restricción: el inicio abre y la clave temporal dejó de servir.
+  await page.goto('/');
+  await expect(page.getByRole('heading', { level: 1, name: /Bienvenid[oa], Prueba/ })).toBeVisible();
 
   const again = await (await browser.newContext()).newPage();
   await loginUi(again, { ...student, password: newPassword, role: 'Tutorado' });

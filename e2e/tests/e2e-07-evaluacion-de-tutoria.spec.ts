@@ -49,7 +49,7 @@ test('el tutorado responde los 20 ítems y no puede enviar antes de terminar', a
 test('la coordinadora ve resultados y sugerencias sin el nombre del estudiante', async ({ page }) => {
   await loginUi(page, accounts.coordinator);
   await goToMenu(page, 'Resultados de evaluación');
-  await expect(page.getByText(/Elena Ramírez/).first()).toBeVisible();
+  await expect(page.getByText(/Elena Ramírez/).filter({ visible: true }).first()).toBeVisible();
 
   await goToMenu(page, 'Sugerencias de estudiantes');
   await expect(page.getByText(likes)).toBeVisible();

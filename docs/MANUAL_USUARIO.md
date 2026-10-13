@@ -359,7 +359,7 @@ El administrador tiene acceso a todo. Además de lo descrito para los demás rol
 
 **Profesionales de servicio:** al elegir el rol *Profesional de Servicio* aparece el campo obligatorio *Servicio al que pertenece* (Escuela Profesional, Psicopedagogía, Psicología, Asistencia Social o Salud). **De ese servicio depende qué casos derivados ve y recibe**: sin él no vería ninguno, por eso el sistema no deja guardar sin elegirlo. En la tabla de usuarios aparece junto al rol (por ejemplo, «Profesional de Servicio · Psicología»).
 
-Una cuenta nueva recibe la **contraseña inicial por defecto del sistema**: entréguesela a la persona por un medio seguro y pídale que la cambie en su primer ingreso (*Mi perfil*).
+Al crear la cuenta, el sistema genera una **clave temporal distinta para cada persona** y la muestra **una sola vez** en una ventana: cópiela y entréguesela en persona o por un canal privado (no se vuelve a mostrar). La persona entra con ella y el sistema solo le deja abrir *Mi perfil* hasta que la cambie; después accede con normalidad.
 
 ### 7.2 Catálogos maestros
 

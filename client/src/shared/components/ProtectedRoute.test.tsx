@@ -12,6 +12,7 @@ function renderAt(route: string) {
           <Route path="/login" element={<h1>Iniciar sesión</h1>} />
           <Route element={<ProtectedRoute />}>
             <Route path="/" element={<h1>Panel principal</h1>} />
+            <Route path="/profile" element={<h1>Mi perfil</h1>} />
           </Route>
         </Routes>
       </MemoryRouter>
@@ -19,7 +20,7 @@ function renderAt(route: string) {
   );
 }
 
-function seedSession() {
+function seedSession(extra: Record<string, unknown> = {}) {
   localStorage.setItem('sit.accessToken', 'access-token');
   localStorage.setItem('sit.refreshToken', 'refresh-token');
   localStorage.setItem(
@@ -30,6 +31,7 @@ function seedSession() {
       firstName: 'Juan',
       lastName: 'Pérez',
       role: 'Docente Tutor',
+      ...extra,
     }),
   );
 }
@@ -56,5 +58,22 @@ describe('ProtectedRoute', () => {
     renderAt('/');
 
     expect(screen.getByRole('heading', { name: /iniciar sesión/i })).toBeInTheDocument();
+  });
+
+  it('con clave temporal pendiente solo deja ver el perfil (A01)', () => {
+    seedSession({ mustChangePassword: true });
+
+    renderAt('/');
+
+    expect(screen.getByRole('heading', { name: /mi perfil/i })).toBeInTheDocument();
+    expect(screen.queryByRole('heading', { name: /panel principal/i })).not.toBeInTheDocument();
+  });
+
+  it('con la clave ya cambiada no redirige', () => {
+    seedSession({ mustChangePassword: false });
+
+    renderAt('/');
+
+    expect(screen.getByRole('heading', { name: /panel principal/i })).toBeInTheDocument();
   });
 });

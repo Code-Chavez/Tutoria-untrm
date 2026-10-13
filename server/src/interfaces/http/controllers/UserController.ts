@@ -56,8 +56,8 @@ export class UserController {
   create = async (req: Request, res: Response) => {
     try {
       const data = createUserSchema.parse(req.body);
-      const user = await this.createUserUseCase.execute(data);
-      res.status(201).json({ message: 'Usuario creado exitosamente', user });
+      const { temporaryPassword, ...user } = await this.createUserUseCase.execute(data);
+      res.status(201).json({ message: 'Usuario creado exitosamente', user, temporaryPassword });
     } catch (error) {
       if (error instanceof z.ZodError) {
         res.status(400).json({ error: 'Datos de entrada inválidos', details: error.errors });

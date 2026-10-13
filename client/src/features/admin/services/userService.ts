@@ -41,9 +41,10 @@ export const userService = {
     return response.data.users;
   },
 
-  createUser: async (data: CreateUserData): Promise<User> => {
-    const response = await apiClient.post<{ message: string; user: User }>('/users', data);
-    return response.data.user;
+  /** Devuelve la cuenta y su clave temporal, que el servidor entrega una sola vez. */
+  createUser: async (data: CreateUserData): Promise<{ user: User; temporaryPassword?: string }> => {
+    const response = await apiClient.post<{ message: string; user: User; temporaryPassword?: string }>('/users', data);
+    return { user: response.data.user, temporaryPassword: response.data.temporaryPassword };
   },
 
   updateUser: async (id: string, data: UpdateUserData): Promise<User> => {

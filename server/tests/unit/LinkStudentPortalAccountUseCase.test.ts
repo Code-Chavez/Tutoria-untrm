@@ -44,6 +44,7 @@ describe('LinkStudentPortalAccountUseCase', () => {
     roleId: 'role-student',
     isActive: true,
     failedLoginAttempts: 0,
+    mustChangePassword: false,
     createdAt: new Date(),
     updatedAt: new Date(),
   };

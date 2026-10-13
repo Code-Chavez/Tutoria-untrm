@@ -29,7 +29,7 @@ export class PrismaPasswordResetTokenRepository implements PasswordResetTokenRep
       const record = await tx.passwordResetToken.findUniqueOrThrow({ where: { tokenHash } });
       await tx.user.update({
         where: { id: record.userId },
-        data: { passwordHash: newPasswordHash, failedLoginAttempts: 0, lockedUntil: null },
+        data: { passwordHash: newPasswordHash, failedLoginAttempts: 0, lockedUntil: null, mustChangePassword: false },
       });
       await tx.passwordResetToken.updateMany({ where: { userId: record.userId, used: false }, data: { used: true } });
       await tx.refreshToken.deleteMany({ where: { userId: record.userId } });

@@ -20,6 +20,8 @@ model User {
   isActive            Boolean   @default(true) @map("is_active")
   failedLoginAttempts Int       @default(0) @map("failed_login_attempts")
   lockedUntil         DateTime? @map("locked_until")
+  // Clave temporal entregada por la DBU: hasta que la persona la cambie solo puede usar su perfil y salir.
+  mustChangePassword  Boolean   @default(false) @map("must_change_password")
   createdAt           DateTime  @default(now()) @map("created_at")
   updatedAt           DateTime  @updatedAt @map("updated_at")
 

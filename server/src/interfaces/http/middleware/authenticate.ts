@@ -13,6 +13,9 @@ declare global {
   }
 }
 
+// Rutas que una cuenta con clave temporal sí puede usar (se compara la ruta completa: req.path es relativo al punto de montaje).
+const PASSWORD_CHANGE_ALLOWED = /^\/api\/profile(\/change-password)?\/?$/;
+
 /**
  * Valida el token y que la cuenta siga activa. El JWT firmado no basta: una
  * cuenta dada de baja (o eliminada) pierde el acceso de inmediato, sin esperar a
@@ -36,9 +39,14 @@ export function authenticate(tokens: TokenService) {
     }
 
     try {
-      const account = await prisma.user.findUnique({ where: { id: payload.sub }, select: { isActive: true } });
+      const account = await prisma.user.findUnique({ where: { id: payload.sub }, select: { isActive: true, mustChangePassword: true } });
       if (!account || !account.isActive) {
         next(new AppError(401, 'La cuenta está desactivada o ya no existe'));
+        return;
+      }
+      // Con clave temporal solo puede cambiarla (perfil) o salir: ningún otro dato hasta que la cambie.
+      if (account.mustChangePassword && !PASSWORD_CHANGE_ALLOWED.test(req.originalUrl.split('?')[0])) {
+        next(new AppError(403, 'Debes cambiar tu contraseña temporal antes de continuar', 'PASSWORD_CHANGE_REQUIRED'));
         return;
       }
     } catch (error) {
