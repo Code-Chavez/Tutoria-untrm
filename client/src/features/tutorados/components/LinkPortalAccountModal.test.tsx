@@ -72,4 +72,16 @@ describe('LinkPortalAccountModal', () => {
 
     expect(onSubmit).toHaveBeenCalledWith(null);
   });
+
+  it('explica qué hacer cuando no hay cuentas disponibles', () => {
+    render(<LinkPortalAccountModal student={student} options={[]} onSubmit={vi.fn()} onCancel={vi.fn()} />);
+
+    expect(screen.getByRole('status')).toHaveTextContent(/crea el usuario con rol Tutorado/i);
+  });
+
+  it('no muestra ese aviso cuando hay cuentas para elegir', () => {
+    render(<LinkPortalAccountModal student={student} options={options} onSubmit={vi.fn()} onCancel={vi.fn()} />);
+
+    expect(screen.queryByRole('status')).toBeNull();
+  });
 });

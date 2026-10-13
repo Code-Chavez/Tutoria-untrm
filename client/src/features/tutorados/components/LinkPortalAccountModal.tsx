@@ -90,6 +90,14 @@ export const LinkPortalAccountModal: React.FC<LinkPortalAccountModalProps> = ({
             </SelectField>
           </div>
 
+          {options.length === 0 && (
+            <p className={styles.empty} role="status">
+              No hay cuentas disponibles para vincular. Primero crea el usuario con rol Tutorado en
+              «Usuarios y roles» (con el correo con el que iniciará sesión); si ya existe, puede
+              estar vinculado a otro estudiante.
+            </p>
+          )}
+
           {serverError && <span className={styles.error}>{serverError}</span>}
         </div>
 
