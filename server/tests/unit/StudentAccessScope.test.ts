@@ -162,8 +162,8 @@ describe('Alcance sobre los tutorados con la política real (A03, Art. 9.a y 14.
       w.students.findByCode.mockResolvedValue(null);
       w.students.create.mockImplementation(async (d) => ({ id: 'n', ...d }) as never);
       const rows = [
-        { rowNumber: 2, studentCode: '20200001', firstName: 'Ana', lastName: 'A', cycle: '2', school: 'Escuela A' },
-        { rowNumber: 3, studentCode: '20200002', firstName: 'Beto', lastName: 'B', cycle: '2', school: 'Escuela B' },
+        { rowNumber: 2, studentCode: '20200001', firstName: 'Ana', lastName: 'Alvarez', cycle: '2', school: 'Escuela A' },
+        { rowNumber: 3, studentCode: '20200002', firstName: 'Beto', lastName: 'Benites', cycle: '2', school: 'Escuela B' },
       ];
       const report = await new ImportStudentsUseCase(w.students, w.schools, w.guard).execute(rows as never, 'coordA');
 
