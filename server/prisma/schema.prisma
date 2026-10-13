@@ -589,7 +589,7 @@ model Notification {
   userId String @map("user_id")
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  // 'REFERRAL_CREATED' | 'REFERRAL_STATUS_CHANGED' | 'TUTORING_REQUEST_CREATED' | 'TUTORING_REQUEST_UPDATED'
+  // 'REFERRAL_CREATED' | 'REFERRAL_STATUS_CHANGED' | 'TUTORING_REQUEST_CREATED' | 'TUTORING_REQUEST_UPDATED' | 'TUTORING_REQUEST_RECEIVED'
   type    String
   message String
 
