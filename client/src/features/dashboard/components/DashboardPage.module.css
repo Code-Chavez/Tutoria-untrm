@@ -68,6 +68,11 @@
   margin-bottom: var(--s5);
 }
 
+/* Con una sola tarjeta (p. ej. el tutorado solo tiene «Acciones rápidas») ocupa todo el ancho, sin hueco a la derecha. */
+.columns:has(> :only-child) {
+  grid-template-columns: 1fr;
+}
+
 @media (max-width: 1100px) {
   .columns {
     grid-template-columns: 1fr;
