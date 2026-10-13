@@ -1,4 +1,11 @@
 import { z } from 'zod';
+import {
+  EMAIL_INVALID,
+  PHONE_INVALID,
+  STUDENT_EMAIL_MAX,
+  STUDENT_PHONE_MAX,
+  STUDENT_PHONE_PATTERN,
+} from '@application/validation/studentFields';
 
 // El código universitario de la UNTRM es numérico (8 a 12 dígitos).
 const studentCode = z
@@ -10,8 +17,8 @@ export const createStudentSchema = z.object({
   studentCode,
   firstName: z.string().trim().min(2, 'El nombre debe tener al menos 2 caracteres'),
   lastName: z.string().trim().min(2, 'El apellido debe tener al menos 2 caracteres'),
-  email: z.string().trim().email('Correo inválido').optional().or(z.literal('')),
-  phone: z.string().trim().max(20, 'El teléfono es demasiado largo').optional().or(z.literal('')),
+  email: z.string().trim().toLowerCase().max(STUDENT_EMAIL_MAX, EMAIL_INVALID).email(EMAIL_INVALID).optional().or(z.literal('')),
+  phone: z.string().trim().max(STUDENT_PHONE_MAX, PHONE_INVALID).regex(STUDENT_PHONE_PATTERN, PHONE_INVALID).optional().or(z.literal('')),
   cycle: z.coerce
     .number()
     .int('El ciclo debe ser un número entero')

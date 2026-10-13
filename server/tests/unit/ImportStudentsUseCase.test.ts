@@ -101,4 +101,69 @@ describe('ImportStudentsUseCase', () => {
     expect(report.errors[0].message).toMatch(/ya existe/i);
     expect(mockStudentRepository.create).not.toHaveBeenCalled();
   });
+
+  describe('correo, teléfono y nombres (A03)', () => {
+    const messages = async (overrides: Partial<ImportStudentRow>) => {
+      const report = await useCase.execute([row(2, overrides)], 'admin-1');
+      return { report, text: report.errors.map((e) => e.message).join(' | ') };
+    };
+
+    it.each(['sin-arroba', 'ana@', '@untrm.edu.pe', 'ana perez@untrm.edu.pe'])('rechaza el correo mal formado «%s» sin crear al estudiante', async (email) => {
+      const { report, text } = await messages({ email });
+
+      expect(report.created).toBe(0);
+      expect(text).toMatch(/formato válido/);
+      expect(mockStudentRepository.create).not.toHaveBeenCalled();
+    });
+
+    it('acepta el correo vacío o ausente y guarda null', async () => {
+      const report = await useCase.execute([row(2, { email: '' }), row(3, { studentCode: '20195678', email: undefined })], 'admin-1');
+
+      expect(report.created).toBe(2);
+      expect(mockStudentRepository.create).toHaveBeenCalledWith(expect.objectContaining({ email: null }));
+    });
+
+    it('guarda el correo sin espacios y en minúsculas', async () => {
+      await useCase.execute([row(2, { email: '  Ana.Torres@UNTRM.edu.pe ' })], 'admin-1');
+
+      expect(mockStudentRepository.create).toHaveBeenCalledWith(expect.objectContaining({ email: 'ana.torres@untrm.edu.pe' }));
+    });
+
+    it.each(['98765abcd', 'nueve ocho', '987654321987654321987'])('rechaza el teléfono «%s»', async (phone) => {
+      const { report, text } = await messages({ phone });
+
+      expect(report.created).toBe(0);
+      expect(text).toMatch(/teléfono/i);
+    });
+
+    it('acepta teléfonos con prefijo, espacios y guiones', async () => {
+      const report = await useCase.execute([row(2, { phone: '+51 987-654-321' })], 'admin-1');
+
+      expect(report.created).toBe(1);
+    });
+
+    it('rechaza nombres de una sola letra y los de solo espacios, igual que el formulario', async () => {
+      const short = await messages({ firstName: 'A' });
+      const blank = await messages({ lastName: '   ' });
+
+      expect(short.text).toMatch(/nombre debe tener al menos 2/);
+      expect(blank.text).toMatch(/apellido es obligatorio/i);
+    });
+
+    it('reporta todos los problemas de la fila a la vez, para corregirla de una vez', async () => {
+      const { text } = await messages({ email: 'malo', phone: 'abc', firstName: 'A' });
+
+      expect(text).toMatch(/formato válido/);
+      expect(text).toMatch(/teléfono/i);
+      expect(text).toMatch(/nombre debe tener/);
+    });
+
+    it('una fila inválida no impide crear las demás', async () => {
+      const report = await useCase.execute([row(2, { email: 'malo' }), row(3, { studentCode: '20195678' })], 'admin-1');
+
+      expect(report.created).toBe(1);
+      expect(report.skipped).toBe(1);
+      expect(report.errors[0].row).toBe(2);
+    });
+  });
 });
