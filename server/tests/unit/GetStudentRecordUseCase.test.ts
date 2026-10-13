@@ -26,6 +26,7 @@ describe('GetStudentRecordUseCase', () => {
   let students: jest.Mocked<StudentRepository>;
   let schools: jest.Mocked<SchoolRepository>;
   let users: jest.Mocked<UserRepository>;
+  let userNames: { findNamesByIds: jest.Mock };
   let interviews: jest.Mocked<TutorInterviewRepository>;
   let history: jest.Mocked<TutorAssignmentHistoryRepository>;
   let contacts: jest.Mocked<SupportContactRepository>;
@@ -139,6 +140,13 @@ describe('GetStudentRecordUseCase', () => {
       findMany: jest.fn().mockResolvedValue([]),
       updateStatus: jest.fn(),
     };
+    // Misma gente que `users`, pero en una sola lectura por lote (como el repositorio real).
+    userNames = {
+      findNamesByIds: jest.fn(async (ids: string[]) => {
+        const known: Record<string, string> = { 'tutor-old': 'Jorge Salazar', 'tutor-new': 'Elena Ramírez' };
+        return new Map(ids.filter((id) => known[id]).map((id) => [id, known[id]]));
+      }),
+    };
     useCase = new GetStudentRecordUseCase(
       students,
       schools,
@@ -152,7 +160,27 @@ describe('GetStudentRecordUseCase', () => {
       referrals,
       allowAllGuard(students),
       { findByStudent: jest.fn().mockResolvedValue([]) } as never,
+      userNames,
     );
+  });
+
+  it('lee los nombres de todas las personas del expediente en una sola consulta, sin repetirlas', async () => {
+    await useCase.execute('student-1', false, 'admin-1');
+
+    expect(userNames.findNamesByIds).toHaveBeenCalledTimes(1);
+    const ids = userNames.findNamesByIds.mock.calls[0][0] as string[];
+    expect(new Set(ids).size).toBe(ids.length);
+    expect(ids).toEqual(expect.arrayContaining(['tutor-old', 'tutor-new']));
+  });
+
+  it('un expediente sin personas relacionadas no consulta nombres inútilmente', async () => {
+    students.findById.mockResolvedValue({ ...student, tutorId: null } as never);
+    interviews.findByStudent.mockResolvedValue([]);
+    history.findByStudent.mockResolvedValue([]);
+
+    await useCase.execute('student-1', false, 'admin-1');
+
+    expect(userNames.findNamesByIds).toHaveBeenCalledWith([]);
   });
 
   it('consolida entrevistas e historial de asignación en orden cronológico descendente', async () => {

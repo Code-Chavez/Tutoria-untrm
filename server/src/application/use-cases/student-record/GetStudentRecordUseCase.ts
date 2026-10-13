@@ -1,6 +1,7 @@
 import { StudentRepository } from '@domain/repositories/StudentRepository';
 import { SchoolRepository } from '@domain/repositories/SchoolRepository';
 import { UserRepository } from '@domain/repositories/UserRepository';
+import { UserNameLookup } from '@domain/repositories/UserNameLookup';
 import { RoleRepository } from '@domain/repositories/RoleRepository';
 import { TutorInterviewRepository } from '@domain/repositories/TutorInterviewRepository';
 import { TutorAssignmentHistoryRepository } from '@domain/repositories/TutorAssignmentHistoryRepository';
@@ -38,6 +39,7 @@ export class GetStudentRecordUseCase {
     private readonly referrals: StudentReferralRepository,
     private readonly guard: StudentAccessGuard,
     private readonly tutoringRequests: TutoringRequestRepository,
+    private readonly userNames: UserNameLookup,
   ) {}
 
   async execute(
@@ -48,14 +50,16 @@ export class GetStudentRecordUseCase {
     // El expediente reúne entrevistas, seguimientos y asistencia: solo con alcance sobre el tutorado.
     const student = await this.guard.assertAccess(requesterId, studentId);
 
-    const school = await this.schools.findById(student.schoolId);
-    const [interviews, history, sessions, followUps, referrals, requests] = await Promise.all([
+    // Todo lo que no depende de otra lectura se pide a la vez: cada etapa encadenada suma una ida y vuelta a la base.
+    const [school, interviews, history, sessions, followUps, referrals, requests, supportContact] = await Promise.all([
+      this.schools.findById(student.schoolId),
       this.interviews.findByStudent(studentId),
       this.assignmentHistory.findByStudent(studentId),
       this.sessions.findByStudent(studentId),
       this.followUps.findByStudent(studentId),
       this.visibleReferrals(studentId, requesterId),
       this.tutoringRequests.findByStudent(studentId),
+      includeSupportContact ? this.supportContacts.findByStudent(studentId) : Promise.resolve(undefined),
     ]);
     const attendedSessions = sessions.filter((s) => s.attendance);
 
@@ -75,14 +79,9 @@ export class GetStudentRecordUseCase {
       if (r.handledById) userIds.add(r.handledById);
     });
 
-    const userEntries = await Promise.all(
-      [...userIds].map(async (id) => [id, await this.users.findById(id)] as const),
-    );
-    const userName = (id?: string | null): string | null => {
-      if (!id) return null;
-      const user = userEntries.find(([uid]) => uid === id)?.[1];
-      return user ? `${user.firstName} ${user.lastName}` : null;
-    };
+    // Los nombres de todas las personas del expediente salen de una sola consulta.
+    const names = await this.userNames.findNamesByIds([...userIds]);
+    const userName = (id?: string | null): string | null => (id ? (names.get(id) ?? null) : null);
 
     const interviewEvents: StudentRecordEvent[] = interviews.map((i) => ({
       type: 'interview',
@@ -173,9 +172,7 @@ export class GetStudentRecordUseCase {
       timeline,
     };
 
-    if (includeSupportContact) {
-      record.supportContact = await this.supportContacts.findByStudent(studentId);
-    }
+    if (includeSupportContact) record.supportContact = supportContact;
 
     return record;
   }

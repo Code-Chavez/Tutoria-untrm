@@ -353,6 +353,7 @@ const getStudentRecordUseCase = new GetStudentRecordUseCase(
   studentReferralRepository,
   studentAccessGuard,
   tutoringRequestRepository,
+  userRepository,
 );
 const createTutoringRequestUseCase = new CreateTutoringRequestUseCase(
   tutoringRequestRepository,
