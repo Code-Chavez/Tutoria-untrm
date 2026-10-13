@@ -123,6 +123,7 @@ export class LoginUseCase {
         lastName: user.lastName,
         role: roleName,
         service: user.service,
+        mustChangePassword: user.mustChangePassword,
       },
     };
   }

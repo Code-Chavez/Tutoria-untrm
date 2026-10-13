@@ -25,6 +25,7 @@ function buildUser(overrides: Partial<User> = {}): User {
     isActive: true,
     failedLoginAttempts: 0,
     lockedUntil: null,
+    mustChangePassword: false,
     createdAt: new Date(),
     updatedAt: new Date(),
     ...overrides,
@@ -74,7 +75,7 @@ describe('ChangePasswordUseCase', () => {
     await useCase.execute(input);
 
     expect(hasher.hash).toHaveBeenCalledWith('ClaveNueva123');
-    expect(users.update).toHaveBeenCalledWith('user-1', { passwordHash: 'hash-of-new' });
+    expect(users.update).toHaveBeenCalledWith('user-1', { passwordHash: 'hash-of-new', mustChangePassword: false });
     expect(refreshTokens.deleteAllForUser).toHaveBeenCalledWith('user-1');
     expect(auditLogs.create).toHaveBeenCalledWith(
       expect.objectContaining({ action: 'CHANGE_PASSWORD', entityId: 'user-1' }),

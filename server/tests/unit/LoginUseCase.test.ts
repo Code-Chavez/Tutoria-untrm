@@ -27,6 +27,7 @@ function buildUser(overrides: Partial<User> = {}): User {
     isActive: true,
     failedLoginAttempts: 0,
     lockedUntil: null,
+    mustChangePassword: false,
     createdAt: new Date('2026-01-01'),
     updatedAt: new Date('2026-01-01'),
     ...overrides,
@@ -113,6 +114,7 @@ describe('LoginUseCase', () => {
       firstName: 'Juan',
       lastName: 'Pérez',
       role: 'Docente Tutor',
+      mustChangePassword: false,
     });
     expect(refreshTokens.create).toHaveBeenCalledWith(
       expect.objectContaining({ tokenHash: hashRefreshToken('refresh-token'), userId: 'user-1' }),
@@ -120,6 +122,16 @@ describe('LoginUseCase', () => {
     expect(auditLogs.create).toHaveBeenCalledWith(
       expect.objectContaining({ action: 'LOGIN', ipAddress: '10.0.0.1' }),
     );
+  });
+
+  it('avisa cuando la cuenta debe cambiar su clave temporal', async () => {
+    const { useCase, users, hasher } = buildMocks();
+    users.findByEmail.mockResolvedValue(buildUser({ mustChangePassword: true }));
+    hasher.compare.mockResolvedValue(true);
+
+    const result = await useCase.execute({ email: 'tutor@untrm.edu.pe', password: 'Temporal123' });
+
+    expect(result.user.mustChangePassword).toBe(true);
   });
 
   it('normaliza el email (mayúsculas y espacios) antes de buscar', async () => {

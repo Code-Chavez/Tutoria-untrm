@@ -14,6 +14,7 @@ export interface LoginOutput {
     lastName: string;
     role: string;
     service?: string | null;
+    mustChangePassword: boolean;
   };
 }
 

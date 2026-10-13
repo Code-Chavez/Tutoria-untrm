@@ -1,6 +1,7 @@
-import { useEffect, useRef, useState, type FormEvent } from 'react';
+import { useContext, useEffect, useRef, useState, type FormEvent } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { getApiErrorMessage } from '@shared/services/apiClient';
+import { AuthContext } from '@features/auth/context/AuthContext';
 import { profileService } from '../services/profileService';
 import styles from './ProfilePage.module.css';
 
@@ -17,6 +18,8 @@ function initials(firstName: string, lastName: string): string {
 
 export function ProfilePage() {
   const queryClient = useQueryClient();
+  const auth = useContext(AuthContext);
+  const mustChangePassword = auth?.user?.mustChangePassword === true;
   const { data: profile, isLoading: loading } = useQuery({
     queryKey: PROFILE_QUERY_KEY,
     queryFn: () => profileService.get(),
@@ -77,6 +80,7 @@ export function ProfilePage() {
         type: 'ok',
         text: 'Contraseña actualizada. Se cerraron tus otras sesiones.',
       });
+      auth?.markPasswordChanged();
       setCurrentPassword('');
       setNewPassword('');
       setConfirmPassword('');
@@ -109,6 +113,12 @@ export function ProfilePage() {
         <h1 className={styles.title}>Mi perfil</h1>
         <p className={styles.subtitle}>Consulta tus datos y gestiona el acceso a tu cuenta.</p>
       </div>
+
+      {mustChangePassword && (
+        <p role="alert" className={styles.mustChange}>
+          Ingresaste con una clave temporal. Para usar el sistema, cámbiala en «Cambiar contraseña».
+        </p>
+      )}
 
       <div className={styles.grid2}>
         {/* ── Datos personales ─────────────────────── */}

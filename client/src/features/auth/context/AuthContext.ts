@@ -6,6 +6,8 @@ export interface AuthContextValue {
   isAuthenticated: boolean;
   login: (credentials: LoginCredentials) => Promise<void>;
   logout: () => void;
+  /** La persona ya cambió su clave temporal: se levanta el bloqueo del resto del sistema. */
+  markPasswordChanged: () => void;
 }
 
 export const AuthContext = createContext<AuthContextValue | null>(null);

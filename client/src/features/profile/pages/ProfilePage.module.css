@@ -223,3 +223,14 @@
   color: var(--g600);
   font-size: 13px;
 }
+
+.mustChange {
+  margin: 0 0 18px;
+  padding: var(--s3) var(--s4);
+  border: 1px solid var(--peligro);
+  border-radius: var(--r-sm);
+  background: var(--peligro-bg);
+  color: var(--peligro);
+  font-size: var(--fs-sm);
+  line-height: 1.5;
+}

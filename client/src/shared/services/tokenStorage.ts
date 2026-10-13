@@ -29,6 +29,11 @@ export const tokenStorage = {
     localStorage.setItem(USER_KEY, JSON.stringify(user));
   },
 
+  /** Actualiza solo los datos del usuario (p. ej. al cambiar la clave temporal). */
+  saveUser(user: unknown): void {
+    localStorage.setItem(USER_KEY, JSON.stringify(user));
+  },
+
   /** Guarda el par renovado sin tocar los datos del usuario. */
   saveTokens(accessToken: string, refreshToken: string): void {
     localStorage.setItem(ACCESS_TOKEN_KEY, accessToken);

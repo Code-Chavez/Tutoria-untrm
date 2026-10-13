@@ -11,6 +11,7 @@ export interface User {
   isActive: boolean;
   failedLoginAttempts: number;
   lockedUntil?: Date | null;
+  mustChangePassword: boolean;
   createdAt: Date;
   updatedAt: Date;
 }
