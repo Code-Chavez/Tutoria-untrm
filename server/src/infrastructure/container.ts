@@ -36,6 +36,8 @@ import { PrismaCatalogRepository } from './repositories/PrismaCatalogRepository'
 import { PrismaBrandingRepository } from './repositories/PrismaBrandingRepository';
 import { PrismaTutorSemesterReportRepository } from './repositories/PrismaTutorSemesterReportRepository';
 import { PrismaNotificationRepository } from './repositories/PrismaNotificationRepository';
+import { EmailNotificationRepository } from './repositories/EmailNotificationRepository';
+import { NotificationRepository } from '@domain/repositories/NotificationRepository';
 import { PrismaAcademicPeriodRepository } from './repositories/PrismaAcademicPeriodRepository';
 import { PrismaTutorEvaluationRepository } from './repositories/PrismaTutorEvaluationRepository';
 import { PrismaEvaluationWindowRepository } from './repositories/PrismaEvaluationWindowRepository';
@@ -74,7 +76,7 @@ const workPlanRepository = new PrismaWorkPlanRepository(prisma);
 const catalogRepository = new PrismaCatalogRepository(prisma);
 const brandingRepository = new PrismaBrandingRepository(prisma);
 const tutorSemesterReportRepository = new PrismaTutorSemesterReportRepository(prisma);
-const notificationRepository = new PrismaNotificationRepository(prisma);
+const prismaNotificationRepository = new PrismaNotificationRepository(prisma);
 const academicPeriodRepository = new PrismaAcademicPeriodRepository(prisma);
 const tutorEvaluationRepository = new PrismaTutorEvaluationRepository(prisma);
 const evaluationWindowRepository = new PrismaEvaluationWindowRepository(prisma);
@@ -161,6 +163,12 @@ const mailer: Mailer = env.SMTP_HOST
       from: env.MAIL_FROM,
     })
   : new UnconfiguredMailer();
+
+// Los avisos de la aplicación también salen por correo cuando hay SMTP configurado (EMAIL_NOTIFICATIONS=false lo desactiva).
+const notificationRepository: NotificationRepository =
+  env.SMTP_HOST && env.EMAIL_NOTIFICATIONS
+    ? new EmailNotificationRepository(prismaNotificationRepository, userRepository, mailer, env.PUBLIC_APP_URL)
+    : prismaNotificationRepository;
 
 const requestPasswordResetUseCase = new RequestPasswordResetUseCase(
   userRepository,

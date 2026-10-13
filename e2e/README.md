@@ -1,7 +1,7 @@
 # Pruebas E2E del SIT (TT-100)
 
 Recorridos de extremo a extremo con [Playwright](https://playwright.dev) sobre la interfaz real. Se definen en
-`docs/MATRIZ_TRAZABILIDAD_PRUEBAS.md` (E2E-01 … E2E-08).
+`docs/MATRIZ_TRAZABILIDAD_PRUEBAS.md` (E2E-01 … E2E-09).
 
 | Recorrido | Archivo | Estado |
 |---|---|---|
@@ -12,7 +12,8 @@ Recorridos de extremo a extremo con [Playwright](https://playwright.dev) sobre l
 | E2E-05 Informes y exportaciones | `tests/e2e-05-informes-y-exportaciones.spec.ts` | escrito |
 | E2E-06 Plan semestral | `tests/e2e-06-plan-semestral.spec.ts` | escrito |
 | E2E-07 Evaluación de tutoría | `tests/e2e-07-evaluacion-de-tutoria.spec.ts` | escrito |
-| E2E-08 Administración | `tests/e2e-08-administracion.spec.ts` | escrito (la prueba de identidad visual requiere el arreglo de #100) |
+| E2E-08 Administración | `tests/e2e-08-administracion.spec.ts` | escrito |
+| E2E-09 Carga masiva y asignación | `tests/e2e-09-carga-masiva-y-asignacion.spec.ts` | escrito |
 
 ## Cómo correrlas
 
