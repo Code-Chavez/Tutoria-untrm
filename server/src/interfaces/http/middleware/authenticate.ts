@@ -9,6 +9,7 @@ declare global {
   namespace Express {
     interface Request {
       auth?: AccessTokenPayload;
+      accountRoleId?: string;
     }
   }
 }
@@ -38,8 +39,9 @@ export function authenticate(tokens: TokenService) {
       return;
     }
 
+    let roleId: string;
     try {
-      const account = await prisma.user.findUnique({ where: { id: payload.sub }, select: { isActive: true, mustChangePassword: true } });
+      const account = await prisma.user.findUnique({ where: { id: payload.sub }, select: { isActive: true, mustChangePassword: true, roleId: true } });
       if (!account || !account.isActive) {
         next(new AppError(401, 'La cuenta está desactivada o ya no existe'));
         return;
@@ -49,12 +51,15 @@ export function authenticate(tokens: TokenService) {
         next(new AppError(403, 'Debes cambiar tu contraseña temporal antes de continuar', 'PASSWORD_CHANGE_REQUIRED'));
         return;
       }
+      roleId = account.roleId;
     } catch (error) {
       next(error);
       return;
     }
 
     req.auth = payload;
+    // Rol vigente en la base (no el del token): authorize lo reutiliza sin volver a consultar la cuenta.
+    req.accountRoleId = roleId;
     // Completa el contexto de la petición para que la auditoría atribuya
     // las mutaciones al usuario autenticado.
     const ctx = getRequestContext();
