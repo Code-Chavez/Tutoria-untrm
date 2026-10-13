@@ -1,4 +1,4 @@
-import { expect, test } from '@playwright/test';
+import { expect, test, type Page } from '@playwright/test';
 import { accounts } from '../support/accounts';
 import { api, apiLogin, unique } from '../support/api';
 import { createStudentForElena, dateInput, ensureAnaWithElena, todayAt } from '../support/setup';
@@ -12,6 +12,14 @@ const topic = unique('Seguimiento');
 const place = unique('Aula');
 const cancelReason = unique('Feriado');
 const pastTopic = unique('Asistencia');
+
+
+// El calendario mensual resume con «+N más» los días con muchas sesiones, y cada corrida deja las suyas: la vista
+// semanal las muestra todas, así que la prueba no depende de cuántas haya acumuladas hoy.
+async function openSessions(page: Page): Promise<void> {
+  await goToMenu(page, 'Sesiones');
+  await page.getByRole('button', { name: 'Semanal' }).click();
+}
 
 let adminToken = '';
 let elenaId = '';
@@ -37,7 +45,7 @@ test('la tutora programa una sesión individual presencial para Ana', async ({ p
   await dialog.getByRole('button', { name: 'Programar sesión' }).click();
   await expect(dialog).toBeHidden();
 
-  await goToMenu(page, 'Sesiones');
+  await openSessions(page);
   await expect(page.getByRole('button', { name: new RegExp(topic) })).toBeVisible();
 });
 
@@ -51,7 +59,7 @@ test('la tutorada ve la sesión con su lugar', async ({ page }) => {
 
 test('la tutora cancela la sesión con un motivo y la tutorada ve Cancelada', async ({ page, browser }) => {
   await loginUi(page, accounts.tutor);
-  await goToMenu(page, 'Sesiones');
+  await openSessions(page);
   await page.getByRole('button', { name: new RegExp(topic) }).click();
   await page.getByRole('dialog', { name: 'Detalle de la sesión' }).getByRole('button', { name: 'Cancelar sesión' }).click();
 
@@ -70,18 +78,25 @@ test('la tutora cancela la sesión con un motivo y la tutorada ve Cancelada', as
 test('la tutora registra la asistencia de una sesión que ya empezó', async ({ page }) => {
   const { id, fullName } = await createStudentForElena(adminToken, elenaId);
   const elena = await apiLogin(accounts.tutor);
-  const when = todayAt(0, 10);
-  const scheduled = await api<{ session: { id: string } }>(elena, 'POST', '/sessions', {
-    studentIds: [id],
-    topic: pastTopic,
-    scheduledAt: when.toISOString(),
-    modality: 'PRESENCIAL',
-    location: 'Oficina de tutoría',
-  });
-  expect(scheduled.status, 'se puede programar una sesión que ya empezó').toBe(201);
+  // Cada corrida deja su sesión: la agenda de la tutora no admite dos a la misma hora, así que se usa el primer
+  // horario ya pasado de hoy que esté libre (de madrugada, cada 70 minutos).
+  let status = 0;
+  for (let minutes = 10; minutes < 24 * 60 && status !== 201; minutes += 70) {
+    const when = todayAt(Math.floor(minutes / 60), minutes % 60);
+    if (when.getTime() > Date.now() - 60_000) break;
+    const scheduled = await api<{ session: { id: string } }>(elena, 'POST', '/sessions', {
+      studentIds: [id],
+      topic: pastTopic,
+      scheduledAt: when.toISOString(),
+      modality: 'PRESENCIAL',
+      location: 'Oficina de tutoría',
+    });
+    status = scheduled.status;
+  }
+  expect(status, 'se puede programar una sesión que ya empezó').toBe(201);
 
   await loginUi(page, accounts.tutor);
-  await goToMenu(page, 'Sesiones');
+  await openSessions(page);
   await page.getByRole('button', { name: new RegExp(pastTopic) }).click();
   const detail = page.getByRole('dialog', { name: 'Detalle de la sesión' });
   await expect(detail).toContainText(fullName.split(' ')[0]);
