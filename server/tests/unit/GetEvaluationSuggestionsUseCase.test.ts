@@ -1,3 +1,4 @@
+import { SchoolRepository } from '@domain/repositories/SchoolRepository';
 import { GetEvaluationSuggestionsUseCase } from '@application/use-cases/evaluation/GetEvaluationSuggestionsUseCase';
 import {
   EvaluationResultsForbiddenError,
@@ -16,6 +17,7 @@ describe('GetEvaluationSuggestionsUseCase', () => {
   let roles: jest.Mocked<RoleRepository>;
   let periods: jest.Mocked<AcademicPeriodRepository>;
   let evaluations: jest.Mocked<TutorEvaluationRepository>;
+  let schools: jest.Mocked<SchoolRepository>;
   let useCase: GetEvaluationSuggestionsUseCase;
 
   const adminUser = { id: 'admin-1', roleId: 'role-admin' } as User;
@@ -49,7 +51,8 @@ describe('GetEvaluationSuggestionsUseCase', () => {
         { tutorId: 'tutor-a', likes: null, dislikes: 'Horarios cruzados' },
       ]),
     };
-    useCase = new GetEvaluationSuggestionsUseCase(users, roles, periods, evaluations);
+    schools = { findAll: jest.fn().mockResolvedValue([{ id: 'school-a', coordinatorId: 'coord-1' }, { id: 'school-b', coordinatorId: 'coord-2' }]), findById: jest.fn() } as unknown as jest.Mocked<SchoolRepository>;
+    useCase = new GetEvaluationSuggestionsUseCase(users, roles, periods, evaluations, schools);
   });
 
   it('devuelve las sugerencias del periodo activo con el nombre del tutor', async () => {
@@ -94,5 +97,35 @@ describe('GetEvaluationSuggestionsUseCase', () => {
     const serialized = JSON.stringify(report);
     expect(serialized).not.toContain('studentId');
     expect(serialized).not.toContain('student-filtrado');
+  });
+
+  describe('alcance del coordinador (A05)', () => {
+    const asCoordinator = (id: string) => {
+      users.findById.mockImplementation(async (userId: string) => (userId === id ? ({ id, roleId: 'role-coord', isActive: true } as User) : null));
+      roles.findById.mockResolvedValue({ id: 'role-coord', name: 'Coordinador' } as Role);
+    };
+
+    it('el coordinador solo recibe sugerencias de tutorados de sus escuelas, aunque pida otra escuela', async () => {
+      asCoordinator('coord-1');
+
+      await useCase.execute('coord-1', { schoolId: 'school-b' });
+
+      // El alcance se suma al filtro pedido: pedir la escuela B no lo amplía (el repositorio las combina con AND).
+      expect(evaluations.findAnonymizedSuggestionsByPeriod).toHaveBeenCalledWith('period-1', { schoolId: 'school-b', schoolIds: ['school-a'] });
+    });
+
+    it('sin filtros enviados igualmente se aplica el alcance', async () => {
+      asCoordinator('coord-2');
+
+      await useCase.execute('coord-2');
+
+      expect(evaluations.findAnonymizedSuggestionsByPeriod).toHaveBeenCalledWith('period-1', { schoolIds: ['school-b'] });
+    });
+
+    it('la DBU no queda restringida', async () => {
+      await useCase.execute('admin-1');
+
+      expect(evaluations.findAnonymizedSuggestionsByPeriod).toHaveBeenCalledWith('period-1', { schoolIds: undefined });
+    });
   });
 });

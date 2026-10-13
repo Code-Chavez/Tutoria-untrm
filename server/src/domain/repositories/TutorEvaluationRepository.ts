@@ -21,12 +21,16 @@ export interface EvaluationStatisticsFilters {
   facultyId?: string;
   /** Ciclo del tutorado que respondió (HU-47). */
   cycle?: number;
+  /** Alcance del solicitante (A05): solo respuestas de tutorados de estas escuelas. Sin valor, sin restricción. */
+  schoolIds?: string[];
 }
 
 export interface EvaluationSuggestionsFilters {
   tutorId?: string;
   schoolId?: string;
   facultyId?: string;
+  /** Alcance del solicitante (A05). */
+  schoolIds?: string[];
 }
 
 // Sugerencias abiertas desvinculadas de la identidad (HU-40): conserva a
@@ -50,6 +54,7 @@ export interface TutorEvaluationRepository {
   findAnonymizedScoresByTutorAndPeriod(
     tutorId: string,
     periodId: string,
+    schoolIds?: string[],
   ): Promise<AnonymizedEvaluationScores[]>;
   /**
    * Puntuaciones de todas las respuestas del periodo, agrupables por tutor,

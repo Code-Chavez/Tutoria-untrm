@@ -52,9 +52,10 @@ export class PrismaTutorEvaluationRepository implements TutorEvaluationRepositor
   async findAnonymizedScoresByTutorAndPeriod(
     tutorId: string,
     periodId: string,
+    schoolIds?: string[],
   ): Promise<AnonymizedEvaluationScores[]> {
     const rows = await this.prisma.tutorEvaluation.findMany({
-      where: { tutorId, periodId },
+      where: { tutorId, periodId, ...(schoolIds ? { student: { schoolId: { in: schoolIds } } } : {}) },
       select: { scores: true },
     });
     return rows.map((r) => ({ scores: r.scores as EvaluationScaleCode[] }));
@@ -70,12 +71,14 @@ export class PrismaTutorEvaluationRepository implements TutorEvaluationRepositor
     const rows = await this.prisma.tutorEvaluation.findMany({
       where: {
         periodId,
-        ...(filters?.schoolId || filters?.facultyId || filters?.cycle !== undefined
+        ...(filters?.schoolId || filters?.facultyId || filters?.cycle !== undefined || filters?.schoolIds
           ? {
               student: {
                 ...(filters.schoolId ? { schoolId: filters.schoolId } : {}),
                 ...(filters.facultyId ? { school: { facultyId: filters.facultyId } } : {}),
                 ...(filters.cycle !== undefined ? { cycle: filters.cycle } : {}),
+                // El alcance se suma al filtro pedido (AND), nunca lo reemplaza.
+                ...(filters.schoolIds ? { AND: [{ schoolId: { in: filters.schoolIds } }] } : {}),
               },
             }
           : {}),
@@ -96,11 +99,12 @@ export class PrismaTutorEvaluationRepository implements TutorEvaluationRepositor
         periodId,
         ...(filters?.tutorId ? { tutorId: filters.tutorId } : {}),
         OR: [{ likes: { not: null } }, { dislikes: { not: null } }],
-        ...(filters?.schoolId || filters?.facultyId
+        ...(filters?.schoolId || filters?.facultyId || filters?.schoolIds
           ? {
               student: {
                 ...(filters.schoolId ? { schoolId: filters.schoolId } : {}),
                 ...(filters.facultyId ? { school: { facultyId: filters.facultyId } } : {}),
+                ...(filters.schoolIds ? { AND: [{ schoolId: { in: filters.schoolIds } }] } : {}),
               },
             }
           : {}),

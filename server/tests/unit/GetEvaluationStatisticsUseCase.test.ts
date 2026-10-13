@@ -161,4 +161,28 @@ describe('GetEvaluationStatisticsUseCase', () => {
     expect(serialized).not.toContain('studentId');
     expect(serialized).not.toContain('student-filtrado');
   });
+
+  describe('alcance del coordinador (A05)', () => {
+    it('el alcance de sus escuelas se envía a la consulta junto con los filtros pedidos', async () => {
+      users.findById.mockResolvedValue({ id: 'coord-1', roleId: 'role-coord', isActive: true } as User);
+      roles.findById.mockResolvedValue({ id: 'role-coord', name: 'Coordinador' } as Role);
+      schools.findAll.mockResolvedValue([
+        { id: 'school-a', name: 'A', facultyId: 'f', coordinatorId: 'coord-1' },
+        { id: 'school-b', name: 'B', facultyId: 'f', coordinatorId: 'coord-2' },
+      ] as never);
+
+      await useCase.execute('coord-1', { schoolId: 'school-b' });
+
+      expect(evaluations.findAnonymizedScoresByPeriod).toHaveBeenCalledWith(
+        'period-1',
+        expect.objectContaining({ schoolId: 'school-b', schoolIds: ['school-a'] }),
+      );
+    });
+
+    it('la DBU no queda restringida', async () => {
+      await useCase.execute('admin-1');
+
+      expect(evaluations.findAnonymizedScoresByPeriod).toHaveBeenCalledWith('period-1', expect.objectContaining({ schoolIds: undefined }));
+    });
+  });
 });
