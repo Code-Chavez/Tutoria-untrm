@@ -144,3 +144,10 @@
   opacity: 0.5;
   cursor: not-allowed;
 }
+
+.submitError {
+  margin: 0 0 var(--s4);
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--peligro);
+}
