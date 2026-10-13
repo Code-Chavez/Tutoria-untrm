@@ -195,6 +195,7 @@ export const InterviewFormModal: React.FC<InterviewFormModalProps> = ({
                 <input
                   id="birthDate"
                   type="date"
+                  max={new Date().toISOString().slice(0, 10)}
                   className={styles.input}
                   value={form.birthDate}
                   onChange={(e) => set('birthDate', e.target.value)}
@@ -259,7 +260,7 @@ export const InterviewFormModal: React.FC<InterviewFormModalProps> = ({
                   id="admissionYear"
                   type="number"
                   min={1980}
-                  max={2100}
+                  max={new Date().getFullYear()}
                   className={styles.input}
                   value={form.admissionYear}
                   onChange={(e) => set('admissionYear', e.target.value)}
