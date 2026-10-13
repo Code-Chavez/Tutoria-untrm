@@ -1,4 +1,5 @@
 import { UserRepository } from '@domain/repositories/UserRepository';
+import { normalizeEmail } from '@application/use-cases/users/normalizeEmail';
 import { PasswordResetTokenRepository } from '@domain/repositories/PasswordResetTokenRepository';
 import { AuditLogRepository } from '@domain/repositories/AuditLogRepository';
 import { Mailer } from '@application/ports/Mailer';
@@ -34,7 +35,7 @@ export class RequestPasswordResetUseCase {
   ) {}
 
   async execute(email: string, ipAddress?: string): Promise<void> {
-    const user = await this.users.findByEmail(email.toLowerCase().trim());
+    const user = await this.users.findByEmail(normalizeEmail(email));
     // Mismo resultado visible exista o no la cuenta (sin enumeración de usuarios).
     if (!user || !user.isActive) return;
 

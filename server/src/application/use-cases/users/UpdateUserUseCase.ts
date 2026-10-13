@@ -3,6 +3,8 @@ import { User } from '@domain/entities/User';
 import { RoleRepository } from '@domain/repositories/RoleRepository';
 import { RoleNotFoundError } from '@application/use-cases/roles/RoleErrors';
 import { resolveService } from './serviceAssignment';
+import { DuplicateEmailError } from './UserErrors';
+import { normalizeEmail } from './normalizeEmail';
 
 export class UserNotFoundError extends Error {
   constructor(id: string) {
@@ -11,12 +13,7 @@ export class UserNotFoundError extends Error {
   }
 }
 
-export class DuplicateEmailError extends Error {
-  constructor(email: string) {
-    super(`El correo ${email} ya está registrado por otro usuario.`);
-    this.name = 'DuplicateEmailError';
-  }
-}
+export { DuplicateEmailError };
 
 export class UpdateUserUseCase {
   constructor(
@@ -32,15 +29,17 @@ export class UpdateUserUseCase {
     }
 
     // 2. Si se está actualizando el correo, validar que no esté en uso por OTRO usuario
-    if (data.email && data.email !== existingUser.email) {
-      const emailUser = await this.userRepository.findByEmail(data.email);
-      if (emailUser) {
-        throw new DuplicateEmailError(data.email);
+    const changes = { ...data };
+    if (data.email) {
+      const email = normalizeEmail(data.email);
+      const emailUser = await this.userRepository.findByEmail(email);
+      if (emailUser && emailUser.id !== id) {
+        throw new DuplicateEmailError(email);
       }
+      changes.email = email;
     }
 
     // 3. Si cambia el rol o el servicio, el par queda coherente (servicio solo para Profesional de Servicio)
-    const changes = { ...data };
     if (data.roleId !== undefined || data.service !== undefined) {
       const roleId = data.roleId ?? existingUser.roleId;
       const role = await this.roles.findById(roleId);

@@ -1,4 +1,5 @@
 import { UserRepository } from '@domain/repositories/UserRepository';
+import { normalizeEmail } from '@application/use-cases/users/normalizeEmail';
 import { RoleRepository } from '@domain/repositories/RoleRepository';
 import { RefreshTokenRepository } from '@domain/repositories/RefreshTokenRepository';
 import { AuditLogRepository } from '@domain/repositories/AuditLogRepository';
@@ -46,7 +47,7 @@ export class LoginUseCase {
   ) {}
 
   async execute(input: LoginInput): Promise<LoginOutput> {
-    const user = await this.users.findByEmail(input.email.toLowerCase().trim());
+    const user = await this.users.findByEmail(normalizeEmail(input.email));
 
     if (!user) {
       // Sin esto, responder en milisegundos delata que el correo no está registrado (A07).

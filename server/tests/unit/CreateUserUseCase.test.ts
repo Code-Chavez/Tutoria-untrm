@@ -33,6 +33,15 @@ describe('CreateUserUseCase', () => {
     useCase = new CreateUserUseCase(mockUserRepository, mockPasswordHasher, mockRoles);
   });
 
+  it('normaliza el correo (espacios y mayúsculas) antes de buscar duplicados y de guardar', async () => {
+    mockUserRepository.findByEmail.mockResolvedValue(null);
+
+    await useCase.execute({ email: '  Persona@UNTRM.edu.pe ', firstName: 'Ana', lastName: 'Ruiz', roleId: 'role-123' });
+
+    expect(mockUserRepository.findByEmail).toHaveBeenCalledWith('persona@untrm.edu.pe');
+    expect(mockUserRepository.create).toHaveBeenCalledWith(expect.objectContaining({ email: 'persona@untrm.edu.pe' }));
+  });
+
   it('debería crear un usuario exitosamente', async () => {
     mockUserRepository.findByEmail.mockResolvedValue(null);
     mockUserRepository.create.mockResolvedValue({
