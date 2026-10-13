@@ -4,13 +4,10 @@ import { PasswordHasher } from '@application/ports/PasswordHasher';
 import { RoleRepository } from '@domain/repositories/RoleRepository';
 import { RoleNotFoundError } from '@application/use-cases/roles/RoleErrors';
 import { resolveService } from './serviceAssignment';
+import { DuplicateEmailError } from './UserErrors';
+import { normalizeEmail } from './normalizeEmail';
 
-export class DuplicateEmailError extends Error {
-  constructor(email: string) {
-    super(`El correo ${email} ya está registrado en el sistema.`);
-    this.name = 'DuplicateEmailError';
-  }
-}
+export { DuplicateEmailError };
 
 export class CreateUserUseCase {
   constructor(
@@ -20,10 +17,11 @@ export class CreateUserUseCase {
   ) {}
 
   async execute(data: Omit<User, 'id' | 'createdAt' | 'updatedAt' | 'passwordHash' | 'isActive' | 'failedLoginAttempts' | 'lockedUntil'> & { password?: string, isActive?: boolean }): Promise<Omit<User, 'passwordHash'>> {
-    // 1. Validar que el correo no esté duplicado
-    const existingUser = await this.userRepository.findByEmail(data.email);
+    // 1. Validar que el correo no esté duplicado (comparado ya normalizado)
+    const email = normalizeEmail(data.email);
+    const existingUser = await this.userRepository.findByEmail(email);
     if (existingUser) {
-      throw new DuplicateEmailError(data.email);
+      throw new DuplicateEmailError(email);
     }
 
     // 2. El rol manda: un Profesional de Servicio necesita su servicio; los demás roles no tienen
@@ -37,7 +35,7 @@ export class CreateUserUseCase {
 
     // 4. Crear el usuario
     const userToCreate = {
-      email: data.email,
+      email,
       passwordHash,
       firstName: data.firstName,
       lastName: data.lastName,

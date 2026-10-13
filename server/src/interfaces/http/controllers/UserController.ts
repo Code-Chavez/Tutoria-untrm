@@ -10,9 +10,9 @@ import { ServiceRequiredError } from '@application/use-cases/users/serviceAssign
 import { z } from 'zod';
 
 const createUserSchema = z.object({
-  email: z.string().email('Correo inválido'),
-  firstName: z.string().min(2, 'El nombre debe tener al menos 2 caracteres'),
-  lastName: z.string().min(2, 'El apellido debe tener al menos 2 caracteres'),
+  email: z.string().trim().toLowerCase().email('Correo inválido'),
+  firstName: z.string().trim().min(2, 'El nombre debe tener al menos 2 caracteres'),
+  lastName: z.string().trim().min(2, 'El apellido debe tener al menos 2 caracteres'),
   roleId: z.string().uuid('El ID de rol debe ser un UUID válido'),
   phone: z.string().optional(),
   photoUrl: z.string().url('URL inválida').optional(),
