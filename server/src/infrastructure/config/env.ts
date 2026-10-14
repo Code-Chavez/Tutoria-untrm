@@ -33,6 +33,8 @@ export const env = {
   SMTP_HOST: process.env.SMTP_HOST || '',
   SMTP_PORT: parseInt(process.env.SMTP_PORT || '587', 10),
   SMTP_SECURE: process.env.SMTP_SECURE === 'true',
+  // STARTTLS obligatorio en los puertos sin TLS implícito: si el servidor no lo ofrece, el envío falla en vez de ir en claro.
+  SMTP_REQUIRE_TLS: process.env.SMTP_REQUIRE_TLS === 'true',
   SMTP_USER: process.env.SMTP_USER || '',
   SMTP_PASS: process.env.SMTP_PASS || '',
   MAIL_FROM: process.env.MAIL_FROM || 'SIT UNTRM <no-reply@untrm.edu.pe>',

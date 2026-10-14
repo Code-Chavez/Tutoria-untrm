@@ -66,6 +66,7 @@ Todo va en el archivo de entorno del servidor, **`.env.production`** (se crea co
 | `SMTP_HOST` | Servidor SMTP | `smtp.untrm.edu.pe` |
 | `SMTP_PORT` | Puerto | `587` |
 | `SMTP_SECURE` | `true` solo con TLS implícito (puerto 465). Con 587 se deja en `false` y se negocia STARTTLS | `false` |
+| `SMTP_REQUIRE_TLS` | `true` = el cifrado STARTTLS es obligatorio: si el servidor no lo ofrece, el correo **no se envía** (nunca va en claro). **En producción hay que definir `SMTP_SECURE=true` o `SMTP_REQUIRE_TLS=true`**; `SMTP_REQUIRE_TLS=false` solo para un relay interno que TI haya aprobado sin cifrado | `true` |
 | `SMTP_USER` / `SMTP_PASS` | Cuenta de envío. Si el servidor no pide autenticación, se dejan vacías | `sit-noreply@untrm.edu.pe` |
 | `MAIL_FROM` | Remitente que verá la persona. Va entre comillas dobles | `"SIT UNTRM <sit-noreply@untrm.edu.pe>"` |
 | `DOMAIN` | Dominio público del sistema. De él se arma `PUBLIC_APP_URL` (`https://` + dominio): **el botón de cada correo lleva ahí**, así que debe ser el dominio real, no `localhost` | `sit.untrm.edu.pe` |
@@ -89,6 +90,7 @@ Valores de referencia; **confirme siempre con TI**, porque cada proveedor decide
 SMTP_HOST=smtp.untrm.edu.pe
 SMTP_PORT=587
 SMTP_SECURE=false
+SMTP_REQUIRE_TLS=true
 SMTP_USER=sit-noreply@untrm.edu.pe
 SMTP_PASS=<contraseña de la cuenta de servicio>
 MAIL_FROM="SIT UNTRM <sit-noreply@untrm.edu.pe>"
@@ -107,6 +109,8 @@ SMTP_SECURE=true
 SMTP_HOST=relay.untrm.edu.pe
 SMTP_PORT=25
 SMTP_SECURE=false
+# Solo si TI aprueba este relay interno sin cifrado; es una decisión explícita.
+SMTP_REQUIRE_TLS=false
 SMTP_USER=
 SMTP_PASS=
 ```
@@ -117,6 +121,7 @@ SMTP_PASS=
 SMTP_HOST=smtp.gmail.com
 SMTP_PORT=587
 SMTP_SECURE=false
+SMTP_REQUIRE_TLS=true
 SMTP_USER=cuenta@dominio
 SMTP_PASS=<contraseña de aplicación de 16 caracteres>
 MAIL_FROM="SIT UNTRM <cuenta@dominio>"
@@ -162,10 +167,24 @@ docker compose -f docker-compose.prod.yml --env-file .env.production logs server
 
 Cada envío fallido deja una línea con el motivo; la operación del usuario no se interrumpe.
 
+## 5b. Qué pasa si el correo falla (reintentos)
+
+Cada aviso se guarda y su correo se pone en una **cola** antes de enviarse. Si el servidor de correo no responde, el sistema **reintenta solo** a 1, 5, 15 y 60 minutos; tras el 5.º fallo seguido lo marca como fallido y deja el motivo en el registro del servidor (`[correo] El aviso … no se pudo entregar`). Un reinicio del servidor no pierde lo pendiente. La entrega es «al menos una vez»: ante un corte justo después de que el servidor SMTP aceptó el correo, podría repetirse. **Que el SMTP acepte el correo no garantiza que llegue a la bandeja** (revise SPF/DKIM/DMARC con TI).
+
+Para vigilar la entrega (desde el servidor de base de datos):
+
+```sql
+SELECT status, count(*) FROM email_outbox GROUP BY status;   -- PENDING, SENT, FAILED, SKIPPED
+SELECT attempts, last_error, next_attempt_at FROM email_outbox WHERE status IN ('PENDING','FAILED') ORDER BY created_at DESC;
+```
+
+Varios `FAILED` seguidos indican un problema de configuración o del servidor de correo: corríjalo y, si quiere reenviarlos, `UPDATE email_outbox SET status='PENDING', attempts=0, next_attempt_at=now() WHERE status='FAILED';`. La recuperación de contraseña se envía directamente (sin cola): si falla, la persona puede pedirla de nuevo.
+
 ## 6. Si algo falla
 
 | Síntoma o error | Causa probable | Qué hacer |
 |---|---|---|
+| El servidor no arranca y menciona `SMTP_REQUIRE_TLS` o `SMTP_PORT`, `MAIL_FROM`, `SMTP_PASS` | La comprobación de arranque de producción detectó una configuración de correo incompleta o insegura | Corregir lo que indica el mensaje (no incluye valores secretos) |
 | El servidor no arranca y menciona `SMTP_HOST` | Falta definir el servidor | Completar `SMTP_HOST` en `.env.production` |
 | `ECONNREFUSED`, `ETIMEDOUT` o `ESOCKET` | El puerto está bloqueado o el servidor/puerto es incorrecto | Comprobar host y puerto; pedir a TI abrir el acceso desde la IP del servidor |
 | `ENOTFOUND` / `EDNS` | El nombre del servidor no se resuelve | Revisar el nombre; probar desde el servidor con `nslookup <host>` |
