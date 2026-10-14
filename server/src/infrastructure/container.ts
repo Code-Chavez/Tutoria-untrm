@@ -38,6 +38,9 @@ import { PrismaBrandingRepository } from './repositories/PrismaBrandingRepositor
 import { PrismaTutorSemesterReportRepository } from './repositories/PrismaTutorSemesterReportRepository';
 import { PrismaNotificationRepository } from './repositories/PrismaNotificationRepository';
 import { EmailNotificationRepository } from './repositories/EmailNotificationRepository';
+import { PrismaEmailOutboxRepository } from './repositories/PrismaEmailOutboxRepository';
+import { EmailOutboxProcessor } from '@application/services/EmailOutboxProcessor';
+import { EmailOutboxWorker } from './services/EmailOutboxWorker';
 import { NotificationRepository } from '@domain/repositories/NotificationRepository';
 import { PrismaAcademicPeriodRepository } from './repositories/PrismaAcademicPeriodRepository';
 import { PrismaTutorEvaluationRepository } from './repositories/PrismaTutorEvaluationRepository';
@@ -162,6 +165,7 @@ const mailer: Mailer = env.SMTP_HOST
       host: env.SMTP_HOST,
       port: env.SMTP_PORT,
       secure: env.SMTP_SECURE,
+      requireTls: env.SMTP_REQUIRE_TLS,
       user: env.SMTP_USER || undefined,
       pass: env.SMTP_PASS || undefined,
       from: env.MAIL_FROM,
@@ -169,10 +173,14 @@ const mailer: Mailer = env.SMTP_HOST
   : new UnconfiguredMailer();
 
 // Los avisos de la aplicación también salen por correo cuando hay SMTP configurado (EMAIL_NOTIFICATIONS=false lo desactiva).
-const notificationRepository: NotificationRepository =
-  env.SMTP_HOST && env.EMAIL_NOTIFICATIONS
-    ? new EmailNotificationRepository(prismaNotificationRepository, userRepository, mailer, env.PUBLIC_APP_URL)
-    : prismaNotificationRepository;
+const emailOutboxRepository = new PrismaEmailOutboxRepository(prisma);
+const emailOutboxProcessor = new EmailOutboxProcessor(emailOutboxRepository, userRepository, mailer, env.PUBLIC_APP_URL);
+const emailDeliveryEnabled = Boolean(env.SMTP_HOST && env.EMAIL_NOTIFICATIONS);
+const notificationRepository: NotificationRepository = emailDeliveryEnabled
+  ? new EmailNotificationRepository(prismaNotificationRepository, emailOutboxRepository, emailOutboxProcessor)
+  : prismaNotificationRepository;
+// Reintenta en segundo plano los correos pendientes; solo existe cuando la entrega por correo está activa.
+const emailOutboxWorker = emailDeliveryEnabled ? new EmailOutboxWorker(emailOutboxProcessor) : undefined;
 
 const requestPasswordResetUseCase = new RequestPasswordResetUseCase(
   userRepository,
@@ -693,6 +701,7 @@ export const container = {
     passwordHasher,
     tokenService,
     evidenceStorage,
+    emailOutboxWorker,
   },
   useCases: {
     loginUseCase,

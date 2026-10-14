@@ -2,6 +2,7 @@ import app from './app';
 import { env } from './infrastructure/config/env';
 import { prisma } from './infrastructure/database/prisma';
 import { assertProductionConfig } from './infrastructure/config/productionConfig';
+import { container } from './infrastructure/container';
 
 async function main() {
   // En producción no se arranca con secretos de ejemplo ni sin correo, URL pública https o base propia (A11).
@@ -14,6 +15,7 @@ async function main() {
     app.listen(env.PORT, () => {
       console.log(`SIT API escuchando en puerto ${env.PORT}`);
       console.log(`Entorno: ${env.NODE_ENV}`);
+      container.services.emailOutboxWorker?.start();
     });
   } catch (error) {
     console.error('Error al iniciar el servidor:', error);

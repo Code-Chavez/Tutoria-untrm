@@ -2,9 +2,8 @@ import { buildNotificationEmail } from '@application/services/notificationEmail'
 import { EmailNotificationRepository } from '@infrastructure/repositories/EmailNotificationRepository';
 import { Notification } from '@domain/entities/Notification';
 import { NotificationRepository } from '@domain/repositories/NotificationRepository';
-import { UserRepository } from '@domain/repositories/UserRepository';
-import { Mailer } from '@application/ports/Mailer';
-import { User } from '@domain/entities/User';
+import { EmailOutboxRepository } from '@domain/repositories/EmailOutboxRepository';
+import { EmailOutboxProcessor } from '@application/services/EmailOutboxProcessor';
 
 const APP = 'https://sit.ejemplo.edu.pe/';
 const recipient = { email: 'elena.ramirez@untrm.edu.pe', firstName: 'Elena', lastName: 'Ramírez Chávez' };
@@ -69,58 +68,43 @@ describe('buildNotificationEmail', () => {
 
 describe('EmailNotificationRepository', () => {
   let inner: jest.Mocked<NotificationRepository>;
-  let users: jest.Mocked<UserRepository>;
-  let mailer: jest.Mocked<Mailer>;
+  let outbox: jest.Mocked<EmailOutboxRepository>;
+  let processor: { processNotification: jest.Mock };
   let logger: { warn: jest.Mock };
   let repo: EmailNotificationRepository;
 
-  const flush = () => new Promise((resolve) => setImmediate(resolve));
-
   beforeEach(() => {
     inner = { create: jest.fn().mockResolvedValue(notification()), findByUser: jest.fn(), markAllRead: jest.fn(), markRead: jest.fn() };
-    users = { findById: jest.fn().mockResolvedValue({ id: 'u1', ...recipient, isActive: true } as User), findByEmail: jest.fn(), findAll: jest.fn(), create: jest.fn(), update: jest.fn() };
-    mailer = { send: jest.fn().mockResolvedValue(undefined) };
+    outbox = { enqueue: jest.fn().mockResolvedValue(undefined) } as unknown as jest.Mocked<EmailOutboxRepository>;
+    processor = { processNotification: jest.fn().mockResolvedValue(undefined) };
     logger = { warn: jest.fn() };
-    repo = new EmailNotificationRepository(inner, users, mailer, APP, logger);
+    repo = new EmailNotificationRepository(inner, outbox, processor as unknown as EmailOutboxProcessor, logger);
   });
 
-  it('guarda el aviso y envía el correo a la persona', async () => {
+  it('guarda el aviso, encola su correo y dispara el primer intento de envío', async () => {
     const created = await repo.create({ userId: 'u1', type: 'TUTORING_REQUEST_CREATED', message: 'x', tutoringRequestId: 'req-1' });
-    await flush();
 
     expect(created.id).toBe('n1');
     expect(inner.create).toHaveBeenCalledTimes(1);
-    expect(mailer.send).toHaveBeenCalledWith(expect.objectContaining({ to: 'elena.ramirez@untrm.edu.pe' }));
+    expect(outbox.enqueue).toHaveBeenCalledWith('n1');
+    expect(processor.processNotification).toHaveBeenCalledWith('n1');
   });
 
-  it('un fallo del correo no afecta al aviso ni a la operación: solo se registra', async () => {
-    mailer.send.mockRejectedValue(new Error('SMTP caído'));
-
-    await expect(repo.create({ userId: 'u1', type: 'TUTORING_REQUEST_CREATED', message: 'x' })).resolves.toEqual(expect.objectContaining({ id: 'n1' }));
-    await flush();
-
-    expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('SMTP caído'));
-  });
-
-  it('no envía a una cuenta desactivada ni a una sin correo', async () => {
-    users.findById.mockResolvedValueOnce({ id: 'u1', ...recipient, isActive: false } as User);
-    await repo.sendEmail(notification());
-    users.findById.mockResolvedValueOnce({ id: 'u1', email: '', firstName: 'X', isActive: true } as User);
-    await repo.sendEmail(notification());
-    users.findById.mockResolvedValueOnce(null);
-    await repo.sendEmail(notification());
-
-    expect(mailer.send).not.toHaveBeenCalled();
-  });
-
-  it('no demora la respuesta: el aviso se devuelve aunque el correo tarde', async () => {
-    let release: () => void = () => undefined;
-    mailer.send.mockImplementation(() => new Promise<void>((resolve) => (release = resolve)));
+  it('no demora la respuesta: el aviso se devuelve aunque el envío tarde', async () => {
+    processor.processNotification.mockReturnValue(new Promise(() => undefined));
 
     const result = await Promise.race([repo.create({ userId: 'u1', type: 'TUTORING_REQUEST_CREATED', message: 'x' }), new Promise((r) => setTimeout(() => r('lento'), 500))]);
 
     expect(result).toEqual(expect.objectContaining({ id: 'n1' }));
-    release();
+  });
+
+  it('si no se puede encolar, el aviso igual se guarda y la operación no falla', async () => {
+    outbox.enqueue.mockRejectedValue(new Error('base caída'));
+
+    await expect(repo.create({ userId: 'u1', type: 'TUTORING_REQUEST_CREATED', message: 'x' })).resolves.toEqual(expect.objectContaining({ id: 'n1' }));
+
+    expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('base caída'));
+    expect(processor.processNotification).not.toHaveBeenCalled();
   });
 
   it('el resto de operaciones pasan al repositorio real', async () => {

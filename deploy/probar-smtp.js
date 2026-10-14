@@ -21,13 +21,15 @@ const transport = nodemailer.createTransport({
   host: env.SMTP_HOST,
   port: Number(env.SMTP_PORT || 587),
   secure: env.SMTP_SECURE === 'true',
+  // Igual que el sistema: con SMTP_REQUIRE_TLS=true, sin STARTTLS no se conecta (nunca en claro).
+  ...(env.SMTP_REQUIRE_TLS === 'true' && env.SMTP_SECURE !== 'true' ? { requireTLS: true } : {}),
   auth: env.SMTP_USER ? { user: env.SMTP_USER, pass: env.SMTP_PASS || '' } : undefined,
   connectionTimeout: 10000,
   greetingTimeout: 10000,
   socketTimeout: 20000,
 });
 
-console.log(`Servidor: ${env.SMTP_HOST}:${env.SMTP_PORT || 587} (TLS implícito: ${env.SMTP_SECURE === 'true' ? 'sí' : 'no'}), usuario: ${env.SMTP_USER || '(sin autenticación)'}`);
+console.log(`Servidor: ${env.SMTP_HOST}:${env.SMTP_PORT || 587} (TLS implícito: ${env.SMTP_SECURE === 'true' ? 'sí' : 'no'}, STARTTLS obligatorio: ${env.SMTP_REQUIRE_TLS === 'true' ? 'sí' : 'no'}), usuario: ${env.SMTP_USER || '(sin autenticación)'}`);
 
 transport
   .verify()

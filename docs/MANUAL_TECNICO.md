@@ -191,7 +191,7 @@ Variables del servidor (`server/.env.example`, `.env.production.example`; los va
 | `TRUST_PROXY` | `0` (en `docker-compose.prod.yml`, `1`: el proxy Caddy) | Saltos de proxy inverso delante del servidor (para la IP real en bitácora y límites). |
 | `EVIDENCE_STORAGE_DIR` | `storage/evidence` | Carpeta de adjuntos (evidencias, resoluciones, documentos firmados). |
 | `PUBLIC_APP_URL` | `http://localhost:5173` | URL pública del cliente: se usa en los enlaces de los correos (en producción, `https://`). |
-| `SMTP_HOST`, `SMTP_PORT`, `SMTP_SECURE`, `SMTP_USER`, `SMTP_PASS`, `MAIL_FROM` | — | Correo saliente. En producción `SMTP_HOST` es obligatorio. |
+| `SMTP_HOST`, `SMTP_PORT`, `SMTP_SECURE`, `SMTP_REQUIRE_TLS`, `SMTP_USER`, `SMTP_PASS`, `MAIL_FROM` | — | Correo saliente. En producción `SMTP_HOST` es obligatorio y hay que definir `SMTP_SECURE=true` o `SMTP_REQUIRE_TLS` (true = STARTTLS obligatorio; false solo en un relay interno aprobado). Los correos de avisos se entregan con cola y reintentos (tabla `email_outbox`, ver `GUIA_SMTP.md` §5b). |
 | `PASSWORD_RESET_TTL_MINUTES` | `60` | Vigencia del enlace de recuperación. |
 | `EMAIL_NOTIFICATIONS` | `true` | Envía cada aviso de la aplicación (nueva solicitud, derivación, cambio de estado) al correo institucional de la persona. Necesita `SMTP_HOST`; `false` lo desactiva. |
 | `ADMIN_EMAIL`, `ADMIN_PASSWORD` | — | Solo para crear el primer administrador (contraseña de ≥ 12 caracteres, no de ejemplo). |
