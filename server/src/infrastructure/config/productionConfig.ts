@@ -24,7 +24,9 @@ export function findSmtpProblems(source: Record<string, string | undefined>): st
     const port = Number(source.SMTP_PORT);
     if (!Number.isInteger(port) || port < 1 || port > 65535) problems.push('SMTP_PORT debe ser un número entre 1 y 65535');
   }
-  if (!source.SMTP_SECURE && !source.SMTP_REQUIRE_TLS) {
+  // «SMTP_SECURE=false» no es una decisión (es el valor por defecto): solo cuenta TLS implícito o una elección explícita de STARTTLS.
+  const decided = source.SMTP_SECURE === 'true' || source.SMTP_REQUIRE_TLS === 'true' || source.SMTP_REQUIRE_TLS === 'false';
+  if (!decided) {
     problems.push(
       'Defina cómo se protege el correo: SMTP_SECURE=true (TLS implícito, puerto 465) o SMTP_REQUIRE_TLS=true (STARTTLS obligatorio); ' +
         'solo para un relay interno aprobado sin TLS, SMTP_REQUIRE_TLS=false de forma explícita',
