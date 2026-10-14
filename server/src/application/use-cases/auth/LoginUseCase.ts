@@ -1,4 +1,5 @@
 import { UserRepository } from '@domain/repositories/UserRepository';
+import { normalizeEmail } from '@application/use-cases/users/normalizeEmail';
 import { RoleRepository } from '@domain/repositories/RoleRepository';
 import { RefreshTokenRepository } from '@domain/repositories/RefreshTokenRepository';
 import { AuditLogRepository } from '@domain/repositories/AuditLogRepository';
@@ -6,6 +7,8 @@ import { PasswordHasher } from '@application/ports/PasswordHasher';
 import { TokenService } from '@application/ports/TokenService';
 import { hashRefreshToken } from './refreshTokenHash';
 import { LoginInput, LoginOutput } from '@application/dtos/auth.dto';
+import { SystemParameterRepository } from '@domain/repositories/SystemParameterRepository';
+import { loadSecurityPolicy } from '@application/use-cases/system-parameters/securityPolicy';
 
 export class InvalidCredentialsError extends Error {
   constructor() {
@@ -28,6 +31,7 @@ export class AccountInactiveError extends Error {
   }
 }
 
+// Valores predeterminados; los vigentes salen de los parámetros del sistema (A08).
 export const MAX_FAILED_ATTEMPTS = 5;
 export const LOCK_DURATION_MINUTES = 15;
 export const REFRESH_TOKEN_DAYS = 7;
@@ -43,10 +47,11 @@ export class LoginUseCase {
     private readonly auditLogs: AuditLogRepository,
     private readonly hasher: PasswordHasher,
     private readonly tokens: TokenService,
+    private readonly parameters: SystemParameterRepository,
   ) {}
 
   async execute(input: LoginInput): Promise<LoginOutput> {
-    const user = await this.users.findByEmail(input.email.toLowerCase().trim());
+    const user = await this.users.findByEmail(normalizeEmail(input.email));
 
     if (!user) {
       // Sin esto, responder en milisegundos delata que el correo no está registrado (A07).
@@ -62,13 +67,14 @@ export class LoginUseCase {
     const passwordOk = await this.hasher.compare(input.password, user.passwordHash);
 
     if (!passwordOk) {
+      const policy = await loadSecurityPolicy(this.parameters);
       const attempts = user.failedLoginAttempts + 1;
-      const shouldLock = attempts >= MAX_FAILED_ATTEMPTS;
+      const shouldLock = attempts >= policy.maxLoginAttempts;
 
       await this.users.update(user.id, {
         failedLoginAttempts: shouldLock ? 0 : attempts,
         lockedUntil: shouldLock
-          ? new Date(Date.now() + LOCK_DURATION_MINUTES * 60_000)
+          ? new Date(Date.now() + policy.lockoutMinutes * 60_000)
           : null,
       });
 
@@ -87,6 +93,7 @@ export class LoginUseCase {
       });
     }
 
+    const policy = await loadSecurityPolicy(this.parameters);
     const role = await this.roles.findById(user.roleId);
     const roleName = role?.name ?? 'Desconocido';
 
@@ -115,6 +122,8 @@ export class LoginUseCase {
     return {
       accessToken,
       refreshToken,
+      // El cliente cierra la sesión inactiva con este plazo; el servidor lo hace valer al renovarla (RefreshSessionUseCase).
+      sessionPolicy: { idleTimeoutMinutes: policy.idleTimeoutMinutes },
       user: {
         id: user.id,
         email: user.email,
@@ -122,6 +131,7 @@ export class LoginUseCase {
         lastName: user.lastName,
         role: roleName,
         service: user.service,
+        mustChangePassword: user.mustChangePassword,
       },
     };
   }

@@ -35,6 +35,8 @@ que otro compañero sí tiene: depende de su rol.
 | Vicerrectorado | Panel de inicio · Informe consolidado · Indicadores |
 | Administrador DBU | Todo lo anterior, más Seguimiento DBU, Usuarios y roles, Catálogos, Parámetros, Identidad visual, Bitácora de auditoría y Evaluación de tutoría |
 
+*Nombres en pantalla:* el sistema muestra **Estudiante** (rol Tutorado), **Docente** (Docente tutor), **Administrador** (Administrador DBU) y, para el Profesional de servicio, su especialidad (p. ej. «Profesional de Psicología»). Son los mismos roles de la tabla; solo cambia cómo se escriben junto a su nombre, en el perfil y en la lista de usuarios.
+
 ### 1.2 Entrar al sistema
 
 ![Pantalla de ingreso](manual/img/01-ingreso.jpg)
@@ -359,7 +361,7 @@ El administrador tiene acceso a todo. Además de lo descrito para los demás rol
 
 **Profesionales de servicio:** al elegir el rol *Profesional de Servicio* aparece el campo obligatorio *Servicio al que pertenece* (Escuela Profesional, Psicopedagogía, Psicología, Asistencia Social o Salud). **De ese servicio depende qué casos derivados ve y recibe**: sin él no vería ninguno, por eso el sistema no deja guardar sin elegirlo. En la tabla de usuarios aparece junto al rol (por ejemplo, «Profesional de Servicio · Psicología»).
 
-Una cuenta nueva recibe la **contraseña inicial por defecto del sistema**: entréguesela a la persona por un medio seguro y pídale que la cambie en su primer ingreso (*Mi perfil*).
+Al crear la cuenta, el sistema genera una **clave temporal distinta para cada persona** y la muestra **una sola vez** en una ventana: cópiela y entréguesela en persona o por un canal privado (no se vuelve a mostrar). La persona entra con ella y el sistema solo le deja abrir *Mi perfil* hasta que la cambie; después accede con normalidad.
 
 ### 7.2 Catálogos maestros
 
@@ -372,7 +374,7 @@ El **periodo académico activo** determina el semestre en curso para reportes y 
 
 ![Parámetros del sistema](manual/img/31-parametros.jpg)
 *Figura: Parámetros del sistema.*
-*Parámetros*: duración de la sesión (45 min), número de sesiones por semestre (8), umbral de alerta por inasistencias (2) y plazo de atención de derivaciones (48 h). Los cambios rigen de inmediato y quedan en la bitácora.
+*Parámetros*: duración de la sesión (45 min), número de sesiones por semestre (8), umbral de alerta por inasistencias (2) y plazo de atención de derivaciones (48 h). En el grupo *Seguridad de acceso*: cierre de sesión por inactividad (15 min), intentos fallidos antes del bloqueo (5) y duración del bloqueo (15 min); el plazo de inactividad rige desde el siguiente inicio de sesión de cada persona y el servidor lo hace valer también al renovar la sesión. Los cambios rigen de inmediato (salvo lo indicado) y quedan en la bitácora.
 
 ### 7.4 Identidad visual
 
@@ -395,7 +397,7 @@ El **periodo académico activo** determina el semestre en curso para reportes y 
 ![Bitácora de auditoría](manual/img/35-bitacora.jpg)
 *Figura: Bitácora de auditoría.*
 - *Seguimiento DBU*: todos los casos derivados por servicio y estado, con el plazo de atención.
-- *Bitácora de auditoría*: registro de las operaciones críticas (inicios de sesión, cambios de usuarios y catálogos, adjuntos, cambios de estado). Se puede filtrar y no se puede modificar.
+- *Bitácora de auditoría*: registro de las operaciones críticas (inicios de sesión, cambios de usuarios y catálogos, adjuntos, cambios de estado) y de los **accesos a información sensible**: quién consultó o descargó un expediente, entrevistas, seguimientos, red de apoyo, derivaciones y documentos firmados, cuándo y desde qué IP, incluidos los intentos rechazados. La bitácora no guarda el contenido consultado. Se puede filtrar y no se puede modificar desde el sistema.
 
 ### 7.7 Cerrar un semestre
 Active el nuevo periodo en *Catálogos → Periodos*. Los informes del semestre anterior conservan sus cifras; la numeración de asistencias reinicia en 1 en el semestre nuevo.

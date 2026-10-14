@@ -1,6 +1,6 @@
 // Parámetros del sistema que el DBU puede ajustar (HU-49). Solo se listan los
-// que el sistema realmente consulta: los demás valores sembrados (p. ej. los
-// de bloqueo de sesión) aún no se leen desde la base y no se exponen.
+// que el sistema realmente consulta; esta lista es la fuente autoritativa de
+// sus rangos y valores predeterminados (también los de seguridad de acceso, A08).
 export interface ParameterDefinition {
   key: string;
   label: string;
@@ -10,7 +10,7 @@ export interface ParameterDefinition {
   max: number;
   /** Valor que usa el sistema cuando el parámetro no está configurado. */
   defaultValue: number;
-  group: 'Sesiones' | 'Alertas y plazos';
+  group: 'Sesiones' | 'Alertas y plazos' | 'Seguridad de acceso';
 }
 
 export const PARAMETER_DEFINITIONS: readonly ParameterDefinition[] = [
@@ -53,6 +53,36 @@ export const PARAMETER_DEFINITIONS: readonly ParameterDefinition[] = [
     max: 720,
     defaultValue: 48,
     group: 'Alertas y plazos',
+  },
+  {
+    key: 'inactivity_timeout_minutes',
+    label: 'Cierre de sesión por inactividad',
+    description: 'Minutos sin actividad tras los cuales se cierra la sesión (RF-07). Rige desde el siguiente inicio de sesión de cada persona.',
+    unit: 'minutos',
+    min: 5,
+    max: 120,
+    defaultValue: 15,
+    group: 'Seguridad de acceso',
+  },
+  {
+    key: 'login_max_attempts',
+    label: 'Intentos fallidos antes del bloqueo',
+    description: 'Contraseñas incorrectas seguidas que bloquean temporalmente la cuenta.',
+    unit: 'intentos',
+    min: 3,
+    max: 10,
+    defaultValue: 5,
+    group: 'Seguridad de acceso',
+  },
+  {
+    key: 'login_lockout_minutes',
+    label: 'Duración del bloqueo de la cuenta',
+    description: 'Minutos que la cuenta queda bloqueada tras superar los intentos fallidos.',
+    unit: 'minutos',
+    min: 1,
+    max: 120,
+    defaultValue: 15,
+    group: 'Seguridad de acceso',
   },
 ];
 

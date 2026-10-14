@@ -10,7 +10,7 @@ import {
   EvaluationStatisticsReport,
   EvaluationStatisticsTutorRow,
 } from '@application/dtos/evaluation.dto';
-import { EvaluationResultsForbiddenError } from './EvaluationErrors';
+import { evaluationScopeFor } from './evaluationScope';
 
 const SCORE_VALUE: Record<EvaluationScaleCode, number> = { N: 1, CN: 2, AV: 3, CS: 4, S: 5 };
 
@@ -35,13 +35,7 @@ export class GetEvaluationStatisticsUseCase {
     requesterId: string,
     filters: ReportFilters = {},
   ): Promise<EvaluationStatisticsReport> {
-    const requester = await this.users.findById(requesterId);
-    if (!requester) throw new EvaluationResultsForbiddenError();
-
-    const role = await this.roles.findById(requester.roleId);
-    if (!role || !['Administrador DBU', 'Coordinador'].includes(role.name)) {
-      throw new EvaluationResultsForbiddenError();
-    }
+    const scope = await evaluationScopeFor(this.users, this.roles, this.schools, requesterId);
 
     const period = await resolveReportPeriod(this.periods, filters.periodId);
 
@@ -52,6 +46,7 @@ export class GetEvaluationStatisticsUseCase {
         schoolId: filters.schoolId,
         facultyId: filters.facultyId,
         cycle: filters.cycle,
+        schoolIds: scope.schoolIds,
       })
     ).filter((r) => !filters.tutorId || r.tutorId === filters.tutorId);
 

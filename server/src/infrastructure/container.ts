@@ -1,5 +1,6 @@
 import { prisma } from './database/prisma';
 import { PrismaUserRepository } from './repositories/PrismaUserRepository';
+import { CachedRoleRepository } from '@infrastructure/repositories/CachedRoleRepository';
 import { PrismaRoleRepository } from './repositories/PrismaRoleRepository';
 import { PrismaSignedDocumentRepository } from './repositories/PrismaSignedDocumentRepository';
 import {
@@ -37,6 +38,9 @@ import { PrismaBrandingRepository } from './repositories/PrismaBrandingRepositor
 import { PrismaTutorSemesterReportRepository } from './repositories/PrismaTutorSemesterReportRepository';
 import { PrismaNotificationRepository } from './repositories/PrismaNotificationRepository';
 import { EmailNotificationRepository } from './repositories/EmailNotificationRepository';
+import { PrismaEmailOutboxRepository } from './repositories/PrismaEmailOutboxRepository';
+import { EmailOutboxProcessor } from '@application/services/EmailOutboxProcessor';
+import { EmailOutboxWorker } from './services/EmailOutboxWorker';
 import { NotificationRepository } from '@domain/repositories/NotificationRepository';
 import { PrismaAcademicPeriodRepository } from './repositories/PrismaAcademicPeriodRepository';
 import { PrismaTutorEvaluationRepository } from './repositories/PrismaTutorEvaluationRepository';
@@ -56,7 +60,7 @@ import { ResetPasswordUseCase } from '@application/use-cases/auth/ResetPasswordU
 // El dominio y la aplicación solo ven interfaces (puertos).
 
 const userRepository = new PrismaUserRepository(prisma);
-const roleRepository = new PrismaRoleRepository(prisma);
+const roleRepository = new CachedRoleRepository(new PrismaRoleRepository(prisma));
 const refreshTokenRepository = new PrismaRefreshTokenRepository(prisma);
 const periodRosterRepository = new PrismaPeriodRosterRepository(prisma);
 const auditLogRepository = new PrismaAuditLogRepository(prisma);
@@ -95,6 +99,7 @@ const loginUseCase = new LoginUseCase(
   auditLogRepository,
   passwordHasher,
   tokenService,
+  systemParameterRepository,
 );
 
 const listAuditLogUseCase = new ListAuditLogUseCase(auditLogRepository, userRepository, roleRepository);
@@ -150,6 +155,8 @@ const refreshSessionUseCase = new RefreshSessionUseCase(
   refreshTokenRepository,
   auditLogRepository,
   tokenService,
+  systemParameterRepository,
+  env.JWT_EXPIRES_MINUTES,
 );
 const logoutUseCase = new LogoutUseCase(refreshTokenRepository);
 
@@ -158,6 +165,7 @@ const mailer: Mailer = env.SMTP_HOST
       host: env.SMTP_HOST,
       port: env.SMTP_PORT,
       secure: env.SMTP_SECURE,
+      requireTls: env.SMTP_REQUIRE_TLS,
       user: env.SMTP_USER || undefined,
       pass: env.SMTP_PASS || undefined,
       from: env.MAIL_FROM,
@@ -165,10 +173,14 @@ const mailer: Mailer = env.SMTP_HOST
   : new UnconfiguredMailer();
 
 // Los avisos de la aplicación también salen por correo cuando hay SMTP configurado (EMAIL_NOTIFICATIONS=false lo desactiva).
-const notificationRepository: NotificationRepository =
-  env.SMTP_HOST && env.EMAIL_NOTIFICATIONS
-    ? new EmailNotificationRepository(prismaNotificationRepository, userRepository, mailer, env.PUBLIC_APP_URL)
-    : prismaNotificationRepository;
+const emailOutboxRepository = new PrismaEmailOutboxRepository(prisma);
+const emailOutboxProcessor = new EmailOutboxProcessor(emailOutboxRepository, userRepository, mailer, env.PUBLIC_APP_URL);
+const emailDeliveryEnabled = Boolean(env.SMTP_HOST && env.EMAIL_NOTIFICATIONS);
+const notificationRepository: NotificationRepository = emailDeliveryEnabled
+  ? new EmailNotificationRepository(prismaNotificationRepository, emailOutboxRepository, emailOutboxProcessor)
+  : prismaNotificationRepository;
+// Reintenta en segundo plano los correos pendientes; solo existe cuando la entrega por correo está activa.
+const emailOutboxWorker = emailDeliveryEnabled ? new EmailOutboxWorker(emailOutboxProcessor) : undefined;
 
 const requestPasswordResetUseCase = new RequestPasswordResetUseCase(
   userRepository,
@@ -352,6 +364,7 @@ const getStudentRecordUseCase = new GetStudentRecordUseCase(
   studentReferralRepository,
   studentAccessGuard,
   tutoringRequestRepository,
+  userRepository,
 );
 const createTutoringRequestUseCase = new CreateTutoringRequestUseCase(
   tutoringRequestRepository,
@@ -605,6 +618,7 @@ const getEvaluationResultsUseCase = new GetEvaluationResultsUseCase(
   roleRepository,
   academicPeriodRepository,
   tutorEvaluationRepository,
+  schoolRepository,
 );
 const getEvaluationStatisticsUseCase = new GetEvaluationStatisticsUseCase(
   userRepository,
@@ -619,6 +633,7 @@ const getEvaluationSuggestionsUseCase = new GetEvaluationSuggestionsUseCase(
   roleRepository,
   academicPeriodRepository,
   tutorEvaluationRepository,
+  schoolRepository,
 );
 const listEvaluationWindowsUseCase = new ListEvaluationWindowsUseCase(
   userRepository,
@@ -686,6 +701,7 @@ export const container = {
     passwordHasher,
     tokenService,
     evidenceStorage,
+    emailOutboxWorker,
   },
   useCases: {
     loginUseCase,

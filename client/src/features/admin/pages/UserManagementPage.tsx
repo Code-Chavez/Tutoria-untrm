@@ -1,9 +1,11 @@
 import React, { useMemo, useState } from 'react';
 import styles from './UserManagementPage.module.css';
 import { User, userService, CreateUserData, UpdateUserData } from '../services/userService';
+import { TemporaryPasswordDialog } from '../components/TemporaryPasswordDialog';
 import { UserFormModal } from '../components/UserFormModal';
 import { UserFilters, UserFilterValues } from '../components/UserFilters';
 import { UserTable } from '../components/UserTable';
+import { roleDisplayName } from '@shared/utils/roleLabel';
 import { useUsers } from '../hooks/useUsers';
 import {
   PageHeader,
@@ -18,6 +20,8 @@ const EMPTY_FILTERS: UserFilterValues = { search: '', roleId: '', status: '' };
 
 export const UserManagementPage: React.FC = () => {
   const { users, roles, loading, error, refresh } = useUsers();
+  // La clave temporal de una cuenta recién creada: se muestra una sola vez, a quien la entrega.
+  const [issuedAccount, setIssuedAccount] = useState<{ email: string; temporaryPassword: string } | null>(null);
 
   const [filters, setFilters] = useState<UserFilterValues>(EMPTY_FILTERS);
 
@@ -26,7 +30,10 @@ export const UserManagementPage: React.FC = () => {
   const [userToToggle, setUserToToggle] = useState<User | null>(null);
   const [toggling, setToggling] = useState(false);
 
-  const roleName = (roleId: string) => roles.find((r) => r.id === roleId)?.name ?? 'Sin rol';
+  const roleName = (roleId: string) => {
+    const name = roles.find((r) => r.id === roleId)?.name;
+    return name ? roleDisplayName(name) : 'Sin rol';
+  };
 
   const filtered = useMemo(() => {
     const term = filters.search.trim().toLowerCase();
@@ -56,7 +63,8 @@ export const UserManagementPage: React.FC = () => {
     if (userToEdit) {
       await userService.updateUser(userToEdit.id, data as UpdateUserData);
     } else {
-      await userService.createUser(data as CreateUserData);
+      const { user, temporaryPassword } = await userService.createUser(data as CreateUserData);
+      if (temporaryPassword) setIssuedAccount({ email: user.email, temporaryPassword });
     }
     refresh();
   };
@@ -135,6 +143,8 @@ export const UserManagementPage: React.FC = () => {
           roles={roles}
         />
       )}
+
+      {issuedAccount && <TemporaryPasswordDialog {...issuedAccount} onClose={() => setIssuedAccount(null)} />}
 
       <ConfirmDialog
         open={userToToggle !== null}

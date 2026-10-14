@@ -34,7 +34,7 @@ export class ChangePasswordUseCase {
     }
 
     const passwordHash = await this.hasher.hash(input.newPassword);
-    await this.users.update(user.id, { passwordHash });
+    await this.users.update(user.id, { passwordHash, mustChangePassword: false });
 
     // Cambiar la clave cierra las demás sesiones: los refresh tokens dejan de
     // ser válidos, así que al expirar el access token habrá que reingresar.

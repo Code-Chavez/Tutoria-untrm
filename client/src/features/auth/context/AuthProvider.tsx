@@ -16,8 +16,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     // Nada de la sesión anterior debe sobrevivir a un cambio de cuenta: ni datos en caché ni consultas en vuelo.
     await queryClient.cancelQueries();
     clearSessionData();
-    tokenStorage.save(result.accessToken, result.refreshToken, result.user);
-    setUser(result.user);
+    const sessionUser = { ...result.user, idleTimeoutMinutes: result.sessionPolicy?.idleTimeoutMinutes };
+    tokenStorage.save(result.accessToken, result.refreshToken, sessionUser);
+    setUser(sessionUser);
   }, []);
 
   const logout = useCallback(() => {
@@ -30,9 +31,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setUser(null);
   }, []);
 
+  const markPasswordChanged = useCallback(() => {
+    setUser((current) => {
+      if (!current) return current;
+      const updated = { ...current, mustChangePassword: false };
+      tokenStorage.saveUser(updated);
+      return updated;
+    });
+  }, []);
+
   const value = useMemo<AuthContextValue>(
-    () => ({ user, isAuthenticated: user !== null, login, logout }),
-    [user, login, logout],
+    () => ({ user, isAuthenticated: user !== null, login, logout, markPasswordChanged }),
+    [user, login, logout, markPasswordChanged],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

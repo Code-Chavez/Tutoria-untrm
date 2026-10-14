@@ -33,6 +33,50 @@ describe('CreateUserUseCase', () => {
     useCase = new CreateUserUseCase(mockUserRepository, mockPasswordHasher, mockRoles);
   });
 
+  it('normaliza el correo (espacios y mayúsculas) antes de buscar duplicados y de guardar', async () => {
+    mockUserRepository.findByEmail.mockResolvedValue(null);
+
+    await useCase.execute({ email: '  Persona@UNTRM.edu.pe ', firstName: 'Ana', lastName: 'Ruiz', roleId: 'role-123' });
+
+    expect(mockUserRepository.findByEmail).toHaveBeenCalledWith('persona@untrm.edu.pe');
+    expect(mockUserRepository.create).toHaveBeenCalledWith(expect.objectContaining({ email: 'persona@untrm.edu.pe' }));
+  });
+
+  describe('clave inicial (A01)', () => {
+    const input = { email: 'nueva@untrm.edu.pe', firstName: 'Ana', lastName: 'Ruiz', roleId: 'role-123' };
+
+    it('sin clave indicada genera una temporal aleatoria, la devuelve una vez y obliga a cambiarla', async () => {
+      mockUserRepository.findByEmail.mockResolvedValue(null);
+
+      const result = await useCase.execute(input);
+
+      expect(result.temporaryPassword).toMatch(/^[A-Za-z0-9]{12}$/);
+      expect(result.temporaryPassword).not.toBe('Tutor2026!');
+      expect(mockPasswordHasher.hash).toHaveBeenCalledWith(result.temporaryPassword);
+      expect(mockUserRepository.create).toHaveBeenCalledWith(expect.objectContaining({ mustChangePassword: true }));
+      expect(result).not.toHaveProperty('passwordHash');
+    });
+
+    it('dos cuentas nuevas no comparten clave', async () => {
+      mockUserRepository.findByEmail.mockResolvedValue(null);
+
+      const first = await useCase.execute(input);
+      const second = await useCase.execute({ ...input, email: 'otra@untrm.edu.pe' });
+
+      expect(first.temporaryPassword).not.toBe(second.temporaryPassword);
+    });
+
+    it('con una clave indicada (carga interna) la usa tal cual y no exige cambiarla', async () => {
+      mockUserRepository.findByEmail.mockResolvedValue(null);
+
+      const result = await useCase.execute({ ...input, password: 'ClaveElegida1!' });
+
+      expect(result.temporaryPassword).toBeUndefined();
+      expect(mockPasswordHasher.hash).toHaveBeenCalledWith('ClaveElegida1!');
+      expect(mockUserRepository.create).toHaveBeenCalledWith(expect.objectContaining({ mustChangePassword: false }));
+    });
+  });
+
   it('debería crear un usuario exitosamente', async () => {
     mockUserRepository.findByEmail.mockResolvedValue(null);
     mockUserRepository.create.mockResolvedValue({

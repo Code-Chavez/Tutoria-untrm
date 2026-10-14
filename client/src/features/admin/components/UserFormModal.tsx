@@ -1,4 +1,6 @@
 import React, { useState } from 'react';
+import { getApiErrorMessage } from '@shared/services/apiClient';
+import { roleDisplayName } from '@shared/utils/roleLabel';
 import { useDialog } from '@shared/hooks/useDialog';
 import styles from './UserFormModal.module.css';
 import { User, CreateUserData, UpdateUserData } from '../services/userService';
@@ -38,6 +40,7 @@ export const UserFormModal: React.FC<UserFormModalProps> = ({
       : { email: '', firstName: '', lastName: '', roleId: '', phone: '', service: '' },
   );
   const [loading, setLoading] = useState(false);
+  const [submitError, setSubmitError] = useState('');
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
@@ -49,14 +52,14 @@ export const UserFormModal: React.FC<UserFormModalProps> = ({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setSubmitError('');
     try {
       setLoading(true);
       await onSubmit({ ...formData, service: isServiceRole ? formData.service || null : null });
       onClose();
     } catch (error) {
-      console.error('Error submitting form', error);
-      // Aqui podrías mostrar una notificación de error usando react-toastify si está configurado
-      alert('Ocurrió un error al guardar el usuario.');
+      // Se muestra el motivo real que envía la API (p. ej. «el correo ya está registrado»), no un aviso genérico.
+      setSubmitError(getApiErrorMessage(error));
     } finally {
       setLoading(false);
     }
@@ -81,6 +84,11 @@ export const UserFormModal: React.FC<UserFormModalProps> = ({
         </div>
 
         <form onSubmit={handleSubmit}>
+          {submitError && (
+            <p role="alert" className={styles.submitError}>
+              {submitError}
+            </p>
+          )}
           <div className={styles.formGroup}>
             <label htmlFor="firstName">Nombre</label>
             <input
@@ -145,7 +153,7 @@ export const UserFormModal: React.FC<UserFormModalProps> = ({
               <option value="">Seleccione un rol...</option>
               {roles.map((role) => (
                 <option key={role.id} value={role.id}>
-                  {role.name}
+                  {roleDisplayName(role.name)}
                 </option>
               ))}
             </select>

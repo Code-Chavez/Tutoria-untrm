@@ -8,13 +8,14 @@ import { RoleNotFoundError, RoleTargetUserNotFoundError } from '@application/use
 import { assignRoleSchema } from '../validators/role.validators';
 import { ServiceRequiredError } from '@application/use-cases/users/serviceAssignment';
 import { z } from 'zod';
+import { optionalPhone, personName } from '../validators/fields';
 
 const createUserSchema = z.object({
-  email: z.string().email('Correo inválido'),
-  firstName: z.string().min(2, 'El nombre debe tener al menos 2 caracteres'),
-  lastName: z.string().min(2, 'El apellido debe tener al menos 2 caracteres'),
+  email: z.string().trim().toLowerCase().email('Correo inválido'),
+  firstName: personName('El nombre'),
+  lastName: personName('El apellido'),
   roleId: z.string().uuid('El ID de rol debe ser un UUID válido'),
-  phone: z.string().optional(),
+  phone: optionalPhone(),
   photoUrl: z.string().url('URL inválida').optional(),
   // Solo para el rol Profesional de Servicio: decide qué casos derivados ve y recibe.
   service: z.enum(['ESCUELA', 'PSICOPEDAGOGIA', 'PSICOLOGIA', 'ASISTENCIA_SOCIAL', 'SALUD']).nullable().optional(),
@@ -56,8 +57,8 @@ export class UserController {
   create = async (req: Request, res: Response) => {
     try {
       const data = createUserSchema.parse(req.body);
-      const user = await this.createUserUseCase.execute(data);
-      res.status(201).json({ message: 'Usuario creado exitosamente', user });
+      const { temporaryPassword, ...user } = await this.createUserUseCase.execute(data);
+      res.status(201).json({ message: 'Usuario creado exitosamente', user, temporaryPassword });
     } catch (error) {
       if (error instanceof z.ZodError) {
         res.status(400).json({ error: 'Datos de entrada inválidos', details: error.errors });

@@ -191,7 +191,7 @@ Variables del servidor (`server/.env.example`, `.env.production.example`; los va
 | `TRUST_PROXY` | `0` (en `docker-compose.prod.yml`, `1`: el proxy Caddy) | Saltos de proxy inverso delante del servidor (para la IP real en bitácora y límites). |
 | `EVIDENCE_STORAGE_DIR` | `storage/evidence` | Carpeta de adjuntos (evidencias, resoluciones, documentos firmados). |
 | `PUBLIC_APP_URL` | `http://localhost:5173` | URL pública del cliente: se usa en los enlaces de los correos (en producción, `https://`). |
-| `SMTP_HOST`, `SMTP_PORT`, `SMTP_SECURE`, `SMTP_USER`, `SMTP_PASS`, `MAIL_FROM` | — | Correo saliente. En producción `SMTP_HOST` es obligatorio. |
+| `SMTP_HOST`, `SMTP_PORT`, `SMTP_SECURE`, `SMTP_REQUIRE_TLS`, `SMTP_USER`, `SMTP_PASS`, `MAIL_FROM` | — | Correo saliente. En producción `SMTP_HOST` es obligatorio y hay que definir `SMTP_SECURE=true` o `SMTP_REQUIRE_TLS` (true = STARTTLS obligatorio; false solo en un relay interno aprobado). Los correos de avisos se entregan con cola y reintentos (tabla `email_outbox`, ver `GUIA_SMTP.md` §5b). |
 | `PASSWORD_RESET_TTL_MINUTES` | `60` | Vigencia del enlace de recuperación. |
 | `EMAIL_NOTIFICATIONS` | `true` | Envía cada aviso de la aplicación (nueva solicitud, derivación, cambio de estado) al correo institucional de la persona. Necesita `SMTP_HOST`; `false` lo desactiva. |
 | `ADMIN_EMAIL`, `ADMIN_PASSWORD` | — | Solo para crear el primer administrador (contraseña de ≥ 12 caracteres, no de ejemplo). |
@@ -208,6 +208,8 @@ alerta por inasistencias (2) y plazo de atención de derivaciones (48 h).
 ### 6.1 Avisos por correo
 
 Cada aviso nuevo de la campana se envía también por correo al correo institucional de la persona (la dirección de su cuenta). Es un complemento de mejor esfuerzo: si el SMTP falla, el aviso interno se crea igual, la operación no se retrasa ni falla y el error queda en el registro del servidor. El mensaje es **formal** (saludo, firma de la Dirección de Bienestar Universitario y de la universidad, aviso de mensaje automático; versión de texto y de HTML) y **no incluye el texto del aviso ni datos de la persona atendida**: solo informa que hay algo nuevo y trae el enlace directo al caso o a la solicitud, donde hay que iniciar sesión (confidencialidad, Ley N.° 29733). Se envía únicamente a cuentas activas. Además del aviso al responsable, **el tutorado recibe una constancia** de que su solicitud quedó registrada (tipo `TUTORING_REQUEST_RECEIVED`), la haya registrado él o su tutor a su nombre. No hay resúmenes ni preferencias por persona: un correo por aviso. En desarrollo, los correos se ven en Mailpit (puerto 8025).
+
+Para configurar y probar el SMTP paso a paso, ver `docs/GUIA_SMTP.md`.
 
 Implementación: `server/src/infrastructure/repositories/EmailNotificationRepository.ts` envuelve al repositorio de avisos (los casos de uso no cambian) y `server/src/application/services/notificationEmail.ts` arma el mensaje.
 

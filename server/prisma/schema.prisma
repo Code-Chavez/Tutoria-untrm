@@ -20,6 +20,8 @@ model User {
   isActive            Boolean   @default(true) @map("is_active")
   failedLoginAttempts Int       @default(0) @map("failed_login_attempts")
   lockedUntil         DateTime? @map("locked_until")
+  // Clave temporal entregada por la DBU: hasta que la persona la cambie solo puede usar su perfil y salir.
+  mustChangePassword  Boolean   @default(false) @map("must_change_password")
   createdAt           DateTime  @default(now()) @map("created_at")
   updatedAt           DateTime  @updatedAt @map("updated_at")
 
@@ -603,6 +605,9 @@ model Notification {
 
   read Boolean @default(false)
 
+  // Cola de entrega del correo de este aviso (A10).
+  emailOutbox EmailOutbox?
+
   @@index([userId, read])
   @@map("notifications")
 }
@@ -845,4 +850,24 @@ model SignedDocument {
   @@index([referralId])
   @@index([studentId, periodId])
   @@map("signed_documents")
+}
+
+// Entrega del correo de cada aviso (A10): se guarda antes de enviar, así que un SMTP caído o un reinicio no pierde el correo.
+// PENDING = por enviar o reintentar; SENT = aceptado por el servidor SMTP; FAILED = agotó los reintentos;
+// SKIPPED = la persona ya no tiene un correo válido o activo.
+model EmailOutbox {
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now()) @map("created_at")
+
+  notificationId String       @unique @map("notification_id")
+  notification   Notification @relation(fields: [notificationId], references: [id], onDelete: Cascade)
+
+  status        String    @default("PENDING")
+  attempts      Int       @default(0)
+  nextAttemptAt DateTime  @default(now()) @map("next_attempt_at")
+  lastError     String?   @map("last_error")
+  sentAt        DateTime? @map("sent_at")
+
+  @@index([status, nextAttemptAt])
+  @@map("email_outbox")
 }

@@ -1,12 +1,23 @@
 import dotenv from 'dotenv';
 dotenv.config();
 
+function durationToMinutes(value: string): number {
+  const match = /^(\d+)\s*([smhd]?)$/.exec(value.trim());
+  if (!match) return 15;
+  const amount = Number(match[1]);
+  const unit = match[2];
+  const minutes = unit === 's' ? amount / 60 : unit === 'h' ? amount * 60 : unit === 'd' ? amount * 1440 : unit === 'm' ? amount : amount / 60;
+  return Math.max(1, Math.ceil(minutes));
+}
+
 export const env = {
   NODE_ENV: process.env.NODE_ENV || 'development',
   PORT: parseInt(process.env.PORT || '3000', 10),
   DATABASE_URL: process.env.DATABASE_URL || 'postgresql://sit_user:sit_pass@localhost:5432/sit_db',
   JWT_SECRET: process.env.JWT_SECRET || 'dev-secret-change-in-production',
   JWT_EXPIRES_IN: process.env.JWT_EXPIRES_IN || '15m',
+  // Vida del access token en minutos (JWT_EXPIRES_IN admite 30s, 15m, 2h o 1d); lo usa la caducidad por inactividad.
+  JWT_EXPIRES_MINUTES: durationToMinutes(process.env.JWT_EXPIRES_IN || '15m'),
   JWT_REFRESH_EXPIRES_IN: process.env.JWT_REFRESH_EXPIRES_IN || '7d',
   BCRYPT_ROUNDS: parseInt(process.env.BCRYPT_ROUNDS || '12', 10),
   CORS_ORIGIN: process.env.CORS_ORIGIN || 'http://localhost:5173',
@@ -22,6 +33,8 @@ export const env = {
   SMTP_HOST: process.env.SMTP_HOST || '',
   SMTP_PORT: parseInt(process.env.SMTP_PORT || '587', 10),
   SMTP_SECURE: process.env.SMTP_SECURE === 'true',
+  // STARTTLS obligatorio en los puertos sin TLS implícito: si el servidor no lo ofrece, el envío falla en vez de ir en claro.
+  SMTP_REQUIRE_TLS: process.env.SMTP_REQUIRE_TLS === 'true',
   SMTP_USER: process.env.SMTP_USER || '',
   SMTP_PASS: process.env.SMTP_PASS || '',
   MAIL_FROM: process.env.MAIL_FROM || 'SIT UNTRM <no-reply@untrm.edu.pe>',

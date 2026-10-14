@@ -51,3 +51,18 @@ describe('UserFormModal: servicio del Profesional de Servicio', () => {
     expect(onSubmit).toHaveBeenCalledWith(expect.objectContaining({ roleId: 'r-tutor', service: null }));
   });
 });
+
+describe('UserFormModal: errores al guardar', () => {
+  it('muestra el motivo que envía la API y no cierra el formulario', async () => {
+    const apiError = Object.assign(new Error('409'), {
+      isAxiosError: true,
+      response: { data: { message: 'El correo ya está registrado' } },
+    });
+    const onSubmit = setup(vi.fn().mockRejectedValue(apiError));
+    fireEvent.change(screen.getByLabelText('Rol'), { target: { value: 'r-tutor' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Guardar' }));
+
+    expect(await screen.findByRole('alert')).toHaveTextContent('El correo ya está registrado');
+    expect(onSubmit).toHaveBeenCalledTimes(1);
+  });
+});

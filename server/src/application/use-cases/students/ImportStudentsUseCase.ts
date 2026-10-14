@@ -2,6 +2,14 @@ import { StudentRepository } from '@domain/repositories/StudentRepository';
 import { SchoolRepository } from '@domain/repositories/SchoolRepository';
 import { StudentAccessGuard } from '@application/access/StudentAccessGuard';
 import {
+  EMAIL_INVALID,
+  NAME_TOO_SHORT,
+  PHONE_INVALID,
+  STUDENT_NAME_MIN,
+  isValidOptionalEmail,
+  isValidOptionalPhone,
+} from '@application/validation/studentFields';
+import {
   ImportStudentRow,
   ImportReport,
   ImportRowError,
@@ -48,12 +56,18 @@ export class ImportStudentsUseCase {
       if (!CODE_PATTERN.test(code)) {
         rowErrors.push('El código universitario debe tener entre 8 y 12 dígitos numéricos');
       }
-      if (!row.firstName?.trim()) {
-        rowErrors.push('El nombre es obligatorio');
-      }
-      if (!row.lastName?.trim()) {
-        rowErrors.push('El apellido es obligatorio');
-      }
+      const firstName = row.firstName?.trim() ?? '';
+      const lastName = row.lastName?.trim() ?? '';
+      if (!firstName) rowErrors.push('El nombre es obligatorio');
+      else if (firstName.length < STUDENT_NAME_MIN) rowErrors.push(`El nombre ${NAME_TOO_SHORT}`);
+      if (!lastName) rowErrors.push('El apellido es obligatorio');
+      else if (lastName.length < STUDENT_NAME_MIN) rowErrors.push(`El apellido ${NAME_TOO_SHORT}`);
+
+      // Mismas reglas que el formulario: correo y teléfono son opcionales, pero si vienen deben ser válidos.
+      const email = row.email?.trim().toLowerCase() ?? '';
+      const phone = row.phone?.trim() ?? '';
+      if (!isValidOptionalEmail(email)) rowErrors.push(`${EMAIL_INVALID} («${email}»)`);
+      if (!isValidOptionalPhone(phone)) rowErrors.push(PHONE_INVALID);
 
       const cycle = Number(row.cycle);
       if (!row.cycle?.toString().trim() || Number.isNaN(cycle) || !Number.isInteger(cycle) || cycle < 1 || cycle > 14) {
@@ -85,14 +99,12 @@ export class ImportStudentsUseCase {
         continue;
       }
 
-      const firstName = row.firstName.trim();
-      const lastName = row.lastName.trim();
       await this.students.create({
         studentCode: code,
         firstName,
         lastName,
-        email: row.email?.trim() || null,
-        phone: row.phone?.trim() || null,
+        email: email || null,
+        phone: phone || null,
         cycle,
         schoolId: schoolId as string,
         isAtRisk: false,

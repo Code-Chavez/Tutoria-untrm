@@ -2,6 +2,7 @@ import React from 'react';
 import { SearchField, SelectField, Button } from '@shared/components/ui';
 import { RefreshIcon } from '@shared/components/icons';
 import { Role } from '../services/roleService';
+import { roleDisplayName } from '@shared/utils/roleLabel';
 import styles from './UserFilters.module.css';
 
 export interface UserFilterValues {
@@ -39,7 +40,7 @@ export const UserFilters: React.FC<UserFiltersProps> = ({ values, roles, onChang
         <option value="">Todos los roles</option>
         {roles.map((r) => (
           <option key={r.id} value={r.id}>
-            {r.name}
+            {roleDisplayName(r.name)}
           </option>
         ))}
       </SelectField>

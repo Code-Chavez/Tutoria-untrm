@@ -1,3 +1,4 @@
+import { getRoleLabel } from '@shared/utils/roleLabel';
 import React, { useEffect, useState } from 'react';
 import { useDialogFocus } from '@shared/hooks/useDialog';
 import { Button, Stepper } from '@shared/components/ui';
@@ -195,6 +196,7 @@ export const InterviewFormModal: React.FC<InterviewFormModalProps> = ({
                 <input
                   id="birthDate"
                   type="date"
+                  max={new Date().toISOString().slice(0, 10)}
                   className={styles.input}
                   value={form.birthDate}
                   onChange={(e) => set('birthDate', e.target.value)}
@@ -259,7 +261,7 @@ export const InterviewFormModal: React.FC<InterviewFormModalProps> = ({
                   id="admissionYear"
                   type="number"
                   min={1980}
-                  max={2100}
+                  max={new Date().getFullYear()}
                   className={styles.input}
                   value={form.admissionYear}
                   onChange={(e) => set('admissionYear', e.target.value)}
@@ -420,7 +422,7 @@ export const InterviewFormModal: React.FC<InterviewFormModalProps> = ({
                 <b>
                   {user?.firstName} {user?.lastName}
                 </b>{' '}
-                ({user?.role}), en reemplazo de la firma física del Anexo N° 3.
+                ({user ? getRoleLabel(user.role, user.service) : ''}), en reemplazo de la firma física del Anexo N° 3.
               </div>
             </>
           )}

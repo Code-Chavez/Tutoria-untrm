@@ -1,10 +1,12 @@
+import { SchoolRepository } from '@domain/repositories/SchoolRepository';
+import { evaluationScopeFor } from './evaluationScope';
 import { UserRepository } from '@domain/repositories/UserRepository';
 import { RoleRepository } from '@domain/repositories/RoleRepository';
 import { AcademicPeriodRepository } from '@domain/repositories/AcademicPeriodRepository';
 import { TutorEvaluationRepository } from '@domain/repositories/TutorEvaluationRepository';
 import { EVALUATION_ITEMS, EvaluationScaleCode } from '@domain/entities/TutorEvaluation';
 import { TutorEvaluationResults, EvaluationItemResult } from '@application/dtos/evaluation.dto';
-import { NoActivePeriodError, EvaluationResultsForbiddenError, TutorNotFoundError } from './EvaluationErrors';
+import { NoActivePeriodError, TutorNotFoundError } from './EvaluationErrors';
 
 const SCORE_VALUE: Record<EvaluationScaleCode, number> = { N: 1, CN: 2, AV: 3, CS: 4, S: 5 };
 
@@ -31,16 +33,11 @@ export class GetEvaluationResultsUseCase {
     private readonly roles: RoleRepository,
     private readonly periods: AcademicPeriodRepository,
     private readonly evaluations: TutorEvaluationRepository,
+    private readonly schools: SchoolRepository,
   ) {}
 
   async execute(requesterId: string, tutorId: string): Promise<TutorEvaluationResults> {
-    const requester = await this.users.findById(requesterId);
-    if (!requester) throw new EvaluationResultsForbiddenError();
-
-    const role = await this.roles.findById(requester.roleId);
-    if (!role || !['Administrador DBU', 'Coordinador'].includes(role.name)) {
-      throw new EvaluationResultsForbiddenError();
-    }
+    const scope = await evaluationScopeFor(this.users, this.roles, this.schools, requesterId);
 
     const tutor = await this.users.findById(tutorId);
     if (!tutor) throw new TutorNotFoundError();
@@ -48,7 +45,7 @@ export class GetEvaluationResultsUseCase {
     const period = await this.periods.findActive();
     if (!period) throw new NoActivePeriodError();
 
-    const responses = await this.evaluations.findAnonymizedScoresByTutorAndPeriod(tutorId, period.id);
+    const responses = await this.evaluations.findAnonymizedScoresByTutorAndPeriod(tutorId, period.id, scope.schoolIds);
     const totalResponses = responses.length;
 
     const items: EvaluationItemResult[] = EVALUATION_ITEMS.map((item, index) => {

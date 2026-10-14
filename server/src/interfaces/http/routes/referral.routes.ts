@@ -1,4 +1,5 @@
 import { Router, type IRouter } from 'express';
+import { auditAccess, byParam } from '../middleware/auditAccess';
 import { container } from '../../../infrastructure/container';
 import { ReferralController } from '../controllers/ReferralController';
 import { ReferralConstanciaPdf } from '../../../infrastructure/parsers/ReferralConstanciaPdf';
@@ -30,6 +31,7 @@ router.post(
 router.get(
   '/referrals/:id/constancia',
   requireAuth,
+  auditAccess('Referral', 'DOWNLOAD', byParam('id')),
   authorize(['referrals:read']),
   referralController.downloadConstancia,
 );
@@ -53,6 +55,7 @@ router.get(
 router.get(
   '/referrals/:id',
   requireAuth,
+  auditAccess('Referral', 'READ', byParam('id')),
   authorize(['referrals:read']),
   referralController.getById,
 );

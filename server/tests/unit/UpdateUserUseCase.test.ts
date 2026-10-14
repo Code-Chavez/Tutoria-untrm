@@ -1,4 +1,5 @@
-import { UpdateUserUseCase, UserNotFoundError } from '@application/use-cases/users/UpdateUserUseCase';
+import { UpdateUserUseCase, UserNotFoundError, DuplicateEmailError } from '@application/use-cases/users/UpdateUserUseCase';
+import { DuplicateEmailError as CreateDuplicateEmailError } from '@application/use-cases/users/CreateUserUseCase';
 import { ServiceRequiredError } from '@application/use-cases/users/serviceAssignment';
 import { UserRepository } from '@domain/repositories/UserRepository';
 import { RoleRepository } from '@domain/repositories/RoleRepository';
@@ -72,5 +73,34 @@ describe('UpdateUserUseCase', () => {
     users.findById.mockResolvedValue(user({ roleId: 'servicio', service: 'SALUD' }));
     await useCase.execute('u1', { roleId: 'tutor' });
     expect(users.update).toHaveBeenCalledWith('u1', { roleId: 'tutor', service: null });
+  });
+
+  describe('correo', () => {
+    it('rechaza un correo que ya usa otra persona, aunque difiera en mayúsculas o espacios', async () => {
+      users.findByEmail.mockResolvedValue(user({ id: 'otra', email: 'ocupado@untrm.edu.pe' }));
+
+      await expect(useCase.execute('u1', { email: '  Ocupado@UNTRM.edu.pe ' })).rejects.toThrow(DuplicateEmailError);
+      expect(users.findByEmail).toHaveBeenCalledWith('ocupado@untrm.edu.pe');
+      expect(users.update).not.toHaveBeenCalled();
+    });
+
+    it('el error de edición es el mismo que captura el controlador (si no, respondería 500)', async () => {
+      users.findByEmail.mockResolvedValue(user({ id: 'otra' }));
+
+      await expect(useCase.execute('u1', { email: 'x@untrm.edu.pe' })).rejects.toBeInstanceOf(CreateDuplicateEmailError);
+    });
+
+    it('guarda el correo normalizado', async () => {
+      await useCase.execute('u1', { email: '  Nuevo@UNTRM.edu.pe ' });
+
+      expect(users.update).toHaveBeenCalledWith('u1', { email: 'nuevo@untrm.edu.pe' });
+    });
+
+    it('la persona puede reescribir su propio correo con otras mayúsculas', async () => {
+      users.findByEmail.mockResolvedValue(user());
+
+      await expect(useCase.execute('u1', { email: 'Persona@untrm.edu.pe' })).resolves.toBeDefined();
+      expect(users.update).toHaveBeenCalledWith('u1', { email: 'persona@untrm.edu.pe' });
+    });
   });
 });

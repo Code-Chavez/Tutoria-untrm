@@ -1,3 +1,4 @@
+import { SchoolRepository } from '@domain/repositories/SchoolRepository';
 import { GetEvaluationResultsUseCase } from '@application/use-cases/evaluation/GetEvaluationResultsUseCase';
 import {
   EvaluationResultsForbiddenError,
@@ -18,6 +19,7 @@ describe('GetEvaluationResultsUseCase', () => {
   let roles: jest.Mocked<RoleRepository>;
   let periods: jest.Mocked<AcademicPeriodRepository>;
   let evaluations: jest.Mocked<TutorEvaluationRepository>;
+  let schools: jest.Mocked<SchoolRepository>;
   let useCase: GetEvaluationResultsUseCase;
 
   const adminUser = { id: 'admin-1', roleId: 'role-admin' } as User;
@@ -58,7 +60,8 @@ describe('GetEvaluationResultsUseCase', () => {
       findAnonymizedScoresByPeriod: jest.fn().mockResolvedValue([]),
       findAnonymizedSuggestionsByPeriod: jest.fn().mockResolvedValue([]),
     };
-    useCase = new GetEvaluationResultsUseCase(users, roles, periods, evaluations);
+    schools = { findAll: jest.fn().mockResolvedValue([{ id: 'school-a', coordinatorId: 'coord-1' }, { id: 'school-b', coordinatorId: 'coord-2' }]), findById: jest.fn() } as unknown as jest.Mocked<SchoolRepository>;
+    useCase = new GetEvaluationResultsUseCase(users, roles, periods, evaluations, schools);
   });
 
   it('calcula el promedio y la distribución de cada ítem', async () => {
@@ -121,5 +124,43 @@ describe('GetEvaluationResultsUseCase', () => {
     expect(serialized).not.toContain('student-filtrado');
     expect(results).not.toHaveProperty('studentId');
     results.items.forEach((item) => expect(item).not.toHaveProperty('studentId'));
+  });
+
+  describe('alcance del coordinador (A05)', () => {
+    const asCoordinator = (id: string) => {
+      users.findById.mockImplementation(async (userId: string) =>
+        userId === id ? ({ id, roleId: 'role-coord', isActive: true } as User) : userId === 'tutor-1' ? tutorUser : null,
+      );
+      roles.findById.mockResolvedValue({ id: 'role-coord', name: 'Coordinador' } as Role);
+    };
+
+    it('el coordinador solo recibe respuestas de tutorados de las escuelas que coordina', async () => {
+      asCoordinator('coord-1');
+
+      await useCase.execute('coord-1', 'tutor-1');
+
+      expect(evaluations.findAnonymizedScoresByTutorAndPeriod).toHaveBeenCalledWith('tutor-1', 'period-1', ['school-a']);
+    });
+
+    it('un coordinador sin escuelas asignadas no recibe respuestas', async () => {
+      asCoordinator('coord-sin-escuelas');
+
+      await useCase.execute('coord-sin-escuelas', 'tutor-1');
+
+      expect(evaluations.findAnonymizedScoresByTutorAndPeriod).toHaveBeenCalledWith('tutor-1', 'period-1', []);
+    });
+
+    it('la DBU no queda restringida', async () => {
+      await useCase.execute('admin-1', 'tutor-1');
+
+      expect(evaluations.findAnonymizedScoresByTutorAndPeriod).toHaveBeenCalledWith('tutor-1', 'period-1', undefined);
+    });
+
+    it('una cuenta desactivada no consulta', async () => {
+      users.findById.mockResolvedValue({ id: 'coord-1', roleId: 'role-coord', isActive: false } as User);
+      roles.findById.mockResolvedValue({ id: 'role-coord', name: 'Coordinador' } as Role);
+
+      await expect(useCase.execute('coord-1', 'tutor-1')).rejects.toThrow(EvaluationResultsForbiddenError);
+    });
   });
 });

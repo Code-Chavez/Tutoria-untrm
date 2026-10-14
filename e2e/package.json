@@ -1,6 +1,6 @@
 {
   "name": "sit-e2e",
-  "version": "0.4.4",
+  "version": "1.0.0-beta.1",
   "private": true,
   "description": "Pruebas de extremo a extremo del SIT (Playwright) contra el stack de docker compose",
   "scripts": {

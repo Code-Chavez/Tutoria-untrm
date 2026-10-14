@@ -6,6 +6,8 @@ export interface SmtpConfig {
   port: number;
   /** TLS implícito (puerto 465); en 587/25 se negocia STARTTLS si el servidor lo ofrece. */
   secure: boolean;
+  /** Exige STARTTLS cuando no hay TLS implícito: sin él no se envía (nunca en claro). */
+  requireTls?: boolean;
   user?: string;
   pass?: string;
   from: string;
@@ -20,6 +22,7 @@ export class SmtpMailer implements Mailer {
       host: config.host,
       port: config.port,
       secure: config.secure,
+      ...(config.requireTls && !config.secure ? { requireTLS: true } : {}),
       ...(config.user ? { auth: { user: config.user, pass: config.pass ?? '' } } : {}),
       connectionTimeout: 10_000,
       greetingTimeout: 10_000,

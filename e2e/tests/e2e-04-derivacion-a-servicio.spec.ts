@@ -25,6 +25,7 @@ async function openCaseFromBell(page: Page): Promise<void> {
 test('la tutora deriva el caso de Ana a Psicología', async ({ page }) => {
   await loginUi(page, accounts.tutor);
   await goToMenu(page, 'Derivar caso');
+  await page.getByLabel('Buscar tutorado').fill('20191234');
   await page.getByRole('button', { name: /Derivar caso: Ana Torres/ }).click();
 
   const form = page.getByRole('dialog', { name: 'Ficha de derivación' });

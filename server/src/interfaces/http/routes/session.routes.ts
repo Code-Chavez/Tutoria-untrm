@@ -1,4 +1,5 @@
 import { Router, type IRouter } from 'express';
+import { auditAccess, byParam } from '../middleware/auditAccess';
 import multer from 'multer';
 import { container } from '../../../infrastructure/container';
 import { SessionController } from '../controllers/SessionController';
@@ -87,6 +88,7 @@ router.get(
 router.get(
   '/sessions/:id/evidence/:evidenceId/file',
   requireAuth,
+  auditAccess('SessionEvidence', 'DOWNLOAD', byParam('evidenceId')),
   authorize(['sessions:read']),
   sessionController.downloadEvidence,
 );

@@ -8,6 +8,7 @@ const valid = {
   CORS_ORIGIN: 'https://sit.untrm.edu.pe',
   PUBLIC_APP_URL: 'https://sit.untrm.edu.pe',
   SMTP_HOST: 'smtp.untrm.edu.pe',
+  SMTP_REQUIRE_TLS: 'true',
   BCRYPT_ROUNDS: '12',
 };
 
@@ -73,3 +74,48 @@ describe('contraseña del primer administrador (A11)', () => {
     expect(() => assertAcceptableAdminPassword('Una-clave-larga-y-propia-2026')).not.toThrow();
   });
 });
+
+describe('findSmtpProblems (A10)', () => {
+  const { findSmtpProblems } = require('@infrastructure/config/productionConfig');
+  const ok = { SMTP_HOST: 'smtp.untrm.edu.pe', SMTP_PORT: '587', SMTP_REQUIRE_TLS: 'true', SMTP_USER: 'sit', SMTP_PASS: 'x', MAIL_FROM: 'SIT UNTRM <no-reply@untrm.edu.pe>' };
+
+  it('acepta una configuración completa con STARTTLS obligatorio', () => {
+    expect(findSmtpProblems(ok)).toEqual([]);
+  });
+
+  it('acepta TLS implícito (465)', () => {
+    expect(findSmtpProblems({ ...ok, SMTP_PORT: '465', SMTP_SECURE: 'true', SMTP_REQUIRE_TLS: undefined })).toEqual([]);
+  });
+
+  it('exige decidir la protección: sin SMTP_SECURE ni SMTP_REQUIRE_TLS no arranca', () => {
+    expect(findSmtpProblems({ ...ok, SMTP_REQUIRE_TLS: undefined }).join(' ')).toMatch(/SMTP_REQUIRE_TLS=true/);
+  });
+
+  it('SMTP_SECURE=false por sí solo no cuenta como decisión (es el valor por defecto del despliegue)', () => {
+    expect(findSmtpProblems({ ...ok, SMTP_SECURE: 'false', SMTP_REQUIRE_TLS: undefined }).join(' ')).toMatch(/SMTP_REQUIRE_TLS=true/);
+    expect(findSmtpProblems({ ...ok, SMTP_SECURE: 'false', SMTP_REQUIRE_TLS: '' }).join(' ')).toMatch(/SMTP_REQUIRE_TLS=true/);
+  });
+
+  it('un relay interno sin TLS solo se admite con SMTP_REQUIRE_TLS=false explícito', () => {
+    expect(findSmtpProblems({ ...ok, SMTP_REQUIRE_TLS: 'false' })).toEqual([]);
+  });
+
+  it.each(['0', '70000', 'abc', '587.5'])('rechaza el puerto «%s»', (port) => {
+    expect(findSmtpProblems({ ...ok, SMTP_PORT: port }).join(' ')).toMatch(/SMTP_PORT/);
+  });
+
+  it('rechaza un usuario sin contraseña y un remitente sin dirección válida', () => {
+    expect(findSmtpProblems({ ...ok, SMTP_PASS: undefined }).join(' ')).toMatch(/SMTP_PASS/);
+    expect(findSmtpProblems({ ...ok, MAIL_FROM: 'sin direccion' }).join(' ')).toMatch(/MAIL_FROM/);
+  });
+
+  it('sin SMTP_HOST el único problema es ese (no se evalúa el resto)', () => {
+    expect(findSmtpProblems({})).toHaveLength(1);
+  });
+
+  it('nunca incluye valores de secretos en los mensajes', () => {
+    const text = findSmtpProblems({ ...ok, SMTP_PASS: undefined, SMTP_PORT: 'abc', MAIL_FROM: 'x' }).join(' ');
+    expect(text).not.toContain('smtp.untrm.edu.pe');
+  });
+});
+

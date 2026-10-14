@@ -242,6 +242,7 @@ Procedimiento, variables y ensayo: **`backup/README.md`**. Reversión de una act
 | `docs/MATRIZ_TRAZABILIDAD_PRUEBAS.md` · `e2e/README.md` | Pruebas y su trazabilidad |
 | `docs/ACEPTACION_*.md` · `docs/INFORME_SEGURIDAD_*.md` | Evidencia de aceptación y de seguridad |
 | `docs/GUIA_PILOTO.md` · `docs/piloto/` | Preparación, ejecución y registro del piloto con usuarios |
+| `docs/GUIA_SMTP.md` · `deploy/probar-smtp.js` | Configurar y probar el correo (recuperación de contraseña y avisos) |
 
 ## Licencia
 

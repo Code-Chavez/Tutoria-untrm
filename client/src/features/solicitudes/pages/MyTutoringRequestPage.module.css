@@ -1,5 +1,6 @@
 .page {
   max-width: 640px;
+  margin: 0 auto;
 }
 
 .header {
@@ -143,4 +144,49 @@
   margin: 0;
   font-size: 13px;
   color: var(--g600);
+}
+
+.requester {
+  margin: 0 0 14px;
+  font-size: 12.5px;
+  line-height: 1.5;
+  color: var(--g600);
+}
+
+.examplesLabel {
+  display: block;
+  margin-bottom: 6px;
+  font-family: var(--ft);
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--g900);
+}
+
+.examples {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.example {
+  font-family: var(--fx);
+  font-size: 12.5px;
+  line-height: 1.4;
+  text-align: left;
+  padding: 7px 11px;
+  border: 1.5px solid var(--g300);
+  border-radius: 999px;
+  background: var(--g50);
+  color: var(--azul);
+  cursor: pointer;
+}
+
+.example:hover:not(:disabled) {
+  border-color: var(--azul-med);
+  background: #fff;
+}
+
+.example:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
 }

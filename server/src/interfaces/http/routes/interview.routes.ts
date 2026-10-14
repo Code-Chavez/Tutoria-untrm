@@ -1,4 +1,5 @@
 import { Router, type IRouter } from 'express';
+import { auditAccess, byParam } from '../middleware/auditAccess';
 import { container } from '../../../infrastructure/container';
 import { InterviewController } from '../controllers/InterviewController';
 import { authenticate } from '../middleware/authenticate';
@@ -24,6 +25,7 @@ router.post(
 router.get(
   '/students/:id/interviews',
   requireAuth,
+  auditAccess('Interview', 'READ', byParam('id')),
   authorize(['interviews:read']),
   interviewController.listByStudent,
 );

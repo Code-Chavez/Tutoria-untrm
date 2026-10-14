@@ -52,7 +52,7 @@ describe('DashboardPage (paneles por rol)', () => {
     expect(screen.getByText('3 en riesgo')).toBeInTheDocument();
     expect(screen.getByText('Alertas pendientes')).toBeInTheDocument();
     expect(screen.getByText(/Periodo académico 2026-II/)).toBeInTheDocument();
-    expect(screen.getByText('Docente Tutor')).toBeInTheDocument(); // etiqueta del rol
+    expect(screen.getByText('Docente')).toBeInTheDocument(); // etiqueta del rol
   });
 
   it('los indicadores con detalle enlazan a su vista y los demás no', async () => {

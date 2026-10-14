@@ -25,13 +25,16 @@ describe('Parámetros del sistema (HU-49)', () => {
   });
 
   describe('listado', () => {
-    it('expone los cuatro parámetros editables con sus rangos y valores predeterminados', async () => {
+    it('expone los siete parámetros editables con sus rangos y valores predeterminados', async () => {
       const list = await new ListSystemParametersUseCase(repo).execute();
       expect(list.map((p) => p.key)).toEqual([
         'session_duration_minutes',
         'max_sessions_per_semester',
         'absence_alert_threshold',
         'referral_followup_deadline_hours',
+        'inactivity_timeout_minutes',
+        'login_max_attempts',
+        'login_lockout_minutes',
       ]);
       expect(list.every((p) => p.isDefault)).toBe(true);
       expect(list.find((p) => p.key === 'session_duration_minutes')).toMatchObject({ value: 45, min: 15, max: 180 });
@@ -53,10 +56,11 @@ describe('Parámetros del sistema (HU-49)', () => {
       expect(list[1]).toMatchObject({ value: 8, isDefault: true });
     });
 
-    it('no expone parámetros que el sistema no consulta (bloqueo de sesión, inactividad)', async () => {
-      repo.findAll.mockResolvedValue([{ id: '1', key: 'login_max_attempts', value: '3', label: 'x' }]);
-      const keys = (await new ListSystemParametersUseCase(repo).execute()).map((p) => p.key);
-      expect(keys).not.toContain('login_max_attempts');
+    it('expone los de seguridad de acceso, que ahora gobiernan el inicio de sesión (A08)', async () => {
+      repo.findAll.mockResolvedValue([{ id: '1', key: 'login_max_attempts', value: '4', label: 'x' }]);
+      const list = await new ListSystemParametersUseCase(repo).execute();
+      expect(list.find((p) => p.key === 'login_max_attempts')).toMatchObject({ value: 4, isDefault: false, group: 'Seguridad de acceso' });
+      expect(list.find((p) => p.key === 'inactivity_timeout_minutes')).toMatchObject({ value: 15, isDefault: true });
     });
   });
 
@@ -105,8 +109,13 @@ describe('Parámetros del sistema (HU-49)', () => {
       expect(audit.create).not.toHaveBeenCalled();
     });
 
+    it('rechaza un valor fuera del rango de seguridad de acceso', async () => {
+      await expect(update().execute('admin-1', 'login_max_attempts', 1)).rejects.toThrow(/entre 3 y 10/);
+      await expect(update().execute('admin-1', 'inactivity_timeout_minutes', 1000)).rejects.toThrow(/entre 5 y 120/);
+    });
+
     it('rechaza un parámetro desconocido o no editable', async () => {
-      await expect(update().execute('admin-1', 'login_max_attempts', 3)).rejects.toBeInstanceOf(UnknownParameterError);
+      await expect(update().execute('admin-1', 'clave_inexistente', 3)).rejects.toBeInstanceOf(UnknownParameterError);
     });
 
     it('los límites incluyen sus extremos', async () => {
