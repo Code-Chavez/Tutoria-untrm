@@ -2,6 +2,7 @@ import { useContext, useEffect, useRef, useState, type FormEvent } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { getApiErrorMessage } from '@shared/services/apiClient';
 import { AuthContext } from '@features/auth/context/AuthContext';
+import { getRoleLabel } from '@shared/utils/roleLabel';
 import { profileService } from '../services/profileService';
 import styles from './ProfilePage.module.css';
 
@@ -139,7 +140,7 @@ export function ProfilePage() {
                 <div className={styles.name}>
                   {profile.firstName} {profile.lastName}
                 </div>
-                <span className={styles.rolePill}>{profile.role}</span>
+                <span className={styles.rolePill}>{getRoleLabel(profile.role, profile.service)}</span>
               </div>
             </div>
 

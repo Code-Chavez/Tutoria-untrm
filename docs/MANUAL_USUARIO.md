@@ -35,6 +35,8 @@ que otro compañero sí tiene: depende de su rol.
 | Vicerrectorado | Panel de inicio · Informe consolidado · Indicadores |
 | Administrador DBU | Todo lo anterior, más Seguimiento DBU, Usuarios y roles, Catálogos, Parámetros, Identidad visual, Bitácora de auditoría y Evaluación de tutoría |
 
+*Nombres en pantalla:* el sistema muestra **Estudiante** (rol Tutorado), **Docente** (Docente tutor), **Administrador** (Administrador DBU) y, para el Profesional de servicio, su especialidad (p. ej. «Profesional de Psicología»). Son los mismos roles de la tabla; solo cambia cómo se escriben junto a su nombre, en el perfil y en la lista de usuarios.
+
 ### 1.2 Entrar al sistema
 
 ![Pantalla de ingreso](manual/img/01-ingreso.jpg)

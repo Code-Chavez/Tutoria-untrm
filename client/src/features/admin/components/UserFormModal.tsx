@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { getApiErrorMessage } from '@shared/services/apiClient';
+import { roleDisplayName } from '@shared/utils/roleLabel';
 import { useDialog } from '@shared/hooks/useDialog';
 import styles from './UserFormModal.module.css';
 import { User, CreateUserData, UpdateUserData } from '../services/userService';
@@ -152,7 +153,7 @@ export const UserFormModal: React.FC<UserFormModalProps> = ({
               <option value="">Seleccione un rol...</option>
               {roles.map((role) => (
                 <option key={role.id} value={role.id}>
-                  {role.name}
+                  {roleDisplayName(role.name)}
                 </option>
               ))}
             </select>

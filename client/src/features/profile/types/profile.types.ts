@@ -6,6 +6,7 @@ export interface UserProfile {
   phone: string | null;
   photoUrl: string | null;
   role: string;
+  service?: string | null;
 }
 
 export interface UpdateProfilePayload {

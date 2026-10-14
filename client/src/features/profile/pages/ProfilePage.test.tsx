@@ -41,7 +41,7 @@ describe('ProfilePage', () => {
 
     expect(await screen.findByText('Juan Pérez')).toBeInTheDocument();
     expect(screen.getByText('tutor@untrm.edu.pe')).toBeInTheDocument();
-    expect(screen.getByText('Docente Tutor')).toBeInTheDocument();
+    expect(screen.getByText('Docente')).toBeInTheDocument();
     expect(screen.getByLabelText(/teléfono/i)).toHaveValue('987654321');
   });
 
