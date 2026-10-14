@@ -1,4 +1,5 @@
 import { useState, type FormEvent } from 'react';
+import { useAuth } from '@features/auth/hooks/useAuth';
 import { getApiErrorMessage } from '@shared/services/apiClient';
 import { PageHeader, Button, SelectField } from '@shared/components/ui';
 import { SendIcon } from '@shared/components/icons';
@@ -25,6 +26,28 @@ const CASE_TYPES: { value: CreateOwnTutoringRequestData['caseType']; label: stri
   { value: 'HEALTH', label: 'Salud' },
 ];
 
+// Comienzos de frase para quien no sabe cómo empezar: se insertan en el cuadro y se pueden editar o borrar. No suponen
+// ningún hecho sobre la persona; solo ayudan a redactar.
+const EXAMPLES: Record<CreateOwnTutoringRequestData['caseType'], string[]> = {
+  ACADEMIC: [
+    'Necesito orientación para organizar mi estudio de ',
+    'Tengo dificultades con el curso de ',
+    'Quisiera apoyo para mejorar mi rendimiento en ',
+  ],
+  PSYCHOLOGICAL: [
+    'Me gustaría conversar con un profesional sobre cómo me he sentido últimamente.',
+    'Estoy pasando por una situación que me preocupa y quisiera orientación.',
+  ],
+  SOCIAL: [
+    'Tengo una dificultad personal o familiar que afecta mis estudios y quisiera apoyo.',
+    'Necesito orientación sobre una situación económica o social que me preocupa.',
+  ],
+  HEALTH: [
+    'Necesito orientación sobre una situación de salud que afecta mis estudios.',
+    'Quisiera saber a quién acudir por un problema de salud.',
+  ],
+};
+
 // Autoservicio (Art. 19.b): el propio tutorado solicita tutoría desde su cuenta.
 const STATUS_TONE: Record<TutoringRequestStatus, 'warning' | 'info' | 'success'> = {
   PENDIENTE: 'warning',
@@ -34,11 +57,15 @@ const STATUS_TONE: Record<TutoringRequestStatus, 'warning' | 'info' | 'success'>
 
 export function MyTutoringRequestPage() {
   const queryClient = useQueryClient();
+  const { user } = useAuth();
   const history = useOwnTutoringRequests();
   const [caseType, setCaseType] = useState<CreateOwnTutoringRequestData['caseType']>('ACADEMIC');
   const [reason, setReason] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [feedback, setFeedback] = useState<Feedback | null>(null);
+
+  // Un ejemplo ocupa el cuadro si está vacío; si ya hay texto, se agrega en otra línea para no perder lo escrito.
+  const insertExample = (text: string) => setReason((current) => (current.trim() ? `${current.trimEnd()}\n${text}` : text));
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -82,6 +109,11 @@ export function MyTutoringRequestPage() {
         </div>
         <div className={styles.panelBody}>
           <form onSubmit={handleSubmit}>
+            {user && (
+              <p className={styles.requester}>
+                Solicitas como <b>{user.firstName} {user.lastName}</b> ({user.email}). Tu solicitud la verá solo quien debe atenderla.
+              </p>
+            )}
             {feedback && (
               <div className={feedback.type === 'ok' ? styles.ok : styles.error} role="alert">
                 {feedback.text}
@@ -107,6 +139,17 @@ export function MyTutoringRequestPage() {
             </div>
 
             <div className={styles.field}>
+              <span className={styles.examplesLabel} id="examples-label">¿No sabes cómo empezar? Toca una frase y complétala:</span>
+              <div className={styles.examples} role="group" aria-labelledby="examples-label">
+                {EXAMPLES[caseType].map((example) => (
+                  <button key={example} type="button" className={styles.example} onClick={() => insertExample(example)} disabled={submitting}>
+                    {example.trim()}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div className={styles.field}>
               <label htmlFor="reason">Descripción del motivo</label>
               <textarea
                 id="reason"
@@ -114,7 +157,7 @@ export function MyTutoringRequestPage() {
                 rows={5}
                 value={reason}
                 maxLength={1000}
-                placeholder="Detalle de la situación que motiva tu solicitud…"
+                placeholder="Cuéntanos con tus palabras qué necesitas y desde cuándo. Escribe solo lo que quieras compartir."
                 onChange={(e) => setReason(e.target.value)}
                 disabled={submitting}
               />

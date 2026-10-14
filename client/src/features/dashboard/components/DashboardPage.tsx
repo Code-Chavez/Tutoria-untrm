@@ -17,6 +17,7 @@ import { useHomePanel } from '../hooks/useHomePanel';
 import type { HomeKpi } from '../services/homePanelService';
 import { QuickActions } from './QuickActions';
 import { ALERT_ROLES, quickActionsFor } from './homeAccess';
+import { getRoleLabel } from '@shared/utils/roleLabel';
 import { RecentActivity } from './RecentActivity';
 import { RiskAlerts } from './RiskAlerts';
 import styles from './DashboardPage.module.css';
@@ -81,7 +82,7 @@ export function DashboardPage() {
             {panel?.periodName ? ` · Periodo académico ${panel.periodName}` : ''}
           </p>
         </div>
-        {user && <span className={styles.roleTag}>{user.role}</span>}
+        {user && <span className={styles.roleTag}>{getRoleLabel(user.role, user.service)}</span>}
       </div>
 
       <div className={styles.kpis}>

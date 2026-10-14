@@ -1,3 +1,4 @@
+import { getRoleLabel } from '@shared/utils/roleLabel';
 import React, { useEffect, useState } from 'react';
 import { useDialogFocus } from '@shared/hooks/useDialog';
 import { Button, Stepper } from '@shared/components/ui';
@@ -421,7 +422,7 @@ export const InterviewFormModal: React.FC<InterviewFormModalProps> = ({
                 <b>
                   {user?.firstName} {user?.lastName}
                 </b>{' '}
-                ({user?.role}), en reemplazo de la firma física del Anexo N° 3.
+                ({user ? getRoleLabel(user.role, user.service) : ''}), en reemplazo de la firma física del Anexo N° 3.
               </div>
             </>
           )}

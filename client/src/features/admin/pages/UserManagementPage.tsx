@@ -5,6 +5,7 @@ import { TemporaryPasswordDialog } from '../components/TemporaryPasswordDialog';
 import { UserFormModal } from '../components/UserFormModal';
 import { UserFilters, UserFilterValues } from '../components/UserFilters';
 import { UserTable } from '../components/UserTable';
+import { roleDisplayName } from '@shared/utils/roleLabel';
 import { useUsers } from '../hooks/useUsers';
 import {
   PageHeader,
@@ -29,7 +30,10 @@ export const UserManagementPage: React.FC = () => {
   const [userToToggle, setUserToToggle] = useState<User | null>(null);
   const [toggling, setToggling] = useState(false);
 
-  const roleName = (roleId: string) => roles.find((r) => r.id === roleId)?.name ?? 'Sin rol';
+  const roleName = (roleId: string) => {
+    const name = roles.find((r) => r.id === roleId)?.name;
+    return name ? roleDisplayName(name) : 'Sin rol';
+  };
 
   const filtered = useMemo(() => {
     const term = filters.search.trim().toLowerCase();

@@ -2,6 +2,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { QueryClientTestWrapper } from '@shared/test-utils/QueryClientTestWrapper';
+import { AuthContext, type AuthContextValue } from '@features/auth/context/AuthContext';
 import { MyTutoringRequestPage } from './MyTutoringRequestPage';
 import { tutoringRequestService } from '../services/tutoringRequestService';
 import type { TutoringRequest, TutoringRequestView } from '../services/tutoringRequestService';
@@ -39,11 +40,21 @@ const view = (over: Partial<TutoringRequestView> = {}): TutoringRequestView => (
   ...over,
 });
 
+const auth: AuthContextValue = {
+  user: { id: 'u1', email: 'ana@untrm.edu.pe', firstName: 'Ana', lastName: 'Torres', role: 'Tutorado' },
+  isAuthenticated: true,
+  login: vi.fn(),
+  logout: vi.fn(),
+  markPasswordChanged: vi.fn(),
+};
+
 const renderPage = () =>
   render(
-    <QueryClientTestWrapper>
-      <MyTutoringRequestPage />
-    </QueryClientTestWrapper>,
+    <AuthContext.Provider value={auth}>
+      <QueryClientTestWrapper>
+        <MyTutoringRequestPage />
+      </QueryClientTestWrapper>
+    </AuthContext.Provider>,
   );
 
 describe('MyTutoringRequestPage', () => {
@@ -108,4 +119,58 @@ describe('MyTutoringRequestPage', () => {
     renderPage();
     expect(await screen.findByText('Aún no has registrado solicitudes.')).toBeInTheDocument();
   });
+
+  describe('ayuda para redactar (A11)', () => {
+    it('muestra quién solicita', () => {
+      renderPage();
+
+      expect(screen.getByText(/Solicitas como/)).toHaveTextContent('Ana Torres');
+      expect(screen.getByText(/Solicitas como/)).toHaveTextContent('ana@untrm.edu.pe');
+    });
+
+    it('ofrece frases de ejemplo según el motivo y las inserta en el cuadro, editables', async () => {
+      const user = userEvent.setup();
+      renderPage();
+
+      await user.click(screen.getByRole('button', { name: /Tengo dificultades con el curso de/ }));
+
+      const box = screen.getByLabelText('Descripción del motivo') as HTMLTextAreaElement;
+      expect(box.value).toBe('Tengo dificultades con el curso de ');
+      await user.type(box, 'Cálculo II');
+      expect(box.value).toBe('Tengo dificultades con el curso de Cálculo II');
+    });
+
+    it('al cambiar el motivo cambian los ejemplos', async () => {
+      const user = userEvent.setup();
+      renderPage();
+      expect(screen.queryByRole('button', { name: /situación de salud/ })).not.toBeInTheDocument();
+
+      await user.selectOptions(screen.getByLabelText(/Motivo/), 'HEALTH');
+
+      expect(screen.getByRole('button', { name: /Necesito orientación sobre una situación de salud/ })).toBeInTheDocument();
+      expect(screen.queryByRole('button', { name: /Tengo dificultades con el curso de/ })).not.toBeInTheDocument();
+    });
+
+    it('si ya hay texto, el ejemplo se agrega en otra línea sin borrar lo escrito', async () => {
+      const user = userEvent.setup();
+      renderPage();
+      const box = screen.getByLabelText('Descripción del motivo') as HTMLTextAreaElement;
+      await user.type(box, 'Hola');
+
+      await user.click(screen.getByRole('button', { name: /Quisiera apoyo para mejorar mi rendimiento en/ }));
+
+      expect(box.value).toBe('Hola' + String.fromCharCode(10) + 'Quisiera apoyo para mejorar mi rendimiento en ');
+    });
+
+    it('un ejemplo solo no basta para enviar: hay que completarlo (no manda texto prellenado sin querer)', async () => {
+      const user = userEvent.setup();
+      renderPage();
+
+      await user.click(screen.getByRole('button', { name: /registrar solicitud/i }));
+
+      expect(await screen.findByText('Describe el motivo de la solicitud.')).toBeInTheDocument();
+      expect(mocked.createOwnTutoringRequest).not.toHaveBeenCalled();
+    });
+  });
 });
+
