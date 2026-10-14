@@ -1,7 +1,7 @@
 # Evidencia de la corrida E2E completa — candidata v1.0.0-beta.1
 
 - **Commit probado:** `132d37f` (rama `release/v1.0.0-beta.1`, sobre `develop` en `da28412`, que incluye A01–A05 y A07–A11 y las mejoras de rendimiento).
-- **Fecha y entorno:** 14/10/2026, stack de desarrollo local con Docker (`docker compose`), Chrome (`E2E_CHANNEL=chrome`), un solo trabajador, **una corrida continua** (sin repetir pruebas).
+- **Fecha y entorno:** 13/10/2026, stack de desarrollo local con Docker (`docker compose`), Chrome (`E2E_CHANNEL=chrome`), un solo trabajador, **una corrida continua** (sin repetir pruebas).
 - **Resultado:** **40 de 40 pruebas pasaron** (9 recorridos), 16.2 min.
 - **Alcance y límites:** solo Chrome; sin Firefox, Edge, Safari ni móvil; datos de demostración; sin entrega SMTP real (los correos van a Mailpit); sin carga de 100 usuarios ni importación de 2000 filas. No sustituye el *smoke test* en el servidor de la beta.
 
