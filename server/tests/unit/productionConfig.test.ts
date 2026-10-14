@@ -91,6 +91,11 @@ describe('findSmtpProblems (A10)', () => {
     expect(findSmtpProblems({ ...ok, SMTP_REQUIRE_TLS: undefined }).join(' ')).toMatch(/SMTP_REQUIRE_TLS=true/);
   });
 
+  it('SMTP_SECURE=false por sí solo no cuenta como decisión (es el valor por defecto del despliegue)', () => {
+    expect(findSmtpProblems({ ...ok, SMTP_SECURE: 'false', SMTP_REQUIRE_TLS: undefined }).join(' ')).toMatch(/SMTP_REQUIRE_TLS=true/);
+    expect(findSmtpProblems({ ...ok, SMTP_SECURE: 'false', SMTP_REQUIRE_TLS: '' }).join(' ')).toMatch(/SMTP_REQUIRE_TLS=true/);
+  });
+
   it('un relay interno sin TLS solo se admite con SMTP_REQUIRE_TLS=false explícito', () => {
     expect(findSmtpProblems({ ...ok, SMTP_REQUIRE_TLS: 'false' })).toEqual([]);
   });

@@ -35,6 +35,8 @@ services:
       SMTP_HOST: ${SMTP_HOST:?defina SMTP_HOST}
       SMTP_PORT: ${SMTP_PORT:-587}
       SMTP_SECURE: ${SMTP_SECURE:-false}
+      # Obligatorio decidir (true = STARTTLS obligatorio); el servidor no arranca en producción si no se define (A10).
+      SMTP_REQUIRE_TLS: ${SMTP_REQUIRE_TLS:-}
       SMTP_USER: ${SMTP_USER:-}
       SMTP_PASS: ${SMTP_PASS:-}
       MAIL_FROM: ${MAIL_FROM:?defina MAIL_FROM}
