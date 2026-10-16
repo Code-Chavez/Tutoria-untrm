@@ -199,6 +199,16 @@ async function main() {
     }
   }
 
+  // Matrícula de los estudiantes activos en el periodo vigente (sin ella no podrían solicitar tutoría ni evaluar).
+  const demoStudents = await prisma.student.findMany({ where: { isActive: true }, select: { id: true, schoolId: true, cycle: true } });
+  for (const student of demoStudents) {
+    await prisma.periodEnrollment.upsert({
+      where: { periodId_studentId: { periodId: period2026II.id, studentId: student.id } },
+      update: {},
+      create: { periodId: period2026II.id, studentId: student.id, schoolId: student.schoolId, cycle: student.cycle },
+    });
+  }
+
   console.log('Seed completed successfully');
   console.log('');
   console.log('Cuentas de prueba (todas con contraseña: %s):', DEMO_PASSWORD);
