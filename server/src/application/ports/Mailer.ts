@@ -3,6 +3,11 @@ export interface MailMessage {
   subject: string;
   text: string;
   html?: string;
+  /** Con copia (p. ej. a quien hizo el pedido). */
+  cc?: string;
+  /** Dónde llegan las respuestas. */
+  replyTo?: string;
+  attachments?: { filename: string; content: Buffer; contentType?: string }[];
 }
 
 /** Envío de correo electrónico (recuperación de contraseña). */

@@ -1,5 +1,6 @@
 import ExcelJS from 'exceljs';
 import { ImportStudentRow } from '@application/dtos/studentImport.dto';
+import { StudentTemplateProvider } from '@application/ports/StudentTemplateProvider';
 
 type Field = 'studentCode' | 'firstName' | 'lastName' | 'email' | 'phone' | 'cycle' | 'school';
 
@@ -54,7 +55,7 @@ function cellText(value: ExcelJS.CellValue): string {
   return '';
 }
 
-export class ExcelStudentParser {
+export class ExcelStudentParser implements StudentTemplateProvider {
   async parse(buffer: Buffer): Promise<ImportStudentRow[]> {
     const workbook = new ExcelJS.Workbook();
     // @types/node 22 tipa Buffer como genérico; exceljs espera el Buffer clásico.
@@ -98,6 +99,10 @@ export class ExcelStudentParser {
     }
 
     return rows;
+  }
+
+  build(): Promise<Buffer> {
+    return this.buildTemplate();
   }
 
   // Genera un .xlsx de plantilla con encabezados y una fila de ejemplo.

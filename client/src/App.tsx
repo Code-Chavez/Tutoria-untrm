@@ -32,6 +32,7 @@ import { EvaluationPage } from '@features/evaluacion/pages/EvaluationPage';
 import { WorkPlanPage } from '@features/planificacion/pages/WorkPlanPage';
 import { IndicatorsPage } from '@features/indicadores/pages/IndicatorsPage';
 import { CatalogsPage } from '@features/catalogos/pages/CatalogsPage';
+import { DataRequestPage } from '@features/pedidos/pages/DataRequestPage';
 import { PeriodClosurePage } from '@features/periodo/pages/PeriodClosurePage';
 import { ParametersPage } from '@features/parametros/pages/ParametersPage';
 import { BrandingPage } from '@features/identidad/pages/BrandingPage';
@@ -83,6 +84,14 @@ export default function App() {
                 element={
                   <RequireRole roles={['Administrador DBU']}>
                     <BrandingPage />
+                  </RequireRole>
+                }
+              />
+              <Route
+                path="pedir-listas"
+                element={
+                  <RequireRole roles={['Administrador DBU', 'Coordinador']}>
+                    <DataRequestPage />
                   </RequireRole>
                 }
               />

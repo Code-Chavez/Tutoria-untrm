@@ -7,7 +7,17 @@ import styles from './PeriodStatusBanner.module.css';
  */
 export function PeriodStatusBanner() {
   const { data } = usePeriodStatus();
-  if (!data || data.open) return null;
+  if (!data) return null;
+
+  if (data.open && data.enrolled === false) {
+    return (
+      <p role="status" className={styles.banner}>
+        <strong>Solo lectura:</strong> no figuras en la carga del periodo {data.period?.name}. Puedes consultar tu historial, pero no solicitar
+        tutoría ni evaluar hasta que tu escuela te incluya en la carga.
+      </p>
+    );
+  }
+  if (data.open) return null;
 
   return (
     <p role="status" className={styles.banner}>

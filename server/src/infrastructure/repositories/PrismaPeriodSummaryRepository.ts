@@ -14,7 +14,15 @@ export class PrismaPeriodSummaryRepository implements PeriodSummaryRepository {
 
     // Un periodo ya cerrado se lee de su corte de matrícula; uno vigente, de la matrícula actual.
     const snapshots = await this.prisma.studentPeriodSnapshot.findMany({ where: { periodId: period.id }, select: { tutorId: true, isActive: true, isAtRisk: true } });
-    const roster = snapshots.length > 0 ? snapshots : await this.prisma.student.findMany({ select: { tutorId: true, isActive: true, isAtRisk: true } });
+    // Con matrícula del periodo, el resumen cuenta a los matriculados; sin ella, a todos los estudiantes.
+    const enrolledIds = snapshots.length > 0 ? [] : (await this.prisma.periodEnrollment.findMany({ where: { periodId: period.id }, select: { studentId: true } })).map((e) => e.studentId);
+    const roster =
+      snapshots.length > 0
+        ? snapshots
+        : await this.prisma.student.findMany({
+            ...(enrolledIds.length > 0 ? { where: { id: { in: enrolledIds } } } : {}),
+            select: { tutorId: true, isActive: true, isAtRisk: true },
+          });
 
     const [sessions, withAttendance, cancelled, requests, openRequests, referrals, openReferrals, upcoming, evaluations, reports] = await Promise.all([
       this.prisma.session.count({ where: { scheduledAt: within } }),

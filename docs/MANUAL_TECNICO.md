@@ -225,13 +225,15 @@ Implementación: `server/src/infrastructure/repositories/EmailNotificationReposi
 |---|---|
 | Acceso | `User`, `Role`, `Permission`, `RolePermission`, `RefreshToken` (con hash), `PasswordResetToken` (con hash, un solo uso), `AuditLog` |
 | Estructura académica | `Faculty`, `School`, `AcademicPeriod` (con `closedAt`, `closedById` y `closureSummary` al cerrarse), `CatalogItem`, `StudentPeriodSnapshot` (corte de matrícula por semestre) |
-| Tutoría | `Student`, `TutorAssignmentHistory`, `TutorInterview`, `TutorFollowUp`, `SupportContact`, `TutoringRequest` |
+| Tutoría | `Student`, `PeriodEnrollment` (matrícula por periodo), `DataRequest` (pedidos de listas por correo), `TutorAssignmentHistory`, `TutorInterview`, `TutorFollowUp`, `SupportContact`, `TutoringRequest` |
 | Sesiones | `Session`, `SessionParticipant`, `SessionAttendance` (numeración por semestre), `SessionChangeHistory`, `SessionEvidence` |
 | Derivaciones | `StudentReferral`, `ReferralStatusHistory`, `Notification`, `SignedDocument` |
 | Evaluación e informes | `TutorEvaluation`, `EvaluationWindow`, `WorkPlan`, `WorkPlanVersion`, `TutorSemesterReport` |
 | Configuración | `SystemParameter`, `BrandingSetting` |
 
 - **Cierre de periodo:** `POST /api/periods/:id/close` (DBU, confirmando el nombre), `POST /api/periods/:id/reopen`, `GET /api/periods/:id/closure` (resumen) y `GET /api/periods/current` (cualquier sesión). Sin periodo vigente, el middleware `requireOpenPeriod` rechaza con `409 PERIOD_CLOSED` los registros operativos (sesiones, asistencias, entrevistas, seguimientos, red de apoyo, derivaciones, solicitudes y adjuntos firmados); las cargas y la administración no pasan por él. Se consulta la base en cada escritura para que el cierre rija al instante.
+- **Matrícula por periodo:** `POST /api/students/import` y el alta manual matriculan al estudiante en el periodo vigente (los que ya existían continúan: se actualiza su ciclo y se reactivan; sin periodo vigente la carga responde `409 NO_OPEN_PERIOD`). El middleware `requireEnrollment` rechaza con `403 NOT_ENROLLED` las acciones propias del estudiante (`POST /tutoring-requests/me`, `POST /evaluations`) si no figura en la matrícula del periodo vigente; `GET /api/periods/current` devuelve `enrolled` para estudiantes. La migración matricula a los estudiantes activos en el periodo vigente al actualizar. El corte de matrícula y el resumen del cierre usan la matrícula cuando el periodo la tiene.
+- **Pedido de listas:** `PUT /api/schools/:id/request-email` (DBU o coordinación de esa escuela), `POST /api/data-requests` (correo formal con la plantilla Excel adjunta, copia y Reply-To a quien pide; queda `ENVIADO` o `FALLIDO`), `GET /api/data-requests` y `POST /api/data-requests/:id/received`. Permiso `students:import`, con el alcance por escuela de siempre.
 - **Datos base** (`seedBase`): permisos, roles, parámetros. **Datos de demostración** (`prisma/seed.ts`): solo desarrollo.
 - Los archivos adjuntos **no** están en la base: viven en `EVIDENCE_STORAGE_DIR` y se respaldan junto con ella.
 

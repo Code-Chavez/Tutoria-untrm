@@ -2,6 +2,8 @@ import { Student } from '@domain/entities/Student';
 import { StudentRepository } from '@domain/repositories/StudentRepository';
 import { SchoolRepository } from '@domain/repositories/SchoolRepository';
 import { StudentAccessGuard } from '@application/access/StudentAccessGuard';
+import { AcademicPeriodRepository } from '@domain/repositories/AcademicPeriodRepository';
+import { PeriodEnrollmentRepository } from '@domain/repositories/PeriodEnrollmentRepository';
 import { CreateStudentInput } from '@application/dtos/student.dto';
 import { DuplicateStudentCodeError, SchoolNotFoundError } from './StudentErrors';
 
@@ -10,6 +12,8 @@ export class CreateStudentUseCase {
     private readonly students: StudentRepository,
     private readonly schools: SchoolRepository,
     private readonly guard: StudentAccessGuard,
+    private readonly periods: AcademicPeriodRepository,
+    private readonly enrollments: PeriodEnrollmentRepository,
   ) {}
 
   async execute(data: CreateStudentInput, requesterId: string): Promise<Student> {
@@ -26,7 +30,7 @@ export class CreateStudentUseCase {
       throw new DuplicateStudentCodeError(code);
     }
 
-    return this.students.create({
+    const student = await this.students.create({
       studentCode: code,
       firstName: data.firstName.trim(),
       lastName: data.lastName.trim(),
@@ -37,5 +41,10 @@ export class CreateStudentUseCase {
       isAtRisk: false,
       isActive: true,
     });
+
+    // Un estudiante dado de alta durante un periodo vigente queda matriculado en él.
+    const period = await this.periods.findActive();
+    if (period) await this.enrollments.enroll({ periodId: period.id, studentId: student.id, schoolId: student.schoolId, cycle: student.cycle });
+    return student;
   }
 }

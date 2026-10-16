@@ -11,7 +11,11 @@ export async function captureRosterSnapshot(
   periodId: string,
 ): Promise<void> {
   if ((await db.studentPeriodSnapshot.count({ where: { periodId } })) > 0) return;
+  // Si el periodo tiene matrícula (carga del periodo), el corte es de quienes están matriculados; sin ella (periodos
+  // anteriores a la matrícula), de todos los estudiantes.
+  const enrolled = await db.periodEnrollment.findMany({ where: { periodId }, select: { studentId: true } });
   const students = await db.student.findMany({
+    ...(enrolled.length > 0 ? { where: { id: { in: enrolled.map((e) => e.studentId) } } } : {}),
     select: { id: true, schoolId: true, cycle: true, tutorId: true, isActive: true, isAtRisk: true },
   });
   await db.studentPeriodSnapshot.createMany({

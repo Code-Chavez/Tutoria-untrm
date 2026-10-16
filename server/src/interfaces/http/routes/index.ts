@@ -1,5 +1,6 @@
 import { Router, type IRouter } from 'express';
 import periodRoutes from './period.routes';
+import dataRequestRoutes from './dataRequest.routes';
 import healthRoutes from './health.routes';
 import authRoutes from './auth.routes';
 import userRoutes from './user.routes';
@@ -48,6 +49,7 @@ router.use(authRoutes);
 router.use(userRoutes);
 router.use(roleRoutes);
 router.use(periodRoutes);
+router.use(dataRequestRoutes);
 router.use(profileRoutes);
 router.use(studentRoutes);
 router.use(schoolRoutes);

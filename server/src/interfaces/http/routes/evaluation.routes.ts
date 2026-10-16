@@ -1,4 +1,5 @@
 import { Router, type IRouter } from 'express';
+import { requireEnrollment } from '../middleware/requireEnrollment';
 import { container } from '../../../infrastructure/container';
 import { EvaluationController } from '../controllers/EvaluationController';
 import { authenticate } from '../middleware/authenticate';
@@ -30,6 +31,7 @@ router.post(
   '/evaluations',
   requireAuth,
   authorize(['evaluation:respond']),
+  requireEnrollment,
   evaluationController.submit,
 );
 

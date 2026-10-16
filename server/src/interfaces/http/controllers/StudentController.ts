@@ -1,4 +1,5 @@
 import { Request, Response } from 'express';
+import { NoOpenPeriodForLoadError } from '@application/use-cases/students/StudentErrors';
 import { z } from 'zod';
 import { CreateStudentUseCase } from '@application/use-cases/students/CreateStudentUseCase';
 import { UpdateStudentUseCase } from '@application/use-cases/students/UpdateStudentUseCase';
@@ -147,6 +148,10 @@ export class StudentController {
       const report = await this.importStudentsUseCase.execute(rows, req.auth?.sub as string);
       res.status(200).json({ message: 'Carga masiva procesada', report });
     } catch (error) {
+      if (error instanceof NoOpenPeriodForLoadError) {
+        res.status(409).json({ error: error.message, code: 'NO_OPEN_PERIOD' });
+        return;
+      }
       console.error('Error en carga masiva de estudiantes', error);
       res.status(500).json({ error: 'No se pudo procesar el archivo. Verifique que sea un .xlsx válido.' });
     }

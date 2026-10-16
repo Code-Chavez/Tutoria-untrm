@@ -1,0 +1,104 @@
+.field {
+  margin-bottom: var(--s4);
+  border: 0;
+  padding: 0;
+}
+
+.field label,
+.label {
+  display: block;
+  margin-bottom: var(--s2);
+  font-size: var(--fs-sm);
+  font-weight: 600;
+  color: var(--g700);
+}
+
+.input {
+  width: 100%;
+  padding: 9px 11px;
+  border: 1.5px solid var(--g300);
+  border-radius: 8px;
+  font-size: 14px;
+  font-family: inherit;
+}
+
+.emailForm {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s2);
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  gap: var(--s3);
+  flex-wrap: wrap;
+}
+
+.cycles {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s3);
+}
+
+.cycle {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0;
+  font-weight: 500;
+}
+
+.note {
+  margin: var(--s2) 0 0;
+  font-size: var(--fs-xs);
+  color: var(--g600);
+  line-height: 1.5;
+}
+
+.ok,
+.error {
+  margin: 0 0 var(--s4);
+  font-size: var(--fs-sm);
+  line-height: 1.5;
+}
+
+.ok {
+  color: var(--g900);
+}
+
+.error {
+  color: var(--peligro);
+}
+
+.history {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--s4);
+}
+
+.historyItem {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s2);
+  padding-bottom: var(--s3);
+  border-bottom: 1px solid var(--g100);
+}
+
+.historyHead {
+  display: flex;
+  align-items: center;
+  gap: var(--s3);
+  flex-wrap: wrap;
+}
+
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+}

@@ -4,5 +4,7 @@ export interface School {
   facultyId: string;
   isActive: boolean;
   coordinatorId?: string | null;
+  /** Correo al que se piden las listas de estudiantes de la escuela. */
+  requestEmail?: string | null;
   createdAt: Date;
 }

@@ -11,6 +11,8 @@ import {
 import { AcademicPeriodRepository } from '@domain/repositories/AcademicPeriodRepository';
 import { PeriodSummary, PeriodSummaryRepository } from '@domain/repositories/PeriodSummaryRepository';
 import { AuditLogRepository } from '@domain/repositories/AuditLogRepository';
+import { StudentRepository } from '@domain/repositories/StudentRepository';
+import { PeriodEnrollmentRepository } from '@domain/repositories/PeriodEnrollmentRepository';
 import { AcademicPeriod } from '@domain/entities/AcademicPeriod';
 
 const NOW = new Date('2026-12-20T15:00:00Z');
@@ -39,6 +41,8 @@ describe('ciclo de vida del periodo (fase 1)', () => {
   let periods: jest.Mocked<AcademicPeriodRepository>;
   let summaries: jest.Mocked<PeriodSummaryRepository>;
   let audit: jest.Mocked<AuditLogRepository>;
+  let students: jest.Mocked<StudentRepository>;
+  let enrollments: jest.Mocked<PeriodEnrollmentRepository>;
 
   beforeEach(() => {
     periods = {
@@ -51,6 +55,8 @@ describe('ciclo de vida del periodo (fase 1)', () => {
     };
     summaries = { summarize: jest.fn().mockResolvedValue(summary) };
     audit = { create: jest.fn().mockResolvedValue({}) } as unknown as jest.Mocked<AuditLogRepository>;
+    students = { findByUserId: jest.fn().mockResolvedValue(null) } as unknown as jest.Mocked<StudentRepository>;
+    enrollments = { enroll: jest.fn(), isEnrolled: jest.fn(), count: jest.fn() } as jest.Mocked<PeriodEnrollmentRepository>;
   });
 
   describe('cerrar', () => {
@@ -160,12 +166,34 @@ describe('ciclo de vida del periodo (fase 1)', () => {
 
   describe('periodo vigente', () => {
     it('abierto cuando hay uno vigente, en solo lectura cuando no', async () => {
-      const current = new GetCurrentPeriodUseCase(periods);
+      const current = new GetCurrentPeriodUseCase(periods, students, enrollments);
 
-      expect(await current.execute()).toMatchObject({ open: true, period: { name: '2026-II' } });
+      expect(await current.execute()).toMatchObject({ open: true, period: { name: '2026-II' }, enrolled: null });
 
       periods.findActive.mockResolvedValue(null);
-      expect(await current.execute()).toEqual({ open: false, period: null });
+      expect(await current.execute()).toEqual({ open: false, period: null, enrolled: null });
+    });
+
+    it('para un estudiante dice si figura en la carga del periodo vigente; para el resto de roles, null', async () => {
+      const current = new GetCurrentPeriodUseCase(periods, students, enrollments);
+      students.findByUserId.mockResolvedValueOnce({ id: 's1' } as never);
+      enrollments.isEnrolled.mockResolvedValueOnce(true);
+      expect((await current.execute('u-student')).enrolled).toBe(true);
+
+      students.findByUserId.mockResolvedValueOnce({ id: 's2' } as never);
+      enrollments.isEnrolled.mockResolvedValueOnce(false);
+      expect((await current.execute('u-student-2')).enrolled).toBe(false);
+      expect(enrollments.isEnrolled).toHaveBeenLastCalledWith('p1', 's2');
+
+      students.findByUserId.mockResolvedValueOnce(null);
+      expect((await current.execute('u-admin')).enrolled).toBeNull();
+    });
+
+    it('sin periodo vigente no consulta la matrícula', async () => {
+      periods.findActive.mockResolvedValue(null);
+
+      expect((await new GetCurrentPeriodUseCase(periods, students, enrollments).execute('u-student')).enrolled).toBeNull();
+      expect(students.findByUserId).not.toHaveBeenCalled();
     });
   });
 });

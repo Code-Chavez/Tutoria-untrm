@@ -11,6 +11,8 @@ export interface PeriodStatus {
   /** Hay un periodo vigente: la tutoría opera. Sin periodo vigente todo queda en solo lectura. */
   open: boolean;
   period: PeriodBrief | null;
+  /** Solo para estudiantes: si figuran en la carga del periodo vigente (sin ella solo leen su historial). Otros roles: null. */
+  enrolled: boolean | null;
 }
 
 export interface PeriodSummary {

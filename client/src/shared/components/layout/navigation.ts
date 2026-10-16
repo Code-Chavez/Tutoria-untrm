@@ -65,6 +65,7 @@ export const NAV: NavGroup[] = [
       { label: 'Panel de inicio', Icon: DashboardIcon, path: '/' },
       { label: 'Tutorados', Icon: GraduationCapIcon, path: '/tutorados', action: '', roles: ['tutor', 'coord', 'dbu'] },
       { label: 'Asignación', Icon: SwitchIcon, path: '/asignacion', roles: ['coord', 'dbu'] },
+      { label: 'Pedir listas', Icon: SendIcon, path: '/pedir-listas', roles: ['coord', 'dbu'] },
       { label: 'Carga masiva', Icon: UploadIcon, path: '/carga-masiva', roles: ['coord', 'dbu'] },
       { label: 'Entrevista inicial', Icon: ClipboardIcon, path: '/tutorados', action: 'entrevista', roles: ['tutor'] },
       { label: 'Expediente', Icon: FolderIcon, path: '/expediente', roles: ['tutor', 'coord', 'dbu'] },

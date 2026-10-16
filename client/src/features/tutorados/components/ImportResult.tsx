@@ -24,7 +24,7 @@ export const ImportResult: React.FC<ImportResultProps> = ({ report, onDownload }
             <h3>Resultado de la carga</h3>
             <p>
               {success
-                ? 'Todos los estudiantes se registraron correctamente.'
+                ? 'Todos los estudiantes quedaron matriculados en el periodo vigente.'
                 : 'La carga finalizó con filas omitidas. Revisa el detalle y corrige el archivo.'}
             </p>
           </div>
@@ -41,7 +41,11 @@ export const ImportResult: React.FC<ImportResultProps> = ({ report, onDownload }
         </div>
         <div className={`${styles.stat} ${styles.created}`}>
           <span className={styles.num}>{report.created}</span>
-          <span className={styles.lbl}>Registrados</span>
+          <span className={styles.lbl}>Nuevos</span>
+        </div>
+        <div className={`${styles.stat} ${styles.created}`}>
+          <span className={styles.num}>{report.continued}</span>
+          <span className={styles.lbl}>Continúan (matriculados de nuevo)</span>
         </div>
         <div className={`${styles.stat} ${styles.skipped}`}>
           <span className={styles.num}>{report.skipped}</span>

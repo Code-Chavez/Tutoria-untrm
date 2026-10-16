@@ -65,8 +65,11 @@ export interface ImportCreatedRow {
 export interface ImportReport {
   totalRows: number;
   created: number;
+  /** Ya existían (de periodos anteriores) y se matricularon de nuevo en el periodo vigente. */
+  continued: number;
   skipped: number;
   createdRows: ImportCreatedRow[];
+  continuedRows: ImportCreatedRow[];
   errors: ImportRowError[];
 }
 

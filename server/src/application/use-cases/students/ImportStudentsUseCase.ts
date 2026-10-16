@@ -1,6 +1,9 @@
 import { StudentRepository } from '@domain/repositories/StudentRepository';
 import { SchoolRepository } from '@domain/repositories/SchoolRepository';
 import { StudentAccessGuard } from '@application/access/StudentAccessGuard';
+import { AcademicPeriodRepository } from '@domain/repositories/AcademicPeriodRepository';
+import { PeriodEnrollmentRepository } from '@domain/repositories/PeriodEnrollmentRepository';
+import { NoOpenPeriodForLoadError } from './StudentErrors';
 import {
   EMAIL_INVALID,
   NAME_TOO_SHORT,
@@ -32,9 +35,14 @@ export class ImportStudentsUseCase {
     private readonly students: StudentRepository,
     private readonly schools: SchoolRepository,
     private readonly guard: StudentAccessGuard,
+    private readonly periods: AcademicPeriodRepository,
+    private readonly enrollments: PeriodEnrollmentRepository,
   ) {}
 
   async execute(rows: ImportStudentRow[], requesterId: string): Promise<ImportReport> {
+    // La carga es de un periodo: cada estudiante cargado queda matriculado en el periodo vigente.
+    const period = await this.periods.findActive();
+    if (!period) throw new NoOpenPeriodForLoadError();
     const scope = await this.guard.scopeFor(requesterId);
     const allSchools = await this.schools.findAll();
     // El coordinador solo carga tutorados de las escuelas que coordina; la DBU, de cualquiera.
@@ -45,6 +53,7 @@ export class ImportStudentsUseCase {
 
     const errors: ImportRowError[] = [];
     const createdRows: ImportCreatedRow[] = [];
+    const continuedRows: ImportCreatedRow[] = [];
 
     // Códigos ya vistos en este mismo archivo, para detectar duplicados internos.
     const seenCodes = new Set<string>();
@@ -92,14 +101,21 @@ export class ImportStudentsUseCase {
         continue;
       }
 
-      // Duplicado contra la base de datos.
       const existing = await this.students.findByCode(code);
       if (existing) {
-        errors.push({ row: row.rowNumber, studentCode: code, message: 'Ya existe un estudiante con ese código' });
+        // Estudiante de un periodo anterior que continúa: se matricula de nuevo en el periodo vigente con su ciclo actual.
+        if (existing.schoolId !== schoolId) {
+          errors.push({ row: row.rowNumber, studentCode: code, message: 'Ya existe un estudiante con ese código en otra escuela' });
+          continue;
+        }
+        await this.students.update(existing.id, { cycle, isActive: true });
+        await this.enrollments.enroll({ periodId: period.id, studentId: existing.id, schoolId: existing.schoolId, cycle });
+        seenCodes.add(code);
+        continuedRows.push({ row: row.rowNumber, studentCode: code, fullName: `${existing.firstName} ${existing.lastName}` });
         continue;
       }
 
-      await this.students.create({
+      const student = await this.students.create({
         studentCode: code,
         firstName,
         lastName,
@@ -110,6 +126,7 @@ export class ImportStudentsUseCase {
         isAtRisk: false,
         isActive: true,
       });
+      await this.enrollments.enroll({ periodId: period.id, studentId: student.id, schoolId: student.schoolId, cycle });
       seenCodes.add(code);
       createdRows.push({ row: row.rowNumber, studentCode: code, fullName: `${firstName} ${lastName}` });
     }
@@ -117,8 +134,10 @@ export class ImportStudentsUseCase {
     return {
       totalRows: rows.length,
       created: createdRows.length,
+      continued: continuedRows.length,
       skipped: errors.length,
       createdRows,
+      continuedRows,
       errors,
     };
   }
