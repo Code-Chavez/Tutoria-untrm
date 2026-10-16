@@ -40,11 +40,13 @@ describe('BulkImportPage', () => {
     const report: ImportReport = {
       totalRows: 3,
       created: 2,
+      continued: 1,
       skipped: 1,
       createdRows: [
         { row: 2, studentCode: '20191234', fullName: 'Ana Torres' },
         { row: 3, studentCode: '20195678', fullName: 'Luis Pérez' },
       ],
+      continuedRows: [{ row: 5, studentCode: '20190001', fullName: 'Rosa Díaz' }],
       errors: [{ row: 4, studentCode: '123', message: 'El código universitario debe tener entre 8 y 12 dígitos numéricos' }],
     };
     mocked.importStudents.mockResolvedValue(report);

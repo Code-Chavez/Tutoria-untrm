@@ -54,3 +54,10 @@ export class StudentAccessDeniedError extends Error {
     this.name = 'StudentAccessDeniedError';
   }
 }
+
+export class NoOpenPeriodForLoadError extends Error {
+  constructor() {
+    super('No hay un periodo académico vigente: cree y abra el periodo (Catálogos) antes de cargar a los estudiantes');
+    this.name = 'NoOpenPeriodForLoadError';
+  }
+}

@@ -25,13 +25,14 @@ export class ImportReportWorkbook {
 
     // ── Resumen ──────────────────────────────────────────────
     const summary = workbook.addWorksheet('Resumen');
-    summary.columns = [{ width: 26 }, { width: 40 }];
+    summary.columns = [{ width: 46 }, { width: 40 }];
     summary.addRow(['Reporte de carga masiva de estudiantes']).font = { bold: true, size: 14, color: { argb: NAVY } };
     summary.addRow([]);
     summary.addRow(['Generado por', meta.generatedBy]);
     summary.addRow(['Fecha', meta.generatedAt.toLocaleString('es-PE')]);
     summary.addRow(['Filas procesadas', report.totalRows]);
-    summary.addRow(['Registrados', report.created]);
+    summary.addRow(['Registrados (nuevos)', report.created]);
+    summary.addRow(['Continúan (ya existían, matriculados de nuevo)', report.continued]);
     summary.addRow(['Omitidos', report.skipped]);
     summary.getColumn(1).font = { bold: true };
 
@@ -44,6 +45,16 @@ export class ImportReportWorkbook {
     ];
     styleHeaderRow(created.getRow(1), OK);
     report.createdRows.forEach((r) => created.addRow({ row: r.row, code: r.studentCode, name: r.fullName }));
+
+    // ── Continúan ────────────────────────────────────────────
+    const continued = workbook.addWorksheet('Continúan');
+    continued.columns = [
+      { header: 'Fila', key: 'row', width: 10 },
+      { header: 'Código', key: 'code', width: 18 },
+      { header: 'Nombre', key: 'name', width: 40 },
+    ];
+    styleHeaderRow(continued.getRow(1), NAVY);
+    report.continuedRows.forEach((r) => continued.addRow({ row: r.row, code: r.studentCode, name: r.fullName }));
 
     // ── Rechazados ───────────────────────────────────────────
     const rejected = workbook.addWorksheet('Rechazados');

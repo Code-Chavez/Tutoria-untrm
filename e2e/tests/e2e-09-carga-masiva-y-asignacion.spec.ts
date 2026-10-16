@@ -33,7 +33,7 @@ test('la coordinadora importa el Excel: 3 estudiantes se registran y la fila con
 
   await expect(page.getByRole('heading', { level: 3, name: 'Resultado de la carga' })).toBeVisible();
   await expect(page.getByText('Filas procesadas').locator('..')).toContainText('4');
-  await expect(page.getByText('Registrados').locator('..')).toContainText('3');
+  await expect(page.getByText('Nuevos', { exact: true }).locator('..')).toContainText('3');
   await expect(page.getByText('Omitidos').locator('..')).toContainText('1');
   await expect(page.getByText(/Errores de validación \(1\)/)).toBeVisible();
   await expect(page.getByRole('button', { name: 'Descargar reporte' })).toBeVisible();

@@ -35,9 +35,9 @@ export class PeriodController {
     }
   }
 
-  current = async (_req: Request, res: Response) => {
+  current = async (req: Request, res: Response) => {
     try {
-      res.status(200).json(await this.getCurrent.execute());
+      res.status(200).json(await this.getCurrent.execute(req.auth?.sub));
     } catch (error) {
       this.fail(error, res);
     }

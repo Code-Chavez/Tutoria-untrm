@@ -44,6 +44,7 @@ model User {
   interviewsConducted  TutorInterview[]
   followUpsConducted   TutorFollowUp[]
   coordinatedSchools   School[]                 @relation("SchoolCoordinator")
+  dataRequestsMade     DataRequest[]           @relation("DataRequestRequester")
   requestsCreated      TutoringRequest[]        @relation("RequestsCreated")
   requestsRouted       TutoringRequest[]        @relation("RequestsRouted")
   sessionsAsTutor      Session[]                @relation("SessionsAsTutor")
@@ -170,6 +171,10 @@ model School {
   coordinatorId String? @map("coordinator_id")
   coordinator   User?   @relation("SchoolCoordinator", fields: [coordinatorId], references: [id])
 
+  // Correo al que se piden las listas de estudiantes de la escuela cada periodo; lo configura quien administra o coordina.
+  requestEmail String?        @map("request_email")
+  dataRequests DataRequest[]
+
   evaluationWindows EvaluationWindow[]
   workPlans         WorkPlan[]
 
@@ -189,6 +194,9 @@ model AcademicPeriod {
   closedAt       DateTime? @map("closed_at")
   closedById     String?   @map("closed_by_id")
   closureSummary Json?     @map("closure_summary")
+
+  enrollments PeriodEnrollment[]
+  dataRequests DataRequest[]
 
   evaluations       TutorEvaluation[]
   evaluationWindows EvaluationWindow[]
@@ -232,6 +240,7 @@ model Student {
   assignmentHistory TutorAssignmentHistory[]
   signedDocuments   SignedDocument[]
   periodSnapshots   StudentPeriodSnapshot[]
+  enrollments       PeriodEnrollment[]
   interviews        TutorInterview[]
   followUps         TutorFollowUp[]
   supportContact    SupportContact?
@@ -875,4 +884,51 @@ model EmailOutbox {
 
   @@index([status, nextAttemptAt])
   @@map("email_outbox")
+}
+
+// Matrícula por periodo: quiénes están en la tutoría de ese periodo (se carga al inicio de cada ciclo). Un estudiante que
+// no figura en la carga del periodo vigente queda en solo lectura: no puede solicitar ni responder.
+model PeriodEnrollment {
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now()) @map("created_at")
+
+  periodId  String         @map("period_id")
+  period    AcademicPeriod @relation(fields: [periodId], references: [id], onDelete: Cascade)
+  studentId String         @map("student_id")
+  student   Student        @relation(fields: [studentId], references: [id], onDelete: Cascade)
+
+  schoolId String @map("school_id")
+  cycle    Int
+
+  @@unique([periodId, studentId])
+  @@index([periodId])
+  @@map("period_enrollments")
+}
+
+// Pedido por correo de las listas (estudiantes) a la persona que las entrega; queda registrado para saber qué se pidió y si llegó.
+model DataRequest {
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now()) @map("created_at")
+
+  periodId String         @map("period_id")
+  period   AcademicPeriod @relation(fields: [periodId], references: [id], onDelete: Cascade)
+  schoolId String         @map("school_id")
+  school   School         @relation(fields: [schoolId], references: [id])
+
+  toEmail String @map("to_email")
+  cycles  Int[]
+  note    String?
+
+  requestedById String @map("requested_by_id")
+  requestedBy   User   @relation("DataRequestRequester", fields: [requestedById], references: [id])
+
+  // ENVIADO = aceptado por el servidor de correo; FALLIDO = no salió (se puede reenviar).
+  status String  @default("ENVIADO")
+  error  String?
+
+  receivedAt   DateTime? @map("received_at")
+  receivedById String?   @map("received_by_id")
+
+  @@index([periodId, schoolId])
+  @@map("data_requests")
 }

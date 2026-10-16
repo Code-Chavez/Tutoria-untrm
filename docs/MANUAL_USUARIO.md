@@ -30,7 +30,7 @@ que otro compañero sí tiene: depende de su rol.
 |---|---|
 | Tutorado | Panel de inicio · Mis sesiones · Solicitar tutoría · Evaluar tutoría |
 | Docente tutor | Panel de inicio · Tutorados · Entrevista inicial · Expediente · Sesiones · Seguimiento · Derivar caso · Solicitudes de tutoría · Casos derivados · Horarios y asistencia · Informe semestral |
-| Coordinador | Panel de inicio · Tutorados · Asignación · Carga masiva · Expediente · Solicitudes de tutoría · Plan semestral · Horarios y asistencia · Indicadores · Resultados de evaluación · Sugerencias de estudiantes |
+| Coordinador | Panel de inicio · Tutorados · Asignación · Pedir listas · Carga masiva · Expediente · Solicitudes de tutoría · Plan semestral · Horarios y asistencia · Indicadores · Resultados de evaluación · Sugerencias de estudiantes |
 | Profesional de servicio | Panel de inicio · Casos derivados |
 | Vicerrectorado | Panel de inicio · Informe consolidado · Indicadores |
 | Administrador DBU | Todo lo anterior, más Seguimiento DBU, Usuarios y roles, Catálogos, Parámetros, Identidad visual, Bitácora de auditoría y Evaluación de tutoría |
@@ -264,7 +264,8 @@ Además de ver los tutorados **de su escuela** (nunca de otras), el coordinador:
 ### 4.2 Registrar y cargar tutorados
 
 - *Tutorados* → *Nuevo tutorado*: código universitario, ciclo, nombres, apellidos, escuela y, opcionalmente, correo y teléfono.
-- *Carga masiva*: descargue la plantilla Excel con *Descargar plantilla*, complétela y súbala; el sistema muestra un **reporte del resultado** (filas importadas y filas con error).
+- *Carga masiva*: descargue la plantilla Excel con *Descargar plantilla*, complétela y súbala; el sistema muestra un **reporte del resultado** (estudiantes nuevos, estudiantes que **continúan** y filas con error). La carga es **del periodo vigente**: cada estudiante cargado queda matriculado en él (un estudiante que ya existía de un periodo anterior no da error: se actualiza su ciclo y se matricula de nuevo). **Quien no figura en la carga del periodo vigente solo puede consultar su historial: no puede solicitar tutoría ni evaluar.** Sin un periodo vigente no se puede cargar.
+- *Pedir listas*: al iniciar el periodo, pida a la escuela la lista de estudiantes. Elija la escuela y, si no hay un correo configurado, escríbalo ahí mismo (se puede cambiar cuando quien lo recibía deje de responder); marque los ciclos (o ninguno para todos), agregue observaciones y pulse *Enviar pedido*. Sale un correo formal a nombre suyo, con copia a su correo y la **plantilla Excel adjunta**; las respuestas le llegan a usted. Queda un historial con lo pedido y a quién, para marcarlo como recibido cuando llegue el archivo, que se carga en *Carga masiva*.
 - Para que un estudiante pueda entrar al sistema hay que **vincular su cuenta** de portal (*Más* → *Vincular cuenta*).
 
 ### 4.3 Solicitudes de tutoría

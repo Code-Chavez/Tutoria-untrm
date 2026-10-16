@@ -1,3 +1,5 @@
+import { AcademicPeriodRepository } from '@domain/repositories/AcademicPeriodRepository';
+import { PeriodEnrollmentRepository } from '@domain/repositories/PeriodEnrollmentRepository';
 import { CreateStudentUseCase } from '@application/use-cases/students/CreateStudentUseCase';
 import {
   DuplicateStudentCodeError,
@@ -11,6 +13,8 @@ import { allowAllGuard } from '../helpers/studentGuard';
 
 describe('CreateStudentUseCase', () => {
   let useCase: CreateStudentUseCase;
+  let periods: jest.Mocked<AcademicPeriodRepository>;
+  let enrollments: jest.Mocked<PeriodEnrollmentRepository>;
   let mockStudentRepository: jest.Mocked<StudentRepository>;
   let mockSchoolRepository: jest.Mocked<SchoolRepository>;
 
@@ -49,7 +53,9 @@ describe('CreateStudentUseCase', () => {
       findById: jest.fn(),
     };
 
-    useCase = new CreateStudentUseCase(mockStudentRepository, mockSchoolRepository, allowAllGuard(mockStudentRepository));
+    periods = { findActive: jest.fn().mockResolvedValue({ id: 'period-1', name: '2026-II' }), findAll: jest.fn(), findById: jest.fn(), findByDate: jest.fn(), close: jest.fn(), reopen: jest.fn() } as unknown as jest.Mocked<AcademicPeriodRepository>;
+    enrollments = { enroll: jest.fn().mockResolvedValue(undefined), isEnrolled: jest.fn(), count: jest.fn() } as jest.Mocked<PeriodEnrollmentRepository>;
+    useCase = new CreateStudentUseCase(mockStudentRepository, mockSchoolRepository, allowAllGuard(mockStudentRepository), periods, enrollments);
   });
 
   it('debería registrar un estudiante exitosamente', async () => {
@@ -88,5 +94,29 @@ describe('CreateStudentUseCase', () => {
 
     await expect(useCase.execute(validInput, 'admin-1')).rejects.toThrow(DuplicateStudentCodeError);
     expect(mockStudentRepository.create).not.toHaveBeenCalled();
+  });
+
+  describe('matrícula en el periodo vigente (fase 2)', () => {
+    const input = { studentCode: '20250001', firstName: 'Ana', lastName: 'Torres', cycle: 3, schoolId: 'school-1' } as never;
+
+    beforeEach(() => {
+      mockStudentRepository.findByCode.mockResolvedValue(null);
+      mockStudentRepository.create.mockImplementation(async (d) => ({ id: 'new', createdAt: new Date(), updatedAt: new Date(), ...d }) as never);
+      mockSchoolRepository.findById.mockResolvedValue({ id: 'school-1', name: 'Sistemas' } as never);
+    });
+
+    it('un estudiante dado de alta con un periodo vigente queda matriculado en él', async () => {
+      await useCase.execute(input, 'admin-1');
+
+      expect(enrollments.enroll).toHaveBeenCalledWith({ periodId: 'period-1', studentId: 'new', schoolId: 'school-1', cycle: 3 });
+    });
+
+    it('sin periodo vigente se registra igual, sin matrícula', async () => {
+      periods.findActive.mockResolvedValue(null);
+
+      await expect(useCase.execute(input, 'admin-1')).resolves.toBeDefined();
+
+      expect(enrollments.enroll).not.toHaveBeenCalled();
+    });
   });
 });

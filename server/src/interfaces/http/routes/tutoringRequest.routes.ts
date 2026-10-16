@@ -1,5 +1,6 @@
 import { Router, type IRouter } from 'express';
 import { requireOpenPeriod } from '../middleware/requireOpenPeriod';
+import { requireEnrollment } from '../middleware/requireEnrollment';
 import { container } from '../../../infrastructure/container';
 import { TutoringRequestController } from '../controllers/TutoringRequestController';
 import { authenticate } from '../middleware/authenticate';
@@ -28,7 +29,7 @@ router.post(
 router.post(
   '/tutoring-requests/me',
   requireAuth,
-  authorize(['tutoring-requests:self']), requireOpenPeriod,
+  authorize(['tutoring-requests:self']), requireOpenPeriod, requireEnrollment,
   tutoringRequestController.createOwn,
 );
 

@@ -192,6 +192,11 @@ const requestPasswordResetUseCase = new RequestPasswordResetUseCase(
 
 const resetPasswordUseCase = new ResetPasswordUseCase(passwordResetTokenRepository, passwordHasher, auditLogRepository);
 
+import { ListDataRequestsUseCase, MarkDataRequestReceivedUseCase, SendDataRequestUseCase, SetSchoolRequestEmailUseCase } from '@application/use-cases/data-requests/DataRequestUseCases';
+import { PrismaDataRequestRepository } from './repositories/PrismaDataRequestRepository';
+import { PrismaSchoolContactRepository } from './repositories/PrismaSchoolContactRepository';
+import { ExcelStudentParser } from './parsers/ExcelStudentParser';
+import { PrismaPeriodEnrollmentRepository } from './repositories/PrismaPeriodEnrollmentRepository';
 import { ClosePeriodUseCase, GetCurrentPeriodUseCase, GetPeriodClosureUseCase, ReopenPeriodUseCase } from '@application/use-cases/periods/PeriodLifecycleUseCases';
 import { PrismaPeriodSummaryRepository } from './repositories/PrismaPeriodSummaryRepository';
 import { CreateUserUseCase } from '@application/use-cases/users/CreateUserUseCase';
@@ -294,7 +299,14 @@ import { MarkAllNotificationsReadUseCase } from '@application/use-cases/notifica
 import { MarkNotificationReadUseCase } from '@application/use-cases/notifications/MarkNotificationReadUseCase';
 
 const periodSummaryRepository = new PrismaPeriodSummaryRepository(prisma);
-const getCurrentPeriodUseCase = new GetCurrentPeriodUseCase(academicPeriodRepository);
+const periodEnrollmentRepository = new PrismaPeriodEnrollmentRepository(prisma);
+const dataRequestRepository = new PrismaDataRequestRepository(prisma);
+const schoolContactRepository = new PrismaSchoolContactRepository(prisma);
+const sendDataRequestUseCase = new SendDataRequestUseCase(studentAccessGuard, academicPeriodRepository, schoolRepository, facultyRepository, userRepository, mailer, new ExcelStudentParser(), dataRequestRepository, auditLogRepository);
+const listDataRequestsUseCase = new ListDataRequestsUseCase(studentAccessGuard, schoolRepository, academicPeriodRepository, dataRequestRepository);
+const markDataRequestReceivedUseCase = new MarkDataRequestReceivedUseCase(studentAccessGuard, dataRequestRepository);
+const setSchoolRequestEmailUseCase = new SetSchoolRequestEmailUseCase(studentAccessGuard, schoolRepository, schoolContactRepository, auditLogRepository);
+const getCurrentPeriodUseCase = new GetCurrentPeriodUseCase(academicPeriodRepository, studentRepository, periodEnrollmentRepository);
 const getPeriodClosureUseCase = new GetPeriodClosureUseCase(academicPeriodRepository, periodSummaryRepository);
 const closePeriodUseCase = new ClosePeriodUseCase(academicPeriodRepository, periodSummaryRepository, auditLogRepository);
 const reopenPeriodUseCase = new ReopenPeriodUseCase(academicPeriodRepository, auditLogRepository);
@@ -319,10 +331,10 @@ const changePasswordUseCase = new ChangePasswordUseCase(
   passwordHasher,
 );
 
-const createStudentUseCase = new CreateStudentUseCase(studentRepository, schoolRepository, studentAccessGuard);
+const createStudentUseCase = new CreateStudentUseCase(studentRepository, schoolRepository, studentAccessGuard, academicPeriodRepository, periodEnrollmentRepository);
 const updateStudentUseCase = new UpdateStudentUseCase(studentRepository, schoolRepository, studentAccessGuard);
 const listStudentsUseCase = new ListStudentsUseCase(studentRepository, studentAccessGuard);
-const importStudentsUseCase = new ImportStudentsUseCase(studentRepository, schoolRepository, studentAccessGuard);
+const importStudentsUseCase = new ImportStudentsUseCase(studentRepository, schoolRepository, studentAccessGuard, academicPeriodRepository, periodEnrollmentRepository);
 const markStudentRiskUseCase = new MarkStudentRiskUseCase(studentRepository, studentAccessGuard);
 const linkStudentPortalAccountUseCase = new LinkStudentPortalAccountUseCase(
   studentRepository,
@@ -731,6 +743,10 @@ export const container = {
     resetPasswordUseCase,
     createUserUseCase,
     getCurrentPeriodUseCase,
+    sendDataRequestUseCase,
+    listDataRequestsUseCase,
+    markDataRequestReceivedUseCase,
+    setSchoolRequestEmailUseCase,
     getPeriodClosureUseCase,
     closePeriodUseCase,
     reopenPeriodUseCase,

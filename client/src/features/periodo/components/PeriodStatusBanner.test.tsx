@@ -21,14 +21,29 @@ describe('PeriodStatusBanner', () => {
   beforeEach(() => vi.clearAllMocks());
 
   it('avisa del solo lectura cuando no hay un periodo abierto', async () => {
-    mocked.current.mockResolvedValue({ open: false, period: null });
+    mocked.current.mockResolvedValue({ open: false, period: null, enrolled: null });
     renderBanner();
 
     expect(await screen.findByRole('status')).toHaveTextContent(/Tutoría en solo lectura/);
   });
 
   it('no muestra nada con un periodo abierto', async () => {
-    mocked.current.mockResolvedValue({ open: true, period: { id: 'p1', name: '2026-II', startDate: '2026-08-24', endDate: '2026-12-18' } });
+    mocked.current.mockResolvedValue({ open: true, period: { id: 'p1', name: '2026-II', startDate: '2026-08-24', endDate: '2026-12-18' }, enrolled: null });
+    renderBanner();
+
+    await vi.waitFor(() => expect(mocked.current).toHaveBeenCalled());
+    expect(screen.queryByRole('status')).not.toBeInTheDocument();
+  });
+
+  it('avisa a un estudiante que no figura en la carga del periodo vigente (solo lectura)', async () => {
+    mocked.current.mockResolvedValue({ open: true, period: { id: 'p1', name: '2026-II', startDate: '2026-08-24', endDate: '2026-12-18' }, enrolled: false });
+    renderBanner();
+
+    expect(await screen.findByRole('status')).toHaveTextContent(/no figuras en la carga del periodo 2026-II/);
+  });
+
+  it('un estudiante matriculado no ve aviso', async () => {
+    mocked.current.mockResolvedValue({ open: true, period: { id: 'p1', name: '2026-II', startDate: '2026-08-24', endDate: '2026-12-18' }, enrolled: true });
     renderBanner();
 
     await vi.waitFor(() => expect(mocked.current).toHaveBeenCalled());

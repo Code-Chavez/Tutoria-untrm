@@ -124,7 +124,7 @@ describe('Alcance sobre los tutorados con la política real (A03, Art. 9.a y 14.
 
   describe('alta, edición, riesgo e importación', () => {
     const create = (who: string, schoolId: string) =>
-      new CreateStudentUseCase(w.students, w.schools, w.guard).execute(
+      new CreateStudentUseCase(w.students, w.schools, w.guard, { findActive: jest.fn().mockResolvedValue(null) } as never, { enroll: jest.fn() } as never).execute(
         { studentCode: '12345678', firstName: 'N', lastName: 'A', cycle: 1, schoolId } as never,
         who,
       );
@@ -165,14 +165,14 @@ describe('Alcance sobre los tutorados con la política real (A03, Art. 9.a y 14.
         { rowNumber: 2, studentCode: '20200001', firstName: 'Ana', lastName: 'Alvarez', cycle: '2', school: 'Escuela A' },
         { rowNumber: 3, studentCode: '20200002', firstName: 'Beto', lastName: 'Benites', cycle: '2', school: 'Escuela B' },
       ];
-      const report = await new ImportStudentsUseCase(w.students, w.schools, w.guard).execute(rows as never, 'coordA');
+      const report = await new ImportStudentsUseCase(w.students, w.schools, w.guard, { findActive: jest.fn().mockResolvedValue({ id: 'p1' }) } as never, { enroll: jest.fn() } as never).execute(rows as never, 'coordA');
 
       expect(report.created).toBe(1);
       expect(report.errors).toHaveLength(1);
       expect(report.errors[0].message).toMatch(/No tienes acceso a la escuela/);
       expect(w.students.create).toHaveBeenCalledTimes(1);
 
-      const all = await new ImportStudentsUseCase(w.students, w.schools, w.guard).execute(rows as never, 'dbu');
+      const all = await new ImportStudentsUseCase(w.students, w.schools, w.guard, { findActive: jest.fn().mockResolvedValue({ id: 'p1' }) } as never, { enroll: jest.fn() } as never).execute(rows as never, 'dbu');
       expect(all.created).toBe(2);
     });
   });

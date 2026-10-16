@@ -1,6 +1,8 @@
 import { AcademicPeriodRepository } from '@domain/repositories/AcademicPeriodRepository';
 import { PeriodSummary, PeriodSummaryRepository } from '@domain/repositories/PeriodSummaryRepository';
 import { AuditLogRepository } from '@domain/repositories/AuditLogRepository';
+import { StudentRepository } from '@domain/repositories/StudentRepository';
+import { PeriodEnrollmentRepository } from '@domain/repositories/PeriodEnrollmentRepository';
 import { AcademicPeriod } from '@domain/entities/AcademicPeriod';
 
 export class PeriodNotFoundError extends Error {
@@ -121,10 +123,23 @@ export class ReopenPeriodUseCase {
 
 /** Periodo vigente, para que el cliente sepa si la tutoría está abierta o en solo lectura. */
 export class GetCurrentPeriodUseCase {
-  constructor(private readonly periods: AcademicPeriodRepository) {}
+  constructor(
+    private readonly periods: AcademicPeriodRepository,
+    private readonly students: StudentRepository,
+    private readonly enrollments: PeriodEnrollmentRepository,
+  ) {}
 
-  async execute(): Promise<{ open: boolean; period: { id: string; name: string; startDate: Date; endDate: Date } | null }> {
+  /**
+   * `enrolled`: para una persona con perfil de estudiante, si figura en la carga del periodo vigente (sin matrícula solo
+   * puede consultar su historial). Para el resto de roles es null: no aplica.
+   */
+  async execute(userId?: string): Promise<{ open: boolean; period: { id: string; name: string; startDate: Date; endDate: Date } | null; enrolled: boolean | null }> {
     const period = await this.periods.findActive();
-    return { open: period !== null, period: period ? brief(period) : null };
+    let enrolled: boolean | null = null;
+    if (period && userId) {
+      const student = await this.students.findByUserId(userId);
+      if (student) enrolled = await this.enrollments.isEnrolled(period.id, student.id);
+    }
+    return { open: period !== null, period: period ? brief(period) : null, enrolled };
   }
 }

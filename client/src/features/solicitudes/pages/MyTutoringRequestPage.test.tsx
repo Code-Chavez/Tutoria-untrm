@@ -68,7 +68,7 @@ describe('MyTutoringRequestPage', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mocked.getOwn.mockResolvedValue([]);
-    mockedPeriod.current.mockResolvedValue({ open: true, period: { id: 'p1', name: '2026-II', startDate: '2026-08-24', endDate: '2026-12-18' } });
+    mockedPeriod.current.mockResolvedValue({ open: true, period: { id: 'p1', name: '2026-II', startDate: '2026-08-24', endDate: '2026-12-18' }, enrolled: true });
   });
 
   it('exige describir el motivo antes de enviar', async () => {
@@ -183,7 +183,7 @@ describe('MyTutoringRequestPage', () => {
 
   describe('periodo cerrado: solo lectura', () => {
     it('explica que no se puede solicitar y deshabilita el formulario, pero deja ver el historial', async () => {
-      mockedPeriod.current.mockResolvedValue({ open: false, period: null });
+      mockedPeriod.current.mockResolvedValue({ open: false, period: null, enrolled: null });
       mocked.getOwn.mockResolvedValue([view()]);
       renderPage();
 
@@ -192,6 +192,17 @@ describe('MyTutoringRequestPage', () => {
       expect(screen.getByLabelText('Descripción del motivo')).toBeDisabled();
       expect(screen.getByLabelText(/Motivo/)).toBeDisabled();
       expect(await screen.findByText('Dificultad en Cálculo')).toBeInTheDocument(); // historial visible
+    });
+
+    it('sin figurar en la carga del periodo vigente: explica, deshabilita y deja ver el historial', async () => {
+      mockedPeriod.current.mockResolvedValue({ open: true, period: { id: 'p1', name: '2026-II', startDate: '2026-08-24', endDate: '2026-12-18' }, enrolled: false });
+      mocked.getOwn.mockResolvedValue([view()]);
+      renderPage();
+
+      expect(await screen.findByText(/No figuras en la carga del periodo 2026-II/)).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: /registrar solicitud/i })).toBeDisabled();
+      expect(screen.getByLabelText('Descripción del motivo')).toBeDisabled();
+      expect(await screen.findByText('Dificultad en Cálculo')).toBeInTheDocument();
     });
 
     it('con el periodo abierto el formulario funciona normalmente', async () => {

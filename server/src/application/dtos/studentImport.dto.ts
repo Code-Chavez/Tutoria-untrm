@@ -25,8 +25,12 @@ export interface ImportCreatedRow {
 
 export interface ImportReport {
   totalRows: number;
+  /** Estudiantes nuevos registrados (y matriculados en el periodo vigente). */
   created: number;
+  /** Estudiantes que ya existían (de periodos anteriores) y se matricularon de nuevo en el periodo vigente. */
+  continued: number;
   skipped: number;
   createdRows: ImportCreatedRow[];
+  continuedRows: ImportCreatedRow[];
   errors: ImportRowError[];
 }

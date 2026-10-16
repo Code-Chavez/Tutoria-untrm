@@ -62,6 +62,8 @@ export function MyTutoringRequestPage() {
   // Sin periodo abierto la tutoría está en solo lectura: se ve el historial, no se puede solicitar.
   const { data: periodStatus } = usePeriodStatus();
   const closed = periodStatus ? !periodStatus.open : false;
+  const notEnrolled = periodStatus?.open === true && periodStatus.enrolled === false;
+  const readOnly = closed || notEnrolled;
   const history = useOwnTutoringRequests();
   const [caseType, setCaseType] = useState<CreateOwnTutoringRequestData['caseType']>('ACADEMIC');
   const [reason, setReason] = useState('');
@@ -75,7 +77,7 @@ export function MyTutoringRequestPage() {
     event.preventDefault();
     setFeedback(null);
 
-    if (closed) return;
+    if (readOnly) return;
 
     if (reason.trim().length < 3) {
       setFeedback({ type: 'error', text: 'Describe el motivo de la solicitud.' });
@@ -120,6 +122,12 @@ export function MyTutoringRequestPage() {
               solicitar tutoría cuando se abra el siguiente periodo y estés cargado en él.
             </p>
           )}
+          {notEnrolled && (
+            <p role="status" className={styles.closedNote}>
+              No figuras en la carga del periodo {periodStatus?.period?.name}, así que por ahora no puedes registrar solicitudes. Tu historial sigue
+              disponible abajo. Consulta con tu escuela para que te incluya en la carga.
+            </p>
+          )}
           <form onSubmit={handleSubmit}>
             {user && (
               <p className={styles.requester}>
@@ -140,7 +148,7 @@ export function MyTutoringRequestPage() {
                 onChange={(e) =>
                   setCaseType(e.target.value as CreateOwnTutoringRequestData['caseType'])
                 }
-                disabled={submitting || closed}
+                disabled={submitting || readOnly}
               >
                 {CASE_TYPES.map((c) => (
                   <option key={c.value} value={c.value}>
@@ -154,7 +162,7 @@ export function MyTutoringRequestPage() {
               <span className={styles.examplesLabel} id="examples-label">¿No sabes cómo empezar? Toca una frase y complétala:</span>
               <div className={styles.examples} role="group" aria-labelledby="examples-label">
                 {EXAMPLES[caseType].map((example) => (
-                  <button key={example} type="button" className={styles.example} onClick={() => insertExample(example)} disabled={submitting || closed}>
+                  <button key={example} type="button" className={styles.example} onClick={() => insertExample(example)} disabled={submitting || readOnly}>
                     {example.trim()}
                   </button>
                 ))}
@@ -171,11 +179,11 @@ export function MyTutoringRequestPage() {
                 maxLength={1000}
                 placeholder="Cuéntanos con tus palabras qué necesitas y desde cuándo. Escribe solo lo que quieras compartir."
                 onChange={(e) => setReason(e.target.value)}
-                disabled={submitting || closed}
+                disabled={submitting || readOnly}
               />
             </div>
 
-            <Button type="submit" variant="primary" loading={submitting} disabled={closed}>
+            <Button type="submit" variant="primary" loading={submitting} disabled={readOnly}>
               Registrar solicitud
             </Button>
           </form>
