@@ -3,6 +3,7 @@ import {
   ReassignReasonRequiredError,
   SameTutorAssignmentError,
   TutorNotFoundError,
+  TutorSchoolMismatchError,
 } from '@application/use-cases/assignments/AssignmentErrors';
 import { StudentNotFoundError } from '@application/use-cases/students/StudentErrors';
 import { StudentRepository } from '@domain/repositories/StudentRepository';
@@ -23,7 +24,7 @@ describe('ReassignStudentUseCase', () => {
 
   const tutorRole = { id: 'role-tutor', name: 'Docente Tutor' } as Role;
   const newTutor = { id: 'tutor-new', roleId: 'role-tutor', isActive: true } as User;
-  const student = { id: 'student-1', tutorId: 'tutor-old' } as Student;
+  const student = { id: 'student-1', tutorId: 'tutor-old', schoolId: 'school-1' } as Student;
 
   beforeEach(() => {
     students = {
@@ -76,6 +77,16 @@ describe('ReassignStudentUseCase', () => {
       reason: 'Cambio de coordinación por carga de trabajo',
       reassignedById: 'user-actor',
     });
+  });
+
+  it('no reasigna a un tutor de otra escuela (fase 3)', async () => {
+    users.findById.mockImplementation(async (id: string) => ({ ...newTutor, id, schoolId: 'school-mecanica' }) as User);
+
+    await expect(
+      useCase.execute('student-1', 'user-actor', { newTutorId: 'tutor-new', reason: 'motivo' }),
+    ).rejects.toThrow(TutorSchoolMismatchError);
+    expect(students.update).not.toHaveBeenCalled();
+    expect(history.create).not.toHaveBeenCalled();
   });
 
   it('exige un motivo', async () => {

@@ -40,6 +40,7 @@ export async function seedBase(prisma: PrismaClient) {
     prisma.permission.upsert({ where: { code: 'catalogs:manage' }, update: {}, create: { code: 'catalogs:manage', description: 'Administrar los catálogos maestros' } }),
     prisma.permission.upsert({ where: { code: 'parameters:manage' }, update: {}, create: { code: 'parameters:manage', description: 'Administrar los parámetros del sistema' } }),
     prisma.permission.upsert({ where: { code: 'branding:manage' }, update: {}, create: { code: 'branding:manage', description: 'Configurar la identidad visual institucional' } }),
+    prisma.permission.upsert({ where: { code: 'campuses:manage' }, update: {}, create: { code: 'campuses:manage', description: 'Administrar las sedes de la universidad y la sede de cada escuela' } }),
     prisma.permission.upsert({ where: { code: 'work-plans:write' }, update: {}, create: { code: 'work-plans:write', description: 'Elaborar planes de trabajo semestrales' } }),
   ]);
 
@@ -89,7 +90,7 @@ export async function seedBase(prisma: PrismaClient) {
     [tutorRole.id]: ['students:read', 'interviews:read', 'interviews:write', 'followups:read', 'followups:write', 'support-contacts:read', 'support-contacts:write', 'tutoring-requests:read', 'tutoring-requests:write', 'sessions:read', 'sessions:write', 'referrals:read', 'referrals:write', 'reports:read', 'reports:export', 'semester-reports:write'],
     [studentRole.id]: ['sessions:read', 'evaluation:respond', 'tutoring-requests:self'],
     [serviceRole.id]: ['referrals:read', 'referrals:write'],
-    [viceRole.id]: ['reports:read', 'consolidated-reports:read', 'indicators:read'],
+    [viceRole.id]: ['reports:read', 'consolidated-reports:read', 'indicators:read', 'campuses:manage'],
   };
 
   for (const [roleId, codes] of Object.entries(rolePerms)) {

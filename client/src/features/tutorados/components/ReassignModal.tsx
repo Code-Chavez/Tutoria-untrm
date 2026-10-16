@@ -26,8 +26,8 @@ export const ReassignModal: React.FC<ReassignModalProps> = ({
   onConfirm,
   onCancel,
 }) => {
-  // Solo tiene sentido elegir entre tutores distintos al actual.
-  const options = tutors.filter((t) => t.tutorId !== student.tutorId);
+  // Solo tiene sentido elegir entre tutores distintos al actual y de la misma escuela del tutorado.
+  const options = tutors.filter((t) => t.tutorId !== student.tutorId && (!t.schoolId || t.schoolId === student.schoolId));
 
   const [newTutorId, setNewTutorId] = useState(options[0]?.tutorId ?? '');
   const [reason, setReason] = useState('');

@@ -3,18 +3,21 @@ import { User } from '@domain/entities/User';
 import { PasswordHasher } from '@application/ports/PasswordHasher';
 import { RoleRepository } from '@domain/repositories/RoleRepository';
 import { RoleNotFoundError } from '@application/use-cases/roles/RoleErrors';
+import { SchoolRepository } from '@domain/repositories/SchoolRepository';
 import { resolveService } from './serviceAssignment';
+import { resolveTutorSchool, TutorSchoolRequiredError } from './tutorSchool';
 import { DuplicateEmailError } from './UserErrors';
 import { normalizeEmail } from './normalizeEmail';
 import { randomBytes } from 'node:crypto';
 
-export { DuplicateEmailError };
+export { DuplicateEmailError, TutorSchoolRequiredError };
 
 export class CreateUserUseCase {
   constructor(
     private readonly userRepository: UserRepository,
     private readonly passwordHasher: PasswordHasher,
     private readonly roles: RoleRepository,
+    private readonly schools: SchoolRepository,
   ) {}
 
   async execute(data: Omit<User, 'id' | 'createdAt' | 'updatedAt' | 'passwordHash' | 'isActive' | 'failedLoginAttempts' | 'lockedUntil' | 'mustChangePassword'> & { password?: string, isActive?: boolean }): Promise<Omit<User, 'passwordHash'>> {
@@ -29,6 +32,7 @@ export class CreateUserUseCase {
     const role = await this.roles.findById(data.roleId);
     if (!role) throw new RoleNotFoundError(data.roleId);
     const service = resolveService(role.name, data.service);
+    const schoolId = await resolveTutorSchool(this.schools, role.name, data.schoolId);
 
     // 3. Sin clave indicada, la cuenta nace **sin clave utilizable** (una al azar que nadie conoce) y pendiente de activación:
     //    la persona crea la suya con la invitación de un solo uso (IssueInvitationUseCase). Ninguna clave se muestra ni se envía.
@@ -49,6 +53,7 @@ export class CreateUserUseCase {
       mustChangePassword: pendingActivation,
       roleId: data.roleId,
       service,
+      schoolId,
     };
 
     const createdUser = await this.userRepository.create(userToCreate);

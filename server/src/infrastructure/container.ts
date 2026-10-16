@@ -30,6 +30,8 @@ import { PrismaStudentReferralRepository } from './repositories/PrismaStudentRef
 import { PrismaSystemParameterRepository } from './repositories/PrismaSystemParameterRepository';
 import { PrismaSupportContactRepository } from './repositories/PrismaSupportContactRepository';
 import { PrismaSchoolRepository } from './repositories/PrismaSchoolRepository';
+import { PrismaCampusRepository } from './repositories/PrismaCampusRepository';
+import { CreateCampusUseCase, ListCampusesUseCase, SetSchoolCampusUseCase, UpdateCampusUseCase } from '@application/use-cases/campuses/CampusUseCases';
 import { PrismaFacultyRepository } from './repositories/PrismaFacultyRepository';
 import { PrismaWorkPlanRepository } from './repositories/PrismaWorkPlanRepository';
 import { StudentAccessGuard } from '@application/access/StudentAccessGuard';
@@ -310,17 +312,17 @@ const getCurrentPeriodUseCase = new GetCurrentPeriodUseCase(academicPeriodReposi
 const getPeriodClosureUseCase = new GetPeriodClosureUseCase(academicPeriodRepository, periodSummaryRepository);
 const closePeriodUseCase = new ClosePeriodUseCase(academicPeriodRepository, periodSummaryRepository, auditLogRepository);
 const reopenPeriodUseCase = new ReopenPeriodUseCase(academicPeriodRepository, auditLogRepository);
-const createUserUseCase = new CreateUserUseCase(userRepository, passwordHasher, roleRepository);
+const createUserUseCase = new CreateUserUseCase(userRepository, passwordHasher, roleRepository, schoolRepository);
 const issueInvitationUseCase = new IssueInvitationUseCase(userRepository, passwordResetTokenRepository, mailer, auditLogRepository, {
   publicUrl: env.PUBLIC_APP_URL,
   ttlHours: env.INVITATION_TTL_HOURS,
 });
-const updateUserUseCase = new UpdateUserUseCase(userRepository, roleRepository);
+const updateUserUseCase = new UpdateUserUseCase(userRepository, roleRepository, schoolRepository);
 const toggleUserStatusUseCase = new ToggleUserStatusUseCase(userRepository);
 const listUsersUseCase = new ListUsersUseCase(userRepository);
 const listRolesUseCase = new ListRolesUseCase(roleRepository);
 const createRoleUseCase = new CreateRoleUseCase(roleRepository);
-const assignRoleUseCase = new AssignRoleUseCase(userRepository, roleRepository, auditLogRepository);
+const assignRoleUseCase = new AssignRoleUseCase(userRepository, roleRepository, auditLogRepository, schoolRepository);
 
 const getProfileUseCase = new GetProfileUseCase(userRepository, roleRepository);
 const updateProfileUseCase = new UpdateProfileUseCase(userRepository, roleRepository);
@@ -452,6 +454,11 @@ const getSessionEvidenceFileUseCase = new GetSessionEvidenceFileUseCase(
   studentAccessGuard,
 );
 const listSchoolsUseCase = new ListSchoolsUseCase(schoolRepository);
+const campusRepository = new PrismaCampusRepository(prisma);
+const listCampusesUseCase = new ListCampusesUseCase(campusRepository, schoolRepository);
+const createCampusUseCase = new CreateCampusUseCase(campusRepository, auditLogRepository);
+const updateCampusUseCase = new UpdateCampusUseCase(campusRepository, auditLogRepository);
+const setSchoolCampusUseCase = new SetSchoolCampusUseCase(schoolRepository, campusRepository, auditLogRepository);
 const listFacultiesUseCase = new ListFacultiesUseCase(facultyRepository);
 const listWorkPlansUseCase = new ListWorkPlansUseCase(
   userRepository,
@@ -790,6 +797,10 @@ export const container = {
     listSessionEvidenceUseCase,
     getSessionEvidenceFileUseCase,
     listSchoolsUseCase,
+    listCampusesUseCase,
+    createCampusUseCase,
+    updateCampusUseCase,
+    setSchoolCampusUseCase,
     listFacultiesUseCase,
     listWorkPlansUseCase,
     getWorkPlanUseCase,

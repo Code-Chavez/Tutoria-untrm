@@ -1,3 +1,5 @@
+import { SchoolRepository } from '@domain/repositories/SchoolRepository';
+import { TutorSchoolRequiredError } from '@application/use-cases/users/tutorSchool';
 import { CreateUserUseCase, DuplicateEmailError } from '@application/use-cases/users/CreateUserUseCase';
 import { UserRepository } from '@domain/repositories/UserRepository';
 import { PasswordHasher } from '@application/ports/PasswordHasher';
@@ -7,6 +9,7 @@ import { Role } from '@domain/entities/Role';
 import { ServiceRequiredError } from '@application/use-cases/users/serviceAssignment';
 
 describe('CreateUserUseCase', () => {
+  let schools: jest.Mocked<SchoolRepository>;
   let useCase: CreateUserUseCase;
   let mockUserRepository: jest.Mocked<UserRepository>;
   let mockPasswordHasher: jest.Mocked<PasswordHasher>;
@@ -27,10 +30,11 @@ describe('CreateUserUseCase', () => {
       compare: jest.fn(),
     };
 
-    mockRoles = { findById: jest.fn().mockResolvedValue(roleNamed('Docente Tutor')), findByName: jest.fn(), findAll: jest.fn(), create: jest.fn() };
+    mockRoles = { findById: jest.fn().mockResolvedValue(roleNamed('Coordinador')), findByName: jest.fn(), findAll: jest.fn(), create: jest.fn() };
+    schools = { findById: jest.fn().mockImplementation(async (id: string) => ({ id, name: 'Sistemas', facultyId: 'f1', isActive: true, createdAt: new Date() })), findAll: jest.fn() };
     mockUserRepository.create.mockImplementation(async (data) => ({ id: 'u1', createdAt: new Date(), updatedAt: new Date(), ...data }) as User);
 
-    useCase = new CreateUserUseCase(mockUserRepository, mockPasswordHasher, mockRoles);
+    useCase = new CreateUserUseCase(mockUserRepository, mockPasswordHasher, mockRoles, schools);
   });
 
   it('normaliza el correo (espacios y mayúsculas) antes de buscar duplicados y de guardar', async () => {
@@ -40,6 +44,41 @@ describe('CreateUserUseCase', () => {
 
     expect(mockUserRepository.findByEmail).toHaveBeenCalledWith('persona@untrm.edu.pe');
     expect(mockUserRepository.create).toHaveBeenCalledWith(expect.objectContaining({ email: 'persona@untrm.edu.pe' }));
+  });
+
+  describe('escuela del docente tutor (fase 3)', () => {
+    const input = { email: 'tutor@untrm.edu.pe', firstName: 'Ana', lastName: 'Ruiz', roleId: 'role-123' };
+
+    it('un docente tutor guarda su escuela', async () => {
+      mockUserRepository.findByEmail.mockResolvedValue(null);
+      mockRoles.findById.mockResolvedValue(roleNamed('Docente Tutor'));
+
+      await useCase.execute({ ...input, schoolId: 'school-1' });
+
+      expect(mockUserRepository.create).toHaveBeenCalledWith(expect.objectContaining({ schoolId: 'school-1' }));
+    });
+
+    it('un docente tutor sin escuela, o con una escuela que no existe o está inactiva, se rechaza', async () => {
+      mockUserRepository.findByEmail.mockResolvedValue(null);
+      mockRoles.findById.mockResolvedValue(roleNamed('Docente Tutor'));
+
+      await expect(useCase.execute(input)).rejects.toBeInstanceOf(TutorSchoolRequiredError);
+      schools.findById.mockResolvedValueOnce(null);
+      await expect(useCase.execute({ ...input, schoolId: 'nada' })).rejects.toBeInstanceOf(TutorSchoolRequiredError);
+      schools.findById.mockResolvedValueOnce({ id: 'school-1', isActive: false } as never);
+      await expect(useCase.execute({ ...input, schoolId: 'school-1' })).rejects.toBeInstanceOf(TutorSchoolRequiredError);
+
+      expect(mockUserRepository.create).not.toHaveBeenCalled();
+    });
+
+    it('los demás roles no guardan escuela aunque se envíe', async () => {
+      mockUserRepository.findByEmail.mockResolvedValue(null);
+      mockRoles.findById.mockResolvedValue(roleNamed('Coordinador'));
+
+      await useCase.execute({ ...input, schoolId: 'school-1' });
+
+      expect(mockUserRepository.create).toHaveBeenCalledWith(expect.objectContaining({ schoolId: null }));
+    });
   });
 
   describe('cuenta nueva: sin clave conocida, pendiente de activación (A01)', () => {

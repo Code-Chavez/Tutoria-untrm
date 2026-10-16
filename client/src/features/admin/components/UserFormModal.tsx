@@ -6,10 +6,13 @@ import styles from './UserFormModal.module.css';
 import { User, CreateUserData, UpdateUserData } from '../services/userService';
 import { Role } from '../services/roleService';
 import { CloseIcon } from '@shared/components/icons';
+import type { School } from '@features/tutorados/services/schoolService';
 import { REFERRAL_SERVICE_LABEL, type ReferralService } from '@features/derivaciones/services/referralService';
 
 // Un Profesional de Servicio solo ve y recibe los casos derivados a su servicio: sin él no recibiría ninguno.
 const SERVICE_ROLE_NAME = 'Profesional de Servicio';
+// Un docente tutor pertenece a una escuela (de ahí salen su facultad y su sede) y solo tutorea estudiantes de ella.
+const TUTOR_ROLE_NAME = 'Docente Tutor';
 const SERVICES = Object.keys(REFERRAL_SERVICE_LABEL) as ReferralService[];
 
 interface UserFormModalProps {
@@ -17,6 +20,7 @@ interface UserFormModalProps {
   onSubmit: (data: CreateUserData | UpdateUserData) => Promise<void>;
   userToEdit: User | null;
   roles: Role[];
+  schools: School[];
 }
 
 export const UserFormModal: React.FC<UserFormModalProps> = ({
@@ -24,6 +28,7 @@ export const UserFormModal: React.FC<UserFormModalProps> = ({
   onSubmit,
   userToEdit,
   roles,
+  schools,
 }) => {
   // El componente se remonta (vía `key`) cuando cambia el usuario a editar,
   // así que el estado inicial se deriva del prop sin necesidad de un efecto.
@@ -36,8 +41,9 @@ export const UserFormModal: React.FC<UserFormModalProps> = ({
           roleId: userToEdit.roleId,
           phone: userToEdit.phone || '',
           service: userToEdit.service ?? '',
+          schoolId: userToEdit.schoolId ?? '',
         }
-      : { email: '', firstName: '', lastName: '', roleId: '', phone: '', service: '' },
+      : { email: '', firstName: '', lastName: '', roleId: '', phone: '', service: '', schoolId: '' },
   );
   const [loading, setLoading] = useState(false);
   const [submitError, setSubmitError] = useState('');
@@ -48,14 +54,16 @@ export const UserFormModal: React.FC<UserFormModalProps> = ({
   };
 
   const dialogRef = useDialog(onClose);
-  const isServiceRole = roles.find((r) => r.id === formData.roleId)?.name === SERVICE_ROLE_NAME;
+  const selectedRole = roles.find((r) => r.id === formData.roleId)?.name;
+  const isServiceRole = selectedRole === SERVICE_ROLE_NAME;
+  const isTutorRole = selectedRole === TUTOR_ROLE_NAME;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSubmitError('');
     try {
       setLoading(true);
-      await onSubmit({ ...formData, service: isServiceRole ? formData.service || null : null });
+      await onSubmit({ ...formData, service: isServiceRole ? formData.service || null : null, schoolId: isTutorRole ? formData.schoolId || null : null });
       onClose();
     } catch (error) {
       // Se muestra el motivo real que envía la API (p. ej. «el correo ya está registrado»), no un aviso genérico.
@@ -174,6 +182,27 @@ export const UserFormModal: React.FC<UserFormModalProps> = ({
                 {SERVICES.map((s) => (
                   <option key={s} value={s}>
                     {REFERRAL_SERVICE_LABEL[s]}
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
+
+          {isTutorRole && (
+            <div className={styles.formGroup}>
+              <label htmlFor="schoolId">Escuela profesional</label>
+              <select
+                id="schoolId"
+                name="schoolId"
+                className={styles.select}
+                value={formData.schoolId ?? ''}
+                onChange={handleChange}
+                required
+              >
+                <option value="">Seleccione una escuela...</option>
+                {schools.map((s) => (
+                  <option key={s.id} value={s.id}>
+                    {s.name}
                   </option>
                 ))}
               </select>

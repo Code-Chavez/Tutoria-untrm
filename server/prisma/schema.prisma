@@ -31,6 +31,10 @@ model User {
   // Para el Profesional de Servicio (HU-30), indica a qué servicio pertenece
   service String?
 
+  // Para el Docente Tutor: escuela profesional a la que pertenece (de ahí salen su facultad y su sede). Solo tutorea estudiantes de su escuela.
+  schoolId String? @map("school_id")
+  school   School? @relation("TutorSchool", fields: [schoolId], references: [id])
+
 
   auditLogs     AuditLog[]
   refreshTokens RefreshToken[]
@@ -58,6 +62,7 @@ model User {
   workPlansAuthored      WorkPlan[]        @relation("WorkPlansAuthored")
   semesterReports        TutorSemesterReport[]
 
+  @@index([schoolId])
   @@map("users")
 }
 
@@ -156,6 +161,17 @@ model Faculty {
   @@map("faculties")
 }
 
+model Campus {
+  id        String   @id @default(uuid())
+  name      String   @unique
+  isActive  Boolean  @default(true) @map("is_active")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  schools School[]
+
+  @@map("campuses")
+}
+
 model School {
   id        String   @id @default(uuid())
   name      String
@@ -171,6 +187,11 @@ model School {
   coordinatorId String? @map("coordinator_id")
   coordinator   User?   @relation("SchoolCoordinator", fields: [coordinatorId], references: [id])
 
+  // Sede donde se dicta la escuela (una sola); la configura Vicerrectorado o la DBU.
+  campusId String? @map("campus_id")
+  campus   Campus? @relation(fields: [campusId], references: [id])
+  tutors   User[]  @relation("TutorSchool")
+
   // Correo al que se piden las listas de estudiantes de la escuela cada periodo; lo configura quien administra o coordina.
   requestEmail String?        @map("request_email")
   dataRequests DataRequest[]
@@ -179,6 +200,7 @@ model School {
   workPlans         WorkPlan[]
 
   @@unique([name, facultyId])
+  @@index([campusId])
   @@map("schools")
 }
 

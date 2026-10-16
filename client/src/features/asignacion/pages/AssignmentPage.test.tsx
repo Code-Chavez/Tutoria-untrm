@@ -67,6 +67,26 @@ describe('AssignmentPage', () => {
     expect(await screen.findByText(/se asignaron 1 estudiante/i)).toBeInTheDocument();
   });
 
+  it('ofrece solo los tutores de la escuela del estudiante elegido (y los aún sin escuela registrada)', async () => {
+    vi.mocked(assignmentService.getTutorWorkload).mockResolvedValue([
+      { tutorId: 'tutor-1', fullName: 'Juan Pérez', email: 'juan@untrm.edu.pe', assignedCount: 3, schoolId: 'school-1' },
+      { tutorId: 'tutor-2', fullName: 'Marta Díaz', email: 'marta@untrm.edu.pe', assignedCount: 1, schoolId: 'school-2' },
+      { tutorId: 'tutor-3', fullName: 'Pedro Antiguo', email: 'pedro@untrm.edu.pe', assignedCount: 0, schoolId: null },
+    ]);
+    const user = userEvent.setup();
+    render(
+      <QueryClientTestWrapper>
+        <AssignmentPage />
+      </QueryClientTestWrapper>,
+    );
+
+    await user.click(await screen.findByLabelText(/seleccionar ana torres/i));
+
+    expect(screen.getByRole('radio', { name: /juan pérez/i })).toBeInTheDocument();
+    expect(screen.getByRole('radio', { name: /pedro antiguo/i })).toBeInTheDocument();
+    expect(screen.queryByRole('radio', { name: /marta díaz/i })).not.toBeInTheDocument();
+  });
+
   it('mantiene el botón de asignar deshabilitado sin selección', async () => {
     render(
       <QueryClientTestWrapper>

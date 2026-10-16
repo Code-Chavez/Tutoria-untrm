@@ -4,7 +4,7 @@ import { RoleRepository } from '@domain/repositories/RoleRepository';
 import { StudentAccessGuard } from '@application/access/StudentAccessGuard';
 import { AssignStudentsInput, AssignStudentsResult } from '@application/dtos/assignment.dto';
 import { NoStudentsSelectedError, StudentsAlreadyAssignedError } from './AssignmentErrors';
-import { assertActiveTutor } from './TutorValidation';
+import { assertActiveTutor, assertTutorServesSchools } from './TutorValidation';
 
 /**
  * Asignación masiva de tutorados a un Docente Tutor (HU-12). Valida que el tutor
@@ -30,6 +30,7 @@ export class AssignStudentsUseCase {
     if (alreadyAssigned > 0) throw new StudentsAlreadyAssignedError(alreadyAssigned);
 
     const tutor = await assertActiveTutor(this.users, this.roles, input.tutorId);
+    assertTutorServesSchools(tutor, targets.map((s) => s.schoolId));
 
     const assigned = await this.students.assignTutor(studentIds, tutor.id, new Date());
     return { assigned };

@@ -95,23 +95,33 @@ async function main() {
   const coordSistemasId = demoUsers.get('rosa.mendoza@untrm.edu.pe');
   const coordMecanicaId = demoUsers.get('carlos.vega@untrm.edu.pe');
 
+  // Sedes (la migración ya las crea; aquí se garantizan) y escuelas de ejemplo, todas en la sede central
+  const campusCentral = await prisma.campus.upsert({ where: { name: 'Sede Central' }, update: {}, create: { name: 'Sede Central' } });
+  await prisma.campus.upsert({ where: { name: 'Sede Bagua' }, update: {}, create: { name: 'Sede Bagua' } });
+  await prisma.campus.upsert({ where: { name: 'Sede Utcubamba' }, update: {}, create: { name: 'Sede Utcubamba' } });
+
   const schoolSistemas = await prisma.school.upsert({
     where: { name_facultyId: { name: 'Ingeniería de Sistemas', facultyId: fisme.id } },
-    update: { coordinatorId: coordSistemasId },
-    create: { name: 'Ingeniería de Sistemas', facultyId: fisme.id, coordinatorId: coordSistemasId },
+    update: { coordinatorId: coordSistemasId, campusId: campusCentral.id },
+    create: { name: 'Ingeniería de Sistemas', facultyId: fisme.id, coordinatorId: coordSistemasId, campusId: campusCentral.id },
   });
 
   const schoolMecanica = await prisma.school.upsert({
     where: { name_facultyId: { name: 'Ingeniería Mecánica Eléctrica', facultyId: fisme.id } },
-    update: { coordinatorId: coordMecanicaId },
-    create: { name: 'Ingeniería Mecánica Eléctrica', facultyId: fisme.id, coordinatorId: coordMecanicaId },
+    update: { coordinatorId: coordMecanicaId, campusId: campusCentral.id },
+    create: { name: 'Ingeniería Mecánica Eléctrica', facultyId: fisme.id, coordinatorId: coordMecanicaId, campusId: campusCentral.id },
   });
 
   const schoolAdmin = await prisma.school.upsert({
     where: { name_facultyId: { name: 'Administración de Empresas', facultyId: fcea.id } },
-    update: {},
-    create: { name: 'Administración de Empresas', facultyId: fcea.id },
+    update: { campusId: campusCentral.id },
+    create: { name: 'Administración de Empresas', facultyId: fcea.id, campusId: campusCentral.id },
   });
+
+  // Cada docente tutor pertenece a la escuela de sus tutorados
+  for (const [tutorId, schoolId] of [[tutorIds[0], schoolSistemas.id], [tutorIds[1], schoolSistemas.id], [tutorIds[2], schoolMecanica.id], [tutorIds[3], schoolAdmin.id]]) {
+    await prisma.user.update({ where: { id: tutorId }, data: { schoolId } });
+  }
 
   // Periodo académico
   const period2026II = await prisma.academicPeriod.upsert({

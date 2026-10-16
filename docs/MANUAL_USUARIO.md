@@ -344,6 +344,9 @@ Perfil de **solo lectura**.
 
 Las cifras del consolidado, del tablero y del panel de inicio coinciden entre sí.
 
+### 6.1 Sedes
+Vicerrectorado (y la DBU) configuran en **Sedes** (menú Gestión) las sedes de la universidad (*Sede Central, Sede Bagua, Sede Utcubamba*) y **la sede de cada escuela profesional**: una escuela pertenece a una sola sede. Se puede agregar una sede, desactivarla o activarla de nuevo; una sede inactiva no se puede asignar a una escuela. Los cambios quedan en la bitácora. Este perfil no ve datos de estudiantes.
+
 ## 7. Administrador DBU
 
 ![Panel de inicio del administrador](manual/img/27-inicio-administrador.jpg)
@@ -410,6 +413,14 @@ Al terminar el periodo académico, vaya a **Cierre de periodo** (menú Gestión)
 5. Para empezar el siguiente, cree el periodo nuevo en *Catálogos → Periodos* y márquelo vigente. **Solo puede haber un periodo vigente**: el catálogo no deja abrir otro mientras el anterior no esté cerrado, ni apagar el vigente sin cerrarlo.
 
 Si cerró por error, **Reabrir periodo** (en el mismo periodo cerrado) lo devuelve a vigente; solo es posible si no hay otro vigente. El cierre y la reapertura quedan en la bitácora. La numeración de asistencias reinicia en 1 en el periodo nuevo.
+
+### 7.8 Docentes tutores por escuela
+Al crear o editar un usuario con rol **Docente**, la DBU debe elegir su **escuela profesional**; de ella salen su facultad y su sede. Un docente tutor **solo puede tutorear estudiantes de su escuela** (un docente de Mecánica Eléctrica no puede tutorear a estudiantes de Sistemas):
+
+- En *Asignación de tutorados* solo se ofrecen los tutores de la escuela de los estudiantes elegidos (si se eligen estudiantes de varias escuelas, ninguno aplica: asigne por escuela).
+- En *Reasignar* solo aparecen tutores de la escuela del tutorado.
+- Si se intenta de otra forma, el sistema lo rechaza con el aviso «El tutor pertenece a otra escuela».
+- Los docentes creados antes de esta regla quedan sin escuela hasta que la DBU se la indique (editando el usuario); mientras tanto no se bloquean.
 
 ## 8. Preguntas frecuentes
 

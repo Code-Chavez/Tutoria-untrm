@@ -1,4 +1,6 @@
 import React, { useMemo, useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
+import { schoolService } from '@features/tutorados/services/schoolService';
 import styles from './UserManagementPage.module.css';
 import { User, userService, CreateUserData, UpdateUserData, Invitation } from '../services/userService';
 import { InvitationDialog } from '../components/InvitationDialog';
@@ -21,6 +23,7 @@ const EMPTY_FILTERS: UserFilterValues = { search: '', roleId: '', status: '' };
 
 export const UserManagementPage: React.FC = () => {
   const { users, roles, loading, error, refresh } = useUsers();
+  const schools = useQuery({ queryKey: ['schools'], queryFn: () => schoolService.getSchools(), staleTime: 60_000 }).data ?? [];
   // La invitación de una cuenta recién creada (o reemitida): el enlace se muestra una sola vez, a quien administra.
   const [issued, setIssued] = useState<{ email: string; invitation: Invitation } | null>(null);
   const [inviteError, setInviteError] = useState('');
@@ -160,6 +163,7 @@ export const UserManagementPage: React.FC = () => {
           onSubmit={handleSubmit}
           userToEdit={userToEdit}
           roles={roles}
+          schools={schools}
         />
       )}
 
