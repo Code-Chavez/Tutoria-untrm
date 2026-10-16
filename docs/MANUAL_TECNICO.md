@@ -224,13 +224,14 @@ Implementación: `server/src/infrastructure/repositories/EmailNotificationReposi
 | Grupo | Modelos |
 |---|---|
 | Acceso | `User`, `Role`, `Permission`, `RolePermission`, `RefreshToken` (con hash), `PasswordResetToken` (con hash, un solo uso), `AuditLog` |
-| Estructura académica | `Faculty`, `School`, `AcademicPeriod`, `CatalogItem`, `StudentPeriodSnapshot` (corte de matrícula por semestre) |
+| Estructura académica | `Faculty`, `School`, `AcademicPeriod` (con `closedAt`, `closedById` y `closureSummary` al cerrarse), `CatalogItem`, `StudentPeriodSnapshot` (corte de matrícula por semestre) |
 | Tutoría | `Student`, `TutorAssignmentHistory`, `TutorInterview`, `TutorFollowUp`, `SupportContact`, `TutoringRequest` |
 | Sesiones | `Session`, `SessionParticipant`, `SessionAttendance` (numeración por semestre), `SessionChangeHistory`, `SessionEvidence` |
 | Derivaciones | `StudentReferral`, `ReferralStatusHistory`, `Notification`, `SignedDocument` |
 | Evaluación e informes | `TutorEvaluation`, `EvaluationWindow`, `WorkPlan`, `WorkPlanVersion`, `TutorSemesterReport` |
 | Configuración | `SystemParameter`, `BrandingSetting` |
 
+- **Cierre de periodo:** `POST /api/periods/:id/close` (DBU, confirmando el nombre), `POST /api/periods/:id/reopen`, `GET /api/periods/:id/closure` (resumen) y `GET /api/periods/current` (cualquier sesión). Sin periodo vigente, el middleware `requireOpenPeriod` rechaza con `409 PERIOD_CLOSED` los registros operativos (sesiones, asistencias, entrevistas, seguimientos, red de apoyo, derivaciones, solicitudes y adjuntos firmados); las cargas y la administración no pasan por él. Se consulta la base en cada escritura para que el cierre rija al instante.
 - **Datos base** (`seedBase`): permisos, roles, parámetros. **Datos de demostración** (`prisma/seed.ts`): solo desarrollo.
 - Los archivos adjuntos **no** están en la base: viven en `EVIDENCE_STORAGE_DIR` y se respaldan junto con ella.
 

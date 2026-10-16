@@ -399,8 +399,16 @@ El **periodo académico activo** determina el semestre en curso para reportes y 
 - *Seguimiento DBU*: todos los casos derivados por servicio y estado, con el plazo de atención.
 - *Bitácora de auditoría*: registro de las operaciones críticas (inicios de sesión, cambios de usuarios y catálogos, adjuntos, cambios de estado) y de los **accesos a información sensible**: quién consultó o descargó un expediente, entrevistas, seguimientos, red de apoyo, derivaciones y documentos firmados, cuándo y desde qué IP, incluidos los intentos rechazados. La bitácora no guarda el contenido consultado. Se puede filtrar y no se puede modificar desde el sistema.
 
-### 7.7 Cerrar un semestre
-Active el nuevo periodo en *Catálogos → Periodos*. Los informes del semestre anterior conservan sus cifras; la numeración de asistencias reinicia en 1 en el semestre nuevo.
+### 7.7 Cierre de periodo
+Al terminar el periodo académico, vaya a **Cierre de periodo** (menú Gestión). La pantalla muestra el periodo vigente con un **resumen** de lo ocurrido: estudiantes, tutores, sesiones (individuales, grupales, canceladas, con asistencia), solicitudes, derivaciones, respuestas de evaluación e informes semestrales, y avisa qué quedará abierto (solicitudes, derivaciones y sesiones próximas).
+
+1. Pulse **Cerrar periodo** y **escriba el nombre exacto del periodo** como confirmación.
+2. El sistema guarda el resumen, congela la matrícula del periodo y lo deja **cerrado**. Nada se borra.
+3. Desde ese momento la tutoría está en **solo lectura** para todas las personas: se puede consultar el historial, pero **no se registran** sesiones, asistencias, entrevistas, seguimientos, derivaciones ni solicitudes, y los estudiantes ven un aviso y no pueden solicitar tutoría. Siguen disponibles la administración (usuarios, catálogos, cargas de estudiantes y asignaciones) y los informes.
+4. Para el reporte completo del periodo use **Informe consolidado**, **Indicadores** y **Resultados de evaluación**, eligiendo ese periodo.
+5. Para empezar el siguiente, cree el periodo nuevo en *Catálogos → Periodos* y márquelo vigente. **Solo puede haber un periodo vigente**: el catálogo no deja abrir otro mientras el anterior no esté cerrado, ni apagar el vigente sin cerrarlo.
+
+Si cerró por error, **Reabrir periodo** (en el mismo periodo cerrado) lo devuelve a vigente; solo es posible si no hay otro vigente. El cierre y la reapertura quedan en la bitácora. La numeración de asistencias reinicia en 1 en el periodo nuevo.
 
 ## 8. Preguntas frecuentes
 

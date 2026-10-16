@@ -1,4 +1,5 @@
 import { Router, type IRouter } from 'express';
+import { requireOpenPeriod } from '../middleware/requireOpenPeriod';
 import { auditAccess, byParam } from '../middleware/auditAccess';
 import multer from 'multer';
 import { container } from '../../../infrastructure/container';
@@ -35,7 +36,7 @@ const requireAuth = authenticate(container.services.tokenService);
 
 // Programar una sesión de tutoría individual (HU-18, Art. 15.c). El tutor es
 // siempre el usuario autenticado; sessions:write es exclusivo de Docente Tutor.
-router.post('/sessions', requireAuth, authorize(['sessions:write']), sessionController.create);
+router.post('/sessions', requireAuth, authorize(['sessions:write']), requireOpenPeriod, sessionController.create);
 
 // Listar sesiones (?mine=true para la agenda propia, ?studentId= para las de un estudiante).
 router.get('/sessions', requireAuth, authorize(['sessions:read']), sessionController.list);
@@ -45,13 +46,13 @@ router.get('/sessions', requireAuth, authorize(['sessions:read']), sessionContro
 router.put(
   '/sessions/:id/attendance-roll',
   requireAuth,
-  authorize(['sessions:write']),
+  authorize(['sessions:write']), requireOpenPeriod,
   sessionController.recordAttendance,
 );
 router.post(
   '/sessions/:id/attendance',
   requireAuth,
-  authorize(['sessions:write']),
+  authorize(['sessions:write']), requireOpenPeriod,
   sessionController.registerAttendance,
 );
 
@@ -59,13 +60,13 @@ router.post(
 router.patch(
   '/sessions/:id/reschedule',
   requireAuth,
-  authorize(['sessions:write']),
+  authorize(['sessions:write']), requireOpenPeriod,
   sessionController.reschedule,
 );
 router.patch(
   '/sessions/:id/cancel',
   requireAuth,
-  authorize(['sessions:write']),
+  authorize(['sessions:write']), requireOpenPeriod,
   sessionController.cancel,
 );
 
@@ -74,7 +75,7 @@ router.patch(
 router.post(
   '/sessions/:id/evidence',
   requireAuth,
-  authorize(['sessions:write']),
+  authorize(['sessions:write']), requireOpenPeriod,
   uploadEvidence.single('file'),
   requireFileSignature(['pdf', 'png', 'jpeg']),
   sessionController.uploadEvidence,

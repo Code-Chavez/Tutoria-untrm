@@ -192,6 +192,8 @@ const requestPasswordResetUseCase = new RequestPasswordResetUseCase(
 
 const resetPasswordUseCase = new ResetPasswordUseCase(passwordResetTokenRepository, passwordHasher, auditLogRepository);
 
+import { ClosePeriodUseCase, GetCurrentPeriodUseCase, GetPeriodClosureUseCase, ReopenPeriodUseCase } from '@application/use-cases/periods/PeriodLifecycleUseCases';
+import { PrismaPeriodSummaryRepository } from './repositories/PrismaPeriodSummaryRepository';
 import { CreateUserUseCase } from '@application/use-cases/users/CreateUserUseCase';
 import { IssueInvitationUseCase } from '@application/use-cases/users/IssueInvitationUseCase';
 import { UpdateUserUseCase } from '@application/use-cases/users/UpdateUserUseCase';
@@ -291,6 +293,11 @@ import { GetNotificationsUseCase } from '@application/use-cases/notifications/Ge
 import { MarkAllNotificationsReadUseCase } from '@application/use-cases/notifications/MarkAllNotificationsReadUseCase';
 import { MarkNotificationReadUseCase } from '@application/use-cases/notifications/MarkNotificationReadUseCase';
 
+const periodSummaryRepository = new PrismaPeriodSummaryRepository(prisma);
+const getCurrentPeriodUseCase = new GetCurrentPeriodUseCase(academicPeriodRepository);
+const getPeriodClosureUseCase = new GetPeriodClosureUseCase(academicPeriodRepository, periodSummaryRepository);
+const closePeriodUseCase = new ClosePeriodUseCase(academicPeriodRepository, periodSummaryRepository, auditLogRepository);
+const reopenPeriodUseCase = new ReopenPeriodUseCase(academicPeriodRepository, auditLogRepository);
 const createUserUseCase = new CreateUserUseCase(userRepository, passwordHasher, roleRepository);
 const issueInvitationUseCase = new IssueInvitationUseCase(userRepository, passwordResetTokenRepository, mailer, auditLogRepository, {
   publicUrl: env.PUBLIC_APP_URL,
@@ -723,6 +730,10 @@ export const container = {
     requestPasswordResetUseCase,
     resetPasswordUseCase,
     createUserUseCase,
+    getCurrentPeriodUseCase,
+    getPeriodClosureUseCase,
+    closePeriodUseCase,
+    reopenPeriodUseCase,
     issueInvitationUseCase,
     updateUserUseCase,
     toggleUserStatusUseCase,

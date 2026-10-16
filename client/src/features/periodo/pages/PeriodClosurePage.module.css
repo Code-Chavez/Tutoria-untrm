@@ -1,0 +1,133 @@
+.picker {
+  display: flex;
+  align-items: center;
+  gap: var(--s3);
+  margin-bottom: var(--s4);
+  max-width: 420px;
+}
+
+.picker label {
+  font-weight: 600;
+  font-size: var(--fs-sm);
+  color: var(--g700);
+}
+
+.summary {
+  margin: 0 0 var(--s4);
+}
+
+.summaryRow {
+  display: grid;
+  grid-template-columns: minmax(180px, 1fr) 2fr;
+  gap: var(--s3);
+  padding: var(--s2) 0;
+  border-bottom: 1px solid var(--g100);
+  font-size: var(--fs-sm);
+}
+
+.summaryRow dt {
+  color: var(--g600);
+}
+
+.summaryRow dd {
+  margin: 0;
+  color: var(--g900);
+}
+
+.note {
+  margin: 0 0 var(--s3);
+  font-size: var(--fs-xs);
+  color: var(--g600);
+}
+
+.warn {
+  margin: 0 0 var(--s3);
+  padding: var(--s3) var(--s4);
+  border: 1px solid var(--borde);
+  border-radius: var(--r-sm);
+  background: var(--g50);
+  font-size: var(--fs-sm);
+  line-height: 1.5;
+}
+
+.reports {
+  margin: 0 0 var(--s4);
+  font-size: var(--fs-sm);
+  color: var(--g700);
+}
+
+.actions {
+  display: flex;
+  align-items: center;
+  gap: var(--s3);
+  flex-wrap: wrap;
+}
+
+.error {
+  margin: 0 0 var(--s4);
+  font-size: var(--fs-sm);
+  color: var(--peligro);
+}
+
+.overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(11, 31, 63, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--s4);
+  z-index: 1100;
+}
+
+.dialog {
+  background: #fff;
+  border-radius: var(--r);
+  width: 100%;
+  max-width: 480px;
+  padding: 24px;
+  box-shadow: var(--sombra);
+  border-top: 3px solid var(--azul);
+}
+
+.dialog h2 {
+  margin: 0 0 var(--s3);
+  font-size: 18px;
+  color: var(--azul);
+}
+
+.dialog p {
+  margin: 0 0 var(--s3);
+  font-size: var(--fs-sm);
+  line-height: 1.5;
+  color: var(--g700);
+}
+
+.dialog label {
+  display: block;
+  margin-bottom: var(--s2);
+  font-size: var(--fs-sm);
+  font-weight: 600;
+}
+
+.input {
+  width: 100%;
+  padding: 9px 11px;
+  border: 1.5px solid var(--g300);
+  border-radius: 8px;
+  font-size: 14px;
+}
+
+.dialogActions {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--s3);
+  margin-top: var(--s4);
+}
+
+@media (max-width: 640px) {
+  .summaryRow {
+    grid-template-columns: 1fr;
+    gap: 2px;
+  }
+}

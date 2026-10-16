@@ -237,6 +237,10 @@ export class PrismaCatalogRepository implements CatalogRepository {
     return (await this.prisma.faculty.count({ where: { id } })) > 0;
   }
 
+  async findActivePeriodId(): Promise<string | null> {
+    return (await this.prisma.academicPeriod.findFirst({ where: { isActive: true }, select: { id: true } }))?.id ?? null;
+  }
+
   async activateOnlyPeriod(id: string): Promise<void> {
     await this.prisma.$transaction(async (tx) => {
       // Los semestres que dejan de estar vigentes se cierran: se congela su matrícula (A17).

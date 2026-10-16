@@ -32,6 +32,7 @@ import { EvaluationPage } from '@features/evaluacion/pages/EvaluationPage';
 import { WorkPlanPage } from '@features/planificacion/pages/WorkPlanPage';
 import { IndicatorsPage } from '@features/indicadores/pages/IndicatorsPage';
 import { CatalogsPage } from '@features/catalogos/pages/CatalogsPage';
+import { PeriodClosurePage } from '@features/periodo/pages/PeriodClosurePage';
 import { ParametersPage } from '@features/parametros/pages/ParametersPage';
 import { BrandingPage } from '@features/identidad/pages/BrandingPage';
 import { EvaluationWindowsPage } from '@features/evaluacion/pages/EvaluationWindowsPage';
@@ -82,6 +83,14 @@ export default function App() {
                 element={
                   <RequireRole roles={['Administrador DBU']}>
                     <BrandingPage />
+                  </RequireRole>
+                }
+              />
+              <Route
+                path="cierre-periodo"
+                element={
+                  <RequireRole roles={['Administrador DBU']}>
+                    <PeriodClosurePage />
                   </RequireRole>
                 }
               />
