@@ -10,7 +10,8 @@ const userController = new UserController(
   container.useCases.updateUserUseCase,
   container.useCases.toggleUserStatusUseCase,
   container.useCases.listUsersUseCase,
-  container.useCases.assignRoleUseCase
+  container.useCases.assignRoleUseCase,
+  container.useCases.issueInvitationUseCase,
 );
 
 // Todas las rutas de usuarios requieren autenticación
@@ -21,6 +22,9 @@ router.get('/users', authorize(['users:read']), userController.list);
 
 // Crear usuario (requiere permiso de crear/editar usuarios)
 router.post('/users', authorize(['users:write']), userController.create);
+
+// Emitir o reemitir la invitación de activación (enlace de un solo uso); la persona crea su propia contraseña
+router.post('/users/:id/invitation', authorize(['users:write']), userController.reissueInvitation);
 
 // Actualizar usuario (requiere permiso de crear/editar usuarios)
 router.patch('/users/:id', authorize(['users:write']), userController.update);

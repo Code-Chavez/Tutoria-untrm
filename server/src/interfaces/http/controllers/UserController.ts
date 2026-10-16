@@ -1,4 +1,5 @@
 import { Request, Response } from 'express';
+import { IssueInvitationUseCase } from '@application/use-cases/users/IssueInvitationUseCase';
 import { CreateUserUseCase, DuplicateEmailError } from '@application/use-cases/users/CreateUserUseCase';
 import { UpdateUserUseCase, UserNotFoundError } from '@application/use-cases/users/UpdateUserUseCase';
 import { ToggleUserStatusUseCase } from '@application/use-cases/users/ToggleUserStatusUseCase';
@@ -29,7 +30,8 @@ export class UserController {
     private readonly updateUserUseCase: UpdateUserUseCase,
     private readonly toggleUserStatusUseCase: ToggleUserStatusUseCase,
     private readonly listUsersUseCase: ListUsersUseCase,
-    private readonly assignRoleUseCase: AssignRoleUseCase
+    private readonly assignRoleUseCase: AssignRoleUseCase,
+    private readonly issueInvitationUseCase: IssueInvitationUseCase,
   ) {}
 
   assignRole = async (req: Request, res: Response) => {
@@ -57,14 +59,30 @@ export class UserController {
   create = async (req: Request, res: Response) => {
     try {
       const data = createUserSchema.parse(req.body);
-      const { temporaryPassword, ...user } = await this.createUserUseCase.execute(data);
-      res.status(201).json({ message: 'Usuario creado exitosamente', user, temporaryPassword });
+      const user = await this.createUserUseCase.execute(data);
+      // La cuenta nace pendiente de activación: la invitación (correo + enlace para quien administra) es la única forma de entrar.
+      const invitation = await this.issueInvitationUseCase.execute(req.auth?.sub as string, user.id, req.ip);
+      res.status(201).json({ message: 'Usuario creado exitosamente', user, invitation });
     } catch (error) {
       if (error instanceof z.ZodError) {
         res.status(400).json({ error: 'Datos de entrada inválidos', details: error.errors });
       } else if (error instanceof DuplicateEmailError || error instanceof ServiceRequiredError) {
         res.status(400).json({ error: error.message });
       } else if (error instanceof RoleNotFoundError) {
+        res.status(404).json({ error: error.message });
+      } else {
+        res.status(500).json({ error: 'Error interno del servidor' });
+      }
+    }
+  };
+
+  /** Reemite la invitación (enlace nuevo de un solo uso); invalida la anterior. */
+  reissueInvitation = async (req: Request, res: Response) => {
+    try {
+      const invitation = await this.issueInvitationUseCase.execute(req.auth?.sub as string, req.params.id as string, req.ip);
+      res.status(200).json({ message: 'Invitación emitida', invitation });
+    } catch (error) {
+      if (error instanceof UserNotFoundError) {
         res.status(404).json({ error: error.message });
       } else {
         res.status(500).json({ error: 'Error interno del servidor' });

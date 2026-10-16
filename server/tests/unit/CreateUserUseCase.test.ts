@@ -42,28 +42,30 @@ describe('CreateUserUseCase', () => {
     expect(mockUserRepository.create).toHaveBeenCalledWith(expect.objectContaining({ email: 'persona@untrm.edu.pe' }));
   });
 
-  describe('clave inicial (A01)', () => {
+  describe('cuenta nueva: sin clave conocida, pendiente de activación (A01)', () => {
     const input = { email: 'nueva@untrm.edu.pe', firstName: 'Ana', lastName: 'Ruiz', roleId: 'role-123' };
 
-    it('sin clave indicada genera una temporal aleatoria, la devuelve una vez y obliga a cambiarla', async () => {
+    it('sin clave indicada nace con una clave al azar que nadie conoce y pendiente de activación', async () => {
       mockUserRepository.findByEmail.mockResolvedValue(null);
 
       const result = await useCase.execute(input);
 
-      expect(result.temporaryPassword).toMatch(/^[A-Za-z0-9]{12}$/);
-      expect(result.temporaryPassword).not.toBe('Tutor2026!');
-      expect(mockPasswordHasher.hash).toHaveBeenCalledWith(result.temporaryPassword);
+      const secret = mockPasswordHasher.hash.mock.calls[0][0] as string;
+      expect(secret).toMatch(/^[0-9a-f]{64}$/);
+      expect(secret).not.toBe('Tutor2026!');
       expect(mockUserRepository.create).toHaveBeenCalledWith(expect.objectContaining({ mustChangePassword: true }));
+      expect(JSON.stringify(result)).not.toContain(secret); // la clave al azar no sale en ninguna respuesta
       expect(result).not.toHaveProperty('passwordHash');
+      expect(result).not.toHaveProperty('temporaryPassword');
     });
 
     it('dos cuentas nuevas no comparten clave', async () => {
       mockUserRepository.findByEmail.mockResolvedValue(null);
 
-      const first = await useCase.execute(input);
-      const second = await useCase.execute({ ...input, email: 'otra@untrm.edu.pe' });
+      await useCase.execute(input);
+      await useCase.execute({ ...input, email: 'otra@untrm.edu.pe' });
 
-      expect(first.temporaryPassword).not.toBe(second.temporaryPassword);
+      expect(mockPasswordHasher.hash.mock.calls[0][0]).not.toBe(mockPasswordHasher.hash.mock.calls[1][0]);
     });
 
     it('con una clave indicada (carga interna) la usa tal cual y no exige cambiarla', async () => {
@@ -71,7 +73,7 @@ describe('CreateUserUseCase', () => {
 
       const result = await useCase.execute({ ...input, password: 'ClaveElegida1!' });
 
-      expect(result.temporaryPassword).toBeUndefined();
+      expect(result).not.toHaveProperty('temporaryPassword');
       expect(mockPasswordHasher.hash).toHaveBeenCalledWith('ClaveElegida1!');
       expect(mockUserRepository.create).toHaveBeenCalledWith(expect.objectContaining({ mustChangePassword: false }));
     });

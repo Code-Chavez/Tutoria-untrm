@@ -4,7 +4,30 @@ import { getApiErrorMessage } from '@shared/services/apiClient';
 import { authService } from '../services/authService';
 import styles from './LoginPage.module.css';
 
-export function ResetPasswordPage() {
+interface ResetPasswordPageProps {
+  /** `activate`: primera contraseña de una cuenta nueva (invitación de un solo uso); `reset`: recuperación. */
+  mode?: 'reset' | 'activate';
+}
+
+const COPY = {
+  reset: {
+    title: 'Nueva contraseña',
+    subtitle: 'Ingresa y confirma tu nueva contraseña institucional.',
+    submit: 'Restablecer contraseña',
+    success: 'Tu contraseña ha sido restablecida con éxito. Ya puedes iniciar sesión con tu nueva contraseña.',
+    invalidToken: 'Token de recuperación no válido.',
+  },
+  activate: {
+    title: 'Activa tu cuenta',
+    subtitle: 'Crea tu contraseña para entrar al sistema. Este enlace sirve una sola vez; si ya se usó o venció, pide uno nuevo a quien administra el sistema.',
+    submit: 'Activar mi cuenta',
+    success: 'Tu cuenta está activa. Ya puedes iniciar sesión con la contraseña que acabas de crear.',
+    invalidToken: 'El enlace de activación no es válido.',
+  },
+} as const;
+
+export function ResetPasswordPage({ mode = 'reset' }: ResetPasswordPageProps) {
+  const copy = COPY[mode];
   const { token } = useParams<{ token: string }>();
   const navigate = useNavigate();
 
@@ -30,7 +53,7 @@ export function ResetPasswordPage() {
     }
 
     if (!token) {
-      setError('Token de recuperación no válido.');
+      setError(copy.invalidToken);
       return;
     }
 
@@ -38,7 +61,7 @@ export function ResetPasswordPage() {
 
     try {
       await authService.resetPassword(token, password);
-      setSuccess('Tu contraseña ha sido restablecida con éxito. Ya puedes iniciar sesión con tu nueva contraseña.');
+      setSuccess(copy.success);
       setTimeout(() => {
         navigate('/login', { replace: true });
       }, 3000);
@@ -60,10 +83,8 @@ export function ResetPasswordPage() {
           </div>
         </div>
 
-        <h1 className={styles.title}>Nueva contraseña</h1>
-        <p className={styles.subtitle}>
-          Ingresa y confirma tu nueva contraseña institucional.
-        </p>
+        <h1 className={styles.title}>{copy.title}</h1>
+        <p className={styles.subtitle}>{copy.subtitle}</p>
 
         {success ? (
           <div className={styles.success} style={{ padding: '12px', background: '#e6f4ea', color: '#137333', borderRadius: '4px', marginBottom: '16px', fontSize: '14px' }}>
@@ -136,7 +157,7 @@ export function ResetPasswordPage() {
                   Guardando…
                 </>
               ) : (
-                'Restablecer contraseña'
+                copy.submit
               )}
             </button>
           </form>

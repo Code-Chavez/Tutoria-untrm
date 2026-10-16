@@ -1,6 +1,6 @@
 import React from 'react';
 import { Badge, IconButton } from '@shared/components/ui';
-import { PencilIcon, BanIcon, CheckCircleIcon } from '@shared/components/icons';
+import { PencilIcon, BanIcon, CheckCircleIcon, SendIcon } from '@shared/components/icons';
 import { User } from '../services/userService';
 import table from '@shared/components/ui/DataTable.module.css';
 import { REFERRAL_SERVICE_LABEL, type ReferralService } from '@features/derivaciones/services/referralService';
@@ -10,6 +10,8 @@ interface UserTableProps {
   roleName: (roleId: string) => string;
   onEdit: (user: User) => void;
   onToggleStatus: (user: User) => void;
+  /** Emite una invitación nueva (cuenta pendiente de activación, o enlace vencido o perdido). */
+  onReissueInvitation: (user: User) => void;
 }
 
 function initials(user: User): string {
@@ -21,6 +23,7 @@ export const UserTable: React.FC<UserTableProps> = ({
   roleName,
   onEdit,
   onToggleStatus,
+  onReissueInvitation,
 }) => (
   <div className={table.scroll}>
     <table className={table.table}>
@@ -54,10 +57,12 @@ export const UserTable: React.FC<UserTableProps> = ({
               </Badge>
             </td>
             <td>
-              {user.isActive ? (
-                <Badge tone="success">Activo</Badge>
-              ) : (
+              {!user.isActive ? (
                 <Badge tone="neutral">Inactivo</Badge>
+              ) : user.mustChangePassword ? (
+                <Badge tone="warning">Pendiente de activación</Badge>
+              ) : (
+                <Badge tone="success">Activo</Badge>
               )}
             </td>
             <td>
@@ -68,6 +73,11 @@ export const UserTable: React.FC<UserTableProps> = ({
                 <IconButton label="Editar usuario" onClick={() => onEdit(user)}>
                   <PencilIcon size={16} />
                 </IconButton>
+                {user.isActive && user.mustChangePassword && (
+                  <IconButton label="Emitir invitación nueva" onClick={() => onReissueInvitation(user)}>
+                    <SendIcon size={16} />
+                  </IconButton>
+                )}
                 <IconButton
                   label={user.isActive ? 'Desactivar' : 'Activar'}
                   tone={user.isActive ? 'danger' : 'success'}

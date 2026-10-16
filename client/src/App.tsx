@@ -48,6 +48,7 @@ export default function App() {
           <Route path="/login" element={<LoginPage />} />
           <Route path="/forgot-password" element={<ForgotPasswordPage />} />
           <Route path="/reset-password/:token" element={<ResetPasswordPage />} />
+          <Route path="/activar-cuenta/:token" element={<ResetPasswordPage mode="activate" />} />
 
           <Route element={<ProtectedRoute />}>
             <Route path="/" element={<AppLayout />}>

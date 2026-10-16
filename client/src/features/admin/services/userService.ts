@@ -11,6 +11,16 @@ export interface User {
   /** Servicio al que pertenece un Profesional de Servicio; nulo en los demás roles. */
   service?: string | null;
   isActive: boolean;
+  /** Pendiente de activación: aún no creó su contraseña con la invitación. */
+  mustChangePassword?: boolean;
+}
+
+/** Invitación de acceso único para activar una cuenta. */
+export interface Invitation {
+  link: string;
+  expiresAt: string;
+  /** El correo salió hacia el servidor SMTP; si es false hay que entregar el enlace por otro medio. */
+  emailSent: boolean;
 }
 
 export interface CreateUserData {
@@ -41,10 +51,16 @@ export const userService = {
     return response.data.users;
   },
 
-  /** Devuelve la cuenta y su clave temporal, que el servidor entrega una sola vez. */
-  createUser: async (data: CreateUserData): Promise<{ user: User; temporaryPassword?: string }> => {
-    const response = await apiClient.post<{ message: string; user: User; temporaryPassword?: string }>('/users', data);
-    return { user: response.data.user, temporaryPassword: response.data.temporaryPassword };
+  /** Crea la cuenta (sin clave) y devuelve su invitación de acceso único. */
+  createUser: async (data: CreateUserData): Promise<{ user: User; invitation: Invitation }> => {
+    const response = await apiClient.post<{ message: string; user: User; invitation: Invitation }>('/users', data);
+    return { user: response.data.user, invitation: response.data.invitation };
+  },
+
+  /** Emite una invitación nueva (la anterior deja de servir). */
+  reissueInvitation: async (id: string): Promise<Invitation> => {
+    const response = await apiClient.post<{ message: string; invitation: Invitation }>(`/users/${id}/invitation`);
+    return response.data.invitation;
   },
 
   updateUser: async (id: string, data: UpdateUserData): Promise<User> => {

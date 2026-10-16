@@ -86,3 +86,7 @@
   justify-content: flex-end;
   margin-top: var(--s4);
 }
+
+.warn {
+  color: var(--peligro);
+}
