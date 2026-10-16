@@ -3,6 +3,7 @@ import { Outlet, useLocation } from 'react-router-dom';
 import { Sidebar } from './Sidebar';
 import { TopBar } from './TopBar';
 import { resolveMeta } from './navigation';
+import { PeriodStatusBanner } from '@features/periodo/components/PeriodStatusBanner';
 import { SessionTimeout } from '@features/auth/components/SessionTimeout';
 import styles from './AppLayout.module.css';
 
@@ -18,6 +19,7 @@ export function AppLayout() {
         <TopBar title={meta.title} group={meta.group} onMenu={() => setDrawerOpen(true)} />
         <div className={styles.scroll}>
           <div className={styles.content}>
+            <PeriodStatusBanner />
             <Outlet />
           </div>
         </div>

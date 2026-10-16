@@ -185,6 +185,11 @@ model AcademicPeriod {
   isActive  Boolean  @default(true) @map("is_active")
   createdAt DateTime @default(now()) @map("created_at")
 
+  // Cierre del periodo (fase 1 de la tutoría por ciclo): quién y cuándo lo cerró, y el resumen de lo ocurrido en él.
+  closedAt       DateTime? @map("closed_at")
+  closedById     String?   @map("closed_by_id")
+  closureSummary Json?     @map("closure_summary")
+
   evaluations       TutorEvaluation[]
   evaluationWindows EvaluationWindow[]
   workPlans         WorkPlan[]

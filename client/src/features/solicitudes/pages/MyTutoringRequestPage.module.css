@@ -190,3 +190,15 @@
   opacity: 0.6;
   cursor: not-allowed;
 }
+
+.closedNote {
+  margin: 0 0 14px;
+  padding: 10px 12px;
+  border: 1px solid var(--borde);
+  border-left: 4px solid var(--azul-med);
+  border-radius: 8px;
+  background: var(--g50);
+  font-size: 12.5px;
+  line-height: 1.5;
+  color: var(--g700);
+}

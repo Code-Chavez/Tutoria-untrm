@@ -1,4 +1,5 @@
 import { Router, type IRouter } from 'express';
+import { requireOpenPeriod } from '../middleware/requireOpenPeriod';
 import { container } from '../../../infrastructure/container';
 import { TutoringRequestController } from '../controllers/TutoringRequestController';
 import { authenticate } from '../middleware/authenticate';
@@ -19,7 +20,7 @@ const requireAuth = authenticate(container.services.tokenService);
 router.post(
   '/students/:id/tutoring-requests',
   requireAuth,
-  authorize(['tutoring-requests:write']),
+  authorize(['tutoring-requests:write']), requireOpenPeriod,
   tutoringRequestController.create,
 );
 
@@ -27,7 +28,7 @@ router.post(
 router.post(
   '/tutoring-requests/me',
   requireAuth,
-  authorize(['tutoring-requests:self']),
+  authorize(['tutoring-requests:self']), requireOpenPeriod,
   tutoringRequestController.createOwn,
 );
 
@@ -43,7 +44,7 @@ router.get(
 router.patch(
   '/tutoring-requests/:id/status',
   requireAuth,
-  authorize(['tutoring-requests:write']),
+  authorize(['tutoring-requests:write']), requireOpenPeriod,
   tutoringRequestController.updateStatus,
 );
 

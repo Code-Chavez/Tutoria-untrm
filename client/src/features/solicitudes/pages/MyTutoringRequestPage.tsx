@@ -10,6 +10,7 @@ import {
 import { Badge } from '@shared/components/ui';
 import { useQueryClient } from '@tanstack/react-query';
 import { OWN_REQUESTS_KEY, useOwnTutoringRequests } from '../hooks/useTutoringRequests';
+import { usePeriodStatus } from '@features/periodo/hooks/usePeriods';
 import { CASE_TYPE_LABEL, REQUEST_STATUS_LABEL, type TutoringRequestStatus } from '../services/tutoringRequestService';
 import styles from './MyTutoringRequestPage.module.css';
 
@@ -58,6 +59,9 @@ const STATUS_TONE: Record<TutoringRequestStatus, 'warning' | 'info' | 'success'>
 export function MyTutoringRequestPage() {
   const queryClient = useQueryClient();
   const { user } = useAuth();
+  // Sin periodo abierto la tutoría está en solo lectura: se ve el historial, no se puede solicitar.
+  const { data: periodStatus } = usePeriodStatus();
+  const closed = periodStatus ? !periodStatus.open : false;
   const history = useOwnTutoringRequests();
   const [caseType, setCaseType] = useState<CreateOwnTutoringRequestData['caseType']>('ACADEMIC');
   const [reason, setReason] = useState('');
@@ -70,6 +74,8 @@ export function MyTutoringRequestPage() {
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setFeedback(null);
+
+    if (closed) return;
 
     if (reason.trim().length < 3) {
       setFeedback({ type: 'error', text: 'Describe el motivo de la solicitud.' });
@@ -108,6 +114,12 @@ export function MyTutoringRequestPage() {
           <h3>Nueva solicitud</h3>
         </div>
         <div className={styles.panelBody}>
+          {closed && (
+            <p role="status" className={styles.closedNote}>
+              No hay un periodo académico abierto, así que por ahora no puedes registrar solicitudes. Tu historial sigue disponible abajo. Podrás
+              solicitar tutoría cuando se abra el siguiente periodo y estés cargado en él.
+            </p>
+          )}
           <form onSubmit={handleSubmit}>
             {user && (
               <p className={styles.requester}>
@@ -128,7 +140,7 @@ export function MyTutoringRequestPage() {
                 onChange={(e) =>
                   setCaseType(e.target.value as CreateOwnTutoringRequestData['caseType'])
                 }
-                disabled={submitting}
+                disabled={submitting || closed}
               >
                 {CASE_TYPES.map((c) => (
                   <option key={c.value} value={c.value}>
@@ -142,7 +154,7 @@ export function MyTutoringRequestPage() {
               <span className={styles.examplesLabel} id="examples-label">¿No sabes cómo empezar? Toca una frase y complétala:</span>
               <div className={styles.examples} role="group" aria-labelledby="examples-label">
                 {EXAMPLES[caseType].map((example) => (
-                  <button key={example} type="button" className={styles.example} onClick={() => insertExample(example)} disabled={submitting}>
+                  <button key={example} type="button" className={styles.example} onClick={() => insertExample(example)} disabled={submitting || closed}>
                     {example.trim()}
                   </button>
                 ))}
@@ -159,11 +171,11 @@ export function MyTutoringRequestPage() {
                 maxLength={1000}
                 placeholder="Cuéntanos con tus palabras qué necesitas y desde cuándo. Escribe solo lo que quieras compartir."
                 onChange={(e) => setReason(e.target.value)}
-                disabled={submitting}
+                disabled={submitting || closed}
               />
             </div>
 
-            <Button type="submit" variant="primary" loading={submitting}>
+            <Button type="submit" variant="primary" loading={submitting} disabled={closed}>
               Registrar solicitud
             </Button>
           </form>

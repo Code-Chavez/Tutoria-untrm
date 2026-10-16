@@ -50,6 +50,8 @@ describe('GetEvaluationResultsUseCase', () => {
       findAll: jest.fn(),
       findById: jest.fn(),
       findByDate: jest.fn(),
+      close: jest.fn(),
+      reopen: jest.fn(),
     };
     evaluations = {
       create: jest.fn(),

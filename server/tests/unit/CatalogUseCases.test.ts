@@ -46,6 +46,7 @@ describe('Catálogos maestros (HU-48)', () => {
       isDuplicate: jest.fn().mockResolvedValue(false),
       facultyExists: jest.fn().mockResolvedValue(true),
       activateOnlyPeriod: jest.fn().mockResolvedValue(undefined),
+      findActivePeriodId: jest.fn().mockResolvedValue(null),
     };
   });
 
@@ -75,7 +76,17 @@ describe('Catálogos maestros (HU-48)', () => {
       ).rejects.toBeInstanceOf(CatalogValidationError);
     });
 
-    it('un periodo creado como activo deja a los demás inactivos', async () => {
+    it('no abre un periodo si ya hay otro vigente: primero hay que cerrarlo', async () => {
+      repo.findActivePeriodId.mockResolvedValue('vigente');
+
+      await expect(
+        create().execute('periods', { name: '2027-I', startDate: new Date('2027-03-01'), endDate: new Date('2027-07-31'), isActive: true }),
+      ).rejects.toThrow(/Cierre de periodo/);
+
+      expect(repo.create).not.toHaveBeenCalled();
+    });
+
+    it('un periodo creado sin vigente que lo impida queda como el vigente', async () => {
       await create().execute('periods', {
         name: '2027-I', startDate: new Date('2027-03-01'), endDate: new Date('2027-07-31'), isActive: true,
       });
@@ -115,7 +126,22 @@ describe('Catálogos maestros (HU-48)', () => {
       expect(repo.update).toHaveBeenCalledWith('faculties', 'e1', { isActive: false });
     });
 
-    it('activar un periodo desactiva los demás', async () => {
+    it('no se puede apagar el periodo vigente desde el catálogo: se cierra con su propio flujo', async () => {
+      repo.findById.mockResolvedValue(entry({ kind: 'periods', isActive: true, startDate: new Date('2027-03-01'), endDate: new Date('2027-07-31') }));
+
+      await expect(update().execute('periods', 'e1', { isActive: false })).rejects.toThrow(/Cierre de periodo/);
+
+      expect(repo.update).not.toHaveBeenCalled();
+    });
+
+    it('no se activa otro periodo mientras haya uno vigente', async () => {
+      repo.findById.mockResolvedValue(entry({ kind: 'periods', isActive: false, startDate: new Date('2027-03-01'), endDate: new Date('2027-07-31') }));
+      repo.findActivePeriodId.mockResolvedValue('otro');
+
+      await expect(update().execute('periods', 'e1', { isActive: true })).rejects.toThrow(/Cierre de periodo/);
+    });
+
+    it('activar un periodo cuando no hay otro vigente lo deja como el vigente', async () => {
       repo.findById.mockResolvedValue(entry({ kind: 'periods', isActive: false, startDate: new Date('2027-03-01'), endDate: new Date('2027-07-31') }));
       await update().execute('periods', 'e1', { isActive: true });
       expect(repo.activateOnlyPeriod).toHaveBeenCalledWith('e1');

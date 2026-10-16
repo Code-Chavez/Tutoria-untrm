@@ -5,6 +5,7 @@ import { QueryClientTestWrapper } from '@shared/test-utils/QueryClientTestWrappe
 import { AuthContext, type AuthContextValue } from '@features/auth/context/AuthContext';
 import { MyTutoringRequestPage } from './MyTutoringRequestPage';
 import { tutoringRequestService } from '../services/tutoringRequestService';
+import { periodService } from '@features/periodo/services/periodService';
 import type { TutoringRequest, TutoringRequestView } from '../services/tutoringRequestService';
 
 vi.mock('../services/tutoringRequestService', async (importOriginal) => {
@@ -18,7 +19,13 @@ vi.mock('../services/tutoringRequestService', async (importOriginal) => {
   };
 });
 
+vi.mock('@features/periodo/services/periodService', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@features/periodo/services/periodService')>();
+  return { ...actual, periodService: { current: vi.fn() } };
+});
+
 const mocked = vi.mocked(tutoringRequestService);
+const mockedPeriod = vi.mocked(periodService);
 
 const view = (over: Partial<TutoringRequestView> = {}): TutoringRequestView => ({
   id: 'r1',
@@ -61,6 +68,7 @@ describe('MyTutoringRequestPage', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mocked.getOwn.mockResolvedValue([]);
+    mockedPeriod.current.mockResolvedValue({ open: true, period: { id: 'p1', name: '2026-II', startDate: '2026-08-24', endDate: '2026-12-18' } });
   });
 
   it('exige describir el motivo antes de enviar', async () => {
@@ -170,6 +178,28 @@ describe('MyTutoringRequestPage', () => {
 
       expect(await screen.findByText('Describe el motivo de la solicitud.')).toBeInTheDocument();
       expect(mocked.createOwnTutoringRequest).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('periodo cerrado: solo lectura', () => {
+    it('explica que no se puede solicitar y deshabilita el formulario, pero deja ver el historial', async () => {
+      mockedPeriod.current.mockResolvedValue({ open: false, period: null });
+      mocked.getOwn.mockResolvedValue([view()]);
+      renderPage();
+
+      expect(await screen.findByText(/No hay un periodo académico abierto/)).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: /registrar solicitud/i })).toBeDisabled();
+      expect(screen.getByLabelText('Descripción del motivo')).toBeDisabled();
+      expect(screen.getByLabelText(/Motivo/)).toBeDisabled();
+      expect(await screen.findByText('Dificultad en Cálculo')).toBeInTheDocument(); // historial visible
+    });
+
+    it('con el periodo abierto el formulario funciona normalmente', async () => {
+      renderPage();
+
+      await waitFor(() => expect(mockedPeriod.current).toHaveBeenCalled());
+      expect(screen.queryByText(/No hay un periodo académico abierto/)).not.toBeInTheDocument();
+      expect(screen.getByRole('button', { name: /registrar solicitud/i })).toBeEnabled();
     });
   });
 });

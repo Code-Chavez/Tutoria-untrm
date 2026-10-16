@@ -49,6 +49,8 @@ describe('SubmitEvaluationUseCase', () => {
       findAll: jest.fn(),
       findById: jest.fn(),
       findByDate: jest.fn(),
+      close: jest.fn(),
+      reopen: jest.fn(),
     };
     evaluations = {
       create: jest.fn().mockImplementation(async (data) => ({ id: 'eval-1', createdAt: new Date(), ...data })),

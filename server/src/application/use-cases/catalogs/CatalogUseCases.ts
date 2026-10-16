@@ -35,12 +35,21 @@ async function assertValid(
   }
 }
 
+/** Solo hay un periodo vigente: para abrir otro hay que cerrar primero el actual en «Cierre de periodo». */
+async function assertNoOtherOpenPeriod(catalogs: CatalogRepository, selfId?: string): Promise<void> {
+  const open = await catalogs.findActivePeriodId();
+  if (open && open !== selfId) {
+    throw new CatalogValidationError('Ya hay un periodo vigente: ciérrelo en «Cierre de periodo» antes de abrir otro');
+  }
+}
+
 /** Alta de un elemento: nombre/código únicos y, para periodos, solo uno activo a la vez. */
 export class CreateCatalogEntryUseCase {
   constructor(private readonly catalogs: CatalogRepository) {}
 
   async execute(kind: CatalogKind, input: CatalogInput): Promise<CatalogEntry> {
     await assertValid(this.catalogs, kind, input);
+    if (kind === 'periods' && input.isActive) await assertNoOtherOpenPeriod(this.catalogs);
     if (await this.catalogs.isDuplicate(kind, input)) throw new CatalogDuplicateError();
 
     const created = await this.catalogs.create(kind, input);
@@ -64,6 +73,13 @@ export class UpdateCatalogEntryUseCase {
 
     const { code: _immutable, ...changes } = input;
     await assertValid(this.catalogs, kind, changes, current);
+    if (kind === 'periods') {
+      // Un periodo se termina con su cierre (resumen, matrícula congelada, solo lectura), no apagando una casilla.
+      if (changes.isActive === false && current.isActive) {
+        throw new CatalogValidationError('Para terminar el periodo vigente use «Cierre de periodo»');
+      }
+      if (changes.isActive === true && !current.isActive) await assertNoOtherOpenPeriod(this.catalogs, id);
+    }
     if (
       (changes.name !== undefined || changes.facultyId !== undefined) &&
       (await this.catalogs.isDuplicate(
