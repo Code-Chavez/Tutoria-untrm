@@ -34,6 +34,7 @@ import { IndicatorsPage } from '@features/indicadores/pages/IndicatorsPage';
 import { CatalogsPage } from '@features/catalogos/pages/CatalogsPage';
 import { DataRequestPage } from '@features/pedidos/pages/DataRequestPage';
 import { PeriodClosurePage } from '@features/periodo/pages/PeriodClosurePage';
+import { CampusesPage } from '@features/sedes/pages/CampusesPage';
 import { ParametersPage } from '@features/parametros/pages/ParametersPage';
 import { BrandingPage } from '@features/identidad/pages/BrandingPage';
 import { EvaluationWindowsPage } from '@features/evaluacion/pages/EvaluationWindowsPage';
@@ -100,6 +101,14 @@ export default function App() {
                 element={
                   <RequireRole roles={['Administrador DBU']}>
                     <PeriodClosurePage />
+                  </RequireRole>
+                }
+              />
+              <Route
+                path="sedes"
+                element={
+                  <RequireRole roles={['Administrador DBU', 'Vicerrectorado']}>
+                    <CampusesPage />
                   </RequireRole>
                 }
               />

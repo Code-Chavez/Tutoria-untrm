@@ -46,7 +46,7 @@ describe('GetTutorWorkloadUseCase', () => {
 
     expect(result).toHaveLength(2);
     // t2 (0) va antes que t1 (5)
-    expect(result[0]).toEqual({ tutorId: 't2', fullName: 'Ana Ruiz', email: 'ana@untrm.edu.pe', assignedCount: 0 });
+    expect(result[0]).toEqual({ tutorId: 't2', fullName: 'Ana Ruiz', email: 'ana@untrm.edu.pe', assignedCount: 0, schoolId: null });
     expect(result[1].assignedCount).toBe(5);
   });
 

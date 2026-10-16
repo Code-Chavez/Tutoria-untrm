@@ -29,6 +29,7 @@ export class GetTutorWorkloadUseCase {
         fullName: `${tutor.firstName} ${tutor.lastName}`,
         email: tutor.email,
         assignedCount: countByTutor.get(tutor.id) ?? 0,
+        schoolId: tutor.schoolId ?? null,
       }))
       .sort((a, b) => a.assignedCount - b.assignedCount);
   }

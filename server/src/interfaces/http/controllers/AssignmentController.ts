@@ -9,6 +9,7 @@ import {
   StudentsAlreadyAssignedError,
   ReassignReasonRequiredError,
   SameTutorAssignmentError,
+  TutorSchoolMismatchError,
 } from '@application/use-cases/assignments/AssignmentErrors';
 import { StudentNotFoundError } from '@application/use-cases/students/StudentErrors';
 
@@ -44,7 +45,7 @@ export class AssignmentController {
         res.status(400).json({ error: error.message });
       } else if (error instanceof TutorNotFoundError || error instanceof StudentNotFoundError) {
         res.status(404).json({ error: error.message });
-      } else if (error instanceof StudentsAlreadyAssignedError) {
+      } else if (error instanceof StudentsAlreadyAssignedError || error instanceof TutorSchoolMismatchError) {
         res.status(409).json({ error: error.message });
       } else {
         res.status(500).json({ error: 'Error interno del servidor' });
@@ -76,6 +77,8 @@ export class AssignmentController {
         res.status(400).json({ error: error.message });
       } else if (error instanceof StudentNotFoundError || error instanceof TutorNotFoundError) {
         res.status(404).json({ error: error.message });
+      } else if (error instanceof TutorSchoolMismatchError) {
+        res.status(409).json({ error: error.message });
       } else {
         res.status(500).json({ error: 'Error interno del servidor' });
       }

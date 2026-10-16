@@ -26,6 +26,7 @@ import {
   ShieldCheckIcon,
   MessageSquareIcon,
   FileTextIcon,
+  MapPinIcon,
 } from '@shared/components/icons';
 
 export type RoleCode = 'tutor' | 'coord' | 'dbu' | 'serv' | 'est' | 'vice';
@@ -102,6 +103,7 @@ export const NAV: NavGroup[] = [
       { label: 'Indicadores', Icon: PieChartIcon, path: '/indicadores', roles: ['dbu', 'coord', 'vice'] },
       { label: 'Usuarios y roles', Icon: UsersIcon, path: '/users', roles: ['dbu'] },
       { label: 'Catálogos', Icon: LayersIcon, path: '/catalogos', roles: ['dbu'] },
+      { label: 'Sedes', Icon: MapPinIcon, path: '/sedes', roles: ['dbu', 'vice'] },
       { label: 'Cierre de periodo', Icon: RefreshIcon, path: '/cierre-periodo', roles: ['dbu'] },
       { label: 'Parámetros', Icon: SlidersIcon, path: '/parametros', roles: ['dbu'] },
       { label: 'Identidad visual', Icon: PaletteIcon, path: '/identidad', roles: ['dbu'] },

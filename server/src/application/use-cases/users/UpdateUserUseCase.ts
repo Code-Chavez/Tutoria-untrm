@@ -2,7 +2,9 @@ import { UserRepository } from '@domain/repositories/UserRepository';
 import { User } from '@domain/entities/User';
 import { RoleRepository } from '@domain/repositories/RoleRepository';
 import { RoleNotFoundError } from '@application/use-cases/roles/RoleErrors';
+import { SchoolRepository } from '@domain/repositories/SchoolRepository';
 import { resolveService } from './serviceAssignment';
+import { resolveTutorSchool, TutorSchoolRequiredError } from './tutorSchool';
 import { DuplicateEmailError } from './UserErrors';
 import { normalizeEmail } from './normalizeEmail';
 
@@ -13,12 +15,13 @@ export class UserNotFoundError extends Error {
   }
 }
 
-export { DuplicateEmailError };
+export { DuplicateEmailError, TutorSchoolRequiredError };
 
 export class UpdateUserUseCase {
   constructor(
     private readonly userRepository: UserRepository,
     private readonly roles: RoleRepository,
+    private readonly schools: SchoolRepository,
   ) {}
 
   async execute(id: string, data: Partial<Omit<User, 'id' | 'createdAt' | 'updatedAt' | 'passwordHash'>>): Promise<Omit<User, 'passwordHash'>> {
@@ -45,6 +48,16 @@ export class UpdateUserUseCase {
       const role = await this.roles.findById(roleId);
       if (!role) throw new RoleNotFoundError(roleId);
       changes.service = resolveService(role.name, data.service !== undefined ? data.service : existingUser.service);
+    }
+
+    // 3b. Un docente tutor pertenece a una escuela: se exige al volverlo tutor o al tocar su escuela; el resto la conserva o la pierde según el rol.
+    if (data.roleId !== undefined || data.schoolId !== undefined) {
+      const roleId = data.roleId ?? existingUser.roleId;
+      const role = await this.roles.findById(roleId);
+      if (!role) throw new RoleNotFoundError(roleId);
+      const schoolId = await resolveTutorSchool(this.schools, role.name, data.schoolId !== undefined ? data.schoolId : existingUser.schoolId);
+      if (schoolId !== (existingUser.schoolId ?? null)) changes.schoolId = schoolId;
+      else delete changes.schoolId;
     }
 
     // 4. Actualizar el usuario

@@ -10,6 +10,8 @@ export interface User {
   photoUrl?: string;
   /** Servicio al que pertenece un Profesional de Servicio; nulo en los demás roles. */
   service?: string | null;
+  /** Escuela profesional del docente tutor; nulo en los demás roles y en tutores anteriores a esta regla. */
+  schoolId?: string | null;
   isActive: boolean;
   /** Pendiente de activación: aún no creó su contraseña con la invitación. */
   mustChangePassword?: boolean;
@@ -30,6 +32,7 @@ export interface CreateUserData {
   roleId: string;
   phone?: string;
   service?: string | null;
+  schoolId?: string | null;
 }
 
 export interface UpdateUserData {
@@ -39,6 +42,7 @@ export interface UpdateUserData {
   roleId?: string;
   phone?: string;
   service?: string | null;
+  schoolId?: string | null;
 }
 
 export const userService = {

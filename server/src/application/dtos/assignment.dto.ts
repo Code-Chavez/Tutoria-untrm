@@ -12,6 +12,8 @@ export interface TutorWorkload {
   fullName: string;
   email: string;
   assignedCount: number;
+  /** Escuela del tutor (null en cuentas anteriores a la regla de escuela). */
+  schoolId: string | null;
 }
 
 export interface ReassignStudentInput {

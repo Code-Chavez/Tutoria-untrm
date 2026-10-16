@@ -73,14 +73,17 @@ export const AssignmentPage: React.FC = () => {
     });
   };
 
-  const selectedTutor = tutors.find((t) => t.tutorId === selectedTutorId) ?? null;
+  // Un tutor solo atiende estudiantes de su escuela: se ofrecen los de la escuela de lo elegido (y los aún sin escuela registrada).
+  const selectedSchools = new Set(students.filter((s) => selectedIds.has(s.id)).map((s) => s.schoolId));
+  const eligibleTutors = tutors.filter((t) => !t.schoolId || selectedSchools.size === 0 || (selectedSchools.size === 1 && selectedSchools.has(t.schoolId)));
+  const selectedTutor = eligibleTutors.find((t) => t.tutorId === selectedTutorId) ?? null;
 
   const handleAssign = async () => {
-    if (!selectedTutorId || selectedIds.size === 0) return;
+    if (!selectedTutor || selectedIds.size === 0) return;
     setAssigning(true);
     setFeedback(null);
     try {
-      const count = await assignmentService.assignStudents(selectedTutorId, [...selectedIds]);
+      const count = await assignmentService.assignStudents(selectedTutor.tutorId, [...selectedIds]);
       setFeedback({
         ok: true,
         text: `Se asignaron ${count} estudiante(s) a ${selectedTutor?.fullName ?? 'el tutor'}.`,
@@ -138,11 +141,11 @@ export const AssignmentPage: React.FC = () => {
           </Card>
 
           <Card className={styles.tutorsCard}>
-            <CardHeader title="2 · Elige el tutor" description="Ordenados por menor carga" />
+            <CardHeader title="2 · Elige el tutor" description="De la escuela de los estudiantes elegidos, por menor carga" />
             <CardBody>
               <TutorWorkloadPanel
-                tutors={tutors}
-                selectedTutorId={selectedTutorId}
+                tutors={eligibleTutors}
+                selectedTutorId={selectedTutor?.tutorId ?? null}
                 onSelect={(id) => {
                   setSelectedTutorId(id);
                   setFeedback(null);
@@ -163,7 +166,7 @@ export const AssignmentPage: React.FC = () => {
                 </span>
                 <Button
                   icon={<SwitchIcon size={17} />}
-                  disabled={!selectedTutorId || selectedIds.size === 0}
+                  disabled={!selectedTutor || selectedIds.size === 0}
                   loading={assigning}
                   onClick={handleAssign}
                 >

@@ -6,6 +6,8 @@ export interface TutorWorkload {
   fullName: string;
   email: string;
   assignedCount: number;
+  /** Escuela del tutor; nulo en cuentas anteriores a la regla de escuela. */
+  schoolId?: string | null;
 }
 
 export const assignmentService = {
