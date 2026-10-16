@@ -12,6 +12,7 @@ const REQUIRE_DB = process.env.REQUIRE_DB_TESTS === '1';
 jest.setTimeout(180_000);
 
 const ADMIN = { email: '7183255722@untrm.edu.pe', password: 'Admin2026!' };
+const PASSWORD = 'ClaveSeguridad2026!';
 const stamp = Date.now();
 const EMAIL = `a08-${stamp}@untrm.edu.pe`;
 const KEYS = ['inactivity_timeout_minutes', 'login_max_attempts', 'login_lockout_minutes'] as const;
@@ -21,7 +22,6 @@ describe('parámetros de seguridad de acceso (A08)', () => {
   let baseUrl = '';
   let dbUp = false;
   let adminToken = '';
-  let temporaryPassword = '';
   let userId = '';
   const original: Record<string, string | undefined> = {};
 
@@ -61,9 +61,11 @@ describe('parámetros de seguridad de acceso (A08)', () => {
     const role = await prisma.role.findFirstOrThrow({ where: { name: 'Docente Tutor' } });
     const created = await call('POST', '/api/users', { email: EMAIL, firstName: 'Prueba', lastName: 'Seguridad', roleId: role.id }, adminToken);
     expect(created.status).toBe(201);
-    const body = (await created.json()) as { user: { id: string }; temporaryPassword: string };
+    const body = (await created.json()) as { user: { id: string }; invitation: { link: string } };
     userId = body.user.id;
-    temporaryPassword = body.temporaryPassword;
+    // La cuenta nace sin clave: se activa con el enlace de la invitación y la clave que elige la persona.
+    const activated = await call('POST', '/api/auth/reset-password', { token: body.invitation.link.split('/').pop(), newPassword: PASSWORD });
+    expect(activated.status).toBe(200);
   });
 
   afterAll(async () => {
@@ -98,7 +100,7 @@ describe('parámetros de seguridad de acceso (A08)', () => {
     expect((await login('incorrecta-3')).status).toBe(401); // tercer intento: bloquea
 
     // Ya bloqueada: ni la clave correcta entra.
-    expect((await login(temporaryPassword)).status).toBe(423);
+    expect((await login(PASSWORD)).status).toBe(423);
 
     const locked = await prisma.user.findUniqueOrThrow({ where: { id: userId } });
     const minutes = ((locked.lockedUntil as Date).getTime() - Date.now()) / 60_000;
@@ -115,14 +117,14 @@ describe('parámetros de seguridad de acceso (A08)', () => {
     expect((await login('incorrecta-2')).status).toBe(401);
     expect((await login('incorrecta-3')).status).toBe(401);
 
-    expect((await login(temporaryPassword)).status).toBe(200); // no hay bloqueo
+    expect((await login(PASSWORD)).status).toBe(200); // no hay bloqueo
   });
 
   it('el cliente recibe el plazo de inactividad configurado y el servidor lo hace valer al renovar la sesión', async () => {
     if (!dbUp) return;
     await setParam('inactivity_timeout_minutes', 10);
 
-    const res = await login(temporaryPassword);
+    const res = await login(PASSWORD);
     expect(res.status).toBe(200);
     const body = (await res.json()) as { data: { sessionPolicy: { idleTimeoutMinutes: number }; refreshToken: string } };
     expect(body.data.sessionPolicy.idleTimeoutMinutes).toBe(10);
