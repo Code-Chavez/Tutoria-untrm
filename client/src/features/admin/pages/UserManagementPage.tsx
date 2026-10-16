@@ -1,11 +1,12 @@
 import React, { useMemo, useState } from 'react';
 import styles from './UserManagementPage.module.css';
-import { User, userService, CreateUserData, UpdateUserData } from '../services/userService';
-import { TemporaryPasswordDialog } from '../components/TemporaryPasswordDialog';
+import { User, userService, CreateUserData, UpdateUserData, Invitation } from '../services/userService';
+import { InvitationDialog } from '../components/InvitationDialog';
 import { UserFormModal } from '../components/UserFormModal';
 import { UserFilters, UserFilterValues } from '../components/UserFilters';
 import { UserTable } from '../components/UserTable';
 import { roleDisplayName } from '@shared/utils/roleLabel';
+import { getApiErrorMessage } from '@shared/services/apiClient';
 import { useUsers } from '../hooks/useUsers';
 import {
   PageHeader,
@@ -20,8 +21,9 @@ const EMPTY_FILTERS: UserFilterValues = { search: '', roleId: '', status: '' };
 
 export const UserManagementPage: React.FC = () => {
   const { users, roles, loading, error, refresh } = useUsers();
-  // La clave temporal de una cuenta recién creada: se muestra una sola vez, a quien la entrega.
-  const [issuedAccount, setIssuedAccount] = useState<{ email: string; temporaryPassword: string } | null>(null);
+  // La invitación de una cuenta recién creada (o reemitida): el enlace se muestra una sola vez, a quien administra.
+  const [issued, setIssued] = useState<{ email: string; invitation: Invitation } | null>(null);
+  const [inviteError, setInviteError] = useState('');
 
   const [filters, setFilters] = useState<UserFilterValues>(EMPTY_FILTERS);
 
@@ -63,10 +65,20 @@ export const UserManagementPage: React.FC = () => {
     if (userToEdit) {
       await userService.updateUser(userToEdit.id, data as UpdateUserData);
     } else {
-      const { user, temporaryPassword } = await userService.createUser(data as CreateUserData);
-      if (temporaryPassword) setIssuedAccount({ email: user.email, temporaryPassword });
+      const { user, invitation } = await userService.createUser(data as CreateUserData);
+      setIssued({ email: user.email, invitation });
     }
     refresh();
+  };
+
+  const reissue = async (user: User) => {
+    setInviteError('');
+    try {
+      setIssued({ email: user.email, invitation: await userService.reissueInvitation(user.id) });
+      refresh();
+    } catch (err) {
+      setInviteError(getApiErrorMessage(err));
+    }
   };
 
   const confirmToggle = async () => {
@@ -95,6 +107,12 @@ export const UserManagementPage: React.FC = () => {
           </Button>
         }
       />
+
+      {inviteError && (
+        <p role="alert" className={styles.inviteError}>
+          {inviteError}
+        </p>
+      )}
 
       <div className={styles.tableCard}>
         <UserFilters
@@ -130,6 +148,7 @@ export const UserManagementPage: React.FC = () => {
             roleName={roleName}
             onEdit={handleOpenModal}
             onToggleStatus={setUserToToggle}
+            onReissueInvitation={reissue}
           />
         )}
       </div>
@@ -144,7 +163,7 @@ export const UserManagementPage: React.FC = () => {
         />
       )}
 
-      {issuedAccount && <TemporaryPasswordDialog {...issuedAccount} onClose={() => setIssuedAccount(null)} />}
+      {issued && <InvitationDialog {...issued} onClose={() => setIssued(null)} />}
 
       <ConfirmDialog
         open={userToToggle !== null}

@@ -193,6 +193,7 @@ const requestPasswordResetUseCase = new RequestPasswordResetUseCase(
 const resetPasswordUseCase = new ResetPasswordUseCase(passwordResetTokenRepository, passwordHasher, auditLogRepository);
 
 import { CreateUserUseCase } from '@application/use-cases/users/CreateUserUseCase';
+import { IssueInvitationUseCase } from '@application/use-cases/users/IssueInvitationUseCase';
 import { UpdateUserUseCase } from '@application/use-cases/users/UpdateUserUseCase';
 import { ToggleUserStatusUseCase } from '@application/use-cases/users/ToggleUserStatusUseCase';
 import { ListUsersUseCase } from '@application/use-cases/users/ListUsersUseCase';
@@ -291,6 +292,10 @@ import { MarkAllNotificationsReadUseCase } from '@application/use-cases/notifica
 import { MarkNotificationReadUseCase } from '@application/use-cases/notifications/MarkNotificationReadUseCase';
 
 const createUserUseCase = new CreateUserUseCase(userRepository, passwordHasher, roleRepository);
+const issueInvitationUseCase = new IssueInvitationUseCase(userRepository, passwordResetTokenRepository, mailer, auditLogRepository, {
+  publicUrl: env.PUBLIC_APP_URL,
+  ttlHours: env.INVITATION_TTL_HOURS,
+});
 const updateUserUseCase = new UpdateUserUseCase(userRepository, roleRepository);
 const toggleUserStatusUseCase = new ToggleUserStatusUseCase(userRepository);
 const listUsersUseCase = new ListUsersUseCase(userRepository);
@@ -718,6 +723,7 @@ export const container = {
     requestPasswordResetUseCase,
     resetPasswordUseCase,
     createUserUseCase,
+    issueInvitationUseCase,
     updateUserUseCase,
     toggleUserStatusUseCase,
     listUsersUseCase,

@@ -5,3 +5,9 @@
   box-shadow: var(--sombra-xs);
   overflow: hidden;
 }
+
+.inviteError {
+  margin: 0 0 var(--s4);
+  font-size: 13px;
+  color: var(--peligro);
+}

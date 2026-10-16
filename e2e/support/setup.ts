@@ -1,6 +1,6 @@
 import { expect } from '@playwright/test';
 import { accounts } from './accounts';
-import { api, apiLogin } from './api';
+import { api, apiLogin, apiPublic } from './api';
 
 interface StudentRow {
   id: string;
@@ -65,21 +65,21 @@ export function dateInput(d: Date): string {
 
 /**
  * Crea un tutorado nuevo con cuenta de portal (rol Tutorado), asignado a Elena.
- * La cuenta nace con una clave temporal aleatoria (A01). Por defecto la prueba la cambia por la API para poder usar la
- * cuenta de inmediato; con `keepTemporary` devuelve la clave temporal tal como la recibió la DBU.
+ * La cuenta nace sin clave y con una invitación de un solo uso (A01). Por defecto la prueba la activa por la API con una
+ * clave propia para poder usar la cuenta de inmediato; con `pending` devuelve la invitación sin activar.
  */
 export async function createPortalStudent(
   adminToken: string,
   elenaId: string,
-  options: { keepTemporary?: boolean } = {},
-): Promise<{ id: string; email: string; password: string; greeting: string }> {
+  options: { pending?: boolean } = {},
+): Promise<{ id: string; email: string; password: string; greeting: string; invitationLink: string }> {
   const student = await createStudentForElena(adminToken, elenaId);
   const roles = await api<{ roles: { id: string; name: string }[] } | { id: string; name: string }[]>(adminToken, 'GET', '/roles');
   const roleList = Array.isArray(roles.body) ? roles.body : roles.body.roles;
   const role = roleList.find((r) => r.name === 'Tutorado');
   expect(role, 'rol Tutorado').toBeTruthy();
   const email = `prueba.${student.fullName.split(' ').pop()}@untrm.edu.pe`;
-  const user = await api<{ user: { id: string }; temporaryPassword: string }>(adminToken, 'POST', '/users', {
+  const user = await api<{ user: { id: string }; invitation: { link: string } }>(adminToken, 'POST', '/users', {
     email,
     firstName: 'Prueba',
     lastName: student.fullName.replace('Prueba ', ''),
@@ -88,14 +88,14 @@ export async function createPortalStudent(
   expect(user.status).toBe(201);
   const linked = await api(adminToken, 'PATCH', `/students/${student.id}/portal-account`, { userId: user.body.user.id });
   expect(linked.status).toBe(200);
-  const temporary = user.body.temporaryPassword;
-  if (options.keepTemporary) return { id: student.id, email, password: temporary, greeting: 'Prueba' };
-
+  const invitationLink = user.body.invitation.link;
   const password = 'Estudiante2026!';
-  const own = await apiLogin({ email, password: temporary, role: 'Tutorado', greeting: 'Prueba' });
-  const changed = await api(own, 'POST', '/profile/change-password', { currentPassword: temporary, newPassword: password });
-  expect(changed.status).toBe(200);
-  return { id: student.id, email, password, greeting: 'Prueba' };
+  if (options.pending) return { id: student.id, email, password, greeting: 'Prueba', invitationLink };
+
+  const token = invitationLink.split('/').pop() as string;
+  const activated = await apiPublic('POST', '/auth/reset-password', { token, newPassword: password });
+  expect(activated.status).toBe(200);
+  return { id: student.id, email, password, greeting: 'Prueba', invitationLink };
 }
 
 /** Abre o cierra la evaluación de la escuela de Sistemas. */

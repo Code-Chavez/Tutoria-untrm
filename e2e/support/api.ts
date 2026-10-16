@@ -22,6 +22,16 @@ export async function api<T = unknown>(token: string, method: string, path: stri
   return { status: res.status, body: (await res.json().catch(() => null)) as T };
 }
 
+/** Llamada sin sesión (p. ej. activar una cuenta con el enlace de la invitación). */
+export async function apiPublic<T = unknown>(method: string, path: string, body?: unknown): Promise<{ status: number; body: T }> {
+  const res = await fetch(`${API}${path}`, {
+    method,
+    headers: { 'content-type': 'application/json' },
+    body: body === undefined ? undefined : JSON.stringify(body),
+  });
+  return { status: res.status, body: (await res.json().catch(() => null)) as T };
+}
+
 /** Texto único por ejecución para que las pruebas no dependan de datos de corridas anteriores. */
 export function unique(label: string): string {
   return `${label} E2E ${Date.now().toString(36)}`;

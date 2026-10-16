@@ -6,7 +6,7 @@ import { RoleNotFoundError } from '@application/use-cases/roles/RoleErrors';
 import { resolveService } from './serviceAssignment';
 import { DuplicateEmailError } from './UserErrors';
 import { normalizeEmail } from './normalizeEmail';
-import { generateTemporaryPassword } from './temporaryPassword';
+import { randomBytes } from 'node:crypto';
 
 export { DuplicateEmailError };
 
@@ -17,7 +17,7 @@ export class CreateUserUseCase {
     private readonly roles: RoleRepository,
   ) {}
 
-  async execute(data: Omit<User, 'id' | 'createdAt' | 'updatedAt' | 'passwordHash' | 'isActive' | 'failedLoginAttempts' | 'lockedUntil' | 'mustChangePassword'> & { password?: string, isActive?: boolean }): Promise<Omit<User, 'passwordHash'> & { temporaryPassword?: string }> {
+  async execute(data: Omit<User, 'id' | 'createdAt' | 'updatedAt' | 'passwordHash' | 'isActive' | 'failedLoginAttempts' | 'lockedUntil' | 'mustChangePassword'> & { password?: string, isActive?: boolean }): Promise<Omit<User, 'passwordHash'>> {
     // 1. Validar que el correo no esté duplicado (comparado ya normalizado)
     const email = normalizeEmail(data.email);
     const existingUser = await this.userRepository.findByEmail(email);
@@ -30,10 +30,10 @@ export class CreateUserUseCase {
     if (!role) throw new RoleNotFoundError(data.roleId);
     const service = resolveService(role.name, data.service);
 
-    // 3. Sin clave indicada, la cuenta nace con una clave temporal aleatoria que debe cambiarse al primer ingreso.
-    const temporaryPassword = data.password ? undefined : generateTemporaryPassword();
-    const rawPassword = data.password ?? temporaryPassword!;
-    const passwordHash = await this.passwordHasher.hash(rawPassword);
+    // 3. Sin clave indicada, la cuenta nace **sin clave utilizable** (una al azar que nadie conoce) y pendiente de activación:
+    //    la persona crea la suya con la invitación de un solo uso (IssueInvitationUseCase). Ninguna clave se muestra ni se envía.
+    const pendingActivation = !data.password;
+    const passwordHash = await this.passwordHasher.hash(data.password ?? randomBytes(32).toString('hex'));
 
     // 4. Crear el usuario
     const userToCreate = {
@@ -46,7 +46,7 @@ export class CreateUserUseCase {
       isActive: data.isActive ?? true,
       failedLoginAttempts: 0,
       lockedUntil: null,
-      mustChangePassword: temporaryPassword !== undefined,
+      mustChangePassword: pendingActivation,
       roleId: data.roleId,
       service,
     };
@@ -55,7 +55,6 @@ export class CreateUserUseCase {
 
     // 5. Retornar el usuario sin exponer el hash de contraseña
     const { passwordHash: _, ...userWithoutPassword } = createdUser;
-    // La clave temporal se devuelve una sola vez, a quien crea la cuenta: no se guarda en claro en ningún lado.
-    return temporaryPassword ? { ...userWithoutPassword, temporaryPassword } : userWithoutPassword;
+    return userWithoutPassword;
   }
 }

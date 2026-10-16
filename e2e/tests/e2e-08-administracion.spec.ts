@@ -48,33 +48,37 @@ test('la DBU registra un tutorado nuevo y aparece en la lista', async ({ page })
   await expect(page.getByRole('row', { name: new RegExp(code) })).toBeVisible();
 });
 
-test('un tutorado con clave temporal solo puede cambiarla y luego entra con la nueva (A01)', async ({ page, browser }) => {
+test('una cuenta nueva solo se activa con su enlace de un solo uso, y el enlace no sirve dos veces (A01)', async ({ page, browser }) => {
   const { adminToken, elenaId } = await ensureAnaWithElena();
-  const student = await createPortalStudent(adminToken, elenaId, { keepTemporary: true });
-  const newPassword = `Nueva${Date.now().toString(36)}!`;
+  const student = await createPortalStudent(adminToken, elenaId, { pending: true });
+  const chosen = `Propia${Date.now().toString(36)}!`;
 
+  // Pendiente de activación: no hay ninguna clave con la que entrar.
   await page.goto('/login');
   await page.getByPlaceholder('usuario@untrm.edu.pe').fill(student.email);
-  await page.getByPlaceholder('••••••••').fill(student.password);
+  await page.getByPlaceholder('••••••••').fill('Tutor2026!');
   await page.getByRole('button', { name: 'Ingresar' }).click();
+  await expect(page.getByRole('alert')).toBeVisible({ timeout: 45_000 });
 
-  // Con la clave temporal solo se abre el perfil: cualquier otra página lo devuelve allí.
-  await expect(page.getByRole('alert').filter({ hasText: /clave temporal/ })).toBeVisible({ timeout: 45_000 });
-  await page.goto('/');
-  await expect(page.getByRole('heading', { level: 1, name: 'Mi perfil' })).toBeVisible();
+  // El enlace de la invitación permite crear la propia contraseña.
+  await page.goto(new URL(student.invitationLink).pathname);
+  await expect(page.getByRole('heading', { name: 'Activa tu cuenta' })).toBeVisible();
+  await page.getByLabel('Nueva contraseña').fill(chosen);
+  await page.getByLabel('Confirmar contraseña').fill(chosen);
+  await page.getByRole('button', { name: 'Activar mi cuenta' }).click();
+  await expect(page.getByText(/Tu cuenta está activa/)).toBeVisible();
 
-  await page.getByLabel('Contraseña actual').fill(student.password);
-  await page.getByLabel('Nueva contraseña', { exact: true }).fill(newPassword);
-  await page.getByLabel('Confirmar nueva contraseña').fill(newPassword);
-  await page.getByRole('button', { name: 'Actualizar contraseña' }).click();
-  await expect(page.getByText(/Contraseña actualizada/)).toBeVisible();
+  // Entra con la contraseña que eligió.
+  const logged = await (await browser.newContext()).newPage();
+  await loginUi(logged, { ...student, password: chosen, role: 'Tutorado' });
 
-  // Ya sin la restricción: el inicio abre y la clave temporal dejó de servir.
-  await page.goto('/');
-  await expect(page.getByRole('heading', { level: 1, name: /Bienvenid[oa], Prueba/ })).toBeVisible();
-
-  const again = await (await browser.newContext()).newPage();
-  await loginUi(again, { ...student, password: newPassword, role: 'Tutorado' });
+  // El mismo enlace ya no sirve.
+  const reuse = await (await browser.newContext()).newPage();
+  await reuse.goto(new URL(student.invitationLink).pathname);
+  await reuse.getByLabel('Nueva contraseña').fill('OtraClave2026!');
+  await reuse.getByLabel('Confirmar contraseña').fill('OtraClave2026!');
+  await reuse.getByRole('button', { name: 'Activar mi cuenta' }).click();
+  await expect(reuse.getByRole('alert')).toBeVisible();
 });
 
 test('la DBU cambia el nombre corto de la identidad visual y lo restituye', async ({ page }) => {
