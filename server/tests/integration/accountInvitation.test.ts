@@ -61,7 +61,8 @@ describe('invitación de acceso único (A01)', () => {
     tutorToken = await token(TUTOR);
 
     const role = await prisma.role.findFirstOrThrow({ where: { name: 'Docente Tutor' } });
-    const created = await call('POST', '/api/users', { email, firstName: 'Prueba', lastName: 'Invitación', roleId: role.id }, adminToken);
+    const school = await prisma.school.findFirstOrThrow({ where: { isActive: true } }); // el docente tutor pertenece a una escuela
+    const created = await call('POST', '/api/users', { email, firstName: 'Prueba', lastName: 'Invitación', roleId: role.id, schoolId: school.id }, adminToken);
     expect(created.status).toBe(201);
     const body = (await created.json()) as { user: { id: string }; invitation: Invitation; temporaryPassword?: string };
     expect(body.temporaryPassword).toBeUndefined();

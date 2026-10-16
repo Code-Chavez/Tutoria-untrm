@@ -59,7 +59,8 @@ describe('parámetros de seguridad de acceso (A08)', () => {
     for (const key of KEYS) original[key] = (await prisma.systemParameter.findUnique({ where: { key } }))?.value;
 
     const role = await prisma.role.findFirstOrThrow({ where: { name: 'Docente Tutor' } });
-    const created = await call('POST', '/api/users', { email: EMAIL, firstName: 'Prueba', lastName: 'Seguridad', roleId: role.id }, adminToken);
+    const school = await prisma.school.findFirstOrThrow({ where: { isActive: true } }); // el docente tutor pertenece a una escuela
+    const created = await call('POST', '/api/users', { email: EMAIL, firstName: 'Prueba', lastName: 'Seguridad', roleId: role.id, schoolId: school.id }, adminToken);
     expect(created.status).toBe(201);
     const body = (await created.json()) as { user: { id: string }; invitation: { link: string } };
     userId = body.user.id;
