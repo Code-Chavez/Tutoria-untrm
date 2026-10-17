@@ -32,7 +32,23 @@ export function RequestListBanner({ kind }: { kind: DataRequestKind }) {
   const [feedback, setFeedback] = useState<{ ok: boolean; text: string } | null>(null);
   const [busy, setBusy] = useState(false);
 
-  if (schoolsQuery.isLoading || schools.length === 0) return null;
+  if (schoolsQuery.isLoading) return null;
+  // Sin escuelas que pedir (o si no se pudieron cargar) el camino no desaparece: lleva a «Pedir listas», donde se ve el motivo.
+  if (schools.length === 0) {
+    return (
+      <section className={styles.box} aria-label={`Pedir ${copy.noun}`}>
+        <div className={styles.text}>
+          <h3>¿Aún no tienes {copy.noun}? Pídela primero</h3>
+          <p>La lista se pide por correo a la escuela desde «Pedir listas»; cuando llegue el Excel, {copy.loadIn}.</p>
+        </div>
+        <div className={styles.actions}>
+          <Link to="/pedir-listas" className={styles.linkButton}>
+            Ir a «Pedir listas»
+          </Link>
+        </div>
+      </section>
+    );
+  }
 
   const targets = choice === ALL || schools.length === 1 ? schools : schools.filter((s) => s.id === choice);
   const single = targets.length === 1 ? targets[0] : null;

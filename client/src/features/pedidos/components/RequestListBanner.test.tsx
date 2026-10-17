@@ -103,11 +103,19 @@ describe('RequestListBanner', () => {
     expect(await screen.findByRole('status')).toHaveTextContent('El correo no salió');
   });
 
-  it('una coordinación sin escuelas a cargo no ve el bloque', async () => {
+  it('una coordinación sin escuelas a cargo no pierde el camino: el bloque la lleva a «Pedir listas»', async () => {
     vi.mocked(schoolService.getSchools).mockResolvedValue([school({ coordinatorId: 'otra-persona' })]);
-    const { container } = renderBanner();
+    renderBanner();
 
-    await waitFor(() => expect(schoolService.getSchools).toHaveBeenCalled());
-    expect(container).toBeEmptyDOMElement();
+    const link = await screen.findByRole('link', { name: /Ir a «Pedir listas»/ });
+    expect(link).toHaveAttribute('href', '/pedir-listas');
+    expect(screen.queryByRole('button', { name: /Pedir la lista/ })).not.toBeInTheDocument();
+  });
+
+  it('si no se pudieron cargar las escuelas, también ofrece ir a «Pedir listas»', async () => {
+    vi.mocked(schoolService.getSchools).mockRejectedValue(new Error('sin red'));
+    renderBanner();
+
+    expect(await screen.findByRole('link', { name: /Ir a «Pedir listas»/ })).toBeInTheDocument();
   });
 });

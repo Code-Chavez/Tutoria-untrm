@@ -68,3 +68,15 @@
 .error {
   color: var(--peligro);
 }
+
+.linkButton {
+  display: inline-flex;
+  align-items: center;
+  padding: var(--s2) var(--s4);
+  border-radius: var(--r-sm);
+  background: var(--azul-med);
+  color: #fff !important;
+  font-weight: 600;
+  font-size: var(--fs-sm);
+  text-decoration: none;
+}
