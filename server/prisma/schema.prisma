@@ -948,6 +948,8 @@ model DataRequest {
   schoolId String         @map("school_id")
   school   School         @relation(fields: [schoolId], references: [id])
 
+  // Qué lista se pide: la de estudiantes o la de docentes tutores (solo la DBU pide esta).
+  kind    String @default("ESTUDIANTES")
   toEmail String @map("to_email")
   cycles  Int[]
   note    String?

@@ -61,6 +61,8 @@ El menú está **agrupado por tareas**, en el orden en que se hacen. Una persona
 | Amonestar a un docente | Decano (o DBU) | Facultad y sedes → Amonestaciones |
 | Cerrar el periodo | DBU | Periodo académico → Cierre de periodo |
 
+**Pedir la lista, con un clic, desde la propia pantalla de carga.** Arriba de *Carga de estudiantes* y de *Carga de docentes* hay un bloque «¿Aún no tienes la lista? Pídela por correo». Un solo clic envía el pedido formal a la escuela (con la plantilla de Excel adjunta, a su nombre y con copia a usted); si la escuela no tiene correo configurado, se escribe ahí mismo y el mismo clic lo guarda y envía. La DBU puede pedir a **todas las escuelas** de una vez o elegir una; la lista de docentes tutores la pide solo la DBU. El bloque muestra el último pedido y si ya llegó la lista, y enlaza a *Pedir listas* para ver el historial.
+
 **Una pantalla lleva a la siguiente.** Cuando a una pantalla le falta algo (por ejemplo, no hay estudiantes o una escuela no tiene docentes) o cuando termina una tarea, muestra un bloque **«Qué sigue»** con enlaces a donde se carga lo que falta o a la tarea siguiente: después de *Pedir listas* sigue *Carga de estudiantes*; después de cargar, *Asignación por ciclo*. El **Panel de inicio** de la coordinación y la DBU muestra el periodo académico como pasos numerados.
 
 *Nombres en pantalla:* el sistema muestra **Estudiante** (rol Tutorado), **Docente** (Docente tutor), **Administrador** (Administrador DBU) y, para el Profesional de servicio, su especialidad (p. ej. «Profesional de Psicología»). Son los mismos roles de la tabla; solo cambia cómo se escriben junto a su nombre, en el perfil y en la lista de usuarios.

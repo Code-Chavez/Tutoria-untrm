@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { PageHeader, Card, CardHeader, CardBody, Button, Badge, SelectField, EmptyState, NextSteps } from '@shared/components/ui';
 import { SendIcon } from '@shared/components/icons';
 import { getApiErrorMessage } from '@shared/services/apiClient';
+import type { DataRequestKind } from '../services/dataRequestService';
 import { useAuth } from '@features/auth/hooks/useAuth';
 import { useDataRequests, useMarkReceived, useRequestSchools, useSendDataRequest, useSetRequestEmail } from '../hooks/useDataRequests';
 import styles from './DataRequestPage.module.css';
@@ -30,6 +31,9 @@ export function DataRequestPage() {
   const [chosen, setChosen] = useState('');
   const school = schools.find((s) => s.id === chosen) ?? schools[0];
   const [cycles, setCycles] = useState<number[]>([]);
+  // La DBU también pide la lista de docentes tutores (la coordinación solo la de estudiantes).
+  const isDbu = user?.role === 'Administrador DBU';
+  const [kind, setKind] = useState<DataRequestKind>('ESTUDIANTES');
   const [note, setNote] = useState('');
   const [emailDraft, setEmailDraft] = useState('');
   const [editing, setEditing] = useState(false);
@@ -57,7 +61,7 @@ export function DataRequestPage() {
     if (!school) return;
     setFeedback(null);
     try {
-      const { request, sent } = await send.mutateAsync({ schoolId: school.id, cycles, note: note.trim() || undefined });
+      const { request, sent } = await send.mutateAsync({ schoolId: school.id, cycles: kind === 'DOCENTES' ? [] : cycles, note: note.trim() || undefined, kind });
       setNote('');
       setFeedback(
         sent
@@ -90,6 +94,15 @@ export function DataRequestPage() {
             )}
 
             <form onSubmit={submit}>
+              {isDbu && (
+                <div className={styles.field}>
+                  <label htmlFor="req-kind">Qué lista pedir</label>
+                  <SelectField id="req-kind" value={kind} onChange={(e) => setKind(e.target.value as DataRequestKind)}>
+                    <option value="ESTUDIANTES">Estudiantes</option>
+                    <option value="DOCENTES">Docentes tutores</option>
+                  </SelectField>
+                </div>
+              )}
               <div className={styles.field}>
                 <label htmlFor="req-school">Escuela profesional</label>
                 <SelectField id="req-school" value={school?.id ?? ''} onChange={(e) => { setChosen(e.target.value); setEditing(false); setFeedback(null); }}>
@@ -175,7 +188,7 @@ export function DataRequestPage() {
                 <li key={r.id} className={styles.historyItem}>
                   <div className={styles.historyHead}>
                     <strong>
-                      {r.schoolName} · {r.periodName}
+                      {r.schoolName} · {r.periodName}{r.kind === 'DOCENTES' ? ' · Docentes' : ''}
                     </strong>
                     <Badge tone={r.status === 'ENVIADO' ? 'success' : 'warning'}>{r.status === 'ENVIADO' ? 'Enviado' : 'Fallido'}</Badge>
                     {r.receivedAt && <Badge tone="info">Recibido el {fmt(r.receivedAt)}</Badge>}

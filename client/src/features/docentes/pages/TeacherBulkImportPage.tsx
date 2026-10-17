@@ -4,6 +4,7 @@ import { getApiErrorMessage } from '@shared/services/apiClient';
 import { ImportStepper } from '@features/tutorados/components/ImportStepper';
 import { UploadDropzone } from '@features/tutorados/components/UploadDropzone';
 import { PageHeader, Button, Card, NextSteps } from '@shared/components/ui';
+import { RequestListBanner } from '@features/pedidos/components/RequestListBanner';
 import { UsersPlusIcon, DownloadIcon, InfoIcon } from '@shared/components/icons';
 import { teacherImportService, type TeacherImportReport } from '../services/teacherImportService';
 import { TeacherImportResult } from '../components/TeacherImportResult';
@@ -71,6 +72,8 @@ export const TeacherBulkImportPage: React.FC = () => {
           </Button>
         }
       />
+
+      <RequestListBanner kind="DOCENTES" />
 
       <Card padded>
         <ImportStepper current={currentStep} />

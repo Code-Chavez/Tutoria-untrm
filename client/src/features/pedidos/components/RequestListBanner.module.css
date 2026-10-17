@@ -1,0 +1,70 @@
+.box {
+  display: grid;
+  gap: var(--s3);
+  margin-bottom: var(--s4);
+  padding: var(--s4);
+  border: 1px solid var(--azul-med);
+  border-left-width: 4px;
+  border-radius: var(--r);
+  background: var(--celeste);
+}
+
+.text h3 {
+  margin: 0 0 var(--s1, 4px);
+  font-family: var(--ft);
+  font-size: var(--fs-md, 16px);
+  color: var(--g900);
+}
+
+.text p {
+  margin: 0;
+  font-size: var(--fs-sm);
+  color: var(--g700);
+}
+
+.text a {
+  color: var(--azul-med);
+  font-weight: 600;
+}
+
+.last {
+  margin-top: var(--s2) !important;
+  font-size: var(--fs-xs) !important;
+  color: var(--g600) !important;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: var(--s3);
+}
+
+.email {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s1, 4px);
+  flex: 1 1 280px;
+  font-size: var(--fs-xs);
+  color: var(--g700);
+}
+
+.email input {
+  padding: var(--s2) var(--s3);
+  border: 1px solid var(--g300);
+  border-radius: var(--r-sm);
+  font: inherit;
+}
+
+.ok,
+.error {
+  display: flex;
+  align-items: center;
+  gap: var(--s2);
+  margin: 0;
+  font-size: var(--fs-sm);
+}
+
+.error {
+  color: var(--peligro);
+}

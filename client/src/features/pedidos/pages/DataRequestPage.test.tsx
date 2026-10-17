@@ -22,6 +22,7 @@ const record = (over: Partial<DataRequest> = {}): DataRequest => ({
   periodName: '2026-II',
   schoolId: 's1',
   schoolName: 'Ingeniería de Sistemas',
+  kind: 'ESTUDIANTES',
   toEmail: 'registros@untrm.edu.pe',
   cycles: [3],
   note: null,
@@ -82,7 +83,7 @@ describe('DataRequestPage (pedido de listas por correo)', () => {
     await user.type(screen.getByLabelText(/Observaciones/), 'Con urgencia');
     await user.click(screen.getByRole('button', { name: 'Enviar pedido' }));
 
-    await waitFor(() => expect(requests.send).toHaveBeenCalledWith({ schoolId: 's1', cycles: [3, 4], note: 'Con urgencia' }));
+    await waitFor(() => expect(requests.send).toHaveBeenCalledWith({ schoolId: 's1', cycles: [3, 4], note: 'Con urgencia', kind: 'ESTUDIANTES' }));
     expect(await screen.findByRole('alert')).toHaveTextContent('Pedido enviado a registros@untrm.edu.pe');
   });
 
