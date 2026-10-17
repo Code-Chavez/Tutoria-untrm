@@ -28,9 +28,10 @@ import {
   FileTextIcon,
   MapPinIcon,
   UserPlusIcon,
+  AlertTriangleIcon,
 } from '@shared/components/icons';
 
-export type RoleCode = 'tutor' | 'coord' | 'dbu' | 'serv' | 'est' | 'vice';
+export type RoleCode = 'tutor' | 'coord' | 'dbu' | 'serv' | 'est' | 'vice' | 'dec';
 
 // El JWT trae el nombre del rol; lo traducimos al código con que se filtra el menú.
 export const ROLE_CODES: Record<string, RoleCode> = {
@@ -40,6 +41,7 @@ export const ROLE_CODES: Record<string, RoleCode> = {
   Tutorado: 'est',
   'Profesional de Servicio': 'serv',
   Vicerrectorado: 'vice',
+  Decano: 'dec',
 };
 
 export interface NavItem {
@@ -105,6 +107,7 @@ export const NAV: NavGroup[] = [
       { label: 'Indicadores', Icon: PieChartIcon, path: '/indicadores', roles: ['dbu', 'coord', 'vice'] },
       { label: 'Usuarios y roles', Icon: UsersIcon, path: '/users', roles: ['dbu'] },
       { label: 'Catálogos', Icon: LayersIcon, path: '/catalogos', roles: ['dbu'] },
+      { label: 'Amonestaciones', Icon: AlertTriangleIcon, path: '/amonestaciones', roles: ['dec', 'dbu', 'coord'] },
       { label: 'Sedes', Icon: MapPinIcon, path: '/sedes', roles: ['dbu', 'vice'] },
       { label: 'Cierre de periodo', Icon: RefreshIcon, path: '/cierre-periodo', roles: ['dbu'] },
       { label: 'Parámetros', Icon: SlidersIcon, path: '/parametros', roles: ['dbu'] },

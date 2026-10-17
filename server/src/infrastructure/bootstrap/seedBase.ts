@@ -41,6 +41,8 @@ export async function seedBase(prisma: PrismaClient) {
     prisma.permission.upsert({ where: { code: 'parameters:manage' }, update: {}, create: { code: 'parameters:manage', description: 'Administrar los parámetros del sistema' } }),
     prisma.permission.upsert({ where: { code: 'branding:manage' }, update: {}, create: { code: 'branding:manage', description: 'Configurar la identidad visual institucional' } }),
     prisma.permission.upsert({ where: { code: 'campuses:manage' }, update: {}, create: { code: 'campuses:manage', description: 'Administrar las sedes de la universidad y la sede de cada escuela' } }),
+    prisma.permission.upsert({ where: { code: 'admonitions:read' }, update: {}, create: { code: 'admonitions:read', description: 'Ver las amonestaciones a docentes tutores' } }),
+    prisma.permission.upsert({ where: { code: 'admonitions:write' }, update: {}, create: { code: 'admonitions:write', description: 'Registrar amonestaciones a docentes tutores' } }),
     prisma.permission.upsert({ where: { code: 'work-plans:write' }, update: {}, create: { code: 'work-plans:write', description: 'Elaborar planes de trabajo semestrales' } }),
   ]);
 
@@ -83,14 +85,21 @@ export async function seedBase(prisma: PrismaClient) {
     create: { name: 'Vicerrectorado', description: 'Vicerrectorado académico (solo lectura)' },
   });
 
+  const deanRole = await prisma.role.upsert({
+    where: { name: 'Decano' },
+    update: {},
+    create: { name: 'Decano', description: 'Decano de facultad: amonesta a los docentes tutores de su facultad' },
+  });
+
   // Asignar permisos a roles
   const rolePerms: Record<string, string[]> = {
     [adminRole.id]: Object.keys(permMap),
-    [coordRole.id]: ['users:read', 'students:read', 'students:write', 'students:import', 'interviews:read', 'followups:read', 'tutoring-requests:read', 'tutoring-requests:write', 'sessions:read', 'referrals:read', 'reports:read', 'reports:export', 'evaluation:manage', 'work-plans:read', 'work-plans:write', 'indicators:read'],
+    [coordRole.id]: ['users:read', 'students:read', 'students:write', 'students:import', 'interviews:read', 'followups:read', 'tutoring-requests:read', 'tutoring-requests:write', 'sessions:read', 'referrals:read', 'reports:read', 'reports:export', 'evaluation:manage', 'work-plans:read', 'work-plans:write', 'indicators:read', 'admonitions:read'],
     [tutorRole.id]: ['students:read', 'interviews:read', 'interviews:write', 'followups:read', 'followups:write', 'support-contacts:read', 'support-contacts:write', 'tutoring-requests:read', 'tutoring-requests:write', 'sessions:read', 'sessions:write', 'referrals:read', 'referrals:write', 'reports:read', 'reports:export', 'semester-reports:write'],
     [studentRole.id]: ['sessions:read', 'evaluation:respond', 'tutoring-requests:self'],
     [serviceRole.id]: ['referrals:read', 'referrals:write'],
     [viceRole.id]: ['reports:read', 'consolidated-reports:read', 'indicators:read', 'campuses:manage'],
+    [deanRole.id]: ['admonitions:read', 'admonitions:write'],
   };
 
   for (const [roleId, codes] of Object.entries(rolePerms)) {
@@ -122,5 +131,5 @@ export async function seedBase(prisma: PrismaClient) {
     });
   }
 
-  return { permMap, adminRole, coordRole, tutorRole, studentRole, serviceRole, viceRole };
+  return { permMap, adminRole, coordRole, tutorRole, studentRole, serviceRole, viceRole, deanRole };
 }

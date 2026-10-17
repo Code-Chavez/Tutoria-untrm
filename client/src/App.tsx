@@ -35,6 +35,7 @@ import { CatalogsPage } from '@features/catalogos/pages/CatalogsPage';
 import { DataRequestPage } from '@features/pedidos/pages/DataRequestPage';
 import { PeriodClosurePage } from '@features/periodo/pages/PeriodClosurePage';
 import { TutorAcceptancePage } from '@features/ciclos/pages/TutorAcceptancePage';
+import { AdmonitionsPage } from '@features/amonestaciones/pages/AdmonitionsPage';
 import { CycleTutorsPage } from '@features/ciclos/pages/CycleTutorsPage';
 import { CampusesPage } from '@features/sedes/pages/CampusesPage';
 import { ParametersPage } from '@features/parametros/pages/ParametersPage';
@@ -112,6 +113,14 @@ export default function App() {
                 element={
                   <RequireRole roles={['Administrador DBU']}>
                     <PeriodClosurePage />
+                  </RequireRole>
+                }
+              />
+              <Route
+                path="amonestaciones"
+                element={
+                  <RequireRole roles={['Administrador DBU', 'Coordinador', 'Decano']}>
+                    <AdmonitionsPage />
                   </RequireRole>
                 }
               />

@@ -32,6 +32,8 @@ import { PrismaSupportContactRepository } from './repositories/PrismaSupportCont
 import { PrismaSchoolRepository } from './repositories/PrismaSchoolRepository';
 import { ImportTutorsUseCase } from '@application/use-cases/users/ImportTutorsUseCase';
 import { GetTutorAcceptanceUseCase, RequestTutorAcceptanceUseCase, RespondTutorAcceptanceUseCase } from '@application/use-cases/cycle-tutors/TutorAcceptanceUseCases';
+import { PrismaAdmonitionRepository } from './repositories/PrismaAdmonitionRepository';
+import { AdmonitionScopeResolver, GetAdmonitionFileUseCase, IssueAdmonitionUseCase, ListAdmonishableTutorsUseCase, ListAdmonitionsUseCase } from '@application/use-cases/admonitions/AdmonitionUseCases';
 import { PrismaCycleTutorRepository } from './repositories/PrismaCycleTutorRepository';
 import { CycleTutorApplier, ListCycleTutorsUseCase, RemoveCycleTutorUseCase, SetCycleTutorUseCase } from '@application/use-cases/cycle-tutors/CycleTutorUseCases';
 import { PrismaCampusRepository } from './repositories/PrismaCampusRepository';
@@ -316,18 +318,24 @@ const getCurrentPeriodUseCase = new GetCurrentPeriodUseCase(academicPeriodReposi
 const getPeriodClosureUseCase = new GetPeriodClosureUseCase(academicPeriodRepository, periodSummaryRepository);
 const closePeriodUseCase = new ClosePeriodUseCase(academicPeriodRepository, periodSummaryRepository, auditLogRepository);
 const reopenPeriodUseCase = new ReopenPeriodUseCase(academicPeriodRepository, auditLogRepository);
-const createUserUseCase = new CreateUserUseCase(userRepository, passwordHasher, roleRepository, schoolRepository);
+const createUserUseCase = new CreateUserUseCase(userRepository, passwordHasher, roleRepository, schoolRepository, facultyRepository);
 const issueInvitationUseCase = new IssueInvitationUseCase(userRepository, passwordResetTokenRepository, mailer, auditLogRepository, {
   publicUrl: env.PUBLIC_APP_URL,
   ttlHours: env.INVITATION_TTL_HOURS,
 });
+const admonitionRepository = new PrismaAdmonitionRepository(prisma);
+const admonitionScope = new AdmonitionScopeResolver(userRepository, roleRepository, studentAccessGuard);
+const listAdmonitionsUseCase = new ListAdmonitionsUseCase(admonitionScope, userRepository, schoolRepository, admonitionRepository);
+const listAdmonishableTutorsUseCase = new ListAdmonishableTutorsUseCase(admonitionScope, userRepository, roleRepository, schoolRepository);
+const issueAdmonitionUseCase = new IssueAdmonitionUseCase(admonitionScope, userRepository, roleRepository, schoolRepository, admonitionRepository, evidenceStorage, auditLogRepository);
+const getAdmonitionFileUseCase = new GetAdmonitionFileUseCase(admonitionScope, admonitionRepository, evidenceStorage);
 const importTutorsUseCase = new ImportTutorsUseCase(userRepository, roleRepository, schoolRepository, createUserUseCase, issueInvitationUseCase);
-const updateUserUseCase = new UpdateUserUseCase(userRepository, roleRepository, schoolRepository);
+const updateUserUseCase = new UpdateUserUseCase(userRepository, roleRepository, schoolRepository, facultyRepository);
 const toggleUserStatusUseCase = new ToggleUserStatusUseCase(userRepository);
 const listUsersUseCase = new ListUsersUseCase(userRepository);
 const listRolesUseCase = new ListRolesUseCase(roleRepository);
 const createRoleUseCase = new CreateRoleUseCase(roleRepository);
-const assignRoleUseCase = new AssignRoleUseCase(userRepository, roleRepository, auditLogRepository, schoolRepository);
+const assignRoleUseCase = new AssignRoleUseCase(userRepository, roleRepository, auditLogRepository, schoolRepository, facultyRepository);
 
 const getProfileUseCase = new GetProfileUseCase(userRepository, roleRepository);
 const updateProfileUseCase = new UpdateProfileUseCase(userRepository, roleRepository);
@@ -813,6 +821,10 @@ export const container = {
     listSchoolsUseCase,
     listCampusesUseCase,
     importTutorsUseCase,
+    listAdmonitionsUseCase,
+    listAdmonishableTutorsUseCase,
+    issueAdmonitionUseCase,
+    getAdmonitionFileUseCase,
     listCycleTutorsUseCase,
     requestTutorAcceptanceUseCase,
     getTutorAcceptanceUseCase,

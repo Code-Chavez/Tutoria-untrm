@@ -59,6 +59,19 @@ Orden sugerido: 0 → 1 → 3 → 2 → 4 → 5. Las fases 0 y 1 son las que má
 7. **Claves iniciales:** ¿invitación por **enlace** de un solo uso (recomendado: no viaja una clave por correo) o la clave temporal en el correo?
 8. **Material recibido:** de la conversación llegó la imagen del **flujograma (Anexo 2)** y el protocolo; **no llegó** la captura de la lista de usuarios de la que hablas. Si es otra imagen, vuelve a enviarla.
 
+## 5.1 Estado de las fases (actualizado)
+
+| Fase | Estado |
+|---|---|
+| 0 Credenciales de acceso único | Hecha (invitación por enlace) |
+| 1 Cierre de periodo | Hecha |
+| 2 Cargas por periodo | Hecha (matrícula, pedido de listas por correo) |
+| 3 Tutores por facultad, sede y ciclo | Hecha (sedes, escuela del tutor, tutor por ciclo con excepción, alta masiva de docentes) |
+| 4 Aceptación del tutor | Hecha (correo con enlace, disponibilidad, rechazo → aviso a coordinación) |
+| 5 Rol Decano y Anexo 2 | Hecha en lo que el sistema puede registrar: rol Decano por facultad y amonestaciones con documento y fecha |
+
+**Revisión contra el flujograma (Anexo 2).** El sistema cubre: carga de estudiantes y tutores por Excel pedida por correo (DBU/coordinación), asignación por ciclo con aceptación del docente y su disponibilidad, reasignación con historial, cierre de periodo y amonestación registrada por el Decano. **Queda fuera del sistema, a propósito:** la propuesta de coordinador y tutores que hace el Decano a la DBU y el envío de la lista al Decano (hoy se coordinan por correo/oficio); la amonestación **no aplica sanciones**, solo las registra. Si la DBU quiere que el Decano proponga dentro del sistema, es una fase adicional.
+
 ## 6. Decisiones tomadas (15/10/2026, el responsable del proyecto)
 
 1. **Pedido de los Excel:** el correo al que se pide es **configurable por facultad/escuela** por la persona que administra (no se fija una sola dirección ni persona). Si no hay correo configurado, el botón de pedir lleva a configurarlo. Se puede cambiar el destinatario y volver a pedir si no llegó. Pendiente fuera del sistema: coordinar con la universidad a quién y cuándo se pide.
