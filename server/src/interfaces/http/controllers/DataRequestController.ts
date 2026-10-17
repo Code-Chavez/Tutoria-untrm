@@ -9,6 +9,7 @@ import {
   RequestEmailNotConfiguredError,
   SendDataRequestUseCase,
   SetSchoolRequestEmailUseCase,
+  TeacherListForbiddenError,
 } from '@application/use-cases/data-requests/DataRequestUseCases';
 import { SchoolNotFoundError, StudentAccessDeniedError } from '@application/use-cases/students/StudentErrors';
 
@@ -16,6 +17,7 @@ const sendSchema = z.object({
   schoolId: z.string().uuid('La escuela indicada no es válida'),
   cycles: z.array(z.coerce.number().int().min(1).max(14)).max(14).optional(),
   note: z.string().trim().max(500, 'Las observaciones no pueden pasar de 500 caracteres').optional(),
+  kind: z.enum(['ESTUDIANTES', 'DOCENTES']).optional(),
 });
 const emailSchema = z.object({ email: z.string().trim().max(254).nullable() });
 
@@ -38,6 +40,8 @@ export class DataRequestController {
       res.status(409).json({ error: error.message, code: 'REQUEST_EMAIL_NOT_CONFIGURED' });
     } else if (error instanceof NoPeriodToRequestError) {
       res.status(409).json({ error: error.message, code: 'NO_OPEN_PERIOD' });
+    } else if (error instanceof TeacherListForbiddenError) {
+      res.status(403).json({ error: error.message });
     } else if (error instanceof InvalidDataRequestError) {
       res.status(400).json({ error: error.message });
     } else {

@@ -1,7 +1,7 @@
 import { PrismaClient } from '@prisma/client';
-import { DataRequest, DataRequestRepository, DataRequestStatus } from '@domain/repositories/DataRequestRepository';
+import { DataRequest, DataRequestKind, DataRequestRepository, DataRequestStatus } from '@domain/repositories/DataRequestRepository';
 
-const toDomain = (row: { status: string } & Omit<DataRequest, 'status'>): DataRequest => ({ ...row, status: row.status as DataRequestStatus });
+const toDomain = (row: { status: string; kind: string } & Omit<DataRequest, 'status' | 'kind'>): DataRequest => ({ ...row, status: row.status as DataRequestStatus, kind: row.kind as DataRequestKind });
 
 export class PrismaDataRequestRepository implements DataRequestRepository {
   constructor(private readonly prisma: PrismaClient) {}

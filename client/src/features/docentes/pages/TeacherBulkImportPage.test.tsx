@@ -6,6 +6,7 @@ import { QueryClientTestWrapper } from '@shared/test-utils/QueryClientTestWrappe
 import { TeacherBulkImportPage } from './TeacherBulkImportPage';
 import { teacherImportService } from '../services/teacherImportService';
 
+vi.mock('@features/pedidos/components/RequestListBanner', () => ({ RequestListBanner: () => null }));
 vi.mock('../services/teacherImportService', () => ({ teacherImportService: { importTeachers: vi.fn(), downloadTemplate: vi.fn() } }));
 const mocked = vi.mocked(teacherImportService);
 

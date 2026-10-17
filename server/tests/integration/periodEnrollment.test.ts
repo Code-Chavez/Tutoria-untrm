@@ -38,6 +38,7 @@ describe('matrícula por periodo y pedido de listas (fase 2)', () => {
   let gateStudentId = '';
   let gateUserId = '';
   let createdRequestId = '';
+  let createdTeacherRequestId = '';
 
   const call = (method: string, path: string, who?: Who | 'student', body?: unknown) =>
     fetch(`${baseUrl}${path}`, {
@@ -91,6 +92,7 @@ describe('matrícula por periodo y pedido de listas (fase 2)', () => {
     if (running) await new Promise((resolve) => running.close(resolve));
     if (dbUp) {
       if (createdRequestId) await prisma.dataRequest.deleteMany({ where: { id: createdRequestId } });
+      if (createdTeacherRequestId) await prisma.dataRequest.deleteMany({ where: { id: createdTeacherRequestId } });
       await prisma.school.update({ where: { id: schoolId }, data: { requestEmail: originalRequestEmail } });
       const codes = [NEW_CODE, OLD_CODE, GATE_CODE];
       const students = await prisma.student.findMany({ where: { studentCode: { in: codes } }, select: { id: true } });
@@ -213,6 +215,19 @@ describe('matrícula por periodo y pedido de listas (fase 2)', () => {
     const received = await call('POST', `/api/data-requests/${createdRequestId}/received`, 'sistemas');
     expect(received.status).toBe(200);
     expect(((await received.json()) as { request: { receivedAt: string | null } }).request.receivedAt).not.toBeNull();
+  });
+
+  it('la lista de docentes la pide solo la DBU, con su propio tipo de pedido; la coordinación no', async () => {
+    if (!dbUp) return;
+    const res = await call('POST', '/api/data-requests', 'admin', { schoolId, kind: 'DOCENTES' });
+    expect([201, 502]).toContain(res.status);
+    const created = ((await res.json()) as { request: { id: string; kind: string } }).request;
+    createdTeacherRequestId = created.id;
+    expect(created.kind).toBe('DOCENTES');
+
+    expect((await call('POST', '/api/data-requests', 'sistemas', { schoolId, kind: 'DOCENTES' })).status).toBe(403);
+    const list = ((await (await call('GET', '/api/data-requests', 'admin')).json()) as { requests: { id: string; kind: string }[] }).requests;
+    expect(list.find((r) => r.id === createdTeacherRequestId)?.kind).toBe('DOCENTES');
   });
 
   it('un tutor no puede pedir listas ni ver los pedidos', async () => {
