@@ -1,3 +1,4 @@
+import type { CycleTutorApplier } from '@application/use-cases/cycle-tutors/CycleTutorUseCases';
 import { StudentRepository } from '@domain/repositories/StudentRepository';
 import { SchoolRepository } from '@domain/repositories/SchoolRepository';
 import { StudentAccessGuard } from '@application/access/StudentAccessGuard';
@@ -37,6 +38,8 @@ export class ImportStudentsUseCase {
     private readonly guard: StudentAccessGuard,
     private readonly periods: AcademicPeriodRepository,
     private readonly enrollments: PeriodEnrollmentRepository,
+    // Si la escuela ya tiene tutor para el ciclo, el estudiante cargado queda con él.
+    private readonly cycleTutors?: CycleTutorApplier,
   ) {}
 
   async execute(rows: ImportStudentRow[], requesterId: string): Promise<ImportReport> {
@@ -110,6 +113,7 @@ export class ImportStudentsUseCase {
         }
         await this.students.update(existing.id, { cycle, isActive: true });
         await this.enrollments.enroll({ periodId: period.id, studentId: existing.id, schoolId: existing.schoolId, cycle });
+        await this.cycleTutors?.applyToStudent(period.id, { id: existing.id, schoolId: existing.schoolId, cycle, tutorId: existing.tutorId }, requesterId);
         seenCodes.add(code);
         continuedRows.push({ row: row.rowNumber, studentCode: code, fullName: `${existing.firstName} ${existing.lastName}` });
         continue;
@@ -127,6 +131,7 @@ export class ImportStudentsUseCase {
         isActive: true,
       });
       await this.enrollments.enroll({ periodId: period.id, studentId: student.id, schoolId: student.schoolId, cycle });
+      await this.cycleTutors?.applyToStudent(period.id, { id: student.id, schoolId: student.schoolId, cycle }, requesterId);
       seenCodes.add(code);
       createdRows.push({ row: row.rowNumber, studentCode: code, fullName: `${firstName} ${lastName}` });
     }

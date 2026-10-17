@@ -422,6 +422,14 @@ Al crear o editar un usuario con rol **Docente**, la DBU debe elegir su **escuel
 - Si se intenta de otra forma, el sistema lo rechaza con el aviso «El tutor pertenece a otra escuela».
 - Los docentes creados antes de esta regla quedan sin escuela hasta que la DBU se la indique (editando el usuario); mientras tanto no se bloquean.
 
+### 7.9 Tutores por ciclo
+En **Tutores por ciclo** (menú Principal; DBU y coordinación de la escuela) se elige, para el periodo vigente, **el tutor de cada ciclo** de una escuela. Solo aparecen los docentes de esa escuela.
+
+1. Elija la escuela y, en cada ciclo, el docente. Al elegirlo, los estudiantes **matriculados** de ese ciclo que no tenían tutor pasan a él; si cambia el tutor del ciclo, quienes seguían con el anterior se mueven (queda en el historial de asignaciones). Un tutor puesto a mano por la coordinación no se toca.
+2. Los estudiantes que se **carguen después** (carga masiva o alta manual) en ese ciclo quedan con el tutor del ciclo.
+3. **Un docente atiende un solo ciclo.** Si intenta ponerlo en otro, el sistema avisa y ofrece **registrar una excepción**: escriba el motivo (p. ej. «aceptó por correo asumir el ciclo 8»). Queda marcada como *Excepción* y en la bitácora. Un docente no puede atender más de dos ciclos.
+4. **Quitar** deja el ciclo sin tutor; los estudiantes conservan el que ya tienen (para cambiarlo, use la reasignación).
+
 ## 8. Preguntas frecuentes
 
 **No me aparece una opción del menú.** Depende de su rol. Si cree que le falta acceso, pida a la DBU revisar su rol.

@@ -30,6 +30,8 @@ import { PrismaStudentReferralRepository } from './repositories/PrismaStudentRef
 import { PrismaSystemParameterRepository } from './repositories/PrismaSystemParameterRepository';
 import { PrismaSupportContactRepository } from './repositories/PrismaSupportContactRepository';
 import { PrismaSchoolRepository } from './repositories/PrismaSchoolRepository';
+import { PrismaCycleTutorRepository } from './repositories/PrismaCycleTutorRepository';
+import { CycleTutorApplier, ListCycleTutorsUseCase, RemoveCycleTutorUseCase, SetCycleTutorUseCase } from '@application/use-cases/cycle-tutors/CycleTutorUseCases';
 import { PrismaCampusRepository } from './repositories/PrismaCampusRepository';
 import { CreateCampusUseCase, ListCampusesUseCase, SetSchoolCampusUseCase, UpdateCampusUseCase } from '@application/use-cases/campuses/CampusUseCases';
 import { PrismaFacultyRepository } from './repositories/PrismaFacultyRepository';
@@ -333,10 +335,15 @@ const changePasswordUseCase = new ChangePasswordUseCase(
   passwordHasher,
 );
 
-const createStudentUseCase = new CreateStudentUseCase(studentRepository, schoolRepository, studentAccessGuard, academicPeriodRepository, periodEnrollmentRepository);
+const cycleTutorRepository = new PrismaCycleTutorRepository(prisma);
+const cycleTutorApplier = new CycleTutorApplier(cycleTutorRepository, studentRepository, tutorAssignmentHistoryRepository);
+const listCycleTutorsUseCase = new ListCycleTutorsUseCase(studentAccessGuard, academicPeriodRepository, cycleTutorRepository);
+const setCycleTutorUseCase = new SetCycleTutorUseCase(studentAccessGuard, academicPeriodRepository, schoolRepository, userRepository, roleRepository, cycleTutorRepository, cycleTutorApplier, auditLogRepository);
+const removeCycleTutorUseCase = new RemoveCycleTutorUseCase(studentAccessGuard, academicPeriodRepository, cycleTutorRepository, auditLogRepository);
+const createStudentUseCase = new CreateStudentUseCase(studentRepository, schoolRepository, studentAccessGuard, academicPeriodRepository, periodEnrollmentRepository, cycleTutorApplier);
 const updateStudentUseCase = new UpdateStudentUseCase(studentRepository, schoolRepository, studentAccessGuard);
 const listStudentsUseCase = new ListStudentsUseCase(studentRepository, studentAccessGuard);
-const importStudentsUseCase = new ImportStudentsUseCase(studentRepository, schoolRepository, studentAccessGuard, academicPeriodRepository, periodEnrollmentRepository);
+const importStudentsUseCase = new ImportStudentsUseCase(studentRepository, schoolRepository, studentAccessGuard, academicPeriodRepository, periodEnrollmentRepository, cycleTutorApplier);
 const markStudentRiskUseCase = new MarkStudentRiskUseCase(studentRepository, studentAccessGuard);
 const linkStudentPortalAccountUseCase = new LinkStudentPortalAccountUseCase(
   studentRepository,
@@ -798,6 +805,9 @@ export const container = {
     getSessionEvidenceFileUseCase,
     listSchoolsUseCase,
     listCampusesUseCase,
+    listCycleTutorsUseCase,
+    setCycleTutorUseCase,
+    removeCycleTutorUseCase,
     createCampusUseCase,
     updateCampusUseCase,
     setSchoolCampusUseCase,

@@ -34,6 +34,7 @@ model User {
   // Para el Docente Tutor: escuela profesional a la que pertenece (de ahí salen su facultad y su sede). Solo tutorea estudiantes de su escuela.
   schoolId String? @map("school_id")
   school   School? @relation("TutorSchool", fields: [schoolId], references: [id])
+  cycleAssignments CycleTutorAssignment[]
 
 
   auditLogs     AuditLog[]
@@ -191,6 +192,7 @@ model School {
   campusId String? @map("campus_id")
   campus   Campus? @relation(fields: [campusId], references: [id])
   tutors   User[]  @relation("TutorSchool")
+  cycleTutors CycleTutorAssignment[]
 
   // Correo al que se piden las listas de estudiantes de la escuela cada periodo; lo configura quien administra o coordina.
   requestEmail String?        @map("request_email")
@@ -218,6 +220,7 @@ model AcademicPeriod {
   closureSummary Json?     @map("closure_summary")
 
   enrollments PeriodEnrollment[]
+  cycleTutors CycleTutorAssignment[]
   dataRequests DataRequest[]
 
   evaluations       TutorEvaluation[]
@@ -953,4 +956,27 @@ model DataRequest {
 
   @@index([periodId, schoolId])
   @@map("data_requests")
+}
+
+// Tutor de un ciclo de una escuela en un periodo: un solo tutor por (periodo, escuela, ciclo) y, salvo excepción registrada, un tutor atiende un solo ciclo.
+model CycleTutorAssignment {
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now()) @map("created_at")
+
+  periodId String         @map("period_id")
+  period   AcademicPeriod @relation(fields: [periodId], references: [id], onDelete: Cascade)
+  schoolId String         @map("school_id")
+  school   School         @relation(fields: [schoolId], references: [id])
+  cycle    Int
+  tutorId  String         @map("tutor_id")
+  tutor    User           @relation(fields: [tutorId], references: [id])
+
+  // Excepción: el tutor atiende un segundo ciclo (la facultad no tiene docentes para todos); queda el motivo.
+  isException Boolean @default(false) @map("is_exception")
+  note        String?
+  assignedById String @map("assigned_by_id")
+
+  @@unique([periodId, schoolId, cycle])
+  @@index([periodId, tutorId])
+  @@map("cycle_tutor_assignments")
 }
