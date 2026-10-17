@@ -200,7 +200,7 @@ export function DataRequestPage() {
         title="Cuando llegue la lista"
         steps={[
           { to: '/carga-masiva', label: 'Cargar el Excel', description: 'Los estudiantes quedan matriculados en el periodo' },
-          { to: '/tutores-por-ciclo', label: 'Elegir el tutor de cada ciclo', description: 'El docente recibe un correo para aceptar' },
+          { to: '/asignacion', label: 'Asignar el tutor de cada ciclo', description: 'El docente recibe un correo para aceptar' },
         ]}
       />
     </div>

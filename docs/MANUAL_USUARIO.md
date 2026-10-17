@@ -33,7 +33,7 @@ El menú está **agrupado por tareas**, en el orden en que se hacen. Una persona
 | **Inicio** | Panel de inicio (resumen y accesos directos) | Todos |
 | **Mi tutoría** | Solicitar tutoría · Mis sesiones · Evaluar tutoría | Estudiante |
 | **Atención a tutorados** | Tutorados · Expediente · Entrevista inicial · Sesiones · Seguimiento · Derivar caso · Solicitudes de tutoría · Casos derivados · Seguimiento DBU | Docente tutor (todo menos Seguimiento DBU), coordinación (Tutorados, Expediente, Solicitudes), profesional de servicio (Casos derivados), DBU |
-| **Periodo académico** | 1 Pedir listas → 2 Carga masiva → 3 Tutores por ciclo → 4 Asignación → 5 Cierre de periodo | Coordinación (pasos 1 a 4) y DBU (1 a 5) |
+| **Periodo académico** | 1 Pedir listas → 2 Carga masiva → 3 Asignación por ciclo → 4 Cierre de periodo | Coordinación (pasos 1 a 3) y DBU (1 a 4) |
 | **Planificación y evaluación** | Plan semestral · Evaluación de tutoría · Resultados de evaluación · Sugerencias de estudiantes | Coordinación y DBU (la configuración de la evaluación, solo DBU) |
 | **Informes** | Horarios y asistencia · Informe semestral · Informe consolidado · Indicadores | Docente, coordinación, Vicerrectorado y DBU, según cada informe |
 | **Facultad y sedes** | Amonestaciones · Sedes | Decano (Amonestaciones), coordinación (consulta), Vicerrectorado (Sedes), DBU |
@@ -48,9 +48,9 @@ El menú está **agrupado por tareas**, en el orden en que se hacen. Una persona
 | Fijar la sede de cada escuela | Vicerrectorado o DBU | Facultad y sedes → Sedes |
 | Pedir a cada escuela la lista de estudiantes | Coordinación o DBU | Periodo académico → Pedir listas |
 | Cargar a los estudiantes del periodo | Coordinación o DBU | Periodo académico → Carga masiva |
-| Elegir el tutor de cada ciclo (y ver si aceptó) | Coordinación o DBU | Periodo académico → Tutores por ciclo |
+| Asignar el tutor de cada ciclo (y ver si aceptó). **Se asigna por ciclo, no estudiante por estudiante** | Coordinación o DBU | Periodo académico → Asignación por ciclo |
 | Aceptar o rechazar ser tutor de un ciclo | El docente, desde el enlace de su correo | Correo → página de aceptación (sin iniciar sesión) |
-| Asignar a quien quedó sin tutor o reasignar | Coordinación o DBU | Periodo académico → Asignación; reasignar desde Atención a tutorados → Tutorados |
+| Reasignar a un estudiante en un caso puntual (con motivo) | Coordinación o DBU | Atención a tutorados → Tutorados → Más → Reasignar tutor |
 | Entrevista, sesiones, asistencia, seguimiento | Docente tutor | Atención a tutorados |
 | Derivar un caso a un servicio | Docente tutor | Atención a tutorados → Derivar caso |
 | Atender un caso derivado | Profesional de servicio | Atención a tutorados → Casos derivados |
@@ -60,7 +60,7 @@ El menú está **agrupado por tareas**, en el orden en que se hacen. Una persona
 | Amonestar a un docente | Decano (o DBU) | Facultad y sedes → Amonestaciones |
 | Cerrar el periodo | DBU | Periodo académico → Cierre de periodo |
 
-**Una pantalla lleva a la siguiente.** Cuando a una pantalla le falta algo (por ejemplo, no hay estudiantes o una escuela no tiene docentes) o cuando termina una tarea, muestra un bloque **«Qué sigue»** con enlaces a donde se carga lo que falta o a la tarea siguiente: después de *Pedir listas* sigue *Carga masiva*; después de cargar, *Tutores por ciclo*; después, *Asignación* para quien quedó sin tutor. El **Panel de inicio** de la coordinación y la DBU muestra el periodo académico como pasos numerados.
+**Una pantalla lleva a la siguiente.** Cuando a una pantalla le falta algo (por ejemplo, no hay estudiantes o una escuela no tiene docentes) o cuando termina una tarea, muestra un bloque **«Qué sigue»** con enlaces a donde se carga lo que falta o a la tarea siguiente: después de *Pedir listas* sigue *Carga masiva*; después de cargar, *Asignación por ciclo*. El **Panel de inicio** de la coordinación y la DBU muestra el periodo académico como pasos numerados.
 
 *Nombres en pantalla:* el sistema muestra **Estudiante** (rol Tutorado), **Docente** (Docente tutor), **Administrador** (Administrador DBU) y, para el Profesional de servicio, su especialidad (p. ej. «Profesional de Psicología»). Son los mismos roles de la tabla; solo cambia cómo se escriben junto a su nombre, en el perfil y en la lista de usuarios.
 
@@ -282,11 +282,10 @@ Además de ver los tutorados **de su escuela** (nunca de otras), el coordinador:
 
 ### 4.1 Asignar tutores
 
-![Asignación de tutorados](manual/img/20-asignacion.jpg)
-*Figura: Asignación de tutorados.*
+La asignación es **por ciclo**: se elige un docente tutor para cada ciclo de la escuela y todos los estudiantes matriculados de ese ciclo pasan a él (ver 7.9). No se asignan estudiantes uno por uno.
 
-- *Asignación*: elija a los estudiantes sin tutor (paso 1) y el docente tutor (paso 2; la lista se ordena de menor a mayor carga) para asignarlos en grupo.
-- **Reasignación individual:** en *Tutorados*, menú *Más* → *Reasignar tutor*; indique el motivo. Queda en el historial de asignaciones.
+- *Asignación por ciclo* (menú Periodo académico): la lista muestra **primero lo que necesita acción** (ciclos con estudiantes y sin tutor, luego los que el docente rechazó, luego los que tienen estudiantes sin tutor) y al final los ya resueltos.
+- **Reasignación individual** (caso puntual): en *Tutorados*, menú *Más* → *Reasignar tutor*; indique el motivo. Queda en el historial de asignaciones.
 
 ### 4.2 Registrar y cargar tutorados
 
@@ -449,7 +448,7 @@ Si cerró por error, **Reabrir periodo** (en el mismo periodo cerrado) lo devuel
 ### 7.8 Docentes tutores por escuela
 Al crear o editar un usuario con rol **Docente**, la DBU debe elegir su **escuela profesional**; de ella salen su facultad y su sede. Un docente tutor **solo puede tutorear estudiantes de su escuela** (un docente de Mecánica Eléctrica no puede tutorear a estudiantes de Sistemas):
 
-- En *Asignación de tutorados* solo se ofrecen los tutores de la escuela de los estudiantes elegidos (si se eligen estudiantes de varias escuelas, ninguno aplica: asigne por escuela).
+- En *Asignación por ciclo* solo se ofrecen los docentes de la escuela.
 - En *Reasignar* solo aparecen tutores de la escuela del tutorado.
 - Si se intenta de otra forma, el sistema lo rechaza con el aviso «El tutor pertenece a otra escuela».
 - Los docentes creados antes de esta regla quedan sin escuela hasta que la DBU se la indique (editando el usuario); mientras tanto no se bloquean.
@@ -457,8 +456,8 @@ Al crear o editar un usuario con rol **Docente**, la DBU debe elegir su **escuel
 ### 7.8.1 Importar docentes desde Excel
 En **Usuarios y roles → Importar docentes** la DBU da de alta a varios docentes tutores a la vez. Descargue la plantilla (nombres, apellidos, correo, teléfono y **escuela**), complétela con la lista que entrega la facultad y súbala. Cada fila crea la cuenta del docente con su escuela y le envía el enlace de un solo uso para crear su contraseña. El resultado indica cuántos se crearon y, fila por fila, los que no se pudieron cargar (correo inválido o ya registrado, escuela que no existe…). Si el correo no pudo salir, la pantalla muestra el enlace de ese docente una sola vez para entregarlo por un medio privado. Volver a subir el mismo archivo no duplica cuentas.
 
-### 7.9 Tutores por ciclo
-En **Tutores por ciclo** (menú Principal; DBU y coordinación de la escuela) se elige, para el periodo vigente, **el tutor de cada ciclo** de una escuela. Solo aparecen los docentes de esa escuela.
+### 7.9 Asignación por ciclo
+En **Asignación por ciclo** (menú Periodo académico; DBU y coordinación de la escuela) se elige, para el periodo vigente, **el tutor de cada ciclo** de una escuela. Solo aparecen los docentes de esa escuela.
 
 1. Elija la escuela y, en cada ciclo, el docente. Al elegirlo, los estudiantes **matriculados** de ese ciclo que no tenían tutor pasan a él; si cambia el tutor del ciclo, quienes seguían con el anterior se mueven (queda en el historial de asignaciones). Un tutor puesto a mano por la coordinación no se toca.
 2. Los estudiantes que se **carguen después** (carga masiva o alta manual) en ese ciclo quedan con el tutor del ciclo.
