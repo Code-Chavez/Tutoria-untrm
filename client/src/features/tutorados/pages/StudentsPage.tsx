@@ -523,7 +523,7 @@ export const StudentsPage: React.FC = () => {
               total === 0
                 ? canWrite
                   ? 'Registra un tutorado o utiliza la carga masiva para importarlos desde Excel.'
-                  : 'Aún no tienes tutorados asignados. La coordinación de tu escuela los asigna en «Tutores por ciclo»; cuando lo haga, aparecerán aquí.'
+                  : 'Aún no tienes tutorados asignados. La coordinación de tu escuela los asigna por ciclo en «Asignación por ciclo»; cuando lo haga, aparecerán aquí.'
                 : 'No se encontraron tutorados con los filtros aplicados. Prueba ajustarlos.'
             }
             action={

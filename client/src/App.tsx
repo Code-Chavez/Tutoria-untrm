@@ -14,7 +14,6 @@ import { DashboardPage } from '@features/dashboard/components/DashboardPage';
 import { UserManagementPage } from '@features/admin/pages/UserManagementPage';
 import { StudentsPage } from '@features/tutorados/pages/StudentsPage';
 import { BulkImportPage } from '@features/tutorados/pages/BulkImportPage';
-import { AssignmentPage } from '@features/asignacion/pages/AssignmentPage';
 import { ExpedienteIndexPage } from '@features/expediente/pages/ExpedienteIndexPage';
 import { ExpedientePage } from '@features/expediente/pages/ExpedientePage';
 import { ProfilePage } from '@features/profile/pages/ProfilePage';
@@ -93,13 +92,14 @@ export default function App() {
                 }
               />
               <Route
-                path="tutores-por-ciclo"
+                path="asignacion"
                 element={
                   <RequireRole roles={['Administrador DBU', 'Coordinador']}>
                     <CycleTutorsPage />
                   </RequireRole>
                 }
               />
+              <Route path="tutores-por-ciclo" element={<Navigate to="/asignacion" replace />} />
               <Route
                 path="pedir-listas"
                 element={
@@ -193,14 +193,6 @@ export default function App() {
                 element={
                   <RequireRole roles={['Coordinador', 'Administrador DBU']}>
                     <BulkImportPage />
-                  </RequireRole>
-                }
-              />
-              <Route
-                path="asignacion"
-                element={
-                  <RequireRole roles={['Coordinador', 'Administrador DBU']}>
-                    <AssignmentPage />
                   </RequireRole>
                 }
               />

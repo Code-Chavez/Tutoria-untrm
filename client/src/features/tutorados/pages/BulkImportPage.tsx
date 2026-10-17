@@ -121,8 +121,7 @@ export const BulkImportPage: React.FC = () => {
         {report && report.created + report.continued > 0 && (
           <NextSteps
             steps={[
-              { to: '/tutores-por-ciclo', label: 'Elegir el tutor de cada ciclo', description: 'Los estudiantes cargados pasan al tutor de su ciclo' },
-              { to: '/asignacion', label: 'Asignar a quien quedó sin tutor', description: 'Para casos puntuales o ciclos sin tutor' },
+              { to: '/asignacion', label: 'Asignar el tutor de cada ciclo', description: 'Los estudiantes cargados pasan al tutor de su ciclo' },
               { to: '/tutorados', label: 'Ver los tutorados', description: 'Comprobar que quedaron registrados' },
             ]}
           />
