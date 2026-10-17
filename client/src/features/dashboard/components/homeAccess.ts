@@ -15,7 +15,6 @@ import {
   PieChartIcon,
   AlertTriangleIcon,
   MapPinIcon,
-  SwitchIcon,
   RefreshIcon,
 } from '@shared/components/icons';
 
@@ -57,9 +56,8 @@ export const QUICK_ACTIONS: QuickAction[] = [
 
   { group: 'Periodo académico', step: 1, label: 'Pedir listas', description: 'Pide a cada escuela la lista de estudiantes por correo', to: '/pedir-listas', Icon: SendIcon, roles: [COORD, DBU] },
   { group: 'Periodo académico', step: 2, label: 'Carga masiva', description: 'Importar estudiantes desde Excel', to: '/carga-masiva', Icon: UploadIcon, roles: [COORD, DBU] },
-  { group: 'Periodo académico', step: 3, label: 'Tutores por ciclo', description: 'Elige al docente de cada ciclo y espera su aceptación', to: '/tutores-por-ciclo', Icon: UserPlusIcon, roles: [COORD, DBU] },
-  { group: 'Periodo académico', step: 4, label: 'Asignación', description: 'Asignar a quien quedó sin tutor o reasignar', to: '/asignacion', Icon: SwitchIcon, roles: [COORD, DBU] },
-  { group: 'Periodo académico', step: 5, label: 'Cierre de periodo', description: 'Cerrar el periodo y dejar la tutoría en solo lectura', to: '/cierre-periodo', Icon: RefreshIcon, roles: [DBU] },
+  { group: 'Periodo académico', step: 3, label: 'Asignación por ciclo', description: 'Elige al docente de cada ciclo: todos sus estudiantes pasan a él', to: '/asignacion', Icon: UserPlusIcon, roles: [COORD, DBU] },
+  { group: 'Periodo académico', step: 4, label: 'Cierre de periodo', description: 'Cerrar el periodo y dejar la tutoría en solo lectura', to: '/cierre-periodo', Icon: RefreshIcon, roles: [DBU] },
 
   { group: 'Planificación y evaluación', label: 'Plan semestral', description: 'Plan de trabajo de tu escuela', to: '/plan-semestral', Icon: CalendarRangeIcon, roles: [COORD] },
 

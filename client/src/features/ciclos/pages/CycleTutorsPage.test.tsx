@@ -104,4 +104,28 @@ describe('CycleTutorsPage', () => {
     await waitFor(() => expect(mocked.resendAcceptance).toHaveBeenCalledWith('s1', 3));
     expect(await screen.findByRole('status')).toHaveTextContent('Ciclo 3: correo enviado al docente.');
   });
+
+  it('muestra primero los ciclos sin tutor (con estudiantes), luego los rechazados, y al final los ya resueltos', async () => {
+    const base = { tutorId: 't1', isException: false, note: null, availability: null, declineReason: null };
+    mocked.list.mockResolvedValue({
+      periodId: 'p1',
+      periodName: '2026-II',
+      cycles: cycles.map((c) =>
+        c.cycle === 1
+          ? { ...c, enrolled: 5, assignment: { ...base, acceptanceStatus: 'ACEPTADA' as const } }
+          : c.cycle === 2
+            ? { ...c, enrolled: 4, assignment: { ...base, acceptanceStatus: 'RECHAZADA' as const, declineReason: 'Licencia' } }
+            : c.cycle === 7
+              ? { ...c, enrolled: 6 }
+              : c,
+      ),
+    });
+    renderPage();
+
+    await screen.findByLabelText('Tutor del ciclo 7');
+    const order = screen.getAllByLabelText(/^Tutor del ciclo /).map((el) => el.getAttribute('aria-label'));
+    expect(order.slice(0, 3)).toEqual(['Tutor del ciclo 7', 'Tutor del ciclo 2', 'Tutor del ciclo 3']);
+    expect(order.at(-1)).toBe('Tutor del ciclo 1');
+    expect(screen.getByText('Sin tutor')).toBeInTheDocument();
+  });
 });

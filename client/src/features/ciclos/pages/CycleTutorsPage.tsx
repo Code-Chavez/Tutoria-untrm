@@ -6,11 +6,26 @@ import { getApiErrorMessage } from '@shared/services/apiClient';
 import { useAuth } from '@features/auth/hooks/useAuth';
 import { useRequestSchools } from '@features/pedidos/hooks/useDataRequests';
 import { DAY_LABEL } from '../services/tutorAcceptanceService';
+import type { CycleRow } from '../services/cycleTutorService';
 import { useCycleTutors, useRemoveCycleTutor, useResendAcceptance, useSetCycleTutor, useTutorOptions } from '../hooks/useCycleTutors';
 import styles from './CycleTutorsPage.module.css';
 
 const STATUS_LABEL = { SIN_SOLICITAR: 'Sin solicitar', PENDIENTE: 'Pendiente', ACEPTADA: 'Aceptó', RECHAZADA: 'Rechazó' } as const;
 const STATUS_TONE = { SIN_SOLICITAR: 'neutral', PENDIENTE: 'warning', ACEPTADA: 'success', RECHAZADA: 'danger' } as const;
+
+/**
+ * Lo que pide acción va primero: ciclos con estudiantes y sin tutor, luego los que el docente rechazó, los que tienen estudiantes
+ * sin tutor, los ciclos vacíos sin tutor, los pendientes de respuesta y, al final, los que ya están resueltos.
+ */
+export function cyclePriority(row: CycleRow): number {
+  if (!row.assignment) return row.enrolled > 0 ? 0 : 3;
+  if (row.assignment.acceptanceStatus === 'RECHAZADA') return 1;
+  if (row.withoutTutor > 0) return 2;
+  if (row.assignment.acceptanceStatus === 'PENDIENTE' || row.assignment.acceptanceStatus === 'SIN_SOLICITAR') return 4;
+  return 5;
+}
+
+const byUrgency = (a: CycleRow, b: CycleRow) => cyclePriority(a) - cyclePriority(b) || a.cycle - b.cycle;
 
 interface PendingException {
   cycle: number;
@@ -79,8 +94,8 @@ export function CycleTutorsPage() {
   return (
     <div>
       <PageHeader
-        title="Tutores por ciclo"
-        subtitle="Elige el tutor de cada ciclo. Los estudiantes matriculados del ciclo (y los que se carguen después) pasan a su tutor."
+        title="Asignación por ciclo"
+        subtitle="Se asigna por ciclo, no estudiante por estudiante: elige el tutor de cada ciclo de la escuela y todos sus estudiantes matriculados (y los que se carguen después) pasan a él."
         icon={<UserPlusIcon size={24} />}
       />
 
@@ -116,7 +131,7 @@ export function CycleTutorsPage() {
               <CardHeader title={`Periodo ${view.data.periodName}`} description={tutors.length === 0 ? 'Esta escuela aún no tiene docentes tutores: créalos en Usuarios y roles indicando su escuela.' : `${tutors.length} docente(s) tutor(es) de la escuela`} />
               <CardBody>
                 <ul className={styles.list}>
-                  {view.data.cycles.map((row) => (
+                  {[...view.data.cycles].sort(byUrgency).map((row) => (
                     <li key={row.cycle} className={styles.row}>
                       <span className={styles.cycle}>Ciclo {row.cycle}</span>
                       <span className={styles.count}>
@@ -135,6 +150,11 @@ export function CycleTutorsPage() {
                           </option>
                         ))}
                       </SelectField>
+                      {!row.assignment && row.enrolled > 0 && (
+                        <span className={styles.status}>
+                          <Badge tone="danger">Sin tutor</Badge>
+                        </span>
+                      )}
                       {row.assignment?.isException && (
                         <span title={row.assignment.note ?? ''}>
                           <Badge tone="warning">Excepción</Badge>
@@ -188,8 +208,8 @@ export function CycleTutorsPage() {
           {school && (
             <NextSteps
               steps={[
-                { to: '/asignacion', label: 'Asignar a quien quedó sin tutor', description: 'Estudiantes de ciclos sin tutor o casos puntuales' },
-                { to: '/tutorados', label: 'Ver los tutorados', description: 'Comprobar quién tiene qué tutor' },
+                { to: '/tutorados', label: 'Ver los tutorados', description: 'Comprobar quién tiene qué tutor; un caso puntual se reasigna ahí, con motivo' },
+                { to: '/carga-masiva', label: 'Cargar más estudiantes', description: 'Los que se carguen en un ciclo con tutor pasan solos a él' },
               ]}
             />
           )}

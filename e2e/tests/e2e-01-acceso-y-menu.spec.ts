@@ -6,11 +6,11 @@ import { loginUi, sidebar } from '../support/ui';
 const MENU: Record<AccountKey, string[]> = {
   student: ['Panel de inicio', 'Solicitar tutoría', 'Mis sesiones', 'Evaluar tutoría'],
   tutor: ['Panel de inicio', 'Tutorados', 'Expediente', 'Entrevista inicial', 'Sesiones', 'Seguimiento', 'Derivar caso', 'Solicitudes de tutoría', 'Casos derivados', 'Horarios y asistencia', 'Informe semestral'],
-  coordinator: ['Panel de inicio', 'Tutorados', 'Expediente', 'Solicitudes de tutoría', 'Pedir listas', 'Carga masiva', 'Tutores por ciclo', 'Asignación', 'Plan semestral', 'Resultados de evaluación', 'Sugerencias de estudiantes', 'Horarios y asistencia', 'Indicadores', 'Amonestaciones'],
+  coordinator: ['Panel de inicio', 'Tutorados', 'Expediente', 'Solicitudes de tutoría', 'Pedir listas', 'Carga masiva', 'Asignación por ciclo', 'Plan semestral', 'Resultados de evaluación', 'Sugerencias de estudiantes', 'Horarios y asistencia', 'Indicadores', 'Amonestaciones'],
   psychology: ['Panel de inicio', 'Casos derivados'],
   vice: ['Panel de inicio', 'Informe consolidado', 'Indicadores', 'Sedes'],
   dean: ['Panel de inicio', 'Amonestaciones'],
-  admin: ['Panel de inicio', 'Tutorados', 'Expediente', 'Solicitudes de tutoría', 'Casos derivados', 'Seguimiento DBU', 'Pedir listas', 'Carga masiva', 'Tutores por ciclo', 'Asignación', 'Cierre de periodo', 'Plan semestral', 'Evaluación de tutoría', 'Resultados de evaluación', 'Sugerencias de estudiantes', 'Horarios y asistencia', 'Informe consolidado', 'Indicadores', 'Amonestaciones', 'Sedes', 'Usuarios y roles', 'Catálogos', 'Parámetros', 'Identidad visual', 'Bitácora de auditoría'],
+  admin: ['Panel de inicio', 'Tutorados', 'Expediente', 'Solicitudes de tutoría', 'Casos derivados', 'Seguimiento DBU', 'Pedir listas', 'Carga masiva', 'Asignación por ciclo', 'Cierre de periodo', 'Plan semestral', 'Evaluación de tutoría', 'Resultados de evaluación', 'Sugerencias de estudiantes', 'Horarios y asistencia', 'Informe consolidado', 'Indicadores', 'Amonestaciones', 'Sedes', 'Usuarios y roles', 'Catálogos', 'Parámetros', 'Identidad visual', 'Bitácora de auditoría'],
 };
 
 for (const [key, account] of Object.entries(accounts) as [AccountKey, (typeof accounts)[AccountKey]][]) {

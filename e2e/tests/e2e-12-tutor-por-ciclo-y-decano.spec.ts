@@ -1,6 +1,6 @@
 import { expect, test } from '@playwright/test';
 import { accounts } from '../support/accounts';
-import { api, apiLogin } from '../support/api';
+import { releaseCycles } from '../support/setup';
 import { goToMenu, loginUi } from '../support/ui';
 
 // E2E-12 (fases 3 a 5, tutoría por ciclo): la coordinación elige al tutor del ciclo 10 de su escuela, al docente le llega un
@@ -13,26 +13,15 @@ let acceptanceLink = '';
 
 test.describe.configure({ mode: 'serial' });
 
-async function schoolId(token: string): Promise<string> {
-  const { body } = await api<{ schools: { id: string; name: string }[] }>(token, 'GET', '/schools');
-  return body.schools.find((s) => s.name === 'Ingeniería de Sistemas')!.id;
-}
+const clearCycles = () => releaseCycles('Ingeniería de Sistemas', accounts.tutor.email, [10]);
 
-test.beforeAll(async () => {
-  // Parte limpio: sin tutor asignado al ciclo 10 (de una corrida anterior).
-  const token = await apiLogin(accounts.admin);
-  await api(token, 'DELETE', `/schools/${await schoolId(token)}/cycle-tutors/10`);
-});
-
-test.afterAll(async () => {
-  const token = await apiLogin(accounts.admin);
-  await api(token, 'DELETE', `/schools/${await schoolId(token)}/cycle-tutors/10`);
-});
+test.beforeAll(clearCycles);
+test.afterAll(clearCycles);
 
 test('la coordinadora elige a Elena como tutora del ciclo 10 y queda pendiente de su respuesta', async ({ page }) => {
   await loginUi(page, accounts.coordinator);
-  await goToMenu(page, 'Tutores por ciclo');
-  await expect(page.getByRole('heading', { name: 'Tutores por ciclo' }).last()).toBeVisible();
+  await goToMenu(page, 'Asignación por ciclo');
+  await expect(page.getByRole('heading', { name: 'Asignación por ciclo' }).last()).toBeVisible();
 
   const select = page.getByLabel('Tutor del ciclo 10');
   await expect(select).toBeVisible({ timeout: 45_000 });
@@ -75,7 +64,7 @@ test('Elena abre el enlace sin iniciar sesión y acepta con su disponibilidad; e
 
 test('la coordinadora ve que Elena aceptó y su disponibilidad', async ({ page }) => {
   await loginUi(page, accounts.coordinator);
-  await goToMenu(page, 'Tutores por ciclo');
+  await goToMenu(page, 'Asignación por ciclo');
 
   const row = page.getByRole('listitem').filter({ has: page.getByLabel('Tutor del ciclo 10') });
   await expect(row.getByText('Aceptó')).toBeVisible({ timeout: 45_000 });

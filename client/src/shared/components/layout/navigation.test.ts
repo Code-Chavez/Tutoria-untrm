@@ -80,9 +80,9 @@ describe('navegación (UI-01, UI-04, UI-07)', () => {
       expect(groupsFor('Administrador DBU').map((g) => g.title)).toEqual(['Inicio', 'Atención a tutorados', 'Periodo académico', 'Planificación y evaluación', 'Informes', 'Facultad y sedes', 'Administración']);
     });
 
-    it('el periodo académico sigue el flujo real: pedir listas, cargar, tutor por ciclo, asignar y cerrar', () => {
+    it('el periodo académico sigue el flujo real: pedir listas, cargar, asignar por ciclo y cerrar', () => {
       const flow = groupsFor('Administrador DBU').find((g) => g.title === 'Periodo académico');
-      expect(flow?.labels).toEqual(['Pedir listas', 'Carga masiva', 'Tutores por ciclo', 'Asignación', 'Cierre de periodo']);
+      expect(flow?.labels).toEqual(['Pedir listas', 'Carga masiva', 'Asignación por ciclo', 'Cierre de periodo']);
     });
 
     it('la administración (usuarios, catálogos, parámetros…) es solo de la DBU', () => {

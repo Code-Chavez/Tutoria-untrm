@@ -106,3 +106,20 @@ export async function setSistemasEvaluationWindow(adminToken: string, isOpen: bo
   const res = await api(adminToken, 'PATCH', `/evaluation-windows/${school!.id}`, { isOpen });
   expect(res.status).toBe(200);
 }
+
+/**
+ * Libera los ciclos que atiende un docente (y, si se pide, otros ciclos) de una escuela en el periodo vigente. Un docente
+ * atiende un solo ciclo, así que una asignación que haya quedado de otra corrida o de una prueba manual haría pedir una
+ * excepción y no es lo que estas pruebas verifican.
+ */
+export async function releaseCycles(schoolName: string, tutorEmail: string, extraCycles: number[] = []): Promise<void> {
+  const token = await apiLogin(accounts.admin);
+  const schools = await api<{ schools: { id: string; name: string }[] }>(token, 'GET', '/schools');
+  const school = schools.body.schools.find((s) => s.name === schoolName);
+  expect(school, `escuela ${schoolName}`).toBeTruthy();
+  const tutorId = await userId(token, tutorEmail);
+  const view = await api<{ cycles: { cycle: number; assignment: { tutorId: string } | null }[] }>(token, 'GET', `/schools/${school!.id}/cycle-tutors`);
+  if (view.status !== 200) return; // sin periodo vigente no hay nada que liberar
+  const own = view.body.cycles.filter((c) => c.assignment?.tutorId === tutorId).map((c) => c.cycle);
+  for (const cycle of new Set([...own, ...extraCycles])) await api(token, 'DELETE', `/schools/${school!.id}/cycle-tutors/${cycle}`);
+}

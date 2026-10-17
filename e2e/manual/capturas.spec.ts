@@ -94,8 +94,8 @@ test('docente tutor (2)', async ({ page }) => {
 test('coordinador', async ({ page }) => {
   await loginUi(page, accounts.coordinator);
   await shot(page, '19-inicio-coordinador');
-  await goToMenu(page, 'Asignación');
-  await page.getByText('1 · Selecciona los estudiantes').waitFor();
+  await goToMenu(page, 'Asignación por ciclo');
+  await page.getByLabel('Tutor del ciclo 1').waitFor();
   await shot(page, '20-asignacion');
   await goToMenu(page, 'Plan semestral');
   await page.getByRole('heading', { level: 3, name: 'Resolución de aprobación' }).waitFor();

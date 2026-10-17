@@ -1,16 +1,24 @@
 import { expect, test } from '@playwright/test';
 import ExcelJS from 'exceljs';
 import { accounts } from '../support/accounts';
+import { releaseCycles } from '../support/setup';
 import { goToMenu, loginUi } from '../support/ui';
 
-// E2E-09 (HU-08, HU-09, HU-12, HU-13): la coordinadora carga estudiantes desde Excel (una fila con error), los asigna
-// a una tutora en bloque, reasigna a uno individualmente, y cada tutor ve solo los suyos.
+// E2E-09 (HU-08, HU-09, HU-12, HU-13): la coordinadora carga estudiantes desde Excel (una fila con error), asigna el ciclo 3
+// a una tutora (la asignación es por ciclo, no estudiante por estudiante), reasigna a uno individualmente con motivo, y cada
+// tutor ve solo los suyos.
 test.describe.configure({ mode: 'serial' });
 
 const stamp = Date.now().toString(36).toUpperCase();
 const base = Number(String(Date.now()).slice(-6)) * 100; // 8 dígitos; únicos por corrida
 const students = [1, 2, 3].map((n) => ({ code: String(98_000_000 + (base % 1_000_000) + n), name: `Carga${n}`, last: `E2E ${stamp}` }));
 const jorge = { email: 'jorge.salazar@untrm.edu.pe', password: 'Demo2026!', role: 'Docente Tutor', greeting: 'Jorge' };
+
+/** El ciclo 3 de Sistemas (y cualquier otro ciclo de Elena) queda libre antes y después: la prueba se repite y no estorba a las demás. */
+const clearCycles = () => releaseCycles('Ingeniería de Sistemas', accounts.tutor.email, [3]);
+
+test.beforeAll(clearCycles);
+test.afterAll(clearCycles);
 
 async function buildWorkbook(): Promise<Buffer> {
   const wb = new ExcelJS.Workbook();
@@ -39,18 +47,20 @@ test('la coordinadora importa el Excel: 3 estudiantes se registran y la fila con
   await expect(page.getByRole('button', { name: 'Descargar reporte' })).toBeVisible();
 });
 
-test('la coordinadora asigna los 3 estudiantes nuevos a Elena en bloque', async ({ page }) => {
+test('la coordinadora asigna el ciclo 3 a Elena y los 3 estudiantes nuevos pasan a ella', async ({ page }) => {
   await loginUi(page, accounts.coordinator);
-  await goToMenu(page, 'Asignación');
-  await page.getByText('1 · Selecciona los estudiantes').waitFor();
+  await goToMenu(page, 'Asignación por ciclo');
 
-  await page.getByLabel('Buscar estudiante').fill(stamp);
-  await expect(page.getByRole('checkbox', { name: /Seleccionar Carga\d/ })).toHaveCount(3);
-  await page.getByLabel('Seleccionar todos los visibles').check();
+  const select = page.getByLabel('Tutor del ciclo 3');
+  await expect(select).toBeVisible({ timeout: 45_000 });
+  const elena = await select.locator('option', { hasText: 'Elena' }).first().getAttribute('value');
+  await select.selectOption(elena!);
+  await expect(page.getByRole('status').filter({ hasText: /Ciclo 3: \d+ estudiante\(s\) asignados/ })).toBeVisible({ timeout: 45_000 });
 
-  await page.getByRole('radiogroup', { name: 'Seleccionar tutor' }).getByRole('radio', { name: /Elena/ }).click();
-  await page.getByRole('button', { name: 'Asignar' }).click();
-  await expect(page.getByText(/Se asignaron 3 estudiante\(s\) a Elena/)).toBeVisible();
+  await goToMenu(page, 'Tutorados');
+  await page.getByLabel('Buscar tutorado').fill(stamp);
+  await expect(page.getByRole('row', { name: /Carga/ })).toHaveCount(3);
+  for (const student of students) await expect(page.getByRole('row', { name: new RegExp(student.code) })).toContainText('Elena');
 });
 
 test('la coordinadora reasigna a uno de ellos a Jorge con un motivo', async ({ page }) => {
