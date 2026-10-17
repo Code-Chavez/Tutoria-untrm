@@ -29,7 +29,7 @@ describe('navegación (UI-01, UI-04, UI-07)', () => {
   });
 
   it('el título de la barra superior describe la misma tarea que el menú', () => {
-    expect(resolveMeta('/informes')).toEqual({ title: 'Consolidado de horarios y asistencia', group: 'Gestión' });
+    expect(resolveMeta('/informes')).toEqual({ title: 'Consolidado de horarios y asistencia', group: 'Informes' });
     expect(resolveMeta('/derivaciones/seguimiento').title).toBe('Seguimiento de derivaciones');
     expect(resolveMeta('/derivaciones').title).toBe('Casos derivados');
     expect(resolveMeta('/expediente/abc').title).toBe('Expediente');
@@ -65,5 +65,37 @@ describe('navegación (UI-01, UI-04, UI-07)', () => {
         seen.set(item.Icon, item.label);
       }
     }
+  });
+
+  describe('estructura del menú por tareas', () => {
+    const groupsFor = (role: string) =>
+      NAV.map((g) => ({ title: g.title, labels: g.items.filter((i) => !i.roles || i.roles.includes(ROLE_CODES[role])).map((i) => i.label) })).filter((g) => g.labels.length > 0);
+
+    it('cada rol ve solo los grupos que le sirven, en el orden del trabajo', () => {
+      expect(groupsFor('Tutorado').map((g) => g.title)).toEqual(['Inicio', 'Mi tutoría']);
+      expect(groupsFor('Docente Tutor').map((g) => g.title)).toEqual(['Inicio', 'Atención a tutorados', 'Informes']);
+      expect(groupsFor('Coordinador').map((g) => g.title)).toEqual(['Inicio', 'Atención a tutorados', 'Periodo académico', 'Planificación y evaluación', 'Informes', 'Facultad y sedes']);
+      expect(groupsFor('Decano').map((g) => g.title)).toEqual(['Inicio', 'Facultad y sedes']);
+      expect(groupsFor('Vicerrectorado').map((g) => g.title)).toEqual(['Inicio', 'Informes', 'Facultad y sedes']);
+      expect(groupsFor('Administrador DBU').map((g) => g.title)).toEqual(['Inicio', 'Atención a tutorados', 'Periodo académico', 'Planificación y evaluación', 'Informes', 'Facultad y sedes', 'Administración']);
+    });
+
+    it('el periodo académico sigue el flujo real: pedir listas, cargar, tutor por ciclo, asignar y cerrar', () => {
+      const flow = groupsFor('Administrador DBU').find((g) => g.title === 'Periodo académico');
+      expect(flow?.labels).toEqual(['Pedir listas', 'Carga masiva', 'Tutores por ciclo', 'Asignación', 'Cierre de periodo']);
+    });
+
+    it('la administración (usuarios, catálogos, parámetros…) es solo de la DBU', () => {
+      for (const role of Object.keys(ROLE_CODES).filter((r) => r !== 'Administrador DBU')) {
+        expect(groupsFor(role).map((g) => g.title), role).not.toContain('Administración');
+      }
+    });
+
+    it('no hay dos entradas con la misma etiqueta dentro de un mismo grupo', () => {
+      for (const group of NAV) {
+        const labels = group.items.map((i) => i.label);
+        expect(new Set(labels).size, group.title).toBe(labels.length);
+      }
+    });
   });
 });

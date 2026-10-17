@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { isAxiosError } from 'axios';
-import { PageHeader, Card, CardHeader, CardBody, Button, Badge, SelectField, EmptyState, TableSkeleton } from '@shared/components/ui';
+import { PageHeader, Card, CardHeader, CardBody, Button, Badge, SelectField, EmptyState, NextSteps, TableSkeleton } from '@shared/components/ui';
 import { UserPlusIcon } from '@shared/components/icons';
 import { getApiErrorMessage } from '@shared/services/apiClient';
 import { useAuth } from '@features/auth/hooks/useAuth';
@@ -84,7 +84,9 @@ export function CycleTutorsPage() {
         icon={<UserPlusIcon size={24} />}
       />
 
-      {schools.length === 0 ? (
+      {schoolsQuery.isLoading ? (
+        <TableSkeleton rows={4} columns={3} />
+      ) : schools.length === 0 ? (
         <EmptyState icon={<UserPlusIcon size={26} />} title="No tienes escuelas a cargo" description="Pide a la DBU que te asigne como coordinador de una escuela." />
       ) : (
         <>
@@ -165,6 +167,32 @@ export function CycleTutorsPage() {
               </CardBody>
             </Card>
           ) : null}
+
+          {school && tutors.length === 0 && !view.isLoading && (
+            <NextSteps
+              title="Esta escuela aún no tiene docentes tutores"
+              steps={
+                user?.role === 'Administrador DBU'
+                  ? [
+                      { to: '/users', label: 'Crear o importar docentes', description: 'Con su escuela; reciben un enlace para crear su contraseña' },
+                      { to: '/catalogos', label: 'Revisar las escuelas', description: 'Si la escuela no aparece o no es la correcta' },
+                    ]
+                  : []
+              }
+            />
+          )}
+          {school && tutors.length === 0 && !view.isLoading && user?.role !== 'Administrador DBU' && (
+            <p className={styles.detail}>Pide a la DBU que registre a los docentes de tu escuela en «Usuarios y roles».</p>
+          )}
+
+          {school && (
+            <NextSteps
+              steps={[
+                { to: '/asignacion', label: 'Asignar a quien quedó sin tutor', description: 'Estudiantes de ciclos sin tutor o casos puntuales' },
+                { to: '/tutorados', label: 'Ver los tutorados', description: 'Comprobar quién tiene qué tutor' },
+              ]}
+            />
+          )}
 
           {pending && (
             <div role="dialog" aria-label="Registrar excepción" className={styles.exception}>

@@ -43,6 +43,7 @@ import {
   StatCard,
   Button,
   EmptyState,
+  NextSteps,
   TableSkeleton,
   Pagination,
   ConfirmDialog,
@@ -520,14 +521,25 @@ export const StudentsPage: React.FC = () => {
             title={total === 0 ? 'Aún no hay tutorados registrados' : 'Sin resultados'}
             description={
               total === 0
-                ? 'Registra un tutorado o utiliza la carga masiva para importarlos desde Excel.'
+                ? canWrite
+                  ? 'Registra un tutorado o utiliza la carga masiva para importarlos desde Excel.'
+                  : 'Aún no tienes tutorados asignados. La coordinación de tu escuela los asigna en «Tutores por ciclo»; cuando lo haga, aparecerán aquí.'
                 : 'No se encontraron tutorados con los filtros aplicados. Prueba ajustarlos.'
             }
             action={
               total === 0 && canWrite ? (
-                <Button icon={<PlusIcon size={16} />} onClick={() => handleOpenModal()}>
-                  Nuevo tutorado
-                </Button>
+                <>
+                  <Button icon={<PlusIcon size={16} />} onClick={() => handleOpenModal()}>
+                    Nuevo tutorado
+                  </Button>
+                  <NextSteps
+                    title="O consíguelos así"
+                    steps={[
+                      { to: '/pedir-listas', label: 'Pedir la lista a la escuela', description: 'Sale por correo con la plantilla de Excel' },
+                      { to: '/carga-masiva', label: 'Cargar el Excel', description: 'Cuando ya tengas la lista' },
+                    ]}
+                  />
+                </>
               ) : undefined
             }
           />

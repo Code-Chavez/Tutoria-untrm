@@ -26,14 +26,41 @@ son los que aparecen en pantalla. Si necesita instalar o mantener el sistema, ve
 Cada persona entra con su cuenta institucional y ve **solo** el menú y la información que le corresponde. No es un error que a usted no le aparezca una opción
 que otro compañero sí tiene: depende de su rol.
 
-| Rol | Menú |
-|---|---|
-| Tutorado | Panel de inicio · Mis sesiones · Solicitar tutoría · Evaluar tutoría |
-| Docente tutor | Panel de inicio · Tutorados · Entrevista inicial · Expediente · Sesiones · Seguimiento · Derivar caso · Solicitudes de tutoría · Casos derivados · Horarios y asistencia · Informe semestral |
-| Coordinador | Panel de inicio · Tutorados · Asignación · Pedir listas · Carga masiva · Expediente · Solicitudes de tutoría · Plan semestral · Horarios y asistencia · Indicadores · Resultados de evaluación · Sugerencias de estudiantes |
-| Profesional de servicio | Panel de inicio · Casos derivados |
-| Vicerrectorado | Panel de inicio · Informe consolidado · Indicadores |
-| Administrador DBU | Todo lo anterior, más Seguimiento DBU, Usuarios y roles, Catálogos, Parámetros, Identidad visual, Bitácora de auditoría y Evaluación de tutoría |
+El menú está **agrupado por tareas**, en el orden en que se hacen. Una persona solo ve los grupos que le sirven:
+
+| Grupo del menú | Qué hay | Quién lo ve |
+|---|---|---|
+| **Inicio** | Panel de inicio (resumen y accesos directos) | Todos |
+| **Mi tutoría** | Solicitar tutoría · Mis sesiones · Evaluar tutoría | Estudiante |
+| **Atención a tutorados** | Tutorados · Expediente · Entrevista inicial · Sesiones · Seguimiento · Derivar caso · Solicitudes de tutoría · Casos derivados · Seguimiento DBU | Docente tutor (todo menos Seguimiento DBU), coordinación (Tutorados, Expediente, Solicitudes), profesional de servicio (Casos derivados), DBU |
+| **Periodo académico** | 1 Pedir listas → 2 Carga masiva → 3 Tutores por ciclo → 4 Asignación → 5 Cierre de periodo | Coordinación (pasos 1 a 4) y DBU (1 a 5) |
+| **Planificación y evaluación** | Plan semestral · Evaluación de tutoría · Resultados de evaluación · Sugerencias de estudiantes | Coordinación y DBU (la configuración de la evaluación, solo DBU) |
+| **Informes** | Horarios y asistencia · Informe semestral · Informe consolidado · Indicadores | Docente, coordinación, Vicerrectorado y DBU, según cada informe |
+| **Facultad y sedes** | Amonestaciones · Sedes | Decano (Amonestaciones), coordinación (consulta), Vicerrectorado (Sedes), DBU |
+| **Administración** | Usuarios y roles · Catálogos · Parámetros · Identidad visual · Bitácora de auditoría | Solo DBU |
+
+### Quién hace qué, y dónde
+
+| Tarea | Quién la hace | Dónde |
+|---|---|---|
+| Crear cuentas y asignar roles (docentes, coordinadores, Decano…) | DBU | Administración → Usuarios y roles (también *Importar docentes* desde Excel) |
+| Registrar facultades, escuelas y periodos | DBU | Administración → Catálogos |
+| Fijar la sede de cada escuela | Vicerrectorado o DBU | Facultad y sedes → Sedes |
+| Pedir a cada escuela la lista de estudiantes | Coordinación o DBU | Periodo académico → Pedir listas |
+| Cargar a los estudiantes del periodo | Coordinación o DBU | Periodo académico → Carga masiva |
+| Elegir el tutor de cada ciclo (y ver si aceptó) | Coordinación o DBU | Periodo académico → Tutores por ciclo |
+| Aceptar o rechazar ser tutor de un ciclo | El docente, desde el enlace de su correo | Correo → página de aceptación (sin iniciar sesión) |
+| Asignar a quien quedó sin tutor o reasignar | Coordinación o DBU | Periodo académico → Asignación; reasignar desde Atención a tutorados → Tutorados |
+| Entrevista, sesiones, asistencia, seguimiento | Docente tutor | Atención a tutorados |
+| Derivar un caso a un servicio | Docente tutor | Atención a tutorados → Derivar caso |
+| Atender un caso derivado | Profesional de servicio | Atención a tutorados → Casos derivados |
+| Pedir tutoría y evaluar a su tutor | Estudiante | Mi tutoría |
+| Plan de trabajo de la escuela | Coordinación | Planificación y evaluación → Plan semestral |
+| Informe semestral del docente | Docente tutor | Informes → Informe semestral |
+| Amonestar a un docente | Decano (o DBU) | Facultad y sedes → Amonestaciones |
+| Cerrar el periodo | DBU | Periodo académico → Cierre de periodo |
+
+**Una pantalla lleva a la siguiente.** Cuando a una pantalla le falta algo (por ejemplo, no hay estudiantes o una escuela no tiene docentes) o cuando termina una tarea, muestra un bloque **«Qué sigue»** con enlaces a donde se carga lo que falta o a la tarea siguiente: después de *Pedir listas* sigue *Carga masiva*; después de cargar, *Tutores por ciclo*; después, *Asignación* para quien quedó sin tutor. El **Panel de inicio** de la coordinación y la DBU muestra el periodo académico como pasos numerados.
 
 *Nombres en pantalla:* el sistema muestra **Estudiante** (rol Tutorado), **Docente** (Docente tutor), **Administrador** (Administrador DBU) y, para el Profesional de servicio, su especialidad (p. ej. «Profesional de Psicología»). Son los mismos roles de la tabla; solo cambia cómo se escriben junto a su nombre, en el perfil y en la lista de usuarios.
 

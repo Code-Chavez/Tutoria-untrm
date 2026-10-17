@@ -4,13 +4,13 @@ import { loginUi, sidebar } from '../support/ui';
 
 // E2E-01 (HU-01, HU-04, HU-49): cada rol entra, ve su menú y su panel de inicio sin bloques vacíos.
 const MENU: Record<AccountKey, string[]> = {
-  student: ['Panel de inicio', 'Mis sesiones', 'Solicitar tutoría', 'Evaluar tutoría'],
-  tutor: ['Panel de inicio', 'Tutorados', 'Entrevista inicial', 'Expediente', 'Sesiones', 'Seguimiento', 'Derivar caso', 'Solicitudes de tutoría', 'Casos derivados', 'Horarios y asistencia', 'Informe semestral'],
-  coordinator: ['Panel de inicio', 'Tutorados', 'Asignación', 'Tutores por ciclo', 'Pedir listas', 'Carga masiva', 'Expediente', 'Solicitudes de tutoría', 'Plan semestral', 'Horarios y asistencia', 'Indicadores', 'Amonestaciones', 'Resultados de evaluación', 'Sugerencias de estudiantes'],
+  student: ['Panel de inicio', 'Solicitar tutoría', 'Mis sesiones', 'Evaluar tutoría'],
+  tutor: ['Panel de inicio', 'Tutorados', 'Expediente', 'Entrevista inicial', 'Sesiones', 'Seguimiento', 'Derivar caso', 'Solicitudes de tutoría', 'Casos derivados', 'Horarios y asistencia', 'Informe semestral'],
+  coordinator: ['Panel de inicio', 'Tutorados', 'Expediente', 'Solicitudes de tutoría', 'Pedir listas', 'Carga masiva', 'Tutores por ciclo', 'Asignación', 'Plan semestral', 'Resultados de evaluación', 'Sugerencias de estudiantes', 'Horarios y asistencia', 'Indicadores', 'Amonestaciones'],
   psychology: ['Panel de inicio', 'Casos derivados'],
   vice: ['Panel de inicio', 'Informe consolidado', 'Indicadores', 'Sedes'],
   dean: ['Panel de inicio', 'Amonestaciones'],
-  admin: ['Panel de inicio', 'Tutorados', 'Asignación', 'Tutores por ciclo', 'Pedir listas', 'Carga masiva', 'Expediente', 'Solicitudes de tutoría', 'Casos derivados', 'Seguimiento DBU', 'Plan semestral', 'Horarios y asistencia', 'Informe consolidado', 'Indicadores', 'Usuarios y roles', 'Catálogos', 'Amonestaciones', 'Sedes', 'Cierre de periodo', 'Parámetros', 'Identidad visual', 'Bitácora de auditoría', 'Evaluación de tutoría', 'Resultados de evaluación', 'Sugerencias de estudiantes'],
+  admin: ['Panel de inicio', 'Tutorados', 'Expediente', 'Solicitudes de tutoría', 'Casos derivados', 'Seguimiento DBU', 'Pedir listas', 'Carga masiva', 'Tutores por ciclo', 'Asignación', 'Cierre de periodo', 'Plan semestral', 'Evaluación de tutoría', 'Resultados de evaluación', 'Sugerencias de estudiantes', 'Horarios y asistencia', 'Informe consolidado', 'Indicadores', 'Amonestaciones', 'Sedes', 'Usuarios y roles', 'Catálogos', 'Parámetros', 'Identidad visual', 'Bitácora de auditoría'],
 };
 
 for (const [key, account] of Object.entries(accounts) as [AccountKey, (typeof accounts)[AccountKey]][]) {

@@ -1,6 +1,6 @@
 import { useState, type FormEvent } from 'react';
 import { Link } from 'react-router-dom';
-import { PageHeader, Card, CardHeader, CardBody, Button, Badge, SelectField, EmptyState } from '@shared/components/ui';
+import { PageHeader, Card, CardHeader, CardBody, Button, Badge, SelectField, EmptyState, NextSteps } from '@shared/components/ui';
 import { SendIcon } from '@shared/components/icons';
 import { getApiErrorMessage } from '@shared/services/apiClient';
 import { useAuth } from '@features/auth/hooks/useAuth';
@@ -196,6 +196,13 @@ export function DataRequestPage() {
           )}
         </CardBody>
       </Card>
+      <NextSteps
+        title="Cuando llegue la lista"
+        steps={[
+          { to: '/carga-masiva', label: 'Cargar el Excel', description: 'Los estudiantes quedan matriculados en el periodo' },
+          { to: '/tutores-por-ciclo', label: 'Elegir el tutor de cada ciclo', description: 'El docente recibe un correo para aceptar' },
+        ]}
+      />
     </div>
   );
 }

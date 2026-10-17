@@ -1,5 +1,5 @@
 import { useState, type FormEvent } from 'react';
-import { PageHeader, Card, CardHeader, CardBody, Button, Badge, SelectField, EmptyState, TableSkeleton } from '@shared/components/ui';
+import { PageHeader, Card, CardHeader, CardBody, Button, Badge, SelectField, EmptyState, NextSteps, TableSkeleton } from '@shared/components/ui';
 import { MapPinIcon } from '@shared/components/icons';
 import { getApiErrorMessage } from '@shared/services/apiClient';
 import { useCampuses, useCreateCampus, useSetSchoolCampus, useUpdateCampus } from '../hooks/useCampuses';
@@ -119,6 +119,12 @@ export function CampusesPage() {
           </Card>
         </div>
       )}
+      <NextSteps
+        steps={[
+          { to: '/users', label: 'Registrar docentes en su escuela', description: 'Cada docente tutor pertenece a una escuela y, por ella, a una sede' },
+          { to: '/catalogos', label: 'Escuelas y facultades', description: 'Si falta una escuela en esta lista' },
+        ]}
+      />
     </div>
   );
 }
