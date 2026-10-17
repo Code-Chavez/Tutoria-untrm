@@ -6,11 +6,11 @@ import { loginUi, sidebar } from '../support/ui';
 const MENU: Record<AccountKey, string[]> = {
   student: ['Panel de inicio', 'Solicitar tutoría', 'Mis sesiones', 'Evaluar tutoría'],
   tutor: ['Panel de inicio', 'Tutorados', 'Expediente', 'Entrevista inicial', 'Sesiones', 'Seguimiento', 'Derivar caso', 'Solicitudes de tutoría', 'Casos derivados', 'Horarios y asistencia', 'Informe semestral'],
-  coordinator: ['Panel de inicio', 'Tutorados', 'Expediente', 'Solicitudes de tutoría', 'Pedir listas', 'Carga de estudiantes', 'Asignación por ciclo', 'Plan semestral', 'Resultados de evaluación', 'Sugerencias de estudiantes', 'Horarios y asistencia', 'Indicadores', 'Amonestaciones', 'Correos de las escuelas'],
+  coordinator: ['Panel de inicio', 'Tutorados', 'Expediente', 'Solicitudes de tutoría', 'Periodo académico', 'Plan semestral', 'Amonestaciones', 'Horarios y asistencia', 'Indicadores', 'Resultados de evaluación', 'Sugerencias de estudiantes', 'Configuración'],
   psychology: ['Panel de inicio', 'Casos derivados'],
-  vice: ['Panel de inicio', 'Informe consolidado', 'Indicadores', 'Sedes'],
+  vice: ['Panel de inicio', 'Informe consolidado', 'Indicadores', 'Configuración'],
   dean: ['Panel de inicio', 'Amonestaciones'],
-  admin: ['Panel de inicio', 'Tutorados', 'Expediente', 'Solicitudes de tutoría', 'Casos derivados', 'Seguimiento DBU', 'Pedir listas', 'Carga de estudiantes', 'Carga de docentes', 'Asignación por ciclo', 'Cierre de periodo', 'Plan semestral', 'Evaluación de tutoría', 'Resultados de evaluación', 'Sugerencias de estudiantes', 'Horarios y asistencia', 'Informe consolidado', 'Indicadores', 'Amonestaciones', 'Sedes', 'Correos de las escuelas', 'Usuarios y roles', 'Catálogos', 'Parámetros', 'Identidad visual', 'Bitácora de auditoría'],
+  admin: ['Panel de inicio', 'Tutorados', 'Expediente', 'Solicitudes de tutoría', 'Casos derivados', 'Seguimiento DBU', 'Periodo académico', 'Plan semestral', 'Amonestaciones', 'Horarios y asistencia', 'Informe consolidado', 'Indicadores', 'Resultados de evaluación', 'Sugerencias de estudiantes', 'Configuración'],
 };
 
 for (const [key, account] of Object.entries(accounts) as [AccountKey, (typeof accounts)[AccountKey]][]) {
@@ -44,4 +44,31 @@ test('un rol no entra a una página que no es suya', async ({ page }) => {
   await loginUi(page, accounts.student);
   await page.goto('/usuarios');
   await expect(page.getByRole('heading', { level: 1, name: /Usuarios y roles/ })).toHaveCount(0);
+});
+
+test('el menú es corto: Periodo académico y Configuración son una pantalla con pestañas, y los grupos se pliegan', async ({ page }) => {
+  await loginUi(page, accounts.admin);
+  const nav = page.locator('nav');
+
+  // Una sola entrada por sección; sus pestañas no están sueltas en el menú
+  await expect(nav.getByRole('link', { name: 'Periodo académico', exact: true })).toBeVisible();
+  await expect(nav.getByRole('link', { name: 'Parámetros', exact: true })).toHaveCount(0);
+  await expect(nav.getByRole('link', { name: 'Pedir listas', exact: true })).toHaveCount(0);
+
+  // Periodo académico: pestañas en el orden del trabajo, y la primera abierta
+  await nav.getByRole('link', { name: 'Periodo académico', exact: true }).click();
+  const tabs = page.getByRole('navigation', { name: 'Secciones de Periodo académico' });
+  await expect(tabs.getByRole('link')).toHaveText(['Pedir listas', 'Carga de estudiantes', 'Carga de docentes', 'Asignación por ciclo', 'Cierre de periodo']);
+  await expect(tabs.getByRole('link', { name: 'Pedir listas', exact: true })).toHaveAttribute('aria-current', 'page');
+  await tabs.getByRole('link', { name: 'Asignación por ciclo' }).click();
+  await expect(nav.getByRole('link', { name: 'Periodo académico', exact: true })).toHaveAttribute('aria-current', 'page');
+
+  // Configuración: todo lo configurable en una sola pantalla
+  await nav.getByRole('link', { name: 'Configuración', exact: true }).click();
+  const config = page.getByRole('navigation', { name: 'Secciones de Configuración' });
+  await expect(config.getByRole('link')).toHaveText(['Correos de las escuelas', 'Sedes', 'Evaluación de tutoría', 'Catálogos', 'Usuarios y roles', 'Parámetros', 'Identidad visual', 'Bitácora de auditoría']);
+
+  // Los grupos del menú se pliegan
+  await nav.getByRole('button', { name: /Informes/ }).click();
+  await expect(nav.getByRole('link', { name: 'Indicadores', exact: true })).toHaveCount(0);
 });

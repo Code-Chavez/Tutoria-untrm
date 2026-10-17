@@ -2,7 +2,6 @@ import { type ComponentType } from 'react';
 import {
   DashboardIcon,
   GraduationCapIcon,
-  UploadIcon,
   ClipboardIcon,
   FolderIcon,
   CalendarIcon,
@@ -13,24 +12,17 @@ import {
   CalendarRangeIcon,
   ReportIcon,
   PieChartIcon,
-  UsersIcon,
-  LayersIcon,
-  SlidersIcon,
-  PaletteIcon,
-  ListChecksIcon,
   RefreshIcon,
   BarChartIcon,
   ClockIcon,
   FileSpreadsheetIcon,
-  ShieldCheckIcon,
   MessageSquareIcon,
   FileTextIcon,
-  MapPinIcon,
-  UserPlusIcon,
-  UsersPlusIcon,
   SettingsIcon,
   AlertTriangleIcon,
 } from '@shared/components/icons';
+
+import { SECTIONS } from './sections';
 
 export type RoleCode = 'tutor' | 'coord' | 'dbu' | 'serv' | 'est' | 'vice' | 'dec';
 
@@ -54,20 +46,29 @@ export interface NavItem {
   /** Acción que abre la lista de tutorados en modo «elegir estudiante» (?accion=…). */
   action?: string;
   roles?: RoleCode[]; // sin roles = visible para todos
+  /** Otras direcciones que también dejan esta entrada activa (las pestañas de una sección). */
+  alsoPaths?: string[];
 }
 
 export interface NavGroup {
+  /** Vacío = grupo sin título (una entrada suelta, como «Configuración»). */
   title: string;
   items: NavItem[];
+  /** Grupo sin título desplegable (p. ej. «Inicio», que es una sola entrada). Por omisión, todos los grupos se despliegan y pliegan. */
+  fixed?: boolean;
+  /** Arranca plegado (se muestra abierto si la página actual está dentro). Por omisión arranca abierto. */
+  startsCollapsed?: boolean;
 }
 
+const sectionPaths = (key: keyof typeof SECTIONS) => SECTIONS[key].tabs.map((tab) => tab.path);
+
 // Única fuente de verdad: el menú, el título de la barra superior y la entrada activa salen de aquí.
-// Cada función tiene su propio icono. Los grupos siguen el trabajo de cada persona y, dentro de cada grupo, el orden es el
-// del flujo real (p. ej. en «Periodo académico»: pedir listas → cargarlas → tutor de cada ciclo → asignar → cerrar).
-// Un grupo sin entradas para el rol de la persona no se muestra.
+// El menú es corto a propósito: «Periodo académico» y «Configuración» juntan varias pantallas en una sola, con pestañas
+// (ver sections.ts). Los grupos siguen el trabajo de cada persona y se pliegan; un grupo sin entradas para el rol no se muestra.
 export const NAV: NavGroup[] = [
   {
     title: 'Inicio',
+    fixed: true,
     items: [{ label: 'Panel de inicio', Icon: DashboardIcon, path: '/' }],
   },
   {
@@ -101,24 +102,13 @@ export const NAV: NavGroup[] = [
     ],
   },
   {
-    // Lo que hacen la coordinación y la DBU en cada periodo, en el orden en que se hace.
-    title: 'Periodo académico',
+    // Lo que hacen la coordinación y la DBU en cada periodo (una sola pantalla con pestañas, en el orden en que se hace) y
+    // la planificación y las amonestaciones.
+    title: 'Gestión',
     items: [
-      { label: 'Pedir listas', Icon: SendIcon, path: '/pedir-listas', roles: ['coord', 'dbu'] },
-      { label: 'Carga de estudiantes', Icon: UploadIcon, path: '/carga-masiva', roles: ['coord', 'dbu'] },
-      { label: 'Carga de docentes', Icon: UsersPlusIcon, path: '/carga-docentes', roles: ['dbu'] },
-      // La asignación es por ciclo (un tutor por ciclo de cada escuela), no estudiante por estudiante.
-      { label: 'Asignación por ciclo', Icon: UserPlusIcon, path: '/asignacion', roles: ['coord', 'dbu'] },
-      { label: 'Cierre de periodo', Icon: RefreshIcon, path: '/cierre-periodo', roles: ['dbu'] },
-    ],
-  },
-  {
-    title: 'Planificación y evaluación',
-    items: [
+      { label: SECTIONS.periodo.title, Icon: RefreshIcon, path: SECTIONS.periodo.path, alsoPaths: sectionPaths('periodo'), roles: ['coord', 'dbu'] },
       { label: 'Plan semestral', Icon: CalendarRangeIcon, path: '/plan-semestral', roles: ['coord', 'dbu'] },
-      { label: 'Evaluación de tutoría', Icon: ListChecksIcon, path: '/evaluacion/configuracion', roles: ['dbu'] },
-      { label: 'Resultados de evaluación', Icon: BarChartIcon, path: '/evaluacion/resultados', roles: ['dbu', 'coord'] },
-      { label: 'Sugerencias de estudiantes', Icon: StarIcon, path: '/evaluacion/sugerencias', roles: ['dbu', 'coord'] },
+      { label: 'Amonestaciones', Icon: AlertTriangleIcon, path: '/amonestaciones', roles: ['dec', 'dbu', 'coord'] },
     ],
   },
   {
@@ -134,37 +124,26 @@ export const NAV: NavGroup[] = [
       { label: 'Informe semestral', Icon: FileTextIcon, path: '/informes/semestral', roles: ['tutor'] },
       { label: 'Informe consolidado', Icon: FileSpreadsheetIcon, path: '/informes/consolidado', roles: ['dbu', 'vice'] },
       { label: 'Indicadores', Icon: PieChartIcon, path: '/indicadores', roles: ['dbu', 'coord', 'vice'] },
+      { label: 'Resultados de evaluación', Icon: BarChartIcon, path: '/evaluacion/resultados', roles: ['dbu', 'coord'] },
+      { label: 'Sugerencias de estudiantes', Icon: StarIcon, path: '/evaluacion/sugerencias', roles: ['dbu', 'coord'] },
     ],
   },
   {
-    // Facultad y sedes: el Decano amonesta; Vicerrectorado y la DBU fijan la sede de cada escuela.
-    title: 'Facultad y sedes',
-    items: [
-      { label: 'Amonestaciones', Icon: AlertTriangleIcon, path: '/amonestaciones', roles: ['dec', 'dbu', 'coord'] },
-      { label: 'Sedes', Icon: MapPinIcon, path: '/sedes', roles: ['dbu', 'vice'] },
-    ],
-  },
-  {
-    // Se configura una vez y se usa después (p. ej. a qué correo se piden las listas de cada escuela).
-    title: 'Configuración',
-    items: [{ label: 'Correos de las escuelas', title: 'Correos para pedir las listas', Icon: SettingsIcon, path: '/correos-escuelas', roles: ['coord', 'dbu'] }],
-  },
-  {
-    title: 'Administración',
-    items: [
-      { label: 'Usuarios y roles', Icon: UsersIcon, path: '/users', roles: ['dbu'] },
-      { label: 'Catálogos', Icon: LayersIcon, path: '/catalogos', roles: ['dbu'] },
-      { label: 'Parámetros', Icon: SlidersIcon, path: '/parametros', roles: ['dbu'] },
-      { label: 'Identidad visual', Icon: PaletteIcon, path: '/identidad', roles: ['dbu'] },
-      { label: 'Bitácora de auditoría', Icon: ShieldCheckIcon, path: '/auditoria', roles: ['dbu'] },
-    ],
+    // Todo lo que se configura, en una sola pantalla con pestañas (correos, sedes, catálogos, usuarios, parámetros…).
+    title: '',
+    fixed: true,
+    items: [{ label: SECTIONS.configuracion.title, Icon: SettingsIcon, path: SECTIONS.configuracion.path, alsoPaths: sectionPaths('configuracion'), roles: ['coord', 'dbu', 'vice'] }],
   },
 ];
 
-const matchesPath = (item: NavItem, pathname: string) =>
-  item.path === '/' ? pathname === '/' : pathname === item.path || pathname.startsWith(`${item.path}/`);
+const pathMatches = (path: string, pathname: string) => (path === '/' ? pathname === '/' : pathname === path || pathname.startsWith(`${path}/`));
+
+const matchesPath = (item: NavItem, pathname: string) => [item.path, ...(item.alsoPaths ?? [])].some((path) => pathMatches(path, pathname));
 
 const matchesAction = (item: NavItem, action: string) => item.action === undefined || item.action === action;
+
+const matchedLength = (item: NavItem, pathname: string) =>
+  Math.max(0, ...[item.path, ...(item.alsoPaths ?? [])].filter((path) => pathMatches(path, pathname)).map((path) => path.length));
 
 /**
  * La entrada que corresponde a la URL: la más específica entre las que coinciden, de modo
@@ -173,7 +152,7 @@ const matchesAction = (item: NavItem, action: string) => item.action === undefin
 export function findActiveItem(items: NavItem[], pathname: string, action: string): NavItem | undefined {
   return items
     .filter((item) => matchesPath(item, pathname) && matchesAction(item, action))
-    .sort((a, b) => b.path.length - a.path.length)[0];
+    .sort((a, b) => matchedLength(b, pathname) - matchedLength(a, pathname))[0];
 }
 
 export const ALL_NAV_ITEMS: NavItem[] = NAV.flatMap((group) => group.items);

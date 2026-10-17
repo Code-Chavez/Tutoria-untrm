@@ -16,7 +16,7 @@ describe('accesos del panel de inicio agrupados', () => {
     const groups = quickActionGroupsFor('Administrador DBU');
 
     expect(groups.find((g) => g.title === 'Periodo académico')?.actions.at(-1)).toMatchObject({ step: 5, label: 'Cierre de periodo' });
-    expect(groups.map((g) => g.title)).toContain('Administración');
+    expect(groups.map((g) => g.title)).toContain('Configuración');
   });
 
   it('cada rol solo recibe accesos de su trabajo', () => {

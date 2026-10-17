@@ -36,6 +36,7 @@ import { PeriodClosurePage } from '@features/periodo/pages/PeriodClosurePage';
 import { TutorAcceptancePage } from '@features/ciclos/pages/TutorAcceptancePage';
 import { AdmonitionsPage } from '@features/amonestaciones/pages/AdmonitionsPage';
 import { TeacherBulkImportPage } from '@features/docentes/pages/TeacherBulkImportPage';
+import { SectionHome, SectionShell } from '@shared/components/layout/SectionShell';
 import { RequestEmailsPage } from '@features/pedidos/pages/RequestEmailsPage';
 import { CycleTutorsPage } from '@features/ciclos/pages/CycleTutorsPage';
 import { CampusesPage } from '@features/sedes/pages/CampusesPage';
@@ -62,14 +63,6 @@ export default function App() {
             <Route path="/" element={<AppLayout />}>
               <Route index element={<DashboardPage />} />
               <Route
-                path="users"
-                element={
-                  <RequireRole roles={['Administrador DBU']}>
-                    <UserManagementPage />
-                  </RequireRole>
-                }
-              />
-              <Route
                 path="indicadores"
                 element={
                   <RequireRole roles={['Administrador DBU', 'Coordinador', 'Vicerrectorado']}>
@@ -77,19 +70,22 @@ export default function App() {
                   </RequireRole>
                 }
               />
+              <Route path="periodo" element={<SectionHome section="periodo" />} />
+              <Route path="configuracion" element={<SectionHome section="configuracion" />} />
+              <Route element={<SectionShell section="periodo" />}>
               <Route
-                path="auditoria"
+                path="pedir-listas"
                 element={
-                  <RequireRole roles={['Administrador DBU']}>
-                    <AuditLogPage />
+                  <RequireRole roles={['Administrador DBU', 'Coordinador']}>
+                    <DataRequestPage />
                   </RequireRole>
                 }
               />
               <Route
-                path="identidad"
+                path="carga-masiva"
                 element={
-                  <RequireRole roles={['Administrador DBU']}>
-                    <BrandingPage />
+                  <RequireRole roles={['Coordinador', 'Administrador DBU']}>
+                    <BulkImportPage />
                   </RequireRole>
                 }
               />
@@ -109,23 +105,6 @@ export default function App() {
                   </RequireRole>
                 }
               />
-              <Route path="tutores-por-ciclo" element={<Navigate to="/asignacion" replace />} />
-              <Route
-                path="correos-escuelas"
-                element={
-                  <RequireRole roles={['Administrador DBU', 'Coordinador']}>
-                    <RequestEmailsPage />
-                  </RequireRole>
-                }
-              />
-              <Route
-                path="pedir-listas"
-                element={
-                  <RequireRole roles={['Administrador DBU', 'Coordinador']}>
-                    <DataRequestPage />
-                  </RequireRole>
-                }
-              />
               <Route
                 path="cierre-periodo"
                 element={
@@ -134,11 +113,13 @@ export default function App() {
                   </RequireRole>
                 }
               />
+              </Route>
+              <Route element={<SectionShell section="configuracion" />}>
               <Route
-                path="amonestaciones"
+                path="correos-escuelas"
                 element={
-                  <RequireRole roles={['Administrador DBU', 'Coordinador', 'Decano']}>
-                    <AdmonitionsPage />
+                  <RequireRole roles={['Administrador DBU', 'Coordinador']}>
+                    <RequestEmailsPage />
                   </RequireRole>
                 }
               />
@@ -151,10 +132,10 @@ export default function App() {
                 }
               />
               <Route
-                path="parametros"
+                path="evaluacion/configuracion"
                 element={
                   <RequireRole roles={['Administrador DBU']}>
-                    <ParametersPage />
+                    <EvaluationWindowsPage />
                   </RequireRole>
                 }
               />
@@ -167,18 +148,52 @@ export default function App() {
                 }
               />
               <Route
-                path="plan-semestral"
+                path="users"
                 element={
-                  <RequireRole roles={['Administrador DBU', 'Coordinador']}>
-                    <WorkPlanPage />
+                  <RequireRole roles={['Administrador DBU']}>
+                    <UserManagementPage />
                   </RequireRole>
                 }
               />
               <Route
-                path="evaluacion/configuracion"
+                path="parametros"
                 element={
                   <RequireRole roles={['Administrador DBU']}>
-                    <EvaluationWindowsPage />
+                    <ParametersPage />
+                  </RequireRole>
+                }
+              />
+              <Route
+                path="identidad"
+                element={
+                  <RequireRole roles={['Administrador DBU']}>
+                    <BrandingPage />
+                  </RequireRole>
+                }
+              />
+              <Route
+                path="auditoria"
+                element={
+                  <RequireRole roles={['Administrador DBU']}>
+                    <AuditLogPage />
+                  </RequireRole>
+                }
+              />
+              </Route>
+              <Route path="tutores-por-ciclo" element={<Navigate to="/asignacion" replace />} />
+              <Route
+                path="amonestaciones"
+                element={
+                  <RequireRole roles={['Administrador DBU', 'Coordinador', 'Decano']}>
+                    <AdmonitionsPage />
+                  </RequireRole>
+                }
+              />
+              <Route
+                path="plan-semestral"
+                element={
+                  <RequireRole roles={['Administrador DBU', 'Coordinador']}>
+                    <WorkPlanPage />
                   </RequireRole>
                 }
               />
@@ -203,14 +218,6 @@ export default function App() {
                 element={
                   <RequireRole roles={['Docente Tutor', 'Coordinador', 'Administrador DBU']}>
                     <StudentsPage />
-                  </RequireRole>
-                }
-              />
-              <Route
-                path="carga-masiva"
-                element={
-                  <RequireRole roles={['Coordinador', 'Administrador DBU']}>
-                    <BulkImportPage />
                   </RequireRole>
                 }
               />

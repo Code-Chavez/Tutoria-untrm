@@ -26,7 +26,7 @@ son los que aparecen en pantalla. Si necesita instalar o mantener el sistema, ve
 Cada persona entra con su cuenta institucional y ve **solo** el menú y la información que le corresponde. No es un error que a usted no le aparezca una opción
 que otro compañero sí tiene: depende de su rol.
 
-El menú está **agrupado por tareas**, en el orden en que se hacen. Una persona solo ve los grupos que le sirven:
+El menú está **agrupado por tareas**, en el orden en que se hacen, y **cada grupo se despliega y se pliega** con un clic en su título (el sistema recuerda lo que usted dejó abierto; el grupo de la pantalla en que está siempre se ve abierto). Todo lo que se configura está junto, en un solo grupo plegable al final, **Configuración**, que parte plegado para que el trabajo diario quede a la vista. Una persona solo ve los grupos que le sirven:
 
 | Grupo del menú | Qué hay | Quién lo ve |
 |---|---|---|
@@ -34,11 +34,10 @@ El menú está **agrupado por tareas**, en el orden en que se hacen. Una persona
 | **Mi tutoría** | Solicitar tutoría · Mis sesiones · Evaluar tutoría | Estudiante |
 | **Atención a tutorados** | Tutorados · Expediente · Entrevista inicial · Sesiones · Seguimiento · Derivar caso · Solicitudes de tutoría · Casos derivados · Seguimiento DBU | Docente tutor (todo menos Seguimiento DBU), coordinación (Tutorados, Expediente, Solicitudes), profesional de servicio (Casos derivados), DBU |
 | **Periodo académico** | 1 Pedir listas → 2 Carga de estudiantes → 3 Carga de docentes (solo DBU) → 4 Asignación por ciclo → 5 Cierre de periodo | Coordinación (pasos 1, 2 y 4) y DBU (todos) |
-| **Planificación y evaluación** | Plan semestral · Evaluación de tutoría · Resultados de evaluación · Sugerencias de estudiantes | Coordinación y DBU (la configuración de la evaluación, solo DBU) |
+| **Planificación y evaluación** | Plan semestral · Resultados de evaluación · Sugerencias de estudiantes | Coordinación y DBU |
 | **Informes** | Horarios y asistencia · Informe semestral · Informe consolidado · Indicadores | Docente, coordinación, Vicerrectorado y DBU, según cada informe |
-| **Facultad y sedes** | Amonestaciones · Sedes | Decano (Amonestaciones), coordinación (consulta), Vicerrectorado (Sedes), DBU |
-| **Configuración** | Correos de las escuelas (a dónde se piden las listas) | Coordinación (sus escuelas) y DBU |
-| **Administración** | Usuarios y roles · Catálogos · Parámetros · Identidad visual · Bitácora de auditoría | Solo DBU |
+| **Facultad** | Amonestaciones | Decano (las registra), coordinación y DBU (consulta) |
+| **Configuración** (plegable) | Correos de las escuelas · Sedes · Evaluación de tutoría · Catálogos · Usuarios y roles · Parámetros · Identidad visual · Bitácora de auditoría | Coordinación (solo Correos de las escuelas), Vicerrectorado (solo Sedes) y DBU (todo) |
 
 ### Quién hace qué, y dónde
 
