@@ -1,10 +1,12 @@
 export type DataRequestStatus = 'ENVIADO' | 'FALLIDO';
+export type DataRequestKind = 'ESTUDIANTES' | 'DOCENTES';
 
 export interface DataRequest {
   id: string;
   createdAt: Date;
   periodId: string;
   schoolId: string;
+  kind: DataRequestKind;
   toEmail: string;
   cycles: number[];
   note: string | null;

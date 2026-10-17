@@ -7,6 +7,7 @@ import {
   RequestEmailNotConfiguredError,
   SendDataRequestUseCase,
   SetSchoolRequestEmailUseCase,
+  TeacherListForbiddenError,
 } from '@application/use-cases/data-requests/DataRequestUseCases';
 import { buildDataRequestEmail } from '@application/services/dataRequestEmail';
 import { StudentAccessDeniedError } from '@application/use-cases/students/StudentErrors';
@@ -116,6 +117,44 @@ describe('pedido de listas por correo (fase 2)', () => {
 
     it('limita las observaciones a 500 caracteres', async () => {
       await expect(send().execute('u1', { schoolId: 's1', note: 'x'.repeat(501) })).rejects.toBeInstanceOf(InvalidDataRequestError);
+    });
+  });
+
+  describe('pedir la lista de docentes tutores', () => {
+    let teacherTemplate: jest.Mocked<StudentTemplateProvider>;
+    const sendTeachers = () =>
+      new SendDataRequestUseCase(guard as unknown as StudentAccessGuard, periods, schools, faculties, users, mailer, template, requests, audit, teacherTemplate);
+
+    beforeEach(() => {
+      teacherTemplate = { build: jest.fn().mockResolvedValue(Buffer.from('docentes')) };
+    });
+
+    it('la DBU lo pide con la plantilla de docentes, el texto de docentes y el pedido queda registrado como tal', async () => {
+      const result = await sendTeachers().execute('u1', { schoolId: 's1', kind: 'DOCENTES' });
+
+      const mail = mailer.send.mock.calls[0][0];
+      expect(mail.subject).toBe('Solicitud de lista de docentes tutores — Ingeniería de Sistemas — periodo 2026-II');
+      expect(mail.text).toContain('docentes que podrían ejercer la tutoría');
+      expect(mail.text).toContain('una fila por docente): nombres, apellidos, correo institucional');
+      expect(mail.attachments?.[0]).toMatchObject({ filename: 'plantilla-docentes-tutores.xlsx' });
+      expect(template.build).not.toHaveBeenCalled();
+      expect(result).toMatchObject({ kind: 'DOCENTES', status: 'ENVIADO' });
+      expect(audit.create.mock.calls[0][0].details).toMatch(/lista de docentes/);
+    });
+
+    it('la coordinación no pide la lista de docentes (solo la DBU crea cuentas) y no se envía nada', async () => {
+      guard.scopeFor.mockResolvedValue({ kind: 'SCHOOLS', schoolIds: ['s1'] });
+
+      await expect(sendTeachers().execute('u1', { schoolId: 's1', kind: 'DOCENTES' })).rejects.toBeInstanceOf(TeacherListForbiddenError);
+
+      expect(mailer.send).not.toHaveBeenCalled();
+    });
+
+    it('sin plantilla de docentes configurada solo se puede pedir la de estudiantes; por omisión es la de estudiantes', async () => {
+      await expect(send().execute('u1', { schoolId: 's1', kind: 'DOCENTES' })).rejects.toBeInstanceOf(InvalidDataRequestError);
+
+      const result = await send().execute('u1', { schoolId: 's1' });
+      expect(result.kind).toBe('ESTUDIANTES');
     });
   });
 

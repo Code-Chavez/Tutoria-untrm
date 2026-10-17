@@ -3,7 +3,7 @@ import { SchoolRepository } from '@domain/repositories/SchoolRepository';
 import { FacultyRepository } from '@domain/repositories/FacultyRepository';
 import { UserRepository } from '@domain/repositories/UserRepository';
 import { AuditLogRepository } from '@domain/repositories/AuditLogRepository';
-import { DataRequest, DataRequestRepository } from '@domain/repositories/DataRequestRepository';
+import { DataRequest, DataRequestKind, DataRequestRepository } from '@domain/repositories/DataRequestRepository';
 import { SchoolContactRepository } from '@domain/repositories/SchoolContactRepository';
 import { Mailer } from '@application/ports/Mailer';
 import { StudentTemplateProvider } from '@application/ports/StudentTemplateProvider';
@@ -31,6 +31,14 @@ export class InvalidDataRequestError extends Error {
   constructor(message: string) {
     super(message);
     this.name = 'InvalidDataRequestError';
+  }
+}
+
+/** La lista de docentes tutores la pide solo quien crea las cuentas (la DBU). */
+export class TeacherListForbiddenError extends Error {
+  constructor() {
+    super('Solo la DBU pide la lista de docentes tutores');
+    this.name = 'TeacherListForbiddenError';
   }
 }
 
@@ -82,6 +90,7 @@ export interface SendDataRequestInput {
   schoolId: string;
   cycles?: number[];
   note?: string;
+  kind?: DataRequestKind;
 }
 
 /**
@@ -99,9 +108,16 @@ export class SendDataRequestUseCase {
     private readonly template: StudentTemplateProvider,
     private readonly requests: DataRequestRepository,
     private readonly auditLogs: AuditLogRepository,
+    // Plantilla de la lista de docentes tutores (sin ella solo se puede pedir la de estudiantes).
+    private readonly teacherTemplate?: StudentTemplateProvider,
   ) {}
 
   async execute(requesterId: string, input: SendDataRequestInput, ipAddress?: string): Promise<DataRequest> {
+    const kind: DataRequestKind = input.kind === 'DOCENTES' ? 'DOCENTES' : 'ESTUDIANTES';
+    if (kind === 'DOCENTES') {
+      if (!this.teacherTemplate) throw new InvalidDataRequestError('La lista de docentes no está disponible');
+      if ((await this.guard.scopeFor(requesterId)).kind !== 'ALL') throw new TeacherListForbiddenError();
+    }
     await this.guard.assertSchoolAccess(requesterId, input.schoolId);
     const school = await this.schools.findById(input.schoolId);
     if (!school) throw new SchoolNotFoundError(input.schoolId);
@@ -130,7 +146,8 @@ export class SendDataRequestUseCase {
           period: period.name,
           cycles,
           note,
-          attachment: await this.template.build(),
+          attachment: await (kind === 'DOCENTES' ? (this.teacherTemplate as StudentTemplateProvider) : this.template).build(),
+          kind,
         }),
       );
     } catch (e) {
@@ -138,13 +155,13 @@ export class SendDataRequestUseCase {
       error = e instanceof Error ? e.name : 'desconocido';
     }
 
-    const saved = await this.requests.create({ periodId: period.id, schoolId: school.id, toEmail: school.requestEmail, cycles, note, requestedById: requesterId, status, error });
+    const saved = await this.requests.create({ periodId: period.id, schoolId: school.id, kind, toEmail: school.requestEmail, cycles, note, requestedById: requesterId, status, error });
     await this.auditLogs.create({
       userId: requesterId,
       action: 'DATA_REQUEST_SENT',
       entity: 'School',
       entityId: school.id,
-      details: `Pedido de lista (${period.name}) ${status === 'ENVIADO' ? 'enviado' : 'no enviado'}`,
+      details: `Pedido de lista de ${kind === 'DOCENTES' ? 'docentes' : 'estudiantes'} (${period.name}) ${status === 'ENVIADO' ? 'enviado' : 'no enviado'}`,
       ipAddress: ipAddress ?? null,
     });
     return saved;

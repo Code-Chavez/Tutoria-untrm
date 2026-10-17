@@ -22,6 +22,7 @@ const record = (over: Partial<DataRequest> = {}): DataRequest => ({
   periodName: '2026-II',
   schoolId: 's1',
   schoolName: 'Ingeniería de Sistemas',
+  kind: 'ESTUDIANTES',
   toEmail: 'registros@untrm.edu.pe',
   cycles: [3],
   note: null,
@@ -39,10 +40,10 @@ const auth = (role: string, id = 'coord-1'): AuthContextValue => ({
   markPasswordChanged: vi.fn(),
 });
 
-const renderPage = (role = 'Coordinador', id = 'coord-1') =>
+const renderPage = (role = 'Coordinador', id = 'coord-1', url = '/pedir-listas') =>
   render(
     <AuthContext.Provider value={auth(role, id)}>
-      <MemoryRouter>
+      <MemoryRouter initialEntries={[url]}>
         <QueryClientTestWrapper>
           <DataRequestPage />
         </QueryClientTestWrapper>
@@ -82,7 +83,7 @@ describe('DataRequestPage (pedido de listas por correo)', () => {
     await user.type(screen.getByLabelText(/Observaciones/), 'Con urgencia');
     await user.click(screen.getByRole('button', { name: 'Enviar pedido' }));
 
-    await waitFor(() => expect(requests.send).toHaveBeenCalledWith({ schoolId: 's1', cycles: [3, 4], note: 'Con urgencia' }));
+    await waitFor(() => expect(requests.send).toHaveBeenCalledWith({ schoolId: 's1', cycles: [3, 4], note: 'Con urgencia', kind: 'ESTUDIANTES' }));
     expect(await screen.findByRole('alert')).toHaveTextContent('Pedido enviado a registros@untrm.edu.pe');
   });
 
@@ -97,29 +98,23 @@ describe('DataRequestPage (pedido de listas por correo)', () => {
     expect(await screen.findByRole('alert')).toHaveTextContent(/quedó registrado pero el correo no salió \(MailNotConfiguredError\)/);
   });
 
-  it('sin correo configurado pide configurarlo ahí mismo y no deja enviar hasta guardarlo', async () => {
+  it('sin correo configurado solo avisa y ofrece un botón que lleva a configurarlo; no deja enviar', async () => {
     schoolsApi.getSchools.mockResolvedValue([school({ requestEmail: null })]);
-    requests.setRequestEmail.mockResolvedValue('nuevo@untrm.edu.pe');
-    const user = userEvent.setup();
     renderPage();
 
     expect(await screen.findByText(/aún no tiene un correo configurado/)).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: 'Configurar correo' })).toHaveAttribute('href', '/correos-escuelas?escuela=s1');
     expect(screen.getByRole('button', { name: 'Enviar pedido' })).toBeDisabled();
-
-    await user.type(screen.getByLabelText('Correo al que se piden las listas'), 'nuevo@untrm.edu.pe');
-    await user.click(screen.getByRole('button', { name: 'Guardar correo' }));
-
-    await waitFor(() => expect(requests.setRequestEmail).toHaveBeenCalledWith('s1', 'nuevo@untrm.edu.pe'));
+    expect(screen.queryByRole('textbox', { name: /Correo/ })).not.toBeInTheDocument();
   });
 
-  it('permite cambiar el correo cuando quien lo recibía ya no responde', async () => {
-    const user = userEvent.setup();
+  it('con el correo configurado lo muestra y «Editar correo» lleva a la configuración (aquí no se edita)', async () => {
     renderPage();
-    await screen.findByText('registros@untrm.edu.pe');
 
-    await user.click(screen.getByRole('button', { name: 'Cambiar correo' }));
-
-    expect(screen.getByLabelText('Correo al que se piden las listas')).toHaveValue('registros@untrm.edu.pe');
+    expect(await screen.findByText('registros@untrm.edu.pe')).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: 'Editar correo' })).toHaveAttribute('href', '/correos-escuelas?escuela=s1');
+    expect(screen.queryByLabelText('Correo al que se piden las listas')).not.toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Enviar pedido' })).toBeEnabled();
   });
 
   it('muestra el historial y permite marcar como recibido un pedido enviado', async () => {
@@ -136,5 +131,23 @@ describe('DataRequestPage (pedido de listas por correo)', () => {
     await user.click(markButtons[0]);
 
     await waitFor(() => expect(requests.markReceived).toHaveBeenCalledWith('r1'));
+  });
+
+  it('si llega desde la carga de docentes, la DBU ya tiene elegida la lista de docentes tutores', async () => {
+    renderPage('Administrador DBU', 'dbu-1', '/pedir-listas?lista=docentes');
+
+    expect(await screen.findByLabelText('Qué lista pedir')).toHaveValue('DOCENTES');
+  });
+
+  it('la lista de estudiantes es la de siempre, y la coordinación ni siquiera ve la opción de docentes', async () => {
+    renderPage('Administrador DBU', 'dbu-1', '/pedir-listas');
+    expect(await screen.findByLabelText('Qué lista pedir')).toHaveValue('ESTUDIANTES');
+  });
+
+  it('una coordinación que llega con ?lista=docentes sigue pidiendo estudiantes, sin selector', async () => {
+    renderPage('Coordinador', 'coord-1', '/pedir-listas?lista=docentes');
+
+    await screen.findByText('registros@untrm.edu.pe');
+    expect(screen.queryByLabelText('Qué lista pedir')).not.toBeInTheDocument();
   });
 });

@@ -4,6 +4,7 @@ import userEvent from '@testing-library/user-event';
 import { BulkImportPage } from './BulkImportPage';
 import { studentService, type ImportReport } from '../services/studentService';
 
+vi.mock('@features/pedidos/components/RequestListBanner', () => ({ RequestListBanner: () => null }));
 vi.mock('../services/studentService', () => ({
   studentService: {
     importStudents: vi.fn(),

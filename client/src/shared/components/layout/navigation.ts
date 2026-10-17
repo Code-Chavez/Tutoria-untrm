@@ -28,6 +28,7 @@ import {
   MapPinIcon,
   UserPlusIcon,
   UsersPlusIcon,
+  SettingsIcon,
   AlertTriangleIcon,
 } from '@shared/components/icons';
 
@@ -142,6 +143,11 @@ export const NAV: NavGroup[] = [
       { label: 'Amonestaciones', Icon: AlertTriangleIcon, path: '/amonestaciones', roles: ['dec', 'dbu', 'coord'] },
       { label: 'Sedes', Icon: MapPinIcon, path: '/sedes', roles: ['dbu', 'vice'] },
     ],
+  },
+  {
+    // Se configura una vez y se usa después (p. ej. a qué correo se piden las listas de cada escuela).
+    title: 'Configuración',
+    items: [{ label: 'Correos de las escuelas', title: 'Correos para pedir las listas', Icon: SettingsIcon, path: '/correos-escuelas', roles: ['coord', 'dbu'] }],
   },
   {
     title: 'Administración',

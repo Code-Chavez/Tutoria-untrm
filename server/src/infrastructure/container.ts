@@ -32,6 +32,7 @@ import { PrismaSupportContactRepository } from './repositories/PrismaSupportCont
 import { PrismaSchoolRepository } from './repositories/PrismaSchoolRepository';
 import { ImportTutorsUseCase } from '@application/use-cases/users/ImportTutorsUseCase';
 import { GetTutorAcceptanceUseCase, RequestTutorAcceptanceUseCase, RespondTutorAcceptanceUseCase } from '@application/use-cases/cycle-tutors/TutorAcceptanceUseCases';
+import { ExcelTutorParser } from './parsers/ExcelTutorParser';
 import { PrismaAdmonitionRepository } from './repositories/PrismaAdmonitionRepository';
 import { AdmonitionScopeResolver, GetAdmonitionFileUseCase, IssueAdmonitionUseCase, ListAdmonishableTutorsUseCase, ListAdmonitionsUseCase } from '@application/use-cases/admonitions/AdmonitionUseCases';
 import { PrismaCycleTutorRepository } from './repositories/PrismaCycleTutorRepository';
@@ -310,7 +311,7 @@ const periodSummaryRepository = new PrismaPeriodSummaryRepository(prisma);
 const periodEnrollmentRepository = new PrismaPeriodEnrollmentRepository(prisma);
 const dataRequestRepository = new PrismaDataRequestRepository(prisma);
 const schoolContactRepository = new PrismaSchoolContactRepository(prisma);
-const sendDataRequestUseCase = new SendDataRequestUseCase(studentAccessGuard, academicPeriodRepository, schoolRepository, facultyRepository, userRepository, mailer, new ExcelStudentParser(), dataRequestRepository, auditLogRepository);
+const sendDataRequestUseCase = new SendDataRequestUseCase(studentAccessGuard, academicPeriodRepository, schoolRepository, facultyRepository, userRepository, mailer, new ExcelStudentParser(), dataRequestRepository, auditLogRepository, { build: () => new ExcelTutorParser().buildTemplate() });
 const listDataRequestsUseCase = new ListDataRequestsUseCase(studentAccessGuard, schoolRepository, academicPeriodRepository, dataRequestRepository);
 const markDataRequestReceivedUseCase = new MarkDataRequestReceivedUseCase(studentAccessGuard, dataRequestRepository);
 const setSchoolRequestEmailUseCase = new SetSchoolRequestEmailUseCase(studentAccessGuard, schoolRepository, schoolContactRepository, auditLogRepository);

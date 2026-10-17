@@ -37,6 +37,7 @@ El menú está **agrupado por tareas**, en el orden en que se hacen. Una persona
 | **Planificación y evaluación** | Plan semestral · Evaluación de tutoría · Resultados de evaluación · Sugerencias de estudiantes | Coordinación y DBU (la configuración de la evaluación, solo DBU) |
 | **Informes** | Horarios y asistencia · Informe semestral · Informe consolidado · Indicadores | Docente, coordinación, Vicerrectorado y DBU, según cada informe |
 | **Facultad y sedes** | Amonestaciones · Sedes | Decano (Amonestaciones), coordinación (consulta), Vicerrectorado (Sedes), DBU |
+| **Configuración** | Correos de las escuelas (a dónde se piden las listas) | Coordinación (sus escuelas) y DBU |
 | **Administración** | Usuarios y roles · Catálogos · Parámetros · Identidad visual · Bitácora de auditoría | Solo DBU |
 
 ### Quién hace qué, y dónde
@@ -47,6 +48,7 @@ El menú está **agrupado por tareas**, en el orden en que se hacen. Una persona
 | Registrar facultades, escuelas y periodos | DBU | Administración → Catálogos |
 | Fijar la sede de cada escuela | Vicerrectorado o DBU | Facultad y sedes → Sedes |
 | Pedir a cada escuela la lista de estudiantes | Coordinación o DBU | Periodo académico → Pedir listas |
+| Configurar a qué correo se pide la lista de cada escuela (y corregirlo) | Coordinación (sus escuelas) o DBU | Configuración → Correos de las escuelas |
 | Cargar a los estudiantes del periodo | Coordinación o DBU | Periodo académico → Carga de estudiantes |
 | Crear las cuentas de los docentes tutores (varios a la vez, desde Excel) | DBU | Periodo académico → Carga de docentes (también «Importar docentes» en Usuarios y roles) |
 | Asignar el tutor de cada ciclo (y ver si aceptó). **Se asigna por ciclo, no estudiante por estudiante** | Coordinación o DBU | Periodo académico → Asignación por ciclo |
@@ -60,6 +62,8 @@ El menú está **agrupado por tareas**, en el orden en que se hacen. Una persona
 | Informe semestral del docente | Docente tutor | Informes → Informe semestral |
 | Amonestar a un docente | Decano (o DBU) | Facultad y sedes → Amonestaciones |
 | Cerrar el periodo | DBU | Periodo académico → Cierre de periodo |
+
+**Pedir las listas desde la pantalla de carga.** Arriba de *Carga de estudiantes* y de *Carga de docentes* hay un bloque «¿Aún no tienes la lista? Pídela primero» con el botón **Ir a «Pedir listas»**, que lleva a esa pantalla con la lista ya elegida (estudiantes o docentes). Allí se elige la escuela y se pide; la lista de docentes tutores la pide solo la DBU. **El correo al que se pide no se escribe ahí:** se configura una vez en **Configuración → Correos de las escuelas** (la coordinación, sus escuelas; la DBU, todas), con un botón **Editar** para corregirlo si hubo un error y **Quitar** para borrarlo. En *Pedir listas* solo se ve a qué correo saldrá el pedido, con el enlace **Editar correo**; si la escuela no tiene correo, aparece el botón **Configurar correo** que lleva al apartado de configuración.
 
 **Una pantalla lleva a la siguiente.** Cuando a una pantalla le falta algo (por ejemplo, no hay estudiantes o una escuela no tiene docentes) o cuando termina una tarea, muestra un bloque **«Qué sigue»** con enlaces a donde se carga lo que falta o a la tarea siguiente: después de *Pedir listas* sigue *Carga de estudiantes*; después de cargar, *Asignación por ciclo*. El **Panel de inicio** de la coordinación y la DBU muestra el periodo académico como pasos numerados.
 

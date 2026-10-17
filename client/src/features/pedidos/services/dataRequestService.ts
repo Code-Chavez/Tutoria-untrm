@@ -1,6 +1,8 @@
 import { apiClient } from '@shared/services/apiClient';
 
 export type DataRequestStatus = 'ENVIADO' | 'FALLIDO';
+/** Qué lista se pide: la de estudiantes o la de docentes tutores (esta solo la DBU). */
+export type DataRequestKind = 'ESTUDIANTES' | 'DOCENTES';
 
 export interface DataRequest {
   id: string;
@@ -9,6 +11,7 @@ export interface DataRequest {
   periodName: string;
   schoolId: string;
   schoolName: string;
+  kind: DataRequestKind;
   toEmail: string;
   cycles: number[];
   note: string | null;
@@ -22,7 +25,7 @@ export const dataRequestService = {
     return (await apiClient.get<{ requests: DataRequest[] }>('/data-requests')).data.requests;
   },
   /** El servidor responde 502 con el pedido registrado como FALLIDO si el correo no sale; se tratan igual. */
-  async send(input: { schoolId: string; cycles: number[]; note?: string }): Promise<{ request: DataRequest; sent: boolean }> {
+  async send(input: { schoolId: string; cycles: number[]; note?: string; kind?: DataRequestKind }): Promise<{ request: DataRequest; sent: boolean }> {
     const response = await apiClient.post<{ request: DataRequest }>('/data-requests', input, { validateStatus: (s) => s === 201 || s === 502 });
     return { request: response.data.request, sent: response.status === 201 };
   },

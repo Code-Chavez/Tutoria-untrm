@@ -6,6 +6,7 @@ import { ImportStepper } from '../components/ImportStepper';
 import { UploadDropzone } from '../components/UploadDropzone';
 import { ImportResult } from '../components/ImportResult';
 import { PageHeader, Button, Card, NextSteps } from '@shared/components/ui';
+import { RequestListBanner } from '@features/pedidos/components/RequestListBanner';
 import { UploadIcon, DownloadIcon, InfoIcon } from '@shared/components/icons';
 
 const XLSX_EXT = '.xlsx';
@@ -79,6 +80,8 @@ export const BulkImportPage: React.FC = () => {
           </Button>
         }
       />
+
+      <RequestListBanner kind="ESTUDIANTES" />
 
       <Card padded>
         <ImportStepper current={currentStep} />

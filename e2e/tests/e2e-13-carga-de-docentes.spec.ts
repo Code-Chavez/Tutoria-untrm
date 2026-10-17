@@ -4,7 +4,8 @@ import { accounts } from '../support/accounts';
 import { api, apiLogin } from '../support/api';
 import { goToMenu, loginUi } from '../support/ui';
 
-// E2E-13 (fase 3, tutoría por ciclo): la DBU crea cuentas de docentes tutores desde un Excel, igual de guiado que la carga de
+// E2E-13 (fase 3, tutoría por ciclo): en cada pantalla de carga hay un bloque «pide la lista» que lleva a «Pedir listas» (con la
+// lista ya elegida: estudiantes o docentes, cada una con su plantilla adjunta). La DBU crea cuentas de docentes tutores desde un Excel, igual de guiado que la carga de
 // estudiantes: una fila con error se informa y las demás se crean con su escuela y una invitación de un solo uso (el correo
 // llega a la bandeja de pruebas). La coordinación no tiene esta carga. Las cuentas de prueba se desactivan al terminar.
 const MAILPIT = process.env.E2E_MAILPIT_URL ?? 'http://localhost:8025';
@@ -12,6 +13,20 @@ const stamp = Date.now().toString(36);
 const good = [1, 2].map((n) => `docente${n}-${stamp}@untrm.edu.pe`);
 
 test.describe.configure({ mode: 'serial' });
+
+const listEmail = `lista-bloque-${stamp}@untrm.edu.pe`;
+let schoolId = '';
+let originalEmail: string | null = null;
+
+test.beforeAll(async () => {
+  // Ingeniería de Sistemas con un correo de pedido propio de la prueba (se restaura al terminar)
+  const token = await apiLogin(accounts.admin);
+  const { body } = await api<{ schools: { id: string; name: string; requestEmail: string | null }[] }>(token, 'GET', '/schools');
+  const school = body.schools.find((s) => s.name === 'Ingeniería de Sistemas')!;
+  schoolId = school.id;
+  originalEmail = school.requestEmail;
+  await api(token, 'PUT', `/schools/${schoolId}/request-email`, { email: listEmail });
+});
 
 async function workbook(): Promise<Buffer> {
   const wb = new ExcelJS.Workbook();
@@ -23,10 +38,42 @@ async function workbook(): Promise<Buffer> {
   return Buffer.from(await wb.xlsx.writeBuffer());
 }
 
-test.afterAll(async () => {
-  const token = await apiLogin(accounts.admin);
-  const users = await api<{ users: { id: string; email: string }[] }>(token, 'GET', '/users');
-  for (const user of users.body.users.filter((u) => good.includes(u.email))) await api(token, 'PATCH', `/users/${user.id}/status`);
+async function mailTo(email: string): Promise<{ Subject: string; Attachments: { FileName: string }[] }> {
+  let message: { ID: string } | undefined;
+  for (let i = 0; i < 40 && !message; i += 1) {
+    const list = (await (await fetch(`${MAILPIT}/api/v1/search?query=${encodeURIComponent(`to:${email}`)}`)).json()) as { messages: { ID: string }[] };
+    message = list.messages?.[0];
+    if (!message) await new Promise((r) => setTimeout(r, 500));
+  }
+  expect(message, `correo para ${email}`).toBeTruthy();
+  return (await (await fetch(`${MAILPIT}/api/v1/message/${message!.ID}`)).json()) as { Subject: string; Attachments: { FileName: string }[] };
+}
+
+test('en la carga de estudiantes, el bloque «pide la lista» lleva a Pedir listas', async ({ page }) => {
+  await loginUi(page, accounts.coordinator);
+  await goToMenu(page, 'Carga de estudiantes');
+  await expect(page.getByRole('heading', { name: /lista de estudiantes\? Pídela primero/ })).toBeVisible({ timeout: 45_000 });
+
+  await page.getByRole('link', { name: /Ir a «Pedir listas»/ }).click();
+  await expect(page).toHaveURL(/\/pedir-listas\?lista=estudiantes/);
+  await expect(page.getByRole('heading', { name: 'Pedir listas de estudiantes' })).toBeVisible({ timeout: 45_000 });
+});
+
+test('en la carga de docentes, la DBU llega a Pedir listas con la lista de docentes elegida y la pide', async ({ page }) => {
+  await loginUi(page, accounts.admin);
+  await goToMenu(page, 'Carga de docentes');
+  await expect(page.getByRole('heading', { name: /lista de docentes tutores\? Pídela primero/ })).toBeVisible({ timeout: 45_000 });
+
+  await page.getByRole('link', { name: /Ir a «Pedir listas»/ }).click();
+  await expect(page.getByLabel('Qué lista pedir')).toHaveValue('DOCENTES', { timeout: 45_000 });
+  await page.getByLabel('Escuela profesional').selectOption({ label: 'Ingeniería de Sistemas' });
+  await expect(page.getByText(listEmail)).toBeVisible();
+  await page.getByRole('button', { name: 'Enviar pedido' }).click();
+  await expect(page.getByRole('alert').filter({ hasText: `Pedido enviado a ${listEmail}` })).toBeVisible({ timeout: 45_000 });
+
+  const mail = await mailTo(listEmail);
+  expect(mail.Subject).toMatch(/Solicitud de lista de docentes tutores/);
+  expect(mail.Attachments.map((a) => a.FileName)).toContain('plantilla-docentes-tutores.xlsx');
 });
 
 test('la DBU carga el Excel de docentes: 2 se crean y 2 filas con error se informan', async ({ page }) => {

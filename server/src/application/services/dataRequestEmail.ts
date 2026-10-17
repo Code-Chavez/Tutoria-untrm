@@ -15,6 +15,8 @@ export interface DataRequestEmailInput {
   cycles: number[];
   note?: string | null;
   attachment: Buffer;
+  /** Qué lista se pide (por omisión, la de estudiantes). */
+  kind?: 'ESTUDIANTES' | 'DOCENTES';
 }
 
 /** Columnas que se piden, en el orden de la plantilla adjunta. */
@@ -28,6 +30,9 @@ export const REQUESTED_COLUMNS = [
   'escuela profesional',
 ];
 
+/** Columnas de la lista de docentes tutores. */
+export const REQUESTED_TEACHER_COLUMNS = ['nombres', 'apellidos', 'correo institucional', 'teléfono (opcional)', 'escuela profesional'];
+
 /**
  * Pedido formal de la lista de estudiantes de una escuela para un periodo. No lleva datos de estudiantes: solo lo que se pide,
  * a nombre de quién y la plantilla Excel adjunta. Las respuestas llegan a quien hizo el pedido (Reply-To) y recibe copia.
@@ -35,13 +40,14 @@ export const REQUESTED_COLUMNS = [
 export function buildDataRequestEmail(input: DataRequestEmailInput): MailMessage {
   const who = `${input.requester.firstName} ${input.requester.lastName}`.trim();
   const where = input.faculty ? `${input.school} (${input.faculty})` : input.school;
+  const teachers = input.kind === 'DOCENTES';
   const cycles = input.cycles.length > 0 ? ` de los ciclos ${input.cycles.join(', ')}` : ' de todos los ciclos';
-  const subject = `Solicitud de lista de estudiantes — ${input.school} — periodo ${input.period}`;
+  const subject = `Solicitud de lista de ${teachers ? 'docentes tutores' : 'estudiantes'} — ${input.school} — periodo ${input.period}`;
   const note = input.note?.trim();
 
   const intro = `Estimado(a):`;
-  const body1 = `La Dirección de Bienestar Universitario, a través del Sistema Integral de Tutoría (SIT), solicita la lista de estudiantes${cycles} de la Escuela Profesional de ${where} para el periodo académico ${input.period}.`;
-  const body2 = `Datos requeridos (una fila por estudiante): ${REQUESTED_COLUMNS.join(', ')}.`;
+  const body1 = `La Dirección de Bienestar Universitario, a través del Sistema Integral de Tutoría (SIT), solicita la lista de ${teachers ? 'docentes que podrían ejercer la tutoría' : `estudiantes${cycles}`} de la Escuela Profesional de ${where} para el periodo académico ${input.period}.`;
+  const body2 = `Datos requeridos (una fila por ${teachers ? 'docente' : 'estudiante'}): ${(teachers ? REQUESTED_TEACHER_COLUMNS : REQUESTED_COLUMNS).join(', ')}.`;
   const body3 = 'Formato: archivo Excel (.xlsx) con la plantilla adjunta; por favor mantenga los encabezados.';
   const body4 = `Solicitado por: ${who} (${input.requester.email}). Responda a este correo adjuntando el archivo.`;
   const privacy = 'Los datos se usarán únicamente para el acompañamiento y la tutoría universitaria, conforme a la Ley N.° 29733.';
@@ -75,6 +81,6 @@ ${note ? `<p style="margin:0 0 14px;"><strong>Observaciones:</strong> ${escapeHt
     subject,
     text,
     html,
-    attachments: [{ filename: 'plantilla-estudiantes.xlsx', content: input.attachment, contentType: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' }],
+    attachments: [{ filename: teachers ? 'plantilla-docentes-tutores.xlsx' : 'plantilla-estudiantes.xlsx', content: input.attachment, contentType: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' }],
   };
 }
