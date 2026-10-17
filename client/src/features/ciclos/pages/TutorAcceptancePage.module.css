@@ -1,0 +1,61 @@
+.choices {
+  display: flex;
+  gap: var(--s4);
+  margin: var(--s4) 0;
+  font-size: var(--fs-sm);
+}
+
+.slots {
+  margin: 0 0 var(--s4);
+  padding: var(--s3);
+  border: 1px solid var(--g300);
+  border-radius: var(--r-sm);
+  font-size: var(--fs-sm);
+}
+
+.slots legend {
+  padding: 0 var(--s2);
+  font-weight: 600;
+}
+
+.slot {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: var(--s2);
+  margin-bottom: var(--s2);
+}
+
+.slot select,
+.slot input {
+  min-width: 0;
+  padding: var(--s2);
+  border: 1px solid var(--g300);
+  border-radius: var(--r-sm);
+  font: inherit;
+}
+
+.slot input[type='text'] {
+  grid-column: 1 / -1;
+}
+
+.add,
+.remove {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--primary, #0b1f3f);
+  text-decoration: underline;
+  cursor: pointer;
+  font: inherit;
+  text-align: left;
+}
+
+.reason {
+  width: 100%;
+  min-height: 80px;
+  padding: var(--s2) var(--s3);
+  border: 1px solid var(--g300);
+  border-radius: var(--r-sm);
+  font: inherit;
+  box-sizing: border-box;
+}

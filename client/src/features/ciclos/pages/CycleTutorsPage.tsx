@@ -5,8 +5,12 @@ import { UserPlusIcon } from '@shared/components/icons';
 import { getApiErrorMessage } from '@shared/services/apiClient';
 import { useAuth } from '@features/auth/hooks/useAuth';
 import { useRequestSchools } from '@features/pedidos/hooks/useDataRequests';
-import { useCycleTutors, useRemoveCycleTutor, useSetCycleTutor, useTutorOptions } from '../hooks/useCycleTutors';
+import { DAY_LABEL } from '../services/tutorAcceptanceService';
+import { useCycleTutors, useRemoveCycleTutor, useResendAcceptance, useSetCycleTutor, useTutorOptions } from '../hooks/useCycleTutors';
 import styles from './CycleTutorsPage.module.css';
+
+const STATUS_LABEL = { SIN_SOLICITAR: 'Sin solicitar', PENDIENTE: 'Pendiente', ACEPTADA: 'Aceptó', RECHAZADA: 'Rechazó' } as const;
+const STATUS_TONE = { SIN_SOLICITAR: 'neutral', PENDIENTE: 'warning', ACEPTADA: 'success', RECHAZADA: 'danger' } as const;
 
 interface PendingException {
   cycle: number;
@@ -26,6 +30,7 @@ export function CycleTutorsPage() {
   const view = useCycleTutors(school?.id);
   const setTutor = useSetCycleTutor(school?.id ?? '');
   const removeTutor = useRemoveCycleTutor(school?.id ?? '');
+  const resend = useResendAcceptance(school?.id ?? '');
   const [pending, setPending] = useState<PendingException | null>(null);
   const [note, setNote] = useState('');
   const [feedback, setFeedback] = useState<{ ok: boolean; text: string } | null>(null);
@@ -40,7 +45,8 @@ export function CycleTutorsPage() {
       const result = await setTutor.mutateAsync({ cycle, tutorId, ...(exception && { isException: true, note: exception.note }) });
       setPending(null);
       setNote('');
-      setFeedback({ ok: true, text: `Ciclo ${cycle}: ${result.assigned} estudiante(s) asignados${result.moved ? ` y ${result.moved} movidos` : ''}.` });
+      const mail = result.acceptanceEmailSent === true ? ' Se envió al docente el correo para que acepte.' : result.acceptanceEmailSent === false ? ' No se pudo enviar el correo al docente: use «Reenviar».' : '';
+      setFeedback({ ok: true, text: `Ciclo ${cycle}: ${result.assigned} estudiante(s) asignados${result.moved ? ` y ${result.moved} movidos` : ''}.${mail}` });
     } catch (error) {
       if (isAxiosError(error) && error.response?.data?.code === 'TUTOR_HAS_CYCLE') {
         setPending({ cycle, tutorId, message: error.response.data.error });
@@ -48,6 +54,16 @@ export function CycleTutorsPage() {
         setPending(null);
         setFeedback({ ok: false, text: getApiErrorMessage(error) });
       }
+    }
+  };
+
+  const resendMail = async (cycle: number) => {
+    setFeedback(null);
+    try {
+      const sent = await resend.mutateAsync(cycle);
+      setFeedback({ ok: sent, text: sent ? `Ciclo ${cycle}: correo enviado al docente.` : `Ciclo ${cycle}: no se pudo enviar el correo (revise la configuración de correo).` });
+    } catch (error) {
+      setFeedback({ ok: false, text: getApiErrorMessage(error) });
     }
   };
 
@@ -122,6 +138,22 @@ export function CycleTutorsPage() {
                           <Badge tone="warning">Excepción</Badge>
                         </span>
                       )}
+                      {row.assignment && (
+                        <span className={styles.status}>
+                          <Badge tone={STATUS_TONE[row.assignment.acceptanceStatus]}>{STATUS_LABEL[row.assignment.acceptanceStatus]}</Badge>
+                        </span>
+                      )}
+                      {row.assignment && row.assignment.acceptanceStatus !== 'ACEPTADA' && (
+                        <Button variant="ghost" size="sm" aria-label={`Reenviar correo del ciclo ${row.cycle}`} onClick={() => resendMail(row.cycle)}>
+                          Reenviar
+                        </Button>
+                      )}
+                      {row.assignment?.acceptanceStatus === 'ACEPTADA' && row.assignment.availability && (
+                        <span className={styles.detail}>
+                          {row.assignment.availability.map((s) => `${DAY_LABEL[s.day]} ${s.start}–${s.end}${s.place ? ` (${s.place})` : ''}`).join(' · ')}
+                        </span>
+                      )}
+                      {row.assignment?.acceptanceStatus === 'RECHAZADA' && row.assignment.declineReason && <span className={styles.detail}>Motivo: {row.assignment.declineReason}</span>}
                       {row.assignment && (
                         <Button variant="ghost" size="sm" aria-label={`Quitar tutor del ciclo ${row.cycle}`} onClick={() => remove(row.cycle)}>
                           Quitar

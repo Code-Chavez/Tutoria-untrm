@@ -25,7 +25,7 @@ describe('Parámetros del sistema (HU-49)', () => {
   });
 
   describe('listado', () => {
-    it('expone los siete parámetros editables con sus rangos y valores predeterminados', async () => {
+    it('expone los ocho parámetros editables con sus rangos y valores predeterminados', async () => {
       const list = await new ListSystemParametersUseCase(repo).execute();
       expect(list.map((p) => p.key)).toEqual([
         'session_duration_minutes',
@@ -35,6 +35,7 @@ describe('Parámetros del sistema (HU-49)', () => {
         'inactivity_timeout_minutes',
         'login_max_attempts',
         'login_lockout_minutes',
+        'tutor_max_weekly_hours',
       ]);
       expect(list.every((p) => p.isDefault)).toBe(true);
       expect(list.find((p) => p.key === 'session_duration_minutes')).toMatchObject({ value: 45, min: 15, max: 180 });

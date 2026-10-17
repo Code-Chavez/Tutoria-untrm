@@ -93,7 +93,7 @@ export class CycleTutorApplier {
 
 export interface CycleRow {
   cycle: number;
-  assignment: Pick<CycleTutorAssignment, 'tutorId' | 'isException' | 'note'> | null;
+  assignment: Pick<CycleTutorAssignment, 'tutorId' | 'isException' | 'note' | 'acceptanceStatus' | 'availability' | 'declineReason' | 'respondedAt'> | null;
   enrolled: number;
   withoutTutor: number;
 }
@@ -114,7 +114,7 @@ export class ListCycleTutorsUseCase {
     const cycles: CycleRow[] = Array.from({ length: MAX_CYCLE }, (_, i) => i + 1).map((cycle) => {
       const a = byCycle.get(cycle);
       const c = counts.get(cycle);
-      return { cycle, assignment: a ? { tutorId: a.tutorId, isException: a.isException, note: a.note ?? null } : null, enrolled: c?.total ?? 0, withoutTutor: c?.withoutTutor ?? 0 };
+      return { cycle, assignment: a ? { tutorId: a.tutorId, isException: a.isException, note: a.note ?? null, acceptanceStatus: a.acceptanceStatus, availability: a.availability ?? null, declineReason: a.declineReason ?? null, respondedAt: a.respondedAt ?? null } : null, enrolled: c?.total ?? 0, withoutTutor: c?.withoutTutor ?? 0 };
     });
     return { periodId: period.id, periodName: period.name, cycles };
   }

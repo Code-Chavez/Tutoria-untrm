@@ -1,27 +1,57 @@
-import { PrismaClient } from '@prisma/client';
-import { CycleStudent, CycleTutorAssignment, CycleTutorRepository } from '@domain/repositories/CycleTutorRepository';
+import { Prisma, PrismaClient } from '@prisma/client';
+import { AvailabilitySlot, AcceptanceStatus, CycleStudent, CycleTutorAssignment, CycleTutorRepository, NewCycleTutorAssignment } from '@domain/repositories/CycleTutorRepository';
 
 export class PrismaCycleTutorRepository implements CycleTutorRepository {
   constructor(private readonly prisma: PrismaClient) {}
 
-  listBySchool(periodId: string, schoolId: string): Promise<CycleTutorAssignment[]> {
-    return this.prisma.cycleTutorAssignment.findMany({ where: { periodId, schoolId }, orderBy: { cycle: 'asc' } });
+  async listBySchool(periodId: string, schoolId: string): Promise<CycleTutorAssignment[]> {
+    return (await this.prisma.cycleTutorAssignment.findMany({ where: { periodId, schoolId }, orderBy: { cycle: 'asc' } })).map(toAssignment);
   }
 
-  find(periodId: string, schoolId: string, cycle: number): Promise<CycleTutorAssignment | null> {
-    return this.prisma.cycleTutorAssignment.findUnique({ where: { periodId_schoolId_cycle: { periodId, schoolId, cycle } } });
+  async find(periodId: string, schoolId: string, cycle: number): Promise<CycleTutorAssignment | null> {
+    const row = await this.prisma.cycleTutorAssignment.findUnique({ where: { periodId_schoolId_cycle: { periodId, schoolId, cycle } } });
+    return row && toAssignment(row);
   }
 
-  listByTutor(periodId: string, tutorId: string): Promise<CycleTutorAssignment[]> {
-    return this.prisma.cycleTutorAssignment.findMany({ where: { periodId, tutorId } });
+  async listByTutor(periodId: string, tutorId: string): Promise<CycleTutorAssignment[]> {
+    return (await this.prisma.cycleTutorAssignment.findMany({ where: { periodId, tutorId } })).map(toAssignment);
   }
 
-  upsert(input: Omit<CycleTutorAssignment, 'id' | 'createdAt'>): Promise<CycleTutorAssignment> {
+  async upsert(input: NewCycleTutorAssignment): Promise<CycleTutorAssignment> {
     const { periodId, schoolId, cycle, ...data } = input;
-    return this.prisma.cycleTutorAssignment.upsert({
-      where: { periodId_schoolId_cycle: { periodId, schoolId, cycle } },
-      update: data,
-      create: input,
+    const where = { periodId_schoolId_cycle: { periodId, schoolId, cycle } };
+    const existing = await this.prisma.cycleTutorAssignment.findUnique({ where });
+    // Mismo docente: se conserva su aceptación. Otro docente: la aceptación empieza de nuevo y el enlace anterior deja de servir.
+    const restart =
+      existing && existing.tutorId !== input.tutorId
+        ? { acceptanceStatus: 'SIN_SOLICITAR', acceptanceTokenHash: null, acceptanceExpiresAt: null, requestedAt: null, respondedAt: null, declineReason: null, availability: Prisma.DbNull }
+        : {};
+    return toAssignment(await this.prisma.cycleTutorAssignment.upsert({ where, update: { ...data, ...restart }, create: input }));
+  }
+
+  async requestAcceptance(id: string, tokenHash: string, expiresAt: Date, requestedAt: Date): Promise<void> {
+    await this.prisma.cycleTutorAssignment.update({
+      where: { id },
+      data: { acceptanceStatus: 'PENDIENTE', acceptanceTokenHash: tokenHash, acceptanceExpiresAt: expiresAt, requestedAt, respondedAt: null, declineReason: null },
+    });
+  }
+
+  async findByAcceptanceToken(tokenHash: string): Promise<CycleTutorAssignment | null> {
+    const row = await this.prisma.cycleTutorAssignment.findUnique({ where: { acceptanceTokenHash: tokenHash } });
+    return row && toAssignment(row);
+  }
+
+  async recordResponse(id: string, response: { accepted: boolean; availability?: AvailabilitySlot[]; declineReason?: string }, respondedAt: Date): Promise<void> {
+    await this.prisma.cycleTutorAssignment.update({
+      where: { id },
+      data: {
+        acceptanceStatus: response.accepted ? 'ACEPTADA' : 'RECHAZADA',
+        respondedAt,
+        acceptanceTokenHash: null,
+        acceptanceExpiresAt: null,
+        declineReason: response.accepted ? null : (response.declineReason ?? null),
+        availability: response.accepted && response.availability ? (response.availability as unknown as Prisma.InputJsonValue) : Prisma.DbNull,
+      },
     });
   }
 
@@ -52,4 +82,9 @@ export class PrismaCycleTutorRepository implements CycleTutorRepository {
     }
     return byCycle;
   }
+}
+
+function toAssignment(row: Prisma.CycleTutorAssignmentGetPayload<object>): CycleTutorAssignment {
+  const { acceptanceTokenHash: _hash, acceptanceStatus, availability, ...rest } = row;
+  return { ...rest, acceptanceStatus: acceptanceStatus as AcceptanceStatus, availability: availability as unknown as AvailabilitySlot[] | null };
 }

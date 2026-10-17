@@ -20,7 +20,8 @@
 
 .row {
   display: grid;
-  grid-template-columns: 80px minmax(140px, 1fr) minmax(200px, 2fr) auto auto;
+  grid-template-columns: 80px minmax(140px, 1fr) minmax(200px, 2fr) auto auto auto auto;
+  row-gap: var(--s1, 4px);
   align-items: center;
   gap: var(--s3);
   padding: var(--s2) 0;
@@ -84,4 +85,14 @@
   .row {
     grid-template-columns: 1fr 1fr;
   }
+}
+
+.status {
+  display: inline-flex;
+}
+
+.detail {
+  grid-column: 2 / -1;
+  color: var(--g600);
+  font-size: var(--fs-xs);
 }
