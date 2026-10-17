@@ -30,6 +30,7 @@ import { PrismaStudentReferralRepository } from './repositories/PrismaStudentRef
 import { PrismaSystemParameterRepository } from './repositories/PrismaSystemParameterRepository';
 import { PrismaSupportContactRepository } from './repositories/PrismaSupportContactRepository';
 import { PrismaSchoolRepository } from './repositories/PrismaSchoolRepository';
+import { ImportTutorsUseCase } from '@application/use-cases/users/ImportTutorsUseCase';
 import { PrismaCycleTutorRepository } from './repositories/PrismaCycleTutorRepository';
 import { CycleTutorApplier, ListCycleTutorsUseCase, RemoveCycleTutorUseCase, SetCycleTutorUseCase } from '@application/use-cases/cycle-tutors/CycleTutorUseCases';
 import { PrismaCampusRepository } from './repositories/PrismaCampusRepository';
@@ -319,6 +320,7 @@ const issueInvitationUseCase = new IssueInvitationUseCase(userRepository, passwo
   publicUrl: env.PUBLIC_APP_URL,
   ttlHours: env.INVITATION_TTL_HOURS,
 });
+const importTutorsUseCase = new ImportTutorsUseCase(userRepository, roleRepository, schoolRepository, createUserUseCase, issueInvitationUseCase);
 const updateUserUseCase = new UpdateUserUseCase(userRepository, roleRepository, schoolRepository);
 const toggleUserStatusUseCase = new ToggleUserStatusUseCase(userRepository);
 const listUsersUseCase = new ListUsersUseCase(userRepository);
@@ -805,6 +807,7 @@ export const container = {
     getSessionEvidenceFileUseCase,
     listSchoolsUseCase,
     listCampusesUseCase,
+    importTutorsUseCase,
     listCycleTutorsUseCase,
     setCycleTutorUseCase,
     removeCycleTutorUseCase,

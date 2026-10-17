@@ -4,6 +4,7 @@ import { schoolService } from '@features/tutorados/services/schoolService';
 import styles from './UserManagementPage.module.css';
 import { User, userService, CreateUserData, UpdateUserData, Invitation } from '../services/userService';
 import { InvitationDialog } from '../components/InvitationDialog';
+import { TutorImportDialog } from '../components/TutorImportDialog';
 import { UserFormModal } from '../components/UserFormModal';
 import { UserFilters, UserFilterValues } from '../components/UserFilters';
 import { UserTable } from '../components/UserTable';
@@ -17,7 +18,7 @@ import {
   TableSkeleton,
   ConfirmDialog,
 } from '@shared/components/ui';
-import { PlusIcon, UsersIcon, XCircleIcon, SearchIcon } from '@shared/components/icons';
+import { PlusIcon, UploadIcon, UsersIcon, XCircleIcon, SearchIcon } from '@shared/components/icons';
 
 const EMPTY_FILTERS: UserFilterValues = { search: '', roleId: '', status: '' };
 
@@ -27,6 +28,7 @@ export const UserManagementPage: React.FC = () => {
   // La invitación de una cuenta recién creada (o reemitida): el enlace se muestra una sola vez, a quien administra.
   const [issued, setIssued] = useState<{ email: string; invitation: Invitation } | null>(null);
   const [inviteError, setInviteError] = useState('');
+  const [importingTutors, setImportingTutors] = useState(false);
 
   const [filters, setFilters] = useState<UserFilterValues>(EMPTY_FILTERS);
 
@@ -105,9 +107,14 @@ export const UserManagementPage: React.FC = () => {
         subtitle="Cuentas del sistema y el rol de cada persona. Los catálogos y parámetros tienen su propia sección en el menú."
         icon={<UsersIcon size={24} />}
         actions={
-          <Button icon={<PlusIcon size={17} />} onClick={() => handleOpenModal()}>
-            Nuevo usuario
-          </Button>
+          <>
+            <Button variant="secondary" icon={<UploadIcon size={17} />} onClick={() => setImportingTutors(true)}>
+              Importar docentes
+            </Button>
+            <Button icon={<PlusIcon size={17} />} onClick={() => handleOpenModal()}>
+              Nuevo usuario
+            </Button>
+          </>
         }
       />
 
@@ -166,6 +173,8 @@ export const UserManagementPage: React.FC = () => {
           schools={schools}
         />
       )}
+
+      {importingTutors && <TutorImportDialog onClose={() => { setImportingTutors(false); refresh(); }} />}
 
       {issued && <InvitationDialog {...issued} onClose={() => setIssued(null)} />}
 

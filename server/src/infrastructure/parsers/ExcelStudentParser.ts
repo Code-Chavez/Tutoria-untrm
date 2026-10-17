@@ -32,7 +32,7 @@ const TEMPLATE_COLUMNS: { header: string; field: Field; example: string }[] = [
   { header: 'escuela', field: 'school', example: 'Ingeniería de Sistemas' },
 ];
 
-function normalizeHeader(value: string): string {
+export function normalizeHeader(value: string): string {
   return value
     .trim()
     .toLowerCase()
@@ -41,7 +41,7 @@ function normalizeHeader(value: string): string {
 }
 
 // exceljs devuelve valores heterogéneos (texto, número, hipervínculo, fórmula).
-function cellText(value: ExcelJS.CellValue): string {
+export function cellText(value: ExcelJS.CellValue): string {
   if (value === null || value === undefined) return '';
   if (typeof value === 'string') return value.trim();
   if (typeof value === 'number' || typeof value === 'boolean') return String(value);
