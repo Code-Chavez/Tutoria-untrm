@@ -1,3 +1,4 @@
+import type { CycleTutorApplier } from '@application/use-cases/cycle-tutors/CycleTutorUseCases';
 import { Student } from '@domain/entities/Student';
 import { StudentRepository } from '@domain/repositories/StudentRepository';
 import { SchoolRepository } from '@domain/repositories/SchoolRepository';
@@ -14,6 +15,7 @@ export class CreateStudentUseCase {
     private readonly guard: StudentAccessGuard,
     private readonly periods: AcademicPeriodRepository,
     private readonly enrollments: PeriodEnrollmentRepository,
+    private readonly cycleTutors?: CycleTutorApplier,
   ) {}
 
   async execute(data: CreateStudentInput, requesterId: string): Promise<Student> {
@@ -44,7 +46,10 @@ export class CreateStudentUseCase {
 
     // Un estudiante dado de alta durante un periodo vigente queda matriculado en él.
     const period = await this.periods.findActive();
-    if (period) await this.enrollments.enroll({ periodId: period.id, studentId: student.id, schoolId: student.schoolId, cycle: student.cycle });
+    if (period) {
+      await this.enrollments.enroll({ periodId: period.id, studentId: student.id, schoolId: student.schoolId, cycle: student.cycle });
+      await this.cycleTutors?.applyToStudent(period.id, { id: student.id, schoolId: student.schoolId, cycle: student.cycle }, requesterId);
+    }
     return student;
   }
 }

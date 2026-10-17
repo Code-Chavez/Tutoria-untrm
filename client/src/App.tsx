@@ -34,6 +34,7 @@ import { IndicatorsPage } from '@features/indicadores/pages/IndicatorsPage';
 import { CatalogsPage } from '@features/catalogos/pages/CatalogsPage';
 import { DataRequestPage } from '@features/pedidos/pages/DataRequestPage';
 import { PeriodClosurePage } from '@features/periodo/pages/PeriodClosurePage';
+import { CycleTutorsPage } from '@features/ciclos/pages/CycleTutorsPage';
 import { CampusesPage } from '@features/sedes/pages/CampusesPage';
 import { ParametersPage } from '@features/parametros/pages/ParametersPage';
 import { BrandingPage } from '@features/identidad/pages/BrandingPage';
@@ -85,6 +86,14 @@ export default function App() {
                 element={
                   <RequireRole roles={['Administrador DBU']}>
                     <BrandingPage />
+                  </RequireRole>
+                }
+              />
+              <Route
+                path="tutores-por-ciclo"
+                element={
+                  <RequireRole roles={['Administrador DBU', 'Coordinador']}>
+                    <CycleTutorsPage />
                   </RequireRole>
                 }
               />
