@@ -49,7 +49,7 @@ export function TutorAcceptancePage() {
 
   return (
     <div className={styles.page}>
-      <main className={styles.card}>
+      <main className={`${styles.card} ${local.still}`}>
         <div className={styles.brandRow}>
           <div className={styles.emblem}>SIT</div>
           <div>

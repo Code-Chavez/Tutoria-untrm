@@ -14,6 +14,7 @@ export const accounts = {
   tutor: { email: 'elena.ramirez@untrm.edu.pe', password: DEMO, role: 'Docente Tutor', greeting: 'Elena' },
   psychology: { email: 'lucia.flores@untrm.edu.pe', password: DEMO, role: 'Profesional de Servicio', greeting: 'Lucía' },
   vice: { email: 'vicerrectorado.academico@untrm.edu.pe', password: DEMO, role: 'Vicerrectorado', greeting: 'Segundo' },
+  dean: { email: 'decano.fisme@untrm.edu.pe', password: DEMO, role: 'Decano', greeting: 'Héctor' },
   student: { email: '20191234@untrm.edu.pe', password: DEMO, role: 'Tutorado', greeting: 'Ana' },
 } satisfies Record<string, Account>;
 
