@@ -12,6 +12,7 @@ import {
   CardHeader,
   CardBody,
   EmptyState,
+  NextSteps,
   TableSkeleton,
 } from '@shared/components/ui';
 import { SwitchIcon, XCircleIcon, CheckCircleIcon } from '@shared/components/icons';
@@ -177,6 +178,14 @@ export const AssignmentPage: React.FC = () => {
           </Card>
         </div>
       )}
+
+      <NextSteps
+        steps={[
+          { to: '/tutores-por-ciclo', label: 'Fijar el tutor de cada ciclo', description: 'Es lo habitual: los estudiantes del ciclo pasan solos a su tutor' },
+          { to: '/tutorados', label: 'Reasignar a un estudiante', description: 'Desde «Tutorados», con motivo y historial' },
+          { to: '/carga-masiva', label: 'Cargar más estudiantes', description: 'Si faltan en la lista' },
+        ]}
+      />
     </div>
   );
 };

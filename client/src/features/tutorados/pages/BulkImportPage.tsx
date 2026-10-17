@@ -5,7 +5,7 @@ import { getApiErrorMessage } from '@shared/services/apiClient';
 import { ImportStepper } from '../components/ImportStepper';
 import { UploadDropzone } from '../components/UploadDropzone';
 import { ImportResult } from '../components/ImportResult';
-import { PageHeader, Button, Card } from '@shared/components/ui';
+import { PageHeader, Button, Card, NextSteps } from '@shared/components/ui';
 import { UploadIcon, DownloadIcon, InfoIcon } from '@shared/components/icons';
 
 const XLSX_EXT = '.xlsx';
@@ -118,6 +118,15 @@ export const BulkImportPage: React.FC = () => {
         </div>
 
         {report && <ImportResult report={report} onDownload={handleDownloadReport} />}
+        {report && report.created + report.continued > 0 && (
+          <NextSteps
+            steps={[
+              { to: '/tutores-por-ciclo', label: 'Elegir el tutor de cada ciclo', description: 'Los estudiantes cargados pasan al tutor de su ciclo' },
+              { to: '/asignacion', label: 'Asignar a quien quedó sin tutor', description: 'Para casos puntuales o ciclos sin tutor' },
+              { to: '/tutorados', label: 'Ver los tutorados', description: 'Comprobar que quedaron registrados' },
+            ]}
+          />
+        )}
       </Card>
     </div>
   );

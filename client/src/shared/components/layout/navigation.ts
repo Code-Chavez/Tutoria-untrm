@@ -61,24 +61,33 @@ export interface NavGroup {
 }
 
 // Única fuente de verdad: el menú, el título de la barra superior y la entrada activa salen de aquí.
-// Cada función tiene su propio icono; los grupos siguen el trabajo de cada rol.
+// Cada función tiene su propio icono. Los grupos siguen el trabajo de cada persona y, dentro de cada grupo, el orden es el
+// del flujo real (p. ej. en «Periodo académico»: pedir listas → cargarlas → tutor de cada ciclo → asignar → cerrar).
+// Un grupo sin entradas para el rol de la persona no se muestra.
 export const NAV: NavGroup[] = [
   {
-    title: 'Principal',
+    title: 'Inicio',
+    items: [{ label: 'Panel de inicio', Icon: DashboardIcon, path: '/' }],
+  },
+  {
+    // El estudiante: pedir, ver y evaluar su tutoría.
+    title: 'Mi tutoría',
     items: [
-      { label: 'Panel de inicio', Icon: DashboardIcon, path: '/' },
-      { label: 'Tutorados', Icon: GraduationCapIcon, path: '/tutorados', action: '', roles: ['tutor', 'coord', 'dbu'] },
-      { label: 'Asignación', Icon: SwitchIcon, path: '/asignacion', roles: ['coord', 'dbu'] },
-      { label: 'Tutores por ciclo', Icon: UserPlusIcon, path: '/tutores-por-ciclo', roles: ['coord', 'dbu'] },
-      { label: 'Pedir listas', Icon: SendIcon, path: '/pedir-listas', roles: ['coord', 'dbu'] },
-      { label: 'Carga masiva', Icon: UploadIcon, path: '/carga-masiva', roles: ['coord', 'dbu'] },
-      { label: 'Entrevista inicial', Icon: ClipboardIcon, path: '/tutorados', action: 'entrevista', roles: ['tutor'] },
-      { label: 'Expediente', Icon: FolderIcon, path: '/expediente', roles: ['tutor', 'coord', 'dbu'] },
-      { label: 'Sesiones', Icon: CalendarIcon, path: '/sesiones', roles: ['tutor'] },
+      { label: 'Solicitar tutoría', Icon: SendIcon, path: '/solicitar-tutoria', roles: ['est'] },
       { label: 'Mis sesiones', Icon: CalendarIcon, path: '/mis-sesiones', roles: ['est'] },
+      { label: 'Evaluar tutoría', Icon: StarIcon, path: '/evaluar-tutoria', roles: ['est'] },
+    ],
+  },
+  {
+    // Quien atiende a los tutorados: el docente tutor y quien lo supervisa (coordinación, DBU) o recibe sus derivaciones (servicios).
+    title: 'Atención a tutorados',
+    items: [
+      { label: 'Tutorados', Icon: GraduationCapIcon, path: '/tutorados', action: '', roles: ['tutor', 'coord', 'dbu'] },
+      { label: 'Expediente', Icon: FolderIcon, path: '/expediente', roles: ['tutor', 'coord', 'dbu'] },
+      { label: 'Entrevista inicial', Icon: ClipboardIcon, path: '/tutorados', action: 'entrevista', roles: ['tutor'] },
+      { label: 'Sesiones', Icon: CalendarIcon, path: '/sesiones', roles: ['tutor'] },
       { label: 'Seguimiento', Icon: ActivityIcon, path: '/tutorados', action: 'seguimiento', roles: ['tutor'] },
       { label: 'Derivar caso', Icon: SendIcon, path: '/tutorados', action: 'derivar', roles: ['tutor'] },
-      { label: 'Solicitar tutoría', Icon: SendIcon, path: '/solicitar-tutoria', roles: ['est'] },
       { label: 'Solicitudes de tutoría', Icon: MessageSquareIcon, path: '/solicitudes', roles: ['tutor', 'coord', 'dbu'] },
       { label: 'Casos derivados', Icon: InboxIcon, path: '/derivaciones', roles: ['tutor', 'serv', 'dbu'] },
       {
@@ -88,13 +97,31 @@ export const NAV: NavGroup[] = [
         path: '/derivaciones/seguimiento',
         roles: ['dbu'],
       },
-      { label: 'Evaluar tutoría', Icon: StarIcon, path: '/evaluar-tutoria', roles: ['est'] },
     ],
   },
   {
-    title: 'Gestión',
+    // Lo que hacen la coordinación y la DBU en cada periodo, en el orden en que se hace.
+    title: 'Periodo académico',
+    items: [
+      { label: 'Pedir listas', Icon: SendIcon, path: '/pedir-listas', roles: ['coord', 'dbu'] },
+      { label: 'Carga masiva', Icon: UploadIcon, path: '/carga-masiva', roles: ['coord', 'dbu'] },
+      { label: 'Tutores por ciclo', Icon: UserPlusIcon, path: '/tutores-por-ciclo', roles: ['coord', 'dbu'] },
+      { label: 'Asignación', Icon: SwitchIcon, path: '/asignacion', roles: ['coord', 'dbu'] },
+      { label: 'Cierre de periodo', Icon: RefreshIcon, path: '/cierre-periodo', roles: ['dbu'] },
+    ],
+  },
+  {
+    title: 'Planificación y evaluación',
     items: [
       { label: 'Plan semestral', Icon: CalendarRangeIcon, path: '/plan-semestral', roles: ['coord', 'dbu'] },
+      { label: 'Evaluación de tutoría', Icon: ListChecksIcon, path: '/evaluacion/configuracion', roles: ['dbu'] },
+      { label: 'Resultados de evaluación', Icon: BarChartIcon, path: '/evaluacion/resultados', roles: ['dbu', 'coord'] },
+      { label: 'Sugerencias de estudiantes', Icon: StarIcon, path: '/evaluacion/sugerencias', roles: ['dbu', 'coord'] },
+    ],
+  },
+  {
+    title: 'Informes',
+    items: [
       {
         label: 'Horarios y asistencia',
         title: 'Consolidado de horarios y asistencia',
@@ -105,17 +132,24 @@ export const NAV: NavGroup[] = [
       { label: 'Informe semestral', Icon: FileTextIcon, path: '/informes/semestral', roles: ['tutor'] },
       { label: 'Informe consolidado', Icon: FileSpreadsheetIcon, path: '/informes/consolidado', roles: ['dbu', 'vice'] },
       { label: 'Indicadores', Icon: PieChartIcon, path: '/indicadores', roles: ['dbu', 'coord', 'vice'] },
-      { label: 'Usuarios y roles', Icon: UsersIcon, path: '/users', roles: ['dbu'] },
-      { label: 'Catálogos', Icon: LayersIcon, path: '/catalogos', roles: ['dbu'] },
+    ],
+  },
+  {
+    // Facultad y sedes: el Decano amonesta; Vicerrectorado y la DBU fijan la sede de cada escuela.
+    title: 'Facultad y sedes',
+    items: [
       { label: 'Amonestaciones', Icon: AlertTriangleIcon, path: '/amonestaciones', roles: ['dec', 'dbu', 'coord'] },
       { label: 'Sedes', Icon: MapPinIcon, path: '/sedes', roles: ['dbu', 'vice'] },
-      { label: 'Cierre de periodo', Icon: RefreshIcon, path: '/cierre-periodo', roles: ['dbu'] },
+    ],
+  },
+  {
+    title: 'Administración',
+    items: [
+      { label: 'Usuarios y roles', Icon: UsersIcon, path: '/users', roles: ['dbu'] },
+      { label: 'Catálogos', Icon: LayersIcon, path: '/catalogos', roles: ['dbu'] },
       { label: 'Parámetros', Icon: SlidersIcon, path: '/parametros', roles: ['dbu'] },
       { label: 'Identidad visual', Icon: PaletteIcon, path: '/identidad', roles: ['dbu'] },
       { label: 'Bitácora de auditoría', Icon: ShieldCheckIcon, path: '/auditoria', roles: ['dbu'] },
-      { label: 'Evaluación de tutoría', Icon: ListChecksIcon, path: '/evaluacion/configuracion', roles: ['dbu'] },
-      { label: 'Resultados de evaluación', Icon: BarChartIcon, path: '/evaluacion/resultados', roles: ['dbu', 'coord'] },
-      { label: 'Sugerencias de estudiantes', Icon: StarIcon, path: '/evaluacion/sugerencias', roles: ['dbu', 'coord'] },
     ],
   },
 ];
@@ -148,7 +182,7 @@ const EXTRA_META: Record<string, { title: string; group: string }> = {
 export function resolveMeta(pathname: string) {
   if (EXTRA_META[pathname]) return EXTRA_META[pathname];
   const item = findActiveItem(ALL_NAV_ITEMS, pathname, '');
-  if (!item) return { title: 'Panel de inicio', group: 'Principal' };
+  if (!item) return { title: 'Panel de inicio', group: 'Inicio' };
   const group = NAV.find((g) => g.items.includes(item));
-  return { title: item.title ?? item.label, group: group?.title ?? 'Principal' };
+  return { title: item.title ?? item.label, group: group?.title ?? 'Inicio' };
 }
