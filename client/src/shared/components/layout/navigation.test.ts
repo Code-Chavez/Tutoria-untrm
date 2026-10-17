@@ -82,7 +82,7 @@ describe('navegación (UI-01, UI-04, UI-07)', () => {
 
     it('el periodo académico sigue el flujo real: pedir listas, cargar, asignar por ciclo y cerrar', () => {
       const flow = groupsFor('Administrador DBU').find((g) => g.title === 'Periodo académico');
-      expect(flow?.labels).toEqual(['Pedir listas', 'Carga masiva', 'Asignación por ciclo', 'Cierre de periodo']);
+      expect(flow?.labels).toEqual(['Pedir listas', 'Carga de estudiantes', 'Carga de docentes', 'Asignación por ciclo', 'Cierre de periodo']);
     });
 
     it('la administración (usuarios, catálogos, parámetros…) es solo de la DBU', () => {

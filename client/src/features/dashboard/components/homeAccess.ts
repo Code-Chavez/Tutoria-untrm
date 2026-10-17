@@ -16,6 +16,7 @@ import {
   AlertTriangleIcon,
   MapPinIcon,
   RefreshIcon,
+  UsersPlusIcon,
 } from '@shared/components/icons';
 
 export interface QuickAction {
@@ -55,9 +56,10 @@ export const QUICK_ACTIONS: QuickAction[] = [
   { group: 'Atención a tutorados', label: 'Seguimiento de derivaciones', description: 'Casos de todos los servicios', to: '/derivaciones/seguimiento', Icon: ClockIcon, roles: [DBU] },
 
   { group: 'Periodo académico', step: 1, label: 'Pedir listas', description: 'Pide a cada escuela la lista de estudiantes por correo', to: '/pedir-listas', Icon: SendIcon, roles: [COORD, DBU] },
-  { group: 'Periodo académico', step: 2, label: 'Carga masiva', description: 'Importar estudiantes desde Excel', to: '/carga-masiva', Icon: UploadIcon, roles: [COORD, DBU] },
-  { group: 'Periodo académico', step: 3, label: 'Asignación por ciclo', description: 'Elige al docente de cada ciclo: todos sus estudiantes pasan a él', to: '/asignacion', Icon: UserPlusIcon, roles: [COORD, DBU] },
-  { group: 'Periodo académico', step: 4, label: 'Cierre de periodo', description: 'Cerrar el periodo y dejar la tutoría en solo lectura', to: '/cierre-periodo', Icon: RefreshIcon, roles: [DBU] },
+  { group: 'Periodo académico', step: 2, label: 'Carga de estudiantes', description: 'Importar los estudiantes del periodo desde Excel', to: '/carga-masiva', Icon: UploadIcon, roles: [COORD, DBU] },
+  { group: 'Periodo académico', step: 3, label: 'Carga de docentes', description: 'Crear las cuentas de los docentes tutores desde Excel', to: '/carga-docentes', Icon: UsersPlusIcon, roles: [DBU] },
+  { group: 'Periodo académico', step: 4, label: 'Asignación por ciclo', description: 'Elige al docente de cada ciclo: todos sus estudiantes pasan a él', to: '/asignacion', Icon: UserPlusIcon, roles: [COORD, DBU] },
+  { group: 'Periodo académico', step: 5, label: 'Cierre de periodo', description: 'Cerrar el periodo y dejar la tutoría en solo lectura', to: '/cierre-periodo', Icon: RefreshIcon, roles: [DBU] },
 
   { group: 'Planificación y evaluación', label: 'Plan semestral', description: 'Plan de trabajo de tu escuela', to: '/plan-semestral', Icon: CalendarRangeIcon, roles: [COORD] },
 
@@ -74,7 +76,8 @@ export const QUICK_ACTIONS: QuickAction[] = [
 export function quickActionGroupsFor(role: string | undefined): { title: string; actions: QuickAction[] }[] {
   const groups = new Map<string, QuickAction[]>();
   for (const action of quickActionsFor(role)) groups.set(action.group, [...(groups.get(action.group) ?? []), action]);
-  return [...groups.entries()].map(([title, actions]) => ({ title, actions }));
+  // El número de paso cuenta solo los pasos que la persona ve (la coordinación no ve la carga de docentes, que es de la DBU).
+  return [...groups.entries()].map(([title, actions]) => ({ title, actions: actions.map((a, i) => (a.step ? { ...a, step: i + 1 } : a)) }));
 }
 
 export function quickActionsFor(role: string | undefined): QuickAction[] {

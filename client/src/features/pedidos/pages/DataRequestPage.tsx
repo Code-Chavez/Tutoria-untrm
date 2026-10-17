@@ -73,7 +73,7 @@ export function DataRequestPage() {
     <div>
       <PageHeader
         title="Pedir listas de estudiantes"
-        subtitle="Al iniciar el periodo, pide por correo a la escuela la lista de estudiantes con el formato de la plantilla; cuando llegue, cárgala en «Carga masiva»."
+        subtitle="Al iniciar el periodo, pide por correo a la escuela la lista de estudiantes con el formato de la plantilla; cuando llegue, cárgala en «Carga de estudiantes»."
         icon={<SendIcon size={24} />}
       />
 
@@ -157,7 +157,7 @@ export function DataRequestPage() {
               </Button>
               <p className={styles.note}>
                 Se adjunta la plantilla Excel con las columnas: código, nombres, apellidos, correo, teléfono, ciclo y escuela. Cuando recibas el archivo,
-                cárgalo en <Link to="/carga-masiva">Carga masiva</Link>.
+                cárgalo en <Link to="/carga-masiva">Carga de estudiantes</Link>.
               </p>
             </form>
           </CardBody>

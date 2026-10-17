@@ -1,11 +1,11 @@
 import React, { useMemo, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
+import { useNavigate } from 'react-router-dom';
 import { catalogService } from '@features/catalogos/services/catalogService';
 import { schoolService } from '@features/tutorados/services/schoolService';
 import styles from './UserManagementPage.module.css';
 import { User, userService, CreateUserData, UpdateUserData, Invitation } from '../services/userService';
 import { InvitationDialog } from '../components/InvitationDialog';
-import { TutorImportDialog } from '../components/TutorImportDialog';
 import { UserFormModal } from '../components/UserFormModal';
 import { UserFilters, UserFilterValues } from '../components/UserFilters';
 import { UserTable } from '../components/UserTable';
@@ -24,13 +24,13 @@ import { PlusIcon, UploadIcon, UsersIcon, XCircleIcon, SearchIcon } from '@share
 const EMPTY_FILTERS: UserFilterValues = { search: '', roleId: '', status: '' };
 
 export const UserManagementPage: React.FC = () => {
+  const navigate = useNavigate();
   const { users, roles, loading, error, refresh } = useUsers();
   const faculties = useQuery({ queryKey: ['catalog', 'faculties'], queryFn: () => catalogService.list('faculties'), staleTime: 60_000 }).data ?? [];
   const schools = useQuery({ queryKey: ['schools'], queryFn: () => schoolService.getSchools(), staleTime: 60_000 }).data ?? [];
   // La invitación de una cuenta recién creada (o reemitida): el enlace se muestra una sola vez, a quien administra.
   const [issued, setIssued] = useState<{ email: string; invitation: Invitation } | null>(null);
   const [inviteError, setInviteError] = useState('');
-  const [importingTutors, setImportingTutors] = useState(false);
 
   const [filters, setFilters] = useState<UserFilterValues>(EMPTY_FILTERS);
 
@@ -110,7 +110,7 @@ export const UserManagementPage: React.FC = () => {
         icon={<UsersIcon size={24} />}
         actions={
           <>
-            <Button variant="secondary" icon={<UploadIcon size={17} />} onClick={() => setImportingTutors(true)}>
+            <Button variant="secondary" icon={<UploadIcon size={17} />} onClick={() => navigate('/carga-docentes')}>
               Importar docentes
             </Button>
             <Button icon={<PlusIcon size={17} />} onClick={() => handleOpenModal()}>
@@ -176,8 +176,6 @@ export const UserManagementPage: React.FC = () => {
           faculties={faculties}
         />
       )}
-
-      {importingTutors && <TutorImportDialog onClose={() => { setImportingTutors(false); refresh(); }} />}
 
       {issued && <InvitationDialog {...issued} onClose={() => setIssued(null)} />}
 
