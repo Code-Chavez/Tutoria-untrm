@@ -59,3 +59,8 @@
   font: inherit;
   box-sizing: border-box;
 }
+
+/* Es un formulario con opciones para marcar: la tarjeta no flota (un objetivo que se mueve estorba). */
+main.still {
+  animation: none;
+}

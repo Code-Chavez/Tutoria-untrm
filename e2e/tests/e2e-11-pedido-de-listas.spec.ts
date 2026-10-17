@@ -16,8 +16,10 @@ test('la coordinadora configura el correo, pide las listas y el correo sale con 
   await expect(page.getByRole('heading', { name: 'Pedir listas de estudiantes' })).toBeVisible();
 
   // Siempre se prueba el cambio de correo: así sirve tanto con la escuela sin correo como con uno ya configurado.
+  // La escuela y su correo llegan después del encabezado: se espera a que aparezca el formulario o el botón antes de decidir.
   const change = page.getByRole('button', { name: 'Cambiar correo' });
-  if (await change.isVisible().catch(() => false)) await change.click();
+  await expect(change.or(page.getByLabel('Correo al que se piden las listas'))).toBeVisible({ timeout: 45_000 });
+  if (await change.isVisible()) await change.click();
   await page.getByLabel('Correo al que se piden las listas').fill(destination);
   await page.getByRole('button', { name: 'Guardar correo' }).click();
   await expect(page.getByText('Correo guardado.')).toBeVisible();

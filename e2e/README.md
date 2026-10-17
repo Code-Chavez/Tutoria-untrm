@@ -14,6 +14,9 @@ Recorridos de extremo a extremo con [Playwright](https://playwright.dev) sobre l
 | E2E-07 Evaluación de tutoría | `tests/e2e-07-evaluacion-de-tutoria.spec.ts` | escrito |
 | E2E-08 Administración | `tests/e2e-08-administracion.spec.ts` | escrito |
 | E2E-09 Carga masiva y asignación | `tests/e2e-09-carga-masiva-y-asignacion.spec.ts` | escrito |
+| E2E-10 Cierre de periodo | `tests/e2e-10-cierre-de-periodo.spec.ts` | escrito |
+| E2E-11 Pedido de listas por correo | `tests/e2e-11-pedido-de-listas.spec.ts` | escrito |
+| E2E-12 Tutor por ciclo, aceptación del docente y amonestación del Decano | `tests/e2e-12-tutor-por-ciclo-y-decano.spec.ts` | escrito |
 
 ## Cómo correrlas
 

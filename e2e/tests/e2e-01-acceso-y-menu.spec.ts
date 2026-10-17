@@ -6,10 +6,11 @@ import { loginUi, sidebar } from '../support/ui';
 const MENU: Record<AccountKey, string[]> = {
   student: ['Panel de inicio', 'Mis sesiones', 'Solicitar tutoría', 'Evaluar tutoría'],
   tutor: ['Panel de inicio', 'Tutorados', 'Entrevista inicial', 'Expediente', 'Sesiones', 'Seguimiento', 'Derivar caso', 'Solicitudes de tutoría', 'Casos derivados', 'Horarios y asistencia', 'Informe semestral'],
-  coordinator: ['Panel de inicio', 'Tutorados', 'Asignación', 'Carga masiva', 'Expediente', 'Solicitudes de tutoría', 'Plan semestral', 'Horarios y asistencia', 'Indicadores', 'Resultados de evaluación', 'Sugerencias de estudiantes'],
+  coordinator: ['Panel de inicio', 'Tutorados', 'Asignación', 'Tutores por ciclo', 'Pedir listas', 'Carga masiva', 'Expediente', 'Solicitudes de tutoría', 'Plan semestral', 'Horarios y asistencia', 'Indicadores', 'Amonestaciones', 'Resultados de evaluación', 'Sugerencias de estudiantes'],
   psychology: ['Panel de inicio', 'Casos derivados'],
-  vice: ['Panel de inicio', 'Informe consolidado', 'Indicadores'],
-  admin: ['Panel de inicio', 'Tutorados', 'Asignación', 'Carga masiva', 'Expediente', 'Solicitudes de tutoría', 'Casos derivados', 'Seguimiento DBU', 'Plan semestral', 'Horarios y asistencia', 'Informe consolidado', 'Indicadores', 'Usuarios y roles', 'Catálogos', 'Parámetros', 'Identidad visual', 'Bitácora de auditoría', 'Evaluación de tutoría', 'Resultados de evaluación', 'Sugerencias de estudiantes'],
+  vice: ['Panel de inicio', 'Informe consolidado', 'Indicadores', 'Sedes'],
+  dean: ['Panel de inicio', 'Amonestaciones'],
+  admin: ['Panel de inicio', 'Tutorados', 'Asignación', 'Tutores por ciclo', 'Pedir listas', 'Carga masiva', 'Expediente', 'Solicitudes de tutoría', 'Casos derivados', 'Seguimiento DBU', 'Plan semestral', 'Horarios y asistencia', 'Informe consolidado', 'Indicadores', 'Usuarios y roles', 'Catálogos', 'Amonestaciones', 'Sedes', 'Cierre de periodo', 'Parámetros', 'Identidad visual', 'Bitácora de auditoría', 'Evaluación de tutoría', 'Resultados de evaluación', 'Sugerencias de estudiantes'],
 };
 
 for (const [key, account] of Object.entries(accounts) as [AccountKey, (typeof accounts)[AccountKey]][]) {
