@@ -77,3 +77,32 @@ export const userService = {
     return response.data.user;
   },
 };
+
+export interface TutorImportReport {
+  totalRows: number;
+  created: number;
+  skipped: number;
+  createdRows: { row: number; email: string; fullName: string; school: string; emailSent: boolean; invitationLink?: string }[];
+  errors: { row: number; email?: string; message: string }[];
+}
+
+export const tutorImportService = {
+  importTutors: async (file: File): Promise<TutorImportReport> => {
+    const formData = new FormData();
+    formData.append('file', file);
+    const response = await apiClient.post<{ report: TutorImportReport }>('/tutors/import', formData, { headers: { 'Content-Type': 'multipart/form-data' } });
+    return response.data.report;
+  },
+
+  downloadTemplate: async (): Promise<void> => {
+    const response = await apiClient.get('/tutors/import/template', { responseType: 'blob' });
+    const url = window.URL.createObjectURL(response.data as Blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = 'plantilla-docentes-tutores.xlsx';
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    window.URL.revokeObjectURL(url);
+  },
+};

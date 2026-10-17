@@ -422,6 +422,9 @@ Al crear o editar un usuario con rol **Docente**, la DBU debe elegir su **escuel
 - Si se intenta de otra forma, el sistema lo rechaza con el aviso «El tutor pertenece a otra escuela».
 - Los docentes creados antes de esta regla quedan sin escuela hasta que la DBU se la indique (editando el usuario); mientras tanto no se bloquean.
 
+### 7.8.1 Importar docentes desde Excel
+En **Usuarios y roles → Importar docentes** la DBU da de alta a varios docentes tutores a la vez. Descargue la plantilla (nombres, apellidos, correo, teléfono y **escuela**), complétela con la lista que entrega la facultad y súbala. Cada fila crea la cuenta del docente con su escuela y le envía el enlace de un solo uso para crear su contraseña. El resultado indica cuántos se crearon y, fila por fila, los que no se pudieron cargar (correo inválido o ya registrado, escuela que no existe…). Si el correo no pudo salir, la pantalla muestra el enlace de ese docente una sola vez para entregarlo por un medio privado. Volver a subir el mismo archivo no duplica cuentas.
+
 ### 7.9 Tutores por ciclo
 En **Tutores por ciclo** (menú Principal; DBU y coordinación de la escuela) se elige, para el periodo vigente, **el tutor de cada ciclo** de una escuela. Solo aparecen los docentes de esa escuela.
 
