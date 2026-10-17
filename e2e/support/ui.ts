@@ -18,14 +18,20 @@ export async function sidebar(page: Page): Promise<{ items: string[]; active: nu
   return { items, active };
 }
 
-/** Despliega los grupos del menú que estén plegados (p. ej. «Configuración», que arranca plegado). */
+/** Despliega los grupos del menú que estén plegados (los que dejó plegados la persona). */
 export async function expandMenuGroups(page: Page): Promise<void> {
   const collapsed = page.locator('nav button[aria-expanded="false"]');
   while ((await collapsed.count()) > 0) await collapsed.first().click();
 }
 
-/** Pantallas que viven como pestaña dentro de una sección del menú («Periodo académico», «Configuración»). */
+/** Pantallas que viven como pestaña dentro de una sección del menú («Periodo académico», «Informes», «Configuración»). */
 const SECTION_OF: Record<string, string> = {
+  'Horarios y asistencia': 'Informes',
+  'Informe semestral': 'Informes',
+  'Informe consolidado': 'Informes',
+  Indicadores: 'Informes',
+  'Resultados de evaluación': 'Informes',
+  'Sugerencias de estudiantes': 'Informes',
   'Pedir listas': 'Periodo académico',
   'Carga de estudiantes': 'Periodo académico',
   'Carga de docentes': 'Periodo académico',
@@ -50,11 +56,17 @@ export async function goToMenu(page: Page, name: string): Promise<void> {
   let link = nav.getByRole('link', { name, exact: true });
   if ((await link.count()) === 0) await expandMenuGroups(page); // la entrada puede estar en un grupo plegado
   if ((await link.count()) === 0 && SECTION_OF[name]) {
-    await nav.getByRole('link', { name: SECTION_OF[name], exact: true }).click();
-    link = nav.getByRole('link', { name, exact: true });
-    // La entrada de la sección redirige a su primera pestaña; con una sola pestaña no hay barra y esa pantalla ya está abierta
-    await page.waitForFunction(() => !['/periodo', '/configuracion'].includes(window.location.pathname), undefined, { timeout: 45_000 });
-    if ((await link.count()) === 0) return;
+    const sectionName = SECTION_OF[name];
+    await nav.getByRole('link', { name: sectionName, exact: true }).click();
+    // La entrada de la sección solo redirige a su primera pestaña. El contenedor de la sección (con la lista de pestañas de
+    // esa persona en data-tabs) solo existe cuando la redirección ya se pintó: no depende de la ruta ni de tiempos.
+    const shell = page.locator(`[data-section="${sectionName}"]`);
+    await expect(shell).toBeAttached();
+    const tabs = ((await shell.getAttribute('data-tabs')) ?? '').split('|').filter(Boolean);
+    if (!tabs.includes(name)) throw new Error(`«${name}» no es una pestaña de «${sectionName}» para este rol (tiene: ${tabs.join(', ') || 'ninguna'})`);
+    // Con una sola pestaña no hay barra: esa pantalla es la que ya se abrió al entrar a la sección.
+    if (tabs.length === 1) return;
+    link = page.getByRole('navigation', { name: `Secciones de ${sectionName}` }).getByRole('link', { name, exact: true });
   }
   await link.click();
 }

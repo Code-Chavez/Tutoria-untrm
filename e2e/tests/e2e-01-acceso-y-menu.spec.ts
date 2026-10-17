@@ -1,16 +1,16 @@
 import { expect, test } from '@playwright/test';
 import { AccountKey, accounts } from '../support/accounts';
-import { loginUi, sidebar } from '../support/ui';
+import { goToMenu, loginUi, sidebar } from '../support/ui';
 
 // E2E-01 (HU-01, HU-04, HU-49): cada rol entra, ve su menú y su panel de inicio sin bloques vacíos.
 const MENU: Record<AccountKey, string[]> = {
   student: ['Panel de inicio', 'Solicitar tutoría', 'Mis sesiones', 'Evaluar tutoría'],
-  tutor: ['Panel de inicio', 'Tutorados', 'Expediente', 'Entrevista inicial', 'Sesiones', 'Seguimiento', 'Derivar caso', 'Solicitudes de tutoría', 'Casos derivados', 'Horarios y asistencia', 'Informe semestral'],
-  coordinator: ['Panel de inicio', 'Tutorados', 'Expediente', 'Solicitudes de tutoría', 'Periodo académico', 'Plan semestral', 'Amonestaciones', 'Horarios y asistencia', 'Indicadores', 'Resultados de evaluación', 'Sugerencias de estudiantes', 'Configuración'],
+  tutor: ['Panel de inicio', 'Tutorados', 'Entrevista inicial', 'Sesiones', 'Seguimiento', 'Derivar caso', 'Solicitudes de tutoría', 'Casos derivados', 'Informes'],
+  coordinator: ['Panel de inicio', 'Tutorados', 'Solicitudes de tutoría', 'Periodo académico', 'Plan semestral', 'Informes', 'Amonestaciones', 'Configuración'],
   psychology: ['Panel de inicio', 'Casos derivados'],
-  vice: ['Panel de inicio', 'Informe consolidado', 'Indicadores', 'Configuración'],
+  vice: ['Panel de inicio', 'Informes', 'Configuración'],
   dean: ['Panel de inicio', 'Amonestaciones'],
-  admin: ['Panel de inicio', 'Tutorados', 'Expediente', 'Solicitudes de tutoría', 'Casos derivados', 'Seguimiento DBU', 'Periodo académico', 'Plan semestral', 'Amonestaciones', 'Horarios y asistencia', 'Informe consolidado', 'Indicadores', 'Resultados de evaluación', 'Sugerencias de estudiantes', 'Configuración'],
+  admin: ['Panel de inicio', 'Tutorados', 'Solicitudes de tutoría', 'Casos derivados', 'Seguimiento DBU', 'Periodo académico', 'Plan semestral', 'Informes', 'Amonestaciones', 'Configuración'],
 };
 
 for (const [key, account] of Object.entries(accounts) as [AccountKey, (typeof accounts)[AccountKey]][]) {
@@ -46,14 +46,13 @@ test('un rol no entra a una página que no es suya', async ({ page }) => {
   await expect(page.getByRole('heading', { level: 1, name: /Usuarios y roles/ })).toHaveCount(0);
 });
 
-test('el menú es corto: Periodo académico y Configuración son una pantalla con pestañas, y los grupos se pliegan', async ({ page }) => {
+test('el menú es corto: Periodo académico, Informes y Configuración son una pantalla con pestañas, y los grupos se pliegan', async ({ page }) => {
   await loginUi(page, accounts.admin);
   const nav = page.locator('nav');
 
-  // Una sola entrada por sección; sus pestañas no están sueltas en el menú
-  await expect(nav.getByRole('link', { name: 'Periodo académico', exact: true })).toBeVisible();
-  await expect(nav.getByRole('link', { name: 'Parámetros', exact: true })).toHaveCount(0);
-  await expect(nav.getByRole('link', { name: 'Pedir listas', exact: true })).toHaveCount(0);
+  // Una sola entrada por sección; sus pestañas no están sueltas en el menú, y el expediente se abre desde Tutorados
+  for (const name of ['Periodo académico', 'Informes', 'Configuración']) await expect(nav.getByRole('link', { name, exact: true })).toBeVisible();
+  for (const name of ['Parámetros', 'Pedir listas', 'Indicadores', 'Expediente']) await expect(nav.getByRole('link', { name, exact: true })).toHaveCount(0);
 
   // Periodo académico: pestañas en el orden del trabajo, y la primera abierta
   await nav.getByRole('link', { name: 'Periodo académico', exact: true }).click();
@@ -63,12 +62,28 @@ test('el menú es corto: Periodo académico y Configuración son una pantalla co
   await tabs.getByRole('link', { name: 'Asignación por ciclo' }).click();
   await expect(nav.getByRole('link', { name: 'Periodo académico', exact: true })).toHaveAttribute('aria-current', 'page');
 
+  // Informes: todo lo que se consulta y se exporta
+  await nav.getByRole('link', { name: 'Informes', exact: true }).click();
+  const reports = page.getByRole('navigation', { name: 'Secciones de Informes' });
+  await expect(reports.getByRole('link')).toHaveText(['Horarios y asistencia', 'Informe consolidado', 'Indicadores', 'Resultados de evaluación', 'Sugerencias de estudiantes']);
+
   // Configuración: todo lo configurable en una sola pantalla
   await nav.getByRole('link', { name: 'Configuración', exact: true }).click();
   const config = page.getByRole('navigation', { name: 'Secciones de Configuración' });
   await expect(config.getByRole('link')).toHaveText(['Correos de las escuelas', 'Sedes', 'Evaluación de tutoría', 'Catálogos', 'Usuarios y roles', 'Parámetros', 'Identidad visual', 'Bitácora de auditoría']);
 
   // Los grupos del menú se pliegan
-  await nav.getByRole('button', { name: /Informes/ }).click();
-  await expect(nav.getByRole('link', { name: 'Indicadores', exact: true })).toHaveCount(0);
+  await nav.getByRole('button', { name: /Gestión/ }).click();
+  await expect(nav.getByRole('link', { name: 'Plan semestral', exact: true })).toHaveCount(0);
+});
+
+test('el expediente se abre desde Tutorados (ya no hay una entrada de menú) y vuelve a Tutorados', async ({ page }) => {
+  await loginUi(page, accounts.coordinator);
+  await goToMenu(page, 'Tutorados');
+  await page.getByRole('button', { name: 'Ver expediente' }).first().click();
+  await expect(page).toHaveURL(/\/expediente\//);
+  await expect(page.locator('nav').getByRole('link', { name: 'Tutorados', exact: true })).toHaveAttribute('aria-current', 'page');
+
+  await page.getByRole('button', { name: 'Volver a Tutorados' }).click();
+  await expect(page).toHaveURL(/\/tutorados/);
 });

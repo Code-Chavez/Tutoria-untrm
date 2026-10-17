@@ -25,8 +25,15 @@ test('la tutora guarda su informe semestral y exporta el PDF', async ({ page }) 
   await loginUi(page, accounts.tutor);
   await goToMenu(page, 'Informe semestral');
   await expect(page.getByRole('heading', { level: 3, name: /I\. Datos generales/ })).toBeVisible();
+  // Dato de prueba en un campo editable: debe seguir ahí tras guardar y volver a abrir el informe
+  const phone = `9${Date.now().toString().slice(-8)}`;
+  await page.getByLabel('Celular').fill(phone);
   await page.getByRole('button', { name: 'Guardar informe' }).click();
   await expect(page.getByText('Informe guardado correctamente.')).toBeVisible();
+
+  await page.reload();
+  await expect(page.getByRole('heading', { level: 3, name: /I\. Datos generales/ })).toBeVisible();
+  await expect(page.getByLabel('Celular')).toHaveValue(phone);
 
   const [download] = await Promise.all([page.waitForEvent('download'), page.getByRole('button', { name: 'Exportar PDF' }).click()]);
   expect(download.suggestedFilename()).toMatch(/\.pdf$/);

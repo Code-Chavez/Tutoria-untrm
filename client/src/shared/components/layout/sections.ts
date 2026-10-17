@@ -16,7 +16,7 @@ export interface Section {
 
 // Pantallas que se juntan en una sola, con pestañas, para que el menú sea corto. Cada pestaña conserva su dirección de siempre
 // (p. ej. /pedir-listas): la sección solo las envuelve con la barra de pestañas.
-export const SECTIONS: Record<'periodo' | 'configuracion', Section> = {
+export const SECTIONS: Record<'periodo' | 'informes' | 'configuracion', Section> = {
   periodo: {
     title: 'Periodo académico',
     path: '/periodo',
@@ -27,6 +27,19 @@ export const SECTIONS: Record<'periodo' | 'configuracion', Section> = {
       { label: 'Carga de docentes', path: '/carga-docentes', roles: ['dbu'] },
       { label: 'Asignación por ciclo', path: '/asignacion', roles: ['coord', 'dbu'] },
       { label: 'Cierre de periodo', path: '/cierre-periodo', roles: ['dbu'] },
+    ],
+  },
+  informes: {
+    title: 'Informes',
+    path: '/reportes',
+    // Todo lo que se consulta y se exporta, en una pantalla: cada rol ve las pestañas que le corresponden.
+    tabs: [
+      { label: 'Horarios y asistencia', path: '/informes', roles: ['tutor', 'coord', 'dbu'] },
+      { label: 'Informe semestral', path: '/informes/semestral', roles: ['tutor'] },
+      { label: 'Informe consolidado', path: '/informes/consolidado', roles: ['dbu', 'vice'] },
+      { label: 'Indicadores', path: '/indicadores', roles: ['dbu', 'coord', 'vice'] },
+      { label: 'Resultados de evaluación', path: '/evaluacion/resultados', roles: ['dbu', 'coord'] },
+      { label: 'Sugerencias de estudiantes', path: '/evaluacion/sugerencias', roles: ['dbu', 'coord'] },
     ],
   },
   configuracion: {

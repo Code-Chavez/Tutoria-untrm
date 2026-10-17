@@ -3,7 +3,6 @@ import {
   DashboardIcon,
   GraduationCapIcon,
   ClipboardIcon,
-  FolderIcon,
   CalendarIcon,
   ActivityIcon,
   SendIcon,
@@ -11,13 +10,9 @@ import {
   StarIcon,
   CalendarRangeIcon,
   ReportIcon,
-  PieChartIcon,
   RefreshIcon,
-  BarChartIcon,
   ClockIcon,
-  FileSpreadsheetIcon,
   MessageSquareIcon,
-  FileTextIcon,
   SettingsIcon,
   AlertTriangleIcon,
 } from '@shared/components/icons';
@@ -84,8 +79,8 @@ export const NAV: NavGroup[] = [
     // Quien atiende a los tutorados: el docente tutor y quien lo supervisa (coordinación, DBU) o recibe sus derivaciones (servicios).
     title: 'Atención a tutorados',
     items: [
-      { label: 'Tutorados', Icon: GraduationCapIcon, path: '/tutorados', action: '', roles: ['tutor', 'coord', 'dbu'] },
-      { label: 'Expediente', Icon: FolderIcon, path: '/expediente', roles: ['tutor', 'coord', 'dbu'] },
+      // El expediente se abre desde la lista de tutorados («Ver expediente»); mientras se ve uno, esta entrada queda activa.
+      { label: 'Tutorados', Icon: GraduationCapIcon, path: '/tutorados', alsoPaths: ['/expediente'], action: '', roles: ['tutor', 'coord', 'dbu'] },
       { label: 'Entrevista inicial', Icon: ClipboardIcon, path: '/tutorados', action: 'entrevista', roles: ['tutor'] },
       { label: 'Sesiones', Icon: CalendarIcon, path: '/sesiones', roles: ['tutor'] },
       { label: 'Seguimiento', Icon: ActivityIcon, path: '/tutorados', action: 'seguimiento', roles: ['tutor'] },
@@ -102,30 +97,14 @@ export const NAV: NavGroup[] = [
     ],
   },
   {
-    // Lo que hacen la coordinación y la DBU en cada periodo (una sola pantalla con pestañas, en el orden en que se hace) y
-    // la planificación y las amonestaciones.
+    // Lo que hacen la coordinación y la DBU en cada periodo (una sola pantalla con pestañas, en el orden en que se hace), la
+    // planificación, los informes (otra pantalla con pestañas) y las amonestaciones.
     title: 'Gestión',
     items: [
       { label: SECTIONS.periodo.title, Icon: RefreshIcon, path: SECTIONS.periodo.path, alsoPaths: sectionPaths('periodo'), roles: ['coord', 'dbu'] },
       { label: 'Plan semestral', Icon: CalendarRangeIcon, path: '/plan-semestral', roles: ['coord', 'dbu'] },
+      { label: SECTIONS.informes.title, Icon: ReportIcon, path: SECTIONS.informes.path, alsoPaths: sectionPaths('informes'), roles: ['tutor', 'coord', 'dbu', 'vice'] },
       { label: 'Amonestaciones', Icon: AlertTriangleIcon, path: '/amonestaciones', roles: ['dec', 'dbu', 'coord'] },
-    ],
-  },
-  {
-    title: 'Informes',
-    items: [
-      {
-        label: 'Horarios y asistencia',
-        title: 'Consolidado de horarios y asistencia',
-        Icon: ReportIcon,
-        path: '/informes',
-        roles: ['tutor', 'coord', 'dbu'],
-      },
-      { label: 'Informe semestral', Icon: FileTextIcon, path: '/informes/semestral', roles: ['tutor'] },
-      { label: 'Informe consolidado', Icon: FileSpreadsheetIcon, path: '/informes/consolidado', roles: ['dbu', 'vice'] },
-      { label: 'Indicadores', Icon: PieChartIcon, path: '/indicadores', roles: ['dbu', 'coord', 'vice'] },
-      { label: 'Resultados de evaluación', Icon: BarChartIcon, path: '/evaluacion/resultados', roles: ['dbu', 'coord'] },
-      { label: 'Sugerencias de estudiantes', Icon: StarIcon, path: '/evaluacion/sugerencias', roles: ['dbu', 'coord'] },
     ],
   },
   {
@@ -161,12 +140,14 @@ export const ALL_NAV_ITEMS: NavItem[] = NAV.flatMap((group) => group.items);
 const EXTRA_META: Record<string, { title: string; group: string }> = {
   '/profile': { title: 'Mi perfil', group: 'Cuenta' },
   '/unauthorized': { title: 'Acceso denegado', group: '' },
+  '/expediente': { title: 'Expediente', group: 'Atención a tutorados' },
 };
 
 // La entrada de menú más específica da el título; las rutas con parámetro (p. ej. /expediente/:id)
 // heredan el de su base.
 export function resolveMeta(pathname: string) {
   if (EXTRA_META[pathname]) return EXTRA_META[pathname];
+  if (pathname.startsWith('/expediente/')) return EXTRA_META['/expediente'];
   const item = findActiveItem(ALL_NAV_ITEMS, pathname, '');
   if (!item) return { title: 'Panel de inicio', group: 'Inicio' };
   const group = NAV.find((g) => g.items.includes(item));

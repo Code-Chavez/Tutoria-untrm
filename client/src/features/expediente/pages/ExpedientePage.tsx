@@ -47,8 +47,8 @@ export const ExpedientePage: React.FC = () => {
         title="No se pudo cargar el expediente"
         description={error || 'El tutorado solicitado no existe.'}
         action={
-          <Button variant="secondary" onClick={() => navigate('/expediente')}>
-            Volver a la búsqueda
+          <Button variant="secondary" onClick={() => navigate('/tutorados')}>
+            Volver a Tutorados
           </Button>
         }
       />
@@ -59,9 +59,9 @@ export const ExpedientePage: React.FC = () => {
 
   return (
     <div>
-      <button className={styles.back} onClick={() => navigate('/expediente')}>
+      <button className={styles.back} onClick={() => navigate('/tutorados')}>
         <ChevronLeftIcon size={16} />
-        Volver a la búsqueda
+        Volver a Tutorados
       </button>
 
       <PageHeader

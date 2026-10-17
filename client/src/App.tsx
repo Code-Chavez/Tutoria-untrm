@@ -14,7 +14,6 @@ import { DashboardPage } from '@features/dashboard/components/DashboardPage';
 import { UserManagementPage } from '@features/admin/pages/UserManagementPage';
 import { StudentsPage } from '@features/tutorados/pages/StudentsPage';
 import { BulkImportPage } from '@features/tutorados/pages/BulkImportPage';
-import { ExpedienteIndexPage } from '@features/expediente/pages/ExpedienteIndexPage';
 import { ExpedientePage } from '@features/expediente/pages/ExpedientePage';
 import { ProfilePage } from '@features/profile/pages/ProfilePage';
 import { MyTutoringRequestPage } from '@features/solicitudes/pages/MyTutoringRequestPage';
@@ -62,6 +61,34 @@ export default function App() {
           <Route element={<ProtectedRoute />}>
             <Route path="/" element={<AppLayout />}>
               <Route index element={<DashboardPage />} />
+              <Route path="reportes" element={<SectionHome section="informes" />} />
+              <Route element={<SectionShell section="informes" />}>
+              <Route
+                path="informes"
+                element={
+                  <RequireRole
+                    roles={['Docente Tutor', 'Coordinador', 'Administrador DBU']}
+                  >
+                    <ScheduleAttendanceReportPage />
+                  </RequireRole>
+                }
+              />
+              <Route
+                path="informes/semestral"
+                element={
+                  <RequireRole roles={['Docente Tutor']}>
+                    <SemesterReportPage />
+                  </RequireRole>
+                }
+              />
+              <Route
+                path="informes/consolidado"
+                element={
+                  <RequireRole roles={['Administrador DBU', 'Vicerrectorado']}>
+                    <ConsolidatedReportPage />
+                  </RequireRole>
+                }
+              />
               <Route
                 path="indicadores"
                 element={
@@ -70,6 +97,23 @@ export default function App() {
                   </RequireRole>
                 }
               />
+              <Route
+                path="evaluacion/resultados"
+                element={
+                  <RequireRole roles={['Administrador DBU', 'Coordinador']}>
+                    <EvaluationStatisticsPage />
+                  </RequireRole>
+                }
+              />
+              <Route
+                path="evaluacion/sugerencias"
+                element={
+                  <RequireRole roles={['Administrador DBU', 'Coordinador']}>
+                    <EvaluationSuggestionsPage />
+                  </RequireRole>
+                }
+              />
+              </Route>
               <Route path="periodo" element={<SectionHome section="periodo" />} />
               <Route path="configuracion" element={<SectionHome section="configuracion" />} />
               <Route element={<SectionShell section="periodo" />}>
@@ -198,22 +242,6 @@ export default function App() {
                 }
               />
               <Route
-                path="evaluacion/sugerencias"
-                element={
-                  <RequireRole roles={['Administrador DBU', 'Coordinador']}>
-                    <EvaluationSuggestionsPage />
-                  </RequireRole>
-                }
-              />
-              <Route
-                path="evaluacion/resultados"
-                element={
-                  <RequireRole roles={['Administrador DBU', 'Coordinador']}>
-                    <EvaluationStatisticsPage />
-                  </RequireRole>
-                }
-              />
-              <Route
                 path="tutorados"
                 element={
                   <RequireRole roles={['Docente Tutor', 'Coordinador', 'Administrador DBU']}>
@@ -221,14 +249,7 @@ export default function App() {
                   </RequireRole>
                 }
               />
-              <Route
-                path="expediente"
-                element={
-                  <RequireRole roles={['Docente Tutor', 'Coordinador', 'Administrador DBU']}>
-                    <ExpedienteIndexPage />
-                  </RequireRole>
-                }
-              />
+              <Route path="expediente" element={<Navigate to="/tutorados" replace />} />
               <Route
                 path="expediente/:id"
                 element={
@@ -274,32 +295,6 @@ export default function App() {
                 element={
                   <RequireRole roles={['Tutorado']}>
                     <EvaluationPage />
-                  </RequireRole>
-                }
-              />
-              <Route
-                path="informes/consolidado"
-                element={
-                  <RequireRole roles={['Administrador DBU', 'Vicerrectorado']}>
-                    <ConsolidatedReportPage />
-                  </RequireRole>
-                }
-              />
-              <Route
-                path="informes/semestral"
-                element={
-                  <RequireRole roles={['Docente Tutor']}>
-                    <SemesterReportPage />
-                  </RequireRole>
-                }
-              />
-              <Route
-                path="informes"
-                element={
-                  <RequireRole
-                    roles={['Docente Tutor', 'Coordinador', 'Administrador DBU']}
-                  >
-                    <ScheduleAttendanceReportPage />
                   </RequireRole>
                 }
               />

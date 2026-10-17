@@ -61,13 +61,14 @@ describe('Sidebar (A15): cada acceso habilitado conduce a una tarea', () => {
   });
 
   describe('secciones con pestañas', () => {
-    it('«Periodo académico» y «Configuración» son una sola entrada cada una (las pestañas están dentro de la sección)', () => {
+    it('«Periodo académico», «Informes» y «Configuración» son una sola entrada cada una (las pestañas están dentro de la sección)', () => {
       role = 'Administrador DBU';
       renderSidebar();
 
       expect(screen.getByRole('link', { name: 'Periodo académico' })).toHaveAttribute('href', '/periodo');
+      expect(screen.getByRole('link', { name: 'Informes' })).toHaveAttribute('href', '/reportes');
       expect(screen.getByRole('link', { name: 'Configuración' })).toHaveAttribute('href', '/configuracion');
-      for (const tab of ['Pedir listas', 'Carga de estudiantes', 'Parámetros', 'Catálogos', 'Usuarios y roles']) {
+      for (const tab of ['Pedir listas', 'Carga de estudiantes', 'Parámetros', 'Catálogos', 'Usuarios y roles', 'Indicadores', 'Informe consolidado', 'Expediente']) {
         expect(screen.queryByRole('link', { name: tab })).not.toBeInTheDocument();
       }
     });
@@ -98,16 +99,16 @@ describe('Sidebar (A15): cada acceso habilitado conduce a una tarea', () => {
       role = 'Administrador DBU';
       renderSidebar();
 
-      const informes = screen.getByRole('button', { name: /Informes/ });
-      expect(informes).toHaveAttribute('aria-expanded', 'true');
-      expect(screen.getByRole('link', { name: 'Indicadores' })).toBeInTheDocument();
+      const gestion = screen.getByRole('button', { name: /Gestión/ });
+      expect(gestion).toHaveAttribute('aria-expanded', 'true');
+      expect(screen.getByRole('link', { name: 'Plan semestral' })).toBeInTheDocument();
 
-      await userEvent.click(informes);
-      expect(screen.getByRole('button', { name: /Informes/ })).toHaveAttribute('aria-expanded', 'false');
-      expect(screen.queryByRole('link', { name: 'Indicadores' })).not.toBeInTheDocument();
+      await userEvent.click(gestion);
+      expect(screen.getByRole('button', { name: /Gestión/ })).toHaveAttribute('aria-expanded', 'false');
+      expect(screen.queryByRole('link', { name: 'Plan semestral' })).not.toBeInTheDocument();
 
-      await userEvent.click(screen.getByRole('button', { name: /Informes/ }));
-      expect(screen.getByRole('link', { name: 'Indicadores' })).toBeInTheDocument();
+      await userEvent.click(screen.getByRole('button', { name: /Gestión/ }));
+      expect(screen.getByRole('link', { name: 'Plan semestral' })).toBeInTheDocument();
     });
 
     it('«Inicio» no se pliega (es una sola entrada)', () => {
@@ -121,14 +122,14 @@ describe('Sidebar (A15): cada acceso habilitado conduce a una tarea', () => {
     it('el grupo de la página actual no se oculta aunque se haya plegado, y recuerda los demás', async () => {
       role = 'Docente Tutor';
       const first = renderSidebar('/sesiones');
-      await userEvent.click(screen.getByRole('button', { name: /Informes/ }));
+      await userEvent.click(screen.getByRole('button', { name: /Gestión/ }));
       await userEvent.click(screen.getByRole('button', { name: /Atención a tutorados/ }));
       expect(screen.getByRole('link', { name: 'Sesiones' })).toHaveAttribute('aria-current', 'page'); // sigue visible
       first.unmount();
 
       renderSidebar('/sesiones');
-      expect(screen.getByRole('button', { name: /Informes/ })).toHaveAttribute('aria-expanded', 'false');
-      expect(screen.queryByRole('link', { name: 'Horarios y asistencia' })).not.toBeInTheDocument();
+      expect(screen.getByRole('button', { name: /Gestión/ })).toHaveAttribute('aria-expanded', 'false');
+      expect(screen.queryByRole('link', { name: 'Informes' })).not.toBeInTheDocument();
     });
   });
 });

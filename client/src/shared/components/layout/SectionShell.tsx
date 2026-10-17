@@ -17,7 +17,8 @@ export function SectionShell({ section }: { section: SectionKey }) {
   const tabs = tabsFor(section, user ? ROLE_CODES[user.role] : undefined);
 
   return (
-    <div>
+    // data-*: la sección siempre deja constancia de qué pestañas tiene la persona (con una sola no se pinta la barra)
+    <div data-section={SECTIONS[section].title} data-tabs={tabs.map((tab) => tab.label).join('|')}>
       {tabs.length > 1 && (
         <nav className={styles.tabs} aria-label={`Secciones de ${SECTIONS[section].title}`}>
           {tabs.map((tab) => (
