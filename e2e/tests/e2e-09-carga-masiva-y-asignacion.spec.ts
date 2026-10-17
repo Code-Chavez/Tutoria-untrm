@@ -31,7 +31,7 @@ async function buildWorkbook(): Promise<Buffer> {
 
 test('la coordinadora importa el Excel: 3 estudiantes se registran y la fila con error se informa', async ({ page }) => {
   await loginUi(page, accounts.coordinator);
-  await goToMenu(page, 'Carga masiva');
+  await goToMenu(page, 'Carga de estudiantes');
   await page.locator('input[type=file]').setInputFiles({
     name: `estudiantes-e2e-${stamp}.xlsx`,
     mimeType: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',

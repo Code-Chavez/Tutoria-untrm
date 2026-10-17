@@ -85,7 +85,7 @@ describe('DashboardPage (paneles por rol)', () => {
     it.each([
       ['Tutorado', ['Solicitar tutoría', 'Mis sesiones', 'Evaluar tutoría'], false, false],
       ['Docente Tutor', ['Ver tutorados', 'Mi calendario', 'Solicitudes de tutoría', 'Casos derivados'], true, false],
-      ['Coordinador', ['Registrar tutorado', 'Carga masiva', 'Solicitudes de tutoría', 'Plan semestral'], true, false],
+      ['Coordinador', ['Registrar tutorado', 'Carga de estudiantes', 'Solicitudes de tutoría', 'Plan semestral'], true, false],
       ['Administrador DBU', ['Usuarios y roles', 'Seguimiento de derivaciones', 'Solicitudes de tutoría'], true, true],
       ['Profesional de Servicio', ['Casos derivados'], false, false],
       ['Vicerrectorado', ['Informe consolidado', 'Indicadores'], false, false],

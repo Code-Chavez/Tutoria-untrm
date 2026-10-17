@@ -27,6 +27,7 @@ import {
   FileTextIcon,
   MapPinIcon,
   UserPlusIcon,
+  UsersPlusIcon,
   AlertTriangleIcon,
 } from '@shared/components/icons';
 
@@ -103,7 +104,8 @@ export const NAV: NavGroup[] = [
     title: 'Periodo académico',
     items: [
       { label: 'Pedir listas', Icon: SendIcon, path: '/pedir-listas', roles: ['coord', 'dbu'] },
-      { label: 'Carga masiva', Icon: UploadIcon, path: '/carga-masiva', roles: ['coord', 'dbu'] },
+      { label: 'Carga de estudiantes', Icon: UploadIcon, path: '/carga-masiva', roles: ['coord', 'dbu'] },
+      { label: 'Carga de docentes', Icon: UsersPlusIcon, path: '/carga-docentes', roles: ['dbu'] },
       // La asignación es por ciclo (un tutor por ciclo de cada escuela), no estudiante por estudiante.
       { label: 'Asignación por ciclo', Icon: UserPlusIcon, path: '/asignacion', roles: ['coord', 'dbu'] },
       { label: 'Cierre de periodo', Icon: RefreshIcon, path: '/cierre-periodo', roles: ['dbu'] },
