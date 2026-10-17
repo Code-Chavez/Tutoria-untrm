@@ -74,10 +74,10 @@ describe('navegación (UI-01, UI-04, UI-07)', () => {
     it('cada rol ve solo los grupos que le sirven, en el orden del trabajo', () => {
       expect(groupsFor('Tutorado').map((g) => g.title)).toEqual(['Inicio', 'Mi tutoría']);
       expect(groupsFor('Docente Tutor').map((g) => g.title)).toEqual(['Inicio', 'Atención a tutorados', 'Informes']);
-      expect(groupsFor('Coordinador').map((g) => g.title)).toEqual(['Inicio', 'Atención a tutorados', 'Periodo académico', 'Planificación y evaluación', 'Informes', 'Facultad y sedes']);
+      expect(groupsFor('Coordinador').map((g) => g.title)).toEqual(['Inicio', 'Atención a tutorados', 'Periodo académico', 'Planificación y evaluación', 'Informes', 'Facultad y sedes', 'Configuración']);
       expect(groupsFor('Decano').map((g) => g.title)).toEqual(['Inicio', 'Facultad y sedes']);
       expect(groupsFor('Vicerrectorado').map((g) => g.title)).toEqual(['Inicio', 'Informes', 'Facultad y sedes']);
-      expect(groupsFor('Administrador DBU').map((g) => g.title)).toEqual(['Inicio', 'Atención a tutorados', 'Periodo académico', 'Planificación y evaluación', 'Informes', 'Facultad y sedes', 'Administración']);
+      expect(groupsFor('Administrador DBU').map((g) => g.title)).toEqual(['Inicio', 'Atención a tutorados', 'Periodo académico', 'Planificación y evaluación', 'Informes', 'Facultad y sedes', 'Configuración', 'Administración']);
     });
 
     it('el periodo académico sigue el flujo real: pedir listas, cargar, asignar por ciclo y cerrar', () => {

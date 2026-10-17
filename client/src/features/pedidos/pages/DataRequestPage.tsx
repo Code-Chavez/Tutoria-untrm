@@ -1,11 +1,11 @@
 import { useState, type FormEvent } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import { PageHeader, Card, CardHeader, CardBody, Button, Badge, SelectField, EmptyState, NextSteps } from '@shared/components/ui';
 import { SendIcon } from '@shared/components/icons';
 import { getApiErrorMessage } from '@shared/services/apiClient';
 import type { DataRequestKind } from '../services/dataRequestService';
 import { useAuth } from '@features/auth/hooks/useAuth';
-import { useDataRequests, useMarkReceived, useRequestSchools, useSendDataRequest, useSetRequestEmail } from '../hooks/useDataRequests';
+import { useDataRequests, useMarkReceived, useRequestSchools, useSendDataRequest } from '../hooks/useDataRequests';
 import styles from './DataRequestPage.module.css';
 
 const CYCLES = Array.from({ length: 10 }, (_, i) => i + 1);
@@ -24,7 +24,6 @@ export function DataRequestPage() {
   const requestsQuery = useDataRequests();
   const send = useSendDataRequest();
   const markReceived = useMarkReceived();
-  const setEmail = useSetRequestEmail();
 
   // La coordinación solo ve sus escuelas; la DBU, todas.
   const schools = (schoolsQuery.data ?? []).filter((s) => user?.role === 'Administrador DBU' || s.coordinatorId === user?.id);
@@ -33,28 +32,14 @@ export function DataRequestPage() {
   const [cycles, setCycles] = useState<number[]>([]);
   // La DBU también pide la lista de docentes tutores (la coordinación solo la de estudiantes).
   const isDbu = user?.role === 'Administrador DBU';
-  const [kind, setKind] = useState<DataRequestKind>('ESTUDIANTES');
+  // Las pantallas de carga llevan aquí con la lista ya elegida (?lista=docentes); la de docentes solo la pide la DBU.
+  const [searchParams] = useSearchParams();
+  const [kind, setKind] = useState<DataRequestKind>(isDbu && searchParams.get('lista') === 'docentes' ? 'DOCENTES' : 'ESTUDIANTES');
   const [note, setNote] = useState('');
-  const [emailDraft, setEmailDraft] = useState('');
-  const [editing, setEditing] = useState(false);
   const [feedback, setFeedback] = useState<Feedback | null>(null);
 
   const toggleCycle = (cycle: number) => setCycles((current) => (current.includes(cycle) ? current.filter((c) => c !== cycle) : [...current, cycle]));
   const hasEmail = !!school?.requestEmail;
-  const showEmailForm = editing || (!!school && !hasEmail);
-
-  const saveEmail = async () => {
-    if (!school) return;
-    setFeedback(null);
-    try {
-      await setEmail.mutateAsync({ schoolId: school.id, email: emailDraft.trim() || null });
-      setEditing(false);
-      setEmailDraft('');
-      setFeedback({ type: 'ok', text: 'Correo guardado.' });
-    } catch (error) {
-      setFeedback({ type: 'error', text: getApiErrorMessage(error) });
-    }
-  };
 
   const submit = async (event: FormEvent) => {
     event.preventDefault();
@@ -105,7 +90,7 @@ export function DataRequestPage() {
               )}
               <div className={styles.field}>
                 <label htmlFor="req-school">Escuela profesional</label>
-                <SelectField id="req-school" value={school?.id ?? ''} onChange={(e) => { setChosen(e.target.value); setEditing(false); setFeedback(null); }}>
+                <SelectField id="req-school" value={school?.id ?? ''} onChange={(e) => { setChosen(e.target.value); setFeedback(null); }}>
                   {schools.map((s) => (
                     <option key={s.id} value={s.id}>
                       {s.name}
@@ -116,40 +101,25 @@ export function DataRequestPage() {
 
               <div className={styles.field}>
                 <span className={styles.label}>Se pedirá a</span>
-                {showEmailForm ? (
-                  <div className={styles.emailForm}>
-                    {!hasEmail && (
-                      <p className={styles.note}>
-                        Esta escuela aún no tiene un correo configurado para pedir las listas. Escríbelo para poder pedir; luego puedes cambiarlo cuando
-                        quieras.
-                      </p>
-                    )}
-                    <label htmlFor="req-email" className={styles.srOnly}>
-                      Correo al que se piden las listas
-                    </label>
-                    <input id="req-email" type="email" className={styles.input} placeholder="correo@untrm.edu.pe" value={emailDraft} onChange={(e) => setEmailDraft(e.target.value)} />
-                    <div className={styles.row}>
-                      <Button type="button" variant="primary" loading={setEmail.isPending} disabled={!emailDraft.trim()} onClick={saveEmail}>
-                        Guardar correo
-                      </Button>
-                      {hasEmail && (
-                        <Button type="button" variant="secondary" onClick={() => { setEditing(false); setEmailDraft(''); }}>
-                          Cancelar
-                        </Button>
-                      )}
-                    </div>
-                  </div>
-                ) : (
+                {hasEmail ? (
                   <div className={styles.row}>
                     <strong>{school?.requestEmail}</strong>
-                    <Button type="button" variant="secondary" onClick={() => { setEditing(true); setEmailDraft(school?.requestEmail ?? ''); }}>
-                      Cambiar correo
-                    </Button>
+                    <Link to={`/correos-escuelas?escuela=${school?.id ?? ''}`} className={styles.editLink}>
+                      Editar correo
+                    </Link>
+                  </div>
+                ) : (
+                  <div className={styles.emailForm}>
+                    <p className={styles.note}>Esta escuela aún no tiene un correo configurado para pedir las listas.</p>
+                    <Link to={`/correos-escuelas?escuela=${school?.id ?? ''}`} className={styles.linkButton}>
+                      Configurar correo
+                    </Link>
                   </div>
                 )}
               </div>
 
-              <fieldset className={styles.field}>
+              {kind === 'ESTUDIANTES' && (
+                <fieldset className={styles.field}>
                 <legend className={styles.label}>Ciclos (sin marcar = todos)</legend>
                 <div className={styles.cycles}>
                   {CYCLES.map((c) => (
@@ -159,13 +129,14 @@ export function DataRequestPage() {
                   ))}
                 </div>
               </fieldset>
+              )}
 
               <div className={styles.field}>
                 <label htmlFor="req-note">Observaciones (opcional)</label>
                 <textarea id="req-note" className={styles.input} rows={3} maxLength={500} value={note} onChange={(e) => setNote(e.target.value)} />
               </div>
 
-              <Button type="submit" variant="primary" loading={send.isPending} disabled={!hasEmail || showEmailForm}>
+              <Button type="submit" variant="primary" loading={send.isPending} disabled={!hasEmail}>
                 Enviar pedido
               </Button>
               <p className={styles.note}>

@@ -36,6 +36,7 @@ import { PeriodClosurePage } from '@features/periodo/pages/PeriodClosurePage';
 import { TutorAcceptancePage } from '@features/ciclos/pages/TutorAcceptancePage';
 import { AdmonitionsPage } from '@features/amonestaciones/pages/AdmonitionsPage';
 import { TeacherBulkImportPage } from '@features/docentes/pages/TeacherBulkImportPage';
+import { RequestEmailsPage } from '@features/pedidos/pages/RequestEmailsPage';
 import { CycleTutorsPage } from '@features/ciclos/pages/CycleTutorsPage';
 import { CampusesPage } from '@features/sedes/pages/CampusesPage';
 import { ParametersPage } from '@features/parametros/pages/ParametersPage';
@@ -109,6 +110,14 @@ export default function App() {
                 }
               />
               <Route path="tutores-por-ciclo" element={<Navigate to="/asignacion" replace />} />
+              <Route
+                path="correos-escuelas"
+                element={
+                  <RequireRole roles={['Administrador DBU', 'Coordinador']}>
+                    <RequestEmailsPage />
+                  </RequireRole>
+                }
+              />
               <Route
                 path="pedir-listas"
                 element={
