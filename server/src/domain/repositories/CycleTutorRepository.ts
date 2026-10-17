@@ -1,3 +1,14 @@
+export type AcceptanceStatus = 'SIN_SOLICITAR' | 'PENDIENTE' | 'ACEPTADA' | 'RECHAZADA';
+
+/** Un tramo semanal de atención que fija el docente. */
+export interface AvailabilitySlot {
+  /** 1 = lunes … 6 = sábado. */
+  day: number;
+  start: string;
+  end: string;
+  place?: string;
+}
+
 export interface CycleTutorAssignment {
   id: string;
   periodId: string;
@@ -8,7 +19,15 @@ export interface CycleTutorAssignment {
   note?: string | null;
   assignedById: string;
   createdAt: Date;
+  acceptanceStatus: AcceptanceStatus;
+  acceptanceExpiresAt?: Date | null;
+  requestedAt?: Date | null;
+  respondedAt?: Date | null;
+  declineReason?: string | null;
+  availability?: AvailabilitySlot[] | null;
 }
+
+export type NewCycleTutorAssignment = Pick<CycleTutorAssignment, 'periodId' | 'schoolId' | 'cycle' | 'tutorId' | 'isException' | 'note' | 'assignedById'>;
 
 /** Estudiante matriculado en un ciclo, con su tutor actual. */
 export interface CycleStudent {
@@ -23,7 +42,13 @@ export interface CycleTutorRepository {
   /** Ciclos (de cualquier escuela) que atiende un tutor en el periodo. */
   listByTutor(periodId: string, tutorId: string): Promise<CycleTutorAssignment[]>;
   /** Fija el tutor del ciclo (reemplaza al anterior). */
-  upsert(input: Omit<CycleTutorAssignment, 'id' | 'createdAt'>): Promise<CycleTutorAssignment>;
+  /** Fija el tutor del ciclo; si cambia el tutor, la aceptación vuelve a empezar. */
+  upsert(input: NewCycleTutorAssignment): Promise<CycleTutorAssignment>;
+  /** Guarda la huella del enlace de aceptación y deja la solicitud pendiente (invalida el enlace anterior). */
+  requestAcceptance(id: string, tokenHash: string, expiresAt: Date, requestedAt: Date): Promise<void>;
+  findByAcceptanceToken(tokenHash: string): Promise<CycleTutorAssignment | null>;
+  /** Registra la respuesta del docente y consume el enlace. */
+  recordResponse(id: string, response: { accepted: boolean; availability?: AvailabilitySlot[]; declineReason?: string }, respondedAt: Date): Promise<void>;
   remove(periodId: string, schoolId: string, cycle: number): Promise<boolean>;
   /** Estudiantes activos matriculados en ese ciclo y escuela en el periodo. */
   studentsOfCycle(periodId: string, schoolId: string, cycle: number): Promise<CycleStudent[]>;

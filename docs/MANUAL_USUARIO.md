@@ -432,6 +432,7 @@ En **Tutores por ciclo** (menú Principal; DBU y coordinación de la escuela) se
 2. Los estudiantes que se **carguen después** (carga masiva o alta manual) en ese ciclo quedan con el tutor del ciclo.
 3. **Un docente atiende un solo ciclo.** Si intenta ponerlo en otro, el sistema avisa y ofrece **registrar una excepción**: escriba el motivo (p. ej. «aceptó por correo asumir el ciclo 8»). Queda marcada como *Excepción* y en la bitácora. Un docente no puede atender más de dos ciclos.
 4. **Quitar** deja el ciclo sin tutor; los estudiantes conservan el que ya tienen (para cambiarlo, use la reasignación).
+5. **Aceptación del docente.** Al asignar un docente nuevo a un ciclo, recibe un correo con un enlace personal de un solo uso (vence en 72 horas). Allí **acepta** indicando los días, las horas y el lugar en que atenderá (cada sesión dura 45 minutos; el máximo semanal lo fija la DBU en *Parámetros*) o **rechaza** con un motivo. En la pantalla, cada ciclo muestra *Sin solicitar / Pendiente / Aceptó / Rechazó*, con su disponibilidad o el motivo. Si rechaza, la coordinación recibe un correo y asigna a otro docente. Si no llegó el correo, use **Reenviar** (genera un enlace nuevo e invalida el anterior). Si se cambia el docente del ciclo, la aceptación empieza de nuevo con el nuevo; si se vuelve a elegir al mismo, conserva su respuesta. En una excepción, el correo le pregunta al docente si puede asumir también ese ciclo.
 
 ## 8. Preguntas frecuentes
 

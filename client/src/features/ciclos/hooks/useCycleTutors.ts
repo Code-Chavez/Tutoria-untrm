@@ -26,6 +26,11 @@ export function useSetCycleTutor(schoolId: string) {
   });
 }
 
+export function useResendAcceptance(schoolId: string) {
+  const refresh = useRefresh(schoolId);
+  return useMutation({ mutationFn: (cycle: number) => cycleTutorService.resendAcceptance(schoolId, cycle), onSuccess: refresh });
+}
+
 export function useRemoveCycleTutor(schoolId: string) {
   const refresh = useRefresh(schoolId);
   return useMutation({ mutationFn: (cycle: number) => cycleTutorService.remove(schoolId, cycle), onSuccess: refresh });

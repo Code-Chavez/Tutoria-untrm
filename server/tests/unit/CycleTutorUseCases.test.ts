@@ -21,7 +21,7 @@ import { TutorAssignmentHistoryRepository } from '@domain/repositories/TutorAssi
 import { AuditLogRepository } from '@domain/repositories/AuditLogRepository';
 
 const assignment = (over: Partial<CycleTutorAssignment> = {}): CycleTutorAssignment => ({
-  id: 'a1', periodId: 'p1', schoolId: 's1', cycle: 1, tutorId: 't1', isException: false, note: null, assignedById: 'coord', createdAt: new Date(), ...over,
+  id: 'a1', periodId: 'p1', schoolId: 's1', cycle: 1, tutorId: 't1', isException: false, note: null, assignedById: 'coord', createdAt: new Date(), acceptanceStatus: 'SIN_SOLICITAR', ...over,
 });
 
 describe('tutor por ciclo (fase 3b)', () => {
@@ -50,6 +50,9 @@ describe('tutor por ciclo (fase 3b)', () => {
       remove: jest.fn().mockResolvedValue(true),
       studentsOfCycle: jest.fn().mockResolvedValue([]),
       enrolledByCycle: jest.fn().mockResolvedValue(new Map()),
+      requestAcceptance: jest.fn(),
+      findByAcceptanceToken: jest.fn(),
+      recordResponse: jest.fn(),
     };
     students = { assignTutor: jest.fn().mockResolvedValue(1) } as unknown as jest.Mocked<StudentRepository>;
     history = { create: jest.fn().mockResolvedValue({}), findByStudent: jest.fn() };

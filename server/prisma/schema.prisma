@@ -976,6 +976,16 @@ model CycleTutorAssignment {
   note        String?
   assignedById String @map("assigned_by_id")
 
+  // Aceptación del docente (fase 4): SIN_SOLICITAR → PENDIENTE (correo con enlace de un solo uso) → ACEPTADA / RECHAZADA.
+  acceptanceStatus    String    @default("SIN_SOLICITAR") @map("acceptance_status")
+  acceptanceTokenHash String?   @unique @map("acceptance_token_hash")
+  acceptanceExpiresAt DateTime? @map("acceptance_expires_at")
+  requestedAt         DateTime? @map("requested_at")
+  respondedAt         DateTime? @map("responded_at")
+  declineReason       String?   @map("decline_reason")
+  // Días, horas y lugar de atención que fija el docente: [{ day: 1-6, start: "HH:MM", end: "HH:MM", place?: string }]
+  availability        Json?
+
   @@unique([periodId, schoolId, cycle])
   @@index([periodId, tutorId])
   @@map("cycle_tutor_assignments")

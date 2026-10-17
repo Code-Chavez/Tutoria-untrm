@@ -9,12 +9,14 @@ const controller = new CycleTutorController(
   container.useCases.listCycleTutorsUseCase,
   container.useCases.setCycleTutorUseCase,
   container.useCases.removeCycleTutorUseCase,
+  container.useCases.requestTutorAcceptanceUseCase,
 );
 const requireAuth = authenticate(container.services.tokenService);
 
 // Tutor de cada ciclo de una escuela en el periodo vigente: la DBU y la coordinación de esa escuela (alcance por escuela en el caso de uso).
 router.get('/schools/:schoolId/cycle-tutors', requireAuth, authorize(['students:write']), controller.index);
 router.put('/schools/:schoolId/cycle-tutors/:cycle', requireAuth, authorize(['students:write']), controller.set);
+router.post('/schools/:schoolId/cycle-tutors/:cycle/acceptance-request', requireAuth, authorize(['students:write']), controller.resend);
 router.delete('/schools/:schoolId/cycle-tutors/:cycle', requireAuth, authorize(['students:write']), controller.remove);
 
 export default router;

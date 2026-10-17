@@ -31,6 +31,7 @@ import { PrismaSystemParameterRepository } from './repositories/PrismaSystemPara
 import { PrismaSupportContactRepository } from './repositories/PrismaSupportContactRepository';
 import { PrismaSchoolRepository } from './repositories/PrismaSchoolRepository';
 import { ImportTutorsUseCase } from '@application/use-cases/users/ImportTutorsUseCase';
+import { GetTutorAcceptanceUseCase, RequestTutorAcceptanceUseCase, RespondTutorAcceptanceUseCase } from '@application/use-cases/cycle-tutors/TutorAcceptanceUseCases';
 import { PrismaCycleTutorRepository } from './repositories/PrismaCycleTutorRepository';
 import { CycleTutorApplier, ListCycleTutorsUseCase, RemoveCycleTutorUseCase, SetCycleTutorUseCase } from '@application/use-cases/cycle-tutors/CycleTutorUseCases';
 import { PrismaCampusRepository } from './repositories/PrismaCampusRepository';
@@ -342,6 +343,10 @@ const cycleTutorApplier = new CycleTutorApplier(cycleTutorRepository, studentRep
 const listCycleTutorsUseCase = new ListCycleTutorsUseCase(studentAccessGuard, academicPeriodRepository, cycleTutorRepository);
 const setCycleTutorUseCase = new SetCycleTutorUseCase(studentAccessGuard, academicPeriodRepository, schoolRepository, userRepository, roleRepository, cycleTutorRepository, cycleTutorApplier, auditLogRepository);
 const removeCycleTutorUseCase = new RemoveCycleTutorUseCase(studentAccessGuard, academicPeriodRepository, cycleTutorRepository, auditLogRepository);
+const acceptanceConfig = { publicUrl: env.PUBLIC_APP_URL, ttlHours: env.INVITATION_TTL_HOURS };
+const requestTutorAcceptanceUseCase = new RequestTutorAcceptanceUseCase(studentAccessGuard, academicPeriodRepository, schoolRepository, userRepository, cycleTutorRepository, mailer, auditLogRepository, acceptanceConfig);
+const getTutorAcceptanceUseCase = new GetTutorAcceptanceUseCase(cycleTutorRepository, userRepository, schoolRepository, academicPeriodRepository, systemParameterRepository);
+const respondTutorAcceptanceUseCase = new RespondTutorAcceptanceUseCase(cycleTutorRepository, userRepository, schoolRepository, academicPeriodRepository, systemParameterRepository, mailer, auditLogRepository);
 const createStudentUseCase = new CreateStudentUseCase(studentRepository, schoolRepository, studentAccessGuard, academicPeriodRepository, periodEnrollmentRepository, cycleTutorApplier);
 const updateStudentUseCase = new UpdateStudentUseCase(studentRepository, schoolRepository, studentAccessGuard);
 const listStudentsUseCase = new ListStudentsUseCase(studentRepository, studentAccessGuard);
@@ -809,6 +814,9 @@ export const container = {
     listCampusesUseCase,
     importTutorsUseCase,
     listCycleTutorsUseCase,
+    requestTutorAcceptanceUseCase,
+    getTutorAcceptanceUseCase,
+    respondTutorAcceptanceUseCase,
     setCycleTutorUseCase,
     removeCycleTutorUseCase,
     createCampusUseCase,
