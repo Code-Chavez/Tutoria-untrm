@@ -66,10 +66,10 @@ export const QUICK_ACTIONS: QuickAction[] = [
   { group: 'Informes', label: 'Informe consolidado', description: 'Cifras por escuela y facultad', to: '/informes/consolidado', Icon: FileSpreadsheetIcon, roles: [VICE] },
   { group: 'Informes', label: 'Indicadores', description: 'Tablero de cobertura y riesgo', to: '/indicadores', Icon: PieChartIcon, roles: [VICE] },
 
-  { group: 'Facultad y sedes', label: 'Amonestaciones', description: 'Registrar y consultar las de los docentes de tu facultad', to: '/amonestaciones', Icon: AlertTriangleIcon, roles: [DEAN] },
-  { group: 'Facultad y sedes', label: 'Sedes', description: 'Sedes de la universidad y sede de cada escuela', to: '/sedes', Icon: MapPinIcon, roles: [VICE] },
+  { group: 'Facultad', label: 'Amonestaciones', description: 'Registrar y consultar las de los docentes de tu facultad', to: '/amonestaciones', Icon: AlertTriangleIcon, roles: [DEAN] },
+  { group: 'Configuración', label: 'Sedes', description: 'Sedes de la universidad y sede de cada escuela', to: '/sedes', Icon: MapPinIcon, roles: [VICE] },
 
-  { group: 'Administración', label: 'Usuarios y roles', description: 'Cuentas del sistema y permisos', to: '/users', Icon: SettingsIcon, roles: [DBU] },
+  { group: 'Configuración', label: 'Usuarios y roles', description: 'Cuentas del sistema y permisos', to: '/users', Icon: SettingsIcon, roles: [DBU] },
 ];
 
 /** Los accesos del rol, agrupados en el orden del menú. */

@@ -26,26 +26,27 @@ son los que aparecen en pantalla. Si necesita instalar o mantener el sistema, ve
 Cada persona entra con su cuenta institucional y ve **solo** el menú y la información que le corresponde. No es un error que a usted no le aparezca una opción
 que otro compañero sí tiene: depende de su rol.
 
-El menú está **agrupado por tareas**, en el orden en que se hacen. Una persona solo ve los grupos que le sirven:
+El menú es **corto a propósito** y está agrupado por tareas. Cada grupo se despliega y se pliega con un clic en su título (el sistema recuerda lo que usted dejó abierto; el grupo de la pantalla en que está siempre se ve abierto). Tres entradas son **una sola pantalla con pestañas**: *Periodo académico*, *Informes* y *Configuración*; al entrar, las pestañas aparecen arriba de la pantalla, en el orden en que se usan. Una persona solo ve lo que le sirve:
 
-| Grupo del menú | Qué hay | Quién lo ve |
+| Entrada del menú | Qué hay | Quién la ve |
 |---|---|---|
-| **Inicio** | Panel de inicio (resumen y accesos directos) | Todos |
+| **Inicio** → Panel de inicio | Resumen y accesos directos | Todos |
 | **Mi tutoría** | Solicitar tutoría · Mis sesiones · Evaluar tutoría | Estudiante |
-| **Atención a tutorados** | Tutorados · Expediente · Entrevista inicial · Sesiones · Seguimiento · Derivar caso · Solicitudes de tutoría · Casos derivados · Seguimiento DBU | Docente tutor (todo menos Seguimiento DBU), coordinación (Tutorados, Expediente, Solicitudes), profesional de servicio (Casos derivados), DBU |
-| **Periodo académico** | 1 Pedir listas → 2 Carga de estudiantes → 3 Carga de docentes (solo DBU) → 4 Asignación por ciclo → 5 Cierre de periodo | Coordinación (pasos 1, 2 y 4) y DBU (todos) |
-| **Planificación y evaluación** | Plan semestral · Evaluación de tutoría · Resultados de evaluación · Sugerencias de estudiantes | Coordinación y DBU (la configuración de la evaluación, solo DBU) |
-| **Informes** | Horarios y asistencia · Informe semestral · Informe consolidado · Indicadores | Docente, coordinación, Vicerrectorado y DBU, según cada informe |
-| **Facultad y sedes** | Amonestaciones · Sedes | Decano (Amonestaciones), coordinación (consulta), Vicerrectorado (Sedes), DBU |
-| **Configuración** | Correos de las escuelas (a dónde se piden las listas) | Coordinación (sus escuelas) y DBU |
-| **Administración** | Usuarios y roles · Catálogos · Parámetros · Identidad visual · Bitácora de auditoría | Solo DBU |
+| **Atención a tutorados** | Tutorados · Entrevista inicial · Sesiones · Seguimiento · Derivar caso · Solicitudes de tutoría · Casos derivados · Seguimiento DBU | Docente tutor (todo menos Seguimiento DBU), coordinación (Tutorados, Solicitudes), profesional de servicio (Casos derivados), DBU |
+| **Gestión** → Periodo académico | *Pestañas:* 1 Pedir listas → 2 Carga de estudiantes → 3 Carga de docentes (solo DBU) → 4 Asignación por ciclo → 5 Cierre de periodo (solo DBU) | Coordinación (pestañas 1, 2 y 4) y DBU (todas) |
+| **Gestión** → Plan semestral | Plan de trabajo de la escuela | Coordinación y DBU |
+| **Gestión** → Informes | *Pestañas:* Horarios y asistencia · Informe semestral · Informe consolidado · Indicadores · Resultados de evaluación · Sugerencias de estudiantes | Cada rol ve las que le corresponden: el docente (Horarios, Semestral), la coordinación (Horarios, Indicadores, Resultados, Sugerencias), Vicerrectorado (Consolidado, Indicadores) y la DBU (todas menos la del docente) |
+| **Gestión** → Amonestaciones | Registro y consulta de amonestaciones a docentes | Decano (las registra), coordinación y DBU (consulta) |
+| **Configuración** | *Pestañas:* Correos de las escuelas · Sedes · Evaluación de tutoría · Catálogos · Usuarios y roles · Parámetros · Identidad visual · Bitácora de auditoría | Coordinación (solo Correos de las escuelas), Vicerrectorado (solo Sedes) y DBU (todas) |
+
+**El expediente de un tutorado** no es una entrada del menú: se abre desde **Tutorados**, con el botón *Ver expediente* de cada fila (y de ahí se vuelve a Tutorados).
 
 ### Quién hace qué, y dónde
 
 | Tarea | Quién la hace | Dónde |
 |---|---|---|
-| Crear cuentas y asignar roles (docentes, coordinadores, Decano…) | DBU | Administración → Usuarios y roles (también *Importar docentes* desde Excel) |
-| Registrar facultades, escuelas y periodos | DBU | Administración → Catálogos |
+| Crear cuentas y asignar roles (docentes, coordinadores, Decano…) | DBU | Configuración → Usuarios y roles (también *Importar docentes* desde Excel) |
+| Registrar facultades, escuelas y periodos | DBU | Configuración → Catálogos |
 | Fijar la sede de cada escuela | Vicerrectorado o DBU | Facultad y sedes → Sedes |
 | Pedir a cada escuela la lista de estudiantes | Coordinación o DBU | Periodo académico → Pedir listas |
 | Configurar a qué correo se pide la lista de cada escuela (y corregirlo) | Coordinación (sus escuelas) o DBU | Configuración → Correos de las escuelas |
@@ -59,7 +60,7 @@ El menú está **agrupado por tareas**, en el orden en que se hacen. Una persona
 | Atender un caso derivado | Profesional de servicio | Atención a tutorados → Casos derivados |
 | Pedir tutoría y evaluar a su tutor | Estudiante | Mi tutoría |
 | Plan de trabajo de la escuela | Coordinación | Planificación y evaluación → Plan semestral |
-| Informe semestral del docente | Docente tutor | Informes → Informe semestral |
+| Informe semestral del docente | Docente tutor | Gestión → Informes → pestaña Informe semestral |
 | Amonestar a un docente | Decano (o DBU) | Facultad y sedes → Amonestaciones |
 | Cerrar el periodo | DBU | Periodo académico → Cierre de periodo |
 
@@ -289,7 +290,7 @@ Además de ver los tutorados **de su escuela** (nunca de otras), el coordinador:
 
 La asignación es **por ciclo**: se elige un docente tutor para cada ciclo de la escuela y todos los estudiantes matriculados de ese ciclo pasan a él (ver 7.9). No se asignan estudiantes uno por uno.
 
-- *Asignación por ciclo* (menú Periodo académico): la lista muestra **primero lo que necesita acción** (ciclos con estudiantes y sin tutor, luego los que el docente rechazó, luego los que tienen estudiantes sin tutor) y al final los ya resueltos.
+- *Asignación por ciclo* (menú Gestión → Periodo académico): la lista muestra **primero lo que necesita acción** (ciclos con estudiantes y sin tutor, luego los que el docente rechazó, luego los que tienen estudiantes sin tutor) y al final los ya resueltos.
 - **Reasignación individual** (caso puntual): en *Tutorados*, menú *Más* → *Reasignar tutor*; indique el motivo. Queda en el historial de asignaciones.
 
 ### 4.2 Registrar y cargar tutorados
@@ -381,7 +382,7 @@ El **Decano** pertenece a una facultad (la DBU la indica al crear su cuenta en *
 La coordinación de cada escuela y la DBU consultan estas amonestaciones (la coordinación, solo las de sus escuelas) y pueden descargar el documento; los docentes tutores y los demás roles no las ven.
 
 ### 6.1 Sedes
-Vicerrectorado (y la DBU) configuran en **Sedes** (menú Gestión) las sedes de la universidad (*Sede Central, Sede Bagua, Sede Utcubamba*) y **la sede de cada escuela profesional**: una escuela pertenece a una sola sede. Se puede agregar una sede, desactivarla o activarla de nuevo; una sede inactiva no se puede asignar a una escuela. Los cambios quedan en la bitácora. Este perfil no ve datos de estudiantes.
+Vicerrectorado (y la DBU) configuran en **Configuración → Sedes** las sedes de la universidad (*Sede Central, Sede Bagua, Sede Utcubamba*) y **la sede de cada escuela profesional**: una escuela pertenece a una sola sede. Se puede agregar una sede, desactivarla o activarla de nuevo; una sede inactiva no se puede asignar a una escuela. Los cambios quedan en la bitácora. Este perfil no ve datos de estudiantes.
 
 ## 7. Administrador DBU
 
@@ -440,7 +441,7 @@ El **periodo académico activo** determina el semestre en curso para reportes y 
 - *Bitácora de auditoría*: registro de las operaciones críticas (inicios de sesión, cambios de usuarios y catálogos, adjuntos, cambios de estado) y de los **accesos a información sensible**: quién consultó o descargó un expediente, entrevistas, seguimientos, red de apoyo, derivaciones y documentos firmados, cuándo y desde qué IP, incluidos los intentos rechazados. La bitácora no guarda el contenido consultado. Se puede filtrar y no se puede modificar desde el sistema.
 
 ### 7.7 Cierre de periodo
-Al terminar el periodo académico, vaya a **Cierre de periodo** (menú Gestión). La pantalla muestra el periodo vigente con un **resumen** de lo ocurrido: estudiantes, tutores, sesiones (individuales, grupales, canceladas, con asistencia), solicitudes, derivaciones, respuestas de evaluación e informes semestrales, y avisa qué quedará abierto (solicitudes, derivaciones y sesiones próximas).
+Al terminar el periodo académico, vaya a **Periodo académico → Cierre de periodo**. La pantalla muestra el periodo vigente con un **resumen** de lo ocurrido: estudiantes, tutores, sesiones (individuales, grupales, canceladas, con asistencia), solicitudes, derivaciones, respuestas de evaluación e informes semestrales, y avisa qué quedará abierto (solicitudes, derivaciones y sesiones próximas).
 
 1. Pulse **Cerrar periodo** y **escriba el nombre exacto del periodo** como confirmación.
 2. El sistema guarda el resumen, congela la matrícula del periodo y lo deja **cerrado**. Nada se borra.
@@ -459,10 +460,10 @@ Al crear o editar un usuario con rol **Docente**, la DBU debe elegir su **escuel
 - Los docentes creados antes de esta regla quedan sin escuela hasta que la DBU se la indique (editando el usuario); mientras tanto no se bloquean.
 
 ### 7.8.1 Carga de docentes desde Excel
-En **Carga de docentes** (menú *Periodo académico*, solo DBU) se crean las cuentas de varios docentes tutores a la vez, con el mismo recorrido guiado de la carga de estudiantes: descargar la plantilla, subir el archivo y revisar el resultado. La plantilla lleva *nombres, apellidos, correo, teléfono y escuela*; el correo debe ser único y la escuela debe existir. Cada fila crea la cuenta del docente con su escuela y le envía el enlace de un solo uso para crear su contraseña (nadie recibe contraseñas). El resultado indica cuántos se crearon y, fila por fila, los que no se pudieron cargar (correo inválido o ya registrado, escuela que no existe…). Si el correo no pudo salir, la pantalla muestra el enlace de ese docente una sola vez para entregarlo por un medio privado. Volver a subir el mismo archivo no duplica cuentas. Al terminar, ofrece ir a *Asignación por ciclo*.
+En **Carga de docentes** (*Gestión → Periodo académico*, solo DBU) se crean las cuentas de varios docentes tutores a la vez, con el mismo recorrido guiado de la carga de estudiantes: descargar la plantilla, subir el archivo y revisar el resultado. La plantilla lleva *nombres, apellidos, correo, teléfono y escuela*; el correo debe ser único y la escuela debe existir. Cada fila crea la cuenta del docente con su escuela y le envía el enlace de un solo uso para crear su contraseña (nadie recibe contraseñas). El resultado indica cuántos se crearon y, fila por fila, los que no se pudieron cargar (correo inválido o ya registrado, escuela que no existe…). Si el correo no pudo salir, la pantalla muestra el enlace de ese docente una sola vez para entregarlo por un medio privado. Volver a subir el mismo archivo no duplica cuentas. Al terminar, ofrece ir a *Asignación por ciclo*.
 
 ### 7.9 Asignación por ciclo
-En **Asignación por ciclo** (menú Periodo académico; DBU y coordinación de la escuela) se elige, para el periodo vigente, **el tutor de cada ciclo** de una escuela. Solo aparecen los docentes de esa escuela.
+En **Asignación por ciclo** (*Gestión → Periodo académico*; DBU y coordinación de la escuela) se elige, para el periodo vigente, **el tutor de cada ciclo** de una escuela. Solo aparecen los docentes de esa escuela.
 
 1. Elija la escuela y, en cada ciclo, el docente. Al elegirlo, los estudiantes **matriculados** de ese ciclo que no tenían tutor pasan a él; si cambia el tutor del ciclo, quienes seguían con el anterior se mueven (queda en el historial de asignaciones). Un tutor puesto a mano por la coordinación no se toca.
 2. Los estudiantes que se **carguen después** (carga masiva o alta manual) en ese ciclo quedan con el tutor del ciclo.

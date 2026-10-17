@@ -7,18 +7,14 @@
 .groupTitle {
   margin: 0 0 var(--s3);
   font-family: var(--ft);
-  font-size: var(--fs-xs);
+  font-size: var(--fs-sm);
   font-weight: 700;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
   color: var(--g600);
 }
 
 .step {
   font-weight: 700;
   color: var(--azul-med);
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
 }
 
 .grid {
