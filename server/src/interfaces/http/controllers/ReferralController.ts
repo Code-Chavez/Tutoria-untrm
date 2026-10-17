@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 import { z } from 'zod';
+import { InvalidTutoringRequestStatusError, TutoringRequestNotFoundError } from '@application/use-cases/tutoring-requests/TutoringRequestErrors';
 import { CreateReferralUseCase } from '@application/use-cases/referrals/CreateReferralUseCase';
 import { GetReferralConstanciaUseCase } from '@application/use-cases/referrals/GetReferralConstanciaUseCase';
 import { GetReferralsUseCase } from '@application/use-cases/referrals/GetReferralsUseCase';
@@ -38,13 +39,15 @@ export class ReferralController {
       const studentId = req.params.id as string;
       const data = createReferralSchema.parse(req.body);
       const referredById = req.auth?.sub as string;
-      const referral = await this.createReferralUseCase.execute(studentId, referredById, data);
+      const referral = await this.createReferralUseCase.execute(studentId, referredById, data, req.ip);
       res.status(201).json({ message: 'Derivación registrada exitosamente', referral });
     } catch (error) {
       if (error instanceof z.ZodError) {
         res.status(400).json({ error: 'Datos de entrada inválidos', details: error.errors });
-      } else if (error instanceof StudentNotFoundError) {
+      } else if (error instanceof StudentNotFoundError || error instanceof TutoringRequestNotFoundError) {
         res.status(404).json({ error: error.message });
+      } else if (error instanceof InvalidTutoringRequestStatusError) {
+        res.status(409).json({ error: error.message });
       } else {
         res.status(500).json({ error: 'Error interno del servidor' });
       }

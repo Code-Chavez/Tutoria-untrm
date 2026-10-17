@@ -50,4 +50,20 @@ export class PrismaTutoringRequestRepository implements TutoringRequestRepositor
     });
     return count === 1 ? this.findById(id) : null;
   }
+
+  async attachFollowUp(
+    id: string,
+    followUp: { sessionId: string } | { referralId: string },
+    handledById: string,
+  ): Promise<TutoringRequest | null> {
+    // Condicional sobre «sin vínculo»: dos personas no crean dos atenciones para la misma solicitud.
+    const { count } = await this.prisma.tutoringRequest.updateMany({
+      where: { id, sessionId: null, referralId: null },
+      data: { ...followUp, handledById, handledAt: new Date() },
+    });
+    if (count !== 1) return null;
+    // Pendiente → en atención (si ya estaba en atención o atendida, se conserva).
+    await this.prisma.tutoringRequest.updateMany({ where: { id, status: 'PENDIENTE' }, data: { status: 'EN_ATENCION' } });
+    return this.findById(id);
+  }
 }

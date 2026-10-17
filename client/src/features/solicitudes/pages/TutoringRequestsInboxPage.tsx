@@ -1,6 +1,13 @@
 import { useState } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
 import { useSearchParams } from 'react-router-dom';
 import { getApiErrorMessage } from '@shared/services/apiClient';
+import { useAuth } from '@features/auth/hooks/useAuth';
+import { useStudents } from '@features/tutorados/hooks/useStudents';
+import { SessionFormModal } from '@features/tutorados/components/SessionFormModal';
+import { ReferralFormModal } from '@features/derivaciones/components/ReferralFormModal';
+import { referralService, type CreateReferralData } from '@features/derivaciones/services/referralService';
+import { sessionService, type ScheduleSessionData } from '@features/sesiones/services/sessionService';
 import { Badge, Button, Card, EmptyState, PageHeader, SelectField, TableSkeleton } from '@shared/components/ui';
 import { InboxIcon, XCircleIcon } from '@shared/components/icons';
 import table from '@shared/components/ui/DataTable.module.css';
@@ -14,13 +21,27 @@ import {
 } from '../services/tutoringRequestService';
 import styles from './TutoringRequestsInboxPage.module.css';
 
+// Duración habitual (Art. 15.c); el valor real lo fija el servidor. Solo es el texto de ayuda del formulario.
+const SESSION_MINUTES = 45;
+
+// Qué se hizo con la solicitud: se dice en la tabla y en el detalle, para no abrirla a ver si ya se atendió.
+const followUpLabel = (r: TutoringRequestView) => (r.sessionId ? 'Con sesión programada' : r.referralId ? 'Derivada a un servicio' : null);
+
 const STATUS_TONE: Record<TutoringRequestStatus, 'warning' | 'info' | 'success'> = {
   PENDIENTE: 'warning',
   EN_ATENCION: 'info',
   ATENDIDA: 'success',
 };
 
-function AttendModal({ request, onClose }: { request: TutoringRequestView; onClose: () => void }) {
+interface AttendModalProps {
+  request: TutoringRequestView;
+  onClose: () => void;
+  /** Solo quien puede programar y derivar (el docente tutor) ve estas acciones. */
+  onSchedule?: () => void;
+  onRefer?: () => void;
+}
+
+function AttendModal({ request, onClose, onSchedule, onRefer }: AttendModalProps) {
   const dialogRef = useDialog(onClose);
   const update = useUpdateTutoringRequestStatus();
   const [note, setNote] = useState(request.responseNote ?? '');
@@ -61,6 +82,25 @@ function AttendModal({ request, onClose }: { request: TutoringRequestView; onClo
           </p>
         )}
         <p className={styles.reason}>{request.reason}</p>
+        {followUpLabel(request) && (
+          <p className={styles.linked} role="status">
+            {followUpLabel(request)}: no hace falta crear otra atención para esta solicitud.
+          </p>
+        )}
+        {onSchedule && onRefer && !request.sessionId && !request.referralId && (
+          <div className={styles.followUp}>
+            <span className={styles.label}>¿Qué hacer con esta solicitud?</span>
+            <div className={styles.followUpButtons}>
+              <Button variant="secondary" onClick={onSchedule}>
+                Programar sesión
+              </Button>
+              <Button variant="secondary" onClick={onRefer}>
+                Derivar a un servicio
+              </Button>
+            </div>
+            <p className={styles.sub}>Ambas parten de esta solicitud: el tutorado y el motivo ya vienen cargados y la solicitud queda vinculada.</p>
+          </div>
+        )}
 
         {request.status === 'ATENDIDA' ? (
           <p className={styles.done}>
@@ -122,6 +162,51 @@ export function TutoringRequestsInboxPage() {
   const clearRequested = () => setSearchParams({}, { replace: true });
   const open = selected ?? requested;
 
+  // Programar una sesión o derivar el caso parte de la solicitud: el tutorado y el motivo ya vienen cargados.
+  const { user } = useAuth();
+  const canFollowUp = user?.role === 'Docente Tutor';
+  const { students } = useStudents();
+  const queryClient = useQueryClient();
+  const [followUp, setFollowUp] = useState<{ kind: 'session' | 'referral'; request: TutoringRequestView } | null>(null);
+  const [followUpBusy, setFollowUpBusy] = useState(false);
+  const [followUpError, setFollowUpError] = useState('');
+  const [feedback, setFeedback] = useState('');
+  const followUpStudent = followUp ? students.find((s) => s.id === followUp.request.studentId) : undefined;
+  const closeFollowUp = () => {
+    setFollowUp(null);
+    setFollowUpError('');
+  };
+  const startFollowUp = (kind: 'session' | 'referral', r: TutoringRequestView) => {
+    setSelected(null);
+    if (requestedId) clearRequested();
+    setFollowUpError('');
+    setFollowUp({ kind, request: r });
+  };
+  const finishFollowUp = async (done: () => Promise<string>) => {
+    setFollowUpBusy(true);
+    setFollowUpError('');
+    try {
+      setFeedback(await done());
+      setFollowUp(null);
+      await queryClient.invalidateQueries({ queryKey: ['tutoringRequests'] });
+    } catch (err) {
+      setFollowUpError(getApiErrorMessage(err));
+    } finally {
+      setFollowUpBusy(false);
+    }
+  };
+  const confirmSession = (r: TutoringRequestView, data: ScheduleSessionData) =>
+    finishFollowUp(async () => {
+      const session = await sessionService.scheduleSession({ ...data, tutoringRequestId: r.id });
+      const when = new Date(session.scheduledAt).toLocaleString('es-PE', { dateStyle: 'medium', timeStyle: 'short' });
+      return `Sesión programada para el ${when} con ${r.studentName}. Quedó vinculada a su solicitud y la verá en Mis sesiones.`;
+    });
+  const confirmReferral = (r: TutoringRequestView, data: CreateReferralData) =>
+    finishFollowUp(async () => {
+      await referralService.createReferral(r.studentId, { ...data, tutoringRequestId: r.id });
+      return `Caso de ${r.studentName} derivado. Quedó vinculado a su solicitud; lo sigues en Casos derivados.`;
+    });
+
   return (
     <div>
       <PageHeader
@@ -134,6 +219,15 @@ export function TutoringRequestsInboxPage() {
         <div className={styles.notice} role="status">
           <span>Esa solicitud ya no está disponible para tu cuenta: fue eliminada, se atendió en otro filtro o dejó de estar a tu cargo.</span>
           <button type="button" className={styles.noticeClose} onClick={clearRequested}>
+            Cerrar
+          </button>
+        </div>
+      )}
+
+      {feedback && (
+        <div className={styles.notice} role="status">
+          <span>{feedback}</span>
+          <button type="button" className={styles.noticeClose} onClick={() => setFeedback('')}>
             Cerrar
           </button>
         </div>
@@ -198,6 +292,7 @@ export function TutoringRequestsInboxPage() {
                     <td>{r.routedToName}</td>
                     <td>
                       <Badge tone={STATUS_TONE[r.status]}>{REQUEST_STATUS_LABEL[r.status]}</Badge>
+                      {followUpLabel(r) && <span className={styles.followUpTag}>{followUpLabel(r)}</span>}
                     </td>
                     <td className={table.right}>
                       <Button size="sm" variant={r.status === 'ATENDIDA' ? 'ghost' : 'secondary'} onClick={() => setSelected(r)}>
@@ -216,10 +311,37 @@ export function TutoringRequestsInboxPage() {
         <AttendModal
           key={open.id}
           request={open}
+          onSchedule={canFollowUp ? () => startFollowUp('session', open) : undefined}
+          onRefer={canFollowUp ? () => startFollowUp('referral', open) : undefined}
           onClose={() => {
             setSelected(null);
             if (requestedId) clearRequested();
           }}
+        />
+      )}
+
+      {followUp?.kind === 'session' && followUpStudent && (
+        <SessionFormModal
+          student={followUpStudent}
+          durationMinutes={SESSION_MINUTES}
+          defaultTopic={followUp.request.reason.slice(0, 200)}
+          context={`Atiende la solicitud de ${followUp.request.studentName}: «${followUp.request.reason}»`}
+          loading={followUpBusy}
+          serverError={followUpError}
+          onSubmit={(data) => confirmSession(followUp.request, data)}
+          onCancel={closeFollowUp}
+        />
+      )}
+
+      {followUp?.kind === 'referral' && followUpStudent && (
+        <ReferralFormModal
+          student={followUpStudent}
+          defaultReason={followUp.request.reason.slice(0, 1000)}
+          context={`Atiende la solicitud de ${followUp.request.studentName}: «${followUp.request.reason}»`}
+          loading={followUpBusy}
+          serverError={followUpError}
+          onSubmit={(data) => confirmReferral(followUp.request, data)}
+          onCancel={closeFollowUp}
         />
       )}
     </div>

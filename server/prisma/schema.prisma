@@ -441,6 +441,8 @@ model TutoringRequest {
   handledAt    DateTime? @map("handled_at")
   // Sesión en la que se atendió (opcional).
   sessionId    String?   @map("session_id")
+  // Derivación a un servicio con la que se atendió (opcional). Una solicitud lleva a una sesión o a una derivación, no a ambas.
+  referralId   String?   @map("referral_id")
 
   @@index([studentId])
   @@index([routedToId])

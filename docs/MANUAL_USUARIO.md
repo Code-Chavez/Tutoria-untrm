@@ -263,6 +263,18 @@ La ven usted, el servicio de destino y la DBU, nadie más.
 
 El estudiante ve la respuesta y recibe un aviso.
 
+**Cuando la solicitud necesita una cita o una derivación, no vuelva a buscar al estudiante.** Dentro de la solicitud (solo el docente tutor) están los botones
+*Programar sesión* y *Derivar a un servicio*. Ambos abren el formulario de siempre con el estudiante ya elegido y el motivo de la solicitud ya escrito
+(puede corregirlo), y al guardar **la solicitud queda vinculada** a la sesión o a la derivación:
+
+- Si programó una sesión, la solicitud pasa a *En atención* y la fila dice **Con sesión programada**. El estudiante la ve en *Mis sesiones* y recibe un aviso.
+- Si derivó el caso, la fila dice **Derivada a un servicio**. El aviso al estudiante dice solo que su solicitud tiene novedades: **no revela la derivación**, que es información reservada.
+- **No se duplica:** una solicitud ya vinculada no ofrece otra sesión ni otra derivación. Si necesita cambiar la cita, use *Sesiones* (reprogramar o cancelar con motivo).
+- *Marcar atendida* sigue siendo un paso aparte: escriba la respuesta para el estudiante cuando termine. «Atendida» significa que usted respondió; que la tutoría se realizó
+  se ve en la asistencia de la sesión.
+
+La coordinación ve el vínculo, pero **no programa sesiones ni deriva**: eso es del docente tutor.
+
 ### 3.8 Horarios y asistencia (Art. 15.d)
 
 ![Consolidado de «Horarios y asistencia»](manual/img/17-horarios-asistencia.jpg)

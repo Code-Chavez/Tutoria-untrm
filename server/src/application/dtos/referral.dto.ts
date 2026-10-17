@@ -5,6 +5,8 @@ export interface CreateReferralInput {
   reason: string;
   service: ReferralService;
   receivingInstance?: string;
+  /** Solicitud de tutoría que esta derivación atiende: queda vinculada, sin duplicar la atención. */
+  tutoringRequestId?: string;
 }
 
 // Datos ya resueltos (nombres, no solo IDs) para generar la constancia

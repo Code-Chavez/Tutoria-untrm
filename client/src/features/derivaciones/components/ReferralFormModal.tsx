@@ -17,6 +17,10 @@ interface ReferralFormModalProps {
   student: Student;
   loading?: boolean;
   serverError?: string;
+  /** Motivo ya sugerido (p. ej. el de la solicitud de tutoría que esta derivación atiende). */
+  defaultReason?: string;
+  /** Texto que explica de dónde viene esta derivación (la solicitud que atiende). */
+  context?: string;
   onSubmit: (data: CreateReferralData) => void;
   onCancel: () => void;
 }
@@ -38,11 +42,13 @@ export const ReferralFormModal: React.FC<ReferralFormModalProps> = ({
   student,
   loading,
   serverError,
+  defaultReason,
+  context,
   onSubmit,
   onCancel,
 }) => {
   const [checked, setChecked] = useState<Set<ReferralAspectCode>>(new Set());
-  const [reason, setReason] = useState('');
+  const [reason, setReason] = useState(defaultReason ?? '');
   // El tutor puede elegir cualquiera de los 5 servicios sin restricción
   // (HU-29): mientras no lo toque, el select sigue la sugerencia calculada
   // en vivo a partir de los aspectos marcados; en cuanto elige uno, esa
@@ -121,6 +127,12 @@ export const ReferralFormModal: React.FC<ReferralFormModalProps> = ({
         </div>
 
         <div className={styles.body}>
+          {context && (
+            <div className={styles.hint}>
+              <InfoIcon size={16} />
+              {context}
+            </div>
+          )}
           <div className={styles.field}>
             <label>Aspectos observados</label>
             {CATEGORIES.map((category) => (

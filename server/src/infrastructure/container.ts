@@ -242,6 +242,7 @@ import {
   ListOwnTutoringRequestsUseCase,
 } from '@application/use-cases/tutoring-requests/ListTutoringRequestsUseCase';
 import { UpdateTutoringRequestStatusUseCase } from '@application/use-cases/tutoring-requests/UpdateTutoringRequestStatusUseCase';
+import { TutoringRequestLinker } from '@application/use-cases/tutoring-requests/TutoringRequestLinker';
 import { ScheduleSessionUseCase } from '@application/use-cases/sessions/ScheduleSessionUseCase';
 import { ListSessionsUseCase } from '@application/use-cases/sessions/ListSessionsUseCase';
 import { RegisterAttendanceUseCase } from '@application/use-cases/sessions/RegisterAttendanceUseCase';
@@ -447,10 +448,18 @@ const createOwnTutoringRequestUseCase = new CreateOwnTutoringRequestUseCase(
   studentRepository,
   createTutoringRequestUseCase,
 );
+const tutoringRequestLinker = new TutoringRequestLinker(
+  tutoringRequestRepository,
+  studentAccessGuard,
+  studentRepository,
+  notificationRepository,
+  auditLogRepository,
+);
 const scheduleSessionUseCase = new ScheduleSessionUseCase(
   sessionRepository,
   studentAccessGuard,
   systemParameterRepository,
+  tutoringRequestLinker,
 );
 const listSessionsUseCase = new ListSessionsUseCase(
   sessionRepository,
@@ -622,6 +631,7 @@ const createReferralUseCase = new CreateReferralUseCase(
   userRepository,
   roleRepository,
   notificationRepository,
+  tutoringRequestLinker,
 );
 const getReferralConstanciaUseCase = new GetReferralConstanciaUseCase(
   studentReferralRepository,
