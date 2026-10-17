@@ -7,7 +7,7 @@ describe('accesos del panel de inicio agrupados', () => {
 
     expect(periodo?.actions.map((a) => [a.step, a.label])).toEqual([
       [1, 'Pedir listas'],
-      [2, 'Carga masiva'],
+      [2, 'Carga de estudiantes'],
       [3, 'Asignación por ciclo'],
     ]);
   });
@@ -15,7 +15,7 @@ describe('accesos del panel de inicio agrupados', () => {
   it('la DBU suma el cierre de periodo como último paso y la administración como bloque aparte', () => {
     const groups = quickActionGroupsFor('Administrador DBU');
 
-    expect(groups.find((g) => g.title === 'Periodo académico')?.actions.at(-1)).toMatchObject({ step: 4, label: 'Cierre de periodo' });
+    expect(groups.find((g) => g.title === 'Periodo académico')?.actions.at(-1)).toMatchObject({ step: 5, label: 'Cierre de periodo' });
     expect(groups.map((g) => g.title)).toContain('Administración');
   });
 

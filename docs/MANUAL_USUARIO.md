@@ -33,7 +33,7 @@ El menú está **agrupado por tareas**, en el orden en que se hacen. Una persona
 | **Inicio** | Panel de inicio (resumen y accesos directos) | Todos |
 | **Mi tutoría** | Solicitar tutoría · Mis sesiones · Evaluar tutoría | Estudiante |
 | **Atención a tutorados** | Tutorados · Expediente · Entrevista inicial · Sesiones · Seguimiento · Derivar caso · Solicitudes de tutoría · Casos derivados · Seguimiento DBU | Docente tutor (todo menos Seguimiento DBU), coordinación (Tutorados, Expediente, Solicitudes), profesional de servicio (Casos derivados), DBU |
-| **Periodo académico** | 1 Pedir listas → 2 Carga masiva → 3 Asignación por ciclo → 4 Cierre de periodo | Coordinación (pasos 1 a 3) y DBU (1 a 4) |
+| **Periodo académico** | 1 Pedir listas → 2 Carga de estudiantes → 3 Carga de docentes (solo DBU) → 4 Asignación por ciclo → 5 Cierre de periodo | Coordinación (pasos 1, 2 y 4) y DBU (todos) |
 | **Planificación y evaluación** | Plan semestral · Evaluación de tutoría · Resultados de evaluación · Sugerencias de estudiantes | Coordinación y DBU (la configuración de la evaluación, solo DBU) |
 | **Informes** | Horarios y asistencia · Informe semestral · Informe consolidado · Indicadores | Docente, coordinación, Vicerrectorado y DBU, según cada informe |
 | **Facultad y sedes** | Amonestaciones · Sedes | Decano (Amonestaciones), coordinación (consulta), Vicerrectorado (Sedes), DBU |
@@ -47,7 +47,8 @@ El menú está **agrupado por tareas**, en el orden en que se hacen. Una persona
 | Registrar facultades, escuelas y periodos | DBU | Administración → Catálogos |
 | Fijar la sede de cada escuela | Vicerrectorado o DBU | Facultad y sedes → Sedes |
 | Pedir a cada escuela la lista de estudiantes | Coordinación o DBU | Periodo académico → Pedir listas |
-| Cargar a los estudiantes del periodo | Coordinación o DBU | Periodo académico → Carga masiva |
+| Cargar a los estudiantes del periodo | Coordinación o DBU | Periodo académico → Carga de estudiantes |
+| Crear las cuentas de los docentes tutores (varios a la vez, desde Excel) | DBU | Periodo académico → Carga de docentes (también «Importar docentes» en Usuarios y roles) |
 | Asignar el tutor de cada ciclo (y ver si aceptó). **Se asigna por ciclo, no estudiante por estudiante** | Coordinación o DBU | Periodo académico → Asignación por ciclo |
 | Aceptar o rechazar ser tutor de un ciclo | El docente, desde el enlace de su correo | Correo → página de aceptación (sin iniciar sesión) |
 | Reasignar a un estudiante en un caso puntual (con motivo) | Coordinación o DBU | Atención a tutorados → Tutorados → Más → Reasignar tutor |
@@ -60,7 +61,7 @@ El menú está **agrupado por tareas**, en el orden en que se hacen. Una persona
 | Amonestar a un docente | Decano (o DBU) | Facultad y sedes → Amonestaciones |
 | Cerrar el periodo | DBU | Periodo académico → Cierre de periodo |
 
-**Una pantalla lleva a la siguiente.** Cuando a una pantalla le falta algo (por ejemplo, no hay estudiantes o una escuela no tiene docentes) o cuando termina una tarea, muestra un bloque **«Qué sigue»** con enlaces a donde se carga lo que falta o a la tarea siguiente: después de *Pedir listas* sigue *Carga masiva*; después de cargar, *Asignación por ciclo*. El **Panel de inicio** de la coordinación y la DBU muestra el periodo académico como pasos numerados.
+**Una pantalla lleva a la siguiente.** Cuando a una pantalla le falta algo (por ejemplo, no hay estudiantes o una escuela no tiene docentes) o cuando termina una tarea, muestra un bloque **«Qué sigue»** con enlaces a donde se carga lo que falta o a la tarea siguiente: después de *Pedir listas* sigue *Carga de estudiantes*; después de cargar, *Asignación por ciclo*. El **Panel de inicio** de la coordinación y la DBU muestra el periodo académico como pasos numerados.
 
 *Nombres en pantalla:* el sistema muestra **Estudiante** (rol Tutorado), **Docente** (Docente tutor), **Administrador** (Administrador DBU) y, para el Profesional de servicio, su especialidad (p. ej. «Profesional de Psicología»). Son los mismos roles de la tabla; solo cambia cómo se escriben junto a su nombre, en el perfil y en la lista de usuarios.
 
@@ -453,8 +454,8 @@ Al crear o editar un usuario con rol **Docente**, la DBU debe elegir su **escuel
 - Si se intenta de otra forma, el sistema lo rechaza con el aviso «El tutor pertenece a otra escuela».
 - Los docentes creados antes de esta regla quedan sin escuela hasta que la DBU se la indique (editando el usuario); mientras tanto no se bloquean.
 
-### 7.8.1 Importar docentes desde Excel
-En **Usuarios y roles → Importar docentes** la DBU da de alta a varios docentes tutores a la vez. Descargue la plantilla (nombres, apellidos, correo, teléfono y **escuela**), complétela con la lista que entrega la facultad y súbala. Cada fila crea la cuenta del docente con su escuela y le envía el enlace de un solo uso para crear su contraseña. El resultado indica cuántos se crearon y, fila por fila, los que no se pudieron cargar (correo inválido o ya registrado, escuela que no existe…). Si el correo no pudo salir, la pantalla muestra el enlace de ese docente una sola vez para entregarlo por un medio privado. Volver a subir el mismo archivo no duplica cuentas.
+### 7.8.1 Carga de docentes desde Excel
+En **Carga de docentes** (menú *Periodo académico*, solo DBU) se crean las cuentas de varios docentes tutores a la vez, con el mismo recorrido guiado de la carga de estudiantes: descargar la plantilla, subir el archivo y revisar el resultado. La plantilla lleva *nombres, apellidos, correo, teléfono y escuela*; el correo debe ser único y la escuela debe existir. Cada fila crea la cuenta del docente con su escuela y le envía el enlace de un solo uso para crear su contraseña (nadie recibe contraseñas). El resultado indica cuántos se crearon y, fila por fila, los que no se pudieron cargar (correo inválido o ya registrado, escuela que no existe…). Si el correo no pudo salir, la pantalla muestra el enlace de ese docente una sola vez para entregarlo por un medio privado. Volver a subir el mismo archivo no duplica cuentas. Al terminar, ofrece ir a *Asignación por ciclo*.
 
 ### 7.9 Asignación por ciclo
 En **Asignación por ciclo** (menú Periodo académico; DBU y coordinación de la escuela) se elige, para el periodo vigente, **el tutor de cada ciclo** de una escuela. Solo aparecen los docentes de esa escuela.
