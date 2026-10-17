@@ -344,6 +344,11 @@ Perfil de **solo lectura**.
 
 Las cifras del consolidado, del tablero y del panel de inicio coinciden entre sí.
 
+### 6.0 Decano
+El **Decano** pertenece a una facultad (la DBU la indica al crear su cuenta en *Usuarios y roles*). En **Amonestaciones** ve las de su facultad y registra una nueva: elige al docente tutor (solo aparecen los de su facultad), la fecha, el motivo y, si lo tiene, adjunta el documento (resolución o memorándum, PDF o imagen). El sistema deja constancia de quién, cuándo y la huella del archivo, pero **no aplica ninguna sanción**: la amonestación es un registro. No tiene acceso a estudiantes ni a expedientes.
+
+La coordinación de cada escuela y la DBU consultan estas amonestaciones (la coordinación, solo las de sus escuelas) y pueden descargar el documento; los docentes tutores y los demás roles no las ven.
+
 ### 6.1 Sedes
 Vicerrectorado (y la DBU) configuran en **Sedes** (menú Gestión) las sedes de la universidad (*Sede Central, Sede Bagua, Sede Utcubamba*) y **la sede de cada escuela profesional**: una escuela pertenece a una sola sede. Se puede agregar una sede, desactivarla o activarla de nuevo; una sede inactiva no se puede asignar a una escuela. Los cambios quedan en la bitácora. Este perfil no ve datos de estudiantes.
 

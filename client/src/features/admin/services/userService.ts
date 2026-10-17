@@ -12,6 +12,8 @@ export interface User {
   service?: string | null;
   /** Escuela profesional del docente tutor; nulo en los demás roles y en tutores anteriores a esta regla. */
   schoolId?: string | null;
+  /** Facultad del Decano; nulo en los demás roles. */
+  facultyId?: string | null;
   isActive: boolean;
   /** Pendiente de activación: aún no creó su contraseña con la invitación. */
   mustChangePassword?: boolean;
@@ -33,6 +35,7 @@ export interface CreateUserData {
   phone?: string;
   service?: string | null;
   schoolId?: string | null;
+  facultyId?: string | null;
 }
 
 export interface UpdateUserData {
@@ -43,6 +46,7 @@ export interface UpdateUserData {
   phone?: string;
   service?: string | null;
   schoolId?: string | null;
+  facultyId?: string | null;
 }
 
 export const userService = {

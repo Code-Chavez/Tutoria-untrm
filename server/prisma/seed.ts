@@ -11,7 +11,7 @@ async function main() {
   console.log('Seeding database...');
 
   // Datos base compartidos con producción (permisos, roles y parámetros).
-  const { adminRole, coordRole, tutorRole, studentRole, serviceRole, viceRole } = await seedBase(prisma);
+  const { adminRole, coordRole, tutorRole, studentRole, serviceRole, viceRole, deanRole } = await seedBase(prisma);
 
   // Administrador de DESARROLLO con contraseña conocida. Producción no usa este seed: crea su primer
   // administrador con `bootstrap` y la contraseña que se defina en el despliegue.
@@ -46,6 +46,8 @@ async function main() {
     { email: 'ronald.diaz@untrm.edu.pe', firstName: 'Ronald', lastName: 'Díaz Cabrera', phone: '941000008', roleId: serviceRole.id, service: 'SALUD' },
     // Vicerrectorado
     { email: 'vicerrectorado.academico@untrm.edu.pe', firstName: 'Segundo', lastName: 'Ortiz Fernández', phone: '941000009', roleId: viceRole.id },
+    // Decano (de la facultad de Ingeniería de Sistemas y Mecánica Eléctrica)
+    { email: 'decano.fisme@untrm.edu.pe', firstName: 'Héctor', lastName: 'Vargas Pizarro', phone: '941000013', roleId: deanRole.id },
     // Tutorado (cuentas de estudiante que inician sesión en el sistema)
     { email: '20191234@untrm.edu.pe', firstName: 'Ana', lastName: 'Torres Ramos', phone: '941000010', roleId: studentRole.id },
     { email: '20195678@untrm.edu.pe', firstName: 'Luis', lastName: 'Pérez Huamán', phone: '941000011', roleId: studentRole.id },
@@ -88,6 +90,8 @@ async function main() {
     update: {},
     create: { name: 'Facultad de Ciencias Económicas y Administrativas' },
   });
+
+  await prisma.user.update({ where: { email: 'decano.fisme@untrm.edu.pe' }, data: { facultyId: fisme.id } });
 
   // Coordinadores por escuela (Art. 17.a); Administración de Empresas se deja
   // sin coordinador a propósito, para ejercitar el respaldo a Administrador

@@ -13,6 +13,7 @@ import {
   MessageSquareIcon,
   FileSpreadsheetIcon,
   PieChartIcon,
+  AlertTriangleIcon,
 } from '@shared/components/icons';
 
 export interface QuickAction {
@@ -30,6 +31,7 @@ const DBU = 'Administrador DBU';
 const STUDENT = 'Tutorado';
 const SERVICE = 'Profesional de Servicio';
 const VICE = 'Vicerrectorado';
+const DEAN = 'Decano';
 
 // Accesos del panel de inicio: cada rol ve solo tareas que puede hacer (R02).
 export const QUICK_ACTIONS: QuickAction[] = [
@@ -49,6 +51,7 @@ export const QUICK_ACTIONS: QuickAction[] = [
 
   { label: 'Casos derivados', description: 'Bandeja de tu servicio: recibir, atender y cerrar', to: '/derivaciones', Icon: InboxIcon, roles: [SERVICE] },
 
+  { label: 'Amonestaciones', description: 'Registrar y consultar las de los docentes de tu facultad', to: '/amonestaciones', Icon: AlertTriangleIcon, roles: [DEAN] },
   { label: 'Informe consolidado', description: 'Cifras por escuela y facultad', to: '/informes/consolidado', Icon: FileSpreadsheetIcon, roles: [VICE] },
   { label: 'Indicadores', description: 'Tablero de cobertura y riesgo', to: '/indicadores', Icon: PieChartIcon, roles: [VICE] },
 ];

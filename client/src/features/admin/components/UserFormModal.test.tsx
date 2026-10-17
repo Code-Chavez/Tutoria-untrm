@@ -6,15 +6,17 @@ import type { Role } from '../services/roleService';
 const roles = [
   { id: 'r-tutor', name: 'Docente Tutor' },
   { id: 'r-service', name: 'Profesional de Servicio' },
+  { id: 'r-dean', name: 'Decano' },
 ] as Role[];
 
+const faculties = [{ id: 'fac-1', name: 'Facultad de Ingeniería' }];
 const schools = [
   { id: 'sch-1', name: 'Ingeniería de Sistemas', facultyId: 'f1', isActive: true },
   { id: 'sch-2', name: 'Ingeniería Mecánica Eléctrica', facultyId: 'f1', isActive: true },
 ];
 
 function setup(onSubmit = vi.fn().mockResolvedValue(undefined)) {
-  render(<UserFormModal onClose={vi.fn()} onSubmit={onSubmit} userToEdit={null} roles={roles} schools={schools} />);
+  render(<UserFormModal onClose={vi.fn()} onSubmit={onSubmit} userToEdit={null} roles={roles} schools={schools} faculties={faculties} />);
   fireEvent.change(screen.getByLabelText('Nombre'), { target: { value: 'Lucía' } });
   fireEvent.change(screen.getByLabelText('Apellido'), { target: { value: 'Flores' } });
   fireEvent.change(screen.getByLabelText('Correo Electrónico'), { target: { value: 'lucia@untrm.edu.pe' } });
@@ -100,5 +102,25 @@ describe('UserFormModal: escuela del docente tutor', () => {
     fireEvent.change(screen.getByLabelText('Servicio al que pertenece'), { target: { value: 'SALUD' } });
     fireEvent.click(screen.getByRole('button', { name: 'Guardar' }));
     await waitFor(() => expect(onSubmit).toHaveBeenCalledWith(expect.objectContaining({ roleId: 'r-service', schoolId: null })));
+  });
+});
+
+describe('UserFormModal: facultad del Decano', () => {
+  it('solo pide la facultad cuando el rol es Decano, y es obligatoria', () => {
+    setup();
+    expect(screen.queryByLabelText('Facultad')).toBeNull();
+
+    fireEvent.change(screen.getByLabelText('Rol'), { target: { value: 'r-dean' } });
+    expect(screen.getByLabelText('Facultad')).toBeRequired();
+    expect(screen.queryByLabelText('Escuela profesional')).toBeNull();
+  });
+
+  it('envía la facultad elegida y no envía escuela', async () => {
+    const onSubmit = setup();
+    fireEvent.change(screen.getByLabelText('Rol'), { target: { value: 'r-dean' } });
+    fireEvent.change(screen.getByLabelText('Facultad'), { target: { value: 'fac-1' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Guardar' }));
+
+    await waitFor(() => expect(onSubmit).toHaveBeenCalledWith(expect.objectContaining({ roleId: 'r-dean', facultyId: 'fac-1', schoolId: null })));
   });
 });

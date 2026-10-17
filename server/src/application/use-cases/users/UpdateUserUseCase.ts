@@ -4,7 +4,9 @@ import { RoleRepository } from '@domain/repositories/RoleRepository';
 import { RoleNotFoundError } from '@application/use-cases/roles/RoleErrors';
 import { SchoolRepository } from '@domain/repositories/SchoolRepository';
 import { resolveService } from './serviceAssignment';
+import { FacultyRepository } from '@domain/repositories/FacultyRepository';
 import { resolveTutorSchool, TutorSchoolRequiredError } from './tutorSchool';
+import { DeanFacultyRequiredError, resolveDeanFaculty } from './deanFaculty';
 import { DuplicateEmailError } from './UserErrors';
 import { normalizeEmail } from './normalizeEmail';
 
@@ -15,13 +17,14 @@ export class UserNotFoundError extends Error {
   }
 }
 
-export { DuplicateEmailError, TutorSchoolRequiredError };
+export { DuplicateEmailError, TutorSchoolRequiredError, DeanFacultyRequiredError };
 
 export class UpdateUserUseCase {
   constructor(
     private readonly userRepository: UserRepository,
     private readonly roles: RoleRepository,
     private readonly schools: SchoolRepository,
+    private readonly faculties?: FacultyRepository,
   ) {}
 
   async execute(id: string, data: Partial<Omit<User, 'id' | 'createdAt' | 'updatedAt' | 'passwordHash'>>): Promise<Omit<User, 'passwordHash'>> {
@@ -58,6 +61,16 @@ export class UpdateUserUseCase {
       const schoolId = await resolveTutorSchool(this.schools, role.name, data.schoolId !== undefined ? data.schoolId : existingUser.schoolId);
       if (schoolId !== (existingUser.schoolId ?? null)) changes.schoolId = schoolId;
       else delete changes.schoolId;
+    }
+
+    // 3c. El Decano pertenece a una facultad (igual criterio que la escuela del tutor).
+    if (data.roleId !== undefined || data.facultyId !== undefined) {
+      const roleId = data.roleId ?? existingUser.roleId;
+      const role = await this.roles.findById(roleId);
+      if (!role) throw new RoleNotFoundError(roleId);
+      const facultyId = await resolveDeanFaculty(this.faculties, role.name, data.facultyId !== undefined ? data.facultyId : existingUser.facultyId);
+      if (facultyId !== (existingUser.facultyId ?? null)) changes.facultyId = facultyId;
+      else delete changes.facultyId;
     }
 
     // 4. Actualizar el usuario

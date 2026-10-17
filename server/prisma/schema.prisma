@@ -36,6 +36,12 @@ model User {
   school   School? @relation("TutorSchool", fields: [schoolId], references: [id])
   cycleAssignments CycleTutorAssignment[]
 
+  // Para el Decano: facultad a la que pertenece (solo amonesta a los docentes de su facultad).
+  facultyId String?  @map("faculty_id")
+  faculty   Faculty? @relation("FacultyDean", fields: [facultyId], references: [id])
+  admonitionsReceived Admonition[] @relation("AdmonitionTutor")
+  admonitionsIssued   Admonition[] @relation("AdmonitionIssuer")
+
 
   auditLogs     AuditLog[]
   refreshTokens RefreshToken[]
@@ -64,6 +70,7 @@ model User {
   semesterReports        TutorSemesterReport[]
 
   @@index([schoolId])
+  @@index([facultyId])
   @@map("users")
 }
 
@@ -158,6 +165,7 @@ model Faculty {
   createdAt DateTime @default(now()) @map("created_at")
 
   schools School[]
+  deans   User[]   @relation("FacultyDean")
 
   @@map("faculties")
 }
@@ -989,4 +997,32 @@ model CycleTutorAssignment {
   @@unique([periodId, schoolId, cycle])
   @@index([periodId, tutorId])
   @@map("cycle_tutor_assignments")
+}
+
+// Amonestación a un docente tutor por incumplir su labor de tutoría (Art. del protocolo): la emite el Decano de su facultad y
+// queda registrada con fecha, motivo y, si se tiene, el documento (resolución / memorándum). El sistema no aplica ninguna sanción.
+model Admonition {
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now()) @map("created_at")
+
+  tutorId String @map("tutor_id")
+  tutor   User   @relation("AdmonitionTutor", fields: [tutorId], references: [id])
+  issuedById String @map("issued_by_id")
+  issuedBy   User   @relation("AdmonitionIssuer", fields: [issuedById], references: [id])
+  // Escuela y facultad del docente al momento de amonestar (el docente puede cambiar después).
+  schoolId  String @map("school_id")
+  facultyId String @map("faculty_id")
+
+  issuedOn DateTime @map("issued_on") @db.Date
+  reason   String
+
+  fileName   String? @map("file_name")
+  mimeType   String? @map("mime_type")
+  fileSize   Int?    @map("file_size")
+  storageKey String? @map("storage_key")
+  sha256     String?
+
+  @@index([facultyId, issuedOn])
+  @@index([tutorId])
+  @@map("admonitions")
 }

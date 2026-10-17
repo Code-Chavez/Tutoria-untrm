@@ -9,6 +9,7 @@ import { RoleNotFoundError, RoleTargetUserNotFoundError } from '@application/use
 import { assignRoleSchema } from '../validators/role.validators';
 import { ServiceRequiredError } from '@application/use-cases/users/serviceAssignment';
 import { TutorSchoolRequiredError } from '@application/use-cases/users/tutorSchool';
+import { DeanFacultyRequiredError } from '@application/use-cases/users/deanFaculty';
 import { z } from 'zod';
 import { optionalPhone, personName } from '../validators/fields';
 
@@ -22,6 +23,8 @@ const createUserSchema = z.object({
   // Solo para el rol Profesional de Servicio: decide qué casos derivados ve y recibe.
   // Solo para el rol Docente Tutor: su escuela profesional (de ella salen su facultad y su sede).
   schoolId: z.string().uuid('La escuela debe ser un UUID válido').nullable().optional(),
+  // Solo para el rol Decano: su facultad.
+  facultyId: z.string().uuid('La facultad debe ser un UUID válido').nullable().optional(),
   service: z.enum(['ESCUELA', 'PSICOPEDAGOGIA', 'PSICOLOGIA', 'ASISTENCIA_SOCIAL', 'SALUD']).nullable().optional(),
 });
 
@@ -40,8 +43,8 @@ export class UserController {
   assignRole = async (req: Request, res: Response) => {
     try {
       const id = req.params.id as string;
-      const { roleId, service, schoolId } = assignRoleSchema.parse(req.body);
-      const user = await this.assignRoleUseCase.execute(id, roleId, service, schoolId);
+      const { roleId, service, schoolId, facultyId } = assignRoleSchema.parse(req.body);
+      const user = await this.assignRoleUseCase.execute(id, roleId, service, schoolId, facultyId);
       res.status(200).json({ message: 'Rol asignado exitosamente', user });
     } catch (error) {
       if (error instanceof z.ZodError) {
@@ -51,7 +54,7 @@ export class UserController {
         error instanceof RoleNotFoundError
       ) {
         res.status(404).json({ error: error.message });
-      } else if (error instanceof ServiceRequiredError || error instanceof TutorSchoolRequiredError) {
+      } else if (error instanceof ServiceRequiredError || error instanceof TutorSchoolRequiredError || error instanceof DeanFacultyRequiredError) {
         res.status(400).json({ error: error.message });
       } else {
         res.status(500).json({ error: 'Error interno del servidor' });
@@ -69,7 +72,7 @@ export class UserController {
     } catch (error) {
       if (error instanceof z.ZodError) {
         res.status(400).json({ error: 'Datos de entrada inválidos', details: error.errors });
-      } else if (error instanceof DuplicateEmailError || error instanceof ServiceRequiredError || error instanceof TutorSchoolRequiredError) {
+      } else if (error instanceof DuplicateEmailError || error instanceof ServiceRequiredError || error instanceof TutorSchoolRequiredError || error instanceof DeanFacultyRequiredError) {
         res.status(400).json({ error: error.message });
       } else if (error instanceof RoleNotFoundError) {
         res.status(404).json({ error: error.message });
@@ -104,7 +107,7 @@ export class UserController {
         res.status(400).json({ error: 'Datos de entrada inválidos', details: error.errors });
       } else if (error instanceof UserNotFoundError) {
         res.status(404).json({ error: error.message });
-      } else if (error instanceof DuplicateEmailError || error instanceof ServiceRequiredError || error instanceof TutorSchoolRequiredError) {
+      } else if (error instanceof DuplicateEmailError || error instanceof ServiceRequiredError || error instanceof TutorSchoolRequiredError || error instanceof DeanFacultyRequiredError) {
         res.status(400).json({ error: error.message });
       } else if (error instanceof RoleNotFoundError) {
         res.status(404).json({ error: error.message });
