@@ -56,6 +56,9 @@ test('la tutora recibe el aviso y exige una respuesta antes de marcarla atendida
 
   await dialog.getByLabel('Respuesta para el estudiante').fill(answer);
   await dialog.getByRole('button', { name: 'Marcar atendida' }).click();
+  // Lo atendido sale de «Por atender» (la vista inicial) y se consulta en «Atendidas»
+  await expect(page.getByRole('row', { name: new RegExp(reason) })).toHaveCount(0);
+  await page.getByRole('button', { name: /^Atendidas/ }).click();
   await expect(page.getByRole('row', { name: new RegExp(reason) }).getByText('Atendida')).toBeVisible();
 });
 
@@ -70,6 +73,7 @@ test('el estudiante ve el estado Atendida y la respuesta', async ({ page }) => {
 test('la coordinadora de la escuela ve la solicitud', async ({ page }) => {
   await loginUi(page, accounts.coordinator);
   await goToMenu(page, 'Solicitudes de tutoría');
+  await page.getByRole('button', { name: /^Atendidas/ }).click(); // la solicitud ya se atendió: no está en «Por atender»
   await expect(page.getByText(reason)).toBeVisible();
 });
 

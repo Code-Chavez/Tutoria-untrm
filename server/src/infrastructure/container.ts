@@ -727,6 +727,7 @@ const getHomePanelUseCase = new GetHomePanelUseCase(
   getIndicatorsUseCase,
   getRiskAlertsUseCase,
   getEvaluationStatusUseCase,
+  listTutoringRequestsUseCase,
 );
 
 const getBrandingUseCase = new GetBrandingUseCase(brandingRepository);

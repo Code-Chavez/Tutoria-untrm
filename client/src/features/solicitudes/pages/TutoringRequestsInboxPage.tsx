@@ -8,8 +8,9 @@ import { SessionFormModal } from '@features/tutorados/components/SessionFormModa
 import { ReferralFormModal } from '@features/derivaciones/components/ReferralFormModal';
 import { referralService, type CreateReferralData } from '@features/derivaciones/services/referralService';
 import { sessionService, type ScheduleSessionData } from '@features/sesiones/services/sessionService';
-import { Badge, Button, Card, EmptyState, PageHeader, SelectField, TableSkeleton } from '@shared/components/ui';
+import { Badge, Button, Card, EmptyState, InboxToolbar, PageHeader, TableSkeleton } from '@shared/components/ui';
 import { InboxIcon, XCircleIcon } from '@shared/components/icons';
+import { parseFilterParam, waitingText } from '@shared/utils/inbox';
 import table from '@shared/components/ui/DataTable.module.css';
 import { useDialog } from '@shared/hooks/useDialog';
 import { useTutoringRequestsInbox, useUpdateTutoringRequestStatus } from '../hooks/useTutoringRequests';
@@ -19,6 +20,15 @@ import {
   type TutoringRequestStatus,
   type TutoringRequestView,
 } from '../services/tutoringRequestService';
+import {
+  countRequests,
+  DEFAULT_REQUEST_FILTER,
+  isOpenRequest,
+  REQUEST_FILTER_LABEL,
+  REQUEST_FILTERS,
+  viewRequests,
+  type RequestFilter,
+} from '../utils/requestInbox';
 import styles from './TutoringRequestsInboxPage.module.css';
 
 // Duración habitual (Art. 15.c); el valor real lo fija el servidor. Solo es el texto de ayuda del formulario.
@@ -151,15 +161,37 @@ function AttendModal({ request, onClose, onSchedule, onRefer }: AttendModalProps
 
 // Bandeja de solicitudes de tutoría (R01): tutor, coordinación y DBU reciben, revisan y atienden.
 export function TutoringRequestsInboxPage() {
-  const [status, setStatus] = useState<TutoringRequestStatus | ''>('');
-  const { requests, loading, error, refresh } = useTutoringRequestsInbox(status || undefined);
+  // Se trae todo y se filtra aquí: la vista inicial es «Por atender» (lo que espera respuesta) y cada contador del inicio
+  // abre la bandeja ya filtrada con ?estado=… (U04, U09).
+  const { requests: all, loading, error, refresh } = useTutoringRequestsInbox();
   const [selected, setSelected] = useState<TutoringRequestView | null>(null);
-  // Un aviso llega con ?solicitud=<id>: se abre esa solicitud, o se explica que ya no está disponible (R03).
+  const [search, setSearch] = useState('');
   const [searchParams, setSearchParams] = useSearchParams();
+  const filter = parseFilterParam(searchParams.get('estado'), REQUEST_FILTERS, DEFAULT_REQUEST_FILTER);
+  const changeFilter = (next: RequestFilter) =>
+    setSearchParams(
+      (prev) => {
+        const params = new URLSearchParams(prev);
+        params.set('estado', next);
+        return params;
+      },
+      { replace: true },
+    );
+  const counts = countRequests(all);
+  const requests = viewRequests(all, filter, search);
+  // Un aviso llega con ?solicitud=<id>: se abre esa solicitud (esté en la vista que esté), o se explica que ya no está disponible (R03).
   const requestedId = searchParams.get('solicitud');
-  const requested = requestedId ? requests.find((r) => r.id === requestedId) ?? null : null;
+  const requested = requestedId ? all.find((r) => r.id === requestedId) ?? null : null;
   const unavailable = !!requestedId && !loading && !error && !requested;
-  const clearRequested = () => setSearchParams({}, { replace: true });
+  const clearRequested = () =>
+    setSearchParams(
+      (prev) => {
+        const params = new URLSearchParams(prev);
+        params.delete('solicitud');
+        return params;
+      },
+      { replace: true },
+    );
   const open = selected ?? requested;
 
   // Programar una sesión o derivar el caso parte de la solicitud: el tutorado y el motivo ya vienen cargados.
@@ -217,7 +249,7 @@ export function TutoringRequestsInboxPage() {
 
       {unavailable && (
         <div className={styles.notice} role="status">
-          <span>Esa solicitud ya no está disponible para tu cuenta: fue eliminada, se atendió en otro filtro o dejó de estar a tu cargo.</span>
+          <span>Esa solicitud ya no está disponible para tu cuenta: fue eliminada o dejó de estar a tu cargo.</span>
           <button type="button" className={styles.noticeClose} onClick={clearRequested}>
             Cerrar
           </button>
@@ -234,14 +266,16 @@ export function TutoringRequestsInboxPage() {
       )}
 
       <Card>
-        <div className={styles.bar}>
-          <SelectField value={status} onChange={(e) => setStatus(e.target.value as TutoringRequestStatus | '')} aria-label="Filtrar por estado" wrapClassName={styles.filter}>
-            <option value="">Todos los estados</option>
-            <option value="PENDIENTE">Pendientes</option>
-            <option value="EN_ATENCION">En atención</option>
-            <option value="ATENDIDA">Atendidas</option>
-          </SelectField>
-        </div>
+        <InboxToolbar
+          label="Filtrar por estado"
+          options={REQUEST_FILTERS.map((key) => ({ key, label: REQUEST_FILTER_LABEL[key], count: counts[key] }))}
+          active={filter}
+          onChange={changeFilter}
+          search={search}
+          onSearch={setSearch}
+          searchLabel="Buscar solicitud"
+          searchPlaceholder="Buscar estudiante o motivo"
+        />
 
         {loading ? (
           <TableSkeleton rows={5} columns={6} />
@@ -257,15 +291,28 @@ export function TutoringRequestsInboxPage() {
               </Button>
             }
           />
+        ) : all.length === 0 ? (
+          <EmptyState
+            icon={<InboxIcon size={26} />}
+            title="Aún no hay solicitudes"
+            description="Cuando un tutorado de tu alcance solicite tutoría, la verás aquí y recibirás un aviso."
+          />
         ) : requests.length === 0 ? (
           <EmptyState
             icon={<InboxIcon size={26} />}
-            title={status ? 'Sin solicitudes con ese estado' : 'Aún no hay solicitudes'}
-            description="Cuando un tutorado de tu alcance solicite tutoría, la verás aquí y recibirás un aviso."
+            title={search ? 'Ninguna solicitud coincide con la búsqueda' : filter === 'por-atender' ? 'No hay solicitudes por atender' : 'No hay solicitudes en esta vista'}
+            description={filter === 'por-atender' && !search ? 'Todo lo recibido ya se atendió. Puedes revisar lo atendido o ver todas.' : 'Prueba con otra búsqueda o cambia de vista.'}
+            action={
+              filter !== 'todas' ? (
+                <Button variant="secondary" onClick={() => changeFilter('todas')}>
+                  Ver todas
+                </Button>
+              ) : undefined
+            }
           />
         ) : (
           <div className={table.scroll}>
-            <table className={table.table}>
+            <table className={`${table.table} ${table.stacked}`}>
               <thead>
                 <tr>
                   <th>Tutorado</th>
@@ -280,21 +327,26 @@ export function TutoringRequestsInboxPage() {
               <tbody>
                 {requests.map((r) => (
                   <tr key={r.id}>
-                    <td>
+                    <td data-label="Tutorado">
                       <div className={table.stack}>
                         <span className={table.name}>{r.studentName}</span>
                         <span className={table.sub}>{r.studentCode}</span>
                       </div>
                     </td>
-                    <td>{CASE_TYPE_LABEL[r.caseType]}</td>
-                    <td className={styles.reasonCell}>{r.reason}</td>
-                    <td>{new Date(r.createdAt).toLocaleDateString('es-PE')}</td>
-                    <td>{r.routedToName}</td>
-                    <td>
+                    <td data-label="Tipo">{CASE_TYPE_LABEL[r.caseType]}</td>
+                    <td data-label="Motivo" className={styles.reasonCell}>{r.reason}</td>
+                    <td data-label="Fecha">
+                      <div className={table.stack}>
+                        <span>{new Date(r.createdAt).toLocaleDateString('es-PE')}</span>
+                        {isOpenRequest(r) && <span className={table.sub}>Espera desde {waitingText(r.createdAt)}</span>}
+                      </div>
+                    </td>
+                    <td data-label="Enrutada a">{r.routedToName}</td>
+                    <td data-label="Estado">
                       <Badge tone={STATUS_TONE[r.status]}>{REQUEST_STATUS_LABEL[r.status]}</Badge>
                       {followUpLabel(r) && <span className={styles.followUpTag}>{followUpLabel(r)}</span>}
                     </td>
-                    <td className={table.right}>
+                    <td className={`${table.right} ${table.cardAction}`}>
                       <Button size="sm" variant={r.status === 'ATENDIDA' ? 'ghost' : 'secondary'} onClick={() => setSelected(r)}>
                         {r.status === 'ATENDIDA' ? 'Ver' : 'Atender'}
                       </Button>

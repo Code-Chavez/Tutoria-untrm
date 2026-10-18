@@ -1,10 +1,44 @@
+.tabsWrap {
+  position: relative;
+  margin-bottom: var(--s4);
+}
+
 .tabs {
   display: flex;
   gap: var(--s1, 4px);
-  margin-bottom: var(--s4);
   border-bottom: 1px solid var(--borde);
   overflow-x: auto;
   scrollbar-width: thin;
+}
+
+/* Flechas que avisan de las pestañas fuera de pantalla (solo aparecen si hay) */
+.more {
+  position: absolute;
+  top: 4px;
+  z-index: 1;
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border: 1px solid var(--borde);
+  border-radius: 50%;
+  background: var(--blanco);
+  color: var(--azul);
+  box-shadow: var(--sombra-xs);
+  cursor: pointer;
+}
+
+.more:hover {
+  border-color: var(--azul-med);
+}
+
+.moreLeft {
+  left: 0;
+}
+
+.moreRight {
+  right: 0;
 }
 
 .tab {
