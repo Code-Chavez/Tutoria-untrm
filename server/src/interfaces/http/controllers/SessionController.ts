@@ -161,7 +161,7 @@ export class SessionController {
   create = async (req: Request, res: Response) => {
     try {
       const data = scheduleSessionSchema.parse(req.body);
-      const tutorId = req.auth?.sub as string; // authenticate() garantiza req.auth; sessions:write es exclusivo del tutor
+      const tutorId = req.auth?.sub as string; // authenticate() garantiza req.auth; el tutor de la sesión es quien la programa: el Docente Tutor o, con todos los permisos, la DBU
       const session = await this.scheduleSessionUseCase.execute(tutorId, data, req.ip);
       res.status(201).json({ message: 'Sesión programada exitosamente', session });
     } catch (error) {
