@@ -1,6 +1,7 @@
 import http from 'http';
 import app from '../../src/app';
 import { prisma } from '../../src/infrastructure/database/prisma';
+import { currentPeriodId } from '../helpers/currentPeriod';
 
 /**
  * Tutor por ciclo (fase 3b) sobre HTTP real y base de datos real: la coordinación fija un tutor por ciclo de su escuela, los
@@ -58,7 +59,7 @@ describe('tutor por ciclo (fase 3b)', () => {
       const res = await fetch(`${baseUrl}/api/auth/login`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(ACCOUNTS[who]) });
       tokens[who] = ((await res.json()) as { data: { accessToken: string } }).data.accessToken;
     }
-    periodId = (await prisma.academicPeriod.findFirstOrThrow({ where: { isActive: true } })).id;
+    periodId = await currentPeriodId(prisma);
     schoolSistemas = (await prisma.school.findFirstOrThrow({ where: { name: 'Ingeniería de Sistemas' } })).id;
     const id = async (email: string) => (await prisma.user.findUniqueOrThrow({ where: { email } })).id;
     elenaId = await id('elena.ramirez@untrm.edu.pe');
