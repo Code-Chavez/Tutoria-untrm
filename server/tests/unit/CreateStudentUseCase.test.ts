@@ -41,7 +41,7 @@ describe('CreateStudentUseCase', () => {
       findById: jest.fn(),
       findByCode: jest.fn(),
       findByUserId: jest.fn(),
-      findAll: jest.fn(),
+      findAll: jest.fn().mockResolvedValue([]),
       create: jest.fn(),
       update: jest.fn(),
       assignTutor: jest.fn(),

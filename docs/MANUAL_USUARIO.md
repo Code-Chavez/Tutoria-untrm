@@ -79,7 +79,7 @@ En las pantallas con pestañas, la pestaña en la que está se lleva a la vista 
 *Figura: Pantalla de ingreso.*
 
 1. Abra la dirección del sistema que le indicó la DBU.
-2. Escriba su **correo institucional** y su **contraseña**, y pulse *Ingresar*.
+2. Escriba su **correo institucional** y su **contraseña**, y pulse *Ingresar*. Da igual si escribe el correo con mayúsculas o con un espacio de más.
 3. Llegará a su *Panel de inicio*, con un resumen de su trabajo y accesos rápidos a las tareas más frecuentes.
 
 Tras **5 intentos fallidos** la cuenta se bloquea 15 minutos. Si la cuenta fue desactivada, pida a la DBU que la reactive.
@@ -318,7 +318,7 @@ La asignación es **por ciclo**: se elige un docente tutor para cada ciclo de la
 
 ### 4.2 Registrar y cargar tutorados
 
-- *Tutorados* → *Nuevo tutorado*: código universitario, ciclo, nombres, apellidos, escuela y, opcionalmente, correo y teléfono.
+- *Tutorados* → *Nuevo tutorado*: código universitario, ciclo, nombres, apellidos, escuela y, opcionalmente, correo y teléfono. **El correo del estudiante es un dato de contacto:** puede ser personal (no se le exige el dominio institucional), se guarda sin espacios y en minúsculas, y **dos estudiantes no pueden tener el mismo correo** (en el alta, en la edición ni en la carga masiva, donde la fila repetida se informa con su motivo).
 - *Carga masiva*: descargue la plantilla Excel con *Descargar plantilla*, complétela y súbala; el sistema muestra un **reporte del resultado** (estudiantes nuevos, estudiantes que **continúan** y filas con error). La carga es **del periodo vigente**: cada estudiante cargado queda matriculado en él (un estudiante que ya existía de un periodo anterior no da error: se actualiza su ciclo y se matricula de nuevo). **Quien no figura en la carga del periodo vigente solo puede consultar su historial: no puede solicitar tutoría ni evaluar.** Sin un periodo vigente no se puede cargar.
 - *Pedir listas*: al iniciar el periodo, pida a la escuela la lista de estudiantes. Elija la escuela y, si no hay un correo configurado, escríbalo ahí mismo (se puede cambiar cuando quien lo recibía deje de responder); marque los ciclos (o ninguno para todos), agregue observaciones y pulse *Enviar pedido*. Sale un correo formal a nombre suyo, con copia a su correo y la **plantilla Excel adjunta**; las respuestas le llegan a usted. Queda un historial con lo pedido y a quién, para marcarlo como recibido cuando llegue el archivo, que se carga en *Carga masiva*.
 - Para que un estudiante pueda entrar al sistema hay que **vincular su cuenta** de portal (*Más* → *Vincular cuenta*).
@@ -428,6 +428,8 @@ El administrador tiene acceso a todo. Además de lo descrito para los demás rol
 *Usuarios y roles*: alta de cuentas (*Nuevo Usuario*: nombre, apellido, correo, teléfono y rol), cambio de rol y **activar/desactivar** (una persona desactivada pierde el acceso de inmediato, aunque tenga la sesión abierta).
 
 **Profesionales de servicio:** al elegir el rol *Profesional de Servicio* aparece el campo obligatorio *Servicio al que pertenece* (Escuela Profesional, Psicopedagogía, Psicología, Asistencia Social o Salud). **De ese servicio depende qué casos derivados ve y recibe**: sin él no vería ninguno, por eso el sistema no deja guardar sin elegirlo. En la tabla de usuarios aparece junto al rol (por ejemplo, «Profesional de Servicio · Psicología»).
+
+**El correo de una cuenta debe ser institucional (@untrm.edu.pe).** El formulario lo indica debajo del campo y avisa al instante si es de otro dominio («El correo debe ser institucional…»); el sistema lo comprueba también al guardar y al cargar docentes desde Excel. Se guarda en una sola forma: da igual escribirlo con mayúsculas o con espacios al principio o al final. **No puede haber dos cuentas con el mismo correo**, aunque se escriba distinto. Una cuenta anterior a esta regla que use otro dominio sigue funcionando y se puede editar sin tocar su correo; solo se exige el dominio al crear una cuenta o al cambiar su correo. Si TI autoriza a profesionales externos, es una excepción formal de la DBU que TI agrega a la configuración del servidor (`EMAIL_ALLOWED_DOMAINS`): no se hace desde la pantalla.
 
 Al crear la cuenta **no se genera ninguna clave**: el sistema envía al correo de la persona una **invitación con un enlace de un solo uso** (vale 72 horas) para que cree su propia contraseña, y muestra ese mismo enlace a quien administra por si el correo no sale. La cuenta queda como *Pendiente de activación* hasta que se use el enlace; antes no hay forma de entrar. Si el enlace se pierde, vence o ya se usó, use el botón *Emitir invitación nueva* de esa fila (el enlace anterior deja de servir). No comparta el enlace: quien lo abra primero crea la contraseña.
 

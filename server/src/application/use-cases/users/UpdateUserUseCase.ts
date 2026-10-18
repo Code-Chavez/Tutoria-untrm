@@ -8,7 +8,8 @@ import { FacultyRepository } from '@domain/repositories/FacultyRepository';
 import { resolveTutorSchool, TutorSchoolRequiredError } from './tutorSchool';
 import { DeanFacultyRequiredError, resolveDeanFaculty } from './deanFaculty';
 import { DuplicateEmailError } from './UserErrors';
-import { normalizeEmail } from './normalizeEmail';
+import { accountEmailProblem, createEmailPolicy, EmailPolicy, normalizeEmail } from '@application/validation/email';
+import { InvalidAccountEmailError } from './UserErrors';
 
 export class UserNotFoundError extends Error {
   constructor(id: string) {
@@ -25,6 +26,8 @@ export class UpdateUserUseCase {
     private readonly roles: RoleRepository,
     private readonly schools: SchoolRepository,
     private readonly faculties?: FacultyRepository,
+    // Sin indicarla rige RF-01: solo el dominio institucional. El despliegue pasa la suya (EMAIL_ALLOWED_DOMAINS).
+    private readonly emailPolicy: EmailPolicy = createEmailPolicy(undefined),
   ) {}
 
   async execute(id: string, data: Partial<Omit<User, 'id' | 'createdAt' | 'updatedAt' | 'passwordHash'>>): Promise<Omit<User, 'passwordHash'>> {
@@ -38,6 +41,11 @@ export class UpdateUserUseCase {
     const changes = { ...data };
     if (data.email) {
       const email = normalizeEmail(data.email);
+      // El dominio se exige al cambiar el correo: una cuenta anterior a la regla puede seguir editándose sin tocar el suyo.
+      if (email !== existingUser.email) {
+        const emailProblem = accountEmailProblem(email, this.emailPolicy);
+        if (emailProblem) throw new InvalidAccountEmailError(emailProblem);
+      }
       const emailUser = await this.userRepository.findByEmail(email);
       if (emailUser && emailUser.id !== id) {
         throw new DuplicateEmailError(email);

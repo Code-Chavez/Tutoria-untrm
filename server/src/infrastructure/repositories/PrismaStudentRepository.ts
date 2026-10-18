@@ -27,6 +27,7 @@ export class PrismaStudentRepository implements StudentRepository {
       ...(filters?.cycle !== undefined && { cycle: filters.cycle }),
       ...(filters?.isActive !== undefined && { isActive: filters.isActive }),
       ...(filters?.isAtRisk !== undefined && { isAtRisk: filters.isAtRisk }),
+      ...(filters?.email && { email: { equals: filters.email, mode: 'insensitive' } }),
       ...(filters?.tutorId && { tutorId: filters.tutorId }),
       ...(filters?.unassigned && { tutorId: null }),
       ...(filters?.search && {

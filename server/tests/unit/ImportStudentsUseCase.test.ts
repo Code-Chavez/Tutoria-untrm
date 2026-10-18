@@ -40,7 +40,7 @@ describe('ImportStudentsUseCase', () => {
       findById: jest.fn(),
       findByCode: jest.fn().mockResolvedValue(null),
       findByUserId: jest.fn(),
-      findAll: jest.fn(),
+      findAll: jest.fn().mockResolvedValue([]),
       create: jest.fn().mockImplementation(async (data) => ({ id: 'new', createdAt: new Date(), updatedAt: new Date(), ...data } as Student)),
       update: jest.fn(),
       assignTutor: jest.fn(),
@@ -58,7 +58,7 @@ describe('ImportStudentsUseCase', () => {
   it('crea las filas válidas y resuelve la escuela por nombre (sin distinguir acentos/mayúsculas)', async () => {
     const report = await useCase.execute([
       row(2),
-      row(3, { studentCode: '20195678', school: 'INGENIERIA DE SISTEMAS' }),
+      row(3, { studentCode: '20195678', school: 'INGENIERIA DE SISTEMAS', email: 'otra.persona@untrm.edu.pe' }), // dos estudiantes no comparten correo
     ], 'admin-1');
 
     expect(report.created).toBe(2);

@@ -12,9 +12,12 @@ import { TutorSchoolRequiredError } from '@application/use-cases/users/tutorScho
 import { DeanFacultyRequiredError } from '@application/use-cases/users/deanFaculty';
 import { z } from 'zod';
 import { optionalPhone, personName } from '../validators/fields';
+import { EmailPolicy, emailField } from '@application/validation/email';
+import { InvalidAccountEmailError } from '@application/use-cases/users/UserErrors';
 
 const createUserSchema = z.object({
-  email: z.string().trim().toLowerCase().email('Correo inválido'),
+  // Forma y tamaño aquí; el dominio permitido (RF-01) lo decide el caso de uso con la política del despliegue.
+  email: emailField(),
   firstName: personName('El nombre'),
   lastName: personName('El apellido'),
   roleId: z.string().uuid('El ID de rol debe ser un UUID válido'),
@@ -38,7 +41,13 @@ export class UserController {
     private readonly listUsersUseCase: ListUsersUseCase,
     private readonly assignRoleUseCase: AssignRoleUseCase,
     private readonly issueInvitationUseCase: IssueInvitationUseCase,
+    private readonly emailPolicy: EmailPolicy,
   ) {}
+
+  // Los formularios muestran y validan el dominio permitido con la misma política que aplica el servidor.
+  getEmailPolicy = (_req: Request, res: Response) => {
+    res.status(200).json({ allowedDomains: this.emailPolicy.allowedDomains });
+  };
 
   assignRole = async (req: Request, res: Response) => {
     try {
@@ -72,7 +81,7 @@ export class UserController {
     } catch (error) {
       if (error instanceof z.ZodError) {
         res.status(400).json({ error: 'Datos de entrada inválidos', details: error.errors });
-      } else if (error instanceof DuplicateEmailError || error instanceof ServiceRequiredError || error instanceof TutorSchoolRequiredError || error instanceof DeanFacultyRequiredError) {
+      } else if (error instanceof DuplicateEmailError || error instanceof InvalidAccountEmailError || error instanceof ServiceRequiredError || error instanceof TutorSchoolRequiredError || error instanceof DeanFacultyRequiredError) {
         res.status(400).json({ error: error.message });
       } else if (error instanceof RoleNotFoundError) {
         res.status(404).json({ error: error.message });
@@ -107,7 +116,7 @@ export class UserController {
         res.status(400).json({ error: 'Datos de entrada inválidos', details: error.errors });
       } else if (error instanceof UserNotFoundError) {
         res.status(404).json({ error: error.message });
-      } else if (error instanceof DuplicateEmailError || error instanceof ServiceRequiredError || error instanceof TutorSchoolRequiredError || error instanceof DeanFacultyRequiredError) {
+      } else if (error instanceof DuplicateEmailError || error instanceof InvalidAccountEmailError || error instanceof ServiceRequiredError || error instanceof TutorSchoolRequiredError || error instanceof DeanFacultyRequiredError) {
         res.status(400).json({ error: error.message });
       } else if (error instanceof RoleNotFoundError) {
         res.status(404).json({ error: error.message });

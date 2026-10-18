@@ -38,6 +38,9 @@ export const env = {
   SMTP_USER: process.env.SMTP_USER || '',
   SMTP_PASS: process.env.SMTP_PASS || '',
   MAIL_FROM: process.env.MAIL_FROM || 'SIT UNTRM <no-reply@untrm.edu.pe>',
+  // Dominios de correo permitidos para las cuentas de usuario (RF-01), separados por comas. Vacío = solo untrm.edu.pe.
+  // Una excepción (p. ej. profesionales externos) es una decisión formal de la DBU: se agrega aquí, no en el código.
+  EMAIL_ALLOWED_DOMAINS: process.env.EMAIL_ALLOWED_DOMAINS || '',
   // Vigencia de la invitación para activar una cuenta nueva (enlace de un solo uso).
   INVITATION_TTL_HOURS: parseInt(process.env.INVITATION_TTL_HOURS || '72', 10),
   PASSWORD_RESET_TTL_MINUTES: parseInt(process.env.PASSWORD_RESET_TTL_MINUTES || '60', 10),

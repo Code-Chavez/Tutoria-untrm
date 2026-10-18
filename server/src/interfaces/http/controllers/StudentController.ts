@@ -10,6 +10,7 @@ import { LinkStudentPortalAccountUseCase } from '@application/use-cases/students
 import { StudentFilters } from '@domain/repositories/StudentRepository';
 import {
   DuplicateStudentCodeError,
+  DuplicateStudentEmailError,
   StudentNotFoundError,
   StudentAccessDeniedError,
   SchoolNotFoundError,
@@ -235,7 +236,7 @@ export class StudentController {
   private handleError(error: unknown, res: Response) {
     if (error instanceof z.ZodError) {
       res.status(400).json({ error: 'Datos de entrada inválidos', details: error.errors });
-    } else if (error instanceof DuplicateStudentCodeError) {
+    } else if (error instanceof DuplicateStudentCodeError || error instanceof DuplicateStudentEmailError) {
       res.status(409).json({ error: error.message });
     } else if (error instanceof SchoolNotFoundError || error instanceof StudentNotFoundError) {
       res.status(404).json({ error: error.message });

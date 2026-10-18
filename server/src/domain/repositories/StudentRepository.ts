@@ -6,6 +6,8 @@ export interface StudentFilters {
   isActive?: boolean;
   isAtRisk?: boolean;
   search?: string;
+  /** Correo exacto (sin distinguir mayúsculas): para detectar un correo ya usado por otro estudiante. */
+  email?: string;
   tutorId?: string;
   unassigned?: boolean;
 }

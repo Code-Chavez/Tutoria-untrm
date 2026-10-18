@@ -2,11 +2,11 @@ import { RoleRepository } from '@domain/repositories/RoleRepository';
 import { SchoolRepository } from '@domain/repositories/SchoolRepository';
 import { UserRepository } from '@domain/repositories/UserRepository';
 import { ImportTutorRow, TutorImportCreated, TutorImportError, TutorImportReport } from '@application/dtos/tutorImport.dto';
-import { EMAIL_INVALID, NAME_TOO_SHORT, PHONE_INVALID, STUDENT_NAME_MIN, isValidOptionalEmail, isValidOptionalPhone } from '@application/validation/studentFields';
+import { NAME_TOO_SHORT, PHONE_INVALID, STUDENT_NAME_MIN, isValidOptionalPhone } from '@application/validation/studentFields';
+import { accountEmailProblem, createEmailPolicy, EmailPolicy, normalizeEmail } from '@application/validation/email';
 import { TUTOR_ROLE_NAME } from '@application/use-cases/assignments/TutorValidation';
 import { CreateUserUseCase } from './CreateUserUseCase';
 import { IssueInvitationUseCase } from './IssueInvitationUseCase';
-import { normalizeEmail } from './normalizeEmail';
 
 export class TutorRoleMissingError extends Error {
   constructor() {
@@ -30,6 +30,8 @@ export class ImportTutorsUseCase {
     private readonly schools: SchoolRepository,
     private readonly createUser: CreateUserUseCase,
     private readonly issueInvitation: IssueInvitationUseCase,
+    // Las mismas reglas de correo que el alta por formulario (CreateUserUseCase): formato y dominio permitido.
+    private readonly emailPolicy: EmailPolicy = createEmailPolicy(undefined),
   ) {}
 
   async execute(rows: ImportTutorRow[], requesterId: string, ip?: string): Promise<TutorImportReport> {
@@ -52,7 +54,10 @@ export class ImportTutorsUseCase {
 
       const email = row.email?.trim() ? normalizeEmail(row.email) : '';
       if (!email) problems.push('El correo es obligatorio');
-      else if (!isValidOptionalEmail(email)) problems.push(`${EMAIL_INVALID} («${email}»)`);
+      else {
+        const emailProblem = accountEmailProblem(email, this.emailPolicy);
+        if (emailProblem) problems.push(emailProblem);
+      }
       const phone = row.phone?.trim() ?? '';
       if (!isValidOptionalPhone(phone)) problems.push(PHONE_INVALID);
 

@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { EMAIL_INVALID, isValidEmailFormat, normalizeEmail } from '@shared/utils/email';
 import { useDialog } from '@shared/hooks/useDialog';
 import styles from './StudentFormModal.module.css';
 import { Student, CreateStudentData, UpdateStudentData } from '../services/studentService';
@@ -75,8 +76,8 @@ export const StudentFormModal: React.FC<StudentFormModalProps> = ({
     if (form.lastName.trim().length < 2) {
       next.lastName = 'Ingrese el apellido.';
     }
-    if (form.email.trim() && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email.trim())) {
-      next.email = 'Correo inválido.';
+    if (form.email.trim() && !isValidEmailFormat(normalizeEmail(form.email))) {
+      next.email = EMAIL_INVALID;
     }
     const cycleNum = Number(form.cycle);
     if (!form.cycle || Number.isNaN(cycleNum) || cycleNum < 1 || cycleNum > 14) {
@@ -100,7 +101,7 @@ export const StudentFormModal: React.FC<StudentFormModalProps> = ({
       studentCode: form.studentCode.trim(),
       firstName: form.firstName.trim(),
       lastName: form.lastName.trim(),
-      email: form.email.trim() || undefined,
+      email: normalizeEmail(form.email) || undefined,
       phone: form.phone.trim() || undefined,
       cycle: Number(form.cycle),
       schoolId: form.schoolId,

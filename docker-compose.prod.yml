@@ -41,6 +41,8 @@ services:
       SMTP_PASS: ${SMTP_PASS:-}
       MAIL_FROM: ${MAIL_FROM:?defina MAIL_FROM}
       INVITATION_TTL_HOURS: ${INVITATION_TTL_HOURS:-72}
+      # Dominios permitidos para las cuentas de usuario (RF-01); vacío = solo untrm.edu.pe
+      EMAIL_ALLOWED_DOMAINS: ${EMAIL_ALLOWED_DOMAINS:-}
       EMAIL_NOTIFICATIONS: ${EMAIL_NOTIFICATIONS:-true}
       ADMIN_EMAIL: ${ADMIN_EMAIL:?defina ADMIN_EMAIL}
       ADMIN_PASSWORD: ${ADMIN_PASSWORD:?defina ADMIN_PASSWORD (mínimo 12 caracteres)}

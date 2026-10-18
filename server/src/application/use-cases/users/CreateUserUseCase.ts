@@ -9,7 +9,8 @@ import { FacultyRepository } from '@domain/repositories/FacultyRepository';
 import { resolveTutorSchool, TutorSchoolRequiredError } from './tutorSchool';
 import { DeanFacultyRequiredError, resolveDeanFaculty } from './deanFaculty';
 import { DuplicateEmailError } from './UserErrors';
-import { normalizeEmail } from './normalizeEmail';
+import { accountEmailProblem, createEmailPolicy, EmailPolicy, normalizeEmail } from '@application/validation/email';
+import { InvalidAccountEmailError } from './UserErrors';
 import { randomBytes } from 'node:crypto';
 
 export { DuplicateEmailError, TutorSchoolRequiredError, DeanFacultyRequiredError };
@@ -21,11 +22,15 @@ export class CreateUserUseCase {
     private readonly roles: RoleRepository,
     private readonly schools: SchoolRepository,
     private readonly faculties?: FacultyRepository,
+    // Sin indicarla rige RF-01: solo el dominio institucional. El despliegue pasa la suya (EMAIL_ALLOWED_DOMAINS).
+    private readonly emailPolicy: EmailPolicy = createEmailPolicy(undefined),
   ) {}
 
   async execute(data: Omit<User, 'id' | 'createdAt' | 'updatedAt' | 'passwordHash' | 'isActive' | 'failedLoginAttempts' | 'lockedUntil' | 'mustChangePassword'> & { password?: string, isActive?: boolean }): Promise<Omit<User, 'passwordHash'>> {
-    // 1. Validar que el correo no esté duplicado (comparado ya normalizado)
+    // 1. El correo: forma única, formato y dominio permitido (RF-01); y que no esté duplicado (comparado ya normalizado)
     const email = normalizeEmail(data.email);
+    const emailProblem = accountEmailProblem(email, this.emailPolicy);
+    if (emailProblem) throw new InvalidAccountEmailError(emailProblem);
     const existingUser = await this.userRepository.findByEmail(email);
     if (existingUser) {
       throw new DuplicateEmailError(email);
