@@ -33,6 +33,9 @@ export interface TutoringRequest {
   responseNote: string | null;
   handledById: string | null;
   handledAt: string | null;
+  /** Sesión programada o derivación hecha desde esta solicitud (una u otra, no ambas). */
+  sessionId: string | null;
+  referralId: string | null;
   createdAt: string;
 }
 

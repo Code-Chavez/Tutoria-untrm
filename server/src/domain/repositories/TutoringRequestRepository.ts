@@ -15,7 +15,7 @@ export interface TutoringRequestAttention {
 }
 
 export interface TutoringRequestRepository {
-  create(data: Omit<TutoringRequest, 'id' | 'createdAt' | 'status' | 'responseNote' | 'handledById' | 'handledAt' | 'sessionId'>): Promise<TutoringRequest>;
+  create(data: Omit<TutoringRequest, 'id' | 'createdAt' | 'status' | 'responseNote' | 'handledById' | 'handledAt' | 'sessionId' | 'referralId'>): Promise<TutoringRequest>;
   findById(id: string): Promise<TutoringRequest | null>;
   findAll(filters?: TutoringRequestFilters): Promise<TutoringRequest[]>;
   /** Historial de un estudiante, más reciente primero (para el expediente). */
@@ -25,4 +25,10 @@ export interface TutoringRequestRepository {
    * mismo cambio). Devuelve la solicitud actualizada, o null si otro cambio se adelantó.
    */
   updateAttention(id: string, expectedStatus: TutoringRequestStatus, attention: TutoringRequestAttention): Promise<TutoringRequest | null>;
+  /**
+   * Vincula la sesión o la derivación con la que se atiende la solicitud, solo si aún no tiene ninguna (no se
+   * duplica la atención). Una solicitud pendiente pasa a «en atención»; quien la gestiona queda como responsable.
+   * Devuelve la solicitud actualizada, o null si ya tenía un vínculo.
+   */
+  attachFollowUp(id: string, followUp: { sessionId: string } | { referralId: string }, handledById: string): Promise<TutoringRequest | null>;
 }

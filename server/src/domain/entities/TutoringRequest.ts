@@ -25,6 +25,8 @@ export interface TutoringRequest {
   handledAt: Date | null;
   /** Sesión en la que se atendió, si se vinculó. */
   sessionId: string | null;
+  /** Derivación a un servicio con la que se atendió, si se vinculó. */
+  referralId: string | null;
   createdAt: Date;
 }
 

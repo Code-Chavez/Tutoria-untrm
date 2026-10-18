@@ -64,6 +64,8 @@ export interface ScheduleSessionData {
   modality: SessionModality;
   location?: string;
   meetingLink?: string;
+  /** Solicitud de tutoría que esta sesión atiende (queda vinculada). */
+  tutoringRequestId?: string;
 }
 
 // Evidencia (PDF o imagen) adjunta a una sesión (HU-25, repositorio seguro

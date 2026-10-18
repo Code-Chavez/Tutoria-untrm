@@ -20,6 +20,7 @@ const base: TutoringRequest = {
   handledById: null,
   handledAt: null,
   sessionId: null,
+  referralId: null,
   createdAt: new Date('2026-10-01T10:00:00Z'),
 };
 
@@ -29,6 +30,7 @@ describe('seguimiento de solicitudes de tutoría (R01)', () => {
   const requests = {
     findById: jest.fn(),
     updateAttention: jest.fn(),
+    attachFollowUp: jest.fn(),
     findByStudent: jest.fn(),
   };
   const guard = { scopeFor: jest.fn(), assertAccess: jest.fn() };

@@ -130,3 +130,31 @@
   text-decoration: underline;
   cursor: pointer;
 }
+
+.linked {
+  margin: 0 0 var(--s3);
+  padding: var(--s3);
+  background: var(--g50, #f6f8fb);
+  border-left: 3px solid var(--azul);
+  border-radius: var(--r-sm);
+  font-size: var(--fs-sm);
+  color: var(--g700, #334155);
+}
+
+.followUp {
+  margin-bottom: var(--s3);
+}
+
+.followUpButtons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s2);
+  margin-top: var(--s2);
+}
+
+.followUpTag {
+  display: block;
+  margin-top: var(--s1);
+  font-size: var(--fs-xs, 12px);
+  color: var(--g600);
+}

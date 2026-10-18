@@ -39,6 +39,8 @@ const view = (over: Partial<TutoringRequestView> = {}): TutoringRequestView => (
   responseNote: null,
   handledById: null,
   handledAt: null,
+  sessionId: null,
+  referralId: null,
   createdAt: '2026-10-01T10:00:00.000Z',
   studentName: 'Ana Torres',
   studentCode: '20191234',

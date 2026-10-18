@@ -95,6 +95,8 @@ export interface CreateReferralData {
   reason: string;
   service: ReferralService;
   receivingInstance?: string;
+  /** Solicitud de tutoría que esta derivación atiende (queda vinculada). */
+  tutoringRequestId?: string;
 }
 
 // Enrutamiento por servicio (HU-29, Art. 21): sugiere el servicio destino

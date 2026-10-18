@@ -11,6 +11,10 @@ interface SessionFormModalProps {
   durationMinutes: number;
   loading?: boolean;
   serverError?: string;
+  /** Tema ya sugerido (p. ej. el motivo de la solicitud que esta sesión atiende). */
+  defaultTopic?: string;
+  /** Texto que explica de dónde viene esta sesión (la solicitud que atiende). */
+  context?: string;
   onSubmit: (data: ScheduleSessionData) => void;
   onCancel: () => void;
 }
@@ -20,12 +24,14 @@ export const SessionFormModal: React.FC<SessionFormModalProps> = ({
   durationMinutes,
   loading,
   serverError,
+  defaultTopic,
+  context,
   onSubmit,
   onCancel,
 }) => {
   const [date, setDate] = useState('');
   const [time, setTime] = useState('');
-  const [topic, setTopic] = useState('');
+  const [topic, setTopic] = useState(defaultTopic ?? '');
   const [modality, setModality] = useState<SessionModality>('PRESENCIAL');
   const [location, setLocation] = useState('');
   const [meetingLink, setMeetingLink] = useState('');
@@ -99,6 +105,12 @@ export const SessionFormModal: React.FC<SessionFormModalProps> = ({
         </div>
 
         <div className={styles.body}>
+          {context && (
+            <div className={styles.hint}>
+              <InfoIcon size={16} />
+              {context}
+            </div>
+          )}
           <div className={styles.grid}>
             <div className={styles.field}>
               <label htmlFor="sessionDate">Fecha</label>

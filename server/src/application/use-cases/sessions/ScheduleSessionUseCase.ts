@@ -1,6 +1,8 @@
 import { SessionWithParticipants } from '@domain/entities/Session';
 import { SessionRepository } from '@domain/repositories/SessionRepository';
 import { StudentAccessGuard } from '@application/access/StudentAccessGuard';
+import { TutoringRequestLinker } from '@application/use-cases/tutoring-requests/TutoringRequestLinker';
+import { InvalidTutoringRequestStatusError } from '@application/use-cases/tutoring-requests/TutoringRequestErrors';
 import { SystemParameterRepository } from '@domain/repositories/SystemParameterRepository';
 import { ScheduleSessionInput } from '@application/dtos/session.dto';
 import {
@@ -24,9 +26,10 @@ export class ScheduleSessionUseCase {
     private readonly sessions: SessionRepository,
     private readonly guard: StudentAccessGuard,
     private readonly systemParameters: SystemParameterRepository,
+    private readonly requestLinker?: TutoringRequestLinker,
   ) {}
 
-  async execute(tutorId: string, input: ScheduleSessionInput): Promise<SessionWithParticipants> {
+  async execute(tutorId: string, input: ScheduleSessionInput, ipAddress?: string): Promise<SessionWithParticipants> {
     // Un tutor solo programa sesiones con los tutorados que tiene asignados.
     await this.guard.assertAccessToAll(tutorId, input.studentIds);
 
@@ -37,6 +40,9 @@ export class ScheduleSessionUseCase {
       throw new MeetingLinkRequiredError();
     }
 
+    // Si la sesión atiende una solicitud, se valida antes de crear nada (es suya, es de ese estudiante, sin atención previa).
+    const request = input.tutoringRequestId && this.requestLinker ? await this.requestLinker.prepare(tutorId, input.tutoringRequestId, input.studentIds) : null;
+
     const durationMinutes = await this.resolveDuration();
     const scheduledAt = new Date(input.scheduledAt);
     const endsAt = new Date(scheduledAt.getTime() + durationMinutes * 60_000);
@@ -46,7 +52,7 @@ export class ScheduleSessionUseCase {
       throw new TutorScheduleConflictError();
     }
 
-    return this.sessions.create(
+    const session = await this.sessions.create(
       {
         tutorId,
         topic: input.topic.trim(),
@@ -61,6 +67,13 @@ export class ScheduleSessionUseCase {
       },
       input.studentIds,
     );
+
+    if (request && this.requestLinker && !(await this.requestLinker.attach(tutorId, request, { kind: 'session', id: session.id }, ipAddress))) {
+      // Otra persona vinculó la solicitud en el mismo instante: no queda una sesión suelta.
+      await this.sessions.cancel(session.id, new Date(), 'La solicitud ya fue atendida por otra sesión o derivación');
+      throw new InvalidTutoringRequestStatusError('Esta solicitud acaba de recibir otra atención: no se crea una segunda sesión.');
+    }
+    return session;
   }
 
   private async resolveDuration(): Promise<number> {

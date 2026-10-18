@@ -41,6 +41,7 @@ describe('CreateTutoringRequestUseCase', () => {
       findAll: jest.fn(),
       findByStudent: jest.fn(),
       updateAttention: jest.fn(),
+      attachFollowUp: jest.fn(),
     };
     students = {
       findById: jest.fn().mockResolvedValue({ id: 'student-1', tutorId: 'tutor-1', schoolId: 'school-1' } as Student),

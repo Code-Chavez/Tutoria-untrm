@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 import { z } from 'zod';
+import { InvalidTutoringRequestStatusError, TutoringRequestNotFoundError } from '@application/use-cases/tutoring-requests/TutoringRequestErrors';
 import { ScheduleSessionUseCase } from '@application/use-cases/sessions/ScheduleSessionUseCase';
 import { ListSessionsUseCase } from '@application/use-cases/sessions/ListSessionsUseCase';
 import { RegisterAttendanceUseCase } from '@application/use-cases/sessions/RegisterAttendanceUseCase';
@@ -161,19 +162,19 @@ export class SessionController {
     try {
       const data = scheduleSessionSchema.parse(req.body);
       const tutorId = req.auth?.sub as string; // authenticate() garantiza req.auth; sessions:write es exclusivo del tutor
-      const session = await this.scheduleSessionUseCase.execute(tutorId, data);
+      const session = await this.scheduleSessionUseCase.execute(tutorId, data, req.ip);
       res.status(201).json({ message: 'Sesión programada exitosamente', session });
     } catch (error) {
       if (error instanceof z.ZodError) {
         res.status(400).json({ error: 'Datos de entrada inválidos', details: error.errors });
-      } else if (error instanceof StudentNotFoundError) {
+      } else if (error instanceof StudentNotFoundError || error instanceof TutoringRequestNotFoundError) {
         res.status(404).json({ error: error.message });
       } else if (
         error instanceof LocationRequiredError ||
         error instanceof MeetingLinkRequiredError
       ) {
         res.status(400).json({ error: error.message });
-      } else if (error instanceof TutorScheduleConflictError) {
+      } else if (error instanceof TutorScheduleConflictError || error instanceof InvalidTutoringRequestStatusError) {
         res.status(409).json({ error: error.message });
       } else {
         res.status(500).json({ error: 'Error interno del servidor' });

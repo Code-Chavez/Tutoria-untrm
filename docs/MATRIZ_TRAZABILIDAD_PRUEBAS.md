@@ -33,6 +33,7 @@ cuando cambia una HU o una prueba.
 | HU-15 Red de apoyo | `UpsertSupportContactUseCase` | `ExpedientePage` | — | E2E-03 |
 | HU-16 Expediente del tutorado | `GetStudentRecordUseCase` | `ExpedientePage` | 1.10, 5.5 | E2E-03 |
 | HU-17 Solicitud de tutoría | `CreateTutoringRequestUseCase`, `CreateOwnTutoringRequestUseCase`, `TutoringRequestAttention`, `tutoringRequestCircuit` (int.) | `MyTutoringRequestPage`, `TutoringRequestsInboxPage`, `TutoringRequestModal` | 1.1–1.11 | E2E-02 |
+| U01 Solicitud → sesión / derivación | `TutoringRequestLinker`, `ScheduleSessionUseCase`, `CreateReferralUseCase`, `tutoringRequestFollowUp` (int.) | `TutoringRequestsInboxPage` (Programar sesión / Derivar a un servicio), `SessionFormModal`, `ReferralFormModal` | 3.7 | E2E-14 |
 | HU-18 Sesión individual | `ScheduleSessionUseCase`, `sessionValidators` | `SessionFormModal` | 2.2 | E2E-03 |
 | HU-19 Sesión grupal | `ScheduleSessionUseCase` | `GroupSessionFormModal` | 2.4 | E2E-03 |
 | HU-20 Presencial o virtual | `ScheduleSessionUseCase`, `sessionValidators` | `SessionDetailModal` | 2.2, 2.3 | E2E-03 |
