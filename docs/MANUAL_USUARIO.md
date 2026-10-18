@@ -32,14 +32,14 @@ El menú es **corto a propósito** y está agrupado por tareas. Cada grupo se de
 |---|---|---|
 | **Inicio** → Panel de inicio | Resumen y accesos directos | Todos |
 | **Mi tutoría** | Solicitar tutoría · Mis sesiones · Evaluar tutoría | Estudiante |
-| **Atención a tutorados** | Tutorados · Entrevista inicial · Sesiones · Seguimiento · Derivar caso · Solicitudes de tutoría · Casos derivados · Seguimiento DBU | Docente tutor (todo menos Seguimiento DBU), coordinación (Tutorados, Solicitudes), profesional de servicio (Casos derivados), DBU |
+| **Atención a estudiantes** | Estudiantes · Entrevista inicial · Sesiones · Seguimiento · Derivar caso · Solicitudes de tutoría · Casos derivados · Seguimiento DBU | Docente tutor (todo menos Seguimiento DBU), coordinación (Tutorados, Solicitudes), profesional de servicio (Casos derivados), DBU |
 | **Gestión** → Periodo académico | *Pestañas:* 1 Pedir listas → 2 Carga de estudiantes → 3 Carga de docentes (solo DBU) → 4 Asignación por ciclo → 5 Cierre de periodo (solo DBU) | Coordinación (pestañas 1, 2 y 4) y DBU (todas) |
 | **Gestión** → Plan semestral | Plan de trabajo de la escuela | Coordinación y DBU |
 | **Gestión** → Informes | *Pestañas:* Horarios y asistencia · Informe semestral · Informe consolidado · Indicadores · Resultados de evaluación · Sugerencias de estudiantes | Cada rol ve las que le corresponden: el docente (Horarios, Semestral), la coordinación (Horarios, Indicadores, Resultados, Sugerencias), Vicerrectorado (Consolidado, Indicadores) y la DBU (todas menos la del docente) |
 | **Gestión** → Amonestaciones | Registro y consulta de amonestaciones a docentes | Decano (las registra), coordinación y DBU (consulta) |
 | **Configuración** | *Pestañas:* Correos de las escuelas · Sedes · Evaluación de tutoría · Catálogos · Usuarios y roles · Parámetros · Identidad visual · Bitácora de auditoría | Coordinación (solo Correos de las escuelas), Vicerrectorado (solo Sedes) y DBU (todas) |
 
-**El expediente de un tutorado** no es una entrada del menú: se abre desde **Tutorados**, con el botón *Ver expediente* de cada fila (y de ahí se vuelve a Tutorados).
+**El expediente de un estudiante** no es una entrada del menú: se abre desde **Estudiantes**, con el botón *Ver expediente* de cada fila (y de ahí se vuelve a Estudiantes).
 
 ### Quién hace qué, y dónde
 
@@ -54,7 +54,7 @@ El menú es **corto a propósito** y está agrupado por tareas. Cada grupo se de
 | Crear las cuentas de los docentes tutores (varios a la vez, desde Excel) | DBU | Periodo académico → Carga de docentes (también «Importar docentes» en Usuarios y roles) |
 | Asignar el tutor de cada ciclo (y ver si aceptó). **Se asigna por ciclo, no estudiante por estudiante** | Coordinación o DBU | Periodo académico → Asignación por ciclo |
 | Aceptar o rechazar ser tutor de un ciclo | El docente, desde el enlace de su correo | Correo → página de aceptación (sin iniciar sesión) |
-| Reasignar a un estudiante en un caso puntual (con motivo) | Coordinación o DBU | Atención a tutorados → Tutorados → Más → Reasignar tutor |
+| Reasignar a un estudiante en un caso puntual (con motivo) | Coordinación o DBU | Atención a estudiantes → Estudiantes → Más → Reasignar tutor |
 | Entrevista, sesiones, asistencia, seguimiento | Docente tutor | Atención a tutorados |
 | Derivar un caso a un servicio | Docente tutor | Atención a tutorados → Derivar caso |
 | Atender un caso derivado | Profesional de servicio | Atención a tutorados → Casos derivados |
@@ -70,6 +70,8 @@ El menú es **corto a propósito** y está agrupado por tareas. Cada grupo se de
 En las pantallas con pestañas, la pestaña en la que está se lleva a la vista y, si hay más pestañas fuera de la pantalla, aparece una **flecha** para verlas.
 
 **Lo que escribe no se pierde.** En la solicitud de tutoría, en la respuesta del docente a una solicitud y en la evaluación, lo que usted está escribiendo se guarda como **borrador**: si cambia de pantalla, recarga la página o lo interrumpen, al volver lo recupera y la pantalla se lo avisa («Recuperamos lo que habías escrito»), con el botón **Descartar borrador**. Por privacidad: el borrador queda **solo en la pestaña de su navegador** (no se envía al servidor y se pierde al cerrar la pestaña), es **de su cuenta** (otra persona no lo ve), **se borra cuando usted pulsa «Cerrar sesión»** y se descarta al entrar otra cuenta. Si el sistema cierra su sesión por inactividad, se conserva para cuando vuelva a entrar. Al enviar, el borrador desaparece.
+
+**Palabras de todos los días.** La pantalla habla de *estudiantes* (no «tutorados»), de la persona *responsable* de una solicitud (no «enrutada») y de lo que usted hace («Recibir caso», «Pedir listas»). Los artículos del Protocolo ya no aparecen en los títulos; los **formatos oficiales** (Anexos, PDF y Excel descargables) conservan su denominación original.
 
 **Una pantalla lleva a la siguiente.** Cuando a una pantalla le falta algo (por ejemplo, no hay estudiantes o una escuela no tiene docentes) o cuando termina una tarea, muestra un bloque **«Qué sigue»** con enlaces a donde se carga lo que falta o a la tarea siguiente: después de *Pedir listas* sigue *Carga de estudiantes*; después de cargar, *Asignación por ciclo*. El **Panel de inicio** de la coordinación y la DBU muestra el periodo académico como pasos numerados.
 
@@ -144,7 +146,7 @@ Mientras la pantalla carga, aparece **«Cargando tus sesiones…»**. Si tarda m
 *Figura: «Solicitar tutoría» y el historial «Mis solicitudes».*
 
 1. Entre a *Solicitar tutoría*.
-2. En *Motivo (Art. 20)* elija el tipo: **Académico, Psicológico, Social o Salud**.
+2. En *Motivo* elija el tipo: **Académico, Psicológico, Social o Salud**.
 3. En *Descripción del motivo* explique brevemente su situación.
 4. Pulse *Registrar solicitud*. Verá «Solicitud registrada: la recibió tu tutor *(nombre)*. Te avisaremos en el sistema cuando responda» (o «la coordinación de tu escuela», o Bienestar Universitario, si aún no tiene tutor asignado).
 
@@ -181,7 +183,7 @@ La coordinación y la DBU ven el mismo contador, en primer lugar.
 ![Lista de tutorados con sus acciones](manual/img/08-tutorados.jpg)
 *Figura: Lista de tutorados con sus acciones.*
 
-*Tutorados* muestra a los estudiantes que usted tiene asignados, con su código, escuela, ciclo y estado. Puede buscar por código, nombre o apellido y filtrar por
+*Estudiantes* muestra a los estudiantes que usted tiene asignados, con su código, escuela, ciclo y estado. Puede buscar por código, nombre o apellido y filtrar por
 escuela, ciclo y estado. En cada fila:
 
 - 📁 **Ver expediente**: línea de tiempo completa del acompañamiento.
@@ -207,7 +209,7 @@ Usted solo ve a **sus** tutorados; no puede abrir el expediente de un estudiante
 ![Detalle de una sesión](manual/img/11-detalle-sesion.jpg)
 *Figura: Detalle de una sesión.*
 
-1. En *Tutorados*, pulse **Programar sesión** en la fila del estudiante (sesión individual), o *Sesión grupal* en la parte superior para varios tutorados.
+1. En *Estudiantes*, pulse **Programar sesión** en la fila del estudiante (sesión individual), o *Sesión grupal* en la parte superior para varios estudiantes.
 2. Indique **fecha, hora y tema**, y la modalidad:
    - **Presencial**: escriba el *Lugar*.
    - **Virtual**: pegue el *Enlace de videollamada* (debe comenzar con `https://` o `http://`).
@@ -293,7 +295,7 @@ El estudiante ve la respuesta y recibe un aviso.
 
 La coordinación ve el vínculo, pero **no programa sesiones ni deriva**: eso es del docente tutor.
 
-### 3.8 Horarios y asistencia (Art. 15.d)
+### 3.8 Horarios y asistencia
 
 ![Consolidado de «Horarios y asistencia»](manual/img/17-horarios-asistencia.jpg)
 *Figura: Consolidado de «Horarios y asistencia».*
@@ -321,13 +323,13 @@ Además de ver los tutorados **de su escuela** (nunca de otras), el coordinador:
 La asignación es **por ciclo**: se elige un docente tutor para cada ciclo de la escuela y todos los estudiantes matriculados de ese ciclo pasan a él (ver 7.9). No se asignan estudiantes uno por uno.
 
 - *Asignación por ciclo* (menú Gestión → Periodo académico): la lista muestra **primero lo que necesita acción** (ciclos con estudiantes y sin tutor, luego los que el docente rechazó, luego los que tienen estudiantes sin tutor) y al final los ya resueltos.
-- **Reasignación individual** (caso puntual): en *Tutorados*, menú *Más* → *Reasignar tutor*; indique el motivo. Queda en el historial de asignaciones.
+- **Reasignación individual** (caso puntual): en *Estudiantes*, menú *Más* → *Reasignar tutor*; indique el motivo. Queda en el historial de asignaciones.
 
 ### 4.2 Registrar y cargar tutorados
 
-- *Tutorados* → *Nuevo tutorado*: código universitario, ciclo, nombres, apellidos, escuela y, opcionalmente, correo y teléfono. **El correo del estudiante es un dato de contacto:** puede ser personal (no se le exige el dominio institucional), se guarda sin espacios y en minúsculas, y **dos estudiantes no pueden tener el mismo correo** (en el alta, en la edición ni en la carga masiva, donde la fila repetida se informa con su motivo).
+- *Estudiantes* → *Nuevo estudiante*: código universitario, ciclo, nombres, apellidos, escuela y, opcionalmente, correo y teléfono. **El correo del estudiante es un dato de contacto:** puede ser personal (no se le exige el dominio institucional), se guarda sin espacios y en minúsculas, y **dos estudiantes no pueden tener el mismo correo** (en el alta, en la edición ni en la carga masiva, donde la fila repetida se informa con su motivo).
 - *Carga masiva*: descargue la plantilla Excel con *Descargar plantilla*, complétela y súbala; el sistema muestra un **reporte del resultado** (estudiantes nuevos, estudiantes que **continúan** y filas con error). La carga es **del periodo vigente**: cada estudiante cargado queda matriculado en él (un estudiante que ya existía de un periodo anterior no da error: se actualiza su ciclo y se matricula de nuevo). **Quien no figura en la carga del periodo vigente solo puede consultar su historial: no puede solicitar tutoría ni evaluar.** Sin un periodo vigente no se puede cargar.
-- *Pedir listas*: al iniciar el periodo, pida a la escuela la lista de estudiantes. Elija la escuela y, si no hay un correo configurado, escríbalo ahí mismo (se puede cambiar cuando quien lo recibía deje de responder); marque los ciclos (o ninguno para todos), agregue observaciones y pulse *Enviar pedido*. Sale un correo formal a nombre suyo, con copia a su correo y la **plantilla Excel adjunta**; las respuestas le llegan a usted. Queda un historial con lo pedido y a quién, para marcarlo como recibido cuando llegue el archivo, que se carga en *Carga masiva*.
+- *Pedir listas*: al iniciar el periodo, pida a la escuela la lista de estudiantes (la DBU también puede pedir la de **docentes tutores**; al cambiar el tipo cambian el título, las columnas de la plantilla, el enlace de carga y los pasos que siguen; el historial indica de qué lista es cada pedido). Elija la escuela y, si no hay un correo configurado, escríbalo ahí mismo (se puede cambiar cuando quien lo recibía deje de responder); marque los ciclos (o ninguno para todos), agregue observaciones y pulse *Enviar pedido*. Sale un correo formal a nombre suyo, con copia a su correo y la **plantilla Excel adjunta**; las respuestas le llegan a usted. Queda un historial con lo pedido y a quién, para marcarlo como recibido cuando llegue el archivo, que se carga en *Carga masiva*.
 - Para que un estudiante pueda entrar al sistema hay que **vincular su cuenta** de portal (*Más* → *Vincular cuenta*).
 
 ### 4.3 Solicitudes de tutoría

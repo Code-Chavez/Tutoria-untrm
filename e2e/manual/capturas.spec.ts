@@ -38,7 +38,7 @@ test('tutorado', async ({ page }) => {
 test('docente tutor', async ({ page }) => {
   await loginUi(page, accounts.tutor);
   await shot(page, '07-inicio-tutor');
-  await goToMenu(page, 'Tutorados');
+  await goToMenu(page, 'Estudiantes');
   await page.getByRole('row', { name: /20191234/ }).waitFor();
   await shot(page, '08-tutorados');
 
@@ -55,7 +55,7 @@ test('docente tutor', async ({ page }) => {
   await shot(page, '11-detalle-sesion');
   await page.keyboard.press('Escape');
 
-  await goToMenu(page, 'Tutorados');
+  await goToMenu(page, 'Estudiantes');
   await page.getByRole('row', { name: /20191234/ }).getByRole('button', { name: 'Ver expediente' }).click();
   await page.getByText('Línea de tiempo del acompañamiento').waitFor();
   await shot(page, '12-expediente');
@@ -101,7 +101,7 @@ test('coordinador', async ({ page }) => {
   await page.getByRole('heading', { level: 3, name: 'Resolución de aprobación' }).waitFor();
   await shot(page, '21-plan-semestral');
   await goToMenu(page, 'Indicadores');
-  await page.getByText('Tutorados activos').first().waitFor();
+  await page.getByText('Estudiantes activos').first().waitFor();
   await shot(page, '22-indicadores');
 });
 

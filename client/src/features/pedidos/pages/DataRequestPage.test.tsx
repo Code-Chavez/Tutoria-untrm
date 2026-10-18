@@ -139,6 +139,35 @@ describe('DataRequestPage (pedido de listas por correo)', () => {
     expect(await screen.findByLabelText('Qué lista pedir')).toHaveValue('DOCENTES');
   });
 
+  it('U13: al pedir docentes cambian título, plantilla, destino y siguientes pasos; al volver a estudiantes, también', async () => {
+    const user = userEvent.setup();
+    renderPage('Administrador DBU', 'dbu-1', '/pedir-listas');
+    expect(await screen.findByRole('heading', { name: 'Pedir listas de estudiantes' })).toBeInTheDocument();
+    expect(await screen.findByText(/código, nombres, apellidos, correo, teléfono, ciclo y escuela/)).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: 'Carga de estudiantes' })).toHaveAttribute('href', '/carga-masiva');
+
+    await user.selectOptions(await screen.findByLabelText('Qué lista pedir'), 'DOCENTES');
+
+    expect(screen.getByRole('heading', { name: 'Pedir la lista de docentes tutores' })).toBeInTheDocument();
+    expect(screen.getByText(/nombres, apellidos, correo institucional, teléfono \(opcional\) y escuela/)).toBeInTheDocument();
+    expect(screen.queryByText(/código, nombres, apellidos, correo, teléfono, ciclo/)).not.toBeInTheDocument();
+    expect(screen.queryByText(/Ciclos \(sin marcar = todos\)/)).not.toBeInTheDocument();
+    expect(screen.getByRole('link', { name: 'Carga de docentes' })).toHaveAttribute('href', '/carga-docentes');
+    expect(screen.getByRole('navigation', { name: 'Cuando llegue la lista de docentes' })).toBeInTheDocument();
+    expect(screen.queryByRole('link', { name: 'Carga de estudiantes' })).not.toBeInTheDocument();
+
+    await user.selectOptions(screen.getByLabelText('Qué lista pedir'), 'ESTUDIANTES');
+    expect(screen.getByRole('heading', { name: 'Pedir listas de estudiantes' })).toBeInTheDocument();
+    expect(screen.getByRole('navigation', { name: 'Cuando llegue la lista de estudiantes' })).toBeInTheDocument();
+  });
+
+  it('el historial dice de qué lista es cada pedido', async () => {
+    requests.list.mockResolvedValue([record(), record({ id: 'r9', kind: 'DOCENTES' })]);
+    renderPage();
+    expect(await screen.findByText(/· Estudiantes$/)).toBeInTheDocument();
+    expect(screen.getByText(/· Docentes tutores$/)).toBeInTheDocument();
+  });
+
   it('la lista de estudiantes es la de siempre, y la coordinación ni siquiera ve la opción de docentes', async () => {
     renderPage('Administrador DBU', 'dbu-1', '/pedir-listas');
     expect(await screen.findByLabelText('Qué lista pedir')).toHaveValue('ESTUDIANTES');

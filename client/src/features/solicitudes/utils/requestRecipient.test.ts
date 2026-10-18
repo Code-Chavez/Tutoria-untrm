@@ -17,7 +17,7 @@ describe('a quién llega mi solicitud (U02)', () => {
   it('después de enviar nombra a quien la recibió; sin saberlo, cae en el texto por rol', () => {
     expect(recipientAfter({ kind: 'tutor', name: 'Elena Ramírez' }, 'tutor')).toBe('Solicitud registrada: la recibió tu tutor Elena Ramírez. Te avisaremos en el sistema cuando responda.');
     expect(recipientAfter({ kind: 'coordinator', name: 'Rosa Mendoza' }, 'coordinator')).toContain('la coordinación de tu escuela (Rosa Mendoza)');
-    expect(recipientAfter(null, 'tutor')).toContain('enrutada a tu tutor');
+    expect(recipientAfter(null, 'tutor')).toContain('enviada a tu tutor');
     expect(recipientAfter(null, 'coordinator')).toContain('la coordinación de tu escuela');
   });
 });

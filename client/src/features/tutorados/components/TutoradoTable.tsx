@@ -77,7 +77,7 @@ export const TutoradoTable: React.FC<TutoradoTableProps> = ({
     if (canWrite) {
       // El tutor ya tiene «Programar sesión» a la vista; quien edita (coordinación/DBU) puede ser también tutor.
       if (canConductInterview) {
-        items.push({ group: 'Gestión', label: 'Editar tutorado', icon: <PencilIcon size={16} />, onSelect: () => onEdit(student) });
+        items.push({ group: 'Gestión', label: 'Editar estudiante', icon: <PencilIcon size={16} />, onSelect: () => onEdit(student) });
       }
       if (student.tutorId) {
         items.push({ group: 'Gestión', label: 'Reasignar tutor', icon: <SwitchIcon size={16} />, onSelect: () => onReassign(student) });
@@ -169,7 +169,7 @@ export const TutoradoTable: React.FC<TutoradoTableProps> = ({
                         </IconButton>
                       ) : (
                         canWrite && (
-                          <IconButton label="Editar tutorado" onClick={() => onEdit(student)}>
+                          <IconButton label="Editar estudiante" onClick={() => onEdit(student)}>
                             <PencilIcon size={16} />
                           </IconButton>
                         )

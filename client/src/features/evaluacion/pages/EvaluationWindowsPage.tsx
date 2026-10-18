@@ -30,7 +30,7 @@ export function EvaluationWindowsPage() {
     <div className={styles.page}>
       <PageHeader
         title="Configuración de la evaluación"
-        subtitle="Habilita o cierra el cuestionario de evaluación de tutoría por escuela (Art. 17.d)"
+        subtitle="Habilita o cierra el cuestionario de evaluación de tutoría por escuela"
         icon={<SettingsIcon size={22} />}
       />
 

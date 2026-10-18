@@ -26,7 +26,7 @@ export function buildTutorAcceptanceEmail(input: AcceptanceEmailInput): MailMess
   const intro = input.isException
     ? `El ciclo ${input.cycle} de ${input.school} no cuenta con docente tutor en el periodo ${input.period}. Como excepción, se le consulta si puede asumirlo además del ciclo que ya atiende.`
     : `Se le ha propuesto como docente tutor del ciclo ${input.cycle} de ${input.school} en el periodo ${input.period}.`;
-  const ask = 'Por favor confirme si acepta. Si acepta, indique los días, las horas y el lugar en que atenderá a sus tutorados (la sesión dura 45 minutos); si no puede, indíquelo para que la coordinación asigne a otro docente.';
+  const ask = 'Por favor confirme si acepta. Si acepta, indique los días, las horas y el lugar en que atenderá a sus estudiantes (la sesión dura 45 minutos); si no puede, indíquelo para que la coordinación asigne a otro docente.';
   const validity = `El enlace es personal, sirve una sola vez y vence en ${input.ttlHours} horas.`;
   const safe = escapeHtml(input.link);
 

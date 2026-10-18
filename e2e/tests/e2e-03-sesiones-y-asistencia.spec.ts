@@ -32,9 +32,9 @@ test.beforeAll(async () => {
 
 test('la tutora programa una sesión individual presencial para Ana', async ({ page }) => {
   await loginUi(page, accounts.tutor);
-  await goToMenu(page, 'Tutorados');
+  await goToMenu(page, 'Estudiantes');
   // La lista está paginada y crece con cada corrida de pruebas: se busca a Ana en vez de depender de su posición.
-  await page.getByLabel('Buscar tutorado').fill('20191234');
+  await page.getByLabel('Buscar estudiante').fill('20191234');
   await page.getByRole('row', { name: /20191234/ }).getByRole('button', { name: 'Programar sesión' }).click();
 
   const dialog = page.getByRole('dialog', { name: 'Programar sesión de tutoría' });
@@ -45,7 +45,7 @@ test('la tutora programa una sesión individual presencial para Ana', async ({ p
   await dialog.getByRole('button', { name: 'Programar sesión' }).click();
   await expect(dialog).toBeHidden();
   // A la tutora se le dice lo que hizo el sistema: Ana tiene cuenta del portal, así que se le avisó
-  await expect(page.getByText(/Se avisó al tutorado en el sistema\./)).toBeVisible();
+  await expect(page.getByText(/Se avisó al estudiante en el sistema\./)).toBeVisible();
 
   await openSessions(page);
   await expect(page.getByRole('button', { name: new RegExp(topic) })).toBeVisible();

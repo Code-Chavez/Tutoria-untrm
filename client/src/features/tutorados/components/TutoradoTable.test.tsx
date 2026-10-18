@@ -65,7 +65,7 @@ describe('TutoradoTable: acciones por estudiante (UI-10)', () => {
 
   it('coordinación ve Editar a la vista y la gestión en «Más»', async () => {
     renderTable({ canWrite: true, canConductInterview: false });
-    expect(screen.getByRole('button', { name: 'Editar tutorado' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Editar estudiante' })).toBeInTheDocument();
     expect(screen.queryByRole('button', { name: 'Programar sesión' })).not.toBeInTheDocument();
     expect(await menuLabels()).toEqual(['Solicitar tutoría', 'Reasignar tutor', 'Vincular cuenta', 'Marcar en riesgo']);
   });
@@ -77,7 +77,7 @@ describe('TutoradoTable: acciones por estudiante (UI-10)', () => {
       'Registrar entrevista inicial',
       'Registrar seguimiento',
       'Derivar caso',
-      'Editar tutorado',
+      'Editar estudiante',
       'Reasignar tutor',
       'Vincular cuenta',
       'Marcar en riesgo',

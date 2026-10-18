@@ -115,7 +115,7 @@ function AttendModal({ request, onClose, onSchedule, onRefer }: AttendModalProps
                 Derivar a un servicio
               </Button>
             </div>
-            <p className={styles.sub}>Ambas parten de esta solicitud: el tutorado y el motivo ya vienen cargados y la solicitud queda vinculada.</p>
+            <p className={styles.sub}>Ambas parten de esta solicitud: el estudiante y el motivo ya vienen cargados y la solicitud queda vinculada.</p>
           </div>
         )}
 
@@ -202,7 +202,7 @@ export function TutoringRequestsInboxPage() {
     );
   const open = selected ?? requested;
 
-  // Programar una sesión o derivar el caso parte de la solicitud: el tutorado y el motivo ya vienen cargados.
+  // Programar una sesión o derivar el caso parte de la solicitud: el estudiante y el motivo ya vienen cargados.
   const { user } = useAuth();
   const canFollowUp = user?.role === 'Docente Tutor';
   const { students } = useStudents();
@@ -252,7 +252,7 @@ export function TutoringRequestsInboxPage() {
     <div>
       <PageHeader
         title="Solicitudes de tutoría"
-        subtitle="Las solicitudes de tus tutorados (o de tu escuela) y las que se te enrutaron, con su estado de atención"
+        subtitle="Las solicitudes de tus estudiantes (o de tu escuela) y las que se te enviaron, con su estado de atención"
         icon={<InboxIcon size={24} />}
       />
 
@@ -304,7 +304,7 @@ export function TutoringRequestsInboxPage() {
           <EmptyState
             icon={<InboxIcon size={26} />}
             title="Aún no hay solicitudes"
-            description="Cuando un tutorado de tu alcance solicite tutoría, la verás aquí y recibirás un aviso."
+            description="Cuando un estudiante de tu alcance solicite tutoría, la verás aquí y recibirás un aviso."
           />
         ) : requests.length === 0 ? (
           <EmptyState
@@ -324,11 +324,11 @@ export function TutoringRequestsInboxPage() {
             <table className={`${table.table} ${table.stacked}`}>
               <thead>
                 <tr>
-                  <th>Tutorado</th>
+                  <th>Estudiante</th>
                   <th>Tipo</th>
                   <th>Motivo</th>
                   <th>Fecha</th>
-                  <th>Enrutada a</th>
+                  <th>Responsable</th>
                   <th>Estado</th>
                   <th className={table.right}></th>
                 </tr>
@@ -336,7 +336,7 @@ export function TutoringRequestsInboxPage() {
               <tbody>
                 {requests.map((r) => (
                   <tr key={r.id}>
-                    <td data-label="Tutorado">
+                    <td data-label="Estudiante">
                       <div className={table.stack}>
                         <span className={table.name}>{r.studentName}</span>
                         <span className={table.sub}>{r.studentCode}</span>
@@ -350,7 +350,7 @@ export function TutoringRequestsInboxPage() {
                         {isOpenRequest(r) && <span className={table.sub}>Espera desde {waitingText(r.createdAt)}</span>}
                       </div>
                     </td>
-                    <td data-label="Enrutada a">{r.routedToName}</td>
+                    <td data-label="Responsable">{r.routedToName}</td>
                     <td data-label="Estado">
                       <Badge tone={STATUS_TONE[r.status]}>{REQUEST_STATUS_LABEL[r.status]}</Badge>
                       {followUpLabel(r) && <span className={styles.followUpTag}>{followUpLabel(r)}</span>}

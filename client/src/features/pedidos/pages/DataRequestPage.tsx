@@ -11,6 +11,42 @@ import styles from './DataRequestPage.module.css';
 const CYCLES = Array.from({ length: 10 }, (_, i) => i + 1);
 const fmt = (iso: string) => new Date(iso).toLocaleDateString('es-PE', { dateStyle: 'medium' });
 
+// Todo lo que cambia según la lista que se pide: título, explicación, columnas de la plantilla y a dónde seguir al recibirla.
+const COPY: Record<DataRequestKind, {
+  title: string;
+  subtitle: string;
+  columns: string;
+  loadTo: string;
+  loadLabel: string;
+  nextTitle: string;
+  steps: { to: string; label: string; description: string }[];
+}> = {
+  ESTUDIANTES: {
+    title: 'Pedir listas de estudiantes',
+    subtitle: 'Al iniciar el periodo, pide por correo a la escuela la lista de estudiantes con el formato de la plantilla; cuando llegue, cárgala en «Carga de estudiantes».',
+    columns: 'código, nombres, apellidos, correo, teléfono, ciclo y escuela',
+    loadTo: '/carga-masiva',
+    loadLabel: 'Carga de estudiantes',
+    nextTitle: 'Cuando llegue la lista de estudiantes',
+    steps: [
+      { to: '/carga-masiva', label: 'Cargar el Excel', description: 'Los estudiantes quedan matriculados en el periodo' },
+      { to: '/asignacion', label: 'Asignar el tutor de cada ciclo', description: 'El docente recibe un correo para aceptar' },
+    ],
+  },
+  DOCENTES: {
+    title: 'Pedir la lista de docentes tutores',
+    subtitle: 'Pide por correo a la escuela la lista de docentes que podrían ejercer la tutoría; cuando llegue, cárgala en «Carga de docentes».',
+    columns: 'nombres, apellidos, correo institucional, teléfono (opcional) y escuela',
+    loadTo: '/carga-docentes',
+    loadLabel: 'Carga de docentes',
+    nextTitle: 'Cuando llegue la lista de docentes',
+    steps: [
+      { to: '/carga-docentes', label: 'Cargar el Excel', description: 'Se crean las cuentas de los docentes y reciben su invitación de acceso' },
+      { to: '/asignacion', label: 'Asignar el tutor de cada ciclo', description: 'Los docentes aparecen al elegir el tutor de los ciclos de su escuela' },
+    ],
+  },
+};
+
 interface Feedback {
   type: 'ok' | 'error';
   text: string;
@@ -40,6 +76,7 @@ export function DataRequestPage() {
 
   const toggleCycle = (cycle: number) => setCycles((current) => (current.includes(cycle) ? current.filter((c) => c !== cycle) : [...current, cycle]));
   const hasEmail = !!school?.requestEmail;
+  const copy = COPY[kind];
 
   const submit = async (event: FormEvent) => {
     event.preventDefault();
@@ -61,8 +98,8 @@ export function DataRequestPage() {
   return (
     <div>
       <PageHeader
-        title="Pedir listas de estudiantes"
-        subtitle="Al iniciar el periodo, pide por correo a la escuela la lista de estudiantes con el formato de la plantilla; cuando llegue, cárgala en «Carga de estudiantes»."
+        title={copy.title}
+        subtitle={copy.subtitle}
         icon={<SendIcon size={24} />}
       />
 
@@ -140,8 +177,8 @@ export function DataRequestPage() {
                 Enviar pedido
               </Button>
               <p className={styles.note}>
-                Se adjunta la plantilla Excel con las columnas: código, nombres, apellidos, correo, teléfono, ciclo y escuela. Cuando recibas el archivo,
-                cárgalo en <Link to="/carga-masiva">Carga de estudiantes</Link>.
+                Se adjunta la plantilla Excel con las columnas: {copy.columns}. Cuando recibas el archivo, cárgalo en{' '}
+                <Link to={copy.loadTo}>{copy.loadLabel}</Link>.
               </p>
             </form>
           </CardBody>
@@ -159,13 +196,13 @@ export function DataRequestPage() {
                 <li key={r.id} className={styles.historyItem}>
                   <div className={styles.historyHead}>
                     <strong>
-                      {r.schoolName} · {r.periodName}{r.kind === 'DOCENTES' ? ' · Docentes' : ''}
+                      {r.schoolName} · {r.periodName} · {r.kind === 'DOCENTES' ? 'Docentes tutores' : 'Estudiantes'}
                     </strong>
                     <Badge tone={r.status === 'ENVIADO' ? 'success' : 'warning'}>{r.status === 'ENVIADO' ? 'Enviado' : 'Fallido'}</Badge>
                     {r.receivedAt && <Badge tone="info">Recibido el {fmt(r.receivedAt)}</Badge>}
                   </div>
                   <span className={styles.note}>
-                    {fmt(r.createdAt)} · a {r.toEmail} · {r.cycles.length > 0 ? `ciclos ${r.cycles.join(', ')}` : 'todos los ciclos'}
+                    {fmt(r.createdAt)} · a {r.toEmail} · {r.kind === 'DOCENTES' ? 'lista de docentes' : r.cycles.length > 0 ? `ciclos ${r.cycles.join(', ')}` : 'todos los ciclos'}
                   </span>
                   {r.status === 'ENVIADO' && !r.receivedAt && (
                     <div>
@@ -181,11 +218,8 @@ export function DataRequestPage() {
         </CardBody>
       </Card>
       <NextSteps
-        title="Cuando llegue la lista"
-        steps={[
-          { to: '/carga-masiva', label: 'Cargar el Excel', description: 'Los estudiantes quedan matriculados en el periodo' },
-          { to: '/asignacion', label: 'Asignar el tutor de cada ciclo', description: 'El docente recibe un correo para aceptar' },
-        ]}
+        title={copy.nextTitle}
+        steps={copy.steps}
       />
     </div>
   );

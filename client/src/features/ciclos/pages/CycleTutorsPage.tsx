@@ -208,7 +208,7 @@ export function CycleTutorsPage() {
           {school && (
             <NextSteps
               steps={[
-                { to: '/tutorados', label: 'Ver los tutorados', description: 'Comprobar quién tiene qué tutor; un caso puntual se reasigna ahí, con motivo' },
+                { to: '/tutorados', label: 'Ver los estudiantes', description: 'Comprobar quién tiene qué tutor; un caso puntual se reasigna ahí, con motivo' },
                 { to: '/carga-masiva', label: 'Cargar más estudiantes', description: 'Los que se carguen en un ciclo con tutor pasan solos a él' },
               ]}
             />

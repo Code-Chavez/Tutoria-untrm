@@ -41,7 +41,7 @@ describe('Sidebar (A15): cada acceso habilitado conduce a una tarea', () => {
     role = 'Docente Tutor';
     renderSidebar('/tutorados?accion=seguimiento');
     expect(screen.getByRole('link', { name: 'Seguimiento' })).toHaveAttribute('aria-current', 'page');
-    expect(screen.getByRole('link', { name: 'Tutorados' })).not.toHaveAttribute('aria-current');
+    expect(screen.getByRole('link', { name: 'Estudiantes' })).not.toHaveAttribute('aria-current');
     expect(screen.getByRole('link', { name: 'Entrevista inicial' })).not.toHaveAttribute('aria-current');
   });
 
@@ -123,7 +123,7 @@ describe('Sidebar (A15): cada acceso habilitado conduce a una tarea', () => {
       role = 'Docente Tutor';
       const first = renderSidebar('/sesiones');
       await userEvent.click(screen.getByRole('button', { name: /Gestión/ }));
-      await userEvent.click(screen.getByRole('button', { name: /Atención a tutorados/ }));
+      await userEvent.click(screen.getByRole('button', { name: /Atención a estudiantes/ }));
       expect(screen.getByRole('link', { name: 'Sesiones' })).toHaveAttribute('aria-current', 'page'); // sigue visible
       first.unmount();
 

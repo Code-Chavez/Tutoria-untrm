@@ -76,9 +76,9 @@ const EMPTY_FILTERS: StudentFilterValues = { search: '', schoolId: '', cycle: ''
 // «elegir tutorado» para que cada acceso conduzca a su formulario real (A15).
 type PickAction = 'entrevista' | 'seguimiento' | 'derivar';
 const PICK_TEXT: Record<PickAction, { button: string; help: string }> = {
-  entrevista: { button: 'Registrar entrevista', help: 'Elige al tutorado a quien le harás la entrevista inicial.' },
-  seguimiento: { button: 'Registrar seguimiento', help: 'Elige al tutorado para registrar su ficha de seguimiento.' },
-  derivar: { button: 'Derivar caso', help: 'Elige al tutorado cuyo caso vas a derivar a un servicio.' },
+  entrevista: { button: 'Registrar entrevista', help: 'Elige al estudiante a quien le harás la entrevista inicial.' },
+  seguimiento: { button: 'Registrar seguimiento', help: 'Elige al estudiante para registrar su ficha de seguimiento.' },
+  derivar: { button: 'Derivar caso', help: 'Elige al estudiante cuyo caso vas a derivar a un servicio.' },
 };
 
 export const StudentsPage: React.FC = () => {
@@ -97,7 +97,7 @@ export const StudentsPage: React.FC = () => {
       : null;
   const clearPickAction = () => setSearchParams({});
 
-  // «Registrar tutorado» del panel de inicio llega con ?accion=nuevo y abre directamente el alta.
+  // «Registrar estudiante» del panel de inicio llega con ?accion=nuevo y abre directamente el alta.
   const wantsNewStudent = canWrite && requestedAction === 'nuevo';
 
   const [filters, setFilters] = useState<StudentFilterValues>(EMPTY_FILTERS);
@@ -308,7 +308,7 @@ export const StudentsPage: React.FC = () => {
         data,
       );
       setRequestFeedback(
-        `Solicitud registrada y enrutada a ${request.routedToRole === 'tutor' ? 'el tutor' : 'el coordinador'} de ${studentForRequest.firstName} ${studentForRequest.lastName}.`,
+        `Solicitud registrada y enviada a ${request.routedToRole === 'tutor' ? 'el tutor' : 'el coordinador'} de ${studentForRequest.firstName} ${studentForRequest.lastName}.`,
       );
       setStudentForRequest(null);
     } catch (err) {
@@ -370,7 +370,7 @@ export const StudentsPage: React.FC = () => {
       });
       setRequestFeedback(
         <>
-          Sesión grupal programada para el {when} con {session.studentIds.length} tutorados.
+          Sesión grupal programada para el {when} con {session.studentIds.length} estudiantes.
           {sessionModalityNote(session)}
           {sessionNoticeText(session.notice)}
         </>,
@@ -450,7 +450,7 @@ export const StudentsPage: React.FC = () => {
   return (
     <div>
       <PageHeader
-        title="Tutorados"
+        title="Estudiantes"
         subtitle="Gestión de estudiantes en el programa de tutoría"
         icon={<GraduationCapIcon size={24} />}
         actions={
@@ -469,7 +469,7 @@ export const StudentsPage: React.FC = () => {
             )}
             {canWrite && (
               <Button icon={<PlusIcon size={17} />} onClick={() => handleOpenModal()}>
-                Nuevo tutorado
+                Nuevo estudiante
               </Button>
             )}
           </>
@@ -484,8 +484,8 @@ export const StudentsPage: React.FC = () => {
       )}
 
       <div className={styles.kpis}>
-        <StatCard icon={<GraduationCapIcon size={22} />} value={String(total)} label="Total de tutorados" hint="Registrados en el sistema" tone="info" loading={loading} />
-        <StatCard icon={<CheckCircleIcon size={22} />} value={String(active)} label="Tutorados activos" hint="Con matrícula vigente" tone="success" loading={loading} />
+        <StatCard icon={<GraduationCapIcon size={22} />} value={String(total)} label="Total de estudiantes" hint="Registrados en el sistema" tone="info" loading={loading} />
+        <StatCard icon={<CheckCircleIcon size={22} />} value={String(active)} label="Estudiantes activos" hint="Con matrícula vigente" tone="success" loading={loading} />
         <StatCard icon={<AlertTriangleIcon size={22} />} value={String(atRisk)} label="En riesgo académico" hint="Requieren seguimiento" tone="warning" loading={loading} />
         <StatCard icon={<BanIcon size={22} />} value={String(inactive)} label="Inactivos" hint="Sin matrícula vigente" tone="neutral" loading={loading} />
       </div>
@@ -514,26 +514,26 @@ export const StudentsPage: React.FC = () => {
           <EmptyState
             variant="error"
             icon={<XCircleIcon size={26} />}
-            title="No se pudieron cargar los tutorados"
+            title="No se pudieron cargar los estudiantes"
             description="Ocurrió un error al consultar la información. Vuelve a intentarlo."
             action={<Button variant="secondary" onClick={refresh}>Reintentar</Button>}
           />
         ) : filtered.length === 0 ? (
           <EmptyState
             icon={<SearchIcon size={26} />}
-            title={total === 0 ? 'Aún no hay tutorados registrados' : 'Sin resultados'}
+            title={total === 0 ? 'Aún no hay estudiantes registrados' : 'Sin resultados'}
             description={
               total === 0
                 ? canWrite
-                  ? 'Registra un tutorado o utiliza la carga masiva para importarlos desde Excel.'
-                  : 'Aún no tienes tutorados asignados. La coordinación de tu escuela los asigna por ciclo en «Asignación por ciclo»; cuando lo haga, aparecerán aquí.'
-                : 'No se encontraron tutorados con los filtros aplicados. Prueba ajustarlos.'
+                  ? 'Registra un estudiante o utiliza la carga masiva para importarlos desde Excel.'
+                  : 'Aún no tienes estudiantes asignados. La coordinación de tu escuela los asigna por ciclo en «Asignación por ciclo»; cuando lo haga, aparecerán aquí.'
+                : 'No se encontraron estudiantes con los filtros aplicados. Prueba ajustarlos.'
             }
             action={
               total === 0 && canWrite ? (
                 <>
                   <Button icon={<PlusIcon size={16} />} onClick={() => handleOpenModal()}>
-                    Nuevo tutorado
+                    Nuevo estudiante
                   </Button>
                   <NextSteps
                     title="O consíguelos así"

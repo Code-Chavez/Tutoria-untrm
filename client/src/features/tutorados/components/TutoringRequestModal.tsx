@@ -150,7 +150,7 @@ export const TutoringRequestModal: React.FC<TutoringRequestModalProps> = ({
           )}
 
           <div className={styles.field}>
-            <label htmlFor="caseType">Motivo (Art. 20)</label>
+            <label htmlFor="caseType">Motivo</label>
             <SelectField
               id="caseType"
               value={caseType}

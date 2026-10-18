@@ -114,20 +114,20 @@ export function IndicatorsPage() {
             <StatCard
               icon={<UsersIcon size={18} />}
               value={report.students.active}
-              label="Tutorados activos"
+              label="Estudiantes activos"
               hint={`${report.students.assignedPct}% con tutor asignado`}
             />
             <StatCard
               icon={<ActivityIcon size={18} />}
               value={`${report.sessions.coveragePct}%`}
               label="Cobertura de sesiones"
-              hint={`${report.sessions.studentsServed} tutorados atendidos · ${report.sessions.total} sesiones`}
+              hint={`${report.sessions.studentsServed} estudiantes atendidos · ${report.sessions.total} sesiones`}
               tone="success"
             />
             <StatCard
               icon={<UsersIcon size={18} />}
               value={`${report.risk.atRiskPct}%`}
-              label="Tutorados en riesgo"
+              label="Estudiantes en riesgo"
               hint={`${report.risk.atRisk} de ${report.students.active}`}
               tone="danger"
             />
@@ -170,7 +170,7 @@ export function IndicatorsPage() {
               }))}
             />
             <BarChart
-              title="Tutorados en riesgo por escuela"
+              title="Estudiantes en riesgo por escuela"
               rows={report.risk.bySchool.map((s) => ({
                 label: s.schoolName,
                 value: s.atRisk,

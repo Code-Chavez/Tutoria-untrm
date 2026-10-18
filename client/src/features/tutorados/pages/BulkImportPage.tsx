@@ -72,7 +72,7 @@ export const BulkImportPage: React.FC = () => {
     <div className={styles.page}>
       <PageHeader
         title="Carga masiva de estudiantes"
-        subtitle="Importa tutorados desde un archivo Excel de forma guiada"
+        subtitle="Importa estudiantes desde un archivo Excel de forma guiada"
         icon={<UploadIcon size={24} />}
         actions={
           <Button variant="secondary" icon={<DownloadIcon size={16} />} onClick={handleTemplate}>
@@ -125,7 +125,7 @@ export const BulkImportPage: React.FC = () => {
           <NextSteps
             steps={[
               { to: '/asignacion', label: 'Asignar el tutor de cada ciclo', description: 'Los estudiantes cargados pasan al tutor de su ciclo' },
-              { to: '/tutorados', label: 'Ver los tutorados', description: 'Comprobar que quedaron registrados' },
+              { to: '/tutorados', label: 'Ver los estudiantes', description: 'Comprobar que quedaron registrados' },
             ]}
           />
         )}

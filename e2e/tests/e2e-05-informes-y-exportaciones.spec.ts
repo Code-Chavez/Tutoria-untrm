@@ -48,7 +48,7 @@ test('Vicerrectorado ve el consolidado e indicadores y exporta', async ({ page }
   await exportAs(page, 'Excel', /\.xlsx$/);
 
   await goToMenu(page, 'Indicadores');
-  await expect(page.getByText('Tutorados activos').first()).toBeVisible();
+  await expect(page.getByText('Estudiantes activos').first()).toBeVisible();
   await expect(page.getByRole('heading', { level: 3, name: 'Derivaciones por servicio' })).toBeVisible();
   await exportAs(page, 'PDF', /\.pdf$/);
   await exportAs(page, 'Excel', /\.xlsx$/);

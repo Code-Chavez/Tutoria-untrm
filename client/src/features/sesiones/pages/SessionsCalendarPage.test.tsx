@@ -172,6 +172,6 @@ describe('SessionsCalendarPage', () => {
     await user.click(screen.getByRole('button', { name: /guardar asistencia/i }));
 
     await waitFor(() => expect(sessionService.recordAttendance).toHaveBeenCalledWith('sess-past', ['s1']));
-    expect(await screen.findByText(/asistieron 1 de 2 tutorados/i)).toBeInTheDocument();
+    expect(await screen.findByText(/asistieron 1 de 2 estudiantes/i)).toBeInTheDocument();
   });
 });

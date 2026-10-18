@@ -62,7 +62,7 @@ export const ReassignModal: React.FC<ReassignModalProps> = ({
         ref={dialogRef}
         tabIndex={-1}
         aria-modal="true"
-        aria-label="Reasignar tutorado"
+        aria-label="Reasignar estudiante"
         onClick={(e) => e.stopPropagation()}
       >
         <div className={styles.header}>
@@ -70,7 +70,7 @@ export const ReassignModal: React.FC<ReassignModalProps> = ({
             <SwitchIcon size={20} />
           </span>
           <div className={styles.headText}>
-            <h2>Reasignar tutorado</h2>
+            <h2>Reasignar estudiante</h2>
             <p>
               {student.firstName} {student.lastName} · {student.studentCode}
             </p>
@@ -103,7 +103,7 @@ export const ReassignModal: React.FC<ReassignModalProps> = ({
               <option value="">Seleccione un tutor…</option>
               {options.map((t) => (
                 <option key={t.tutorId} value={t.tutorId}>
-                  {t.fullName} · {t.assignedCount} tutorado{t.assignedCount === 1 ? '' : 's'}
+                  {t.fullName} · {t.assignedCount} estudiante{t.assignedCount === 1 ? '' : 's'}
                 </option>
               ))}
             </SelectField>

@@ -5,12 +5,12 @@ import { goToMenu, loginUi, sidebar } from '../support/ui';
 // E2E-01 (HU-01, HU-04, HU-49): cada rol entra, ve su menú y su panel de inicio sin bloques vacíos.
 const MENU: Record<AccountKey, string[]> = {
   student: ['Panel de inicio', 'Solicitar tutoría', 'Mis sesiones', 'Evaluar tutoría'],
-  tutor: ['Panel de inicio', 'Tutorados', 'Entrevista inicial', 'Sesiones', 'Seguimiento', 'Derivar caso', 'Solicitudes de tutoría', 'Casos derivados', 'Informes'],
-  coordinator: ['Panel de inicio', 'Tutorados', 'Solicitudes de tutoría', 'Periodo académico', 'Plan semestral', 'Informes', 'Amonestaciones', 'Configuración'],
+  tutor: ['Panel de inicio', 'Estudiantes', 'Entrevista inicial', 'Sesiones', 'Seguimiento', 'Derivar caso', 'Solicitudes de tutoría', 'Casos derivados', 'Informes'],
+  coordinator: ['Panel de inicio', 'Estudiantes', 'Solicitudes de tutoría', 'Periodo académico', 'Plan semestral', 'Informes', 'Amonestaciones', 'Configuración'],
   psychology: ['Panel de inicio', 'Casos derivados'],
   vice: ['Panel de inicio', 'Informes', 'Configuración'],
   dean: ['Panel de inicio', 'Amonestaciones'],
-  admin: ['Panel de inicio', 'Tutorados', 'Solicitudes de tutoría', 'Casos derivados', 'Seguimiento DBU', 'Periodo académico', 'Plan semestral', 'Informes', 'Amonestaciones', 'Configuración'],
+  admin: ['Panel de inicio', 'Estudiantes', 'Solicitudes de tutoría', 'Casos derivados', 'Seguimiento DBU', 'Periodo académico', 'Plan semestral', 'Informes', 'Amonestaciones', 'Configuración'],
 };
 
 for (const [key, account] of Object.entries(accounts) as [AccountKey, (typeof accounts)[AccountKey]][]) {
@@ -79,11 +79,11 @@ test('el menú es corto: Periodo académico, Informes y Configuración son una p
 
 test('el expediente se abre desde Tutorados (ya no hay una entrada de menú) y vuelve a Tutorados', async ({ page }) => {
   await loginUi(page, accounts.coordinator);
-  await goToMenu(page, 'Tutorados');
+  await goToMenu(page, 'Estudiantes');
   await page.getByRole('button', { name: 'Ver expediente' }).first().click();
   await expect(page).toHaveURL(/\/expediente\//);
-  await expect(page.locator('nav').getByRole('link', { name: 'Tutorados', exact: true })).toHaveAttribute('aria-current', 'page');
+  await expect(page.locator('nav').getByRole('link', { name: 'Estudiantes', exact: true })).toHaveAttribute('aria-current', 'page');
 
-  await page.getByRole('button', { name: 'Volver a Tutorados' }).click();
+  await page.getByRole('button', { name: 'Volver a Estudiantes' }).click();
   await expect(page).toHaveURL(/\/tutorados/);
 });

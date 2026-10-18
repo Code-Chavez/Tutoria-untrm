@@ -117,7 +117,7 @@ export function ScheduleAttendanceReportPage() {
     <div>
       <PageHeader
         title="Consolidado de horarios y asistencia"
-        subtitle="Resumen de sesiones y asistencias del periodo, por tutor (Art. 15.d)"
+        subtitle="Resumen de sesiones y asistencias del periodo, por tutor"
         icon={<ReportIcon size={24} />}
       />
 
@@ -248,7 +248,7 @@ export function ScheduleAttendanceReportPage() {
                     <th>Fecha</th>
                     <th>Tema</th>
                     <th>Modalidad</th>
-                    <th>Tutorados</th>
+                    <th>Estudiantes</th>
                     <th>Estado</th>
                     <th>Asistencia</th>
                   </tr>
