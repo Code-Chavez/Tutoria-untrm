@@ -17,7 +17,7 @@ export interface RequestRecipient {
 /**
  * Una sola regla para decidir a quién llega una solicitud de tutoría: la usan el registro (para enrutarla) y la consulta previa
  * del estudiante (para decirle, antes de enviarla, quién la recibirá), de modo que lo que se promete es lo que ocurre.
- * Tutor asignado → coordinador de la escuela → un Administrador DBU activo (respaldo: la solicitud nunca se pierde).
+ * Tutor asignado y activo → coordinador de la escuela → un Administrador DBU activo (respaldo: la solicitud nunca se pierde).
  */
 export class TutoringRequestRouter {
   constructor(
@@ -27,7 +27,8 @@ export class TutoringRequestRouter {
   ) {}
 
   async resolve(tutorId: string | null | undefined, schoolId: string): Promise<RequestRecipient> {
-    if (tutorId) return { routedToId: tutorId, routedToRole: 'tutor', kind: 'tutor' };
+    // Un tutor con la cuenta desactivada no puede atender: la solicitud pasa a la coordinación en vez de quedar sin responsable.
+    if (tutorId && (await this.users.findById(tutorId))?.isActive) return { routedToId: tutorId, routedToRole: 'tutor', kind: 'tutor' };
 
     const school = await this.schools.findById(schoolId);
     if (school?.coordinatorId) return { routedToId: school.coordinatorId, routedToRole: 'coordinator', kind: 'coordinator' };

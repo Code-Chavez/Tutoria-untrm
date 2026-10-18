@@ -16,7 +16,7 @@ describe('a quién llega una solicitud de tutoría', () => {
   beforeEach(() => {
     schools = { findById: jest.fn().mockResolvedValue({ id: 'sch', coordinatorId: 'coord-1' }) } as unknown as jest.Mocked<SchoolRepository>;
     users = {
-      findById: jest.fn().mockImplementation(async (id: string) => ({ id, firstName: id === 'tutor-1' ? 'Elena' : id === 'coord-1' ? 'Rosa' : 'Dora', lastName: 'Apellido' })),
+      findById: jest.fn().mockImplementation(async (id: string) => ({ id, isActive: true, firstName: id === 'tutor-1' ? 'Elena' : id === 'coord-1' ? 'Rosa' : 'Dora', lastName: 'Apellido' })),
       findAll: jest.fn().mockResolvedValue([{ id: 'dbu-1' }]),
     } as unknown as jest.Mocked<UserRepository>;
     roles = { findByName: jest.fn().mockResolvedValue({ id: 'r-dbu' }) } as unknown as jest.Mocked<RoleRepository>;
@@ -25,6 +25,13 @@ describe('a quién llega una solicitud de tutoría', () => {
 
   it('con tutor asignado, llega a su tutor', async () => {
     expect(await router.resolve('tutor-1', 'sch')).toEqual({ routedToId: 'tutor-1', routedToRole: 'tutor', kind: 'tutor' });
+  });
+
+  it('si el tutor asignado tiene la cuenta desactivada o ya no existe, llega a la coordinación (no a quien no puede atender)', async () => {
+    users.findById.mockResolvedValueOnce({ id: 'tutor-1', isActive: false } as never);
+    expect(await router.resolve('tutor-1', 'sch')).toEqual({ routedToId: 'coord-1', routedToRole: 'coordinator', kind: 'coordinator' });
+    users.findById.mockResolvedValueOnce(null);
+    expect(await router.resolve('tutor-1', 'sch')).toEqual({ routedToId: 'coord-1', routedToRole: 'coordinator', kind: 'coordinator' });
   });
 
   it('sin tutor, a la coordinación de su escuela', async () => {

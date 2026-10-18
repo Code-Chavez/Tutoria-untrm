@@ -55,7 +55,7 @@ describe('CreateTutoringRequestUseCase', () => {
     };
     schools = { findAll: jest.fn(), findById: jest.fn().mockResolvedValue(school) };
     users = {
-      findById: jest.fn(),
+      findById: jest.fn().mockResolvedValue({ id: 'tutor-1', isActive: true } as User), // el tutor asignado, activo
       findByEmail: jest.fn(),
       findAll: jest.fn().mockResolvedValue([{ id: 'dbu-1' } as User]),
       create: jest.fn(),
