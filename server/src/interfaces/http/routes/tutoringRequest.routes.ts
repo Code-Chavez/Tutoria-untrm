@@ -13,6 +13,7 @@ const tutoringRequestController = new TutoringRequestController(
   container.useCases.createOwnTutoringRequestUseCase,
   container.useCases.listOwnTutoringRequestsUseCase,
   container.useCases.updateTutoringRequestStatusUseCase,
+  container.useCases.getOwnRequestRecipientUseCase,
 );
 
 const requireAuth = authenticate(container.services.tokenService);
@@ -31,6 +32,14 @@ router.post(
   requireAuth,
   authorize(['tutoring-requests:self']), requireOpenPeriod, requireEnrollment,
   tutoringRequestController.createOwn,
+);
+
+// A quién llegará mi solicitud (antes de enviarla). Antes de /:id para que «recipient» no se tome por un identificador.
+router.get(
+  '/tutoring-requests/recipient',
+  requireAuth,
+  authorize(['tutoring-requests:self']),
+  tutoringRequestController.recipient,
 );
 
 // Historial propio del tutorado (estado y respuesta). Antes de /:id para que «mine» no se tome por un identificador.

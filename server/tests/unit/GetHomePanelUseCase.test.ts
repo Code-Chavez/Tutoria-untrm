@@ -13,6 +13,7 @@ import { Student } from '@domain/entities/Student';
 import { StudentReferral } from '@domain/entities/StudentReferral';
 import { ListTutoringRequestsUseCase } from '@application/use-cases/tutoring-requests/ListTutoringRequestsUseCase';
 import { TutoringRequestView } from '@domain/entities/TutoringRequest';
+import { GetOwnRequestRecipientUseCase } from '@application/use-cases/tutoring-requests/GetOwnRequestRecipientUseCase';
 
 const future = (days: number) => new Date(Date.now() + days * 86_400_000);
 const session = (over: Partial<SessionWithParticipants>) =>
@@ -32,10 +33,14 @@ describe('GetHomePanelUseCase (HU-49)', () => {
   let riskAlerts: jest.Mocked<GetRiskAlertsUseCase>;
   let evaluationStatus: jest.Mocked<GetEvaluationStatusUseCase>;
   let requestInbox: jest.Mocked<ListTutoringRequestsUseCase> | undefined;
+  let ownRequests: { execute: jest.Mock } | undefined;
+  let requestRecipient: { execute: jest.Mock } | undefined;
 
   beforeEach(() => {
     roleName = 'Docente Tutor';
     requestInbox = undefined;
+    ownRequests = undefined;
+    requestRecipient = undefined;
     user = { id: 'u1', roleId: 'r1', firstName: 'Elena', lastName: 'Ramírez', service: null };
     users = {
       findById: jest.fn().mockImplementation(async (id: string) => (id === 'u1' ? user : { id, firstName: 'Elena', lastName: 'Ramírez' })),
@@ -54,6 +59,7 @@ describe('GetHomePanelUseCase (HU-49)', () => {
       { findById: jest.fn().mockImplementation(async () => ({ id: 'r1', name: roleName })) } as unknown as RoleRepository,
       { findActive: jest.fn().mockResolvedValue({ id: 'p1', name: '2026-II' }) } as unknown as AcademicPeriodRepository,
       students, sessions, referrals, indicators, riskAlerts, evaluationStatus, requestInbox,
+      ownRequests as never, requestRecipient as never,
     ).execute('u1');
 
   const kpi = (panel: Awaited<ReturnType<typeof run>>, key: string) => panel.kpis.find((k) => k.key === key);
@@ -247,5 +253,44 @@ describe('GetHomePanelUseCase (HU-49)', () => {
 
     users.findById.mockResolvedValue(null);
     expect(await run()).toEqual({ role: '', periodName: null, kpis: [] });
+  });
+
+  describe('panel del estudiante (U02): a quién llegan sus solicitudes y cuáles esperan', () => {
+    const own = (status: string, routedToName: string) => ({ status, routedToName }) as TutoringRequestView;
+    beforeEach(() => {
+      roleName = 'Tutorado';
+      students.findByUserId.mockResolvedValue({ id: 'st1', tutorId: null } as Student);
+      sessions.findByStudent.mockResolvedValue([]);
+      evaluationStatus.execute.mockResolvedValue({ canRespond: false, alreadyResponded: false, periodName: 'x' } as never);
+    });
+
+    it('sin tutor: dice «Sin asignar» y quién recibe sus solicitudes mientras tanto', async () => {
+      requestRecipient = { execute: jest.fn().mockResolvedValue({ kind: 'coordinator', name: 'Rosa Mendoza' }) };
+      ownRequests = { execute: jest.fn().mockResolvedValue([]) };
+
+      const panel = await run();
+
+      expect(kpi(panel, 'my-tutor')).toMatchObject({ value: 'Sin asignar', hint: 'Mientras tanto, tus solicitudes las recibe la coordinación de tu escuela (Rosa Mendoza)' });
+      expect(kpi(panel, 'my-requests')).toMatchObject({ value: 'Ninguna pendiente', tone: 'neutral', hint: 'Si necesitas ayuda, tu solicitud la recibirá la coordinación de tu escuela (Rosa Mendoza)', link: '/solicitar-tutoria' });
+    });
+
+    it('con una solicitud esperando: la cuenta (las atendidas no) y dice quién debe responder', async () => {
+      students.findByUserId.mockResolvedValue({ id: 'st1', tutorId: 'u-tutor' } as Student);
+      users.findById.mockImplementation(async (id: string) => (id === 'u-tutor' ? ({ id, firstName: 'Elena', lastName: 'Ramírez' } as never) : (user as never)));
+      ownRequests = { execute: jest.fn().mockResolvedValue([own('PENDIENTE', 'Elena Ramírez'), own('ATENDIDA', 'Elena Ramírez')]) };
+      requestRecipient = { execute: jest.fn() };
+
+      const panel = await run();
+
+      expect(kpi(panel, 'my-requests')).toMatchObject({ value: '1 esperando respuesta', tone: 'warning', hint: 'Te avisaremos en cuanto Elena Ramírez responda' });
+      expect(kpi(panel, 'my-tutor')?.hint).toBeUndefined(); // con tutor no hace falta explicar
+      expect(requestRecipient.execute).not.toHaveBeenCalled();
+    });
+
+    it('en orden: tutor, próxima sesión, solicitudes y evaluación', async () => {
+      ownRequests = { execute: jest.fn().mockResolvedValue([]) };
+      requestRecipient = { execute: jest.fn().mockResolvedValue(null) };
+      expect((await run()).kpis.map((k) => k.key)).toEqual(['my-tutor', 'next-session', 'my-requests', 'evaluation']);
+    });
   });
 });

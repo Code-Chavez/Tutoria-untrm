@@ -458,6 +458,8 @@ model Session {
   id        String   @id @default(uuid())
   createdAt DateTime @default(now()) @map("created_at")
 
+  notifications Notification[]
+
   tutorId String @map("tutor_id")
   tutor   User   @relation("SessionsAsTutor", fields: [tutorId], references: [id])
 
@@ -641,6 +643,7 @@ model Notification {
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   // 'REFERRAL_CREATED' | 'REFERRAL_STATUS_CHANGED' | 'TUTORING_REQUEST_CREATED' | 'TUTORING_REQUEST_UPDATED' | 'TUTORING_REQUEST_RECEIVED'
+  // | 'SESSION_SCHEDULED' | 'SESSION_RESCHEDULED' | 'SESSION_CANCELLED'
   type    String
   message String
 
@@ -651,6 +654,9 @@ model Notification {
   // Solicitud de tutoría a la que se refiere el aviso (R01).
   tutoringRequestId String?          @map("tutoring_request_id")
   tutoringRequest   TutoringRequest? @relation(fields: [tutoringRequestId], references: [id], onDelete: Cascade)
+  // Sesión a la que se refiere el aviso (programada, reprogramada o cancelada).
+  sessionId String?  @map("session_id")
+  session   Session? @relation(fields: [sessionId], references: [id], onDelete: Cascade)
 
   read Boolean @default(false)
 
@@ -658,6 +664,7 @@ model Notification {
   emailOutbox EmailOutbox?
 
   @@index([userId, read])
+  @@index([sessionId])
   @@map("notifications")
 }
 

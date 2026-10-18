@@ -1,6 +1,7 @@
 import { SessionWithParticipants } from '@domain/entities/Session';
 import { SessionRepository } from '@domain/repositories/SessionRepository';
 import { CancelSessionInput } from '@application/dtos/session.dto';
+import { SessionNotice, SessionNotifier } from '@application/services/SessionNotifier';
 import {
   SessionNotFoundError,
   NotSessionTutorError,
@@ -15,13 +16,17 @@ import {
  * cancelada; no se permite cancelar una que ya se realizó.
  */
 export class CancelSessionUseCase {
-  constructor(private readonly sessions: SessionRepository) {}
+  constructor(
+    private readonly sessions: SessionRepository,
+    // Avisa a los tutorados de la cancelación y de su motivo.
+    private readonly notifier?: SessionNotifier,
+  ) {}
 
   async execute(
     sessionId: string,
     tutorId: string,
     input: CancelSessionInput,
-  ): Promise<SessionWithParticipants> {
+  ): Promise<SessionWithParticipants & { notice?: SessionNotice }> {
     const session = await this.sessions.findById(sessionId);
     if (!session) {
       throw new SessionNotFoundError(sessionId);
@@ -52,9 +57,9 @@ export class CancelSessionUseCase {
       changedById: tutorId,
     });
 
-    // TODO(notificaciones): notificar al tutorado cuando exista un servicio
-    // de notificaciones (correo/in-app), mismo punto de extensión de HU-13.
-
-    return (await this.sessions.findById(sessionId)) as SessionWithParticipants;
+    const updated = (await this.sessions.findById(sessionId)) as SessionWithParticipants;
+    if (!this.notifier) return updated;
+    const notice = await this.notifier.notify(updated, { kind: 'cancelled', reason });
+    return Object.assign(updated, { notice });
   }
 }

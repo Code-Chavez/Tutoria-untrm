@@ -202,3 +202,13 @@
   line-height: 1.5;
   color: var(--g700);
 }
+
+.recipient {
+  margin: 0 0 var(--s4);
+  padding: var(--s3) var(--s4);
+  border-left: 3px solid var(--azul);
+  border-radius: var(--r-sm);
+  background: var(--g50);
+  font-size: var(--fs-sm);
+  color: var(--g700);
+}

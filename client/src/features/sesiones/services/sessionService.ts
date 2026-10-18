@@ -45,6 +45,13 @@ export interface TutoringSession {
   cancelledAt: string | null;
   cancelReason: string | null;
   createdAt: string;
+  /** Solo en la respuesta de programar, reprogramar o cancelar: a cuántos tutorados avisó el sistema y a cuántos no pudo. */
+  notice?: SessionNotice;
+}
+
+export interface SessionNotice {
+  notified: number;
+  notReached: number;
 }
 
 export interface RescheduleSessionData {

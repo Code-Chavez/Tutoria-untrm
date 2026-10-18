@@ -66,6 +66,21 @@ describe('MySessionsPage (A15)', () => {
     expect(screen.getByText('No tienes sesiones próximas.')).toBeInTheDocument();
   });
 
+  it('mientras carga lo dice (visible y accesible), en vez de dejar solo el título (U03)', () => {
+    mocked.getOwnSessions.mockReturnValue(new Promise(() => undefined)); // nunca responde
+    renderPage();
+    expect(screen.getByText('Cargando tus sesiones…')).toBeVisible();
+    expect(screen.getByRole('progressbar', { name: 'Cargando tus sesiones…' })).toBeInTheDocument();
+    expect(screen.queryByText('Aún no tienes sesiones programadas')).not.toBeInTheDocument(); // no confunde «cargando» con «sin sesiones»
+  });
+
+  it('si falla la consulta lo dice y permite reintentar', async () => {
+    mocked.getOwnSessions.mockRejectedValue(new Error('boom'));
+    renderPage();
+    expect(await screen.findByText('No se pudieron cargar tus sesiones')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Reintentar' })).toBeInTheDocument();
+  });
+
   it('sin sesiones explica cómo pedir una', async () => {
     mocked.getOwnSessions.mockResolvedValue([]);
     renderPage();

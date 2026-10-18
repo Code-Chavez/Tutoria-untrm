@@ -27,11 +27,14 @@ test.beforeAll(async () => {
 test('el estudiante registra la solicitud y queda Pendiente', async ({ page }) => {
   await loginUi(page, accounts.student);
   await goToMenu(page, 'Solicitar tutoría');
+  // Antes de enviar ya sabe quien la recibira (se espera a verlo: asi lo veria una persona antes de pulsar el boton)
+  await expect(page.getByText(/Tu solicitud la recibirá tu tutor Elena/)).toBeVisible();
   await page.getByLabel('Motivo (Art. 20)').selectOption({ label: 'Académico' });
   await page.getByLabel('Descripción del motivo').fill(reason);
   await page.getByRole('button', { name: 'Registrar solicitud' }).click();
 
-  await expect(page.getByText('Solicitud registrada y enrutada a tu tutor.')).toBeVisible();
+  // Despues de enviar, la pantalla dice a quien llego
+  await expect(page.getByText(/Solicitud registrada: la recibió tu tutor Elena .*Te avisaremos en el sistema cuando responda\./)).toBeVisible();
   const row = page.getByText(reason).first();
   await expect(row).toBeVisible();
   await expect(page.getByText('Pendiente').first()).toBeVisible();

@@ -80,7 +80,7 @@ export function MySessionsPage() {
       />
 
       {loading ? (
-        <TableSkeleton rows={4} columns={2} />
+        <TableSkeleton rows={4} columns={2} label="Cargando tus sesiones…" onRetry={() => refresh()} />
       ) : error ? (
         <EmptyState
           variant="error"

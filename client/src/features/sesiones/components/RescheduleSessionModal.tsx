@@ -123,6 +123,8 @@ export const RescheduleSessionModal: React.FC<RescheduleSessionModalProps> = ({
             />
           </div>
 
+          <p className={styles.note}>Cada tutorado con cuenta del portal recibe un aviso con el nuevo horario y este motivo.</p>
+
           {(error || serverError) && <span className={styles.error}>{error || serverError}</span>}
         </div>
 

@@ -46,8 +46,15 @@ export async function createStudentForElena(adminToken: string, elenaId: string)
   });
   expect(created.status).toBe(201);
   const id = created.body.student.id;
+  // Si la escuela ya tiene tutor para ese ciclo, el estudiante nuevo nace con él y asignar se rechaza (correctamente): el cambio de
+  // tutor es una reasignación, que exige motivo y deja historial.
   const assigned = await api(adminToken, 'POST', '/students/assign', { tutorId: elenaId, studentIds: [id] });
-  expect(assigned.status).toBe(200);
+  if (assigned.status === 409) {
+    const reassigned = await api(adminToken, 'PATCH', `/students/${id}/reassign`, { newTutorId: elenaId, reason: 'Preparación de prueba E2E' });
+    expect(reassigned.status).toBe(200);
+  } else {
+    expect(assigned.status).toBe(200);
+  }
   return { id, fullName: `Prueba E2E ${code}` };
 }
 
