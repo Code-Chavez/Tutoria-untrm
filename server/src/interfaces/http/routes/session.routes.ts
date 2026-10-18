@@ -35,7 +35,8 @@ const uploadEvidence = multer({
 const requireAuth = authenticate(container.services.tokenService);
 
 // Programar una sesión de tutoría individual (HU-18, Art. 15.c). El tutor es
-// siempre el usuario autenticado; sessions:write es exclusivo de Docente Tutor.
+// siempre el usuario autenticado; sessions:write lo tienen el Docente Tutor y la DBU (que queda como tutora de la sesión);
+// reprogramar, cancelar y registrar asistencia son solo de quien es el tutor de esa sesión.
 router.post('/sessions', requireAuth, authorize(['sessions:write']), requireOpenPeriod, sessionController.create);
 
 // Listar sesiones (?mine=true para la agenda propia, ?studentId= para las de un estudiante).
