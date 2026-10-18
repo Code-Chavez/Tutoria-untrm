@@ -8,6 +8,8 @@ import { Role } from '../services/roleService';
 import { CloseIcon } from '@shared/components/icons';
 import type { School } from '@features/tutorados/services/schoolService';
 import { REFERRAL_SERVICE_LABEL, type ReferralService } from '@features/derivaciones/services/referralService';
+import { accountEmailProblem, normalizeEmail } from '@shared/utils/email';
+import { useEmailPolicy } from '../hooks/useUsers';
 
 // Un Profesional de Servicio solo ve y recibe los casos derivados a su servicio: sin él no recibiría ninguno.
 const SERVICE_ROLE_NAME = 'Profesional de Servicio';
@@ -52,6 +54,7 @@ export const UserFormModal: React.FC<UserFormModalProps> = ({
   );
   const [loading, setLoading] = useState(false);
   const [submitError, setSubmitError] = useState('');
+  const allowedDomains = useEmailPolicy();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
@@ -67,9 +70,18 @@ export const UserFormModal: React.FC<UserFormModalProps> = ({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSubmitError('');
+    // Mismas reglas que el servidor: forma única, formato y dominio permitido. El dominio se exige al crear o al cambiar el
+    // correo (una cuenta anterior a la regla puede editarse sin tocar el suyo).
+    const email = normalizeEmail(formData.email);
+    const emailChanged = !userToEdit || email !== userToEdit.email;
+    const emailProblem = emailChanged ? accountEmailProblem(email, allowedDomains) : null;
+    if (emailProblem) {
+      setSubmitError(emailProblem);
+      return;
+    }
     try {
       setLoading(true);
-      await onSubmit({ ...formData, service: isServiceRole ? formData.service || null : null, schoolId: isTutorRole ? formData.schoolId || null : null, facultyId: isDeanRole ? formData.facultyId || null : null });
+      await onSubmit({ ...formData, email, service: isServiceRole ? formData.service || null : null, schoolId: isTutorRole ? formData.schoolId || null : null, facultyId: isDeanRole ? formData.facultyId || null : null });
       onClose();
     } catch (error) {
       // Se muestra el motivo real que envía la API (p. ej. «el correo ya está registrado»), no un aviso genérico.
@@ -138,8 +150,14 @@ export const UserFormModal: React.FC<UserFormModalProps> = ({
               className={styles.input}
               value={formData.email}
               onChange={handleChange}
+              aria-describedby="email-help"
               required
             />
+            {allowedDomains && (
+              <small id="email-help" className={styles.help}>
+                Correo institucional ({allowedDomains.map((d) => `@${d}`).join(' o ')})
+              </small>
+            )}
           </div>
 
           <div className={styles.formGroup}>

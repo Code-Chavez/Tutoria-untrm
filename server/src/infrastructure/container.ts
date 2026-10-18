@@ -242,6 +242,7 @@ import {
   ListOwnTutoringRequestsUseCase,
 } from '@application/use-cases/tutoring-requests/ListTutoringRequestsUseCase';
 import { UpdateTutoringRequestStatusUseCase } from '@application/use-cases/tutoring-requests/UpdateTutoringRequestStatusUseCase';
+import { createEmailPolicy } from '@application/validation/email';
 import { TutoringRequestLinker } from '@application/use-cases/tutoring-requests/TutoringRequestLinker';
 import { ScheduleSessionUseCase } from '@application/use-cases/sessions/ScheduleSessionUseCase';
 import { ListSessionsUseCase } from '@application/use-cases/sessions/ListSessionsUseCase';
@@ -320,7 +321,9 @@ const getCurrentPeriodUseCase = new GetCurrentPeriodUseCase(academicPeriodReposi
 const getPeriodClosureUseCase = new GetPeriodClosureUseCase(academicPeriodRepository, periodSummaryRepository);
 const closePeriodUseCase = new ClosePeriodUseCase(academicPeriodRepository, periodSummaryRepository, auditLogRepository);
 const reopenPeriodUseCase = new ReopenPeriodUseCase(academicPeriodRepository, auditLogRepository);
-const createUserUseCase = new CreateUserUseCase(userRepository, passwordHasher, roleRepository, schoolRepository, facultyRepository);
+// Política de dominio de las cuentas de usuario (RF-01), del despliegue; la usan el alta, la edición y la carga de docentes.
+const emailPolicy = createEmailPolicy(env.EMAIL_ALLOWED_DOMAINS);
+const createUserUseCase = new CreateUserUseCase(userRepository, passwordHasher, roleRepository, schoolRepository, facultyRepository, emailPolicy);
 const issueInvitationUseCase = new IssueInvitationUseCase(userRepository, passwordResetTokenRepository, mailer, auditLogRepository, {
   publicUrl: env.PUBLIC_APP_URL,
   ttlHours: env.INVITATION_TTL_HOURS,
@@ -331,8 +334,8 @@ const listAdmonitionsUseCase = new ListAdmonitionsUseCase(admonitionScope, userR
 const listAdmonishableTutorsUseCase = new ListAdmonishableTutorsUseCase(admonitionScope, userRepository, roleRepository, schoolRepository);
 const issueAdmonitionUseCase = new IssueAdmonitionUseCase(admonitionScope, userRepository, roleRepository, schoolRepository, admonitionRepository, evidenceStorage, auditLogRepository);
 const getAdmonitionFileUseCase = new GetAdmonitionFileUseCase(admonitionScope, admonitionRepository, evidenceStorage);
-const importTutorsUseCase = new ImportTutorsUseCase(userRepository, roleRepository, schoolRepository, createUserUseCase, issueInvitationUseCase);
-const updateUserUseCase = new UpdateUserUseCase(userRepository, roleRepository, schoolRepository, facultyRepository);
+const importTutorsUseCase = new ImportTutorsUseCase(userRepository, roleRepository, schoolRepository, createUserUseCase, issueInvitationUseCase, emailPolicy);
+const updateUserUseCase = new UpdateUserUseCase(userRepository, roleRepository, schoolRepository, facultyRepository, emailPolicy);
 const toggleUserStatusUseCase = new ToggleUserStatusUseCase(userRepository);
 const listUsersUseCase = new ListUsersUseCase(userRepository);
 const listRolesUseCase = new ListRolesUseCase(roleRepository);
@@ -763,6 +766,7 @@ export const container = {
     evaluationWindowRepository,
   },
   services: {
+    emailPolicy,
     passwordHasher,
     tokenService,
     evidenceStorage,

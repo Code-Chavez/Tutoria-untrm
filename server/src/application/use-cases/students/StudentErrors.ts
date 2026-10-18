@@ -5,6 +5,13 @@ export class DuplicateStudentCodeError extends Error {
   }
 }
 
+export class DuplicateStudentEmailError extends Error {
+  constructor(email: string) {
+    super(`Ya hay un estudiante con el correo ${email}`);
+    this.name = 'DuplicateStudentEmailError';
+  }
+}
+
 export class StudentNotFoundError extends Error {
   constructor(id: string) {
     super(`No se encontró el estudiante con ID ${id}`);

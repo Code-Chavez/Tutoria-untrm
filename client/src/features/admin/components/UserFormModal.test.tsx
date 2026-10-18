@@ -1,7 +1,15 @@
 import { describe, it, expect, vi } from 'vitest';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { QueryClientTestWrapper } from '@shared/test-utils/QueryClientTestWrapper';
 import { UserFormModal } from './UserFormModal';
 import type { Role } from '../services/roleService';
+import type { User } from '../services/userService';
+
+// La política de dominio (RF-01) llega del servidor; aquí es la institucional.
+vi.mock('../services/userService', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('../services/userService')>();
+  return { ...actual, userService: { ...actual.userService, getEmailPolicy: vi.fn().mockResolvedValue(['untrm.edu.pe']) } };
+});
 
 const roles = [
   { id: 'r-tutor', name: 'Docente Tutor' },
@@ -16,7 +24,11 @@ const schools = [
 ];
 
 function setup(onSubmit = vi.fn().mockResolvedValue(undefined)) {
-  render(<UserFormModal onClose={vi.fn()} onSubmit={onSubmit} userToEdit={null} roles={roles} schools={schools} faculties={faculties} />);
+  render(
+    <QueryClientTestWrapper>
+      <UserFormModal onClose={vi.fn()} onSubmit={onSubmit} userToEdit={null} roles={roles} schools={schools} faculties={faculties} />
+    </QueryClientTestWrapper>,
+  );
   fireEvent.change(screen.getByLabelText('Nombre'), { target: { value: 'Lucía' } });
   fireEvent.change(screen.getByLabelText('Apellido'), { target: { value: 'Flores' } });
   fireEvent.change(screen.getByLabelText('Correo Electrónico'), { target: { value: 'lucia@untrm.edu.pe' } });
@@ -122,5 +134,60 @@ describe('UserFormModal: facultad del Decano', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Guardar' }));
 
     await waitFor(() => expect(onSubmit).toHaveBeenCalledWith(expect.objectContaining({ roleId: 'r-dean', facultyId: 'fac-1', schoolId: null })));
+  });
+});
+
+describe('UserFormModal: correo institucional (RF-01)', () => {
+  const save = () => fireEvent.click(screen.getByRole('button', { name: 'Guardar' }));
+  const chooseTutor = () => {
+    fireEvent.change(screen.getByLabelText('Rol'), { target: { value: 'r-tutor' } });
+    fireEvent.change(screen.getByLabelText('Escuela profesional'), { target: { value: 'sch-1' } });
+  };
+
+  it('dice qué dominio se espera, con la misma política que aplica el servidor', async () => {
+    setup();
+    expect(await screen.findByText('Correo institucional (@untrm.edu.pe)')).toBeInTheDocument();
+  });
+
+  it('un correo de otro dominio se rechaza al instante, sin llegar a enviarse', async () => {
+    const onSubmit = setup();
+    await screen.findByText('Correo institucional (@untrm.edu.pe)');
+    fireEvent.change(screen.getByLabelText('Correo Electrónico'), { target: { value: 'lucia@gmail.com' } });
+    chooseTutor();
+    save();
+
+    expect(await screen.findByRole('alert')).toHaveTextContent('El correo debe ser institucional (@untrm.edu.pe)');
+    expect(onSubmit).not.toHaveBeenCalled();
+  });
+
+  it('envía el correo en su forma única (sin espacios y en minúsculas)', async () => {
+    const onSubmit = setup();
+    await screen.findByText('Correo institucional (@untrm.edu.pe)');
+    fireEvent.change(screen.getByLabelText('Correo Electrónico'), { target: { value: '  Lucia.Flores@UNTRM.edu.pe ' } });
+    chooseTutor();
+    save();
+
+    await waitFor(() => expect(onSubmit).toHaveBeenCalledWith(expect.objectContaining({ email: 'lucia.flores@untrm.edu.pe' })));
+  });
+
+  it('una cuenta anterior a la regla (otro dominio) se edita sin tocar su correo; cambiarlo a otro dominio no se permite', async () => {
+    const legacy = { id: 'u1', email: 'antigua@gmail.com', firstName: 'Ana', lastName: 'Ruiz', roleId: 'r-service', service: 'SALUD', phone: '' } as User;
+    const onSubmit = vi.fn().mockResolvedValue(undefined);
+    render(
+      <QueryClientTestWrapper>
+        <UserFormModal onClose={vi.fn()} onSubmit={onSubmit} userToEdit={legacy} roles={roles} schools={schools} faculties={faculties} />
+      </QueryClientTestWrapper>,
+    );
+    await screen.findByText('Correo institucional (@untrm.edu.pe)');
+
+    fireEvent.change(screen.getByLabelText('Nombre'), { target: { value: 'Ana María' } });
+    save();
+    await waitFor(() => expect(onSubmit).toHaveBeenCalledWith(expect.objectContaining({ firstName: 'Ana María', email: 'antigua@gmail.com' })));
+
+    onSubmit.mockClear();
+    fireEvent.change(screen.getByLabelText('Correo Electrónico'), { target: { value: 'otra@hotmail.com' } });
+    save();
+    expect(await screen.findByRole('alert')).toHaveTextContent('institucional');
+    expect(onSubmit).not.toHaveBeenCalled();
   });
 });

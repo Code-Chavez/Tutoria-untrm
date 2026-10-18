@@ -6,7 +6,8 @@ import { StudentAccessGuard } from '@application/access/StudentAccessGuard';
 import { AcademicPeriodRepository } from '@domain/repositories/AcademicPeriodRepository';
 import { PeriodEnrollmentRepository } from '@domain/repositories/PeriodEnrollmentRepository';
 import { CreateStudentInput } from '@application/dtos/student.dto';
-import { DuplicateStudentCodeError, SchoolNotFoundError } from './StudentErrors';
+import { normalizeEmail } from '@application/validation/email';
+import { DuplicateStudentCodeError, DuplicateStudentEmailError, SchoolNotFoundError } from './StudentErrors';
 
 export class CreateStudentUseCase {
   constructor(
@@ -32,11 +33,16 @@ export class CreateStudentUseCase {
       throw new DuplicateStudentCodeError(code);
     }
 
+    // Correo de contacto opcional, guardado en su forma única; vacío es «sin correo» (no una cadena vacía). Dos estudiantes no
+    // comparten correo: el aviso o el vínculo con la cuenta de portal llegaría a la persona equivocada.
+    const email = data.email ? normalizeEmail(data.email) : null;
+    if (email && (await this.students.findAll({ email })).length > 0) throw new DuplicateStudentEmailError(email);
+
     const student = await this.students.create({
       studentCode: code,
       firstName: data.firstName.trim(),
       lastName: data.lastName.trim(),
-      email: data.email ?? null,
+      email,
       phone: data.phone ?? null,
       cycle: data.cycle,
       schoolId: data.schoolId,

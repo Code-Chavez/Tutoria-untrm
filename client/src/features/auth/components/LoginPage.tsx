@@ -1,4 +1,5 @@
 import { useState, type FormEvent } from 'react';
+import { normalizeEmail } from '@shared/utils/email';
 import { Navigate, useLocation, useNavigate, Link } from 'react-router-dom';
 import { getApiErrorMessage } from '@shared/services/apiClient';
 import { useAuth } from '../hooks/useAuth';
@@ -32,7 +33,7 @@ export function LoginPage() {
     setIsSubmitting(true);
 
     try {
-      await login({ email, password });
+      await login({ email: normalizeEmail(email), password });
       const destination = (location.state as LocationState | null)?.from?.pathname ?? '/';
       navigate(destination, { replace: true });
     } catch (err) {

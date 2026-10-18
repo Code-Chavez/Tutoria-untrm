@@ -50,6 +50,12 @@ export interface UpdateUserData {
 }
 
 export const userService = {
+  /** Dominios de correo permitidos para las cuentas (RF-01): la misma política que aplica el servidor. */
+  getEmailPolicy: async (): Promise<string[]> => {
+    const response = await apiClient.get<{ allowedDomains: string[] }>('/users/email-policy');
+    return response.data.allowedDomains;
+  },
+
   getUsers: async (filters?: { isActive?: boolean; roleId?: string }): Promise<User[]> => {
     const params = new URLSearchParams();
     if (filters?.isActive !== undefined) params.append('isActive', String(filters.isActive));

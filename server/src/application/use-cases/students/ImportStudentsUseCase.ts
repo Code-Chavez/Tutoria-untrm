@@ -4,6 +4,7 @@ import { SchoolRepository } from '@domain/repositories/SchoolRepository';
 import { StudentAccessGuard } from '@application/access/StudentAccessGuard';
 import { AcademicPeriodRepository } from '@domain/repositories/AcademicPeriodRepository';
 import { PeriodEnrollmentRepository } from '@domain/repositories/PeriodEnrollmentRepository';
+import { normalizeEmail } from '@application/validation/email';
 import { NoOpenPeriodForLoadError } from './StudentErrors';
 import {
   EMAIL_INVALID,
@@ -54,6 +55,12 @@ export class ImportStudentsUseCase {
     const schools = allSchools;
     const schoolByName = new Map(schools.map((s) => [normalize(s.name), s.id]));
 
+    // Correos que ya tiene algún estudiante (una sola consulta para todo el archivo) y los ya vistos en este archivo: dos
+    // estudiantes no comparten correo.
+    const emailOwner = new Set<string>();
+    for (const student of await this.students.findAll()) if (student.email) emailOwner.add(normalizeEmail(student.email));
+    const seenEmails = new Set<string>();
+
     const errors: ImportRowError[] = [];
     const createdRows: ImportCreatedRow[] = [];
     const continuedRows: ImportCreatedRow[] = [];
@@ -76,7 +83,7 @@ export class ImportStudentsUseCase {
       else if (lastName.length < STUDENT_NAME_MIN) rowErrors.push(`El apellido ${NAME_TOO_SHORT}`);
 
       // Mismas reglas que el formulario: correo y teléfono son opcionales, pero si vienen deben ser válidos.
-      const email = row.email?.trim().toLowerCase() ?? '';
+      const email = row.email ? normalizeEmail(row.email) : '';
       const phone = row.phone?.trim() ?? '';
       if (!isValidOptionalEmail(email)) rowErrors.push(`${EMAIL_INVALID} («${email}»)`);
       if (!isValidOptionalPhone(phone)) rowErrors.push(PHONE_INVALID);
@@ -98,6 +105,7 @@ export class ImportStudentsUseCase {
       if (CODE_PATTERN.test(code) && seenCodes.has(code)) {
         rowErrors.push('El código está duplicado dentro del archivo');
       }
+      if (email && seenEmails.has(email)) rowErrors.push('El correo está duplicado dentro del archivo');
 
       if (rowErrors.length > 0) {
         errors.push({ row: row.rowNumber, studentCode: code || undefined, message: rowErrors.join('; ') });
@@ -119,6 +127,12 @@ export class ImportStudentsUseCase {
         continue;
       }
 
+      // Quien ya existe por su código continúa (su correo no se toca); un estudiante nuevo no puede traer el de otro.
+      if (email && emailOwner.has(email)) {
+        errors.push({ row: row.rowNumber, studentCode: code, message: `Ya hay un estudiante con el correo ${email}` });
+        continue;
+      }
+
       const student = await this.students.create({
         studentCode: code,
         firstName,
@@ -133,6 +147,10 @@ export class ImportStudentsUseCase {
       await this.enrollments.enroll({ periodId: period.id, studentId: student.id, schoolId: student.schoolId, cycle });
       await this.cycleTutors?.applyToStudent(period.id, { id: student.id, schoolId: student.schoolId, cycle }, requesterId);
       seenCodes.add(code);
+      if (email) {
+        seenEmails.add(email);
+        emailOwner.add(email);
+      }
       createdRows.push({ row: row.rowNumber, studentCode: code, fullName: `${firstName} ${lastName}` });
     }
 

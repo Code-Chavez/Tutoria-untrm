@@ -1,4 +1,5 @@
 import { useState, type FormEvent } from 'react';
+import { normalizeEmail } from '@shared/utils/email';
 import { Link } from 'react-router-dom';
 import { getApiErrorMessage } from '@shared/services/apiClient';
 import { authService } from '../services/authService';
@@ -17,7 +18,7 @@ export function ForgotPasswordPage() {
     setIsSubmitting(true);
 
     try {
-      await authService.forgotPassword(email);
+      await authService.forgotPassword(normalizeEmail(email));
       setSuccess('Si el correo está registrado en nuestro sistema, recibirás un enlace para restablecer tu contraseña. Revisa tu bandeja de entrada o la consola del servidor de desarrollo.');
     } catch (err) {
       setError(getApiErrorMessage(err));

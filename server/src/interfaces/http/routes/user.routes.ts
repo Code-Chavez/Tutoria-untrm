@@ -12,10 +12,14 @@ const userController = new UserController(
   container.useCases.listUsersUseCase,
   container.useCases.assignRoleUseCase,
   container.useCases.issueInvitationUseCase,
+  container.services.emailPolicy,
 );
 
 // Todas las rutas de usuarios requieren autenticación
 router.use('/users', authenticate(container.services.tokenService));
+
+// Dominios de correo permitidos para las cuentas (RF-01): lo necesitan los formularios de alta y edición
+router.get('/users/email-policy', authorize(['users:write']), userController.getEmailPolicy);
 
 // Listar usuarios (requiere permiso de leer usuarios)
 router.get('/users', authorize(['users:read']), userController.list);

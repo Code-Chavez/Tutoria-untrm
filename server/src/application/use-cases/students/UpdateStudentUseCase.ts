@@ -3,8 +3,10 @@ import { StudentRepository } from '@domain/repositories/StudentRepository';
 import { SchoolRepository } from '@domain/repositories/SchoolRepository';
 import { StudentAccessGuard } from '@application/access/StudentAccessGuard';
 import { UpdateStudentInput } from '@application/dtos/student.dto';
+import { normalizeEmail } from '@application/validation/email';
 import {
   DuplicateStudentCodeError,
+  DuplicateStudentEmailError,
   SchoolNotFoundError,
 } from './StudentErrors';
 
@@ -37,11 +39,21 @@ export class UpdateStudentUseCase {
       }
     }
 
+    // Correo de contacto: forma única; vacío lo quita; no puede ser el de otro estudiante.
+    let email: string | null | undefined;
+    if (data.email !== undefined) {
+      email = data.email ? normalizeEmail(data.email) : null;
+      if (email && email !== (existing.email ?? null)) {
+        const owners = await this.students.findAll({ email });
+        if (owners.some((s) => s.id !== id)) throw new DuplicateStudentEmailError(email);
+      }
+    }
+
     return this.students.update(id, {
       ...(data.studentCode !== undefined && { studentCode: data.studentCode.trim() }),
       ...(data.firstName !== undefined && { firstName: data.firstName.trim() }),
       ...(data.lastName !== undefined && { lastName: data.lastName.trim() }),
-      ...(data.email !== undefined && { email: data.email }),
+      ...(email !== undefined && { email }),
       ...(data.phone !== undefined && { phone: data.phone }),
       ...(data.cycle !== undefined && { cycle: data.cycle }),
       ...(data.schoolId !== undefined && { schoolId: data.schoolId }),

@@ -1,8 +1,11 @@
 import { z } from 'zod';
 
+// El correo se normaliza antes de validar su formato: «  Ana@UNTRM.edu.pe » entra igual que «ana@untrm.edu.pe».
 export const loginSchema = z.object({
   email: z
     .string({ required_error: 'El email es obligatorio' })
+    .trim()
+    .toLowerCase()
     .email('El formato del email no es válido'),
   password: z
     .string({ required_error: 'La contraseña es obligatoria' })
@@ -20,6 +23,8 @@ export const refreshSchema = z.object({
 export const forgotPasswordSchema = z.object({
   email: z
     .string({ required_error: 'El email es obligatorio' })
+    .trim()
+    .toLowerCase()
     .email('El formato del email no es válido'),
 });
 
