@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useDialogFocus } from '@shared/hooks/useDialog';
 import { Button } from '@shared/components/ui';
 import { SearchIcon, CloseIcon } from '@shared/components/icons';
-import { StudentReferral, REFERRAL_SERVICE_LABEL, ReferralStatus, REFERRAL_STATUS_LABEL, referralService } from '../services/referralService';
+import { StudentReferral, REFERRAL_ASPECTS, REFERRAL_SERVICE_LABEL, ReferralStatus, REFERRAL_STATUS_LABEL, referralService } from '../services/referralService';
 import { getApiErrorMessage } from '@shared/services/apiClient';
 import { useAuth } from '@features/auth/hooks/useAuth';
 import { SignedDocumentsPanel } from '@features/firmados/components/SignedDocumentsPanel';
@@ -17,6 +17,16 @@ interface ReferralDetailModalProps {
 
 // El estado solo avanza (el servidor rechaza retroceder o repetir), así que solo se ofrecen los siguientes.
 const STATUS_ORDER: ReferralStatus[] = ['ENVIADO', 'RECIBIDO', 'EN_ATENCION', 'ATENDIDO', 'CERRADO'];
+
+// Cada paso del caso se llama por lo que se hace, no por el estado al que pasa.
+const STATUS_ACTION: Record<ReferralStatus, string> = {
+  ENVIADO: 'Guardar cambios',
+  RECIBIDO: 'Recibir caso',
+  EN_ATENCION: 'Iniciar atención',
+  ATENDIDO: 'Registrar atención',
+  CERRADO: 'Cerrar caso',
+};
+const ASPECT_LABEL = new Map(REFERRAL_ASPECTS.map((a) => [a.code, a.label]));
 
 export const ReferralDetailModal: React.FC<ReferralDetailModalProps> = ({ referral, onClose, onStatusUpdated }) => {
   const { user } = useAuth();
@@ -130,8 +140,9 @@ export const ReferralDetailModal: React.FC<ReferralDetailModalProps> = ({ referr
             ) : (
               <div className={styles.aspectsList}>
                 {referral.checkedAspects.map((aspect) => (
+                  // El nombre oficial del aspecto (Anexo N.° 6), no su código interno
                   <span key={aspect} className={styles.aspectBadge}>
-                    {aspect}
+                    {ASPECT_LABEL.get(aspect) ?? aspect}
                   </span>
                 ))}
               </div>
@@ -182,11 +193,11 @@ export const ReferralDetailModal: React.FC<ReferralDetailModalProps> = ({ referr
             </p>
           ) : (
             <div className={styles.updateSection}>
-              <h3 className={styles.updateTitle}>Registrar Atención y Cambio de Estado (HU-32)</h3>
+              <h3 className={styles.updateTitle}>Registrar la atención y cambiar el estado</h3>
               {error && <div className={styles.errorMessage}>{error}</div>}
               <div className={styles.updateForm}>
                 <div className={styles.formGroup}>
-                  <label htmlFor="statusSelect">Nuevo Estado</label>
+                  <label htmlFor="statusSelect">Nuevo estado</label>
                   <select
                     id="statusSelect"
                     className={styles.select}
@@ -230,13 +241,7 @@ export const ReferralDetailModal: React.FC<ReferralDetailModalProps> = ({ referr
                       ((newStatus === 'ATENDIDO' || newStatus === 'CERRADO') && !notes.trim())
                     }
                   >
-                    {updating
-                      ? 'Guardando...'
-                      : newStatus === 'CERRADO'
-                      ? 'Cerrar Caso Derivado'
-                      : newStatus === 'ATENDIDO'
-                      ? 'Registrar Atención'
-                      : 'Guardar Cambios'}
+                    {updating ? 'Guardando...' : STATUS_ACTION[newStatus]}
                   </Button>
                 </div>
               </div>

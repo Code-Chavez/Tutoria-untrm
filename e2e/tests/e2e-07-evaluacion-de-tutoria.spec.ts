@@ -31,9 +31,17 @@ test('el tutorado responde los 20 ítems y no puede enviar antes de terminar', a
   const submit = page.getByRole('button', { name: 'Enviar evaluación' });
   await expect(submit).toBeDisabled();
 
+  // La leyenda de la escala está antes de la primera pregunta, con el nombre completo de cada opción
+  await expect(page.getByRole('list', { name: 'Significado de cada opción' })).toContainText('CS = Casi Siempre');
+
   const best = page.locator('input[type=radio][value="S"]');
   await expect(best).toHaveCount(20);
-  for (let i = 0; i < 20; i++) await best.nth(i).check();
+  await best.nth(0).check();
+  await best.nth(1).check();
+  // «Ir a la primera que falta» lleva a la tercera pregunta sin perder lo respondido
+  await page.getByRole('button', { name: 'Ir a la primera que falta' }).click();
+  await expect(page.locator('#item-03 input[type=radio]').first()).toBeFocused();
+  for (let i = 2; i < 20; i++) await best.nth(i).check();
   await expect(page.getByText('20 de 20 respondidas')).toBeVisible();
 
   await page.getByLabel('Me gustaría').fill(likes);

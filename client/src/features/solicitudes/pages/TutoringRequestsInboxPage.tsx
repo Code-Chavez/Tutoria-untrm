@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useCallback, useState } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { useSearchParams } from 'react-router-dom';
 import { getApiErrorMessage } from '@shared/services/apiClient';
@@ -9,7 +9,8 @@ import { ReferralFormModal } from '@features/derivaciones/components/ReferralFor
 import { referralService, type CreateReferralData } from '@features/derivaciones/services/referralService';
 import { sessionService, type ScheduleSessionData } from '@features/sesiones/services/sessionService';
 import { sessionNoticeText } from '@features/sesiones/utils/sessionNotice';
-import { Badge, Button, Card, EmptyState, InboxToolbar, PageHeader, TableSkeleton } from '@shared/components/ui';
+import { Badge, Button, Card, DraftNotice, EmptyState, InboxToolbar, PageHeader, TableSkeleton } from '@shared/components/ui';
+import { useDraft } from '@shared/hooks/useDraft';
 import { InboxIcon, XCircleIcon } from '@shared/components/icons';
 import { parseFilterParam, waitingText } from '@shared/utils/inbox';
 import table from '@shared/components/ui/DataTable.module.css';
@@ -55,7 +56,11 @@ interface AttendModalProps {
 function AttendModal({ request, onClose, onSchedule, onRefer }: AttendModalProps) {
   const dialogRef = useDialog(onClose);
   const update = useUpdateTutoringRequestStatus();
-  const [note, setNote] = useState(request.responseNote ?? '');
+  const { user } = useAuth();
+  // La respuesta a medio escribir se conserva si cierra la ventana sin querer o la interrumpen (solo en esta pestaña).
+  const saved = request.responseNote ?? '';
+  const isUnchanged = useCallback((value: string) => value.trim() === saved.trim(), [saved]);
+  const { value: note, setValue: setNote, restored, discard } = useDraft(user?.id, `respuesta-${request.id}`, saved, isUnchanged);
   const [error, setError] = useState('');
 
   const apply = async (status: 'EN_ATENCION' | 'ATENDIDA') => {
@@ -66,6 +71,7 @@ function AttendModal({ request, onClose, onSchedule, onRefer }: AttendModalProps
     }
     try {
       await update.mutateAsync({ id: request.id, data: { status, note: note.trim() || undefined } });
+      discard();
       onClose();
     } catch (err) {
       setError(getApiErrorMessage(err));
@@ -122,6 +128,7 @@ function AttendModal({ request, onClose, onSchedule, onRefer }: AttendModalProps
             <label htmlFor="response-note" className={styles.label}>
               Respuesta para el estudiante
             </label>
+            {restored && <DraftNotice onDiscard={discard} />}
             <textarea
               id="response-note"
               className={styles.textarea}

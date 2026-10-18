@@ -6,6 +6,7 @@ import { tokenStorage } from '@shared/services/tokenStorage';
 import { AuthProvider } from './AuthProvider';
 import { useAuth } from '../hooks/useAuth';
 import { authService } from '../services/authService';
+import { readDraft, writeDraft } from '@shared/utils/drafts';
 
 vi.mock('../services/authService', () => ({ authService: { login: vi.fn(), logout: vi.fn().mockResolvedValue(undefined) } }));
 
@@ -27,7 +28,8 @@ function Probe() {
       >
         entrar
       </button>
-      <button onClick={logout}>salir</button>
+      <button onClick={() => logout()}>salir</button>
+      <button onClick={() => logout({ keepDrafts: true })}>expirar</button>
     </>
   );
 }
@@ -148,3 +150,47 @@ describe('AuthProvider: política de sesión (A08)', () => {
   });
 });
 
+describe('AuthProvider: borradores y privacidad (U07)', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    localStorage.clear();
+    sessionStorage.clear();
+    queryClient.clear();
+  });
+
+  it('al cerrar sesión por decisión propia no queda ningún borrador', async () => {
+    writeDraft('u1', 'solicitud', { reason: 'algo privado' });
+    renderProvider();
+
+    await act(async () => {
+      screen.getByText('salir').click();
+    });
+
+    expect(readDraft('u1', 'solicitud')).toBeNull();
+  });
+
+  it('si el cierre es por inactividad, lo que escribía se conserva para cuando vuelva a entrar', async () => {
+    writeDraft('u1', 'solicitud', { reason: 'a medias' });
+    renderProvider();
+
+    await act(async () => {
+      screen.getByText('expirar').click();
+    });
+
+    expect(readDraft('u1', 'solicitud')).toEqual({ reason: 'a medias' });
+  });
+
+  it('al entrar otra persona, los borradores de la anterior se descartan y los propios se conservan', async () => {
+    writeDraft('u1', 'solicitud', { reason: 'de la primera persona' });
+    writeDraft('u2', 'solicitud', { reason: 'de la segunda' });
+    mocked.login.mockResolvedValue({ user: { id: 'u2', email: 'b@untrm.edu.pe', firstName: 'B', lastName: 'B', role: 'Tutorado' }, accessToken: 'a', refreshToken: 'r' } as never);
+    renderProvider();
+
+    await act(async () => {
+      screen.getByText('entrar').click();
+    });
+
+    expect(readDraft('u1', 'solicitud')).toBeNull();
+    expect(readDraft('u2', 'solicitud')).toEqual({ reason: 'de la segunda' });
+  });
+});
