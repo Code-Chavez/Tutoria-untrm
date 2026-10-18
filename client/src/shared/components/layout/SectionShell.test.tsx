@@ -63,4 +63,28 @@ describe('SectionShell (pantallas juntas con pestañas)', () => {
     renderAt('/configuracion');
     expect(screen.getByText('Pantalla de sedes')).toBeInTheDocument();
   });
+
+  it('lleva la pestaña activa a la vista y avisa con una flecha si hay pestañas fuera de la pantalla (U05)', () => {
+    const scrollIntoView = vi.fn();
+    Element.prototype.scrollIntoView = scrollIntoView;
+    vi.spyOn(HTMLElement.prototype, 'scrollWidth', 'get').mockReturnValue(800); // las pestañas ocupan más de lo que cabe
+    vi.spyOn(HTMLElement.prototype, 'clientWidth', 'get').mockReturnValue(300);
+    role = 'Administrador DBU';
+    try {
+      renderAt('/asignacion');
+
+      expect(scrollIntoView).toHaveBeenCalledWith({ inline: 'nearest', block: 'nearest' });
+      expect(screen.getByRole('button', { name: 'Ver más pestañas' })).toBeInTheDocument();
+      expect(screen.queryByRole('button', { name: 'Ver pestañas anteriores' })).not.toBeInTheDocument(); // aún no se desplazó
+    } finally {
+      vi.restoreAllMocks();
+      Reflect.deleteProperty(Element.prototype, 'scrollIntoView');
+    }
+  });
+
+  it('si las pestañas caben, no hay flechas', () => {
+    role = 'Administrador DBU';
+    renderAt('/asignacion');
+    expect(screen.queryByRole('button', { name: 'Ver más pestañas' })).not.toBeInTheDocument();
+  });
 });

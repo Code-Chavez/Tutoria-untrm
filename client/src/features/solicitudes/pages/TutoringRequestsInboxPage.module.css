@@ -1,19 +1,17 @@
-.bar {
-  display: flex;
-  gap: var(--s3);
-  padding: var(--s4) var(--s5);
-  border-bottom: 1px solid var(--borde);
-}
-
-.filter {
-  min-width: 200px;
-}
-
 .reasonCell {
-  max-width: 320px;
+  max-width: 260px;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+/* En tarjeta (ancho disponible estrecho) el motivo se lee completo en varias líneas */
+@container (max-width: 920px) {
+  .reasonCell {
+    max-width: none;
+    white-space: normal;
+    overflow: visible;
+  }
 }
 
 .overlay {

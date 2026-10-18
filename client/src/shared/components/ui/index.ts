@@ -11,4 +11,5 @@ export { ConfirmDialog } from './ConfirmDialog';
 export { Pagination } from './Pagination';
 export { SearchField, SelectField } from './Field';
 export { Stepper } from './Stepper';
+export { InboxToolbar, type InboxFilterOption } from './InboxToolbar';
 export { NextSteps, type NextStep } from './NextSteps';

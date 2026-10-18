@@ -66,6 +66,9 @@ El menú es **corto a propósito** y está agrupado por tareas. Cada grupo se de
 
 **Pedir las listas desde la pantalla de carga.** Arriba de *Carga de estudiantes* y de *Carga de docentes* hay un bloque «¿Aún no tienes la lista? Pídela primero» con el botón **Ir a «Pedir listas»**, que lleva a esa pantalla con la lista ya elegida (estudiantes o docentes). Allí se elige la escuela y se pide; la lista de docentes tutores la pide solo la DBU. **El correo al que se pide no se escribe ahí:** se configura una vez en **Configuración → Correos de las escuelas** (la coordinación, sus escuelas; la DBU, todas), con un botón **Editar** para corregirlo si hubo un error y **Quitar** para borrarlo. En *Pedir listas* solo se ve a qué correo saldrá el pedido, con el enlace **Editar correo**; si la escuela no tiene correo, aparece el botón **Configurar correo** que lleva al apartado de configuración.
 
+**En un celular o una ventana estrecha** las bandejas (solicitudes y casos derivados) muestran cada caso como una **tarjeta** con su estado y su botón de acción siempre a la vista, sin desplazarse a los lados.
+En las pantallas con pestañas, la pestaña en la que está se lleva a la vista y, si hay más pestañas fuera de la pantalla, aparece una **flecha** para verlas.
+
 **Una pantalla lleva a la siguiente.** Cuando a una pantalla le falta algo (por ejemplo, no hay estudiantes o una escuela no tiene docentes) o cuando termina una tarea, muestra un bloque **«Qué sigue»** con enlaces a donde se carga lo que falta o a la tarea siguiente: después de *Pedir listas* sigue *Carga de estudiantes*; después de cargar, *Asignación por ciclo*. El **Panel de inicio** de la coordinación y la DBU muestra el periodo académico como pasos numerados.
 
 *Nombres en pantalla:* el sistema muestra **Estudiante** (rol Tutorado), **Docente** (Docente tutor), **Administrador** (Administrador DBU) y, para el Profesional de servicio, su especialidad (p. ej. «Profesional de Psicología»). Son los mismos roles de la tabla; solo cambia cómo se escriben junto a su nombre, en el perfil y en la lista de usuarios.
@@ -162,6 +165,9 @@ Solo se puede responder **una vez por periodo**. Sus respuestas son **anónimas*
 ![Panel de inicio del docente tutor](manual/img/07-inicio-tutor.jpg)
 *Figura: Panel de inicio del docente tutor.*
 
+El panel muestra, además de sus tutorados y sesiones, **Solicitudes por atender** (cuántas esperan su respuesta y desde cuándo espera la más antigua); al pulsarlo abre la bandeja de solicitudes ya filtrada en *Por atender*.
+La coordinación y la DBU ven el mismo contador, en primer lugar.
+
 ### 3.1 Mis tutorados
 
 ![Lista de tutorados con sus acciones](manual/img/08-tutorados.jpg)
@@ -239,7 +245,8 @@ el estudiante y usted la firmen, y **adjunte el escaneo** en *Hoja firmada del s
 3. Pulse *Derivar caso*. El profesional de ese servicio recibe un aviso.
 
 **Seguimiento del caso:** en *Casos derivados* ve sus derivaciones con su estado (**Enviado → Recibido → En atención → Atendido → Cerrado**). Con el icono de la
-lupa abre el detalle y con el otro icono descarga la **constancia** (PDF).
+lupa abre el detalle y con el otro icono descarga la **constancia** (PDF). La bandeja abre en **Pendientes** (lo enviado, recibido o en atención) y los casos atendidos o cerrados
+se consultan con los botones **Atendidos**, **Cerrados**, **Abiertas** o **Todos**; cada botón muestra cuántos casos tiene y *Buscar* encuentra por estudiante, código, servicio o instancia.
 
 **Constancia firmada:** imprima la constancia, fírmela (usted y el profesional que recibe) y adjunte el escaneo en *Constancia firmada (Anexo N° 6)* dentro del detalle.
 La ven usted, el servicio de destino y la DBU, nadie más.
@@ -254,7 +261,11 @@ La ven usted, el servicio de destino y la DBU, nadie más.
 ![Cuadro «Atender solicitud de tutoría»](manual/img/15-atender-solicitud.jpg)
 *Figura: Cuadro «Atender solicitud de tutoría».*
 
-*Solicitudes de tutoría* lista las solicitudes de sus tutorados. Para atender una:
+*Solicitudes de tutoría* lista las solicitudes de sus tutorados. **Lo que espera respuesta va primero:** la pantalla abre en **Por atender** (pendientes y en atención), con
+la que más lleva esperando arriba y, en cada fila, desde cuándo espera («Espera desde hace 6 días»); las ya atendidas no la tapan. Los botones de arriba cambian de vista
+(**Por atender · Pendientes · En atención · Atendidas · Todas**) y muestran cuántas hay en cada una; el cuadro *Buscar* encuentra por estudiante, código o motivo.
+Los contadores del Panel de inicio abren esta pantalla ya filtrada. El sistema muestra cuánto lleva esperando algo, pero **no marca plazos vencidos**: los plazos los define la DBU.
+Para atender una:
 
 1. Pulse *Atender* en su fila. Se abre la solicitud.
 2. Si la va a trabajar, pulse *Pasar a en atención*.
@@ -351,6 +362,10 @@ Aplica a Psicología, Psicopedagogía, Asistencia Social, Salud y Escuela Profes
 
 Cuando un tutor deriva un caso a su servicio, aparece un aviso en la campana: *Nueva derivación recibida*. Al pulsarlo se abre **ese caso**. También puede entrar por
 *Casos derivados*, donde ve la bandeja con fecha, estado, servicio e instancia receptora.
+
+**Los contadores del Panel de inicio abren la bandeja ya filtrada:** *Por recibir* muestra solo los casos enviados a su servicio, *En atención* los recibidos y en atención, *Atendidas* y *Cerradas* sus casos
+respectivos. La bandeja abre en **Pendientes** (enviados, recibidos y en atención, con los enviados primero y la fecha desde la que esperan), de modo que un caso por recibir no se pierde entre casos ya cerrados.
+Los demás casos se ven con los botones **Atendidos**, **Cerrados**, **Abiertas** o **Todos**, y *Buscar* encuentra por estudiante, código, servicio o instancia.
 
 ### 5.2 Atender el caso
 
