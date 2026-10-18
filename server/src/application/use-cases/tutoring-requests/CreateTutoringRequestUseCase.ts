@@ -7,10 +7,9 @@ import { UserRepository } from '@domain/repositories/UserRepository';
 import { RoleRepository } from '@domain/repositories/RoleRepository';
 import { NotificationRepository } from '@domain/repositories/NotificationRepository';
 import { CreateTutoringRequestInput } from '@application/dtos/tutoringRequest.dto';
-import { InstructorDetailsRequiredError, NoRoutingTargetError } from './TutoringRequestErrors';
+import { InstructorDetailsRequiredError } from './TutoringRequestErrors';
+import { TutoringRequestRouter } from './TutoringRequestRouter';
 import { CASE_TYPE_LABEL } from './tutoringRequestSupport';
-
-const DBU_ROLE_NAME = 'Administrador DBU';
 
 /**
  * Registra una solicitud de tutoría (HU-17, Art. 19.b/19.c) y la enruta
@@ -27,7 +26,11 @@ export class CreateTutoringRequestUseCase {
     private readonly users: UserRepository,
     private readonly roles: RoleRepository,
     private readonly notifications: NotificationRepository,
-  ) {}
+  ) {
+    this.router = new TutoringRequestRouter(schools, users, roles);
+  }
+
+  private readonly router: TutoringRequestRouter;
 
   async execute(
     studentId: string,
@@ -52,7 +55,7 @@ export class CreateTutoringRequestUseCase {
       throw new InstructorDetailsRequiredError();
     }
 
-    const { routedToId, routedToRole } = await this.resolveRouting(student.tutorId, student.schoolId);
+    const { routedToId, routedToRole } = await this.router.resolve(student.tutorId, student.schoolId);
 
     const request = await this.requests.create({
       studentId: student.id,
@@ -89,30 +92,5 @@ export class CreateTutoringRequestUseCase {
       });
     }
     return request;
-  }
-
-  private async resolveRouting(
-    tutorId: string | null | undefined,
-    schoolId: string,
-  ): Promise<{ routedToId: string; routedToRole: 'tutor' | 'coordinator' }> {
-    if (tutorId) {
-      return { routedToId: tutorId, routedToRole: 'tutor' };
-    }
-
-    const school = await this.schools.findById(schoolId);
-    if (school?.coordinatorId) {
-      return { routedToId: school.coordinatorId, routedToRole: 'coordinator' };
-    }
-
-    // Respaldo: la escuela no tiene coordinador asignado todavía.
-    const dbuRole = await this.roles.findByName(DBU_ROLE_NAME);
-    const fallback = dbuRole
-      ? (await this.users.findAll({ isActive: true, roleId: dbuRole.id }))[0]
-      : undefined;
-    if (!fallback) {
-      throw new NoRoutingTargetError();
-    }
-
-    return { routedToId: fallback.id, routedToRole: 'coordinator' };
   }
 }

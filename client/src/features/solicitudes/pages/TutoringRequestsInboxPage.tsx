@@ -8,6 +8,7 @@ import { SessionFormModal } from '@features/tutorados/components/SessionFormModa
 import { ReferralFormModal } from '@features/derivaciones/components/ReferralFormModal';
 import { referralService, type CreateReferralData } from '@features/derivaciones/services/referralService';
 import { sessionService, type ScheduleSessionData } from '@features/sesiones/services/sessionService';
+import { sessionNoticeText } from '@features/sesiones/utils/sessionNotice';
 import { Badge, Button, Card, EmptyState, InboxToolbar, PageHeader, TableSkeleton } from '@shared/components/ui';
 import { InboxIcon, XCircleIcon } from '@shared/components/icons';
 import { parseFilterParam, waitingText } from '@shared/utils/inbox';
@@ -231,7 +232,8 @@ export function TutoringRequestsInboxPage() {
     finishFollowUp(async () => {
       const session = await sessionService.scheduleSession({ ...data, tutoringRequestId: r.id });
       const when = new Date(session.scheduledAt).toLocaleString('es-PE', { dateStyle: 'medium', timeStyle: 'short' });
-      return `Sesión programada para el ${when} con ${r.studentName}. Quedó vinculada a su solicitud y la verá en Mis sesiones.`;
+      // El aviso de la sesión es el de la solicitud vinculada (no se repite): se le dice a quien programó si no se pudo avisar.
+      return `Sesión programada para el ${when} con ${r.studentName}. Quedó vinculada a su solicitud y la verá en Mis sesiones.${sessionNoticeText(session.notice)}`;
     });
   const confirmReferral = (r: TutoringRequestView, data: CreateReferralData) =>
     finishFollowUp(async () => {

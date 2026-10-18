@@ -9,7 +9,8 @@ import {
 } from '../services/tutoringRequestService';
 import { Badge } from '@shared/components/ui';
 import { useQueryClient } from '@tanstack/react-query';
-import { OWN_REQUESTS_KEY, useOwnTutoringRequests } from '../hooks/useTutoringRequests';
+import { OWN_REQUESTS_KEY, useOwnRequestRecipient, useOwnTutoringRequests } from '../hooks/useTutoringRequests';
+import { recipientAfter, recipientBefore } from '../utils/requestRecipient';
 import { usePeriodStatus } from '@features/periodo/hooks/usePeriods';
 import { CASE_TYPE_LABEL, REQUEST_STATUS_LABEL, type TutoringRequestStatus } from '../services/tutoringRequestService';
 import styles from './MyTutoringRequestPage.module.css';
@@ -65,6 +66,8 @@ export function MyTutoringRequestPage() {
   const notEnrolled = periodStatus?.open === true && periodStatus.enrolled === false;
   const readOnly = closed || notEnrolled;
   const history = useOwnTutoringRequests();
+  // A quién llegará la solicitud: se dice antes de enviarla y después (con la misma regla con la que se enruta).
+  const recipient = useOwnRequestRecipient();
   const [caseType, setCaseType] = useState<CreateOwnTutoringRequestData['caseType']>('ACADEMIC');
   const [reason, setReason] = useState('');
   const [submitting, setSubmitting] = useState(false);
@@ -92,7 +95,7 @@ export function MyTutoringRequestPage() {
       });
       setFeedback({
         type: 'ok',
-        text: `Solicitud registrada y enrutada a ${request.routedToRole === 'tutor' ? 'tu tutor' : 'el coordinador de tu escuela'}.`,
+        text: recipientAfter(recipient, request.routedToRole),
       });
       setReason('');
       await queryClient.invalidateQueries({ queryKey: OWN_REQUESTS_KEY });
@@ -134,6 +137,7 @@ export function MyTutoringRequestPage() {
                 Solicitas como <b>{user.firstName} {user.lastName}</b> ({user.email}). Tu solicitud la verá solo quien debe atenderla.
               </p>
             )}
+            {recipient && <p className={styles.recipient}>{recipientBefore(recipient)}</p>}
             {feedback && (
               <div className={feedback.type === 'ok' ? styles.ok : styles.error} role="alert">
                 {feedback.text}

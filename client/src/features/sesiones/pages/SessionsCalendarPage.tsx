@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
+import { sessionNoticeText } from '../utils/sessionNotice';
 import { Card, Button, IconButton, EmptyState, TableSkeleton, PageHeader } from '@shared/components/ui';
 import {
   CalendarIcon,
@@ -51,6 +52,7 @@ export const SessionsCalendarPage: React.FC = () => {
   const [attendanceError, setAttendanceError] = useState('');
   const [recordingRoll, setRecordingRoll] = useState(false);
   const [rollError, setRollError] = useState('');
+  const [feedback, setFeedback] = useState('');
   const [rescheduleOpen, setRescheduleOpen] = useState(false);
   const [cancelOpen, setCancelOpen] = useState(false);
   const [changeLoading, setChangeLoading] = useState(false);
@@ -104,7 +106,8 @@ export const SessionsCalendarPage: React.FC = () => {
     setChangeLoading(true);
     setChangeError('');
     try {
-      await sessionService.rescheduleSession(selectedSession.id, data);
+      const moved = await sessionService.rescheduleSession(selectedSession.id, data);
+      setFeedback(`Sesión reprogramada.${sessionNoticeText(moved.notice)}`);
       setRescheduleOpen(false);
       setSelectedSession(null);
       refresh();
@@ -120,7 +123,8 @@ export const SessionsCalendarPage: React.FC = () => {
     setChangeLoading(true);
     setChangeError('');
     try {
-      await sessionService.cancelSession(selectedSession.id, { reason });
+      const cancelled = await sessionService.cancelSession(selectedSession.id, { reason });
+      setFeedback(`Sesión cancelada.${sessionNoticeText(cancelled.notice)}`);
       setCancelOpen(false);
       setSelectedSession(null);
       refresh();
@@ -192,6 +196,15 @@ export const SessionsCalendarPage: React.FC = () => {
         subtitle="Calendario de tu agenda de tutoría (individuales y grupales)"
         icon={<CalendarIcon size={24} />}
       />
+
+      {feedback && (
+        <div className={styles.notice} role="status">
+          <span>{feedback}</span>
+          <button type="button" className={styles.noticeClose} onClick={() => setFeedback('')}>
+            Cerrar
+          </button>
+        </div>
+      )}
 
       <Card>
         <div className={styles.toolbar}>

@@ -217,8 +217,10 @@ export const SessionFormModal: React.FC<SessionFormModalProps> = ({
 
           <div className={styles.hint}>
             <InfoIcon size={16} />
-            La sesión tendrá una duración de {durationMinutes} minutos (Art. 15.c del Protocolo). Se
-            notificará al tutorado cuando el módulo de notificaciones esté disponible.
+            La sesión tendrá una duración de {durationMinutes} minutos (Art. 15.c del Protocolo).{' '}
+            {student.userId
+              ? `${student.firstName} recibirá un aviso en el sistema con la fecha y el lugar o enlace (y por correo, si el correo institucional está activo).`
+              : `${student.firstName} no tiene cuenta del portal: el sistema no puede avisarle. Comunícale la sesión por otro medio.`}
           </div>
 
           {(error || serverError) && (

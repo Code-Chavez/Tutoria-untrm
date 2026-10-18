@@ -1,6 +1,7 @@
 import { SessionWithParticipants } from '@domain/entities/Session';
 import { SessionRepository } from '@domain/repositories/SessionRepository';
 import { StudentAccessGuard } from '@application/access/StudentAccessGuard';
+import { SessionNotice, SessionNotifier } from '@application/services/SessionNotifier';
 import { TutoringRequestLinker } from '@application/use-cases/tutoring-requests/TutoringRequestLinker';
 import { InvalidTutoringRequestStatusError } from '@application/use-cases/tutoring-requests/TutoringRequestErrors';
 import { SystemParameterRepository } from '@domain/repositories/SystemParameterRepository';
@@ -27,9 +28,11 @@ export class ScheduleSessionUseCase {
     private readonly guard: StudentAccessGuard,
     private readonly systemParameters: SystemParameterRepository,
     private readonly requestLinker?: TutoringRequestLinker,
+    // Avisa a los tutorados de la sesión programada.
+    private readonly notifier?: SessionNotifier,
   ) {}
 
-  async execute(tutorId: string, input: ScheduleSessionInput, ipAddress?: string): Promise<SessionWithParticipants> {
+  async execute(tutorId: string, input: ScheduleSessionInput, ipAddress?: string): Promise<SessionWithParticipants & { notice?: SessionNotice }> {
     // Un tutor solo programa sesiones con los tutorados que tiene asignados.
     await this.guard.assertAccessToAll(tutorId, input.studentIds);
 
@@ -73,7 +76,11 @@ export class ScheduleSessionUseCase {
       await this.sessions.cancel(session.id, new Date(), 'La solicitud ya fue atendida por otra sesión o derivación');
       throw new InvalidTutoringRequestStatusError('Esta solicitud acaba de recibir otra atención: no se crea una segunda sesión.');
     }
-    return session;
+
+    if (!this.notifier) return session;
+    // Quien pidió la sesión por una solicitud ya recibió su aviso al vincularla: no se le repite.
+    const notice = await this.notifier.notify(session, { kind: 'scheduled' }, new Set(request ? [request.studentId] : []));
+    return Object.assign(session, { notice });
   }
 
   private async resolveDuration(): Promise<number> {

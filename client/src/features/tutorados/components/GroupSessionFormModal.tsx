@@ -49,6 +49,8 @@ export const GroupSessionFormModal: React.FC<GroupSessionFormModalProps> = ({
   const [meetingLink, setMeetingLink] = useState('');
   const [filters, setFilters] = useState<AssignFilterValues>(EMPTY_FILTERS);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  // A quién el sistema no puede avisar: los seleccionados sin cuenta del portal.
+  const withoutAccount = students.filter((s) => selectedIds.has(s.id) && !s.userId).length;
   const [error, setError] = useState('');
 
   const dialogRef = useDialogFocus();
@@ -284,8 +286,10 @@ export const GroupSessionFormModal: React.FC<GroupSessionFormModalProps> = ({
 
           <div className={styles.hint}>
             <InfoIcon size={16} />
-            La sesión tendrá una duración de {durationMinutes} minutos (Art. 15.c del Protocolo). Se
-            notificará a todos los participantes cuando el módulo de notificaciones esté disponible.
+            La sesión tendrá una duración de {durationMinutes} minutos (Art. 15.c del Protocolo). Cada participante con cuenta del portal
+            recibe un aviso en el sistema con la fecha y el lugar o enlace.
+            {withoutAccount > 0 &&
+              ` ${withoutAccount} de los seleccionados no ${withoutAccount === 1 ? 'tiene' : 'tienen'} cuenta del portal: avísa${withoutAccount === 1 ? 'le' : 'les'} por otro medio.`}
           </div>
 
           {(error || serverError) && <span className={styles.error}>{error || serverError}</span>}

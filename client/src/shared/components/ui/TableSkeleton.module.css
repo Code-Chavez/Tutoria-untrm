@@ -31,3 +31,26 @@
     background-position: 0 50%;
   }
 }
+
+.caption {
+  margin: 0 0 var(--s2);
+  font-size: var(--fs-sm);
+  color: var(--g500);
+}
+
+.slow {
+  margin: var(--s3) 0 0;
+  font-size: var(--fs-sm);
+  color: var(--g700);
+}
+
+.retry {
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: var(--azul);
+  font: inherit;
+  font-weight: 600;
+  text-decoration: underline;
+  cursor: pointer;
+}

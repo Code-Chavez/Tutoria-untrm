@@ -132,6 +132,10 @@ involucradas en el proceso.
 
 En una sesión grupal usted ve únicamente su propia participación, no la de sus compañeros.
 
+**Usted se entera sin entrar a buscar.** Cuando su tutor programa una sesión, la cambia de horario o la cancela, le llega un **aviso en la campana** con la fecha, el lugar (o la indicación de que el enlace está en *Mis sesiones*) y, si hubo cambio o cancelación, **el motivo**; al pulsarlo se abre *Mis sesiones*. También le llega por correo institucional **si el servicio de correo está activo**: ese correo solo avisa que hay una novedad y no trae la fecha ni el motivo (por confidencialidad). Si usted no tiene cuenta del portal, el sistema no puede avisarle y su tutor debe comunicárselo por otro medio.
+
+Mientras la pantalla carga, aparece **«Cargando tus sesiones…»**. Si tarda más de lo normal, lo dice y ofrece **Reintentar**; si falla, lo dice y permite reintentar; y si no hay sesiones, lo dice con claridad (no se confunde con que aún esté cargando).
+
 ### 2.2 Solicitar tutoría
 
 ![«Solicitar tutoría» y el historial «Mis solicitudes»](manual/img/05-solicitar-tutoria.jpg)
@@ -140,7 +144,9 @@ En una sesión grupal usted ve únicamente su propia participación, no la de su
 1. Entre a *Solicitar tutoría*.
 2. En *Motivo (Art. 20)* elija el tipo: **Académico, Psicológico, Social o Salud**.
 3. En *Descripción del motivo* explique brevemente su situación.
-4. Pulse *Registrar solicitud*. Verá «Solicitud registrada y enrutada a tu tutor» (o «al coordinador de tu escuela» si aún no tiene tutor asignado).
+4. Pulse *Registrar solicitud*. Verá «Solicitud registrada: la recibió tu tutor *(nombre)*. Te avisaremos en el sistema cuando responda» (o «la coordinación de tu escuela», o Bienestar Universitario, si aún no tiene tutor asignado).
+
+**Antes de enviarla** la pantalla ya le dice quién la recibirá: «Tu solicitud la recibirá tu tutor *(nombre)*». Si aún no tiene tutor, le explica que la recibirá la coordinación de su escuela (con el nombre de quien coordina) y que le avisarán cuando responda. El sistema **no promete un plazo de respuesta**: los plazos los define la DBU. En su **Panel de inicio**, *Mi tutor* dice «Sin asignar» y quién recibe sus solicitudes mientras tanto, y *Mis solicitudes* dice cuántas esperan respuesta (o «Ninguna pendiente»).
 
 Debajo, en *Mis solicitudes*, ve el historial con el estado de cada una: **Pendiente** → **En atención** → **Atendida**. Cuando su tutor la atiende
 verá también **su respuesta** (por ejemplo, fecha y lugar de la sesión) y recibirá un aviso en la campana.
@@ -203,12 +209,11 @@ Usted solo ve a **sus** tutorados; no puede abrir el expediente de un estudiante
 2. Indique **fecha, hora y tema**, y la modalidad:
    - **Presencial**: escriba el *Lugar*.
    - **Virtual**: pegue el *Enlace de videollamada* (debe comenzar con `https://` o `http://`).
-3. Pulse *Programar sesión*. El estudiante la ve de inmediato en *Mis sesiones*.
+3. Pulse *Programar sesión*. El estudiante la ve de inmediato en *Mis sesiones* y **recibe un aviso en el sistema** con la fecha y el lugar. El formulario le dice si el tutorado no tiene cuenta del portal (en ese caso el sistema no puede avisarle y usted debe comunicarle la sesión por otro medio); al guardar, la pantalla le dice a cuántos se avisó y a quién no se pudo.
 
 La duración es de 45 minutos (la DBU puede ajustarla). *Sesiones* muestra su **calendario mensual**; pulse una sesión para ver su detalle.
 
-**Reprogramar o cancelar:** abra la sesión desde *Sesiones* y use *Reprogramar* o *Cancelar sesión*. **El motivo es obligatorio**; queda en el historial y el
-estudiante lo ve.
+**Reprogramar o cancelar:** abra la sesión desde *Sesiones* y use *Reprogramar* o *Cancelar sesión*. **El motivo es obligatorio**; queda en el historial y **cada tutorado con cuenta del portal recibe un aviso** con el nuevo horario (o la cancelación) y ese motivo. Al terminar, la pantalla confirma a cuántos se avisó y a quién no se pudo.
 
 ### 3.4 Registrar la asistencia (Anexo 4)
 

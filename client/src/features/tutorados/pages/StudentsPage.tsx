@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
+import { sessionNoticeText } from '@features/sesiones/utils/sessionNotice';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import styles from './StudentsPage.module.css';
 import {
@@ -347,6 +348,7 @@ export const StudentsPage: React.FC = () => {
         <>
           Sesión programada para el {when} con {studentForSession.firstName}{' '}
           {studentForSession.lastName}.{sessionModalityNote(session)}
+          {sessionNoticeText(session.notice)}
         </>,
       );
       setStudentForSession(null);
@@ -370,6 +372,7 @@ export const StudentsPage: React.FC = () => {
         <>
           Sesión grupal programada para el {when} con {session.studentIds.length} tutorados.
           {sessionModalityNote(session)}
+          {sessionNoticeText(session.notice)}
         </>,
       );
       setGroupSessionOpen(false);

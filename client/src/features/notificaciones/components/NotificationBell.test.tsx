@@ -59,6 +59,23 @@ describe('NotificationBell (R03)', () => {
     await waitFor(() => expect(screen.getByTestId('where')).toHaveTextContent('/derivaciones?caso=ref-9'));
   });
 
+  it('un aviso de sesión lleva a la agenda: «Mis sesiones» al estudiante, el calendario al personal (U06)', async () => {
+    mocked.getNotifications.mockResolvedValue([note({ type: 'SESSION_RESCHEDULED', message: 'Tu sesión de tutoría cambió de horario', sessionId: 'ses-1' })]);
+    const user = userEvent.setup();
+    mockRole = 'Tutorado';
+    const { unmount } = renderBell();
+    await user.click(await screen.findByRole('button', { name: 'Notificaciones' }));
+    await user.click(await screen.findByText('Tu sesión de tutoría cambió de horario'));
+    await waitFor(() => expect(screen.getByTestId('where')).toHaveTextContent('/mis-sesiones'));
+    unmount();
+
+    mockRole = 'Docente Tutor';
+    renderBell();
+    await user.click(await screen.findByRole('button', { name: 'Notificaciones' }));
+    await user.click(await screen.findByText('Tu sesión de tutoría cambió de horario'));
+    await waitFor(() => expect(screen.getByTestId('where')).toHaveTextContent('/sesiones'));
+  });
+
   it('un aviso de solicitud abre la solicitud al personal y el historial al estudiante', async () => {
     mocked.getNotifications.mockResolvedValue([note({ type: 'TUTORING_REQUEST_CREATED', message: 'Nueva solicitud', tutoringRequestId: 'r-1' })]);
     const user = userEvent.setup();

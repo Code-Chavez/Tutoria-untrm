@@ -8,7 +8,8 @@ import { User } from '@domain/entities/User';
 import { GetIndicatorsUseCase } from '@application/use-cases/indicators/GetIndicatorsUseCase';
 import { GetRiskAlertsUseCase } from '@application/use-cases/alerts/GetRiskAlertsUseCase';
 import { GetEvaluationStatusUseCase } from '@application/use-cases/evaluation/GetEvaluationStatusUseCase';
-import { ListTutoringRequestsUseCase } from '@application/use-cases/tutoring-requests/ListTutoringRequestsUseCase';
+import { ListOwnTutoringRequestsUseCase, ListTutoringRequestsUseCase } from '@application/use-cases/tutoring-requests/ListTutoringRequestsUseCase';
+import { GetOwnRequestRecipientUseCase } from '@application/use-cases/tutoring-requests/GetOwnRequestRecipientUseCase';
 
 export type KpiTone = 'info' | 'success' | 'warning' | 'danger' | 'neutral';
 
@@ -62,6 +63,9 @@ export class GetHomePanelUseCase {
     private readonly evaluationStatus: GetEvaluationStatusUseCase,
     /** Bandeja de solicitudes (mismo alcance que la pantalla), para el contador «Solicitudes por atender». */
     private readonly requestInbox?: ListTutoringRequestsUseCase,
+    /** Solicitudes del propio estudiante y a quién llegarán, para su panel. */
+    private readonly ownRequests?: ListOwnTutoringRequestsUseCase,
+    private readonly requestRecipient?: GetOwnRequestRecipientUseCase,
   ) {}
 
   async execute(userId: string): Promise<HomePanel> {
@@ -191,9 +195,25 @@ export class GetHomePanelUseCase {
           ? { value: 'Pendiente', hint: 'Evalúa a tu tutor de forma anónima', tone: 'warning' as KpiTone }
           : { value: 'No disponible', hint: 'Aún no está habilitada para tu escuela', tone: 'neutral' as KpiTone };
 
+    // A quién llegan sus solicitudes: su tutor, o, si aún no tiene, quien las recibe en su lugar (no queda sin saber qué hacer).
+    const recipient = !tutor && this.requestRecipient ? await this.requestRecipient.execute(userId) : null;
+    const recipientText = recipient ? (recipient.kind === 'coordinator' ? `la coordinación de tu escuela (${recipient.name})` : recipient.kind === 'dbu' ? `Bienestar Universitario (${recipient.name})` : recipient.name) : null;
+    const open = this.ownRequests ? (await this.ownRequests.execute(userId)).filter((r) => r.status !== 'ATENDIDA') : null;
+    const requestsKpi: HomeKpi | null = open
+      ? {
+          key: 'my-requests',
+          label: 'Mis solicitudes',
+          value: open.length === 0 ? 'Ninguna pendiente' : plural(open.length, 'esperando respuesta', 'esperando respuesta'),
+          hint: open.length === 0 ? (recipientText ? `Si necesitas ayuda, tu solicitud la recibirá ${recipientText}` : 'Si necesitas ayuda, pide tutoría') : `Te avisaremos en cuanto ${open[0].routedToName} responda`,
+          tone: open.length > 0 ? 'warning' : 'neutral',
+          link: '/solicitar-tutoria',
+        }
+      : null;
+
     return [
-      { key: 'my-tutor', label: 'Mi tutor', value: tutor ? `${tutor.firstName} ${tutor.lastName}` : 'Sin asignar', tone: 'info' },
+      { key: 'my-tutor', label: 'Mi tutor', value: tutor ? `${tutor.firstName} ${tutor.lastName}` : 'Sin asignar', hint: tutor ? undefined : recipientText ? `Mientras tanto, tus solicitudes las recibe ${recipientText}` : undefined, tone: 'info' },
       { key: 'next-session', label: 'Próxima sesión', value: next ? formatDateTime(next.scheduledAt) : '—', hint: next ? next.topic : 'No tienes sesiones programadas', tone: 'success', link: '/mis-sesiones' },
+      ...(requestsKpi ? [requestsKpi] : []),
       { key: 'evaluation', label: 'Evaluación de mi tutor', ...evaluation, link: status?.canRespond && !status.alreadyResponded ? '/evaluar-tutoria' : undefined },
     ];
   }

@@ -259,3 +259,27 @@
   padding: var(--s3);
   text-align: center;
 }
+
+.notice {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--s3);
+  margin-bottom: var(--s4);
+  padding: var(--s3) var(--s4);
+  border: 1px solid var(--borde);
+  border-left: 3px solid var(--azul);
+  border-radius: var(--r-sm);
+  background: var(--g50);
+  font-size: var(--fs-sm);
+  color: var(--g700);
+}
+
+.noticeClose {
+  border: none;
+  background: transparent;
+  color: var(--azul);
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}

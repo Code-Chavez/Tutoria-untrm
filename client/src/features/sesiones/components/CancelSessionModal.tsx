@@ -83,6 +83,7 @@ export const CancelSessionModal: React.FC<CancelSessionModalProps> = ({
             }}
             autoFocus
           />
+          <p className={styles.note}>Cada tutorado con cuenta del portal recibe un aviso con la cancelación y este motivo.</p>
           {(error || serverError) && <span className={styles.error}>{error || serverError}</span>}
         </div>
 

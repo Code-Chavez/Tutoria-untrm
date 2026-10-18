@@ -9,6 +9,14 @@ export function useOwnTutoringRequests() {
   return { requests: query.data ?? [], loading: query.isLoading, error: query.isError };
 }
 
+export const RECIPIENT_KEY = ['tutoringRequests', 'recipient'] as const;
+
+/** A quién llegará la solicitud del propio estudiante (null si no se sabe: la pantalla funciona igual). */
+export function useOwnRequestRecipient() {
+  const query = useQuery({ queryKey: RECIPIENT_KEY, queryFn: () => tutoringRequestService.getRecipient() });
+  return query.data ?? null;
+}
+
 export function useTutoringRequestsInbox(status?: TutoringRequestStatus) {
   const query = useQuery({
     queryKey: [...INBOX_KEY, status ?? 'ALL'],

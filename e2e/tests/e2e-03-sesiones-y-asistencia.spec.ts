@@ -44,6 +44,8 @@ test('la tutora programa una sesión individual presencial para Ana', async ({ p
   await dialog.getByLabel('Lugar').fill(place);
   await dialog.getByRole('button', { name: 'Programar sesión' }).click();
   await expect(dialog).toBeHidden();
+  // A la tutora se le dice lo que hizo el sistema: Ana tiene cuenta del portal, así que se le avisó
+  await expect(page.getByText(/Se avisó al tutorado en el sistema\./)).toBeVisible();
 
   await openSessions(page);
   await expect(page.getByRole('button', { name: new RegExp(topic) })).toBeVisible();
@@ -55,6 +57,10 @@ test('la tutorada ve la sesión con su lugar', async ({ page }) => {
   const item = page.getByText(topic).first();
   await expect(item).toBeVisible();
   await expect(page.getByText(place).first()).toBeVisible();
+
+  // Y se enteró sin entrar a buscarla: tiene el aviso en la campana, con la fecha y el lugar
+  await page.getByRole('button', { name: 'Notificaciones' }).click();
+  await expect(page.getByRole('menu')).toContainText(`Lugar: ${place}`);
 });
 
 test('la tutora cancela la sesión con un motivo y la tutorada ve Cancelada', async ({ page, browser }) => {
@@ -73,6 +79,9 @@ test('la tutora cancela la sesión con un motivo y la tutorada ve Cancelada', as
   await loginUi(student, accounts.student);
   await goToMenu(student, 'Mis sesiones');
   await expect(student.getByText(cancelReason).first()).toBeVisible();
+  // También recibió el aviso de la cancelación, con el motivo
+  await student.getByRole('button', { name: 'Notificaciones' }).click();
+  await expect(student.getByRole('menu')).toContainText(`Motivo: ${cancelReason}`);
 });
 
 test('la tutora registra la asistencia de una sesión que ya empezó', async ({ page }) => {

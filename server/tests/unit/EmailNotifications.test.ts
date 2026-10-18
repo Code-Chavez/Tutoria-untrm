@@ -33,6 +33,21 @@ describe('buildNotificationEmail', () => {
     );
   });
 
+  it('los avisos de sesión llevan a «Mis sesiones» y su correo solo avisa: ni fecha, ni lugar, ni motivo', () => {
+    const base = { userId: 'u1', referralId: null, tutoringRequestId: null, sessionId: 'ses-1', read: false, createdAt: new Date() };
+    const cases: [Notification['type'], string][] = [
+      ['SESSION_SCHEDULED', 'Sesión de tutoría programada'],
+      ['SESSION_RESCHEDULED', 'Cambio en su sesión de tutoría'],
+      ['SESSION_CANCELLED', 'Su sesión de tutoría fue cancelada'],
+    ];
+    for (const [type, subject] of cases) {
+      const mail = buildNotificationEmail({ id: 'n', type, message: 'Lugar: Aula 204. Motivo: Enfermedad del tutor', ...base }, recipient, APP);
+      expect(mail.subject).toContain(subject);
+      expect(mail.text).toContain('https://sit.ejemplo.edu.pe/mis-sesiones');
+      expect(mail.text + mail.html).not.toMatch(/Aula 204|Enfermedad/);
+    }
+  });
+
   it('no incluye el texto del aviso ni datos de la persona atendida (confidencialidad)', () => {
     const mail = buildNotificationEmail(notification(), recipient, APP);
     expect(mail.to).toBe('elena.ramirez@untrm.edu.pe');

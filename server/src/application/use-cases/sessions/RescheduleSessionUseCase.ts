@@ -1,6 +1,7 @@
 import { SessionWithParticipants } from '@domain/entities/Session';
 import { SessionRepository } from '@domain/repositories/SessionRepository';
 import { RescheduleSessionInput } from '@application/dtos/session.dto';
+import { SessionNotice, SessionNotifier } from '@application/services/SessionNotifier';
 import {
   SessionNotFoundError,
   NotSessionTutorError,
@@ -17,13 +18,17 @@ import {
  * cancelada.
  */
 export class RescheduleSessionUseCase {
-  constructor(private readonly sessions: SessionRepository) {}
+  constructor(
+    private readonly sessions: SessionRepository,
+    // Avisa a los tutorados del cambio de horario y de su motivo.
+    private readonly notifier?: SessionNotifier,
+  ) {}
 
   async execute(
     sessionId: string,
     tutorId: string,
     input: RescheduleSessionInput,
-  ): Promise<SessionWithParticipants> {
+  ): Promise<SessionWithParticipants & { notice?: SessionNotice }> {
     const session = await this.sessions.findById(sessionId);
     if (!session) {
       throw new SessionNotFoundError(sessionId);
@@ -66,9 +71,9 @@ export class RescheduleSessionUseCase {
       changedById: tutorId,
     });
 
-    // TODO(notificaciones): notificar al tutorado cuando exista un servicio
-    // de notificaciones (correo/in-app), mismo punto de extensión de HU-13.
-
-    return (await this.sessions.findById(sessionId)) as SessionWithParticipants;
+    const updated = (await this.sessions.findById(sessionId)) as SessionWithParticipants;
+    if (!this.notifier) return updated;
+    const notice = await this.notifier.notify(updated, { kind: 'rescheduled', previousScheduledAt: session.scheduledAt, reason });
+    return Object.assign(updated, { notice });
   }
 }

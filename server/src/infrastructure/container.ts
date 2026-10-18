@@ -243,6 +243,9 @@ import {
 } from '@application/use-cases/tutoring-requests/ListTutoringRequestsUseCase';
 import { UpdateTutoringRequestStatusUseCase } from '@application/use-cases/tutoring-requests/UpdateTutoringRequestStatusUseCase';
 import { createEmailPolicy } from '@application/validation/email';
+import { SessionNotifier } from '@application/services/SessionNotifier';
+import { TutoringRequestRouter } from '@application/use-cases/tutoring-requests/TutoringRequestRouter';
+import { GetOwnRequestRecipientUseCase } from '@application/use-cases/tutoring-requests/GetOwnRequestRecipientUseCase';
 import { TutoringRequestLinker } from '@application/use-cases/tutoring-requests/TutoringRequestLinker';
 import { ScheduleSessionUseCase } from '@application/use-cases/sessions/ScheduleSessionUseCase';
 import { ListSessionsUseCase } from '@application/use-cases/sessions/ListSessionsUseCase';
@@ -447,6 +450,9 @@ const updateTutoringRequestStatusUseCase = new UpdateTutoringRequestStatusUseCas
   notificationRepository,
   auditLogRepository,
 );
+// Una sola regla de a quién llega una solicitud: la usa el registro y la consulta previa del estudiante.
+const tutoringRequestRouter = new TutoringRequestRouter(schoolRepository, userRepository, roleRepository);
+const getOwnRequestRecipientUseCase = new GetOwnRequestRecipientUseCase(studentRepository, userRepository, tutoringRequestRouter);
 const createOwnTutoringRequestUseCase = new CreateOwnTutoringRequestUseCase(
   studentRepository,
   createTutoringRequestUseCase,
@@ -458,11 +464,14 @@ const tutoringRequestLinker = new TutoringRequestLinker(
   notificationRepository,
   auditLogRepository,
 );
+// Avisa a los tutorados cuando se programa, reprograma o cancela una sesión (aviso en el sistema y, si está activo, su correo).
+const sessionNotifier = new SessionNotifier(studentRepository, notificationRepository);
 const scheduleSessionUseCase = new ScheduleSessionUseCase(
   sessionRepository,
   studentAccessGuard,
   systemParameterRepository,
   tutoringRequestLinker,
+  sessionNotifier,
 );
 const listSessionsUseCase = new ListSessionsUseCase(
   sessionRepository,
@@ -476,8 +485,8 @@ const registerAttendanceUseCase = new RegisterAttendanceUseCase(
   systemParameterRepository,
   academicPeriodRepository,
 );
-const rescheduleSessionUseCase = new RescheduleSessionUseCase(sessionRepository);
-const cancelSessionUseCase = new CancelSessionUseCase(sessionRepository);
+const rescheduleSessionUseCase = new RescheduleSessionUseCase(sessionRepository, sessionNotifier);
+const cancelSessionUseCase = new CancelSessionUseCase(sessionRepository, sessionNotifier);
 const uploadSessionEvidenceUseCase = new UploadSessionEvidenceUseCase(
   sessionRepository,
   evidenceStorage,
@@ -731,6 +740,8 @@ const getHomePanelUseCase = new GetHomePanelUseCase(
   getRiskAlertsUseCase,
   getEvaluationStatusUseCase,
   listTutoringRequestsUseCase,
+  listOwnTutoringRequestsUseCase,
+  getOwnRequestRecipientUseCase,
 );
 
 const getBrandingUseCase = new GetBrandingUseCase(brandingRepository);
@@ -825,6 +836,7 @@ export const container = {
     createOwnTutoringRequestUseCase,
     listTutoringRequestsUseCase,
     listOwnTutoringRequestsUseCase,
+    getOwnRequestRecipientUseCase,
     updateTutoringRequestStatusUseCase,
     scheduleSessionUseCase,
     listSessionsUseCase,

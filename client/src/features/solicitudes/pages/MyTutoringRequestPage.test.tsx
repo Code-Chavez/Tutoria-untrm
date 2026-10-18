@@ -15,6 +15,7 @@ vi.mock('../services/tutoringRequestService', async (importOriginal) => {
     tutoringRequestService: {
       createOwnTutoringRequest: vi.fn(),
       getOwn: vi.fn(),
+      getRecipient: vi.fn(),
     },
   };
 });
@@ -109,6 +110,35 @@ describe('MyTutoringRequestPage', () => {
     expect(await screen.findByText(/enrutada a tu tutor/i)).toBeInTheDocument();
     // Tras registrar, el historial se vuelve a pedir para que aparezca la nueva solicitud.
     await waitFor(() => expect(mocked.getOwn.mock.calls.length).toBeGreaterThan(1));
+  });
+
+  describe('a quién llega mi solicitud (U02)', () => {
+    const created = { id: 'req-1', studentId: 's1', source: 'STUDENT', caseType: 'ACADEMIC', reason: 'x', routedToId: 't', routedToRole: 'tutor', createdAt: new Date().toISOString() } as TutoringRequest;
+
+    it('antes de enviar dice quién la recibirá, con su nombre', async () => {
+      mocked.getRecipient.mockResolvedValue({ kind: 'tutor', name: 'Elena Ramírez' });
+      renderPage();
+      expect(await screen.findByText('Tu solicitud la recibirá tu tutor Elena Ramírez. Te avisaremos en el sistema cuando responda.')).toBeInTheDocument();
+    });
+
+    it('sin tutor explica quién la recibe y no deja al estudiante sin saber qué hacer', async () => {
+      mocked.getRecipient.mockResolvedValue({ kind: 'coordinator', name: 'Rosa Mendoza' });
+      renderPage();
+      expect(await screen.findByText(/Aún no tienes tutor asignado: tu solicitud la recibirá la coordinación de tu escuela \(Rosa Mendoza\)/)).toBeInTheDocument();
+    });
+
+    it('después de enviar nombra a quien la recibió', async () => {
+      mocked.getRecipient.mockResolvedValue({ kind: 'tutor', name: 'Elena Ramírez' });
+      mocked.createOwnTutoringRequest.mockResolvedValue(created);
+      const user = userEvent.setup();
+      renderPage();
+      await screen.findByText(/Tu solicitud la recibirá tu tutor Elena Ramírez/);
+
+      await user.type(screen.getByLabelText(/descripción del motivo/i), 'Dificultad en Cálculo');
+      await user.click(screen.getByRole('button', { name: /registrar solicitud/i }));
+
+      expect(await screen.findByText('Solicitud registrada: la recibió tu tutor Elena Ramírez. Te avisaremos en el sistema cuando responda.')).toBeInTheDocument();
+    });
   });
 
   it('muestra el historial con el estado y la respuesta recibida (R01)', async () => {
