@@ -73,7 +73,7 @@ describe('GroupSessionFormModal', () => {
     expect(onSubmit).not.toHaveBeenCalled();
   });
 
-  it('exige al menos dos tutorados seleccionados (Art. 7.b)', async () => {
+  it('exige al menos dos estudiantes seleccionados', async () => {
     const onSubmit = renderModal();
     const user = userEvent.setup();
 
@@ -83,7 +83,7 @@ describe('GroupSessionFormModal', () => {
     await user.click(screen.getByLabelText(/seleccionar ana torres/i));
     await user.click(screen.getByRole('button', { name: /programar sesión grupal/i }));
 
-    expect(await screen.findByText(/selecciona al menos dos tutorados/i)).toBeInTheDocument();
+    expect(await screen.findByText(/selecciona al menos dos estudiantes/i)).toBeInTheDocument();
     expect(onSubmit).not.toHaveBeenCalled();
   });
 
@@ -102,7 +102,7 @@ describe('GroupSessionFormModal', () => {
     expect(onSubmit).not.toHaveBeenCalled();
   });
 
-  it('confirma con dos o más tutorados seleccionados y el lugar (presencial)', async () => {
+  it('confirma con dos o más estudiantes seleccionados y el lugar (presencial)', async () => {
     const onSubmit = renderModal();
     const user = userEvent.setup();
 

@@ -22,7 +22,7 @@ describe('navegación (UI-01, UI-04, UI-07)', () => {
     expect(findActiveItem(dbu, '/derivaciones/seguimiento', '')?.label).toBe('Seguimiento DBU');
     expect(findActiveItem(dbu, '/informes/consolidado', '')?.label).toBe('Informes');
     expect(findActiveItem(dbu, '/informes', '')?.label).toBe('Informes');
-    expect(findActiveItem(dbu, '/expediente/abc-123', '')?.label).toBe('Tutorados');
+    expect(findActiveItem(dbu, '/expediente/abc-123', '')?.label).toBe('Estudiantes');
   });
 
   it('en el perfil no hay entrada activa', () => {
@@ -33,7 +33,7 @@ describe('navegación (UI-01, UI-04, UI-07)', () => {
     expect(resolveMeta('/informes').title).toBe('Informes'); // pestaña de la sección Informes
     expect(resolveMeta('/derivaciones/seguimiento').title).toBe('Seguimiento de derivaciones');
     expect(resolveMeta('/derivaciones').title).toBe('Casos derivados');
-    expect(resolveMeta('/expediente/abc')).toEqual({ title: 'Expediente', group: 'Atención a tutorados' });
+    expect(resolveMeta('/expediente/abc')).toEqual({ title: 'Expediente', group: 'Atención a estudiantes' });
     expect(resolveMeta('/users').title).toBe('Configuración'); // pestaña de la sección Configuración
     expect(resolveMeta('/pedir-listas').title).toBe('Periodo académico'); // pestaña de la sección Periodo académico
     expect(resolveMeta('/profile').title).toBe('Mi perfil');
@@ -71,29 +71,29 @@ describe('navegación (UI-01, UI-04, UI-07)', () => {
 
     it('cada rol ve solo los grupos que le sirven, en el orden del trabajo', () => {
       expect(groupsFor('Tutorado').map((g) => g.title)).toEqual(['Inicio', 'Mi tutoría']);
-      expect(groupsFor('Docente Tutor').map((g) => g.title)).toEqual(['Inicio', 'Atención a tutorados', 'Gestión']);
-      expect(groupsFor('Coordinador').map((g) => g.title)).toEqual(['Inicio', 'Atención a tutorados', 'Gestión', '']);
+      expect(groupsFor('Docente Tutor').map((g) => g.title)).toEqual(['Inicio', 'Atención a estudiantes', 'Gestión']);
+      expect(groupsFor('Coordinador').map((g) => g.title)).toEqual(['Inicio', 'Atención a estudiantes', 'Gestión', '']);
       expect(groupsFor('Decano').map((g) => g.title)).toEqual(['Inicio', 'Gestión']);
       expect(groupsFor('Vicerrectorado').map((g) => g.title)).toEqual(['Inicio', 'Gestión', '']);
-      expect(groupsFor('Administrador DBU').map((g) => g.title)).toEqual(['Inicio', 'Atención a tutorados', 'Gestión', '']);
+      expect(groupsFor('Administrador DBU').map((g) => g.title)).toEqual(['Inicio', 'Atención a estudiantes', 'Gestión', '']);
     });
 
     it('el menú es corto: Periodo académico, Informes y Configuración juntan varias pantallas con pestañas', () => {
       expect(labelsFor('Administrador DBU')).toEqual([
         'Panel de inicio',
-        'Tutorados', 'Solicitudes de tutoría', 'Casos derivados', 'Seguimiento DBU',
+        'Estudiantes', 'Solicitudes de tutoría', 'Casos derivados', 'Seguimiento DBU',
         'Periodo académico', 'Plan semestral', 'Informes', 'Amonestaciones',
         'Configuración',
       ]);
       expect(labelsFor('Administrador DBU').length).toBeLessThanOrEqual(10);
-      expect(labelsFor('Coordinador')).toEqual(['Panel de inicio', 'Tutorados', 'Solicitudes de tutoría', 'Periodo académico', 'Plan semestral', 'Informes', 'Amonestaciones', 'Configuración']);
+      expect(labelsFor('Coordinador')).toEqual(['Panel de inicio', 'Estudiantes', 'Solicitudes de tutoría', 'Periodo académico', 'Plan semestral', 'Informes', 'Amonestaciones', 'Configuración']);
       expect(labelsFor('Vicerrectorado')).toEqual(['Panel de inicio', 'Informes', 'Configuración']);
     });
 
     it('el expediente no es una entrada del menú: se abre desde Tutorados, que queda activa mientras se ve uno', () => {
       expect(ALL_NAV_ITEMS.map((i) => i.label)).not.toContain('Expediente');
       const coord = visibleFor('Coordinador');
-      expect(findActiveItem(coord, '/expediente/abc-123', '')?.label).toBe('Tutorados');
+      expect(findActiveItem(coord, '/expediente/abc-123', '')?.label).toBe('Estudiantes');
     });
 
     describe('las pestañas de cada sección', () => {

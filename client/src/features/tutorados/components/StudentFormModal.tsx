@@ -113,7 +113,7 @@ export const StudentFormModal: React.FC<StudentFormModalProps> = ({
       onClose();
     } catch (error) {
       console.error('Error submitting student form', error);
-      alert('Ocurrió un error al guardar el tutorado.');
+      alert('Ocurrió un error al guardar el estudiante.');
     } finally {
       setLoading(false);
     }
@@ -131,7 +131,7 @@ export const StudentFormModal: React.FC<StudentFormModalProps> = ({
         onClick={(e) => e.stopPropagation()}
       >
         <div className={styles.modalHeader}>
-          <h2 id="student-form-title">{studentToEdit ? 'Editar tutorado' : 'Nuevo tutorado'}</h2>
+          <h2 id="student-form-title">{studentToEdit ? 'Editar estudiante' : 'Nuevo estudiante'}</h2>
           <button className={styles.closeButton} onClick={onClose} aria-label="Cerrar">
             <CloseIcon size={18} />
           </button>

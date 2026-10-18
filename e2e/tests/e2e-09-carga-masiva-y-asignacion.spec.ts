@@ -57,22 +57,22 @@ test('la coordinadora asigna el ciclo 3 a Elena y los 3 estudiantes nuevos pasan
   await select.selectOption(elena!);
   await expect(page.getByRole('status').filter({ hasText: /Ciclo 3: \d+ estudiante\(s\) asignados/ })).toBeVisible({ timeout: 45_000 });
 
-  await goToMenu(page, 'Tutorados');
-  await page.getByLabel('Buscar tutorado').fill(stamp);
+  await goToMenu(page, 'Estudiantes');
+  await page.getByLabel('Buscar estudiante').fill(stamp);
   await expect(page.getByRole('row', { name: /Carga/ })).toHaveCount(3);
   for (const student of students) await expect(page.getByRole('row', { name: new RegExp(student.code) })).toContainText('Elena');
 });
 
 test('la coordinadora reasigna a uno de ellos a Jorge con un motivo', async ({ page }) => {
   await loginUi(page, accounts.coordinator);
-  await goToMenu(page, 'Tutorados');
-  await page.getByLabel('Buscar tutorado').fill(students[0].code);
+  await goToMenu(page, 'Estudiantes');
+  await page.getByLabel('Buscar estudiante').fill(students[0].code);
   const row = page.getByRole('row', { name: new RegExp(students[0].code) });
   await expect(row).toContainText('Elena');
 
   await row.getByRole('button', { name: /Más/ }).click();
   await page.getByText('Reasignar tutor', { exact: true }).click();
-  const dialog = page.getByRole('dialog', { name: 'Reasignar tutorado' });
+  const dialog = page.getByRole('dialog', { name: 'Reasignar estudiante' });
   const jorgeValue = await dialog.locator('select option', { hasText: 'Jorge' }).first().getAttribute('value');
   await dialog.locator('select').selectOption(jorgeValue!);
   await dialog.getByPlaceholder(/Reorganización de carga/).fill(`Reasignación de prueba ${stamp}`);
@@ -83,15 +83,15 @@ test('la coordinadora reasigna a uno de ellos a Jorge con un motivo', async ({ p
 
 test('cada tutor ve solo los suyos: Elena dos, Jorge uno', async ({ page, browser }) => {
   await loginUi(page, accounts.tutor);
-  await goToMenu(page, 'Tutorados');
-  await page.getByLabel('Buscar tutorado').fill(stamp);
+  await goToMenu(page, 'Estudiantes');
+  await page.getByLabel('Buscar estudiante').fill(stamp);
   await expect(page.getByRole('row', { name: /Carga/ })).toHaveCount(2);
   await expect(page.getByRole('row', { name: new RegExp(students[0].code) })).toHaveCount(0);
 
   const other = await (await browser.newContext()).newPage();
   await loginUi(other, jorge);
-  await goToMenu(other, 'Tutorados');
-  await other.getByLabel('Buscar tutorado').fill(stamp);
+  await goToMenu(other, 'Estudiantes');
+  await other.getByLabel('Buscar estudiante').fill(stamp);
   await expect(other.getByRole('row', { name: /Carga/ })).toHaveCount(1);
   await expect(other.getByRole('row', { name: new RegExp(students[0].code) })).toBeVisible();
 });

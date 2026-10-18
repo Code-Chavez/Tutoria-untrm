@@ -18,7 +18,7 @@ export function recipientBefore(recipient: OwnRequestRecipient | null): string {
 
 /** Después de enviar: lo mismo, en pasado. Si no se sabe a quién llegó, cae en el texto de antes (por rol). */
 export function recipientAfter(recipient: OwnRequestRecipient | null, routedToRole: 'tutor' | 'coordinator'): string {
-  if (!recipient) return `Solicitud registrada y enrutada a ${routedToRole === 'tutor' ? 'tu tutor' : 'la coordinación de tu escuela'}. Te avisaremos cuando responda.`;
+  if (!recipient) return `Solicitud registrada y enviada a ${routedToRole === 'tutor' ? 'tu tutor' : 'la coordinación de tu escuela'}. Te avisaremos cuando responda.`;
   const who = recipient.kind === 'tutor' ? `tu tutor ${recipient.name}` : recipient.kind === 'coordinator' ? `la coordinación de tu escuela (${recipient.name})` : `Bienestar Universitario (${recipient.name})`;
   return `Solicitud registrada: la recibió ${who}. Te avisaremos en el sistema cuando responda.`;
 }

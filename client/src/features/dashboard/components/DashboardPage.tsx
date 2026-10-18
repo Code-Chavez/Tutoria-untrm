@@ -127,7 +127,7 @@ export function DashboardPage() {
         <Card>
           <CardHeader
             title="Alertas de inasistencia y riesgo"
-            description="Tutorados en riesgo sin sesiones o con inasistencias por encima del umbral"
+            description="Estudiantes en riesgo sin sesiones o con inasistencias por encima del umbral"
           />
           <RiskAlerts />
         </Card>

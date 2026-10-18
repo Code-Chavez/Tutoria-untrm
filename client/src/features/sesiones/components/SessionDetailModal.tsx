@@ -100,7 +100,7 @@ export const SessionDetailModal: React.FC<SessionDetailModalProps> = ({
     const student = students.find((s) => s.id === id);
     return student
       ? `${student.firstName} ${student.lastName} · ${student.studentCode}`
-      : 'Tutorado';
+      : 'Estudiante';
   });
 
   // Cuántas sesiones individuales de esta misma tutoría (mismo tutor y
@@ -203,7 +203,7 @@ export const SessionDetailModal: React.FC<SessionDetailModalProps> = ({
             <div className={styles.row}>
               <UsersIcon size={16} />
               <span>
-                {participants.length} tutorado{participants.length !== 1 ? 's' : ''}
+                {participants.length} estudiante{participants.length !== 1 ? 's' : ''}
               </span>
             </div>
             <ul>
@@ -263,13 +263,13 @@ export const SessionDetailModal: React.FC<SessionDetailModalProps> = ({
 
 
           {isGroup && !session.cancelledAt && status !== 'PROXIMA' && onRecordRoll && (
-            <div className={styles.attendance} aria-label="Asistencia de los tutorados">
+            <div className={styles.attendance} aria-label="Asistencia de los estudiantes">
               <div className={styles.row}>
                 <CheckCircleIcon size={16} />
                 <span>
                   {(session.attendedStudentIds ?? []).length + (session.absentStudentIds ?? []).length === 0
                     ? 'Asistencia sin registrar: marca quiénes asistieron.'
-                    : `Asistieron ${(session.attendedStudentIds ?? []).length} de ${session.studentIds.length} tutorados.`}
+                    : `Asistieron ${(session.attendedStudentIds ?? []).length} de ${session.studentIds.length} estudiantes.`}
                 </span>
               </div>
               <ul className={styles.rollList}>

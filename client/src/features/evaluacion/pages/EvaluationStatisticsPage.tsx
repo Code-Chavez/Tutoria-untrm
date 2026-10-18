@@ -51,7 +51,7 @@ export function EvaluationStatisticsPage() {
         <EmptyState
           icon={<PieChartIcon size={26} />}
           title="Sin respuestas para este filtro"
-          description={`Ningún tutorado respondió el cuestionario del periodo ${report.periodName} con los filtros seleccionados.`}
+          description={`Ningún estudiante respondió el cuestionario del periodo ${report.periodName} con los filtros seleccionados.`}
         />
       ) : (
         <Card>

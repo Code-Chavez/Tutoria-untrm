@@ -29,7 +29,7 @@ test('el estudiante registra la solicitud y queda Pendiente', async ({ page }) =
   await goToMenu(page, 'Solicitar tutoría');
   // Antes de enviar ya sabe quien la recibira (se espera a verlo: asi lo veria una persona antes de pulsar el boton)
   await expect(page.getByText(/Tu solicitud la recibirá tu tutor Elena/)).toBeVisible();
-  await page.getByLabel('Motivo (Art. 20)').selectOption({ label: 'Académico' });
+  await page.getByLabel('Motivo', { exact: true }).selectOption({ label: 'Académico' });
   await page.getByLabel('Descripción del motivo').fill(reason);
   await page.getByRole('button', { name: 'Registrar solicitud' }).click();
 

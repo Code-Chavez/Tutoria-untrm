@@ -108,7 +108,7 @@ describe('MyTutoringRequestPage', () => {
         reason: 'Dificultad en Cálculo',
       });
     });
-    expect(await screen.findByText(/enrutada a tu tutor/i)).toBeInTheDocument();
+    expect(await screen.findByText(/enviada a tu tutor/i)).toBeInTheDocument();
     // Tras registrar, el historial se vuelve a pedir para que aparezca la nueva solicitud.
     await waitFor(() => expect(mocked.getOwn.mock.calls.length).toBeGreaterThan(1));
   });

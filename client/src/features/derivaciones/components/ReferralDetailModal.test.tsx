@@ -111,8 +111,8 @@ describe('ReferralDetailModal (HU-32 - Registro de atención y cierre)', () => {
         onStatusUpdated={onStatusUpdatedMock}
       />,
     );
-    expect(screen.getByText('Tutorado: Ana Torres Ramos · 20191234')).toBeDefined();
-    expect(screen.queryByText(/Tutorado ID/)).toBeNull();
+    expect(screen.getByText('Estudiante: Ana Torres Ramos · 20191234')).toBeDefined();
+    expect(screen.queryByText(/Estudiante ID/)).toBeNull();
   });
 
   describe('lenguaje de tarea (U10)', () => {

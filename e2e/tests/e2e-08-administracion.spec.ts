@@ -33,8 +33,8 @@ test('la DBU crea, desactiva y elimina una facultad del catálogo', async ({ pag
 test('la DBU registra un tutorado nuevo y aparece en la lista', async ({ page }) => {
   const code = String(Date.now()).slice(-8);
   await loginUi(page, accounts.admin);
-  await goToMenu(page, 'Tutorados');
-  await page.getByRole('button', { name: 'Nuevo tutorado' }).click();
+  await goToMenu(page, 'Estudiantes');
+  await page.getByRole('button', { name: 'Nuevo estudiante' }).click();
 
   await page.getByLabel('Código universitario').fill(code);
   await page.getByLabel('Ciclo', { exact: true }).fill('4');
@@ -44,7 +44,7 @@ test('la DBU registra un tutorado nuevo y aparece en la lista', async ({ page })
   await page.getByRole('button', { name: 'Guardar' }).click();
 
   // La lista crece con cada corrida: se busca por el código en vez de depender de la posición.
-  await page.getByLabel('Buscar tutorado').fill(code);
+  await page.getByLabel('Buscar estudiante').fill(code);
   await expect(page.getByRole('row', { name: new RegExp(code) })).toBeVisible();
 });
 

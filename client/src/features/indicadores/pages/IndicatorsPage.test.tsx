@@ -81,7 +81,7 @@ describe('IndicatorsPage', () => {
   it('muestra los indicadores clave y los gráficos', async () => {
     renderPage();
 
-    expect(await screen.findByText('Tutorados activos')).toBeInTheDocument();
+    expect(await screen.findByText('Estudiantes activos')).toBeInTheDocument();
     expect(screen.getByText('40')).toBeInTheDocument();
     expect(screen.getByText('60%')).toBeInTheDocument(); // cobertura de sesiones
     expect(screen.getByText('20%')).toBeInTheDocument(); // riesgo
@@ -104,7 +104,7 @@ describe('IndicatorsPage', () => {
   it('al elegir un tutor vuelve a consultar con ese filtro', async () => {
     const user = userEvent.setup();
     renderPage();
-    await screen.findByText('Tutorados activos');
+    await screen.findByText('Estudiantes activos');
 
     await screen.findByRole('option', { name: 'Elena Ramírez' });
     await user.selectOptions(screen.getByLabelText('Tutor'), 't1');

@@ -36,7 +36,7 @@ export const TutoradoFilters: React.FC<TutoradoFiltersProps> = ({
         placeholder="Buscar por código, nombre o apellido…"
         value={values.search}
         onChange={(e) => set({ search: e.target.value })}
-        aria-label="Buscar tutorado"
+        aria-label="Buscar estudiante"
         wrapClassName={styles.search}
       />
       <SelectField

@@ -76,14 +76,14 @@ export const CancelSessionModal: React.FC<CancelSessionModalProps> = ({
             rows={4}
             value={reason}
             maxLength={500}
-            placeholder="Ej. El tutor tuvo una emergencia, el tutorado avisó que no podía asistir…"
+            placeholder="Ej. El tutor tuvo una emergencia, el estudiante avisó que no podía asistir…"
             onChange={(e) => {
               setReason(e.target.value);
               setError('');
             }}
             autoFocus
           />
-          <p className={styles.note}>Cada tutorado con cuenta del portal recibe un aviso con la cancelación y este motivo.</p>
+          <p className={styles.note}>Cada estudiante con cuenta del portal recibe un aviso con la cancelación y este motivo.</p>
           {(error || serverError) && <span className={styles.error}>{error || serverError}</span>}
         </div>
 

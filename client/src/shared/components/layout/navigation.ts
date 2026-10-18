@@ -38,7 +38,7 @@ export interface NavItem {
   title?: string;
   Icon: ComponentType<{ size?: number }>;
   path: string;
-  /** Acción que abre la lista de tutorados en modo «elegir estudiante» (?accion=…). */
+  /** Acción que abre la lista de estudiantes en modo «elegir estudiante» (?accion=…). */
   action?: string;
   roles?: RoleCode[]; // sin roles = visible para todos
   /** Otras direcciones que también dejan esta entrada activa (las pestañas de una sección). */
@@ -77,10 +77,10 @@ export const NAV: NavGroup[] = [
   },
   {
     // Quien atiende a los tutorados: el docente tutor y quien lo supervisa (coordinación, DBU) o recibe sus derivaciones (servicios).
-    title: 'Atención a tutorados',
+    title: 'Atención a estudiantes',
     items: [
-      // El expediente se abre desde la lista de tutorados («Ver expediente»); mientras se ve uno, esta entrada queda activa.
-      { label: 'Tutorados', Icon: GraduationCapIcon, path: '/tutorados', alsoPaths: ['/expediente'], action: '', roles: ['tutor', 'coord', 'dbu'] },
+      // El expediente se abre desde la lista de estudiantes («Ver expediente»); mientras se ve uno, esta entrada queda activa.
+      { label: 'Estudiantes', Icon: GraduationCapIcon, path: '/tutorados', alsoPaths: ['/expediente'], action: '', roles: ['tutor', 'coord', 'dbu'] },
       { label: 'Entrevista inicial', Icon: ClipboardIcon, path: '/tutorados', action: 'entrevista', roles: ['tutor'] },
       { label: 'Sesiones', Icon: CalendarIcon, path: '/sesiones', roles: ['tutor'] },
       { label: 'Seguimiento', Icon: ActivityIcon, path: '/tutorados', action: 'seguimiento', roles: ['tutor'] },
@@ -140,7 +140,7 @@ export const ALL_NAV_ITEMS: NavItem[] = NAV.flatMap((group) => group.items);
 const EXTRA_META: Record<string, { title: string; group: string }> = {
   '/profile': { title: 'Mi perfil', group: 'Cuenta' },
   '/unauthorized': { title: 'Acceso denegado', group: '' },
-  '/expediente': { title: 'Expediente', group: 'Atención a tutorados' },
+  '/expediente': { title: 'Expediente', group: 'Atención a estudiantes' },
 };
 
 // La entrada de menú más específica da el título; las rutas con parámetro (p. ej. /expediente/:id)

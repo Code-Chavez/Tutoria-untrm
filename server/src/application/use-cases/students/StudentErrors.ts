@@ -42,7 +42,7 @@ export class PortalUserNotFoundError extends Error {
 
 export class PortalUserRoleMismatchError extends Error {
   constructor() {
-    super('Solo se puede vincular una cuenta con rol Tutorado');
+    super('Solo se puede vincular una cuenta con rol Estudiante');
     this.name = 'PortalUserRoleMismatchError';
   }
 }
@@ -57,7 +57,7 @@ export class PortalUserAlreadyLinkedError extends Error {
 // El solicitante no tiene alcance sobre la escuela o el tutorado indicados (Art. 9.a y 14.c).
 export class StudentAccessDeniedError extends Error {
   constructor() {
-    super('No tienes acceso a los tutorados de esa escuela');
+    super('No tienes acceso a los estudiantes de esa escuela');
     this.name = 'StudentAccessDeniedError';
   }
 }

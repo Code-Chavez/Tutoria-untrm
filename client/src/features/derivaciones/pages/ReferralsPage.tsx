@@ -134,7 +134,7 @@ export function ReferralsPage() {
               <tr>
                 <th>Fecha</th>
                 <th>Estado</th>
-                <th>Tutorado</th>
+                <th>Estudiante</th>
                 <th>Servicio Destino</th>
                 <th>Instancia Receptora</th>
                 <th>Acciones</th>
@@ -156,7 +156,7 @@ export function ReferralsPage() {
                       {REFERRAL_STATUS_LABEL[ref.status]}
                     </span>
                   </td>
-                  <td data-label="Tutorado">
+                  <td data-label="Estudiante">
                     {ref.studentName ? (
                       <>
                         <div>{ref.studentName}</div>

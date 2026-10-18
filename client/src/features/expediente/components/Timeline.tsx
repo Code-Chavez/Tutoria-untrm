@@ -154,7 +154,7 @@ export const Timeline: React.FC<TimelineProps> = ({ events }) => {
                     <b>Respuesta{event.handledByName ? ` de ${event.handledByName}` : ''}:</b> {event.responseNote}
                   </p>
                 )}
-                <span className={styles.meta}>Enrutada a {event.routedToName}</span>
+                <span className={styles.meta}>Dirigida a {event.routedToName}</span>
               </div>
             )}
 

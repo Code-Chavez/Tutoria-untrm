@@ -45,10 +45,10 @@ export const ExpedientePage: React.FC = () => {
         variant="error"
         icon={<XCircleIcon size={26} />}
         title="No se pudo cargar el expediente"
-        description={error || 'El tutorado solicitado no existe.'}
+        description={error || 'El estudiante solicitado no existe.'}
         action={
           <Button variant="secondary" onClick={() => navigate('/tutorados')}>
-            Volver a Tutorados
+            Volver a Estudiantes
           </Button>
         }
       />
@@ -61,7 +61,7 @@ export const ExpedientePage: React.FC = () => {
     <div>
       <button className={styles.back} onClick={() => navigate('/tutorados')}>
         <ChevronLeftIcon size={16} />
-        Volver a Tutorados
+        Volver a Estudiantes
       </button>
 
       <PageHeader
@@ -106,7 +106,7 @@ export const ExpedientePage: React.FC = () => {
           <CardBody>
             <SignedDocumentsPanel
               title="Hoja firmada del semestre"
-              hint="Imprima la hoja, haga que el tutorado firme cada sesión junto con el docente tutor, y adjunte el escaneo. La asistencia confirmada en el sistema no reemplaza la firma del estudiante."
+              hint="Imprima la hoja, haga que el estudiante firme cada sesión junto con el docente tutor, y adjunte el escaneo. La asistencia confirmada en el sistema no reemplaza la firma del estudiante."
               documents={sheet.documents}
               loading={sheet.loading}
               canUpload={!!user && SHEET_UPLOAD_ROLES.includes(user.role)}
@@ -157,7 +157,7 @@ export const ExpedientePage: React.FC = () => {
                 </div>
               ) : (
                 <p className={styles.noContact}>
-                  Aún no se registró una persona de red de apoyo para este tutorado.
+                  Aún no se registró una persona de red de apoyo para este estudiante.
                 </p>
               )}
             </CardBody>

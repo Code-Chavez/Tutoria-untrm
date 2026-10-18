@@ -109,7 +109,7 @@ export class GetHomePanelUseCase {
     const openReferrals = myReferrals.filter((r) => r.status !== 'CERRADO').length;
 
     return [
-      { key: 'my-students', label: 'Mis tutorados', value: String(myStudents.length), hint: `${atRisk} en riesgo`, tone: 'info', link: '/tutorados' },
+      { key: 'my-students', label: 'Mis estudiantes', value: String(myStudents.length), hint: `${atRisk} en riesgo`, tone: 'info', link: '/tutorados' },
       { key: 'upcoming-sessions', label: 'Sesiones próximas', value: String(upcoming.length), hint: upcoming[0] ? `Siguiente: ${formatDateTime(upcoming[0].scheduledAt)}` : 'Sin sesiones programadas', tone: 'success', link: '/sesiones' },
       { key: 'alerts', label: 'Alertas pendientes', value: String(alerts.length), hint: 'Riesgo sin sesiones o con inasistencias', tone: alerts.length > 0 ? 'warning' : 'neutral' },
       ...(requestsKpi ? [requestsKpi] : []),
@@ -130,9 +130,9 @@ export class GetHomePanelUseCase {
     const requestsKpi = roleName === 'Vicerrectorado' ? null : await this.pendingRequestsKpi(userId);
     return [
       ...(requestsKpi ? [requestsKpi] : []),
-      { key: 'students', label: 'Tutorados activos', value: String(report.students.active), hint: `${report.students.assignedPct}% con tutor asignado`, tone: 'info', link: '/indicadores' },
+      { key: 'students', label: 'Estudiantes activos', value: String(report.students.active), hint: `${report.students.assignedPct}% con tutor asignado`, tone: 'info', link: '/indicadores' },
       { key: 'coverage', label: 'Cobertura de sesiones', value: `${report.sessions.coveragePct}%`, hint: `${report.sessions.studentsServed} tutorados atendidos`, tone: 'success', link: '/indicadores' },
-      { key: 'risk', label: 'Tutorados en riesgo', value: `${report.risk.atRiskPct}%`, hint: `${report.risk.atRisk} de ${report.students.active}`, tone: 'danger', link: '/indicadores' },
+      { key: 'risk', label: 'Estudiantes en riesgo', value: `${report.risk.atRiskPct}%`, hint: `${report.risk.atRisk} de ${report.students.active}`, tone: 'danger', link: '/indicadores' },
       { key: 'referrals', label: 'Derivaciones del periodo', value: String(report.referrals.total), tone: 'warning', link: '/indicadores' },
       {
         key: 'evaluation',
@@ -177,7 +177,7 @@ export class GetHomePanelUseCase {
   private async studentKpis(userId: string): Promise<HomeKpi[]> {
     const student = await this.students.findByUserId(userId);
     if (!student) {
-      return [{ key: 'no-profile', label: 'Mi perfil de tutorado', value: '—', hint: 'Tu cuenta aún no está vinculada a un tutorado', tone: 'neutral' }];
+      return [{ key: 'no-profile', label: 'Mi perfil de estudiante', value: '—', hint: 'Tu cuenta aún no está vinculada a un tutorado', tone: 'neutral' }];
     }
 
     const tutor = student.tutorId ? await this.users.findById(student.tutorId) : null;

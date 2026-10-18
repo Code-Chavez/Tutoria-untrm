@@ -115,7 +115,7 @@ export const RescheduleSessionModal: React.FC<RescheduleSessionModalProps> = ({
               rows={3}
               value={reason}
               maxLength={500}
-              placeholder="Ej. El tutorado solicitó cambio de horario…"
+              placeholder="Ej. El estudiante solicitó cambio de horario…"
               onChange={(e) => {
                 setReason(e.target.value);
                 setError('');
@@ -123,7 +123,7 @@ export const RescheduleSessionModal: React.FC<RescheduleSessionModalProps> = ({
             />
           </div>
 
-          <p className={styles.note}>Cada tutorado con cuenta del portal recibe un aviso con el nuevo horario y este motivo.</p>
+          <p className={styles.note}>Cada estudiante con cuenta del portal recibe un aviso con el nuevo horario y este motivo.</p>
 
           {(error || serverError) && <span className={styles.error}>{error || serverError}</span>}
         </div>

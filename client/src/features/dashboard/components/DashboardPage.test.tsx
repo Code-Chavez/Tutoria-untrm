@@ -22,7 +22,7 @@ const tutorPanel: HomePanel = {
   role: 'Docente Tutor',
   periodName: '2026-II',
   kpis: [
-    { key: 'my-students', label: 'Mis tutorados', value: '12', hint: '3 en riesgo', tone: 'info', link: '/tutorados' },
+    { key: 'my-students', label: 'Mis estudiantes', value: '12', hint: '3 en riesgo', tone: 'info', link: '/tutorados' },
     { key: 'alerts', label: 'Alertas pendientes', value: '2', tone: 'warning' },
   ],
 };
@@ -47,7 +47,7 @@ describe('DashboardPage (paneles por rol)', () => {
     mocked.getPanel.mockResolvedValue(tutorPanel);
     renderPage();
 
-    expect(await screen.findByText('Mis tutorados')).toBeInTheDocument();
+    expect(await screen.findByText('Mis estudiantes')).toBeInTheDocument();
     expect(screen.getByText('12')).toBeInTheDocument();
     expect(screen.getByText('3 en riesgo')).toBeInTheDocument();
     expect(screen.getByText('Alertas pendientes')).toBeInTheDocument();
@@ -59,7 +59,7 @@ describe('DashboardPage (paneles por rol)', () => {
     mocked.getPanel.mockResolvedValue(tutorPanel);
     renderPage();
 
-    const link = await screen.findByRole('link', { name: 'Mis tutorados: 12' });
+    const link = await screen.findByRole('link', { name: 'Mis estudiantes: 12' });
     expect(link).toHaveAttribute('href', '/tutorados');
     expect(screen.queryByRole('link', { name: /Alertas pendientes/ })).not.toBeInTheDocument();
   });
@@ -68,7 +68,7 @@ describe('DashboardPage (paneles por rol)', () => {
     mocked.getPanel.mockResolvedValue({ ...tutorPanel, periodName: null });
     renderPage();
 
-    await screen.findByText('Mis tutorados');
+    await screen.findByText('Mis estudiantes');
     expect(screen.queryByText(/Periodo académico/)).not.toBeInTheDocument();
   });
 
@@ -84,8 +84,8 @@ describe('DashboardPage (paneles por rol)', () => {
 
     it.each([
       ['Tutorado', ['Solicitar tutoría', 'Mis sesiones', 'Evaluar tutoría'], false, false],
-      ['Docente Tutor', ['Ver tutorados', 'Mi calendario', 'Solicitudes de tutoría', 'Casos derivados'], true, false],
-      ['Coordinador', ['Registrar tutorado', 'Carga de estudiantes', 'Solicitudes de tutoría', 'Plan semestral'], true, false],
+      ['Docente Tutor', ['Ver estudiantes', 'Mi calendario', 'Solicitudes de tutoría', 'Casos derivados'], true, false],
+      ['Coordinador', ['Registrar estudiante', 'Carga de estudiantes', 'Solicitudes de tutoría', 'Plan semestral'], true, false],
       ['Administrador DBU', ['Usuarios y roles', 'Seguimiento de derivaciones', 'Solicitudes de tutoría'], true, true],
       ['Profesional de Servicio', ['Casos derivados'], false, false],
       ['Vicerrectorado', ['Informe consolidado', 'Indicadores'], false, false],

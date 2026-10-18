@@ -185,7 +185,7 @@ export const FollowUpFormModal: React.FC<FollowUpFormModalProps> = ({
 
           <div className={styles.hint}>
             <InfoIcon size={16} />
-            La ficha se agrega al expediente del tutorado (Anexo N° 5) para dar continuidad al
+            La ficha se agrega al expediente del estudiante (Anexo N° 5) para dar continuidad al
             acompañamiento.
           </div>
 
