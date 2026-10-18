@@ -1,12 +1,15 @@
 import http from 'http';
 import app from '../../src/app';
 import { prisma } from '../../src/infrastructure/database/prisma';
+import { currentPeriodId } from '../helpers/currentPeriod';
 import { generateSecretToken, hashSecretToken } from '../../src/application/use-cases/auth/secretToken';
 
 /**
  * Aceptación del tutor por ciclo (fase 4) sobre HTTP real y base de datos real: al asignar un ciclo el docente queda pendiente
  * de responder, abre su enlace de un solo uso (sin sesión), acepta con su disponibilidad o rechaza, y el enlace deja de servir.
- * Usa el ciclo 10 y registros propios. Se omite sin base de datos, salvo REQUIRE_DB_TESTS=1.
+ * Trabaja en una escuela propia, con docentes propios, que crea y borra: así no comparte el ciclo ni a los docentes con las demás
+ * suites de tutor por ciclo (un docente solo atiende un ciclo, y dos suites a la vez se pisarían). Se omite sin base de datos,
+ * salvo REQUIRE_DB_TESTS=1.
  */
 const REQUIRE_DB = process.env.REQUIRE_DB_TESTS === '1';
 jest.setTimeout(180_000);
@@ -18,6 +21,8 @@ const ACCOUNTS = {
 } as const;
 type Who = keyof typeof ACCOUNTS;
 
+const stamp = String(Date.now());
+
 describe('aceptación del tutor por ciclo (fase 4)', () => {
   let server: http.Server | undefined;
   let baseUrl = '';
@@ -25,8 +30,9 @@ describe('aceptación del tutor por ciclo (fase 4)', () => {
   const tokens = {} as Record<Who, string>;
   let periodId = '';
   let schoolId = '';
-  let elenaId = '';
-  let jorgeId = '';
+  let schoolName = '';
+  let elenaId = ''; // primer docente de la escuela propia
+  let jorgeId = ''; // segundo docente de la escuela propia
 
   const call = (method: string, path: string, who?: Who, body?: unknown) =>
     fetch(`${baseUrl}${path}`, {
@@ -66,16 +72,30 @@ describe('aceptación del tutor por ciclo (fase 4)', () => {
       const res = await call('POST', '/api/auth/login', undefined, ACCOUNTS[who]);
       tokens[who] = ((await res.json()) as { data: { accessToken: string } }).data.accessToken;
     }
-    periodId = (await prisma.academicPeriod.findFirstOrThrow({ where: { isActive: true } })).id;
-    schoolId = (await prisma.school.findFirstOrThrow({ where: { name: 'Ingeniería de Sistemas' } })).id;
-    elenaId = (await prisma.user.findUniqueOrThrow({ where: { email: 'elena.ramirez@untrm.edu.pe' } })).id;
-    jorgeId = (await prisma.user.findUniqueOrThrow({ where: { email: 'jorge.salazar@untrm.edu.pe' } })).id;
+    periodId = await currentPeriodId(prisma);
+    // Escuela propia: misma facultad, sede y coordinadora que Sistemas (la coordinadora de la prueba), sin estudiantes matriculados
+    const sistemas = await prisma.school.findFirstOrThrow({ where: { name: 'Ingeniería de Sistemas' } });
+    schoolName = `Escuela de prueba de aceptación ${stamp}`;
+    schoolId = (await prisma.school.create({ data: { name: schoolName, facultyId: sistemas.facultyId, campusId: sistemas.campusId, coordinatorId: sistemas.coordinatorId } })).id;
+    const tutorRole = await prisma.role.findFirstOrThrow({ where: { name: 'Docente Tutor' } });
+    const hash = (await prisma.user.findFirstOrThrow({ where: { email: 'elena.ramirez@untrm.edu.pe' } })).passwordHash;
+    const teacher = async (suffix: string, lastName: string) =>
+      (await prisma.user.create({ data: { email: `acept-${stamp}-${suffix}@untrm.edu.pe`, passwordHash: hash, firstName: 'Docente', lastName, roleId: tutorRole.id, schoolId } })).id;
+    elenaId = await teacher('a', `Aceptación Alfa ${stamp}`);
+    jorgeId = await teacher('b', `Aceptación Beta ${stamp}`);
   });
 
   afterAll(async () => {
     const running = server;
     if (running) await new Promise((resolve) => running.close(resolve));
-    if (dbUp) await prisma.cycleTutorAssignment.deleteMany({ where: { periodId, schoolId, cycle: 10 } });
+    if (dbUp && schoolId) {
+      const tutors = [elenaId, jorgeId].filter(Boolean);
+      await prisma.cycleTutorAssignment.deleteMany({ where: { schoolId } });
+      await prisma.notification.deleteMany({ where: { userId: { in: tutors } } });
+      await prisma.auditLog.deleteMany({ where: { userId: { in: tutors } } }); // la aceptación por enlace deja su bitácora a nombre del docente
+      await prisma.user.deleteMany({ where: { id: { in: tutors } } });
+      await prisma.school.deleteMany({ where: { id: schoolId } });
+    }
     await prisma.$disconnect();
   });
 
@@ -103,7 +123,7 @@ describe('aceptación del tutor por ciclo (fase 4)', () => {
 
     const info = await call('GET', `/api/tutor-acceptance/${token}`);
     expect(info.status).toBe(200);
-    expect(await info.json()).toMatchObject({ tutorName: expect.stringContaining('Elena'), school: 'Ingeniería de Sistemas', cycle: 10, sessionMinutes: 45 });
+    expect(await info.json()).toMatchObject({ tutorName: expect.stringContaining('Alfa'), school: schoolName, cycle: 10, sessionMinutes: 45 });
 
     expect((await call('POST', `/api/tutor-acceptance/${token}`, undefined, { accept: true, availability: [{ day: 1, start: '08:00', end: '08:20' }] })).status).toBe(400);
     expect((await row()).acceptanceStatus).toBe('PENDIENTE');

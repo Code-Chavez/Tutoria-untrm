@@ -2,6 +2,7 @@ import http from 'http';
 import ExcelJS from 'exceljs';
 import app from '../../src/app';
 import { prisma } from '../../src/infrastructure/database/prisma';
+import { currentPeriodId } from '../helpers/currentPeriod';
 
 /**
  * Matrícula por periodo y pedido de listas (fase 2) sobre HTTP real y base de datos real: la carga matricula a los nuevos y
@@ -81,7 +82,7 @@ describe('matrícula por periodo y pedido de listas (fase 2)', () => {
       const res = await call('POST', '/api/auth/login', undefined, ACCOUNTS[who]);
       tokens[who] = ((await res.json()) as { data: { accessToken: string } }).data.accessToken;
     }
-    periodId = (await prisma.academicPeriod.findFirstOrThrow({ where: { isActive: true } })).id;
+    periodId = await currentPeriodId(prisma);
     const school = await prisma.school.findFirstOrThrow({ where: { name: 'Ingeniería de Sistemas' } });
     schoolId = school.id;
     originalRequestEmail = school.requestEmail;

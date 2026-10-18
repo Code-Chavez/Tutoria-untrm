@@ -1,6 +1,7 @@
 import http from 'http';
 import app from '../../src/app';
 import { prisma } from '../../src/infrastructure/database/prisma';
+import { TEST_PERIOD_CREATED_AT } from '../helpers/currentPeriod';
 import { PrismaAcademicPeriodRepository } from '../../src/infrastructure/repositories/PrismaAcademicPeriodRepository';
 import { PrismaPeriodSummaryRepository } from '../../src/infrastructure/repositories/PrismaPeriodSummaryRepository';
 import { PrismaAuditLogRepository } from '../../src/infrastructure/repositories/PrismaAuditLogRepository';
@@ -64,7 +65,7 @@ describe('cierre de periodo (fase 1)', () => {
     }
     adminId = (await prisma.user.findFirstOrThrow({ where: { email: ACCOUNTS.admin.email } })).id;
     const created = await prisma.academicPeriod.create({
-      data: { name: NAME, startDate: new Date('2026-01-05'), endDate: new Date('2026-06-30'), isActive: true },
+      data: { name: NAME, startDate: new Date('2026-01-05'), endDate: new Date('2026-06-30'), isActive: true, createdAt: TEST_PERIOD_CREATED_AT },
     });
     periodId = created.id;
   });
@@ -138,7 +139,7 @@ describe('cierre de periodo (fase 1)', () => {
 
   it('dos cierres simultáneos del mismo periodo: solo uno gana', async () => {
     if (!dbUp) return;
-    const other = await prisma.academicPeriod.create({ data: { name: `${NAME}-b`, startDate: new Date('2026-01-05'), endDate: new Date('2026-06-30'), isActive: true } });
+    const other = await prisma.academicPeriod.create({ data: { name: `${NAME}-b`, startDate: new Date('2026-01-05'), endDate: new Date('2026-06-30'), isActive: true, createdAt: TEST_PERIOD_CREATED_AT } });
     try {
       const results = await Promise.all([periods.close(other.id, adminId, new Date(), {}), periods.close(other.id, adminId, new Date(), {})]);
 
