@@ -70,6 +70,7 @@ const renderPage = () =>
 describe('MyTutoringRequestPage', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    window.sessionStorage.clear(); // los borradores viven en la pestaña: que no pasen de una prueba a otra
     mocked.getOwn.mockResolvedValue([]);
     mockedPeriod.current.mockResolvedValue({ open: true, period: { id: 'p1', name: '2026-II', startDate: '2026-08-24', endDate: '2026-12-18' }, enrolled: true });
   });
@@ -110,6 +111,51 @@ describe('MyTutoringRequestPage', () => {
     expect(await screen.findByText(/enrutada a tu tutor/i)).toBeInTheDocument();
     // Tras registrar, el historial se vuelve a pedir para que aparezca la nueva solicitud.
     await waitFor(() => expect(mocked.getOwn.mock.calls.length).toBeGreaterThan(1));
+  });
+
+  describe('borrador: no se pierde lo escrito (U07)', () => {
+    it('al volver a la pantalla recupera lo que había escrito y lo avisa; descartar lo borra', async () => {
+      const user = userEvent.setup();
+      const first = renderPage();
+      await user.type(screen.getByLabelText(/descripción del motivo/i), 'Tengo dificultades con Cálculo');
+      first.unmount(); // fue a «Mis sesiones» sin enviar
+
+      renderPage();
+      expect(screen.getByLabelText(/descripción del motivo/i)).toHaveValue('Tengo dificultades con Cálculo');
+      expect(screen.getByRole('status', { name: '' })).toBeDefined();
+      expect(screen.getByText(/Recuperamos lo que habías escrito/)).toBeInTheDocument();
+
+      await user.click(screen.getByRole('button', { name: 'Descartar borrador' }));
+      expect(screen.getByLabelText(/descripción del motivo/i)).toHaveValue('');
+      expect(screen.queryByText(/Recuperamos lo que habías escrito/)).not.toBeInTheDocument();
+    });
+
+    it('el borrador es de esa persona: otra cuenta en la misma pestaña no lo ve', async () => {
+      const user = userEvent.setup();
+      const first = renderPage();
+      await user.type(screen.getByLabelText(/descripción del motivo/i), 'Algo privado');
+      first.unmount();
+
+      render(
+        <AuthContext.Provider value={{ ...auth, user: { ...auth.user!, id: 'otra-persona' } }}>
+          <QueryClientTestWrapper>
+            <MyTutoringRequestPage />
+          </QueryClientTestWrapper>
+        </AuthContext.Provider>,
+      );
+      expect(screen.getByLabelText(/descripción del motivo/i)).toHaveValue('');
+    });
+
+    it('al enviar con éxito no queda borrador', async () => {
+      mocked.createOwnTutoringRequest.mockResolvedValue({ id: 'r', studentId: 's', source: 'STUDENT', caseType: 'ACADEMIC', reason: 'x', routedToId: 't', routedToRole: 'tutor', createdAt: new Date().toISOString() } as TutoringRequest);
+      const user = userEvent.setup();
+      renderPage();
+      await user.type(screen.getByLabelText(/descripción del motivo/i), 'Dificultad en Cálculo');
+      await user.click(screen.getByRole('button', { name: /registrar solicitud/i }));
+      await screen.findByText(/Solicitud registrada/);
+      expect(Object.keys(window.sessionStorage).filter((k) => k.startsWith('sit.draft.'))).toEqual([]);
+      expect(screen.getByLabelText(/descripción del motivo/i)).toHaveValue('');
+    });
   });
 
   describe('a quién llega mi solicitud (U02)', () => {

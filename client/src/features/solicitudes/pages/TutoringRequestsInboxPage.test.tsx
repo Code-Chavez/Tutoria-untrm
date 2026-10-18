@@ -77,6 +77,7 @@ const renderPage = (url = '/solicitudes', role = 'Docente Tutor') =>
 describe('TutoringRequestsInboxPage (R01)', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    window.sessionStorage.clear(); // los borradores viven en la pestaña: que no pasen de una prueba a otra
     mocked.getInbox.mockResolvedValue([request()]);
     vi.mocked(studentService.getStudents).mockResolvedValue([ana]);
   });
@@ -154,6 +155,31 @@ describe('TutoringRequestsInboxPage (R01)', () => {
     renderPage('/solicitudes?solicitud=otra');
     expect(await screen.findByRole('status')).toHaveTextContent('ya no está disponible para tu cuenta');
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+  });
+
+  describe('la respuesta a medio escribir no se pierde (U07)', () => {
+    it('si cierra la ventana sin querer, al volver a abrir la solicitud recupera lo escrito', async () => {
+      const user = userEvent.setup();
+      renderPage();
+      await user.click(await screen.findByRole('button', { name: 'Atender' }));
+      await user.type(screen.getByLabelText('Respuesta para el estudiante'), 'Te espero el jueves');
+      await user.click(screen.getByRole('button', { name: 'Cerrar' })); // cierra sin guardar
+
+      await user.click(screen.getByRole('button', { name: 'Atender' }));
+      expect(screen.getByLabelText('Respuesta para el estudiante')).toHaveValue('Te espero el jueves');
+      expect(screen.getByText(/Recuperamos lo que habías escrito/)).toBeInTheDocument();
+    });
+
+    it('al guardar la respuesta no queda borrador', async () => {
+      mocked.updateStatus.mockResolvedValue(request({ status: 'ATENDIDA' }));
+      const user = userEvent.setup();
+      renderPage();
+      await user.click(await screen.findByRole('button', { name: 'Atender' }));
+      await user.type(screen.getByLabelText('Respuesta para el estudiante'), 'Listo');
+      await user.click(screen.getByRole('button', { name: 'Marcar atendida' }));
+      await waitFor(() => expect(mocked.updateStatus).toHaveBeenCalled());
+      await waitFor(() => expect(Object.keys(window.sessionStorage).filter((k) => k.startsWith('sit.draft.'))).toEqual([]));
+    });
   });
 
   describe('continuidad: de la solicitud a la sesión o la derivación (U01)', () => {

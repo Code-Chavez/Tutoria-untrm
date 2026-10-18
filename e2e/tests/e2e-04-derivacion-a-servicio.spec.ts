@@ -46,19 +46,19 @@ test('Psicología recibe el aviso, abre el caso y lo lleva hasta cerrarlo', asyn
   const detail = page.getByRole('dialog', { name: 'Detalle de derivación' });
   await expect(detail).toContainText(reason);
 
-  const status = detail.getByLabel('Nuevo Estado');
+  const status = detail.getByLabel('Nuevo estado');
   await expect(status).toHaveValue('RECIBIDO');
-  await detail.getByRole('button', { name: 'Guardar Cambios' }).click();
+  await detail.getByRole('button', { name: 'Recibir caso' }).click();
   await expect(status).toHaveValue('EN_ATENCION');
-  await detail.getByRole('button', { name: 'Guardar Cambios' }).click();
+  await detail.getByRole('button', { name: 'Iniciar atención' }).click();
   await expect(status).toHaveValue('ATENDIDO');
-  await expect(detail.getByRole('button', { name: 'Registrar Atención' })).toBeDisabled();
+  await expect(detail.getByRole('button', { name: 'Registrar atención' })).toBeDisabled();
   await detail.getByLabel(/Observaciones/).fill(internalNote);
-  await detail.getByRole('button', { name: 'Registrar Atención' }).click();
+  await detail.getByRole('button', { name: 'Registrar atención' }).click();
   if (!(await detail.isVisible())) await reopen(page);
 
   await detail.getByLabel(/Observaciones/).fill('Cierre del caso E2E');
-  await detail.getByRole('button', { name: 'Cerrar Caso Derivado' }).click();
+  await detail.getByRole('button', { name: 'Cerrar caso', exact: true }).click();
   // Un caso cerrado sale de «Pendientes» (la vista inicial): se cierra el detalle y se consulta en «Cerrados»
   await page.keyboard.press('Escape');
   await expect(detail).toBeHidden();

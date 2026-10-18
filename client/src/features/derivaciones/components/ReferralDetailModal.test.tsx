@@ -115,6 +115,37 @@ describe('ReferralDetailModal (HU-32 - Registro de atención y cierre)', () => {
     expect(screen.queryByText(/Tutorado ID/)).toBeNull();
   });
 
+  describe('lenguaje de tarea (U10)', () => {
+    it('los aspectos observados se muestran con su nombre oficial, no con su código interno', () => {
+      render(<ReferralDetailModal referral={{ ...mockReferral, checkedAspects: ['ACADEMIC_AT_RISK_OF_FAILING', 'MENTAL_HEALTH_ANXIOUS'] }} onClose={onCloseMock} onStatusUpdated={onStatusUpdatedMock} />);
+      expect(screen.getByText('Está en riesgo de repetir algún curso')).toBeDefined();
+      expect(screen.queryByText('MENTAL_HEALTH_ANXIOUS')).toBeNull();
+      expect(screen.queryByText('ACADEMIC_AT_RISK_OF_FAILING')).toBeNull();
+    });
+
+    it('el encabezado y el botón dicen la tarea, sin códigos de historia de usuario', () => {
+      render(<ReferralDetailModal referral={mockReferral} onClose={onCloseMock} onStatusUpdated={onStatusUpdatedMock} />);
+      expect(screen.getByText('Registrar la atención y cambiar el estado')).toBeDefined();
+      expect(document.body.textContent).not.toMatch(/HU-\d+/);
+      expect(screen.getByRole('button', { name: 'Registrar atención' })).toBeDefined(); // EN_ATENCION → ATENDIDO
+    });
+
+    it('cada paso se llama por lo que se hace: recibir, iniciar atención, registrar atención, cerrar', () => {
+      const labelFor = (status: 'ENVIADO' | 'RECIBIDO' | 'EN_ATENCION' | 'ATENDIDO') => {
+        const { unmount } = render(<ReferralDetailModal referral={{ ...mockReferral, status }} onClose={onCloseMock} onStatusUpdated={onStatusUpdatedMock} />);
+        const select = screen.getByLabelText(/Nuevo estado/i) as HTMLSelectElement;
+        const button = screen.getByRole('button', { name: /Recibir caso|Iniciar atención|Registrar atención|Cerrar caso|Guardar cambios/ }).textContent;
+        const value = select.value;
+        unmount();
+        return `${value}:${button}`;
+      };
+      expect(labelFor('ENVIADO')).toBe('RECIBIDO:Recibir caso');
+      expect(labelFor('RECIBIDO')).toBe('EN_ATENCION:Iniciar atención');
+      expect(labelFor('EN_ATENCION')).toBe('ATENDIDO:Registrar atención');
+      expect(labelFor('ATENDIDO')).toBe('CERRADO:Cerrar caso');
+    });
+  });
+
   it('muestra el banner de caso cerrado y deshabilita edición si el estado es CERRADO', () => {
     const closedReferral = { ...mockReferral, status: 'CERRADO' as const };
 
@@ -142,7 +173,7 @@ describe('ReferralDetailModal (HU-32 - Registro de atención y cierre)', () => {
     const select = screen.getByLabelText(/Nuevo Estado/i);
     fireEvent.change(select, { target: { value: 'CERRADO' } });
 
-    const submitBtn = screen.getByRole('button', { name: /Cerrar Caso Derivado/i });
+    const submitBtn = screen.getByRole('button', { name: /Cerrar caso/i });
     expect(submitBtn.hasAttribute('disabled')).toBe(true);
 
     const textarea = screen.getByLabelText(/Observaciones /i);

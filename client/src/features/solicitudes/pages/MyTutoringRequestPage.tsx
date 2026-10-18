@@ -1,7 +1,8 @@
 import { useState, type FormEvent } from 'react';
 import { useAuth } from '@features/auth/hooks/useAuth';
 import { getApiErrorMessage } from '@shared/services/apiClient';
-import { PageHeader, Button, SelectField } from '@shared/components/ui';
+import { PageHeader, Button, DraftNotice, SelectField } from '@shared/components/ui';
+import { useDraft } from '@shared/hooks/useDraft';
 import { SendIcon } from '@shared/components/icons';
 import {
   tutoringRequestService,
@@ -14,6 +15,9 @@ import { recipientAfter, recipientBefore } from '../utils/requestRecipient';
 import { usePeriodStatus } from '@features/periodo/hooks/usePeriods';
 import { CASE_TYPE_LABEL, REQUEST_STATUS_LABEL, type TutoringRequestStatus } from '../services/tutoringRequestService';
 import styles from './MyTutoringRequestPage.module.css';
+
+const EMPTY_FORM: { caseType: CreateOwnTutoringRequestData['caseType']; reason: string } = { caseType: 'ACADEMIC', reason: '' };
+const isEmptyForm = (value: typeof EMPTY_FORM) => value.reason.trim() === '';
 
 interface Feedback {
   type: 'ok' | 'error';
@@ -68,8 +72,17 @@ export function MyTutoringRequestPage() {
   const history = useOwnTutoringRequests();
   // A quién llegará la solicitud: se dice antes de enviarla y después (con la misma regla con la que se enruta).
   const recipient = useOwnRequestRecipient();
-  const [caseType, setCaseType] = useState<CreateOwnTutoringRequestData['caseType']>('ACADEMIC');
-  const [reason, setReason] = useState('');
+  // Lo escrito se conserva si cambia de pantalla, recarga o lo interrumpen (borrador solo de esta pestaña; ver shared/utils/drafts).
+  const {
+    value: form,
+    setValue: setForm,
+    restored: draftRestored,
+    discard: discardDraft,
+  } = useDraft(user?.id, 'solicitud', EMPTY_FORM, isEmptyForm);
+  const { caseType, reason } = form;
+  const setCaseType = (value: CreateOwnTutoringRequestData['caseType']) => setForm((current) => ({ ...current, caseType: value }));
+  const setReason = (value: string | ((current: string) => string)) =>
+    setForm((current) => ({ ...current, reason: typeof value === 'function' ? value(current.reason) : value }));
   const [submitting, setSubmitting] = useState(false);
   const [feedback, setFeedback] = useState<Feedback | null>(null);
 
@@ -97,7 +110,7 @@ export function MyTutoringRequestPage() {
         type: 'ok',
         text: recipientAfter(recipient, request.routedToRole),
       });
-      setReason('');
+      discardDraft(); // ya se envió: no queda borrador
       await queryClient.invalidateQueries({ queryKey: OWN_REQUESTS_KEY });
     } catch (error) {
       setFeedback({ type: 'error', text: getApiErrorMessage(error) });
@@ -138,6 +151,7 @@ export function MyTutoringRequestPage() {
               </p>
             )}
             {recipient && <p className={styles.recipient}>{recipientBefore(recipient)}</p>}
+            {draftRestored && <DraftNotice onDiscard={discardDraft} />}
             {feedback && (
               <div className={feedback.type === 'ok' ? styles.ok : styles.error} role="alert">
                 {feedback.text}

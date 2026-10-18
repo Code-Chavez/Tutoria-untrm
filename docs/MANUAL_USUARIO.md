@@ -69,6 +69,8 @@ El menú es **corto a propósito** y está agrupado por tareas. Cada grupo se de
 **En un celular o una ventana estrecha** las bandejas (solicitudes y casos derivados) muestran cada caso como una **tarjeta** con su estado y su botón de acción siempre a la vista, sin desplazarse a los lados.
 En las pantallas con pestañas, la pestaña en la que está se lleva a la vista y, si hay más pestañas fuera de la pantalla, aparece una **flecha** para verlas.
 
+**Lo que escribe no se pierde.** En la solicitud de tutoría, en la respuesta del docente a una solicitud y en la evaluación, lo que usted está escribiendo se guarda como **borrador**: si cambia de pantalla, recarga la página o lo interrumpen, al volver lo recupera y la pantalla se lo avisa («Recuperamos lo que habías escrito»), con el botón **Descartar borrador**. Por privacidad: el borrador queda **solo en la pestaña de su navegador** (no se envía al servidor y se pierde al cerrar la pestaña), es **de su cuenta** (otra persona no lo ve), **se borra cuando usted pulsa «Cerrar sesión»** y se descarta al entrar otra cuenta. Si el sistema cierra su sesión por inactividad, se conserva para cuando vuelva a entrar. Al enviar, el borrador desaparece.
+
 **Una pantalla lleva a la siguiente.** Cuando a una pantalla le falta algo (por ejemplo, no hay estudiantes o una escuela no tiene docentes) o cuando termina una tarea, muestra un bloque **«Qué sigue»** con enlaces a donde se carga lo que falta o a la tarea siguiente: después de *Pedir listas* sigue *Carga de estudiantes*; después de cargar, *Asignación por ciclo*. El **Panel de inicio** de la coordinación y la DBU muestra el periodo académico como pasos numerados.
 
 *Nombres en pantalla:* el sistema muestra **Estudiante** (rol Tutorado), **Docente** (Docente tutor), **Administrador** (Administrador DBU) y, para el Profesional de servicio, su especialidad (p. ej. «Profesional de Psicología»). Son los mismos roles de la tabla; solo cambia cómo se escriben junto a su nombre, en el perfil y en la lista de usuarios.
@@ -159,8 +161,8 @@ verá también **su respuesta** (por ejemplo, fecha y lugar de la sesión) y rec
 La evaluación está disponible solo cuando la DBU la habilita para su escuela.
 
 1. Entre a *Evaluar tutoría*.
-2. Responda los **20 ítems** del cuestionario con la escala: **N** Nunca · **CN** Casi nunca · **AV** A veces · **CS** Casi siempre · **S** Siempre.
-   El contador muestra «x de 20 respondidas»; el botón *Enviar evaluación* se activa cuando completa todas.
+2. Antes de la primera pregunta verá **«Cómo responder»**, con el significado de cada opción: **N** Nunca · **CN** Casi nunca · **AV** A veces · **CS** Casi siempre · **S** Siempre (cada opción también lleva su nombre completo). Responda los **20 ítems**.
+   El contador muestra «x de 20 respondidas», con el enlace **Ir a la primera que falta** para no recorrer todo buscando lo pendiente; el botón *Enviar evaluación* se activa cuando completa todas. **Lo respondido no se pierde** si cambia de pantalla, recarga o se interrumpe (ver «Lo que escribe no se pierde»).
 3. Opcionalmente escriba *Me gustaría* y *No me gusta*.
 4. Pulse *Enviar evaluación*.
 
@@ -377,14 +379,14 @@ Los demás casos se ven con los botones **Atendidos**, **Cerrados**, **Abiertas*
 ![Detalle de la derivación y registro de atención](manual/img/25-detalle-derivacion.jpg)
 *Figura: Detalle de la derivación y registro de atención.*
 
-En el detalle del caso, la sección *Registrar Atención y Cambio de Estado* permite avanzar el estado:
+En el detalle del caso, la sección *Registrar la atención y cambiar el estado* permite avanzar el caso. Los **aspectos observados** aparecen con su nombre oficial del Anexo N.° 6 (por ejemplo «Está en riesgo de repetir algún curso»), no con códigos. Cada paso se llama por lo que se hace:
 
 | Paso | Cómo | Qué exige |
 |---|---|---|
-| Recibido | Elija *Recibido* en *Nuevo Estado* y pulse *Guardar Cambios* | — |
-| En atención | *En Atención* → *Guardar Cambios* | — |
-| Atendido | *Atendido* → *Registrar Atención* | **Observaciones obligatorias** |
-| Cerrado | *Cerrado* → *Cerrar Caso Derivado* | **Observaciones obligatorias** |
+| Recibido | Pulse **Recibir caso** (el *Nuevo estado* ya viene elegido) | — |
+| En atención | Pulse **Iniciar atención** | — |
+| Atendido | Pulse **Registrar atención** | **Observaciones obligatorias** |
+| Cerrado | Pulse **Cerrar caso** | **Observaciones obligatorias** |
 
 El estado **solo avanza**: no se puede volver a uno anterior ni repetirlo. Las *Observaciones / Detalles de Atención* son **internas**: las ven su servicio y la DBU, no el tutor
 que derivó (él ve el estado y las fechas). Un caso **Cerrado** ya no se modifica.
@@ -472,7 +474,7 @@ El **periodo académico activo** determina el semestre en curso para reportes y 
 ![Bitácora de auditoría](manual/img/35-bitacora.jpg)
 *Figura: Bitácora de auditoría.*
 - *Seguimiento DBU*: todos los casos derivados por servicio y estado, con el plazo de atención.
-- *Bitácora de auditoría*: registro de las operaciones críticas (inicios de sesión, cambios de usuarios y catálogos, adjuntos, cambios de estado) y de los **accesos a información sensible**: quién consultó o descargó un expediente, entrevistas, seguimientos, red de apoyo, derivaciones y documentos firmados, cuándo y desde qué IP, incluidos los intentos rechazados. La bitácora no guarda el contenido consultado. Se puede filtrar y no se puede modificar desde el sistema.
+- *Bitácora de auditoría* (y la actividad reciente del Panel de inicio): cada operación aparece con un nombre claro («Invitación de acceso emitida», «Periodo cerrado», «Tutor del ciclo asignado»…), no con su código interno. Registro de las operaciones críticas (inicios de sesión, cambios de usuarios y catálogos, adjuntos, cambios de estado) y de los **accesos a información sensible**: quién consultó o descargó un expediente, entrevistas, seguimientos, red de apoyo, derivaciones y documentos firmados, cuándo y desde qué IP, incluidos los intentos rechazados. La bitácora no guarda el contenido consultado. Se puede filtrar y no se puede modificar desde el sistema.
 
 ### 7.7 Cierre de periodo
 Al terminar el periodo académico, vaya a **Periodo académico → Cierre de periodo**. La pantalla muestra el periodo vigente con un **resumen** de lo ocurrido: estudiantes, tutores, sesiones (individuales, grupales, canceladas, con asistencia), solicitudes, derivaciones, respuestas de evaluación e informes semestrales, y avisa qué quedará abierto (solicitudes, derivaciones y sesiones próximas).
