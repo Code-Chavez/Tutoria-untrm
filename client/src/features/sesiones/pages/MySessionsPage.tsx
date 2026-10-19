@@ -1,5 +1,7 @@
 import { Badge, Button, Card, EmptyState, PageHeader, TableSkeleton } from '@shared/components/ui';
 import { CalendarIcon, XCircleIcon } from '@shared/components/icons';
+import { Link } from 'react-router-dom';
+import { useOwnTutoringRequests } from '@features/solicitudes/hooks/useTutoringRequests';
 import { useOwnSessions } from '../hooks/useOwnSessions';
 import type { TutoringSession } from '../services/sessionService';
 import { getSessionStatus, SESSION_STATUS_LABEL, type SessionStatus } from '../utils/sessionStatus';
@@ -21,8 +23,15 @@ const isUpcoming = (status: SessionStatus) => status === 'PROXIMA' || status ===
 // Un enlace de videollamada solo se abre si es http(s): lo escribe el tutor y no se asume seguro.
 const isHttpUrl = (value: string) => /^https?:\/\//i.test(value);
 
-function SessionItem({ session }: { session: TutoringSession }) {
+// Qué pasó con una cita según las solicitudes del estudiante: la que reemplazó a una cancelada y la cancelada que fue reemplazada.
+interface Relations {
+  replacedBy: Map<string, string>; // id de la cita cancelada → fecha de la que la reemplazó
+  replacements: Set<string>; // ids de las citas vigentes que reemplazaron a una cancelada
+}
+
+function SessionItem({ session, relations }: { session: TutoringSession; relations: Relations }) {
   const status = getSessionStatus(session);
+  const replacedBy = relations.replacedBy.get(session.id);
   const place =
     session.modality === 'VIRTUAL' ? session.meetingLink : session.location;
 
@@ -30,7 +39,7 @@ function SessionItem({ session }: { session: TutoringSession }) {
     <li className={styles.item}>
       <div className={styles.head}>
         <b className={styles.topic}>{session.topic}</b>
-        <Badge tone={TONE[status]}>{SESSION_STATUS_LABEL[status]}</Badge>
+        <Badge tone={replacedBy ? 'neutral' : TONE[status]}>{replacedBy ? 'Reemplazada' : SESSION_STATUS_LABEL[status]}</Badge>
       </div>
       <p className={styles.when}>
         {WHEN.format(new Date(session.scheduledAt))} · {session.durationMinutes} min
@@ -50,11 +59,18 @@ function SessionItem({ session }: { session: TutoringSession }) {
           'sin lugar ni enlace registrado'
         )}
       </p>
+      {relations.replacements.has(session.id) && <p className={styles.when}>Esta cita reemplaza a una que se canceló.</p>}
       {session.cancelledAt && (
         <p className={styles.cancel}>
           Cancelada el {new Date(session.cancelledAt).toLocaleDateString('es-PE')}
-          {session.cancelReason ? `: ${session.cancelReason}` : ''}. Si necesitas otra fecha, coordínala con tu
-          tutor.
+          {session.cancelReason ? `: ${session.cancelReason}` : ''}.{' '}
+          {replacedBy ? (
+            <>Se programó otra cita: {WHEN.format(new Date(replacedBy))}.</>
+          ) : (
+            <>
+              Si necesitas otra fecha, coordínala con tu tutor o escríbela en <Link to="/solicitar-tutoria">Solicitar tutoría</Link>.
+            </>
+          )}
         </p>
       )}
     </li>
@@ -64,6 +80,14 @@ function SessionItem({ session }: { session: TutoringSession }) {
 // Agenda propia del tutorado (A15): solo consulta; programar, reprogramar y cancelar es del tutor.
 export function MySessionsPage() {
   const { sessions, loading, error, refresh } = useOwnSessions();
+  const own = useOwnTutoringRequests(); // si no carga, la agenda se muestra igual (sin las notas de reemplazo)
+  const relations: Relations = { replacedBy: new Map(), replacements: new Set() };
+  for (const request of own.requests) {
+    const appointment = request.appointment;
+    if (!appointment || appointment.state !== 'VIGENTE' || !request.sessionId) continue;
+    for (const id of appointment.replacedSessionIds) relations.replacedBy.set(id, appointment.scheduledAt);
+    if (appointment.replacedSessionIds.length > 0) relations.replacements.add(request.sessionId);
+  }
 
   const sorted = [...sessions].sort(
     (a, b) => new Date(a.scheduledAt).getTime() - new Date(b.scheduledAt).getTime(),
@@ -102,23 +126,23 @@ export function MySessionsPage() {
       ) : (
         <>
           <Card padded className={styles.card}>
-            <h3 className={styles.section}>Próximas</h3>
+            <h2 className={styles.section}>Próximas</h2>
             {upcoming.length === 0 ? (
               <p className={styles.empty}>No tienes sesiones próximas.</p>
             ) : (
               <ul className={styles.list}>
                 {upcoming.map((s) => (
-                  <SessionItem key={s.id} session={s} />
+                  <SessionItem key={s.id} session={s} relations={relations} />
                 ))}
               </ul>
             )}
           </Card>
           {past.length > 0 && (
             <Card padded className={styles.card}>
-              <h3 className={styles.section}>Anteriores y canceladas</h3>
+              <h2 className={styles.section}>Anteriores y canceladas</h2>
               <ul className={styles.list}>
                 {past.map((s) => (
-                  <SessionItem key={s.id} session={s} />
+                  <SessionItem key={s.id} session={s} relations={relations} />
                 ))}
               </ul>
             </Card>

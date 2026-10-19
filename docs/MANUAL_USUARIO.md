@@ -106,6 +106,10 @@ Por seguridad, el sistema responde lo mismo exista o no el correo: si no llega e
 Pulse su nombre en la esquina superior derecha. Allí puede actualizar su teléfono y foto, y en *Contraseña actual / Nueva contraseña / Confirmar nueva contraseña*
 cambiar su clave con *Actualizar contraseña*. Al cambiarla se cierran sus otras sesiones abiertas.
 
+### Accesibilidad y teclado
+
+El sistema se puede usar solo con el teclado y con lector de pantalla: **Tab** recorre los campos y botones en orden; al abrir una ventana (por ejemplo *Atender solicitud*) el foco entra en ella, **Esc** la cierra y el foco vuelve al botón que la abrió. Al comenzar cada pantalla, la primera pulsación de **Tab** muestra el enlace **«Saltar al contenido»**. Las cargas se anuncian («Cargando tus sesiones…») y los errores aparecen como avisos con un botón **Reintentar**. En el celular las pantallas se adaptan sin desplazarse hacia los lados. Los colores de los estados (pendiente, atendida…) llevan además su texto, y los enlaces dentro de un párrafo van subrayados.
+
 ### 1.5 Avisos (campana)
 
 La campana de la parte superior muestra sus avisos (nueva solicitud, cambio de estado de un caso, nueva derivación…). Pulsar un aviso **abre directamente**
@@ -137,6 +141,8 @@ involucradas en el proceso.
 *Próxima*, *Cancelada* (con el motivo) o realizada. Si la sesión es virtual, el enlace aparece como vínculo solo cuando empieza con `https://` o `http://`.
 
 En una sesión grupal usted ve únicamente su propia participación, no la de sus compañeros.
+
+**Si una cita se cancela.** En *Mis sesiones* la cita cancelada aparece con su motivo y con el siguiente paso: si todavía no hay otra, un enlace a *Solicitar tutoría*; si su tutor ya programó una nueva, la cancelada se marca **«Reemplazada»** (con la fecha de la nueva) y la nueva dice **«Esta cita reemplaza a una que se canceló»**. En *Solicitar tutoría → Mis solicitudes*, la solicitud muestra su cita: **Cita programada**, **Nueva cita** o **Cita cancelada** (la solicitud sigue abierta; no hace falta pedirla de nuevo ni se promete una fecha). Solo se muestran la fecha, la modalidad y el lugar o enlace: nunca las notas del tutor ni nada reservado.
 
 **Usted se entera sin entrar a buscar.** Cuando su tutor programa una sesión, la cambia de horario o la cancela, le llega un **aviso en la campana** con la fecha, el lugar (o la indicación de que el enlace está en *Mis sesiones*) y, si hubo cambio o cancelación, **el motivo**; al pulsarlo se abre *Mis sesiones*. También le llega por correo institucional **si el servicio de correo está activo**: ese correo solo avisa que hay una novedad y no trae la fecha ni el motivo (por confidencialidad). Si usted no tiene cuenta del portal, el sistema no puede avisarle y su tutor debe comunicárselo por otro medio.
 

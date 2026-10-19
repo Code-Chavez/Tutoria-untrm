@@ -86,6 +86,23 @@ test('la tutora reemplaza la cita cancelada desde la solicitud y el pendiente de
   expect(pending.body.items.filter((i) => i.detail.includes(cancelReason))).toHaveLength(0);
 });
 
+test('la estudiante ve su solicitud con la nueva cita y, en su agenda, la cancelada como «Reemplazada» con el siguiente paso', async ({ page }) => {
+  await loginUi(page, accounts.student);
+  await goToMenu(page, 'Solicitar tutoría');
+  const item = page.getByRole('listitem').filter({ hasText: reason });
+  await expect(item).toContainText('Nueva cita');
+  await expect(item).toContainText('Tu cita anterior se canceló y se programó otra');
+  await expect(item).toContainText('Aula 302');
+  await item.getByRole('link', { name: 'Ir a Mis sesiones' }).click();
+
+  await expect(page).toHaveURL(/\/mis-sesiones/);
+  const cancelled = page.getByRole('listitem').filter({ hasText: reason, has: page.getByText('Reemplazada') });
+  await expect(cancelled).toContainText('Se programó otra cita');
+  await expect(cancelled).toContainText(cancelReason); // el motivo de la cancelación ya lo veía la estudiante; nada más
+  const current = page.getByRole('listitem').filter({ hasText: reason, has: page.getByText('Esta cita reemplaza a una que se canceló.') });
+  await expect(current).toContainText('Aula 302');
+});
+
 test('el docente tutor no tiene la pestaña ni accede a los datos', async ({ page }) => {
   const tutor = await apiLogin(accounts.tutor);
   expect((await api(tutor, 'GET', '/institutional-pending')).status).toBe(403);

@@ -35,7 +35,7 @@
 .caption {
   margin: 0 0 var(--s2);
   font-size: var(--fs-sm);
-  color: var(--g500);
+  color: var(--g600);
 }
 
 .slow {

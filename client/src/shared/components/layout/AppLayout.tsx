@@ -14,14 +14,17 @@ export function AppLayout() {
 
   return (
     <div className={styles.app}>
+      <a href="#contenido" className="skip-link">
+        Saltar al contenido
+      </a>
       <Sidebar drawerOpen={drawerOpen} onClose={() => setDrawerOpen(false)} />
       <div className={styles.main}>
         <TopBar title={meta.title} group={meta.group} onMenu={() => setDrawerOpen(true)} />
         <div className={styles.scroll}>
-          <div className={styles.content}>
+          <main id="contenido" tabIndex={-1} className={styles.content}>
             <PeriodStatusBanner />
             <Outlet />
-          </div>
+          </main>
         </div>
       </div>
       <SessionTimeout />

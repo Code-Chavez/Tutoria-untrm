@@ -19,7 +19,7 @@
 
 .success {
   background: var(--ok-bg);
-  color: var(--ok);
+  color: var(--ok-texto);
   border-color: rgba(30, 127, 79, 0.18);
 }
 .neutral {
@@ -34,7 +34,7 @@
 }
 .warning {
   background: var(--alerta-bg);
-  color: var(--alerta);
+  color: var(--alerta-texto);
   border-color: rgba(199, 120, 0, 0.18);
 }
 .info {

@@ -61,7 +61,7 @@ export function NotificationBell() {
       <button
         className={styles.bell}
         type="button"
-        aria-label="Notificaciones"
+        aria-label={unreadCount > 0 ? `Notificaciones: ${unreadCount > 9 ? '9+' : unreadCount} sin leer` : 'Notificaciones'}
         onClick={() => setOpen((prev) => !prev)}
       >
         <BellIcon size={19} />

@@ -25,6 +25,9 @@ interface SidebarProps {
   onClose: () => void;
 }
 
+// El id de un grupo no puede llevar espacios (en aria-controls cada espacio separaría otro identificador): «Atención a estudiantes» → «atencion-a-estudiantes».
+const groupId = (title: string) => `nav-group-${title.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().replace(/[^a-z0-9]+/g, '-')}`;
+
 export function Sidebar({ drawerOpen, onClose }: SidebarProps) {
   const { user } = useAuth();
   const { branding, logoSrc } = useBranding();
@@ -89,7 +92,8 @@ export function Sidebar({ drawerOpen, onClose }: SidebarProps) {
                     type="button"
                     className={`${styles.group} ${styles.groupToggle}`}
                     aria-expanded={expanded}
-                    aria-controls={`nav-group-${group.title}`}
+                    // Solo apunta al grupo cuando existe en la página: plegado no está, y una referencia a un id inexistente es inválida
+                    aria-controls={expanded ? groupId(group.title) : undefined}
                     onClick={() => toggle(group)}
                   >
                     <span>{group.title}</span>
@@ -98,7 +102,7 @@ export function Sidebar({ drawerOpen, onClose }: SidebarProps) {
                 ) : (
                   <span className={styles.group}>{group.title}</span>
                 )}
-                {expanded && <div id={`nav-group-${group.title}`}>{visible.map((item) => (
+                {expanded && <div id={groupId(group.title)}>{visible.map((item) => (
                   <Link
                     key={item.label}
                     to={item.action ? `${item.path}?accion=${item.action}` : item.path}

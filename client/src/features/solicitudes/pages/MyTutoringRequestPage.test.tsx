@@ -1,6 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { MemoryRouter } from 'react-router-dom';
 import { QueryClientTestWrapper } from '@shared/test-utils/QueryClientTestWrapper';
 import { AuthContext, type AuthContextValue } from '@features/auth/context/AuthContext';
 import { MyTutoringRequestPage } from './MyTutoringRequestPage';
@@ -62,7 +63,9 @@ const renderPage = () =>
   render(
     <AuthContext.Provider value={auth}>
       <QueryClientTestWrapper>
-        <MyTutoringRequestPage />
+        <MemoryRouter>
+          <MyTutoringRequestPage />
+        </MemoryRouter>
       </QueryClientTestWrapper>
     </AuthContext.Provider>,
   );
@@ -122,7 +125,7 @@ describe('MyTutoringRequestPage', () => {
 
       renderPage();
       expect(screen.getByLabelText(/descripción del motivo/i)).toHaveValue('Tengo dificultades con Cálculo');
-      expect(screen.getByRole('status', { name: '' })).toBeDefined();
+      expect(screen.getByText(/Recuperamos lo que habías escrito/)).toBeInTheDocument();
       expect(screen.getByText(/Recuperamos lo que habías escrito/)).toBeInTheDocument();
 
       await user.click(screen.getByRole('button', { name: 'Descartar borrador' }));
@@ -212,6 +215,41 @@ describe('MyTutoringRequestPage', () => {
     expect(screen.getByText('Atendida')).toBeInTheDocument();
     expect(screen.getByText(/Te espero el jueves a las 10:00/)).toBeInTheDocument();
     expect(screen.getByText(/Respuesta de Elena Ramírez/)).toBeInTheDocument();
+  });
+
+  describe('la cita de mi solicitud (vigente, cancelada, nueva)', () => {
+    const appointment = (over: Record<string, unknown>) => ({ state: 'VIGENTE', scheduledAt: '2026-11-05T15:00:00.000Z', modality: 'PRESENCIAL', place: 'Aula 302', replacedSessionIds: [], ...over });
+
+    it('cita vigente: fecha y lugar, y enlace a «Mis sesiones»', async () => {
+      mocked.getOwn.mockResolvedValue([view({ status: 'EN_ATENCION', sessionId: 'x2', appointment: appointment({}) as never })]);
+      renderPage();
+      expect(await screen.findByText('Cita programada')).toBeInTheDocument();
+      expect(screen.getByText(/Aula 302/)).toBeInTheDocument();
+      expect(screen.getByRole('link', { name: 'Ir a Mis sesiones' })).toHaveAttribute('href', '/mis-sesiones');
+    });
+
+    it('cita cancelada: lo dice, que la solicitud sigue abierta y qué esperar (sin plazos ni pedirla de nuevo)', async () => {
+      mocked.getOwn.mockResolvedValue([view({ status: 'EN_ATENCION', sessionId: 'x1', appointment: appointment({ state: 'CANCELADA' }) as never })]);
+      renderPage();
+      expect(await screen.findByText('Cita cancelada')).toBeInTheDocument();
+      expect(screen.getByText(/tu solicitud sigue abierta/)).toBeInTheDocument();
+      expect(screen.getByText(/No hace falta pedirla de nuevo/)).toBeInTheDocument();
+      expect(screen.queryByRole('link', { name: 'Ir a Mis sesiones' })).not.toBeInTheDocument();
+    });
+
+    it('nueva cita que reemplaza a una cancelada: lo dice con la fecha nueva', async () => {
+      mocked.getOwn.mockResolvedValue([view({ status: 'EN_ATENCION', sessionId: 'x2', appointment: appointment({ replacedSessionIds: ['x1'] }) as never })]);
+      renderPage();
+      expect(await screen.findByText('Nueva cita')).toBeInTheDocument();
+      expect(screen.getByText(/Tu cita anterior se canceló y se programó otra/)).toBeInTheDocument();
+    });
+
+    it('no muestra notas ni datos reservados de la sesión', async () => {
+      mocked.getOwn.mockResolvedValue([view({ status: 'EN_ATENCION', sessionId: 'x2', appointment: { ...appointment({}), topic: 'Reservado', notes: 'Nota clínica' } as never })]);
+      renderPage();
+      await screen.findByText('Cita programada');
+      expect(screen.queryByText(/Reservado|Nota clínica/)).not.toBeInTheDocument();
+    });
   });
 
   it('sin solicitudes lo dice', async () => {
