@@ -38,4 +38,15 @@ export interface TutoringRequestView extends TutoringRequest {
   handledByName: string | null;
   /** La sesión vinculada se canceló: la solicitud sigue sin atención y se puede reemplazar por otra sesión o una derivación. */
   sessionCancelled?: boolean;
+  /**
+   * Solo en el historial propio del estudiante: la cita de la solicitud, sin notas ni datos reservados (solo lo que ya ve en «Mis
+   * sesiones»). `replacedSessionIds`: citas canceladas que luego se reemplazaron por esta.
+   */
+  appointment?: {
+    state: 'VIGENTE' | 'CANCELADA';
+    scheduledAt: string;
+    modality: string;
+    place: string | null;
+    replacedSessionIds: string[];
+  };
 }

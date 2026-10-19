@@ -1,4 +1,5 @@
 import { useState, type FormEvent } from 'react';
+import { Link } from 'react-router-dom';
 import { useAuth } from '@features/auth/hooks/useAuth';
 import { getApiErrorMessage } from '@shared/services/apiClient';
 import { PageHeader, Button, DraftNotice, SelectField } from '@shared/components/ui';
@@ -12,8 +13,9 @@ import { Badge } from '@shared/components/ui';
 import { useQueryClient } from '@tanstack/react-query';
 import { OWN_REQUESTS_KEY, useOwnRequestRecipient, useOwnTutoringRequests } from '../hooks/useTutoringRequests';
 import { recipientAfter, recipientBefore } from '../utils/requestRecipient';
+import { appointmentSummary } from '../utils/requestAppointment';
 import { usePeriodStatus } from '@features/periodo/hooks/usePeriods';
-import { CASE_TYPE_LABEL, REQUEST_STATUS_LABEL, type TutoringRequestStatus } from '../services/tutoringRequestService';
+import { CASE_TYPE_LABEL, REQUEST_STATUS_LABEL, type TutoringRequestStatus, type TutoringRequestView } from '../services/tutoringRequestService';
 import styles from './MyTutoringRequestPage.module.css';
 
 const EMPTY_FORM: { caseType: CreateOwnTutoringRequestData['caseType']; reason: string } = { caseType: 'ACADEMIC', reason: '' };
@@ -60,6 +62,16 @@ const STATUS_TONE: Record<TutoringRequestStatus, 'warning' | 'info' | 'success'>
   EN_ATENCION: 'info',
   ATENDIDA: 'success',
 };
+
+function AppointmentNote({ appointment }: { appointment: NonNullable<TutoringRequestView['appointment']> }) {
+  const summary = appointmentSummary(appointment);
+  return (
+    <p className={styles.historyResponse}>
+      <Badge tone={summary.tone}>{summary.label}</Badge> {summary.text} {summary.next}{' '}
+      {appointment.state === 'VIGENTE' && <Link to="/mis-sesiones">Ir a Mis sesiones</Link>}
+    </p>
+  );
+}
 
 export function MyTutoringRequestPage() {
   const queryClient = useQueryClient();
@@ -131,7 +143,7 @@ export function MyTutoringRequestPage() {
 
       <div className={styles.panel}>
         <div className={styles.panelHead}>
-          <h3>Nueva solicitud</h3>
+          <h2>Nueva solicitud</h2>
         </div>
         <div className={styles.panelBody}>
           {closed && (
@@ -212,11 +224,13 @@ export function MyTutoringRequestPage() {
 
       <div className={styles.panel} style={{ marginTop: 18 }}>
         <div className={styles.panelHead}>
-          <h3>Mis solicitudes</h3>
+          <h2>Mis solicitudes</h2>
         </div>
         <div className={styles.panelBody}>
           {history.loading ? (
-            <p className={styles.historyEmpty}>Cargando…</p>
+            <p className={styles.historyEmpty} role="status">
+              Cargando tus solicitudes…
+            </p>
           ) : history.error ? (
             <p className={styles.error} role="alert">
               No se pudo cargar tu historial. Recarga la página.
@@ -240,6 +254,7 @@ export function MyTutoringRequestPage() {
                       <b>Respuesta{r.handledByName ? ` de ${r.handledByName}` : ''}:</b> {r.responseNote}
                     </p>
                   )}
+                  {r.appointment && <AppointmentNote appointment={r.appointment} />}
                 </li>
               ))}
             </ul>

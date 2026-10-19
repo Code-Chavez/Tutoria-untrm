@@ -339,7 +339,9 @@ export function TutoringRequestsInboxPage() {
                   <th>Fecha</th>
                   <th>Responsable</th>
                   <th>Estado</th>
-                  <th className={table.right}></th>
+                  <th className={table.right}>
+                    <span className="sr-only">Acciones</span>
+                  </th>
                 </tr>
               </thead>
               <tbody>

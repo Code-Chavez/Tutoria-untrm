@@ -453,6 +453,8 @@ const listOwnTutoringRequestsUseCase = new ListOwnTutoringRequestsUseCase(
   tutoringRequestRepository,
   studentRepository,
   userRepository,
+  sessionRepository,
+  auditLogRepository,
 );
 const updateTutoringRequestStatusUseCase = new UpdateTutoringRequestStatusUseCase(
   tutoringRequestRepository,

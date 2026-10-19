@@ -59,7 +59,7 @@ export function EvaluationWindowsPage() {
               <tr>
                 <th>Escuela Profesional</th>
                 <th>Estado</th>
-                <th></th>
+                <th aria-label="Acciones" />
               </tr>
             </thead>
             <tbody>

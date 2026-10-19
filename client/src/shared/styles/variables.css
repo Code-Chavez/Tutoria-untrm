@@ -23,8 +23,12 @@
   /* Semánticos */
   --ok: #1E7F4F;
   --ok-bg: #E6F4EC;
+  /* Texto verde sobre --ok-bg con contraste AA (≈5,8:1) */
+  --ok-texto: #176B41;
   --alerta: #C77800;
   --alerta-bg: #FBF0DC;
+  /* Texto ámbar sobre --alerta-bg con contraste AA (≈5,7:1); --alerta (≈3:1) queda para bordes e íconos, no para texto pequeño */
+  --alerta-texto: #8A5200;
   --peligro: #B3261E;
   --peligro-bg: #FBE7E5;
   --info: #2E5FA3;

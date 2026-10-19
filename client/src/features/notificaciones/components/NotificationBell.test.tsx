@@ -54,7 +54,7 @@ describe('NotificationBell (R03)', () => {
     mocked.getNotifications.mockResolvedValue([note({ referralId: 'ref-9' })]);
     const user = userEvent.setup();
     renderBell();
-    await user.click(await screen.findByRole('button', { name: 'Notificaciones' }));
+    await user.click(await screen.findByRole('button', { name: /^Notificaciones/ }));
     await user.click(await screen.findByText('Nueva derivación recibida'));
     await waitFor(() => expect(screen.getByTestId('where')).toHaveTextContent('/derivaciones?caso=ref-9'));
   });
@@ -64,14 +64,14 @@ describe('NotificationBell (R03)', () => {
     const user = userEvent.setup();
     mockRole = 'Tutorado';
     const { unmount } = renderBell();
-    await user.click(await screen.findByRole('button', { name: 'Notificaciones' }));
+    await user.click(await screen.findByRole('button', { name: /^Notificaciones/ }));
     await user.click(await screen.findByText('Tu sesión de tutoría cambió de horario'));
     await waitFor(() => expect(screen.getByTestId('where')).toHaveTextContent('/mis-sesiones'));
     unmount();
 
     mockRole = 'Docente Tutor';
     renderBell();
-    await user.click(await screen.findByRole('button', { name: 'Notificaciones' }));
+    await user.click(await screen.findByRole('button', { name: /^Notificaciones/ }));
     await user.click(await screen.findByText('Tu sesión de tutoría cambió de horario'));
     await waitFor(() => expect(screen.getByTestId('where')).toHaveTextContent('/sesiones'));
   });
@@ -80,14 +80,14 @@ describe('NotificationBell (R03)', () => {
     mocked.getNotifications.mockResolvedValue([note({ type: 'TUTORING_REQUEST_CREATED', message: 'Nueva solicitud', tutoringRequestId: 'r-1' })]);
     const user = userEvent.setup();
     const { unmount } = renderBell();
-    await user.click(await screen.findByRole('button', { name: 'Notificaciones' }));
+    await user.click(await screen.findByRole('button', { name: /^Notificaciones/ }));
     await user.click(await screen.findByText('Nueva solicitud'));
     await waitFor(() => expect(screen.getByTestId('where')).toHaveTextContent('/solicitudes?solicitud=r-1'));
     unmount();
 
     mockRole = 'Tutorado';
     renderBell();
-    await user.click(await screen.findByRole('button', { name: 'Notificaciones' }));
+    await user.click(await screen.findByRole('button', { name: /^Notificaciones/ }));
     await user.click(await screen.findByText('Nueva solicitud'));
     await waitFor(() => expect(screen.getByTestId('where')).toHaveTextContent('/solicitar-tutoria'));
   });
@@ -96,7 +96,7 @@ describe('NotificationBell (R03)', () => {
     mocked.getNotifications.mockResolvedValue([note({ id: 'a' }), note({ id: 'b', message: 'Otro aviso' })]);
     const user = userEvent.setup();
     renderBell();
-    await user.click(await screen.findByRole('button', { name: 'Notificaciones' }));
+    await user.click(await screen.findByRole('button', { name: /^Notificaciones/ }));
     expect(await screen.findByText('2 sin leer')).toBeInTheDocument();
 
     await user.click(screen.getByRole('button', { name: 'Marcar todas como leídas' }));
@@ -104,5 +104,13 @@ describe('NotificationBell (R03)', () => {
     await waitFor(() => expect(mocked.markAllAsRead).toHaveBeenCalledTimes(1));
     await waitFor(() => expect(screen.queryByText('2 sin leer')).not.toBeInTheDocument());
     expect(screen.queryByRole('button', { name: 'Marcar todas como leídas' })).not.toBeInTheDocument();
+  });
+
+  it('el nombre accesible del botón incluye lo que se ve (cuántas sin leer), para lectores de pantalla y control por voz', async () => {
+    renderBell();
+    const button = await screen.findByRole('button', { name: /^Notificaciones/ });
+    const visible = button.textContent?.trim() ?? '';
+    const name = button.getAttribute('aria-label') ?? '';
+    if (visible) expect(name).toContain(visible);
   });
 });
