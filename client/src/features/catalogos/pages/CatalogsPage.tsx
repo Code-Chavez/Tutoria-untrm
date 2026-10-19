@@ -117,7 +117,9 @@ export function CatalogsPage() {
                   {detailHeader && <th>{detailHeader}</th>}
                   <th>Estado</th>
                   <th className={styles.num}>En uso</th>
-                  <th aria-label="Acciones" />
+                  <th>
+                  <span className="sr-only">Acciones</span>
+                </th>
                 </tr>
               </thead>
               <tbody>

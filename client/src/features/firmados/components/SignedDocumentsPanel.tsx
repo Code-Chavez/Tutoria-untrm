@@ -60,7 +60,7 @@ export function SignedDocumentsPanel({ title, hint, documents, loading, canUploa
 
   return (
     <section className={styles.panel} aria-label={title}>
-      <h3 className={styles.title}>{title}</h3>
+      <h2 className={styles.title}>{title}</h2>
       <p className={styles.hint}>{hint}</p>
 
       <div className={styles.actions}>

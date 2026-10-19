@@ -52,7 +52,7 @@ test.beforeAll(async () => {
 test('la coordinadora deja vigente el plan con la resolución', async ({ page }) => {
   await loginUi(page, accounts.coordinator);
   await goToMenu(page, 'Plan semestral');
-  await expect(page.getByRole('heading', { level: 3, name: 'Resolución de aprobación' })).toBeVisible();
+  await expect(page.getByRole('heading', { level: 2, name: 'Resolución de aprobación' })).toBeVisible();
 
   if (!(await page.getByText('Plan vigente').isVisible())) await attachResolution(page);
   await expect(page.getByText('Plan vigente')).toBeVisible();

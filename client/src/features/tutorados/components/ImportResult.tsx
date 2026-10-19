@@ -21,7 +21,7 @@ export const ImportResult: React.FC<ImportResultProps> = ({ report, onDownload }
             {success ? <CheckCircleIcon size={20} /> : <AlertTriangleIcon size={20} />}
           </span>
           <div>
-            <h3>Resultado de la carga</h3>
+            <h2>Resultado de la carga</h2>
             <p>
               {success
                 ? 'Todos los estudiantes quedaron matriculados en el periodo vigente.'

@@ -24,7 +24,7 @@ test('la tutora ve su consolidado de horarios y exporta PDF y Excel', async ({ p
 test('la tutora guarda su informe semestral y exporta el PDF', async ({ page }) => {
   await loginUi(page, accounts.tutor);
   await goToMenu(page, 'Informe semestral');
-  await expect(page.getByRole('heading', { level: 3, name: /I\. Datos generales/ })).toBeVisible();
+  await expect(page.getByRole('heading', { level: 2, name: /I\. Datos generales/ })).toBeVisible();
   // Dato de prueba en un campo editable: debe seguir ahí tras guardar y volver a abrir el informe
   const phone = `9${Date.now().toString().slice(-8)}`;
   await page.getByLabel('Celular').fill(phone);
@@ -32,7 +32,7 @@ test('la tutora guarda su informe semestral y exporta el PDF', async ({ page }) 
   await expect(page.getByText('Informe guardado correctamente.')).toBeVisible();
 
   await page.reload();
-  await expect(page.getByRole('heading', { level: 3, name: /I\. Datos generales/ })).toBeVisible();
+  await expect(page.getByRole('heading', { level: 2, name: /I\. Datos generales/ })).toBeVisible();
   await expect(page.getByLabel('Celular')).toHaveValue(phone);
 
   const [download] = await Promise.all([page.waitForEvent('download'), page.getByRole('button', { name: 'Exportar PDF' }).click()]);
@@ -49,7 +49,7 @@ test('Vicerrectorado ve el consolidado e indicadores y exporta', async ({ page }
 
   await goToMenu(page, 'Indicadores');
   await expect(page.getByText('Estudiantes activos').first()).toBeVisible();
-  await expect(page.getByRole('heading', { level: 3, name: 'Derivaciones por servicio' })).toBeVisible();
+  await expect(page.getByRole('heading', { level: 2, name: 'Derivaciones por servicio' })).toBeVisible();
   await exportAs(page, 'PDF', /\.pdf$/);
   await exportAs(page, 'Excel', /\.xlsx$/);
 });

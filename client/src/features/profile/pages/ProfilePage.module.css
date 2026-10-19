@@ -46,7 +46,7 @@
   border-bottom: 1px solid var(--g100);
 }
 
-.panelHead h3 {
+.panelHead h2 {
   font-size: 14.5px;
   color: var(--azul);
   margin: 0;

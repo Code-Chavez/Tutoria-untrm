@@ -92,7 +92,7 @@ test('la DBU carga el Excel de docentes: 2 se crean y 2 filas con error se infor
   });
   await page.getByRole('button', { name: 'Importar docentes' }).click();
 
-  await expect(page.getByRole('heading', { level: 3, name: 'Resultado de la carga' })).toBeVisible({ timeout: 45_000 });
+  await expect(page.getByRole('heading', { level: 2, name: 'Resultado de la carga' })).toBeVisible({ timeout: 45_000 });
   await expect(page.getByText('Filas procesadas').locator('..')).toContainText('4');
   await expect(page.getByText('Docentes creados').locator('..')).toContainText('2');
   await expect(page.getByText('Omitidos').locator('..')).toContainText('2');

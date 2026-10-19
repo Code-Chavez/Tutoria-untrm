@@ -42,7 +42,7 @@ function BarChart({ title, rows, legend }: { title: string; rows: BarRow[]; lege
   const max = Math.max(1, ...rows.map((r) => r.value + (r.extra ?? 0)));
   return (
     <Card padded className={styles.chart}>
-      <h3>{title}</h3>
+      <h2>{title}</h2>
       {legend && (
         <p className={styles.legend}>
           <span className={styles.swatchA} /> {legend[0]} <span className={styles.swatchB} /> {legend[1]}

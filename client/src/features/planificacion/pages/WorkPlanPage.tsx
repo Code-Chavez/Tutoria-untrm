@@ -245,7 +245,7 @@ function WorkPlanEditor({ schoolId, plan }: { schoolId: string; plan: WorkPlan |
     const total = (r: Row) => (Number(r.quantity) || 0) * (Number(r.unitCost) || 0);
     return (
       <section className={styles.tableBlock} key={table}>
-        <h3>{title}</h3>
+        <h2>{title}</h2>
         <div className={styles.tableWrap}>
           <table className={styles.table}>
             <thead>
@@ -254,7 +254,9 @@ function WorkPlanEditor({ schoolId, plan }: { schoolId: string; plan: WorkPlan |
                   <th key={c.key}>{c.label}</th>
                 ))}
                 {table === 'budget' && <th>Costo total (S/)</th>}
-                <th aria-label="Acciones" />
+                <th>
+                  <span className="sr-only">Acciones</span>
+                </th>
               </tr>
             </thead>
             <tbody>
@@ -407,7 +409,7 @@ function WorkPlanEditor({ schoolId, plan }: { schoolId: string; plan: WorkPlan |
 
                 {tab === 'operational' && (
                   <section className={styles.tableBlock}>
-                    <h3>X. Actividades operativas</h3>
+                    <h2>X. Actividades operativas</h2>
                     <div className={styles.tableWrap}>
                       <table className={styles.table}>
                         <thead>

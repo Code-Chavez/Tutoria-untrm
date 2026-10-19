@@ -9,7 +9,7 @@
   background: var(--celeste);
 }
 
-.text h3 {
+.text h2 {
   margin: 0 0 var(--s1, 4px);
   font-family: var(--ft);
   font-size: var(--fs-md, 16px);

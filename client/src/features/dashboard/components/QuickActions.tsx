@@ -16,9 +16,9 @@ export function QuickActions() {
     <div className={styles.groups}>
       {groups.map((group) => (
         <section key={group.title} aria-labelledby={`qa-${group.title}`} className={styles.group}>
-          <h3 id={`qa-${group.title}`} className={styles.groupTitle}>
+          <h2 id={`qa-${group.title}`} className={styles.groupTitle}>
             {group.title}
-          </h3>
+          </h2>
           <div className={styles.grid}>
             {group.actions.map((action) => (
               <Link key={`${action.group}-${action.label}-${action.to}`} to={action.to} className={styles.action}>

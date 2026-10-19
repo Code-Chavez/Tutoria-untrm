@@ -73,6 +73,11 @@ textarea {
   background-clip: padding-box;
 }
 
+/* Un enlace dentro de un párrafo no puede distinguirse solo por el color (WCAG 1.4.1) */
+main p a:not([class*='linkButton']) {
+  text-decoration: underline;
+}
+
 /* «Saltar al contenido»: oculto hasta que recibe el foco con el teclado (WCAG 2.4.1) */
 .skip-link {
   position: absolute;

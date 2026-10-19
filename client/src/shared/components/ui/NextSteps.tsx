@@ -19,7 +19,7 @@ export function NextSteps({ title = 'Qué sigue', steps }: NextStepsProps) {
   if (steps.length === 0 || !inRouter) return null;
   return (
     <nav className={styles.box} aria-label={title}>
-      <h3 className={styles.title}>{title}</h3>
+      <h2 className={styles.title}>{title}</h2>
       <ul className={styles.list}>
         {steps.map((step) => (
           <li key={step.to + step.label}>

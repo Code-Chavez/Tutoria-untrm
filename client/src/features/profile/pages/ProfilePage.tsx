@@ -125,7 +125,7 @@ export function ProfilePage() {
         {/* ── Datos personales ─────────────────────── */}
         <section className={styles.panel}>
           <div className={styles.panelHead}>
-            <h3>Datos personales</h3>
+            <h2>Datos personales</h2>
           </div>
           <div className={styles.panelBody}>
             <div className={styles.identity}>
@@ -192,7 +192,7 @@ export function ProfilePage() {
         {/* ── Cambio de contraseña ─────────────────── */}
         <section className={styles.panel}>
           <div className={styles.panelHead}>
-            <h3>Cambiar contraseña</h3>
+            <h2>Cambiar contraseña</h2>
           </div>
           <div className={styles.panelBody}>
             <form onSubmit={handlePasswordSubmit}>

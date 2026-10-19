@@ -87,7 +87,7 @@ test('docente tutor (2)', async ({ page }) => {
   await shot(page, '17-horarios-asistencia');
 
   await goToMenu(page, 'Informe semestral');
-  await page.getByRole('heading', { level: 3, name: /I\. Datos generales/ }).waitFor();
+  await page.getByRole('heading', { level: 2, name: /I\. Datos generales/ }).waitFor();
   await shot(page, '18-informe-semestral');
 });
 
@@ -98,7 +98,7 @@ test('coordinador', async ({ page }) => {
   await page.getByLabel('Tutor del ciclo 1').waitFor();
   await shot(page, '20-asignacion');
   await goToMenu(page, 'Plan semestral');
-  await page.getByRole('heading', { level: 3, name: 'Resolución de aprobación' }).waitFor();
+  await page.getByRole('heading', { level: 2, name: 'Resolución de aprobación' }).waitFor();
   await shot(page, '21-plan-semestral');
   await goToMenu(page, 'Indicadores');
   await page.getByText('Estudiantes activos').first().waitFor();
