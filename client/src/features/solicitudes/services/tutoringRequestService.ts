@@ -43,6 +43,8 @@ export interface TutoringRequest {
 export interface TutoringRequestView extends TutoringRequest {
   studentName: string;
   studentCode: string;
+  /** La sesión vinculada se canceló: la solicitud sigue sin atención y se puede reemplazar por otra sesión o una derivación. */
+  sessionCancelled?: boolean;
   routedToName: string;
   handledByName: string | null;
 }

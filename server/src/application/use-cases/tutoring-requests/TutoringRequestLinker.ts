@@ -3,6 +3,7 @@ import { TutoringRequestRepository } from '@domain/repositories/TutoringRequestR
 import { StudentRepository } from '@domain/repositories/StudentRepository';
 import { NotificationRepository } from '@domain/repositories/NotificationRepository';
 import { AuditLogRepository } from '@domain/repositories/AuditLogRepository';
+import { SessionRepository } from '@domain/repositories/SessionRepository';
 import { StudentAccessGuard } from '@application/access/StudentAccessGuard';
 import { InvalidTutoringRequestStatusError, TutoringRequestNotFoundError } from './TutoringRequestErrors';
 import { canManageTutoringRequest } from './tutoringRequestSupport';
@@ -21,6 +22,7 @@ export class TutoringRequestLinker {
     private readonly students: StudentRepository,
     private readonly notifications: NotificationRepository,
     private readonly auditLogs: AuditLogRepository,
+    private readonly sessions?: SessionRepository,
   ) {}
 
   /** Valida antes de crear nada: la solicitud existe y es suya, es del estudiante indicado y aún no tiene atención vinculada. */
@@ -31,6 +33,8 @@ export class TutoringRequestLinker {
     if (!studentIds.includes(request.studentId)) {
       throw new InvalidTutoringRequestStatusError('La solicitud es de otro estudiante: no se puede vincular a esta atención.');
     }
+    // Una sesión cancelada ya no atiende la solicitud: se puede reemplazar por otra atención (sesión o derivación).
+    if (request.sessionId && !request.referralId && (await this.isCancelled(request.sessionId))) return request;
     if (request.sessionId || request.referralId) {
       throw new InvalidTutoringRequestStatusError(
         `Esta solicitud ya tiene ${request.sessionId ? 'una sesión programada' : 'una derivación'}: no se crea otra atención para la misma solicitud.`,
@@ -39,12 +43,17 @@ export class TutoringRequestLinker {
     return request;
   }
 
+  private async isCancelled(sessionId: string): Promise<boolean> {
+    return !!(await this.sessions?.findById(sessionId))?.cancelledAt;
+  }
+
   /** Enlaza lo creado con la solicitud. Devuelve false si otra persona se adelantó (el llamador deshace lo que creó). */
   async attach(requesterId: string, request: TutoringRequest, followUp: TutoringRequestFollowUp, ipAddress?: string): Promise<boolean> {
     const linked = await this.requests.attachFollowUp(
       request.id,
       followUp.kind === 'session' ? { sessionId: followUp.id } : { referralId: followUp.id },
       requesterId,
+      request.sessionId ?? undefined, // si ya traía una sesión, `prepare` comprobó que estaba cancelada: se la reemplaza
     );
     if (!linked) return false;
 
@@ -53,7 +62,7 @@ export class TutoringRequestLinker {
       action: followUp.kind === 'session' ? 'TUTORING_REQUEST_SESSION' : 'TUTORING_REQUEST_REFERRAL',
       entity: 'TutoringRequest',
       entityId: request.id,
-      details: `${followUp.kind}:${followUp.id}`,
+      details: `${followUp.kind}:${followUp.id}${request.sessionId ? ` (reemplaza la sesión cancelada ${request.sessionId})` : ''}`,
       ipAddress: ipAddress ?? null,
     });
 

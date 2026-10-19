@@ -55,11 +55,13 @@ export class PrismaTutoringRequestRepository implements TutoringRequestRepositor
     id: string,
     followUp: { sessionId: string } | { referralId: string },
     handledById: string,
+    replacingSessionId?: string,
   ): Promise<TutoringRequest | null> {
-    // Condicional sobre «sin vínculo»: dos personas no crean dos atenciones para la misma solicitud.
+    // Condicional sobre «sin vínculo» (o sobre seguir vinculada a la sesión cancelada que se reemplaza): dos personas no crean
+    // dos atenciones para la misma solicitud.
     const { count } = await this.prisma.tutoringRequest.updateMany({
-      where: { id, sessionId: null, referralId: null },
-      data: { ...followUp, handledById, handledAt: new Date() },
+      where: { id, sessionId: replacingSessionId ?? null, referralId: null },
+      data: { ...followUp, ...(replacingSessionId && 'referralId' in followUp ? { sessionId: null } : {}), handledById, handledAt: new Date() },
     });
     if (count !== 1) return null;
     // Pendiente → en atención (si ya estaba en atención o atendida, se conserva).
