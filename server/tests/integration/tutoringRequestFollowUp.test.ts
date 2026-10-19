@@ -158,6 +158,64 @@ describe('solicitud de tutoría → sesión o derivación (U01)', () => {
     expect(((await again.json()) as { error: string }).error).toMatch(/ya tiene una derivación/i);
   });
 
+  it('si la sesión vinculada se cancela, la solicitud se puede atender con otra sesión: queda enlazada a la nueva y no a la cancelada', async () => {
+    if (!dbUp) return;
+    const id = await newRequest('Prueba U01: reemplazo de cita cancelada');
+    const first = ((await (await call('POST', '/api/sessions', tokens.tutor, sessionBody(id))).json()) as { session: { id: string } }).session;
+    sessionIds.push(first.id);
+    // Con la cita vigente no se puede crear otra
+    expect((await call('POST', '/api/sessions', tokens.tutor, sessionBody(id))).status).toBe(409);
+
+    expect((await call('PATCH', `/api/sessions/${first.id}/cancel`, tokens.tutor, { reason: 'Paro de transporte' })).status).toBe(200);
+    // La bandeja lo dice: la cita cancelada ya no atiende la solicitud
+    const inbox = (await (await call('GET', '/api/tutoring-requests?mine=true', tokens.tutor)).json()) as { requests: { id: string; sessionCancelled?: boolean }[] };
+    expect(inbox.requests.find((r) => r.id === id)?.sessionCancelled).toBe(true);
+
+    const res = await call('POST', '/api/sessions', tokens.tutor, sessionBody(id));
+    expect(res.status).toBe(201);
+    const second = ((await res.json()) as { session: { id: string } }).session;
+    sessionIds.push(second.id);
+    const request = await requestOf(id);
+    expect(request.sessionId).toBe(second.id);
+    expect(request.status).toBe('EN_ATENCION');
+    const log = await prisma.auditLog.findFirst({ where: { entity: 'TutoringRequest', entityId: id, action: 'TUTORING_REQUEST_SESSION' }, orderBy: { createdAt: 'desc' } });
+    expect(log?.details).toContain(`session:${second.id}`);
+    expect(log?.details).toContain(first.id);
+
+    // Y la nueva cita vigente vuelve a bloquear duplicados
+    expect((await call('POST', '/api/sessions', tokens.tutor, sessionBody(id))).status).toBe(409);
+  });
+
+  it('si la sesión vinculada se cancela, también se puede derivar: el vínculo pasa a la derivación y no quedan las dos', async () => {
+    if (!dbUp) return;
+    const id = await newRequest('Prueba U01: cita cancelada y luego derivación');
+    const session = ((await (await call('POST', '/api/sessions', tokens.tutor, sessionBody(id))).json()) as { session: { id: string } }).session;
+    sessionIds.push(session.id);
+    expect((await call('PATCH', `/api/sessions/${session.id}/cancel`, tokens.tutor, { reason: 'Enfermedad del tutor' })).status).toBe(200);
+
+    const res = await call('POST', `/api/students/${studentId}/referrals`, tokens.tutor, referralBody(id));
+    expect(res.status).toBe(201);
+    const referral = ((await res.json()) as { referral: { id: string } }).referral;
+    referralIds.push(referral.id);
+    const request = await requestOf(id);
+    expect(request.referralId).toBe(referral.id);
+    expect(request.sessionId).toBeNull();
+  });
+
+  it('dos personas que reemplazan la cita cancelada a la vez: solo una queda y la otra se rechaza', async () => {
+    if (!dbUp) return;
+    const id = await newRequest('Prueba U01: reemplazo simultáneo');
+    const first = ((await (await call('POST', '/api/sessions', tokens.tutor, sessionBody(id))).json()) as { session: { id: string } }).session;
+    sessionIds.push(first.id);
+    expect((await call('PATCH', `/api/sessions/${first.id}/cancel`, tokens.tutor, { reason: 'Paro' })).status).toBe(200);
+
+    const [a, b] = await Promise.all([call('POST', '/api/sessions', tokens.tutor, sessionBody(id)), call('POST', '/api/sessions', tokens.tutor, sessionBody(id))]);
+    expect([a.status, b.status].sort()).toEqual([201, 409]);
+    const winner = ((await (a.status === 201 ? a : b).json()) as { session: { id: string } }).session;
+    sessionIds.push(winner.id);
+    expect((await requestOf(id)).sessionId).toBe(winner.id);
+  });
+
   it('la solicitud solo se vincula con una atención del mismo estudiante', async () => {
     if (!dbUp) return;
     const id = await newRequest('Prueba U01: solicitud de Ana');

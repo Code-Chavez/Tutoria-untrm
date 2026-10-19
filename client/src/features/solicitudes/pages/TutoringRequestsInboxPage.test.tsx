@@ -273,6 +273,20 @@ describe('TutoringRequestsInboxPage (R01)', () => {
     });
   });
 
+  it('con la cita cancelada la solicitud lo dice y vuelve a ofrecer programar otra sesión o derivar', async () => {
+    mocked.getInbox.mockResolvedValue([request({ status: 'EN_ATENCION', sessionId: 'ses1', sessionCancelled: true })]);
+    const user = userEvent.setup();
+    renderPage();
+    expect(await screen.findByText('Cita cancelada')).toBeInTheDocument();
+    expect(screen.queryByText('Con sesión programada')).not.toBeInTheDocument();
+    await user.click(screen.getByRole('button', { name: 'Atender' }));
+    const dialog = screen.getByRole('dialog');
+    expect(within(dialog).getByRole('status')).toHaveTextContent('La cita de esta solicitud se canceló y sigue sin atención');
+    expect(within(dialog).queryByText(/no hace falta crear otra atención/)).not.toBeInTheDocument();
+    expect(within(dialog).getByRole('button', { name: 'Programar sesión' })).toBeInTheDocument();
+    expect(within(dialog).getByRole('button', { name: 'Derivar a un servicio' })).toBeInTheDocument();
+  });
+
   describe('lo pendiente primero y a la vista (U04, U09)', () => {
     const ago = (days: number) => new Date(Date.now() - days * 86_400_000).toISOString();
 

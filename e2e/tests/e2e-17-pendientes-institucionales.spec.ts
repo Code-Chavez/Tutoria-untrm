@@ -1,7 +1,7 @@
 import { expect, test } from '@playwright/test';
 import { accounts } from '../support/accounts';
 import { api, apiLogin, unique } from '../support/api';
-import { ensureAnaWithElena } from '../support/setup';
+import { dateInput, ensureAnaWithElena } from '../support/setup';
 import { goToMenu, loginUi } from '../support/ui';
 
 // E2E-17: «Pendientes» (pestaña de Periodo académico). Una cita cancelada de una solicitud que sigue sin atender aparece para la
@@ -37,6 +37,10 @@ test.afterAll(async () => {
   // La solicitud de la prueba se da por atendida para no dejar pendientes ajenos en el entorno de desarrollo
   const tutor = await apiLogin(accounts.tutor);
   const inbox = await api<{ requests: { id: string; reason: string }[] }>(tutor, 'GET', '/tutoring-requests?mine=true');
+  const sessions = await api<{ sessions: { id: string; topic: string; cancelledAt?: string | null }[] }>(tutor, 'GET', '/sessions?mine=true');
+  for (const x of sessions.body.sessions.filter((x) => x.topic === reason && !x.cancelledAt)) {
+    await api(tutor, 'PATCH', `/sessions/${x.id}/cancel`, { reason: 'Limpieza de prueba E2E' });
+  }
   for (const r of inbox.body.requests.filter((x) => x.reason === reason)) {
     await api(tutor, 'PATCH', `/tutoring-requests/${r.id}/status`, { status: 'ATENDIDA', note: 'Limpieza de prueba E2E' });
   }
@@ -59,6 +63,27 @@ test('la DBU también lo ve, y se puede filtrar por tipo', async ({ page }) => {
   await goToMenu(page, 'Pendientes');
   await page.getByLabel('Tipo de pendiente').selectOption('CANCELLED_SESSION_NO_FOLLOWUP');
   await expect(page.getByRole('listitem').filter({ hasText: cancelReason })).toHaveCount(1);
+});
+
+test('la tutora reemplaza la cita cancelada desde la solicitud y el pendiente desaparece', async ({ page }) => {
+  await loginUi(page, accounts.tutor);
+  await goToMenu(page, 'Solicitudes de tutoría');
+  await page.getByRole('row', { name: new RegExp(reason) }).getByRole('button', { name: 'Atender' }).click();
+  const detail = page.getByRole('dialog', { name: 'Atender solicitud de tutoría' });
+  await expect(detail.getByRole('status')).toContainText('La cita de esta solicitud se canceló');
+  await detail.getByRole('button', { name: 'Programar sesión' }).click();
+
+  const form = page.getByRole('dialog', { name: 'Programar sesión de tutoría' });
+  await form.getByLabel('Fecha').fill(dateInput(new Date(2037, 6, 15)));
+  await form.getByLabel('Hora').fill('10:00');
+  await form.getByLabel('Lugar').fill('Aula 302');
+  await form.getByRole('button', { name: 'Programar sesión' }).click();
+  await expect(page.getByText(/Quedó vinculada a su solicitud/)).toBeVisible();
+
+  // Ya tiene cita vigente: la coordinación no lo ve como pendiente
+  const coordinator = await apiLogin(accounts.coordinator);
+  const pending = await api<{ items: { detail: string }[] }>(coordinator, 'GET', '/institutional-pending');
+  expect(pending.body.items.filter((i) => i.detail.includes(cancelReason))).toHaveLength(0);
 });
 
 test('el docente tutor no tiene la pestaña ni accede a los datos', async ({ page }) => {

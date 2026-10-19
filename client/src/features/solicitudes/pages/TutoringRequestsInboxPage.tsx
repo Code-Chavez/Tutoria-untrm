@@ -37,7 +37,10 @@ import styles from './TutoringRequestsInboxPage.module.css';
 const SESSION_MINUTES = 45;
 
 // Qué se hizo con la solicitud: se dice en la tabla y en el detalle, para no abrirla a ver si ya se atendió.
-const followUpLabel = (r: TutoringRequestView) => (r.sessionId ? 'Con sesión programada' : r.referralId ? 'Derivada a un servicio' : null);
+// Una cita cancelada ya no atiende la solicitud: se dice, y se puede programar otra o derivar.
+const needsNewFollowUp = (r: TutoringRequestView) => !!r.sessionId && !r.referralId && r.sessionCancelled === true;
+const followUpLabel = (r: TutoringRequestView) =>
+  needsNewFollowUp(r) ? 'Cita cancelada' : r.sessionId ? 'Con sesión programada' : r.referralId ? 'Derivada a un servicio' : null;
 
 const STATUS_TONE: Record<TutoringRequestStatus, 'warning' | 'info' | 'success'> = {
   PENDIENTE: 'warning',
@@ -99,12 +102,18 @@ function AttendModal({ request, onClose, onSchedule, onRefer }: AttendModalProps
           </p>
         )}
         <p className={styles.reason}>{request.reason}</p>
-        {followUpLabel(request) && (
+        {needsNewFollowUp(request) ? (
           <p className={styles.linked} role="status">
-            {followUpLabel(request)}: no hace falta crear otra atención para esta solicitud.
+            La cita de esta solicitud se canceló y sigue sin atención: programa otra sesión o deriva el caso.
           </p>
+        ) : (
+          followUpLabel(request) && (
+            <p className={styles.linked} role="status">
+              {followUpLabel(request)}: no hace falta crear otra atención para esta solicitud.
+            </p>
+          )
         )}
-        {onSchedule && onRefer && !request.sessionId && !request.referralId && (
+        {onSchedule && onRefer && ((!request.sessionId && !request.referralId) || needsNewFollowUp(request)) && (
           <div className={styles.followUp}>
             <span className={styles.label}>¿Qué hacer con esta solicitud?</span>
             <div className={styles.followUpButtons}>

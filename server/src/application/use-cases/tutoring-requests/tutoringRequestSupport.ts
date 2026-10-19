@@ -1,6 +1,7 @@
 import { TutoringRequest, TutoringRequestView, TutoringCaseType } from '@domain/entities/TutoringRequest';
 import { StudentRepository } from '@domain/repositories/StudentRepository';
 import { UserRepository } from '@domain/repositories/UserRepository';
+import { SessionRepository } from '@domain/repositories/SessionRepository';
 import { StudentAccessGuard } from '@application/access/StudentAccessGuard';
 
 export const CASE_TYPE_LABEL: Record<TutoringCaseType, string> = {
@@ -34,6 +35,7 @@ export async function toTutoringRequestViews(
   requests: TutoringRequest[],
   students: StudentRepository,
   users: UserRepository,
+  sessions?: SessionRepository,
 ): Promise<TutoringRequestView[]> {
   const studentCache = new Map<string, Awaited<ReturnType<StudentRepository['findById']>>>();
   const userCache = new Map<string, string>();
@@ -56,6 +58,7 @@ export async function toTutoringRequestViews(
       studentCode: student?.studentCode ?? '—',
       routedToName: (await userName(request.routedToId)) ?? 'Desconocido',
       handledByName: await userName(request.handledById),
+      ...(sessions && request.sessionId ? { sessionCancelled: !!(await sessions.findById(request.sessionId))?.cancelledAt } : {}),
     });
   }
   return views;

@@ -447,6 +447,7 @@ const listTutoringRequestsUseCase = new ListTutoringRequestsUseCase(
   studentAccessGuard,
   studentRepository,
   userRepository,
+  sessionRepository,
 );
 const listOwnTutoringRequestsUseCase = new ListOwnTutoringRequestsUseCase(
   tutoringRequestRepository,
@@ -475,6 +476,7 @@ const tutoringRequestLinker = new TutoringRequestLinker(
   studentRepository,
   notificationRepository,
   auditLogRepository,
+  sessionRepository,
 );
 // Avisa a los tutorados cuando se programa, reprograma o cancela una sesión (aviso en el sistema y, si está activo, su correo).
 const sessionNotifier = new SessionNotifier(studentRepository, notificationRepository);
