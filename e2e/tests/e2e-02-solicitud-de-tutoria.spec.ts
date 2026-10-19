@@ -28,13 +28,17 @@ test('el estudiante registra la solicitud y queda Pendiente', async ({ page }) =
   await loginUi(page, accounts.student);
   await goToMenu(page, 'Solicitar tutoría');
   // Antes de enviar ya sabe quien la recibira (se espera a verlo: asi lo veria una persona antes de pulsar el boton)
-  await expect(page.getByText(/Tu solicitud la recibirá tu tutor Elena/)).toBeVisible();
+  const announcement = page.getByText(/Tu solicitud la recibirá tu tutor Elena/);
+  await expect(announcement).toBeVisible();
+  const announcedName = /tu tutor (.+?)\. Te avisaremos/.exec((await announcement.textContent()) ?? '')?.[1];
+  expect(announcedName, 'nombre del destinatario anunciado').toBeTruthy();
   await page.getByLabel('Motivo', { exact: true }).selectOption({ label: 'Académico' });
   await page.getByLabel('Descripción del motivo').fill(reason);
   await page.getByRole('button', { name: 'Registrar solicitud' }).click();
 
   // Despues de enviar, la pantalla dice a quien llego
-  await expect(page.getByText(/Solicitud registrada: la recibió tu tutor Elena .*Te avisaremos en el sistema cuando responda\./)).toBeVisible();
+  // y es la MISMA persona que se anunció (y la tutora de abajo recibe el aviso: es quien tiene la solicitud)
+  await expect(page.getByText(`Solicitud registrada: la recibió tu tutor ${announcedName}. Te avisaremos en el sistema cuando responda.`)).toBeVisible();
   const row = page.getByText(reason).first();
   await expect(row).toBeVisible();
   await expect(page.getByText('Pendiente').first()).toBeVisible();

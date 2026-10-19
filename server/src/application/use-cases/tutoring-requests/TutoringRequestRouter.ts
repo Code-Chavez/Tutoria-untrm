@@ -4,6 +4,7 @@ import { RoleRepository } from '@domain/repositories/RoleRepository';
 import { NoRoutingTargetError } from './TutoringRequestErrors';
 
 const DBU_ROLE_NAME = 'Administrador DBU';
+const COORDINATOR_ROLE_NAME = 'Coordinador';
 
 /** A quién llega una solicitud: el tutor del estudiante, la coordinación de su escuela o, en último caso, la DBU. */
 export type RecipientKind = 'tutor' | 'coordinator' | 'dbu';
@@ -30,10 +31,16 @@ export class TutoringRequestRouter {
     // Un tutor con la cuenta desactivada no puede atender: la solicitud pasa a la coordinación en vez de quedar sin responsable.
     if (tutorId && (await this.users.findById(tutorId))?.isActive) return { routedToId: tutorId, routedToRole: 'tutor', kind: 'tutor' };
 
+    // La coordinación solo vale si la cuenta sigue activa y conserva el rol de coordinación (pudo cambiarse o desactivarse).
     const school = await this.schools.findById(schoolId);
-    if (school?.coordinatorId) return { routedToId: school.coordinatorId, routedToRole: 'coordinator', kind: 'coordinator' };
+    if (school?.coordinatorId) {
+      const [coordinator, coordinatorRole] = await Promise.all([this.users.findById(school.coordinatorId), this.roles.findByName(COORDINATOR_ROLE_NAME)]);
+      if (coordinator?.isActive && coordinatorRole && coordinator.roleId === coordinatorRole.id) {
+        return { routedToId: coordinator.id, routedToRole: 'coordinator', kind: 'coordinator' };
+      }
+    }
 
-    // Respaldo: la escuela no tiene coordinador asignado todavía.
+    // Respaldo: la escuela no tiene coordinación utilizable (sin asignar, desactivada o sin el rol).
     const dbuRole = await this.roles.findByName(DBU_ROLE_NAME);
     const fallback = dbuRole ? (await this.users.findAll({ isActive: true, roleId: dbuRole.id }))[0] : undefined;
     if (!fallback) throw new NoRoutingTargetError();
