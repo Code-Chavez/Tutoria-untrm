@@ -71,7 +71,7 @@ test('al editar el plan aprobado se crea una revisión y se conserva la versión
   await page.getByRole('button', { name: 'Guardar revisión' }).click();
 
   await expect(page.getByText('Revisión pendiente de resolución')).toBeVisible();
-  await expect(page.getByRole('heading', { level: 4, name: 'Versiones aprobadas anteriores' })).toBeVisible();
+  await expect(page.getByRole('heading', { level: 3, name: 'Versiones aprobadas anteriores' })).toBeVisible();
 
   await attachResolution(page);
 });
