@@ -38,6 +38,7 @@ import { TeacherBulkImportPage } from '@features/docentes/pages/TeacherBulkImpor
 import { SectionHome, SectionShell } from '@shared/components/layout/SectionShell';
 import { RequestEmailsPage } from '@features/pedidos/pages/RequestEmailsPage';
 import { CycleTutorsPage } from '@features/ciclos/pages/CycleTutorsPage';
+import { PendingPage } from '@features/pendientes/pages/PendingPage';
 import { CampusesPage } from '@features/sedes/pages/CampusesPage';
 import { ParametersPage } from '@features/parametros/pages/ParametersPage';
 import { BrandingPage } from '@features/identidad/pages/BrandingPage';
@@ -154,6 +155,14 @@ export default function App() {
                 element={
                   <RequireRole roles={['Administrador DBU']}>
                     <PeriodClosurePage />
+                  </RequireRole>
+                }
+              />
+              <Route
+                path="pendientes"
+                element={
+                  <RequireRole roles={['Coordinador', 'Administrador DBU']}>
+                    <PendingPage />
                   </RequireRole>
                 }
               />

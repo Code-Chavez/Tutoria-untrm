@@ -32,7 +32,7 @@ describe('SectionShell (pantallas juntas con pestañas)', () => {
 
     const nav = screen.getByRole('navigation', { name: 'Secciones de Periodo académico' });
     expect(nav).toBeInTheDocument();
-    expect(screen.getAllByRole('link').map((a) => a.textContent)).toEqual(['Pedir listas', 'Carga de estudiantes', 'Carga de docentes', 'Asignación por ciclo', 'Cierre de periodo']);
+    expect(screen.getAllByRole('link').map((a) => a.textContent)).toEqual(['Pedir listas', 'Carga de estudiantes', 'Carga de docentes', 'Asignación por ciclo', 'Cierre de periodo', 'Pendientes']);
     expect(screen.getByRole('link', { name: 'Asignación por ciclo' })).toHaveAttribute('aria-current', 'page');
     expect(screen.getByText('Pantalla de asignación')).toBeInTheDocument();
   });
@@ -41,7 +41,7 @@ describe('SectionShell (pantallas juntas con pestañas)', () => {
     role = 'Coordinador';
     renderAt('/pedir-listas');
 
-    expect(screen.getAllByRole('link').map((a) => a.textContent)).toEqual(['Pedir listas', 'Carga de estudiantes', 'Asignación por ciclo']);
+    expect(screen.getAllByRole('link').map((a) => a.textContent)).toEqual(['Pedir listas', 'Carga de estudiantes', 'Asignación por ciclo', 'Pendientes']);
   });
 
   it('con una sola pestaña no dibuja la barra (solo está la pantalla)', () => {

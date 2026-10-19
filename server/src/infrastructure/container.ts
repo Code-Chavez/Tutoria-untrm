@@ -37,6 +37,7 @@ import { PrismaAdmonitionRepository } from './repositories/PrismaAdmonitionRepos
 import { AdmonitionScopeResolver, GetAdmonitionFileUseCase, IssueAdmonitionUseCase, ListAdmonishableTutorsUseCase, ListAdmonitionsUseCase } from '@application/use-cases/admonitions/AdmonitionUseCases';
 import { PrismaCycleTutorRepository } from './repositories/PrismaCycleTutorRepository';
 import { CycleTutorApplier, ListCycleTutorsUseCase, RemoveCycleTutorUseCase, SetCycleTutorUseCase } from '@application/use-cases/cycle-tutors/CycleTutorUseCases';
+import { GetInstitutionalPendingUseCase } from '@application/use-cases/pending/GetInstitutionalPendingUseCase';
 import { PrismaCampusRepository } from './repositories/PrismaCampusRepository';
 import { CreateCampusUseCase, ListCampusesUseCase, SetSchoolCampusUseCase, UpdateCampusUseCase } from '@application/use-cases/campuses/CampusUseCases';
 import { PrismaFacultyRepository } from './repositories/PrismaFacultyRepository';
@@ -357,6 +358,17 @@ const changePasswordUseCase = new ChangePasswordUseCase(
 const cycleTutorRepository = new PrismaCycleTutorRepository(prisma);
 const cycleTutorApplier = new CycleTutorApplier(cycleTutorRepository, studentRepository, tutorAssignmentHistoryRepository);
 const listCycleTutorsUseCase = new ListCycleTutorsUseCase(studentAccessGuard, academicPeriodRepository, cycleTutorRepository);
+const getInstitutionalPendingUseCase = new GetInstitutionalPendingUseCase(
+  studentAccessGuard,
+  academicPeriodRepository,
+  schoolRepository,
+  cycleTutorRepository,
+  userRepository,
+  auditLogRepository,
+  tutoringRequestRepository,
+  sessionRepository,
+  studentRepository,
+);
 const setCycleTutorUseCase = new SetCycleTutorUseCase(studentAccessGuard, academicPeriodRepository, schoolRepository, userRepository, roleRepository, cycleTutorRepository, cycleTutorApplier, auditLogRepository);
 const removeCycleTutorUseCase = new RemoveCycleTutorUseCase(studentAccessGuard, academicPeriodRepository, cycleTutorRepository, auditLogRepository);
 const acceptanceConfig = { publicUrl: env.PUBLIC_APP_URL, ttlHours: env.INVITATION_TTL_HOURS };
@@ -854,6 +866,7 @@ export const container = {
     issueAdmonitionUseCase,
     getAdmonitionFileUseCase,
     listCycleTutorsUseCase,
+    getInstitutionalPendingUseCase,
     requestTutorAcceptanceUseCase,
     getTutorAcceptanceUseCase,
     respondTutorAcceptanceUseCase,
