@@ -57,7 +57,7 @@ test('el menú es corto: Periodo académico, Informes y Configuración son una p
   // Periodo académico: pestañas en el orden del trabajo, y la primera abierta
   await nav.getByRole('link', { name: 'Periodo académico', exact: true }).click();
   const tabs = page.getByRole('navigation', { name: 'Secciones de Periodo académico' });
-  await expect(tabs.getByRole('link')).toHaveText(['Pedir listas', 'Carga de estudiantes', 'Carga de docentes', 'Asignación por ciclo', 'Cierre de periodo']);
+  await expect(tabs.getByRole('link')).toHaveText(['Pedir listas', 'Carga de estudiantes', 'Carga de docentes', 'Asignación por ciclo', 'Cierre de periodo', 'Pendientes']);
   await expect(tabs.getByRole('link', { name: 'Pedir listas', exact: true })).toHaveAttribute('aria-current', 'page');
   await tabs.getByRole('link', { name: 'Asignación por ciclo' }).click();
   await expect(nav.getByRole('link', { name: 'Periodo académico', exact: true })).toHaveAttribute('aria-current', 'page');

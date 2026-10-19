@@ -27,6 +27,8 @@ export const SECTIONS: Record<'periodo' | 'informes' | 'configuracion', Section>
       { label: 'Carga de docentes', path: '/carga-docentes', roles: ['dbu'] },
       { label: 'Asignación por ciclo', path: '/asignacion', roles: ['coord', 'dbu'] },
       { label: 'Cierre de periodo', path: '/cierre-periodo', roles: ['dbu'] },
+      // Transversal al orden anterior: lo que quedó sin resolver en cualquiera de esos pasos (y las citas canceladas sin continuación).
+      { label: 'Pendientes', path: '/pendientes', roles: ['coord', 'dbu'] },
     ],
   },
   informes: {

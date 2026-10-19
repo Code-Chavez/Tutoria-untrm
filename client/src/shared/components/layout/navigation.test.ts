@@ -100,8 +100,8 @@ describe('navegación (UI-01, UI-04, UI-07)', () => {
       const tabs = (section: 'periodo' | 'informes' | 'configuracion', role: string) => tabsFor(section, ROLE_CODES[role]).map((t) => t.label);
 
       it('el periodo académico sigue el flujo real: pedir listas, cargar, asignar por ciclo y cerrar', () => {
-        expect(tabs('periodo', 'Administrador DBU')).toEqual(['Pedir listas', 'Carga de estudiantes', 'Carga de docentes', 'Asignación por ciclo', 'Cierre de periodo']);
-        expect(tabs('periodo', 'Coordinador')).toEqual(['Pedir listas', 'Carga de estudiantes', 'Asignación por ciclo']);
+        expect(tabs('periodo', 'Administrador DBU')).toEqual(['Pedir listas', 'Carga de estudiantes', 'Carga de docentes', 'Asignación por ciclo', 'Cierre de periodo', 'Pendientes']);
+        expect(tabs('periodo', 'Coordinador')).toEqual(['Pedir listas', 'Carga de estudiantes', 'Asignación por ciclo', 'Pendientes']);
         expect(tabs('periodo', 'Docente Tutor')).toEqual([]);
       });
 
