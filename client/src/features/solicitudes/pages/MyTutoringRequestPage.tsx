@@ -83,6 +83,8 @@ export function MyTutoringRequestPage() {
   const setCaseType = (value: CreateOwnTutoringRequestData['caseType']) => setForm((current) => ({ ...current, caseType: value }));
   const setReason = (value: string | ((current: string) => string)) =>
     setForm((current) => ({ ...current, reason: typeof value === 'function' ? value(current.reason) : value }));
+  // Sin nadie que pueda recibirla hoy, no se deja enviar (el servidor tampoco la registraría): no se promete atención.
+  const noRecipient = recipient?.kind === 'none';
   const [submitting, setSubmitting] = useState(false);
   const [feedback, setFeedback] = useState<Feedback | null>(null);
 
@@ -93,7 +95,7 @@ export function MyTutoringRequestPage() {
     event.preventDefault();
     setFeedback(null);
 
-    if (readOnly) return;
+    if (readOnly || noRecipient) return;
 
     if (reason.trim().length < 3) {
       setFeedback({ type: 'error', text: 'Describe el motivo de la solicitud.' });
@@ -123,7 +125,7 @@ export function MyTutoringRequestPage() {
     <div className={styles.page}>
       <PageHeader
         title="Solicitar tutoría"
-        subtitle="Cuéntanos qué necesitas y lo enrutaremos a tu tutor o coordinador."
+        subtitle="Cuéntanos qué necesitas y se la haremos llegar a tu tutor o a la coordinación de tu escuela."
         icon={<SendIcon size={22} />}
       />
 
@@ -150,7 +152,7 @@ export function MyTutoringRequestPage() {
                 Solicitas como <b>{user.firstName} {user.lastName}</b> ({user.email}). Tu solicitud la verá solo quien debe atenderla.
               </p>
             )}
-            {recipient && <p className={styles.recipient}>{recipientBefore(recipient)}</p>}
+            {recipient && <p className={styles.recipient} role={noRecipient ? 'status' : undefined}>{recipientBefore(recipient)}</p>}
             {draftRestored && <DraftNotice onDiscard={discardDraft} />}
             {feedback && (
               <div className={feedback.type === 'ok' ? styles.ok : styles.error} role="alert">
@@ -201,7 +203,7 @@ export function MyTutoringRequestPage() {
               />
             </div>
 
-            <Button type="submit" variant="primary" loading={submitting} disabled={readOnly}>
+            <Button type="submit" variant="primary" loading={submitting} disabled={readOnly || noRecipient}>
               Registrar solicitud
             </Button>
           </form>

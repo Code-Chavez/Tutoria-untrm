@@ -7,6 +7,11 @@ describe('a quién llega mi solicitud (U02)', () => {
     expect(recipientBefore({ kind: 'coordinator', name: 'Rosa Mendoza' })).toContain('Aún no tienes tutor asignado');
     expect(recipientBefore({ kind: 'coordinator', name: 'Rosa Mendoza' })).toContain('la coordinación de tu escuela (Rosa Mendoza)');
     expect(recipientBefore({ kind: 'dbu', name: 'Admin' })).toContain('Bienestar Universitario (Admin)');
+    // Sin nadie disponible no se promete atención ni se inventa un contacto
+    const none = recipientBefore({ kind: 'none', name: '' });
+    expect(none).toContain('no hay una persona disponible');
+    expect(none).toContain('no queda registrada');
+    expect(none).not.toMatch(/te avisaremos|recibirá/i);
     for (const kind of ['tutor', 'coordinator', 'dbu'] as const) expect(recipientBefore({ kind, name: 'X' })).not.toMatch(/horas|días|plazo/i);
   });
 

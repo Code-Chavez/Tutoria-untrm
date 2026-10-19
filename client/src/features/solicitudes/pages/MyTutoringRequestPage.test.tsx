@@ -173,6 +173,19 @@ describe('MyTutoringRequestPage', () => {
       expect(await screen.findByText(/Aún no tienes tutor asignado: tu solicitud la recibirá la coordinación de tu escuela \(Rosa Mendoza\)/)).toBeInTheDocument();
     });
 
+    it('sin nadie que pueda recibirla lo dice, no promete atención, no deja enviar y conserva lo escrito', async () => {
+      mocked.getRecipient.mockResolvedValue({ kind: 'none', name: '' });
+      const user = userEvent.setup();
+      renderPage();
+      expect(await screen.findByText(/no hay una persona disponible para recibir tu solicitud/)).toBeInTheDocument();
+      expect(screen.queryByText(/te avisaremos/i)).not.toBeInTheDocument();
+
+      await user.type(screen.getByLabelText(/descripción del motivo/i), 'Dificultad en Cálculo');
+      expect(screen.getByRole('button', { name: /registrar solicitud/i })).toBeDisabled();
+      expect(screen.getByLabelText(/descripción del motivo/i)).toHaveValue('Dificultad en Cálculo');
+      expect(mocked.createOwnTutoringRequest).not.toHaveBeenCalled();
+    });
+
     it('después de enviar nombra a quien la recibió', async () => {
       mocked.getRecipient.mockResolvedValue({ kind: 'tutor', name: 'Elena Ramírez' });
       mocked.createOwnTutoringRequest.mockResolvedValue(created);

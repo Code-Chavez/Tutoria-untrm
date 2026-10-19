@@ -1,15 +1,17 @@
 import { StudentRepository } from '@domain/repositories/StudentRepository';
 import { UserRepository } from '@domain/repositories/UserRepository';
+import { NoRoutingTargetError } from './TutoringRequestErrors';
 import { RecipientKind, TutoringRequestRouter } from './TutoringRequestRouter';
 
+/** `none`: la cuenta está vinculada pero hoy no hay nadie que pueda recibirla; no se debe prometer atención. */
 export interface OwnRequestRecipient {
-  kind: RecipientKind;
+  kind: RecipientKind | 'none';
   name: string;
 }
 
 /**
  * A quién llegará la solicitud del propio estudiante, ANTES de enviarla (con la misma regla con que se enruta). Null si su cuenta
- * aún no está vinculada a un registro de estudiante o si no hay a quién enrutar.
+ * aún no está vinculada a un registro de estudiante; `none` si no hay a quién enrutar (el envío fallaría: no se promete atención).
  */
 export class GetOwnRequestRecipientUseCase {
   constructor(
@@ -24,9 +26,10 @@ export class GetOwnRequestRecipientUseCase {
     try {
       const target = await this.router.resolve(student.tutorId, student.schoolId);
       const user = await this.users.findById(target.routedToId);
-      return user ? { kind: target.kind, name: `${user.firstName} ${user.lastName}` } : null;
-    } catch {
-      return null;
+      return user ? { kind: target.kind, name: `${user.firstName} ${user.lastName}` } : { kind: 'none', name: '' };
+    } catch (error) {
+      if (error instanceof NoRoutingTargetError) return { kind: 'none', name: '' };
+      throw error;
     }
   }
 }

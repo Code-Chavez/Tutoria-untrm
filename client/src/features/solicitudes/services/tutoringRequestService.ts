@@ -47,9 +47,9 @@ export interface TutoringRequestView extends TutoringRequest {
   handledByName: string | null;
 }
 
-/** Quién recibirá la solicitud del propio estudiante: su tutor, la coordinación de su escuela o, de respaldo, la DBU. */
+/** Quién recibirá la solicitud del propio estudiante: su tutor, la coordinación de su escuela o, de respaldo, la DBU; `none` si hoy no hay nadie. */
 export interface OwnRequestRecipient {
-  kind: 'tutor' | 'coordinator' | 'dbu';
+  kind: 'tutor' | 'coordinator' | 'dbu' | 'none';
   name: string;
 }
 

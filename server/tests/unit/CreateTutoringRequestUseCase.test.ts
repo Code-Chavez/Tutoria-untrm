@@ -55,7 +55,8 @@ describe('CreateTutoringRequestUseCase', () => {
     };
     schools = { findAll: jest.fn(), findById: jest.fn().mockResolvedValue(school) };
     users = {
-      findById: jest.fn(),
+      // el tutor asignado y la coordinación: cuentas activas (la coordinación, con el rol de coordinación)
+      findById: jest.fn().mockImplementation(async (id: string) => ({ id, isActive: true, roleId: 'role-coord' }) as User),
       findByEmail: jest.fn(),
       findAll: jest.fn().mockResolvedValue([{ id: 'dbu-1' } as User]),
       create: jest.fn(),
@@ -63,7 +64,7 @@ describe('CreateTutoringRequestUseCase', () => {
     };
     roles = {
       findById: jest.fn(),
-      findByName: jest.fn().mockResolvedValue({ id: 'role-dbu', name: 'Administrador DBU' } as Role),
+      findByName: jest.fn().mockImplementation(async (name: string) => ({ id: name === 'Coordinador' ? 'role-coord' : 'role-dbu', name }) as Role),
       findAll: jest.fn(),
       create: jest.fn(),
     };
