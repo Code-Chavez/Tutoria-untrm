@@ -1,10 +1,16 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen } from '@testing-library/react';
+import { configure, render, screen } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import { QueryClientTestWrapper } from '@shared/test-utils/QueryClientTestWrapper';
 import { DashboardPage } from './DashboardPage';
 import { homePanelService } from '../services/homePanelService';
 import type { HomePanel } from '../services/homePanelService';
+
+// Esta prueba falló una vez en una corrida completa (salida guardada: «Unable to find role=link … Mis estudiantes: 12», 1179 ms): el
+// panel tarda en pintarse la primera vez en esta suite (importación diferida de los bloques) y la búsqueda asíncrona por defecto
+// espera 1000 ms. Sola y en dos corridas completas pasa; la evidencia (1179 ms ≈ el límite de 1000 ms; pasa sola) apunta al tiempo y no a la pantalla → se da margen a las búsquedas
+// asíncronas de ESTE archivo (4 s) en vez de reintentar o ignorar la prueba.
+configure({ asyncUtilTimeout: 4000 });
 
 vi.mock('../services/homePanelService', () => ({ homePanelService: { getPanel: vi.fn() } }));
 
