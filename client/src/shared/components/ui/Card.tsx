@@ -24,7 +24,7 @@ export const CardHeader: React.FC<CardHeaderProps> = ({ title, description, acti
     <div className={styles.headingWrap}>
       {icon && <span className={styles.headIcon}>{icon}</span>}
       <div>
-        <h3 className={styles.title}>{title}</h3>
+        <h2 className={styles.title}>{title}</h2>
         {description && <p className={styles.desc}>{description}</p>}
       </div>
     </div>

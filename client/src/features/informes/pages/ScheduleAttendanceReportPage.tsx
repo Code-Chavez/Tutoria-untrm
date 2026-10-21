@@ -125,8 +125,8 @@ export function ScheduleAttendanceReportPage() {
         <div className={styles.filters}>
           {!isTutor && (
             <div className={styles.field}>
-              <label>Tutor</label>
-              <SelectField value={tutorId} onChange={(e) => setTutorId(e.target.value)}>
+              <label htmlFor="report-tutor">Tutor</label>
+              <SelectField id="report-tutor" value={tutorId} onChange={(e) => setTutorId(e.target.value)}>
                 <option value="">Selecciona un tutor…</option>
                 {tutors.map((t) => (
                   <option key={t.tutorId} value={t.tutorId}>
@@ -137,8 +137,9 @@ export function ScheduleAttendanceReportPage() {
             </div>
           )}
           <div className={styles.field}>
-            <label>Desde</label>
+            <label htmlFor="report-from">Desde</label>
             <input
+              id="report-from"
               type="date"
               className={styles.dateInput}
               value={from}
@@ -146,8 +147,9 @@ export function ScheduleAttendanceReportPage() {
             />
           </div>
           <div className={styles.field}>
-            <label>Hasta</label>
+            <label htmlFor="report-to">Hasta</label>
             <input
+              id="report-to"
               type="date"
               className={styles.dateInput}
               value={to}

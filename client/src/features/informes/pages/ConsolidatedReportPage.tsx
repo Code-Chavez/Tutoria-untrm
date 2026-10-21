@@ -103,7 +103,8 @@ export function ConsolidatedReportPage() {
         />
       ) : (
         <Card>
-          <div className={styles.tableWrap}>
+          {/* Región con desplazamiento: se enfoca con el teclado para poder recorrerla (WCAG 2.1.1) */}
+          <div className={styles.tableWrap} tabIndex={0} role="region" aria-label="Informe consolidado: tabla desplazable">
             <table className={styles.table}>
               <thead>
                 <tr>

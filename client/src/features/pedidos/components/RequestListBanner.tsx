@@ -16,7 +16,7 @@ export function RequestListBanner({ kind }: { kind: DataRequestKind }) {
   return (
     <section className={styles.box} aria-label={`Pedir ${copy.noun}`}>
       <div className={styles.text}>
-        <h3>¿Aún no tienes {copy.noun}? Pídela primero</h3>
+        <h2>¿Aún no tienes {copy.noun}? Pídela primero</h2>
         <p>La lista se pide por correo a la escuela. Cuando llegue el Excel, cárgalo aquí abajo.</p>
       </div>
       <div className={styles.actions}>

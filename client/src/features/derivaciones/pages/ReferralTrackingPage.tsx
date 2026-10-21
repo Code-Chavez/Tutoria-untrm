@@ -117,7 +117,9 @@ export function ReferralTrackingPage() {
                     <th>Servicio</th>
                     <th>Estado</th>
                     <th>Última actualización</th>
-                    <th aria-label="Acciones" />
+                    <th>
+                  <span className="sr-only">Acciones</span>
+                </th>
                   </tr>
                 </thead>
                 <tbody>

@@ -99,13 +99,20 @@ test.describe('estudiante', () => {
     await expect(page.locator('#item-01 input[type=radio]').first()).not.toBeChecked();
   });
 
-  test('«Saltar al contenido»: con Tab aparece, y con Enter el foco pasa al contenido principal (hay un solo <main>)', async ({ page }) => {
+  test('«Saltar al contenido»: con Tab aparece, y con Enter el foco pasa al contenido principal (hay un solo <main>)', async ({ page, browserName }) => {
     await loginUi(page, accounts.student);
     await expect(page.locator('main')).toHaveCount(1);
     await page.reload(); // como al abrir la pantalla: nada tiene el foco todavía
     await expect(page.locator('main')).toHaveCount(1);
-    await page.keyboard.press('Tab');
     const skip = page.getByRole('link', { name: 'Saltar al contenido' });
+    if (browserName === 'webkit') {
+      // Safari/WebKit no incluye los enlaces en el orden de Tab por defecto (hace falta Opción+Tab o activar «Tab resalta cada elemento»):
+      // es el comportamiento del navegador en TODOS los sitios. Aquí se comprueba que el enlace funciona cuando recibe el foco.
+      test.info().annotations.push({ type: 'webkit', description: 'Tab no llega a los enlaces por defecto (comportamiento de Safari); se enfoca el enlace por programa.' });
+      await skip.focus();
+    } else {
+      await page.keyboard.press('Tab');
+    }
     await expect(skip).toBeFocused();
     await expect(skip).toBeInViewport();
     await page.keyboard.press('Enter');

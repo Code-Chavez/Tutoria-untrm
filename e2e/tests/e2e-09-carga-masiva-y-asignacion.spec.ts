@@ -39,7 +39,7 @@ test('la coordinadora importa el Excel: 3 estudiantes se registran y la fila con
   });
   await page.getByRole('button', { name: 'Importar estudiantes' }).click();
 
-  await expect(page.getByRole('heading', { level: 3, name: 'Resultado de la carga' })).toBeVisible();
+  await expect(page.getByRole('heading', { level: 2, name: 'Resultado de la carga' })).toBeVisible();
   await expect(page.getByText('Filas procesadas').locator('..')).toContainText('4');
   await expect(page.getByText('Nuevos', { exact: true }).locator('..')).toContainText('3');
   await expect(page.getByText('Omitidos').locator('..')).toContainText('1');

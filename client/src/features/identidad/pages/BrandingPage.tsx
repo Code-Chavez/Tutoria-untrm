@@ -95,7 +95,7 @@ function BrandingEditor({
   return (
     <div className={styles.layout}>
       <Card padded>
-        <h3 className={styles.heading}>Textos</h3>
+        <h2 className={styles.heading}>Textos</h2>
         <div className={styles.field}>
           <label htmlFor="br-institution">Nombre de la institución</label>
           <input id="br-institution" value={form.institutionName} maxLength={150} onChange={(e) => setForm({ ...form, institutionName: e.target.value })} />
@@ -106,7 +106,7 @@ function BrandingEditor({
           <small>Aparece junto al logotipo en la barra lateral y como título del navegador.</small>
         </div>
 
-        <h3 className={styles.heading}>Colores</h3>
+        <h2 className={styles.heading}>Colores</h2>
         <div className={styles.colors}>
           {([
             ['primaryColor', 'Color principal', 'br-primary'],
@@ -137,7 +137,7 @@ function BrandingEditor({
           </p>
         )}
 
-        <h3 className={styles.heading}>Logotipo</h3>
+        <h2 className={styles.heading}>Logotipo</h2>
         <div className={styles.logoRow}>
           <img src={logoSrc} alt="Logotipo actual" className={styles.logoThumb} />
           <div className={styles.logoActions}>
@@ -170,7 +170,7 @@ function BrandingEditor({
       </Card>
 
       <Card padded>
-        <h3 className={styles.heading}>Vista previa</h3>
+        <h2 className={styles.heading}>Vista previa</h2>
         <div className={styles.preview} style={previewVars} data-testid="preview">
           <div className={styles.previewBar}>
             <img src={logoSrc} alt="" className={styles.previewLogo} />

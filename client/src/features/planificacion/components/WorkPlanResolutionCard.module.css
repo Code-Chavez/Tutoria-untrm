@@ -11,7 +11,7 @@
   margin-bottom: var(--s3);
 }
 
-.head h3 {
+.head h2 {
   margin: 0;
   font-size: var(--fs-sm);
   color: var(--g900);
@@ -43,7 +43,7 @@
   padding-top: var(--s3);
 }
 
-.versions h4 {
+.versions h3 {
   margin: 0 0 var(--s2);
   font-size: var(--fs-sm);
   color: var(--g900);

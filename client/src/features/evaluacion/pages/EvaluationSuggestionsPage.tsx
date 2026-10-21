@@ -37,8 +37,8 @@ export function EvaluationSuggestionsPage() {
 
       <Card padded className={styles.filters}>
         <div className={styles.field}>
-          <label>Facultad</label>
-          <SelectField value={facultyId} onChange={(e) => setFacultyId(e.target.value)}>
+          <label htmlFor="sugg-faculty">Facultad</label>
+          <SelectField id="sugg-faculty" value={facultyId} onChange={(e) => setFacultyId(e.target.value)}>
             <option value="">Todas las facultades</option>
             {faculties.map((f) => (
               <option key={f.id} value={f.id}>
@@ -48,8 +48,8 @@ export function EvaluationSuggestionsPage() {
           </SelectField>
         </div>
         <div className={styles.field}>
-          <label>Escuela Profesional</label>
-          <SelectField value={schoolId} onChange={(e) => setSchoolId(e.target.value)}>
+          <label htmlFor="sugg-school">Escuela Profesional</label>
+          <SelectField id="sugg-school" value={schoolId} onChange={(e) => setSchoolId(e.target.value)}>
             <option value="">Todas las escuelas</option>
             {schools.map((s) => (
               <option key={s.id} value={s.id}>

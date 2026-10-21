@@ -20,7 +20,7 @@ export const EmptyState: React.FC<EmptyStateProps> = ({
 }) => (
   <div className={styles.wrap} role={variant === 'error' ? 'alert' : undefined}>
     <span className={`${styles.icon} ${styles[variant]}`}>{icon}</span>
-    <h3 className={styles.title}>{title}</h3>
+    <h2 className={styles.title}>{title}</h2>
     {description && <p className={styles.desc}>{description}</p>}
     {action && <div className={styles.action}>{action}</div>}
   </div>

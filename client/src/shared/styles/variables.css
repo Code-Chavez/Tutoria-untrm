@@ -12,7 +12,7 @@
   --g900: #16202E;
   --g700: #384456;
   --g600: #55606E;
-  --g500: #6B7683;
+  --g500: #5E6977; /* texto secundario: ≥4,5:1 también sobre --g100 */
   --g400: #94A0AE;
   --g300: #C9D2DD;
   --g200: #E4E9F1;
@@ -21,10 +21,10 @@
   --blanco: #fff;
 
   /* Semánticos */
-  --ok: #1E7F4F;
+  --ok: #176B41; /* verde de estado: texto AA sobre --ok-bg */
   --ok-bg: #E6F4EC;
   /* Texto verde sobre --ok-bg con contraste AA (≈5,8:1) */
-  --ok-texto: #176B41;
+  --ok-texto: var(--ok);
   --alerta: #C77800;
   --alerta-bg: #FBF0DC;
   /* Texto ámbar sobre --alerta-bg con contraste AA (≈5,7:1); --alerta (≈3:1) queda para bordes e íconos, no para texto pequeño */

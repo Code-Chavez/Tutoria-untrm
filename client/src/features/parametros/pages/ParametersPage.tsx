@@ -113,7 +113,7 @@ export function ParametersPage() {
       ) : (
         groups.map((group) => (
           <Card key={group} padded className={styles.group}>
-            <h3>{group}</h3>
+            <h2>{group}</h2>
             <ul className={styles.list}>
               {parameters
                 .filter((p) => p.group === group)

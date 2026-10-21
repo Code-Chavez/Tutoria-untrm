@@ -20,7 +20,7 @@ export const TeacherImportResult: React.FC<TeacherImportResultProps> = ({ report
             {success ? <CheckCircleIcon size={20} /> : <AlertTriangleIcon size={20} />}
           </span>
           <div>
-            <h3>Resultado de la carga</h3>
+            <h2>Resultado de la carga</h2>
             <p>
               {success
                 ? 'Todos los docentes quedaron registrados con su escuela y recibieron su invitación.'

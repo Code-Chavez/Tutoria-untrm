@@ -31,7 +31,11 @@ export async function ensureAnaWithElena(): Promise<{ adminToken: string; anaId:
 }
 
 /** Crea un tutorado nuevo (código único) en Ingeniería de Sistemas y lo asigna a Elena. */
-export async function createStudentForElena(adminToken: string, elenaId: string): Promise<{ id: string; fullName: string }> {
+export async function createStudentForElena(
+  adminToken: string,
+  elenaId: string,
+  options: { cycle?: number; assignToElena?: boolean } = {},
+): Promise<{ id: string; fullName: string }> {
   const schools = await api<{ schools: { id: string; name: string }[] } | { id: string; name: string }[]>(adminToken, 'GET', '/schools');
   const list = Array.isArray(schools.body) ? schools.body : schools.body.schools;
   const school = list.find((s) => /Sistemas/.test(s.name));
@@ -41,11 +45,12 @@ export async function createStudentForElena(adminToken: string, elenaId: string)
     studentCode: code,
     firstName: 'Prueba',
     lastName: `E2E ${code}`,
-    cycle: 3,
+    cycle: options.cycle ?? 3,
     schoolId: school!.id,
   });
   expect(created.status).toBe(201);
   const id = created.body.student.id;
+  if (options.assignToElena === false) return { id, fullName: `Prueba E2E ${code}` };
   // Si la escuela ya tiene tutor para ese ciclo, el estudiante nuevo nace con él y asignar se rechaza (correctamente): el cambio de
   // tutor es una reasignación, que exige motivo y deja historial.
   const assigned = await api(adminToken, 'POST', '/students/assign', { tutorId: elenaId, studentIds: [id] });
@@ -78,9 +83,9 @@ export function dateInput(d: Date): string {
 export async function createPortalStudent(
   adminToken: string,
   elenaId: string,
-  options: { pending?: boolean } = {},
+  options: { pending?: boolean; cycle?: number; assignToElena?: boolean } = {},
 ): Promise<{ id: string; email: string; password: string; greeting: string; invitationLink: string }> {
-  const student = await createStudentForElena(adminToken, elenaId);
+  const student = await createStudentForElena(adminToken, elenaId, { cycle: options.cycle, assignToElena: options.assignToElena });
   const roles = await api<{ roles: { id: string; name: string }[] } | { id: string; name: string }[]>(adminToken, 'GET', '/roles');
   const roleList = Array.isArray(roles.body) ? roles.body : roles.body.roles;
   const role = roleList.find((r) => r.name === 'Tutorado');
