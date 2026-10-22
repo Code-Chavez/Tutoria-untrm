@@ -22,7 +22,7 @@ import { SchoolContactRepository } from '@domain/repositories/SchoolContactRepos
 import { Mailer } from '@application/ports/Mailer';
 import { StudentTemplateProvider } from '@application/ports/StudentTemplateProvider';
 
-const school = { id: 's1', name: 'Ingeniería de Sistemas', facultyId: 'f1', isActive: true, createdAt: new Date('2026-01-01'), requestEmail: 'registros@untrm.edu.pe' };
+const school = { cycleCount: 10, id: 's1', name: 'Ingeniería de Sistemas', facultyId: 'f1', isActive: true, createdAt: new Date('2026-01-01'), requestEmail: 'registros@untrm.edu.pe' };
 const requester = { id: 'u1', email: 'rosa@untrm.edu.pe', firstName: 'Rosa', lastName: 'Mendoza' };
 
 describe('pedido de listas por correo (fase 2)', () => {
@@ -58,6 +58,16 @@ describe('pedido de listas por correo (fase 2)', () => {
   const send = () => new SendDataRequestUseCase(guard as unknown as StudentAccessGuard, periods, schools, faculties, users, mailer, template, requests, audit);
 
   describe('enviar el pedido', () => {
+    it('rechaza un ciclo ajeno al plan de la escuela antes de enviar correo', async () => {
+      await expect(send().execute('u1', { schoolId: 's1', cycles: [11] })).rejects.toBeInstanceOf(InvalidDataRequestError);
+      expect(mailer.send).not.toHaveBeenCalled();
+    });
+
+    it('permite pedir el ciclo 12 cuando la escuela tiene doce ciclos', async () => {
+      schools.findById.mockResolvedValue({ ...school, cycleCount: 12 });
+      await send().execute('u1', { schoolId: 's1', cycles: [12] });
+      expect(mailer.send).toHaveBeenCalledWith(expect.objectContaining({ text: expect.stringContaining('ciclos 12') }));
+    });
     it('envía un correo formal al correo configurado de la escuela, con copia y respuesta a quien pide, y la plantilla adjunta', async () => {
       const result = await send().execute('u1', { schoolId: 's1', cycles: [3, 1, 3], note: 'Con urgencia' });
 

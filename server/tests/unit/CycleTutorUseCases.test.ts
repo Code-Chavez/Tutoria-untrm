@@ -39,7 +39,7 @@ describe('tutor por ciclo (fase 3b)', () => {
   beforeEach(() => {
     guard = { assertSchoolAccess: jest.fn().mockResolvedValue(undefined) };
     periods = { findActive: jest.fn().mockResolvedValue({ id: 'p1', name: '2026-II' }) } as unknown as jest.Mocked<AcademicPeriodRepository>;
-    schools = { findById: jest.fn().mockResolvedValue({ id: 's1', name: 'Sistemas' }), findAll: jest.fn() } as unknown as jest.Mocked<SchoolRepository>;
+    schools = { findById: jest.fn().mockResolvedValue({ id: 's1', name: 'Sistemas', cycleCount: 10 }), findAll: jest.fn() } as unknown as jest.Mocked<SchoolRepository>;
     users = { findById: jest.fn().mockResolvedValue({ id: 't1', roleId: 'rt', isActive: true, schoolId: 's1' }) } as unknown as jest.Mocked<UserRepository>;
     roles = { findByName: jest.fn().mockResolvedValue({ id: 'rt', name: 'Docente Tutor' }) } as unknown as jest.Mocked<RoleRepository>;
     cycleTutors = {
@@ -98,6 +98,7 @@ describe('tutor por ciclo (fase 3b)', () => {
       periods.findActive.mockResolvedValue(null);
       await expect(set().execute('coord', input)).rejects.toBeInstanceOf(NoPeriodForCycleTutorsError);
       await expect(set().execute('coord', { ...input, cycle: 0 })).rejects.toBeInstanceOf(InvalidCycleError);
+      periods.findActive.mockResolvedValue({ id: 'p1', name: '2026-II' } as Awaited<ReturnType<AcademicPeriodRepository['findActive']>>);
       await expect(set().execute('coord', { ...input, cycle: 11 })).rejects.toBeInstanceOf(InvalidCycleError);
     });
 
@@ -171,11 +172,19 @@ describe('tutor por ciclo (fase 3b)', () => {
     cycleTutors.listBySchool.mockResolvedValue([assignment({ cycle: 2, tutorId: 't1', isException: true, note: 'x' })]);
     cycleTutors.enrolledByCycle.mockResolvedValue(new Map([[2, { total: 8, withoutTutor: 3 }]]));
 
-    const result = await new ListCycleTutorsUseCase(guard as unknown as StudentAccessGuard, periods, cycleTutors).execute('coord', 's1');
+    const result = await new ListCycleTutorsUseCase(guard as unknown as StudentAccessGuard, periods, cycleTutors, schools).execute('coord', 's1');
 
     expect(result.cycles).toHaveLength(10);
     expect(result.cycles[1]).toMatchObject({ cycle: 2, assignment: { tutorId: 't1', isException: true }, enrolled: 8, withoutTutor: 3 });
     expect(result.cycles[0]).toMatchObject({ cycle: 1, assignment: null, enrolled: 0 });
+  });
+
+  it('lista y permite asignar el ciclo 12 según la configuración de la escuela', async () => {
+    schools.findById.mockResolvedValue({ id: 's1', name: 'Sistemas', facultyId: 'f1', isActive: true, createdAt: new Date(), cycleCount: 12 });
+    const result = await new ListCycleTutorsUseCase(guard as unknown as StudentAccessGuard, periods, cycleTutors, schools).execute('coord', 's1');
+    expect(result.cycles).toHaveLength(12);
+    await set().execute('coord', { ...input, cycle: 12 });
+    expect(cycleTutors.upsert).toHaveBeenCalledWith(expect.objectContaining({ cycle: 12 }));
   });
 
   it('quitar al tutor del ciclo lo deja en la bitácora y no toca a los estudiantes', async () => {

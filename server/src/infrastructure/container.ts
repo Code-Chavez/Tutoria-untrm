@@ -357,7 +357,7 @@ const changePasswordUseCase = new ChangePasswordUseCase(
 
 const cycleTutorRepository = new PrismaCycleTutorRepository(prisma);
 const cycleTutorApplier = new CycleTutorApplier(cycleTutorRepository, studentRepository, tutorAssignmentHistoryRepository);
-const listCycleTutorsUseCase = new ListCycleTutorsUseCase(studentAccessGuard, academicPeriodRepository, cycleTutorRepository);
+const listCycleTutorsUseCase = new ListCycleTutorsUseCase(studentAccessGuard, academicPeriodRepository, cycleTutorRepository, schoolRepository);
 const getInstitutionalPendingUseCase = new GetInstitutionalPendingUseCase(
   studentAccessGuard,
   academicPeriodRepository,
@@ -374,7 +374,7 @@ const removeCycleTutorUseCase = new RemoveCycleTutorUseCase(studentAccessGuard, 
 const acceptanceConfig = { publicUrl: env.PUBLIC_APP_URL, ttlHours: env.INVITATION_TTL_HOURS };
 const requestTutorAcceptanceUseCase = new RequestTutorAcceptanceUseCase(studentAccessGuard, academicPeriodRepository, schoolRepository, userRepository, cycleTutorRepository, mailer, auditLogRepository, acceptanceConfig);
 const getTutorAcceptanceUseCase = new GetTutorAcceptanceUseCase(cycleTutorRepository, userRepository, schoolRepository, academicPeriodRepository, systemParameterRepository);
-const respondTutorAcceptanceUseCase = new RespondTutorAcceptanceUseCase(cycleTutorRepository, userRepository, schoolRepository, academicPeriodRepository, systemParameterRepository, mailer, auditLogRepository);
+const respondTutorAcceptanceUseCase = new RespondTutorAcceptanceUseCase(cycleTutorRepository, userRepository, schoolRepository, academicPeriodRepository, systemParameterRepository, mailer, auditLogRepository, issueInvitationUseCase);
 const createStudentUseCase = new CreateStudentUseCase(studentRepository, schoolRepository, studentAccessGuard, academicPeriodRepository, periodEnrollmentRepository, cycleTutorApplier);
 const updateStudentUseCase = new UpdateStudentUseCase(studentRepository, schoolRepository, studentAccessGuard);
 const listStudentsUseCase = new ListStudentsUseCase(studentRepository, studentAccessGuard);

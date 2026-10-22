@@ -54,6 +54,7 @@ export class PrismaCatalogRepository implements CatalogRepository {
           name: r.name,
           isActive: r.isActive,
           facultyId: r.facultyId,
+          cycleCount: r.cycleCount,
           usage: r._count.students + r._count.evaluationWindows + r._count.workPlans,
         }));
       }
@@ -119,7 +120,7 @@ export class PrismaCatalogRepository implements CatalogRepository {
       case 'schools':
         id = (
           await this.prisma.school.create({
-            data: { name: input.name, facultyId: input.facultyId as string, isActive: input.isActive ?? true },
+            data: { name: input.name, facultyId: input.facultyId as string, isActive: input.isActive ?? true, cycleCount: input.cycleCount },
           })
         ).id;
         break;
@@ -162,7 +163,7 @@ export class PrismaCatalogRepository implements CatalogRepository {
       case 'schools':
         await this.prisma.school.update({
           where: { id },
-          data: { ...common, ...(input.facultyId !== undefined && { facultyId: input.facultyId }) },
+          data: { ...common, ...(input.facultyId !== undefined && { facultyId: input.facultyId }), ...(input.cycleCount !== undefined && { cycleCount: input.cycleCount }) },
         });
         break;
       case 'periods':
@@ -235,6 +236,14 @@ export class PrismaCatalogRepository implements CatalogRepository {
 
   async facultyExists(id: string): Promise<boolean> {
     return (await this.prisma.faculty.count({ where: { id } })) > 0;
+  }
+
+  async highestSchoolCycle(id: string): Promise<number> {
+    const [students, assignments] = await Promise.all([
+      this.prisma.student.aggregate({ where: { schoolId: id }, _max: { cycle: true } }),
+      this.prisma.cycleTutorAssignment.aggregate({ where: { schoolId: id }, _max: { cycle: true } }),
+    ]);
+    return Math.max(students._max.cycle ?? 0, assignments._max.cycle ?? 0);
   }
 
   async findActivePeriodId(): Promise<string | null> {

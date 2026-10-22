@@ -127,6 +127,9 @@ export class SendDataRequestUseCase {
 
     const cycles = [...new Set(input.cycles ?? [])].sort((a, b) => a - b);
     if (cycles.some((c) => !Number.isInteger(c) || c < 1 || c > 14)) throw new InvalidDataRequestError('Los ciclos deben ser números enteros entre 1 y 14');
+    if (kind === 'ESTUDIANTES' && cycles.some((cycle) => cycle > (school.cycleCount ?? 0))) {
+      throw new InvalidDataRequestError('Los ciclos elegidos exceden la cantidad configurada para esta escuela');
+    }
     const note = input.note?.trim() || null;
     if (note && note.length > 500) throw new InvalidDataRequestError('Las observaciones no pueden pasar de 500 caracteres');
 

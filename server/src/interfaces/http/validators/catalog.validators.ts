@@ -9,7 +9,7 @@ const date = z.coerce.date();
 // y el código (ciclos, servicios, motivos) no se puede cambiar.
 const CREATE: Record<CatalogKind, z.ZodObject<z.ZodRawShape>> = {
   faculties: z.object({ name, isActive }),
-  schools: z.object({ name, facultyId: z.string().uuid('La facultad debe ser un UUID válido'), isActive }),
+  schools: z.object({ name, facultyId: z.string().uuid('La facultad debe ser un UUID válido'), cycleCount: z.number().int().min(1).max(14).optional(), isActive }),
   periods: z.object({ name, startDate: date, endDate: date, isActive }),
   cycles: z.object({
     name,

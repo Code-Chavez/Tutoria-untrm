@@ -35,6 +35,8 @@ router.get('/tutor-acceptance/:token', limiter, async (req: Request, res: Respon
 });
 
 router.post('/tutor-acceptance/:token', limiter, async (req: Request, res: Response) => {
+  // La respuesta puede contener un enlace personal de activación de un solo uso.
+  res.setHeader('Cache-Control', 'no-store');
   try {
     const body = responseSchema.parse(req.body);
     res.status(200).json(await container.useCases.respondTutorAcceptanceUseCase.execute(req.params.token as string, body, req.ip));

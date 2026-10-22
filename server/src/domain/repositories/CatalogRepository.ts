@@ -13,6 +13,7 @@ export interface CatalogRepository {
     excludeId?: string,
   ): Promise<boolean>;
   facultyExists(id: string): Promise<boolean>;
+  highestSchoolCycle(id: string): Promise<number>;
   /** Deja un único periodo activo (el indicado); los demás pasan a inactivos. */
   activateOnlyPeriod(id: string): Promise<void>;
   /** El periodo vigente, si lo hay (cerrarlo se hace en «Cierre de periodo», no desde el catálogo). */

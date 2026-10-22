@@ -1,3 +1,4 @@
+import { IssueInvitationUseCase } from '@application/use-cases/users/IssueInvitationUseCase';
 import { StudentAccessGuard } from '@application/access/StudentAccessGuard';
 import { Mailer } from '@application/ports/Mailer';
 import { generateSecretToken, hashSecretToken } from '@application/use-cases/auth/secretToken';
@@ -193,9 +194,10 @@ export class RespondTutorAcceptanceUseCase {
     private readonly parameters: SystemParameterRepository,
     private readonly mailer: Mailer,
     private readonly audit: AuditLogRepository,
+    private readonly invitations: Pick<IssueInvitationUseCase, 'execute'>,
   ) {}
 
-  async execute(token: string, response: AcceptanceResponse, ip?: string | null): Promise<{ accepted: boolean }> {
+  async execute(token: string, response: AcceptanceResponse, ip?: string | null): Promise<{ accepted: boolean; activationLink?: string; activationUnavailable?: boolean }> {
     const assignment = await loadByToken(this.cycleTutors, token);
     const now = new Date();
     if (response.accept) {
@@ -215,6 +217,18 @@ export class RespondTutorAcceptanceUseCase {
       details: `ciclo ${assignment.cycle}`,
       ipAddress: ip ?? null,
     });
+    if (response.accept) {
+      const tutor = await this.users.findById(assignment.tutorId);
+      if (tutor?.isActive && tutor.mustChangePassword) {
+        try {
+          const invitation = await this.invitations.execute(tutor.id, tutor.id, ip ?? undefined);
+          return { accepted: true, activationLink: invitation.link };
+        } catch {
+          // La aceptación ya quedó registrada. Nunca exponer secretos ni fingir que debe responder de nuevo.
+          return { accepted: true, activationUnavailable: true };
+        }
+      }
+    }
     return { accepted: response.accept };
   }
 
