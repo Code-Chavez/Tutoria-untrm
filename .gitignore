@@ -42,3 +42,8 @@ doc/
 
 # Evidencias de sesión (HU-25): archivos subidos, no versionados
 server/storage/.env.production
+
+# Archivos subidos por usuarios; nunca agregarlos como pendientes de código
+/server/storage/evidence/
+# Imágenes de contexto generadas descartadas por el usuario
+/client/public/images/contexto/
