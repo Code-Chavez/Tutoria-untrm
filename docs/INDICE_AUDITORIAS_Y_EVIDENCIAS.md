@@ -30,4 +30,4 @@ Estos documentos conservan el estado observado en su fecha y en el commit indica
 
 ## Límites de esta entrega
 
-Solo se versiona documentación. No se modifican endpoints, lógica, dependencias, migraciones ni interfaces. No se incluyen archivos subidos a `server/storage/evidence`, credenciales de servicios, entornos locales ni CSS sin uso. No implica aprobación del Product Owner, ejecución del piloto ni movimiento de tarjetas del tablero.
+Solo se versiona documentación. No se modifican endpoints, lógica, dependencias, migraciones ni interfaces. No se incluyen archivos subidos a `server/storage/evidence`, credenciales de servicios, entornos locales ni CSS sin uso. Las imágenes de contexto generadas fueron descartadas; ya no existen en el proyecto y se eliminó su CSS sobrante. No implica aprobación del Product Owner, ejecución del piloto ni movimiento de tarjetas del tablero.
