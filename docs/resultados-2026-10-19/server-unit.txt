@@ -1,0 +1,113 @@
+PASS tests/unit/TutorAcceptanceUseCases.test.ts (42.095 s)
+PASS tests/unit/TutoringRequestRouter.test.ts
+PASS tests/unit/CreateOwnTutoringRequestUseCase.test.ts
+PASS tests/unit/StudentAccessScope.test.ts
+PASS tests/unit/TutoringRequestLinker.test.ts
+PASS tests/unit/ScheduleSessionUseCase.test.ts
+PASS tests/unit/BcryptPasswordHasher.test.ts (53.003 s)
+PASS tests/unit/ReferralConstanciaPdf.test.ts (6.933 s)
+PASS tests/unit/ScheduleAttendanceReportPdf.test.ts (14.821 s)
+PASS tests/unit/productionConfig.test.ts
+PASS tests/unit/GetHomePanelUseCase.test.ts
+PASS tests/unit/CreateTutoringRequestUseCase.test.ts
+PASS tests/unit/GetStudentRecordUseCase.test.ts
+PASS tests/unit/GetInstitutionalPendingUseCase.test.ts
+PASS tests/unit/LoginUseCase.test.ts
+PASS tests/unit/CreateReferralUseCase.test.ts
+PASS tests/unit/BrandingUseCases.test.ts
+PASS tests/unit/UpdateUserUseCase.test.ts
+PASS tests/unit/SessionNotifier.test.ts
+PASS tests/unit/sessionValidators.test.ts
+PASS tests/unit/AssignRoleUseCase.test.ts
+PASS tests/unit/ReportFilters.test.ts
+PASS tests/unit/AccountEmailPolicy.test.ts
+PASS tests/unit/StudentEmail.test.ts
+PASS tests/unit/SignedDocumentUseCases.test.ts
+PASS tests/unit/ImportStudentsUseCase.test.ts
+PASS tests/unit/WorkPlanUseCases.test.ts
+PASS tests/unit/GetConsolidatedReportUseCase.test.ts
+PASS tests/unit/GetReferralConstanciaUseCase.test.ts
+PASS tests/unit/IssueInvitationUseCase.test.ts
+PASS tests/unit/ImportReportWorkbook.test.ts (69.58 s)
+PASS tests/unit/ScheduleAttendanceReportWorkbook.test.ts (69.656 s)
+PASS tests/unit/dataLimitsValidators.test.ts
+PASS tests/unit/ExcelStudentParser.test.ts (69.773 s)
+PASS tests/unit/RefreshSessionUseCase.test.ts
+PASS tests/unit/RequestPasswordResetUseCase.test.ts
+PASS tests/unit/ReferralAccessPolicy.test.ts
+PASS tests/unit/GetIndicatorsUseCase.test.ts
+PASS tests/unit/ExportController.test.ts
+PASS tests/unit/GetReferralByIdUseCase.test.ts
+PASS tests/unit/GetScheduleAttendanceReportUseCase.test.ts
+PASS tests/unit/GetReferralTrackingUseCase.test.ts
+PASS tests/unit/CatalogUseCases.test.ts
+PASS tests/unit/AuditLabelsCoverage.test.ts
+PASS tests/unit/GetEvaluationStatisticsUseCase.test.ts
+PASS tests/unit/DataRequestUseCases.test.ts
+PASS tests/unit/UpdateReferralStatusUseCase.test.ts
+PASS tests/unit/requireOpenPeriod.test.ts
+PASS tests/unit/WorkPlanResolutionUseCases.test.ts
+PASS tests/unit/RescheduleSessionUseCase.test.ts
+PASS tests/unit/SemesterReportUseCases.test.ts
+PASS tests/unit/TtlCache.test.ts
+PASS tests/unit/RegisterAttendanceUseCase.test.ts
+PASS tests/unit/MarkStudentRiskUseCase.test.ts
+PASS tests/unit/SystemParameterUseCases.test.ts
+PASS tests/unit/CreateFollowUpUseCase.test.ts
+PASS tests/unit/EmailOutboxProcessor.test.ts
+PASS tests/unit/authenticate.test.ts
+PASS tests/unit/ReassignStudentUseCase.test.ts
+PASS tests/unit/GetEvaluationResultsUseCase.test.ts
+PASS tests/unit/TutoringRequestAttention.test.ts
+PASS tests/unit/emailRules.test.ts
+PASS tests/unit/CreateStudentUseCase.test.ts
+PASS tests/unit/RecordSessionAttendanceUseCase.test.ts
+PASS tests/unit/ListEvaluationWindowsUseCase.test.ts
+PASS tests/unit/CycleTutorUseCases.test.ts
+PASS tests/unit/ChangePasswordUseCase.test.ts
+PASS tests/unit/CreateInterviewUseCase.test.ts
+PASS tests/unit/GetSessionEvidenceFileUseCase.test.ts
+PASS tests/unit/PeriodLifecycle.test.ts
+PASS tests/unit/UpsertSupportContactUseCase.test.ts
+PASS tests/unit/GetEvaluationStatusUseCase.test.ts
+PASS tests/unit/EmailNotifications.test.ts
+PASS tests/unit/SubmitEvaluationUseCase.test.ts
+PASS tests/unit/LinkStudentPortalAccountUseCase.test.ts
+PASS tests/unit/AssignStudentsUseCase.test.ts
+PASS tests/unit/SessionOutcome.test.ts
+PASS tests/unit/BrandedExport.test.ts (77.062 s)
+PASS tests/unit/UploadSessionEvidenceUseCase.test.ts
+PASS tests/unit/requireEnrollment.test.ts
+PASS tests/unit/WorkPlanRevisions.test.ts
+PASS tests/unit/ResetPasswordUseCase.test.ts
+PASS tests/unit/GetEvaluationSuggestionsUseCase.test.ts
+PASS tests/unit/CancelSessionUseCase.test.ts
+PASS tests/unit/ImportTutorsUseCase.test.ts
+PASS tests/unit/authorize.test.ts
+PASS tests/unit/AdmonitionUseCases.test.ts
+PASS tests/unit/ListSessionEvidenceUseCase.test.ts
+PASS tests/unit/CampusUseCases.test.ts
+PASS tests/unit/CreateUserUseCase.test.ts
+PASS tests/unit/AuditLogUseCases.test.ts
+PASS tests/unit/securityPolicy.test.ts
+PASS tests/unit/auditEntry.test.ts
+PASS tests/unit/GetRiskAlertsUseCase.test.ts
+PASS tests/unit/SetEvaluationWindowUseCase.test.ts
+PASS tests/unit/auditAccess.test.ts
+PASS tests/unit/studentValidators.test.ts
+PASS tests/unit/ListOwnTutoringRequestsAppointment.test.ts
+PASS tests/unit/ReferralStudentName.test.ts
+PASS tests/unit/GetTutorWorkloadUseCase.test.ts
+PASS tests/unit/MarkAllNotificationsReadUseCase.test.ts
+PASS tests/unit/MarkNotificationReadUseCase.test.ts
+PASS tests/unit/suggestReferralService.test.ts
+PASS tests/unit/ExportBuilders.test.ts (80.518 s)
+PASS tests/unit/GetNotificationsUseCase.test.ts
+PASS tests/unit/fileSignature.test.ts
+PASS tests/unit/errorHandler.test.ts
+
+Test Suites: 107 passed, 107 total
+Tests:       1007 passed, 1007 total
+Snapshots:   0 total
+Time:        91.401 s, estimated 99 s
+Ran all test suites matching /tests\\unit/i.

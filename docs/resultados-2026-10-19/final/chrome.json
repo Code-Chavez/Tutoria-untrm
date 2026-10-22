@@ -1,0 +1,3861 @@
+{
+  "config": {
+    "configFile": "C:\\Proyects\\Proyects\\Tutoria-untrm\\e2e\\playwright.config.ts",
+    "rootDir": "C:/Proyects/Proyects/Tutoria-untrm/e2e/tests",
+    "forbidOnly": false,
+    "fullyParallel": false,
+    "globalSetup": null,
+    "globalTeardown": null,
+    "globalTimeout": 0,
+    "grep": {},
+    "grepInvert": null,
+    "maxFailures": 0,
+    "metadata": {
+      "actualWorkers": 1
+    },
+    "preserveOutput": "always",
+    "reporter": [
+      [
+        "list"
+      ],
+      [
+        "json"
+      ]
+    ],
+    "reportSlowTests": {
+      "max": 5,
+      "threshold": 300000
+    },
+    "quiet": false,
+    "projects": [
+      {
+        "outputDir": "C:/Proyects/Proyects/Tutoria-untrm/e2e/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "",
+        "name": "",
+        "testDir": "C:/Proyects/Proyects/Tutoria-untrm/e2e/tests",
+        "testIgnore": [],
+        "testMatch": [
+          "**/*.@(spec|test).?(c|m)[jt]s?(x)"
+        ],
+        "timeout": 150000
+      }
+    ],
+    "shard": null,
+    "updateSnapshots": "missing",
+    "updateSourceMethod": "patch",
+    "version": "1.56.1",
+    "workers": 1,
+    "webServer": null
+  },
+  "suites": [
+    {
+      "title": "e2e-01-acceso-y-menu.spec.ts",
+      "file": "e2e-01-acceso-y-menu.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [
+        {
+          "title": "Administrador DBU: menú y panel de inicio",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 150000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 58701,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-19T19:20:31.632Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "b8db18e3cd0d80bd29c9-071e9c8e14171018706a",
+          "file": "e2e-01-acceso-y-menu.spec.ts",
+          "line": 17,
+          "column": 7
+        },
+        {
+          "title": "Coordinador: menú y panel de inicio",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 150000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 34657,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-19T19:21:32.419Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "b8db18e3cd0d80bd29c9-1ef7249e3dfb7debc1d3",
+          "file": "e2e-01-acceso-y-menu.spec.ts",
+          "line": 17,
+          "column": 7
+        },
+        {
+          "title": "Docente Tutor: menú y panel de inicio",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 150000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 31915,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-19T19:22:07.273Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "b8db18e3cd0d80bd29c9-e9fa5d2638c9ce7991e5",
+          "file": "e2e-01-acceso-y-menu.spec.ts",
+          "line": 17,
+          "column": 7
+        },
+        {
+          "title": "Profesional de Servicio: menú y panel de inicio",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 150000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 28929,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-19T19:22:39.256Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "b8db18e3cd0d80bd29c9-98275fd888c13bc59c3d",
+          "file": "e2e-01-acceso-y-menu.spec.ts",
+          "line": 17,
+          "column": 7
+        },
+        {
+          "title": "Vicerrectorado: menú y panel de inicio",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 150000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 32543,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-19T19:23:08.304Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "b8db18e3cd0d80bd29c9-9511eae40baafbecb015",
+          "file": "e2e-01-acceso-y-menu.spec.ts",
+          "line": 17,
+          "column": 7
+        },
+        {
+          "title": "Decano: menú y panel de inicio",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 150000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 20616,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-19T19:23:40.927Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "b8db18e3cd0d80bd29c9-d3b366f20dc55c4ee151",
+          "file": "e2e-01-acceso-y-menu.spec.ts",
+          "line": 17,
+          "column": 7
+        },
+        {
+          "title": "Tutorado: menú y panel de inicio",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 150000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 55602,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-19T19:24:01.636Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "b8db18e3cd0d80bd29c9-559c11c3f4c5c1680c64",
+          "file": "e2e-01-acceso-y-menu.spec.ts",
+          "line": 17,
+          "column": 7
+        },
+        {
+          "title": "credenciales inválidas muestran un error y no entran",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 150000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 42548,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-19T19:24:57.367Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "b8db18e3cd0d80bd29c9-ee3ae21eddcbacc26398",
+          "file": "e2e-01-acceso-y-menu.spec.ts",
+          "line": 29,
+          "column": 5
+        },
+        {
+          "title": "una ruta protegida sin sesión redirige al ingreso",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 150000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 12984,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-19T19:25:40.040Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "b8db18e3cd0d80bd29c9-92159f18351ebf418c0f",
+          "file": "e2e-01-acceso-y-menu.spec.ts",
+          "line": 38,
+          "column": 5
+        },
+        {
+          "title": "un rol no entra a una página que no es suya",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 150000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 32883,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-19T19:25:53.138Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "b8db18e3cd0d80bd29c9-53a66ea561759b942c40",
+          "file": "e2e-01-acceso-y-menu.spec.ts",
+          "line": 43,
+          "column": 5
+        },
+        {
+          "title": "el menú es corto: Periodo académico, Informes y Configuración son una pantalla con pestañas, y los grupos se pliegan",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 150000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 31154,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-19T19:26:26.156Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "b8db18e3cd0d80bd29c9-2b42b355eb926b70f4a9",
+          "file": "e2e-01-acceso-y-menu.spec.ts",
+          "line": 49,
+          "column": 5
+        },
+        {
+          "title": "el expediente se abre desde Tutorados (ya no hay una entrada de menú) y vuelve a Tutorados",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 150000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 56022,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-19T19:26:57.426Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "b8db18e3cd0d80bd29c9-bb843957a650773628d6",
+          "file": "e2e-01-acceso-y-menu.spec.ts",
+          "line": 80,
+          "column": 5
+        }
+      ]
+    },
+    {
+      "title": "e2e-02-solicitud-de-tutoria.spec.ts",
+      "file": "e2e-02-solicitud-de-tutoria.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [
+        {
+          "title": "el estudiante registra la solicitud y queda Pendiente",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 150000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 52689,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-19T19:27:53.720Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "ce9837e13be2f07a1807-4cf920f72f8a88963c67",
+          "file": "e2e-02-solicitud-de-tutoria.spec.ts",
+          "line": 27,
+          "column": 5
+        },
+        {
+          "title": "la tutora recibe el aviso y exige una respuesta antes de marcarla atendida",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 150000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 65710,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-19T19:28:48.979Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "ce9837e13be2f07a1807-4efcb6ace10b8ed28839",
+          "file": "e2e-02-solicitud-de-tutoria.spec.ts",
+          "line": 47,
+          "column": 5
+        },
+        {
+          "title": "el estudiante ve el estado Atendida y la respuesta",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 150000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 37153,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-19T19:29:54.789Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "ce9837e13be2f07a1807-1952d2d80b407d4b2ba1",
+          "file": "e2e-02-solicitud-de-tutoria.spec.ts",
+          "line": 72,
+          "column": 5
+        },
+        {
+          "title": "la coordinadora de la escuela ve la solicitud",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 150000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 56165,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-19T19:30:32.064Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "ce9837e13be2f07a1807-06a61dbb6ae6fa5ee3ba",
+          "file": "e2e-02-solicitud-de-tutoria.spec.ts",
+          "line": 80,
+          "column": 5
+        },
+        {
+          "title": "un tutor que no es el de Ana no la ve",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 150000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 30685,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-19T19:31:28.325Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "ce9837e13be2f07a1807-36285e5f4aff4696f56f",
+          "file": "e2e-02-solicitud-de-tutoria.spec.ts",
+          "line": 87,
+          "column": 5
+        }
+      ]
+    },
+    {
+      "title": "e2e-03-sesiones-y-asistencia.spec.ts",
+      "file": "e2e-03-sesiones-y-asistencia.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [
+        {
+          "title": "la tutora programa una sesión individual presencial para Ana",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 150000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 71000,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-19T19:31:59.169Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "055b490a0c3bbab71590-7805ea5f10491ca373b9",
+          "file": "e2e-03-sesiones-y-asistencia.spec.ts",
+          "line": 33,
+          "column": 5
+        },
+        {
+          "title": "la tutorada ve la sesión con su lugar",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 150000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 38698,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-19T19:33:13.084Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "055b490a0c3bbab71590-59608ab556f9f05f4093",
+          "file": "e2e-03-sesiones-y-asistencia.spec.ts",
+          "line": 54,
+          "column": 5
+        },
+        {
+          "title": "la tutora cancela la sesión con un motivo y la tutorada ve Cancelada",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 150000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 95245,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-19T19:33:51.866Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "055b490a0c3bbab71590-6afec73a964fff10f8bb",
+          "file": "e2e-03-sesiones-y-asistencia.spec.ts",
+          "line": 66,
+          "column": 5
+        },
+        {
+          "title": "la tutora registra la asistencia de una sesión que ya empezó",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 150000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 44042,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-19T19:35:27.231Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "055b490a0c3bbab71590-9eebae65d32ab7e38b46",
+          "file": "e2e-03-sesiones-y-asistencia.spec.ts",
+          "line": 87,
+          "column": 5
+        }
+      ]
+    },
+    {
+      "title": "e2e-04-derivacion-a-servicio.spec.ts",
+      "file": "e2e-04-derivacion-a-servicio.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [
+        {
+          "title": "la tutora deriva el caso de Ana a Psicología",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 150000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 60064,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-19T19:36:11.473Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "273664b38a7385421c19-203cb3c2eca0ce83aafd",
+          "file": "e2e-04-derivacion-a-servicio.spec.ts",
+          "line": 25,
+          "column": 5
+        },
+        {
+          "title": "Psicología recibe el aviso, abre el caso y lo lleva hasta cerrarlo",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 150000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 63172,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-19T19:37:14.697Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "273664b38a7385421c19-17532de68078a2bfb277",
+          "file": "e2e-04-derivacion-a-servicio.spec.ts",
+          "line": 43,
+          "column": 5
+        },
+        {
+          "title": "otro servicio no ve el caso",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 150000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 36558,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-19T19:38:17.981Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "273664b38a7385421c19-2a901bad7d3812ac3a97",
+          "file": "e2e-04-derivacion-a-servicio.spec.ts",
+          "line": 76,
+          "column": 5
+        },
+        {
+          "title": "la tutora descarga la constancia y no ve las notas internas",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 150000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 56615,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-19T19:38:54.694Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "273664b38a7385421c19-990ec79b5980425e9701",
+          "file": "e2e-04-derivacion-a-servicio.spec.ts",
+          "line": 83,
+          "column": 5
+        },
+        {
+          "title": "la DBU ve el caso en el seguimiento",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 150000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 70634,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-19T19:39:51.433Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "273664b38a7385421c19-5788be22752141806502",
+          "file": "e2e-04-derivacion-a-servicio.spec.ts",
+          "line": 98,
+          "column": 5
+        }
+      ]
+    },
+    {
+      "title": "e2e-05-informes-y-exportaciones.spec.ts",
+      "file": "e2e-05-informes-y-exportaciones.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [
+        {
+          "title": "la tutora ve su consolidado de horarios y exporta PDF y Excel",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 150000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 65394,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-19T19:41:02.260Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "bdc0507224878b590df5-db428971a4c47d4d99a0",
+          "file": "e2e-05-informes-y-exportaciones.spec.ts",
+          "line": 16,
+          "column": 5
+        },
+        {
+          "title": "la tutora guarda su informe semestral y exporta el PDF",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 150000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 94705,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-19T19:42:07.774Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "bdc0507224878b590df5-db72d35a4368bd9b1826",
+          "file": "e2e-05-informes-y-exportaciones.spec.ts",
+          "line": 24,
+          "column": 5
+        },
+        {
+          "title": "Vicerrectorado ve el consolidado e indicadores y exporta",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 150000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 76895,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-19T19:43:42.637Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "bdc0507224878b590df5-36b06b8d547ae9c0b427",
+          "file": "e2e-05-informes-y-exportaciones.spec.ts",
+          "line": 42,
+          "column": 5
+        },
+        {
+          "title": "el consolidado y los indicadores muestran las mismas cifras",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 150000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 2033,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-19T19:44:59.669Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "bdc0507224878b590df5-cae1b041c8335b122d29",
+          "file": "e2e-05-informes-y-exportaciones.spec.ts",
+          "line": 57,
+          "column": 5
+        }
+      ]
+    },
+    {
+      "title": "e2e-06-plan-semestral.spec.ts",
+      "file": "e2e-06-plan-semestral.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [
+        {
+          "title": "la coordinadora deja vigente el plan con la resolución",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 150000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 46704,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-19T19:45:01.838Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "c66d20a92529541f1703-81db25597cf9643b7760",
+          "file": "e2e-06-plan-semestral.spec.ts",
+          "line": 52,
+          "column": 5
+        },
+        {
+          "title": "al editar el plan aprobado se crea una revisión y se conserva la versión aprobada",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 150000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 82320,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-19T19:45:51.336Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "c66d20a92529541f1703-0dcab0fb7903d3baccfb",
+          "file": "e2e-06-plan-semestral.spec.ts",
+          "line": 62,
+          "column": 5
+        }
+      ]
+    },
+    {
+      "title": "e2e-07-evaluacion-de-tutoria.spec.ts",
+      "file": "e2e-07-evaluacion-de-tutoria.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [
+        {
+          "title": "el tutorado responde los 20 ítems y no puede enviar antes de terminar",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 150000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 71539,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-19T19:47:13.979Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "4a5270d52c3651824290-5293dddd759d701fee08",
+          "file": "e2e-07-evaluacion-de-tutoria.spec.ts",
+          "line": 28,
+          "column": 5
+        },
+        {
+          "title": "la coordinadora ve resultados y sugerencias sin el nombre del estudiante",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 150000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 53577,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-19T19:48:41.618Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "4a5270d52c3651824290-2ecaa510d111f0bde9da",
+          "file": "e2e-07-evaluacion-de-tutoria.spec.ts",
+          "line": 57,
+          "column": 5
+        },
+        {
+          "title": "la DBU cierra la evaluación y otro tutorado ya no puede responder",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 150000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 84426,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-19T19:49:35.302Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "4a5270d52c3651824290-f638813552f3baf38efe",
+          "file": "e2e-07-evaluacion-de-tutoria.spec.ts",
+          "line": 68,
+          "column": 5
+        }
+      ]
+    },
+    {
+      "title": "e2e-09-carga-masiva-y-asignacion.spec.ts",
+      "file": "e2e-09-carga-masiva-y-asignacion.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [
+        {
+          "title": "la coordinadora importa el Excel: 3 estudiantes se registran y la fila con error se informa",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 150000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 49449,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-19T19:51:08.282Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "ae7c59d88a6b846d324d-839056483c36f7f5cfa9",
+          "file": "e2e-09-carga-masiva-y-asignacion.spec.ts",
+          "line": 32,
+          "column": 5
+        },
+        {
+          "title": "la coordinadora asigna el ciclo 3 a Elena y los 3 estudiantes nuevos pasan a ella",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 150000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 105022,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-19T19:52:00.993Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "ae7c59d88a6b846d324d-f64153c271e10e3b9b44",
+          "file": "e2e-09-carga-masiva-y-asignacion.spec.ts",
+          "line": 50,
+          "column": 5
+        },
+        {
+          "title": "la coordinadora reasigna a uno de ellos a Jorge con un motivo",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 150000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 80299,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-19T19:53:46.176Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "ae7c59d88a6b846d324d-df0fcae2dc7c0daf6b3a",
+          "file": "e2e-09-carga-masiva-y-asignacion.spec.ts",
+          "line": 66,
+          "column": 5
+        },
+        {
+          "title": "cada tutor ve solo los suyos: Elena dos, Jorge uno",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 150000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 87298,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-19T19:55:06.668Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "ae7c59d88a6b846d324d-df01ca8d097fe87b91c8",
+          "file": "e2e-09-carga-masiva-y-asignacion.spec.ts",
+          "line": 84,
+          "column": 5
+        }
+      ]
+    },
+    {
+      "title": "e2e-13-carga-de-docentes.spec.ts",
+      "file": "e2e-13-carga-de-docentes.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [
+        {
+          "title": "en la carga de estudiantes, el bloque «pide la lista» lleva a Pedir listas",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 150000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 23239,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-19T19:56:37.022Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "affbc7bf43247fd4d668-38681190db338ecb3495",
+          "file": "e2e-13-carga-de-docentes.spec.ts",
+          "line": 52,
+          "column": 5
+        },
+        {
+          "title": "en la carga de docentes, la DBU llega a Pedir listas con la lista de docentes elegida y la pide",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 150000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 80862,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-19T19:57:03.417Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "affbc7bf43247fd4d668-fcf158ff10b3e6b85c5c",
+          "file": "e2e-13-carga-de-docentes.spec.ts",
+          "line": 62,
+          "column": 5
+        },
+        {
+          "title": "la DBU carga el Excel de docentes: 2 se crean y 2 filas con error se informan",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 150000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 59273,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-19T19:58:24.433Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "affbc7bf43247fd4d668-58b60aabe87691d60c22",
+          "file": "e2e-13-carga-de-docentes.spec.ts",
+          "line": 83,
+          "column": 5
+        },
+        {
+          "title": "a cada docente le llega su invitación con un enlace de un solo uso, sin contraseñas",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 150000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 254,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-19T19:59:23.907Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "affbc7bf43247fd4d668-a6ac861fb350d3b8c6d7",
+          "file": "e2e-13-carga-de-docentes.spec.ts",
+          "line": 103,
+          "column": 5
+        },
+        {
+          "title": "la coordinación no tiene la carga de docentes",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 150000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 54535,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-19T19:59:24.369Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "affbc7bf43247fd4d668-09e7e7df25d37a9c0c20",
+          "file": "e2e-13-carga-de-docentes.spec.ts",
+          "line": 118,
+          "column": 5
+        }
+      ]
+    },
+    {
+      "title": "e2e-14-solicitud-a-sesion-o-derivacion.spec.ts",
+      "file": "e2e-14-solicitud-a-sesion-o-derivacion.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [
+        {
+          "title": "la tutora programa la sesión desde la solicitud: estudiante y motivo ya vienen y la solicitud queda vinculada",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 150000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 76800,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-19T20:00:19.178Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "e09201b41ccc9d24819d-18dfe3a5c0a5877f2f6c",
+          "file": "e2e-14-solicitud-a-sesion-o-derivacion.spec.ts",
+          "line": 36,
+          "column": 5
+        },
+        {
+          "title": "la estudiante ve la sesión en su agenda y su solicitud ya está en atención",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 150000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 56700,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-19T20:01:45.052Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "e09201b41ccc9d24819d-b2c3296cd260eeb2e843",
+          "file": "e2e-14-solicitud-a-sesion-o-derivacion.spec.ts",
+          "line": 64,
+          "column": 5
+        },
+        {
+          "title": "la tutora deriva desde otra solicitud: el motivo ya viene y queda vinculada sin duplicarse",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 150000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 111623,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-19T20:02:42.011Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "e09201b41ccc9d24819d-81e923534fdcd3d934cd",
+          "file": "e2e-14-solicitud-a-sesion-o-derivacion.spec.ts",
+          "line": 74,
+          "column": 5
+        },
+        {
+          "title": "la coordinadora ve el vínculo pero no programa ni deriva",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 150000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 46065,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-19T20:04:33.773Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "e09201b41ccc9d24819d-02cde6f09312398371c4",
+          "file": "e2e-14-solicitud-a-sesion-o-derivacion.spec.ts",
+          "line": 92,
+          "column": 5
+        }
+      ]
+    },
+    {
+      "title": "e2e-16-borrador-del-estudiante.spec.ts",
+      "file": "e2e-16-borrador-del-estudiante.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [
+        {
+          "title": "lo escrito en la solicitud se recupera al volver de otra pantalla y se puede descartar",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 150000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 45827,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-19T20:05:23.159Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "9866fe624cc249d29605-44878f742fb81e5b4bf3",
+          "file": "e2e-16-borrador-del-estudiante.spec.ts",
+          "line": 8,
+          "column": 5
+        },
+        {
+          "title": "al cerrar sesión no queda lo escrito: otra persona en el mismo equipo no lo ve",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 150000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 51074,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-19T20:06:09.103Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "9866fe624cc249d29605-42d59824d88ab5802ee7",
+          "file": "e2e-16-borrador-del-estudiante.spec.ts",
+          "line": 27,
+          "column": 5
+        }
+      ]
+    },
+    {
+      "title": "e2e-17-pendientes-institucionales.spec.ts",
+      "file": "e2e-17-pendientes-institucionales.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [
+        {
+          "title": "la coordinación de la escuela ve la cita cancelada de la solicitud, con el motivo",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 150000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 95263,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-19T20:07:00.360Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "d58ffadc511504a179c8-70bcbcc1da5e84c55bd9",
+          "file": "e2e-17-pendientes-institucionales.spec.ts",
+          "line": 49,
+          "column": 5
+        },
+        {
+          "title": "la DBU también lo ve, y se puede filtrar por tipo",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 150000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 56826,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-19T20:08:46.135Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "d58ffadc511504a179c8-055550d99ca589b91486",
+          "file": "e2e-17-pendientes-institucionales.spec.ts",
+          "line": 61,
+          "column": 5
+        },
+        {
+          "title": "la tutora reemplaza la cita cancelada desde la solicitud y el pendiente desaparece",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 150000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 70739,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-19T20:09:43.105Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "d58ffadc511504a179c8-bc6016f002c221b0f717",
+          "file": "e2e-17-pendientes-institucionales.spec.ts",
+          "line": 68,
+          "column": 5
+        },
+        {
+          "title": "la estudiante ve su solicitud con la nueva cita y, en su agenda, la cancelada como «Reemplazada» con el siguiente paso",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 150000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 40797,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-19T20:10:53.975Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "d58ffadc511504a179c8-3be2775e7852ff866c88",
+          "file": "e2e-17-pendientes-institucionales.spec.ts",
+          "line": 89,
+          "column": 5
+        },
+        {
+          "title": "el docente tutor no tiene la pestaña ni accede a los datos",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 150000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 22887,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-19T20:11:34.898Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "d58ffadc511504a179c8-c295d545066c49b71d34",
+          "file": "e2e-17-pendientes-institucionales.spec.ts",
+          "line": 106,
+          "column": 5
+        }
+      ]
+    },
+    {
+      "title": "e2e-18-accesibilidad.spec.ts",
+      "file": "e2e-18-accesibilidad.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [],
+      "suites": [
+        {
+          "title": "ingreso",
+          "file": "e2e-18-accesibilidad.spec.ts",
+          "line": 33,
+          "column": 6,
+          "specs": [
+            {
+              "title": "la pantalla de ingreso no tiene infracciones serias y se maneja solo con teclado",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 150000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 32921,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-10-19T20:12:01.241Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "e684b2c8f585e0c6a98a-a9e1a0ecd998ce172992",
+              "file": "e2e-18-accesibilidad.spec.ts",
+              "line": 34,
+              "column": 7
+            },
+            {
+              "title": "un error de ingreso se anuncia (role alert) y no depende solo del color",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 150000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 28870,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-10-19T20:12:46.045Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "e684b2c8f585e0c6a98a-eba59de0b425efff33a3",
+              "file": "e2e-18-accesibilidad.spec.ts",
+              "line": 55,
+              "column": 7
+            }
+          ]
+        },
+        {
+          "title": "estudiante",
+          "file": "e2e-18-accesibilidad.spec.ts",
+          "line": 66,
+          "column": 6,
+          "specs": [
+            {
+              "title": "solicitar tutoría, mis sesiones y evaluación no tienen infracciones serias",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 150000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 54326,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-10-19T20:13:15.113Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "e684b2c8f585e0c6a98a-0f0103e85f70ecf96501",
+              "file": "e2e-18-accesibilidad.spec.ts",
+              "line": 67,
+              "column": 7
+            },
+            {
+              "title": "la evaluación (20 ítems con leyenda) no tiene infracciones serias y su grupo de opciones tiene nombre",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 150000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 82565,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-10-19T20:14:09.684Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "e684b2c8f585e0c6a98a-5bf09159fe6e5d63803d",
+              "file": "e2e-18-accesibilidad.spec.ts",
+              "line": 79,
+              "column": 7
+            },
+            {
+              "title": "con teclado se contesta una opción (flechas) y se llega al botón de enviar",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 150000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 40583,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-10-19T20:15:32.443Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "e684b2c8f585e0c6a98a-b495fa61e696262c9c47",
+              "file": "e2e-18-accesibilidad.spec.ts",
+              "line": 90,
+              "column": 7
+            },
+            {
+              "title": "«Saltar al contenido»: con Tab aparece, y con Enter el foco pasa al contenido principal (hay un solo <main>)",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 150000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 35142,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-10-19T20:16:13.280Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "e684b2c8f585e0c6a98a-b3ab070592ac4bf58b55",
+              "file": "e2e-18-accesibilidad.spec.ts",
+              "line": 102,
+              "column": 7
+            },
+            {
+              "title": "mientras carga y si falla, la agenda lo anuncia (progressbar / alert) y ofrece reintentar",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 150000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 37545,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-10-19T20:16:48.581Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "e684b2c8f585e0c6a98a-0f323b2cd0de8c9b6c69",
+              "file": "e2e-18-accesibilidad.spec.ts",
+              "line": 122,
+              "column": 7
+            }
+          ]
+        },
+        {
+          "title": "tutora: bandeja y diálogos de atención",
+          "file": "e2e-18-accesibilidad.spec.ts",
+          "line": 147,
+          "column": 6,
+          "specs": [
+            {
+              "title": "la bandeja y el diálogo «Atender» no tienen infracciones serias",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 150000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 53689,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-10-19T20:17:26.288Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "e684b2c8f585e0c6a98a-6d21cc043cf18b3401a4",
+              "file": "e2e-18-accesibilidad.spec.ts",
+              "line": 157,
+              "column": 7
+            },
+            {
+              "title": "al abrir con teclado el foco entra en el diálogo; Escape lo cierra y el foco vuelve al botón que lo abrió",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 150000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 32565,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-10-19T20:18:20.138Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "e684b2c8f585e0c6a98a-58542ad8884a665cb2d2",
+              "file": "e2e-18-accesibilidad.spec.ts",
+              "line": 168,
+              "column": 7
+            },
+            {
+              "title": "con el diálogo abierto, Tab no saca el foco hacia la página de atrás",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 150000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 39686,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-10-19T20:18:52.911Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "e684b2c8f585e0c6a98a-566ea61de07aa41bf035",
+              "file": "e2e-18-accesibilidad.spec.ts",
+              "line": 180,
+              "column": 7
+            },
+            {
+              "title": "el diálogo «Programar sesión» tampoco tiene infracciones serias y sus campos tienen etiqueta",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 150000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 40334,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-10-19T20:19:32.739Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "e684b2c8f585e0c6a98a-9e8c452bc7bbee3899f0",
+              "file": "e2e-18-accesibilidad.spec.ts",
+              "line": 190,
+              "column": 7
+            }
+          ]
+        },
+        {
+          "title": "móvil (375×812)",
+          "file": "e2e-18-accesibilidad.spec.ts",
+          "line": 200,
+          "column": 6,
+          "specs": [
+            {
+              "title": "ingreso, solicitud, sesiones y evaluación: sin desplazamiento horizontal ni infracciones serias",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 150000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 98110,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-10-19T20:20:13.236Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "e684b2c8f585e0c6a98a-250e9ffd4af168d5bc3d",
+              "file": "e2e-18-accesibilidad.spec.ts",
+              "line": 205,
+              "column": 7
+            },
+            {
+              "title": "la evaluación en móvil no se desborda y se puede responder",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 150000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 62549,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-10-19T20:21:51.511Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "e684b2c8f585e0c6a98a-ad4c602a48dcba235105",
+              "file": "e2e-18-accesibilidad.spec.ts",
+              "line": 225,
+              "column": 7
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "e2e-19-accesibilidad-gestion.spec.ts",
+      "file": "e2e-19-accesibilidad-gestion.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [
+        {
+          "title": "el detalle de un caso derivado (diálogo) tampoco tiene infracciones y se cierra con Escape devolviendo el foco",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 150000,
+              "annotations": [
+                {
+                  "type": "skip",
+                  "description": "no hay casos derivados en el entorno para abrir el detalle",
+                  "location": {
+                    "file": "C:\\Proyects\\Proyects\\Tutoria-untrm\\e2e\\tests\\e2e-19-accesibilidad-gestion.spec.ts",
+                    "line": 35,
+                    "column": 8
+                  }
+                }
+              ],
+              "expectedStatus": "skipped",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 1,
+                  "parallelIndex": 0,
+                  "status": "skipped",
+                  "duration": 16924,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-19T20:50:04.567Z",
+                  "annotations": [
+                    {
+                      "type": "skip",
+                      "description": "no hay casos derivados en el entorno para abrir el detalle",
+                      "location": {
+                        "file": "C:\\Proyects\\Proyects\\Tutoria-untrm\\e2e\\tests\\e2e-19-accesibilidad-gestion.spec.ts",
+                        "line": 35,
+                        "column": 8
+                      }
+                    }
+                  ],
+                  "attachments": []
+                }
+              ],
+              "status": "skipped"
+            }
+          ],
+          "id": "a407b2282e7beedd5f01-3ff7e47a94c7c4136d7f",
+          "file": "e2e-19-accesibilidad-gestion.spec.ts",
+          "line": 30,
+          "column": 5
+        }
+      ],
+      "suites": [
+        {
+          "title": "gestión · coordinator",
+          "file": "e2e-19-accesibilidad-gestion.spec.ts",
+          "line": 17,
+          "column": 8,
+          "specs": [
+            {
+              "title": "«Estudiantes» no tiene infracciones serias ni de estructura",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 150000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 64670,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-10-19T20:22:58.150Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "a407b2282e7beedd5f01-c430db1212820357604b",
+              "file": "e2e-19-accesibilidad-gestion.spec.ts",
+              "line": 19,
+              "column": 11
+            },
+            {
+              "title": "«Solicitudes de tutoría» no tiene infracciones serias ni de estructura",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 150000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 48068,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-10-19T20:24:02.962Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "a407b2282e7beedd5f01-462680fa9bde377a017e",
+              "file": "e2e-19-accesibilidad-gestion.spec.ts",
+              "line": 19,
+              "column": 11
+            },
+            {
+              "title": "«Pendientes» no tiene infracciones serias ni de estructura",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 150000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 45435,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-10-19T20:24:51.205Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "a407b2282e7beedd5f01-9bd3c5c670fd14d31d4c",
+              "file": "e2e-19-accesibilidad-gestion.spec.ts",
+              "line": 19,
+              "column": 11
+            },
+            {
+              "title": "«Pedir listas» no tiene infracciones serias ni de estructura",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 150000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 29618,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-10-19T20:25:36.780Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "a407b2282e7beedd5f01-379b43d877ecfbb800f4",
+              "file": "e2e-19-accesibilidad-gestion.spec.ts",
+              "line": 19,
+              "column": 11
+            },
+            {
+              "title": "«Carga de estudiantes» no tiene infracciones serias ni de estructura",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 150000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 34585,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-10-19T20:26:06.580Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "a407b2282e7beedd5f01-9e3ede5d1dfff5bbffec",
+              "file": "e2e-19-accesibilidad-gestion.spec.ts",
+              "line": 19,
+              "column": 11
+            },
+            {
+              "title": "«Asignación por ciclo» no tiene infracciones serias ni de estructura",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 150000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 41324,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-10-19T20:26:41.371Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "a407b2282e7beedd5f01-6fcedaeb217fe3713284",
+              "file": "e2e-19-accesibilidad-gestion.spec.ts",
+              "line": 19,
+              "column": 11
+            },
+            {
+              "title": "«Plan semestral» no tiene infracciones serias ni de estructura",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 150000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 41509,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-10-19T20:27:22.994Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "a407b2282e7beedd5f01-b1cc532614f5c8374c33",
+              "file": "e2e-19-accesibilidad-gestion.spec.ts",
+              "line": 19,
+              "column": 11
+            },
+            {
+              "title": "«Horarios y asistencia» no tiene infracciones serias ni de estructura",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 150000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 36665,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-10-19T20:28:04.673Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "a407b2282e7beedd5f01-7371c225f4c67f8a5723",
+              "file": "e2e-19-accesibilidad-gestion.spec.ts",
+              "line": 19,
+              "column": 11
+            },
+            {
+              "title": "«Indicadores» no tiene infracciones serias ni de estructura",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 150000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 73200,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-10-19T20:28:41.484Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "a407b2282e7beedd5f01-53647e30691b8beffaf2",
+              "file": "e2e-19-accesibilidad-gestion.spec.ts",
+              "line": 19,
+              "column": 11
+            },
+            {
+              "title": "«Resultados de evaluación» no tiene infracciones serias ni de estructura",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 150000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 56494,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-10-19T20:29:54.925Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "a407b2282e7beedd5f01-b69720b3e86b06266cbb",
+              "file": "e2e-19-accesibilidad-gestion.spec.ts",
+              "line": 19,
+              "column": 11
+            },
+            {
+              "title": "«Sugerencias de estudiantes» no tiene infracciones serias ni de estructura",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 150000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 84954,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-10-19T20:30:51.652Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "a407b2282e7beedd5f01-1e644cfee2f850e6e378",
+              "file": "e2e-19-accesibilidad-gestion.spec.ts",
+              "line": 19,
+              "column": 11
+            },
+            {
+              "title": "«Correos de las escuelas» no tiene infracciones serias ni de estructura",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 150000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 37810,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-10-19T20:32:16.804Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "a407b2282e7beedd5f01-9710bb2f9af994da155c",
+              "file": "e2e-19-accesibilidad-gestion.spec.ts",
+              "line": 19,
+              "column": 11
+            },
+            {
+              "title": "«Amonestaciones» no tiene infracciones serias ni de estructura",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 150000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 35410,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-10-19T20:32:54.768Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "a407b2282e7beedd5f01-9319f14771228da3562c",
+              "file": "e2e-19-accesibilidad-gestion.spec.ts",
+              "line": 19,
+              "column": 11
+            }
+          ]
+        },
+        {
+          "title": "gestión · admin",
+          "file": "e2e-19-accesibilidad-gestion.spec.ts",
+          "line": 17,
+          "column": 8,
+          "specs": [
+            {
+              "title": "«Carga de docentes» no tiene infracciones serias ni de estructura",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 150000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 26939,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-10-19T20:33:30.340Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "a407b2282e7beedd5f01-cfbdeac96814a81bdde4",
+              "file": "e2e-19-accesibilidad-gestion.spec.ts",
+              "line": 19,
+              "column": 11
+            },
+            {
+              "title": "«Cierre de periodo» no tiene infracciones serias ni de estructura",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 150000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 51529,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-10-19T20:33:57.478Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "a407b2282e7beedd5f01-a3157a7f7e523791fafe",
+              "file": "e2e-19-accesibilidad-gestion.spec.ts",
+              "line": 19,
+              "column": 11
+            },
+            {
+              "title": "«Casos derivados» no tiene infracciones serias ni de estructura",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 150000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 37186,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-10-19T20:34:49.164Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "a407b2282e7beedd5f01-8fc933ac5efc6db0f267",
+              "file": "e2e-19-accesibilidad-gestion.spec.ts",
+              "line": 19,
+              "column": 11
+            },
+            {
+              "title": "«Seguimiento DBU» no tiene infracciones serias ni de estructura",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 150000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 40692,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-10-19T20:35:26.512Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "a407b2282e7beedd5f01-bcf2e68819b2db08bfde",
+              "file": "e2e-19-accesibilidad-gestion.spec.ts",
+              "line": 19,
+              "column": 11
+            },
+            {
+              "title": "«Informe consolidado» no tiene infracciones serias ni de estructura",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 150000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 44204,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-10-19T20:36:07.377Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "a407b2282e7beedd5f01-ae70c7dd6dffbcd8ae24",
+              "file": "e2e-19-accesibilidad-gestion.spec.ts",
+              "line": 19,
+              "column": 11
+            },
+            {
+              "title": "«Sedes» no tiene infracciones serias ni de estructura",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 150000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 41733,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-10-19T20:36:51.956Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "a407b2282e7beedd5f01-faca35a3c20691510e10",
+              "file": "e2e-19-accesibilidad-gestion.spec.ts",
+              "line": 19,
+              "column": 11
+            },
+            {
+              "title": "«Evaluación de tutoría» no tiene infracciones serias ni de estructura",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 150000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 39553,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-10-19T20:37:33.866Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "a407b2282e7beedd5f01-b10134bf2e35ffe48464",
+              "file": "e2e-19-accesibilidad-gestion.spec.ts",
+              "line": 19,
+              "column": 11
+            },
+            {
+              "title": "«Catálogos» no tiene infracciones serias ni de estructura",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 150000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 38222,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-10-19T20:38:13.610Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "a407b2282e7beedd5f01-30863c52f52376081220",
+              "file": "e2e-19-accesibilidad-gestion.spec.ts",
+              "line": 19,
+              "column": 11
+            },
+            {
+              "title": "«Usuarios y roles» no tiene infracciones serias ni de estructura",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 150000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 100812,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-10-19T20:38:51.976Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "a407b2282e7beedd5f01-f1a1d08ecf83c5b6b0eb",
+              "file": "e2e-19-accesibilidad-gestion.spec.ts",
+              "line": 19,
+              "column": 11
+            },
+            {
+              "title": "«Parámetros» no tiene infracciones serias ni de estructura",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 150000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 39168,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-10-19T20:40:32.948Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "a407b2282e7beedd5f01-7febd599a81ed7f97dd0",
+              "file": "e2e-19-accesibilidad-gestion.spec.ts",
+              "line": 19,
+              "column": 11
+            },
+            {
+              "title": "«Identidad visual» no tiene infracciones serias ni de estructura",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 150000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 24139,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-10-19T20:41:12.288Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "a407b2282e7beedd5f01-0eede674d3f0189c0d50",
+              "file": "e2e-19-accesibilidad-gestion.spec.ts",
+              "line": 19,
+              "column": 11
+            },
+            {
+              "title": "«Bitácora de auditoría» no tiene infracciones serias ni de estructura",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 150000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 42459,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-10-19T20:41:36.571Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "a407b2282e7beedd5f01-8a2b62a9e271110c0014",
+              "file": "e2e-19-accesibilidad-gestion.spec.ts",
+              "line": 19,
+              "column": 11
+            }
+          ]
+        },
+        {
+          "title": "gestión · tutor",
+          "file": "e2e-19-accesibilidad-gestion.spec.ts",
+          "line": 17,
+          "column": 8,
+          "specs": [
+            {
+              "title": "«Estudiantes» no tiene infracciones serias ni de estructura",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 150000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 41332,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-10-19T20:42:19.178Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "a407b2282e7beedd5f01-66646d73ae848f828041",
+              "file": "e2e-19-accesibilidad-gestion.spec.ts",
+              "line": 19,
+              "column": 11
+            },
+            {
+              "title": "«Sesiones» no tiene infracciones serias ni de estructura",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 150000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 36461,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-10-19T20:43:00.677Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "a407b2282e7beedd5f01-1c8574955c518e4a7d9d",
+              "file": "e2e-19-accesibilidad-gestion.spec.ts",
+              "line": 19,
+              "column": 11
+            },
+            {
+              "title": "«Casos derivados» no tiene infracciones serias ni de estructura",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 150000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 40653,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-10-19T20:43:37.279Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "a407b2282e7beedd5f01-9d63f0e4bcac858452ce",
+              "file": "e2e-19-accesibilidad-gestion.spec.ts",
+              "line": 19,
+              "column": 11
+            },
+            {
+              "title": "«Informe semestral» no tiene infracciones serias ni de estructura",
+              "ok": false,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 150000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "timedOut",
+                      "duration": 211388,
+                      "error": {
+                        "message": "\u001b[31mTest timeout of 150000ms exceeded.\u001b[39m",
+                        "stack": "\u001b[31mTest timeout of 150000ms exceeded.\u001b[39m"
+                      },
+                      "errors": [
+                        {
+                          "message": "\u001b[31mTest timeout of 150000ms exceeded.\u001b[39m"
+                        },
+                        {
+                          "location": {
+                            "file": "C:\\Proyects\\Proyects\\Tutoria-untrm\\e2e\\tests\\e2e-19-accesibilidad-gestion.spec.ts",
+                            "column": 53,
+                            "line": 23
+                          },
+                          "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoHaveCount\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m)\u001b[22m failed\n\nLocator:  getByRole('progressbar')\nExpected: \u001b[32m0\u001b[39m\nReceived: \u001b[31m1\u001b[39m\nTimeout:  60000ms\n\nCall log:\n\u001b[2m  - Expect \"toHaveCount\" with timeout 60000ms\u001b[22m\n\u001b[2m  - waiting for getByRole('progressbar')\u001b[22m\n\u001b[2m    34 × locator resolved to 1 element\u001b[22m\n\u001b[2m       - unexpected value \"1\"\u001b[22m\n\n\n  21 |         await goToMenu(page, screen);\n  22 |         await expect(page.getByRole('heading', { level: 1 }).first()).toBeVisible();\n> 23 |         await expect(page.getByRole('progressbar')).toHaveCount(0, { timeout: 60_000 }); // ya cargó: se revisa la pantalla final\n     |                                                     ^\n  24 |         await expectNoSeriousViolations(page, testInfo, `${who} · ${screen}`);\n  25 |       });\n  26 |     }\n    at C:\\Proyects\\Proyects\\Tutoria-untrm\\e2e\\tests\\e2e-19-accesibilidad-gestion.spec.ts:23:53"
+                        }
+                      ],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-10-19T20:44:18.082Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "screenshot",
+                          "contentType": "image/png",
+                          "path": "C:\\Proyects\\Proyects\\Tutoria-untrm\\e2e\\test-results\\e2e-19-accesibilidad-gesti-b1525-nes-serias-ni-de-estructura\\test-failed-3.png"
+                        },
+                        {
+                          "name": "screenshot",
+                          "contentType": "image/png",
+                          "path": "C:\\Proyects\\Proyects\\Tutoria-untrm\\e2e\\test-results\\e2e-19-accesibilidad-gesti-b1525-nes-serias-ni-de-estructura\\test-failed-4.png"
+                        },
+                        {
+                          "name": "screenshot",
+                          "contentType": "image/png",
+                          "path": "C:\\Proyects\\Proyects\\Tutoria-untrm\\e2e\\test-results\\e2e-19-accesibilidad-gesti-b1525-nes-serias-ni-de-estructura\\test-failed-2.png"
+                        },
+                        {
+                          "name": "error-context",
+                          "contentType": "text/markdown",
+                          "path": "C:\\Proyects\\Proyects\\Tutoria-untrm\\e2e\\test-results\\e2e-19-accesibilidad-gesti-b1525-nes-serias-ni-de-estructura\\error-context.md"
+                        },
+                        {
+                          "name": "trace",
+                          "contentType": "application/zip",
+                          "path": "C:\\Proyects\\Proyects\\Tutoria-untrm\\e2e\\test-results\\e2e-19-accesibilidad-gesti-b1525-nes-serias-ni-de-estructura\\trace.zip"
+                        }
+                      ]
+                    }
+                  ],
+                  "status": "unexpected"
+                }
+              ],
+              "id": "a407b2282e7beedd5f01-2b91d16507873f7817a6",
+              "file": "e2e-19-accesibilidad-gestion.spec.ts",
+              "line": 19,
+              "column": 11
+            }
+          ]
+        },
+        {
+          "title": "gestión · psychology",
+          "file": "e2e-19-accesibilidad-gestion.spec.ts",
+          "line": 17,
+          "column": 8,
+          "specs": [
+            {
+              "title": "«Casos derivados» no tiene infracciones serias ni de estructura",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 150000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 1,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 46836,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-10-19T20:49:16.261Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "a407b2282e7beedd5f01-aaf131da8136ec955081",
+              "file": "e2e-19-accesibilidad-gestion.spec.ts",
+              "line": 19,
+              "column": 11
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "e2e-20-estados-del-docente.spec.ts",
+      "file": "e2e-20-estados-del-docente.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [
+        {
+          "title": "RECHAZO: el docente dice que no puede; la coordinación lo ve con el motivo y el ciclo queda sin tutor efectivo",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 150000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 1,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 47133,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-19T20:50:21.622Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "1fec32c5e4e45b8e8e7b-1187d68df851e4a9c58f",
+          "file": "e2e-20-estados-del-docente.spec.ts",
+          "line": 80,
+          "column": 5
+        },
+        {
+          "title": "RECHAZO (comportamiento actual, pendiente de decisión de la DBU): la estudiante conserva a la docente que rechazó y su solicitud sigue yendo a ella",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 150000,
+              "annotations": [
+                {
+                  "type": "decisión pendiente",
+                  "description": "La solicitud sigue yendo al docente que rechazó (temas 1 y 2 del documento de decisiones)."
+                }
+              ],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 1,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 1785,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-19T20:51:22.553Z",
+                  "annotations": [
+                    {
+                      "type": "decisión pendiente",
+                      "description": "La solicitud sigue yendo al docente que rechazó (temas 1 y 2 del documento de decisiones)."
+                    }
+                  ],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "1fec32c5e4e45b8e8e7b-25cd85b615551f898d68",
+          "file": "e2e-20-estados-del-docente.spec.ts",
+          "line": 102,
+          "column": 5
+        },
+        {
+          "title": "SIN RESPUESTA: el enlace vence sin que el docente responda; aparece como pendiente y el enlace ya no sirve",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 150000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 1,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 40012,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-19T20:51:24.497Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "1fec32c5e4e45b8e8e7b-4363535b7f8b6888498b",
+          "file": "e2e-20-estados-del-docente.spec.ts",
+          "line": 113,
+          "column": 5
+        },
+        {
+          "title": "CORREO NO ENVIADO: si el servidor de correo no responde, se avisa a quien designó y queda como pendiente; al reenviar desaparece",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 150000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 1,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 43711,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-19T20:52:04.584Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "1fec32c5e4e45b8e8e7b-3a57b818e1d2da7b482b",
+          "file": "e2e-20-estados-del-docente.spec.ts",
+          "line": 140,
+          "column": 5
+        },
+        {
+          "title": "la lista de pendientes del ciclo queda limpia al liberar la designación",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 150000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 1,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 4655,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-19T20:52:48.391Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "1fec32c5e4e45b8e8e7b-61692477921b235d2643",
+          "file": "e2e-20-estados-del-docente.spec.ts",
+          "line": 168,
+          "column": 5
+        }
+      ]
+    }
+  ],
+  "errors": [],
+  "stats": {
+    "startTime": "2026-10-19T19:20:13.335Z",
+    "duration": 5562803.787,
+    "expected": 102,
+    "skipped": 1,
+    "unexpected": 1,
+    "flaky": 0
+  }
+}

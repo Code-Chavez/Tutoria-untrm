@@ -1,0 +1,39 @@
+@startuml
+left to right direction
+skinparam shadowing false
+skinparam defaultFontName Arial
+title Preparación y gestión del periodo
+actor "Coordinador de tutoría" as coord
+actor "Administrador (DBU)" as admin
+rectangle "SIT UNTRM" {
+  usecase "PE01\nPedir listas a las escuelas" as PE01
+  usecase "PE02\nImportar o registrar estudiantes" as PE02
+  usecase "PE03\nImportar docentes tutores" as PE03
+  usecase "PE04\nAsignar docente por ciclo" as PE04
+  usecase "PE05\nSolicitar aceptación del docente" as PE05
+  usecase "PE06\nReasignar estudiante con motivo" as PE06
+  usecase "PE07\nGestionar plan semestral y resolución" as PE07
+  usecase "PE08\nConsultar versiones del plan" as PE08
+  usecase "PE09\nCerrar periodo académico" as PE09
+}
+coord -- PE01
+admin -- PE01
+coord -- PE02
+admin -- PE02
+admin -- PE03
+coord -- PE04
+admin -- PE04
+coord -- PE05
+admin -- PE05
+coord -- PE06
+admin -- PE06
+coord -- PE07
+admin -- PE07
+coord -- PE08
+admin -- PE08
+admin -- PE09
+note bottom
+Alcance restringido por rol, escuela, servicio y periodo.
+Autenticación previa, salvo ingreso y recuperación.
+end note
+@enduml

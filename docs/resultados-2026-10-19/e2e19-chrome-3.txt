@@ -1,0 +1,7 @@
+
+Running 2 tests using 1 worker
+
+  ok 1 tests\e2e-19-accesibilidad-gestion.spec.ts:19:11 › gestión · admin › «Informe consolidado» no tiene infracciones serias ni de estructura (54.6s)
+  ok 2 tests\e2e-19-accesibilidad-gestion.spec.ts:19:11 › gestión · tutor › «Informe semestral» no tiene infracciones serias ni de estructura (30.4s)
+
+  2 passed (1.6m)
