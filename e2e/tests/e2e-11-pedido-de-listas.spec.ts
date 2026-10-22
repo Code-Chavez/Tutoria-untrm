@@ -32,6 +32,7 @@ test('la coordinadora configura el correo, pide las listas y el correo sale con 
   await expect(page.getByRole('link', { name: 'Editar correo' })).toBeVisible();
   await expect(page.getByLabel('Correo al que se piden las listas')).toHaveCount(0);
 
+  await page.getByRole('button', { name: 'Quitar selección' }).click();
   await page.getByLabel('3', { exact: true }).check();
   await page.getByLabel(/Observaciones/).fill('Prueba E2E del pedido');
   await page.getByRole('button', { name: 'Enviar pedido' }).click();

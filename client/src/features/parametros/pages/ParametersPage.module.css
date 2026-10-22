@@ -102,3 +102,18 @@
     grid-template-columns: 1fr;
   }
 }
+
+.group { padding: 20px; border: 1px solid var(--borde); border-radius: 12px; background: var(--blanco); }
+.group h2 { font-size: 18px; margin-bottom: 16px; }
+.row { padding: 20px 0; grid-template-columns: minmax(0, 1fr) auto; }
+.label { flex-wrap: wrap; line-height: 1.5; }
+.description, .range { font-size: var(--fs-sm); line-height: 1.6; }
+.inputWrap input { min-height: 44px; background: var(--g50); }
+.inputWrap input:focus-visible { background: var(--blanco); outline: 2px solid var(--azul-med); outline-offset: 2px; }
+@media (max-width: 960px) { .row { grid-template-columns: 1fr; } .controls { justify-content: flex-start; } }
+@media (max-width: 480px) { .group { padding: 16px; } .controls { gap: 12px; } }
+.group { padding: 14px 16px; }
+.group h2 { font-size: 16px; margin-bottom: 10px; }
+.row { padding: 12px 0; gap: 10px 16px; }
+.description, .range { font-size: var(--fs-xs); line-height: 1.5; }
+.inputWrap input { min-height: 38px; }

@@ -68,9 +68,11 @@ test('la coordinadora ve resultados y sugerencias sin el nombre del estudiante',
 test('la DBU cierra la evaluación y otro tutorado ya no puede responder', async ({ page, browser }) => {
   await loginUi(page, accounts.admin);
   await goToMenu(page, 'Evaluación de tutoría');
-  const row = page.getByRole('row', { name: /Sistemas/ });
+  const row = page.getByRole('listitem').filter({ has: page.getByRole('heading', { name: /Sistemas/ }) });
   await expect(row).toContainText('Habilitada');
-  await row.getByRole('button', { name: 'Cerrar' }).click();
+  await row.getByRole('button', { name: /Cerrar evaluación de/ }).click();
+  await expect(page.getByRole('alertdialog')).toContainText('Las respuestas enviadas se conservan');
+  await page.getByRole('button', { name: 'Confirmar cierre de evaluación' }).click();
   await expect(row).toContainText('Cerrada');
 
   const student = await (await browser.newContext()).newPage();
@@ -78,6 +80,7 @@ test('la DBU cierra la evaluación y otro tutorado ya no puede responder', async
   await goToMenu(student, 'Evaluar tutoría');
   await expect(student.getByText('La evaluación no está disponible por ahora')).toBeVisible();
 
-  await row.getByRole('button', { name: 'Habilitar' }).click();
+  await row.getByRole('button', { name: /Habilitar evaluación de/ }).click();
+  await page.getByRole('button', { name: 'Confirmar habilitación de evaluación' }).click();
   await expect(row).toContainText('Habilitada');
 });

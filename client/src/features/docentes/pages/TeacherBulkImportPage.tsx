@@ -66,22 +66,24 @@ export const TeacherBulkImportPage: React.FC = () => {
         title="Carga masiva de docentes"
         subtitle="Crea las cuentas de los docentes tutores desde un archivo Excel de forma guiada"
         icon={<UsersPlusIcon size={24} />}
-        actions={
-          <Button variant="secondary" icon={<DownloadIcon size={16} />} onClick={handleTemplate}>
-            Descargar plantilla
-          </Button>
-        }
       />
 
-      <RequestListBanner kind="DOCENTES" />
-
-      <Card padded>
+      <Card padded className={styles.importCard}>
         <ImportStepper current={currentStep} />
 
+        <div className={styles.workspace}>
+          <section className={styles.preparation} aria-label="Plantilla y requisitos">
+            <h2 className={styles.panelTitle}>Plantilla y requisitos</h2>
+            <p className={styles.panelHint}>Completa una fila por docente. Las cuentas nuevas reciben un enlace para crear su contraseña.</p>
+            <div className={styles.templateAction}><Button variant="secondary" icon={<DownloadIcon size={16} />} onClick={handleTemplate}>
+            Descargar plantilla
+          </Button></div>
         <div className={styles.intro}>
           <span className={styles.introIcon}>
             <InfoIcon size={18} />
           </span>
+          <details className={styles.rules}>
+            <summary>Ver columnas y validaciones</summary>
           <p>
             Descarga la plantilla, completa los datos y súbela. El archivo debe incluir las columnas <code>nombres</code>,{' '}
             <code>apellidos</code>, <code>correo</code>, <code>telefono</code> y <code>escuela</code>. El <strong>correo</strong> debe ser
@@ -89,8 +91,14 @@ export const TeacherBulkImportPage: React.FC = () => {
             ella. Cada docente recibe un correo con un <strong>enlace de un solo uso</strong> para crear su contraseña (nadie recibe
             contraseñas). Las filas con errores se omiten y se listan al final para su corrección.
           </p>
+          </details>
         </div>
 
+            <RequestListBanner kind="DOCENTES" />
+          </section>
+          <section className={styles.uploadPanel} aria-label="Archivo a importar">
+            <h2 className={styles.panelTitle}>Archivo a importar</h2>
+            <p className={styles.panelHint}>Selecciona el Excel completado y luego pulsa Importar. El resultado mostrará las filas con errores.</p>
         <UploadDropzone file={file} maxSizeMB={MAX_SIZE_MB} onFile={pickFile} />
 
         {error && (
@@ -105,6 +113,8 @@ export const TeacherBulkImportPage: React.FC = () => {
           </Button>
         </div>
 
+          </section>
+        </div>
         {report && <TeacherImportResult report={report} />}
         {report && report.created > 0 && (
           <NextSteps

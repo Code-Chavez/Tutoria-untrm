@@ -40,3 +40,13 @@
     padding: var(--s5) var(--s4) var(--s7);
   }
 }
+
+/* El periodo aprovecha el ancho disponible a ambos lados. */
+.content.contentWide {
+  max-width: none;
+  padding: 24px 20px var(--s8);
+  box-sizing: border-box;
+}
+@media (max-width: 900px) {
+  .content.contentWide { padding: 20px 16px var(--s7); }
+}

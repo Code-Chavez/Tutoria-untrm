@@ -124,7 +124,7 @@ export function PeriodClosurePage() {
                 {view.state === 'CERRADO' && view.closedAt && <p className={styles.note}>Cerrado el {fmt(view.closedAt)}. Resumen guardado al momento del cierre.</p>}
                 {view.isPreview && <p className={styles.note}>Vista previa calculada ahora; el resumen definitivo se guarda al cerrar.</p>}
 
-                <SummaryList summary={view.summary} />
+                <div className={styles.closureLayout}><section aria-label="Resumen del periodo"><h3 className={styles.sectionTitle}>Resumen del periodo</h3><SummaryList summary={view.summary} /></section><section className={styles.review} aria-label="Revisión del cierre"><h3 className={styles.sectionTitle}>Revisión del cierre</h3>
 
                 {view.state === 'VIGENTE' && pendingTotal > 0 && (
                   <p role="status" className={styles.warn}>
@@ -154,6 +154,7 @@ export function PeriodClosurePage() {
                     </>
                   )}
                 </div>
+                </section></div>
               </CardBody>
             </Card>
           )}

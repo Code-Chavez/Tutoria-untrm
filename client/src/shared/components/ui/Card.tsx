@@ -20,7 +20,7 @@ interface CardHeaderProps {
 }
 
 export const CardHeader: React.FC<CardHeaderProps> = ({ title, description, actions, icon }) => (
-  <div className={styles.header}>
+  <div className={styles.header} data-ui="card-header">
     <div className={styles.headingWrap}>
       {icon && <span className={styles.headIcon}>{icon}</span>}
       <div>
@@ -37,7 +37,7 @@ export const CardBody: React.FC<React.HTMLAttributes<HTMLDivElement>> = ({
   className = '',
   ...rest
 }) => (
-  <div className={`${styles.body} ${className}`} {...rest}>
+  <div className={`${styles.body} ${className}`} data-ui="card-body" {...rest}>
     {children}
   </div>
 );

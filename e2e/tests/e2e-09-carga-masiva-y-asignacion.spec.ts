@@ -50,11 +50,13 @@ test('la coordinadora importa el Excel: 3 estudiantes se registran y la fila con
 test('la coordinadora asigna el ciclo 3 a Elena y los 3 estudiantes nuevos pasan a ella', async ({ page }) => {
   await loginUi(page, accounts.coordinator);
   await goToMenu(page, 'Asignación por ciclo');
+  await page.getByRole('button', { name: 'Todos los ciclos' }).click();
 
   const select = page.getByLabel('Tutor del ciclo 3');
   await expect(select).toBeVisible({ timeout: 45_000 });
   const elena = await select.locator('option', { hasText: 'Elena' }).first().getAttribute('value');
   await select.selectOption(elena!);
+  await page.getByRole('button', { name: 'Guardar asignación del ciclo 3', exact: true }).click();
   await expect(page.getByRole('status').filter({ hasText: /Ciclo 3: \d+ estudiante\(s\) asignados/ })).toBeVisible({ timeout: 45_000 });
 
   await goToMenu(page, 'Estudiantes');

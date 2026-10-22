@@ -1,13 +1,13 @@
 import { useEffect, useState, type FormEvent } from 'react';
-import { useParams } from 'react-router-dom';
+import { Link, useParams } from 'react-router-dom';
 import { getApiErrorMessage } from '@shared/services/apiClient';
 import { DAY_LABEL, tutorAcceptanceService, type AcceptanceInfo, type AvailabilitySlot } from '../services/tutorAcceptanceService';
 import styles from '@features/auth/components/LoginPage.module.css';
 import local from './TutorAcceptancePage.module.css';
 
-const EMPTY_SLOT: AvailabilitySlot = { day: 1, start: '08:00', end: '09:30', place: '' };
+const EMPTY_SLOT: AvailabilitySlot = { day: 1, start: '08:00', end: '09:30' };
 
-type Step = { kind: 'loading' } | { kind: 'invalid'; message: string } | { kind: 'form'; info: AcceptanceInfo } | { kind: 'done'; accepted: boolean };
+type Step = { kind: 'loading' } | { kind: 'invalid'; message: string } | { kind: 'form'; info: AcceptanceInfo } | { kind: 'done'; accepted: boolean; activationLink?: string; activationUnavailable?: boolean };
 
 // Página pública a la que llega el docente desde el correo: no requiere sesión, el enlace personal de un solo uso es la autorización.
 export function TutorAcceptancePage() {
@@ -38,8 +38,8 @@ export function TutorAcceptancePage() {
     setSending(true);
     setError('');
     try {
-      await tutorAcceptanceService.respond(token, decision === 'accept' ? { accept: true, availability: slots.map((s) => ({ ...s, place: s.place?.trim() || undefined })) } : { accept: false, reason });
-      setStep({ kind: 'done', accepted: decision === 'accept' });
+      const result = await tutorAcceptanceService.respond(token, decision === 'accept' ? { accept: true, availability: slots.map(({ day, start, end }) => ({ day, start, end })) } : { accept: false, reason });
+      setStep({ kind: 'done', accepted: decision === 'accept', activationLink: result?.activationLink, activationUnavailable: result?.activationUnavailable });
     } catch (err) {
       setError(getApiErrorMessage(err));
     } finally {
@@ -48,7 +48,7 @@ export function TutorAcceptancePage() {
   };
 
   return (
-    <div className={styles.page}>
+    <div className={`${styles.page} ${local.page}`}>
       <main className={`${styles.card} ${local.still}`}>
         <div className={styles.brandRow}>
           <div className={styles.emblem}>SIT</div>
@@ -73,8 +73,15 @@ export function TutorAcceptancePage() {
           <>
             <h1 className={styles.title}>{step.accepted ? '¡Gracias por aceptar!' : 'Respuesta registrada'}</h1>
             <p role="status" className={styles.subtitle}>
-              {step.accepted ? 'Su disponibilidad quedó registrada y la coordinación ya puede verla.' : 'Se avisó a la coordinación para que asigne a otro docente.'} Puede cerrar esta página.
+              {step.accepted ? 'Su disponibilidad quedó registrada y la coordinación ya puede verla.' : 'Se avisó a la coordinación para que asigne a otro docente.'}
             </p>
+            {step.activationLink ? <>
+              <p className={local.hint}>Es tu primer acceso: crea tu contraseña con este enlace de un solo uso. Después podrás iniciar sesión con tu correo y tu nueva contraseña.</p>
+              <a className={local.systemLink} href={step.activationLink} referrerPolicy="no-referrer">Activar mi cuenta y crear contraseña</a>
+            </> : <>
+              {step.activationUnavailable && <p role="alert" className={local.hint}>Tu aceptación quedó registrada, pero no se pudo preparar la activación. Pide a la administración un nuevo enlace para activar tu cuenta.</p>}
+              <Link className={local.systemLink} to="/">Ir al sistema</Link>
+            </>}
           </>
         )}
 
@@ -97,7 +104,7 @@ export function TutorAcceptancePage() {
             {decision === 'accept' && (
               <fieldset className={local.slots}>
                 <legend>
-                  ¿Cuándo, cuánto y dónde atenderá? (la sesión dura {step.info.sessionMinutes} minutos; máximo {step.info.maxWeeklyHours} horas por semana)
+                  ¿Cuándo podrá atender? (la sesión dura {step.info.sessionMinutes} minutos; máximo {step.info.maxWeeklyHours} horas por semana)
                 </legend>
                 {slots.map((slot, i) => (
                   <div key={i} className={local.slot}>
@@ -110,7 +117,6 @@ export function TutorAcceptancePage() {
                     </select>
                     <input type="time" aria-label={`Desde ${i + 1}`} value={slot.start} onChange={(e) => updateSlot(i, { start: e.target.value })} />
                     <input type="time" aria-label={`Hasta ${i + 1}`} value={slot.end} onChange={(e) => updateSlot(i, { end: e.target.value })} />
-                    <input type="text" aria-label={`Lugar ${i + 1}`} placeholder="Lugar (aula, cubículo…)" maxLength={120} value={slot.place ?? ''} onChange={(e) => updateSlot(i, { place: e.target.value })} />
                     {slots.length > 1 && (
                       <button type="button" className={local.remove} aria-label={`Quitar horario ${i + 1}`} onClick={() => setSlots((current) => current.filter((_, j) => j !== i))}>
                         Quitar
@@ -123,6 +129,7 @@ export function TutorAcceptancePage() {
                     + Agregar otro horario
                   </button>
                 )}
+                <p className={local.hint}>Aquí registra solo sus días y horas disponibles; no se fija el lugar de las sesiones.</p>
               </fieldset>
             )}
 
@@ -148,3 +155,4 @@ export function TutorAcceptancePage() {
     </div>
   );
 }
+

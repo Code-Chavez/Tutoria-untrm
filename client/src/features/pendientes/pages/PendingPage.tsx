@@ -26,25 +26,22 @@ const waiting = (iso: string) => {
 export function PendingPage() {
   const query = useQuery({ queryKey: ['institutional-pending'], queryFn: () => pendingService.list(), retry: false });
   const [kind, setKind] = useState<'ALL' | PendingKind>('ALL');
-  const items: PendingItem[] = (query.data ?? []).filter((item) => kind === 'ALL' || item.kind === kind);
+  const [search, setSearch] = useState('');
+  const [school, setSchool] = useState('ALL');
+  const normalize = (text: string) => text.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLocaleLowerCase('es');
+  const schools = [...new Map((query.data ?? []).map((item) => [item.schoolId, item.schoolName])).entries()].sort((a, b) => a[1].localeCompare(b[1], 'es'));
+  const items: PendingItem[] = (query.data ?? []).filter((item) =>
+    (kind === 'ALL' || item.kind === kind) && (school === 'ALL' || item.schoolId === school) &&
+    normalize([item.title, item.detail, item.schoolName, KIND_LABEL[item.kind].label, item.cycle ? 'ciclo ' + item.cycle : ''].join(' ')).includes(normalize(search.trim())));
+
 
   return (
-    <div>
+    <div className={styles.page}>
       <PageHeader
         title="Pendientes"
-        subtitle="Lo que necesita una decisión o un aviso de la coordinación o de la DBU: docentes que no aceptaron, ciclos sin tutor y citas canceladas. Se ordena por lo que lleva más tiempo esperando."
+        subtitle="Revisa docentes, ciclos y citas que necesitan atención. Los más antiguos aparecen primero."
         icon={<InboxIcon size={24} />}
-      />
-
-      {query.isLoading ? (
-        <TableSkeleton rows={4} />
-      ) : query.isError ? (
-        <EmptyState variant="error" icon={<InboxIcon size={26} />} title="No se pudieron cargar los pendientes" description={getApiErrorMessage(query.error)} />
-      ) : (query.data ?? []).length === 0 ? (
-        <EmptyState icon={<InboxIcon size={26} />} title="No hay pendientes" description="Todos los ciclos tienen docente que aceptó, y ninguna cita de una solicitud está cancelada sin continuación." />
-      ) : (
-        <>
-          <div className={styles.filter}>
+        actions={query.isSuccess && (query.data ?? []).length > 0 ? (<div className={styles.filter}>
             <label htmlFor="pending-kind">Tipo de pendiente</label>
             <SelectField id="pending-kind" value={kind} onChange={(e) => setKind(e.target.value as 'ALL' | PendingKind)}>
               <option value="ALL">Todos ({(query.data ?? []).length})</option>
@@ -56,28 +53,44 @@ export function PendingPage() {
                   </option>
                 ))}
             </SelectField>
+          </div>) : undefined}
+      />
+
+      {query.isLoading ? (
+        <TableSkeleton rows={4} />
+      ) : query.isError ? (
+        <EmptyState variant="error" icon={<InboxIcon size={26} />} title="No se pudieron cargar los pendientes" description={getApiErrorMessage(query.error)} />
+      ) : (query.data ?? []).length === 0 ? (
+        <EmptyState icon={<InboxIcon size={26} />} title="No hay pendientes" description="Todos los ciclos tienen docente que aceptó, y ninguna cita de una solicitud está cancelada sin continuación." />
+      ) : (
+        <>
+          <div className={styles.searchBar}>
+            <div className={styles.searchField}><label htmlFor="pending-search">Buscar pendiente</label><input id="pending-search" type="search" value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Nombre, escuela, ciclo o detalle…" /></div>
+            <div className={styles.schoolField}><label htmlFor="pending-school">Escuela profesional</label><SelectField id="pending-school" value={school} onChange={(e) => setSchool(e.target.value)}><option value="ALL">Todas las escuelas</option>{schools.map(([id, name]) => <option key={id} value={id}>{name}</option>)}</SelectField></div>
+            <button type="button" className={styles.clear} disabled={!search && school === 'ALL' && kind === 'ALL'} onClick={() => { setSearch(''); setSchool('ALL'); setKind('ALL'); }}>Limpiar filtros</button>
           </div>
-          <ul className={styles.list} aria-label="Pendientes">
+          <p role="status" className={styles.results}>{items.length} de {(query.data ?? []).length} pendientes · Más antiguos primero</p>
+          {items.length === 0 ? <EmptyState icon={<InboxIcon size={26} />} title="No hay coincidencias" description="Prueba otra búsqueda o limpia los filtros." /> : <div className={styles.scrollArea} role="region" aria-label="Resultados de pendientes" tabIndex={0}><ul className={styles.list} aria-label="Pendientes">
             {items.map((item, index) => {
               const copy = KIND_LABEL[item.kind];
               return (
                 <li key={`${item.kind}-${item.schoolId}-${item.cycle ?? 'x'}-${index}`} className={styles.item}>
                   <div className={styles.text}>
-                    <Badge tone={copy.tone}>{copy.label}</Badge>
-                    <p className={styles.title}>{item.title}</p>
+                    <div className={styles.itemHeading}><Badge tone={copy.tone}>{copy.label}</Badge>
+                    <p className={styles.title}>{item.title}</p></div>
                     <p className={styles.detail}>{item.detail}</p>
+                  </div>
                     <p className={styles.meta}>
                       {item.schoolName}
                       {item.cycle ? ` · ciclo ${item.cycle}` : ''} · {waiting(item.since)}
                     </p>
-                  </div>
                   <Link to={item.link} className={styles.action}>
                     {copy.action}
                   </Link>
                 </li>
               );
             })}
-          </ul>
+          </ul></div>}
         </>
       )}
     </div>

@@ -21,15 +21,17 @@ test.afterAll(clearCycles);
 test('la coordinadora elige a Elena como tutora del ciclo 10 y queda pendiente de su respuesta', async ({ page }) => {
   await loginUi(page, accounts.coordinator);
   await goToMenu(page, 'Asignación por ciclo');
+  await page.getByRole('button', { name: 'Todos los ciclos' }).click();
   await expect(page.getByRole('heading', { name: 'Asignación por ciclo' }).last()).toBeVisible();
 
   const select = page.getByLabel('Tutor del ciclo 10');
   await expect(select).toBeVisible({ timeout: 45_000 });
   const elena = await select.locator('option', { hasText: 'Elena' }).first().getAttribute('value');
   await select.selectOption(elena!);
+  await page.getByRole('button', { name: 'Guardar asignación del ciclo 10', exact: true }).click();
 
   await expect(page.getByRole('status').filter({ hasText: /Ciclo 10:/ })).toBeVisible({ timeout: 45_000 });
-  await expect(page.getByRole('listitem').filter({ has: page.getByLabel('Tutor del ciclo 10') }).getByText('Pendiente')).toBeVisible();
+  await expect(page.getByRole('listitem').filter({ has: page.getByLabel('Tutor del ciclo 10') }).getByText('Esperando respuesta')).toBeVisible();
 });
 
 test('a Elena le llega el correo con su enlace personal', async () => {
@@ -65,6 +67,7 @@ test('Elena abre el enlace sin iniciar sesión y acepta con su disponibilidad; e
 test('la coordinadora ve que Elena aceptó y su disponibilidad', async ({ page }) => {
   await loginUi(page, accounts.coordinator);
   await goToMenu(page, 'Asignación por ciclo');
+  await page.getByRole('button', { name: 'Todos los ciclos' }).click();
 
   const row = page.getByRole('listitem').filter({ has: page.getByLabel('Tutor del ciclo 10') });
   await expect(row.getByText('Aceptó')).toBeVisible({ timeout: 45_000 });

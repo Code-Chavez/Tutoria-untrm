@@ -9,7 +9,7 @@ interface PageHeaderProps {
 }
 
 export const PageHeader: React.FC<PageHeaderProps> = ({ title, subtitle, icon, actions }) => (
-  <div className={styles.header}>
+  <div className={styles.header} data-ui="page-header">
     <div className={styles.titleWrap}>
       {icon && <span className={styles.icon}>{icon}</span>}
       <div className={styles.text}>

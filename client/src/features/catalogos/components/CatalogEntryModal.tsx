@@ -26,6 +26,7 @@ export function CatalogEntryModal({ definition, entry, onClose, onSubmit }: Cata
     name: entry?.name ?? '',
     code: entry?.code ?? '',
     facultyId: entry?.facultyId ?? '',
+    cycleCount: String(entry?.cycleCount ?? ''),
     startDate: toDateInput(entry?.startDate ?? null),
     endDate: toDateInput(entry?.endDate ?? null),
     isActive: entry?.isActive ?? false,
@@ -40,7 +41,10 @@ export function CatalogEntryModal({ definition, entry, onClose, onSubmit }: Cata
     setError('');
     const input: CatalogInput = { name: form.name.trim() };
     if (definition.hasCode && !editing) input.code = form.code.trim();
-    if (definition.kind === 'schools') input.facultyId = form.facultyId;
+    if (definition.kind === 'schools') {
+      input.facultyId = form.facultyId;
+      input.cycleCount = Number(form.cycleCount);
+    }
     if (definition.kind === 'periods') {
       input.startDate = form.startDate;
       input.endDate = form.endDate;
@@ -104,6 +108,7 @@ export function CatalogEntryModal({ definition, entry, onClose, onSubmit }: Cata
           </div>
 
           {definition.kind === 'schools' && (
+            <>
             <div className={styles.field}>
               <label htmlFor="cat-faculty">Facultad</label>
               <select id="cat-faculty" value={form.facultyId} onChange={(e) => set({ facultyId: e.target.value })} required>
@@ -115,6 +120,12 @@ export function CatalogEntryModal({ definition, entry, onClose, onSubmit }: Cata
                 ))}
               </select>
             </div>
+            <div className={styles.field}>
+              <label htmlFor="cat-cycle-count">Cantidad de ciclos de la escuela</label>
+              <input id="cat-cycle-count" type="number" min={1} max={14} step={1} required value={form.cycleCount} onChange={(event) => set({ cycleCount: event.target.value })} />
+              <small>Según el plan de estudios: por ejemplo, 10 o 12. El sistema admite de 1 a 14 ciclos. Se usa al pedir listas y asignar tutores.</small>
+            </div>
+            </>
           )}
 
           {definition.kind === 'periods' && (

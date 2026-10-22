@@ -14,7 +14,7 @@ vi.mock('@features/tutorados/services/schoolService', () => ({ schoolService: { 
 const requests = vi.mocked(dataRequestService);
 const schoolsApi = vi.mocked(schoolService);
 
-const school = (over: Partial<School> = {}): School => ({ id: 's1', name: 'Ingeniería de Sistemas', facultyId: 'f1', isActive: true, coordinatorId: 'coord-1', requestEmail: 'registros@untrm.edu.pe', ...over });
+const school = (over: Partial<School> = {}): School => ({ cycleCount: 10, id: 's1', name: 'Ingeniería de Sistemas', facultyId: 'f1', isActive: true, coordinatorId: 'coord-1', requestEmail: 'registros@untrm.edu.pe', ...over });
 const record = (over: Partial<DataRequest> = {}): DataRequest => ({
   id: 'r1',
   createdAt: '2026-10-16T12:00:00.000Z',
@@ -78,6 +78,7 @@ describe('DataRequestPage (pedido de listas por correo)', () => {
     renderPage();
     await screen.findByText('registros@untrm.edu.pe');
 
+    await user.click(screen.getByRole('button', { name: 'Quitar selección' }));
     await user.click(screen.getByLabelText('3'));
     await user.click(screen.getByLabelText('4'));
     await user.type(screen.getByLabelText(/Observaciones/), 'Con urgencia');
@@ -85,6 +86,42 @@ describe('DataRequestPage (pedido de listas por correo)', () => {
 
     await waitFor(() => expect(requests.send).toHaveBeenCalledWith({ schoolId: 's1', cycles: [3, 4], note: 'Con urgencia', kind: 'ESTUDIANTES' }));
     expect(await screen.findByRole('alert')).toHaveTextContent('Pedido enviado a registros@untrm.edu.pe');
+  });
+
+  it('marca todos por defecto y envía explícitamente los diez ciclos', async () => {
+    requests.send.mockResolvedValue({ request: record(), sent: true });
+    renderPage();
+    await screen.findByText('registros@untrm.edu.pe');
+    expect(screen.getAllByRole('checkbox')).toHaveLength(10);
+    screen.getAllByRole('checkbox').forEach((checkbox) => expect(checkbox).toBeChecked());
+    await userEvent.click(screen.getByRole('button', { name: 'Enviar pedido' }));
+    await waitFor(() => expect(requests.send).toHaveBeenCalledWith({ schoolId: 's1', cycles: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10], note: undefined, kind: 'ESTUDIANTES' }));
+  });
+
+  it('lee los ciclos de cada escuela y reinicia la selección al cambiarla', async () => {
+    schoolsApi.getSchools.mockResolvedValue([school({ cycleCount: 12 }), school({ id: 's2', name: 'Otra escuela', cycleCount: 8 })]);
+    renderPage();
+    await screen.findByText('registros@untrm.edu.pe');
+    expect(screen.getAllByRole('checkbox')).toHaveLength(12);
+    expect(screen.getByLabelText('12')).toBeChecked();
+    await userEvent.click(screen.getByRole('button', { name: 'Quitar selección' }));
+    await userEvent.selectOptions(screen.getByLabelText('Escuela profesional'), 's2');
+    expect(screen.getAllByRole('checkbox')).toHaveLength(8);
+    screen.getAllByRole('checkbox').forEach((checkbox) => expect(checkbox).toBeChecked());
+    expect(screen.queryByLabelText('12')).not.toBeInTheDocument();
+  });
+
+  it('sin selección impide enviar y permite recuperar todos los ciclos', async () => {
+    renderPage();
+    await screen.findByText('registros@untrm.edu.pe');
+    await userEvent.click(screen.getByRole('button', { name: 'Quitar selección' }));
+    screen.getAllByRole('checkbox').forEach((checkbox) => expect(checkbox).not.toBeChecked());
+    expect(screen.getByRole('button', { name: 'Enviar pedido' })).toBeDisabled();
+    expect(screen.getByText('Selecciona al menos un ciclo para enviar el pedido.')).toBeInTheDocument();
+    expect(requests.send).not.toHaveBeenCalled();
+    await userEvent.click(screen.getByRole('button', { name: 'Seleccionar todos' }));
+    screen.getAllByRole('checkbox').forEach((checkbox) => expect(checkbox).toBeChecked());
+    expect(screen.getByRole('button', { name: 'Enviar pedido' })).toBeEnabled();
   });
 
   it('si el correo no sale lo dice como error pero el pedido queda registrado', async () => {
@@ -151,7 +188,7 @@ describe('DataRequestPage (pedido de listas por correo)', () => {
     expect(screen.getByRole('heading', { name: 'Pedir la lista de docentes tutores' })).toBeInTheDocument();
     expect(screen.getByText(/nombres, apellidos, correo institucional, teléfono \(opcional\) y escuela/)).toBeInTheDocument();
     expect(screen.queryByText(/código, nombres, apellidos, correo, teléfono, ciclo/)).not.toBeInTheDocument();
-    expect(screen.queryByText(/Ciclos \(sin marcar = todos\)/)).not.toBeInTheDocument();
+    expect(screen.queryByRole('group', { name: 'Ciclos a solicitar' })).not.toBeInTheDocument();
     expect(screen.getByRole('link', { name: 'Carga de docentes' })).toHaveAttribute('href', '/carga-docentes');
     expect(screen.getByRole('navigation', { name: 'Cuando llegue la lista de docentes' })).toBeInTheDocument();
     expect(screen.queryByRole('link', { name: 'Carga de estudiantes' })).not.toBeInTheDocument();

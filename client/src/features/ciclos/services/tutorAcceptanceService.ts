@@ -23,7 +23,7 @@ export const DAY_LABEL: Record<number, string> = { 1: 'Lunes', 2: 'Martes', 3: '
 // Rutas públicas: la autorización es el enlace personal que llegó por correo.
 export const tutorAcceptanceService = {
   info: async (token: string): Promise<AcceptanceInfo> => (await apiClient.get<AcceptanceInfo>(`/tutor-acceptance/${token}`)).data,
-  respond: async (token: string, response: { accept: boolean; availability?: AvailabilitySlot[]; reason?: string }): Promise<void> => {
-    await apiClient.post(`/tutor-acceptance/${token}`, response);
+  respond: async (token: string, response: { accept: boolean; availability?: AvailabilitySlot[]; reason?: string }): Promise<{ accepted: boolean; activationLink?: string; activationUnavailable?: boolean }> => {
+    return (await apiClient.post(`/tutor-acceptance/${token}`, response)).data;
   },
 };

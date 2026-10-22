@@ -41,9 +41,42 @@ describe('CycleTutorsPage', () => {
     const select = await screen.findByLabelText('Tutor del ciclo 1');
     expect(screen.queryByRole('option', { name: 'Docente de Mecánica' })).not.toBeInTheDocument();
     await userEvent.selectOptions(select, 't1');
+    expect(mocked.set).not.toHaveBeenCalled();
+    await userEvent.click(screen.getByRole('button', { name: 'Guardar asignación del ciclo 1' }));
 
     await waitFor(() => expect(mocked.set).toHaveBeenCalledWith('s1', 1, { tutorId: 't1' }));
     expect(await screen.findByRole('status')).toHaveTextContent('Ciclo 1: 8 estudiante(s) asignados');
+  });
+
+  it('abre la ayuda en un diálogo y devuelve el foco al cerrarlo con Escape', async () => {
+    renderPage();
+    const help = await screen.findByRole('button', { name: 'Cómo asignar un docente' });
+    await userEvent.click(help);
+    expect(screen.getByRole('dialog', { name: 'Cómo asignar un docente' })).toHaveTextContent('Revisa los ciclos con estudiantes');
+    await userEvent.keyboard('{Escape}');
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+    expect(help).toHaveFocus();
+    expect(mocked.set).not.toHaveBeenCalled();
+  });
+
+  it('permite descartar una selección sin modificar las asignaciones', async () => {
+    renderPage();
+    const select = await screen.findByLabelText('Tutor del ciclo 1');
+    await userEvent.selectOptions(select, 't1');
+    await userEvent.click(screen.getByRole('button', { name: 'Descartar selección' }));
+    expect(select).toHaveValue('');
+    expect(mocked.set).not.toHaveBeenCalled();
+    expect(screen.queryByRole('button', { name: 'Guardar asignación del ciclo 1' })).not.toBeInTheDocument();
+  });
+
+  it('prioriza ciclos con estudiantes y permite consultar los vacíos y las vistas sin resultados', async () => {
+    renderPage();
+    await screen.findByLabelText('Tutor del ciclo 1');
+    expect(screen.queryByLabelText('Tutor del ciclo 2')).not.toBeInTheDocument();
+    await userEvent.click(screen.getByRole('button', { name: 'Con aceptación' }));
+    expect(screen.getByText('No hay ciclos en esta vista')).toBeInTheDocument();
+    await userEvent.click(screen.getByRole('button', { name: 'Todos los ciclos' }));
+    expect(screen.getAllByLabelText(/^Tutor del ciclo /)).toHaveLength(10);
   });
 
   it('si el docente ya tiene otro ciclo pide el motivo y registra la excepción', async () => {
@@ -52,16 +85,40 @@ describe('CycleTutorsPage', () => {
       .mockResolvedValueOnce({ assigned: 0, moved: 0 });
     renderPage();
 
+    await userEvent.click(await screen.findByRole('button', { name: 'Todos los ciclos' }));
     await userEvent.selectOptions(await screen.findByLabelText('Tutor del ciclo 2'), 't1');
+    await userEvent.click(screen.getByRole('button', { name: 'Guardar asignación del ciclo 2' }));
     const dialog = await screen.findByRole('dialog', { name: 'Registrar excepción' });
     expect(dialog).toHaveTextContent('ya es tutor del ciclo 1');
     const register = screen.getByRole('button', { name: 'Registrar excepción' });
     expect(register).toBeDisabled();
 
-    await userEvent.type(screen.getByLabelText('Motivo de la excepción'), 'Aceptó por correo');
+    expect(screen.queryByRole('textbox')).not.toBeInTheDocument();
+    await userEvent.selectOptions(screen.getByLabelText('Motivo de la excepción'), 'OTHER');
+    await userEvent.type(screen.getByLabelText('Describe el motivo'), '   ');
+    expect(register).toBeDisabled();
+    await userEvent.clear(screen.getByLabelText('Describe el motivo'));
+    await userEvent.type(screen.getByLabelText('Describe el motivo'), 'Aceptó por correo');
     await userEvent.click(register);
 
     await waitFor(() => expect(mocked.set).toHaveBeenLastCalledWith('s1', 2, { tutorId: 't1', isException: true, note: 'Aceptó por correo' }));
+  });
+
+  it('registra un motivo sugerido sin exigir texto y descarta el texto de Otro al cambiar de motivo', async () => {
+    mocked.set
+      .mockRejectedValueOnce(Object.assign(new Error('x'), { isAxiosError: true, response: { data: { code: 'TUTOR_HAS_CYCLE', error: 'El docente ya tiene un ciclo.' } } }))
+      .mockResolvedValueOnce({ assigned: 8, moved: 0 });
+    renderPage();
+    await userEvent.selectOptions(await screen.findByLabelText('Tutor del ciclo 1'), 't1');
+    await userEvent.click(screen.getByRole('button', { name: 'Guardar asignación del ciclo 1' }));
+    const reason = await screen.findByLabelText('Motivo de la excepción');
+    await userEvent.selectOptions(reason, 'OTHER');
+    await userEvent.type(screen.getByLabelText('Describe el motivo'), 'Texto que no debe enviarse');
+    const preset = 'No hay suficientes docentes disponibles en la escuela.';
+    await userEvent.selectOptions(reason, preset);
+    expect(screen.queryByLabelText('Describe el motivo')).not.toBeInTheDocument();
+    await userEvent.click(screen.getByRole('button', { name: 'Registrar excepción' }));
+    await waitFor(() => expect(mocked.set).toHaveBeenLastCalledWith('s1', 1, { tutorId: 't1', isException: true, note: preset }));
   });
 
   it('muestra un ciclo con tutor como excepción y permite quitarlo', async () => {
@@ -69,9 +126,13 @@ describe('CycleTutorsPage', () => {
     mocked.remove.mockResolvedValue();
     renderPage();
 
+    await userEvent.click(await screen.findByRole('button', { name: 'Todos los ciclos' }));
     expect(await screen.findByText('Excepción')).toBeInTheDocument();
     await userEvent.click(screen.getByRole('button', { name: 'Quitar tutor del ciclo 3' }));
 
+    expect(mocked.remove).not.toHaveBeenCalled();
+    expect(screen.getByRole('dialog')).toHaveTextContent('Los estudiantes conservarán el tutor que ya tienen.');
+    await userEvent.click(screen.getByRole('button', { name: 'Confirmar quitar asignación' }));
     await waitFor(() => expect(mocked.remove).toHaveBeenCalledWith('s1', 3));
   });
 
@@ -93,6 +154,7 @@ describe('CycleTutorsPage', () => {
     mocked.resendAcceptance.mockResolvedValue(true);
     renderPage();
 
+    await userEvent.click(await screen.findByRole('button', { name: 'Todos los ciclos' }));
     expect(await screen.findByText('Aceptó')).toBeInTheDocument();
     expect(screen.getByText('Martes 10:00–11:30 (Aula 12)')).toBeInTheDocument();
     expect(screen.getByText('Rechazó')).toBeInTheDocument();
@@ -123,9 +185,10 @@ describe('CycleTutorsPage', () => {
     renderPage();
 
     await screen.findByLabelText('Tutor del ciclo 7');
+    await userEvent.click(screen.getByRole('button', { name: 'Todos los ciclos' }));
     const order = screen.getAllByLabelText(/^Tutor del ciclo /).map((el) => el.getAttribute('aria-label'));
     expect(order.slice(0, 3)).toEqual(['Tutor del ciclo 7', 'Tutor del ciclo 2', 'Tutor del ciclo 3']);
     expect(order.at(-1)).toBe('Tutor del ciclo 1');
-    expect(screen.getByText('Sin tutor')).toBeInTheDocument();
+    expect(screen.getByText('Sin docente de ciclo')).toBeInTheDocument();
   });
 });

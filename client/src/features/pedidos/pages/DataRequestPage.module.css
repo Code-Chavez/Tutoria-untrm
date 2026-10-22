@@ -122,3 +122,52 @@
   font-size: var(--fs-sm);
   text-decoration: underline;
 }
+
+.input { box-sizing: border-box; min-height: 44px; }
+.cycles { display: grid; grid-template-columns: repeat(auto-fit, minmax(90px, 1fr)); gap: 10px; }
+.cycle { padding: 12px; border: 1px solid var(--borde); border-radius: 8px; background: var(--g50); cursor: pointer; }
+.cycle:has(input:checked) { border-color: var(--azul-med); background: var(--celeste); color: var(--azul); }
+.note { font-size: var(--fs-sm); line-height: 1.6; }
+.historyItem { padding: 16px; border: 1px solid var(--borde); border-radius: 10px; background: var(--g50); }
+@media (max-width: 480px) { .row { align-items: stretch; flex-direction: column; } .row > button { width: 100%; } }
+
+.workspace { display: grid; grid-template-columns: minmax(0, 1fr); gap: 20px; align-items: start; }
+.workspace > * { min-width: 0; }
+.formGrid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px 16px; }
+.formGrid .field { margin: 0; min-width: 0; }
+.fullWidth, .recipient, .formFooter { grid-column: 1 / -1; }
+.recipient { padding: 12px 14px !important; border: 1px solid var(--borde) !important; border-radius: 8px; background: var(--g50); }
+.recipient .note { margin: 0; }
+.recipient .label { margin-bottom: 6px; }
+.recipient strong { overflow-wrap: anywhere; }
+.emailForm { flex-direction: row; align-items: center; flex-wrap: wrap; justify-content: space-between; gap: 8px 16px; }
+.emailForm .note { flex: 1 1 220px; }
+.linkButton { padding: 8px 12px; }
+.formGrid .cycles { grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 8px; }
+.formGrid .cycle { display: flex; align-items: center; justify-content: center; gap: 6px; margin: 0; padding: 10px 6px; min-height: 40px; box-sizing: border-box; }
+.formFooter { display: flex; align-items: flex-start; flex-wrap: wrap; gap: 12px 16px; border-top: 1px solid var(--borde); padding-top: 16px; }
+.formFooter .note { flex: 1 1 240px; margin: 0; font-size: var(--fs-xs); }
+.historyBody { max-height: 640px; overflow-y: auto; scrollbar-width: thin; }
+.history { gap: 12px; }
+.historyItem { padding: 12px; gap: 8px; }
+.historyHead { gap: 6px 8px; }
+.historyHead strong { font-size: var(--fs-sm); line-height: 1.5; overflow-wrap: anywhere; }
+.historyItem .note { margin: 0; font-size: var(--fs-xs); overflow-wrap: anywhere; }
+@media (min-width: 1500px) {
+  .workspace { grid-template-columns: minmax(0, 1.5fr) minmax(300px, 1fr); }
+  .historyCard { position: sticky; top: 20px; }
+  .historyBody { max-height: min(680px, 75vh); }
+}
+@media (max-width: 600px) {
+  .formGrid { grid-template-columns: minmax(0, 1fr); }
+  .historyBody { max-height: none; }
+  .formFooter > button { width: 100%; }
+}
+
+.cycleActions { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 12px; margin-bottom: 10px; }
+.cycleActions > span { margin-right: auto; color: var(--g600); font-size: var(--fs-xs); }
+
+/* Casillas compactas: se conserva un área cómoda para pulsar el número. */
+.formGrid .cycles { display: flex; flex-wrap: wrap; gap: 8px; }
+.formGrid .cycle { flex: 0 0 auto; min-width: 46px; min-height: 34px; padding: 6px 9px; border-radius: 6px; font-size: var(--fs-sm); }
+.formGrid .cycle input { width: 14px; height: 14px; margin: 0; accent-color: var(--azul-med); }
