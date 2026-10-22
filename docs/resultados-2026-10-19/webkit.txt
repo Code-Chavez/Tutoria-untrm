@@ -1,0 +1,106 @@
+
+Running 51 tests using 1 worker
+
+  ok  1 tests\e2e-01-acceso-y-menu.spec.ts:17:7 › Administrador DBU: menú y panel de inicio (29.6s)
+  ok  2 tests\e2e-01-acceso-y-menu.spec.ts:17:7 › Coordinador: menú y panel de inicio (24.2s)
+  ok  3 tests\e2e-01-acceso-y-menu.spec.ts:17:7 › Docente Tutor: menú y panel de inicio (22.0s)
+  ok  4 tests\e2e-01-acceso-y-menu.spec.ts:17:7 › Profesional de Servicio: menú y panel de inicio (21.8s)
+  ok  5 tests\e2e-01-acceso-y-menu.spec.ts:17:7 › Vicerrectorado: menú y panel de inicio (21.8s)
+  ok  6 tests\e2e-01-acceso-y-menu.spec.ts:17:7 › Decano: menú y panel de inicio (21.9s)
+  ok  7 tests\e2e-01-acceso-y-menu.spec.ts:17:7 › Tutorado: menú y panel de inicio (18.7s)
+  ok  8 tests\e2e-01-acceso-y-menu.spec.ts:29:5 › credenciales inválidas muestran un error y no entran (21.9s)
+  ok  9 tests\e2e-01-acceso-y-menu.spec.ts:38:5 › una ruta protegida sin sesión redirige al ingreso (13.9s)
+  ok 10 tests\e2e-01-acceso-y-menu.spec.ts:43:5 › un rol no entra a una página que no es suya (25.5s)
+  ok 11 tests\e2e-01-acceso-y-menu.spec.ts:49:5 › el menú es corto: Periodo académico, Informes y Configuración son una pantalla con pestañas, y los grupos se pliegan (25.5s)
+  ok 12 tests\e2e-01-acceso-y-menu.spec.ts:80:5 › el expediente se abre desde Tutorados (ya no hay una entrada de menú) y vuelve a Tutorados (31.8s)
+  ok 13 tests\e2e-02-solicitud-de-tutoria.spec.ts:27:5 › el estudiante registra la solicitud y queda Pendiente (32.3s)
+  ok 14 tests\e2e-02-solicitud-de-tutoria.spec.ts:47:5 › la tutora recibe el aviso y exige una respuesta antes de marcarla atendida (49.1s)
+  ok 15 tests\e2e-02-solicitud-de-tutoria.spec.ts:72:5 › el estudiante ve el estado Atendida y la respuesta (35.7s)
+  ok 16 tests\e2e-02-solicitud-de-tutoria.spec.ts:80:5 › la coordinadora de la escuela ve la solicitud (33.2s)
+  ok 17 tests\e2e-02-solicitud-de-tutoria.spec.ts:87:5 › un tutor que no es el de Ana no la ve (22.7s)
+  ok 18 tests\e2e-03-sesiones-y-asistencia.spec.ts:33:5 › la tutora programa una sesión individual presencial para Ana (40.9s)
+  ok 19 tests\e2e-03-sesiones-y-asistencia.spec.ts:54:5 › la tutorada ve la sesión con su lugar (24.6s)
+  ok 20 tests\e2e-03-sesiones-y-asistencia.spec.ts:66:5 › la tutora cancela la sesión con un motivo y la tutorada ve Cancelada (52.3s)
+  ok 21 tests\e2e-03-sesiones-y-asistencia.spec.ts:87:5 › la tutora registra la asistencia de una sesión que ya empezó (29.1s)
+  ok 22 tests\e2e-04-derivacion-a-servicio.spec.ts:25:5 › la tutora deriva el caso de Ana a Psicología (47.6s)
+  ok 23 tests\e2e-04-derivacion-a-servicio.spec.ts:43:5 › Psicología recibe el aviso, abre el caso y lo lleva hasta cerrarlo (34.8s)
+  ok 24 tests\e2e-04-derivacion-a-servicio.spec.ts:76:5 › otro servicio no ve el caso (16.7s)
+  ok 25 tests\e2e-04-derivacion-a-servicio.spec.ts:83:5 › la tutora descarga la constancia y no ve las notas internas (27.4s)
+  ok 26 tests\e2e-04-derivacion-a-servicio.spec.ts:98:5 › la DBU ve el caso en el seguimiento (26.9s)
+  ok 27 tests\e2e-07-evaluacion-de-tutoria.spec.ts:28:5 › el tutorado responde los 20 ítems y no puede enviar antes de terminar (1.1m)
+  ok 28 tests\e2e-07-evaluacion-de-tutoria.spec.ts:57:5 › la coordinadora ve resultados y sugerencias sin el nombre del estudiante (46.4s)
+  ok 29 tests\e2e-07-evaluacion-de-tutoria.spec.ts:68:5 › la DBU cierra la evaluación y otro tutorado ya no puede responder (1.3m)
+  ok 30 tests\e2e-14-solicitud-a-sesion-o-derivacion.spec.ts:36:5 › la tutora programa la sesión desde la solicitud: estudiante y motivo ya vienen y la solicitud queda vinculada (1.0m)
+  ok 31 tests\e2e-14-solicitud-a-sesion-o-derivacion.spec.ts:64:5 › la estudiante ve la sesión en su agenda y su solicitud ya está en atención (27.8s)
+  ok 32 tests\e2e-14-solicitud-a-sesion-o-derivacion.spec.ts:74:5 › la tutora deriva desde otra solicitud: el motivo ya viene y queda vinculada sin duplicarse (37.1s)
+  ok 33 tests\e2e-14-solicitud-a-sesion-o-derivacion.spec.ts:92:5 › la coordinadora ve el vínculo pero no programa ni deriva (25.7s)
+  ok 34 tests\e2e-17-pendientes-institucionales.spec.ts:49:5 › la coordinación de la escuela ve la cita cancelada de la solicitud, con el motivo (28.9s)
+  ok 35 tests\e2e-17-pendientes-institucionales.spec.ts:61:5 › la DBU también lo ve, y se puede filtrar por tipo (26.8s)
+  ok 36 tests\e2e-17-pendientes-institucionales.spec.ts:68:5 › la tutora reemplaza la cita cancelada desde la solicitud y el pendiente desaparece (37.2s)
+  ok 37 tests\e2e-17-pendientes-institucionales.spec.ts:89:5 › la estudiante ve su solicitud con la nueva cita y, en su agenda, la cancelada como «Reemplazada» con el siguiente paso (22.6s)
+  ok 38 tests\e2e-17-pendientes-institucionales.spec.ts:106:5 › el docente tutor no tiene la pestaña ni accede a los datos (15.9s)
+  ok 39 tests\e2e-18-accesibilidad.spec.ts:34:7 › ingreso › la pantalla de ingreso no tiene infracciones serias y se maneja solo con teclado (23.2s)
+  ok 40 tests\e2e-18-accesibilidad.spec.ts:55:7 › ingreso › un error de ingreso se anuncia (role alert) y no depende solo del color (16.0s)
+  ok 41 tests\e2e-18-accesibilidad.spec.ts:67:7 › estudiante › solicitar tutoría, mis sesiones y evaluación no tienen infracciones serias (38.6s)
+  ok 42 tests\e2e-18-accesibilidad.spec.ts:79:7 › estudiante › la evaluación (20 ítems con leyenda) no tiene infracciones serias y su grupo de opciones tiene nombre (40.6s)
+  ok 43 tests\e2e-18-accesibilidad.spec.ts:90:7 › estudiante › con teclado se contesta una opción (flechas) y se llega al botón de enviar (24.1s)
+  x  44 tests\e2e-18-accesibilidad.spec.ts:102:7 › estudiante › «Saltar al contenido»: con Tab aparece, y con Enter el foco pasa al contenido principal (hay un solo <main>) (1.1m)
+  ok 45 tests\e2e-18-accesibilidad.spec.ts:115:7 › estudiante › mientras carga y si falla, la agenda lo anuncia (progressbar / alert) y ofrece reintentar (25.0s)
+  ok 46 tests\e2e-18-accesibilidad.spec.ts:150:7 › tutora: bandeja y diálogos de atención › la bandeja y el diálogo «Atender» no tienen infracciones serias (35.0s)
+  ok 47 tests\e2e-18-accesibilidad.spec.ts:161:7 › tutora: bandeja y diálogos de atención › al abrir con teclado el foco entra en el diálogo; Escape lo cierra y el foco vuelve al botón que lo abrió (25.0s)
+  ok 48 tests\e2e-18-accesibilidad.spec.ts:173:7 › tutora: bandeja y diálogos de atención › con el diálogo abierto, Tab no saca el foco hacia la página de atrás (23.6s)
+  ok 49 tests\e2e-18-accesibilidad.spec.ts:183:7 › tutora: bandeja y diálogos de atención › el diálogo «Programar sesión» tampoco tiene infracciones serias y sus campos tienen etiqueta (26.0s)
+  ok 50 tests\e2e-18-accesibilidad.spec.ts:198:7 › móvil (375×812) › ingreso, solicitud, sesiones y evaluación: sin desplazamiento horizontal ni infracciones serias (54.1s)
+  ok 51 tests\e2e-18-accesibilidad.spec.ts:218:7 › móvil (375×812) › la evaluación en móvil no se desborda y se puede responder (37.5s)
+
+
+  1) tests\e2e-18-accesibilidad.spec.ts:102:7 › estudiante › «Saltar al contenido»: con Tab aparece, y con Enter el foco pasa al contenido principal (hay un solo <main>) 
+
+    Error: [2mexpect([22m[31mlocator[39m[2m).[22mtoBeFocused[2m([22m[2m)[22m failed
+
+    Locator:  getByRole('link', { name: 'Saltar al contenido' })
+    Expected: focused
+    Received: inactive
+    Timeout:  45000ms
+
+    Call log:
+    [2m  - Expect "toBeFocused" with timeout 45000ms[22m
+    [2m  - waiting for getByRole('link', { name: 'Saltar al contenido' })[22m
+    [2m    45 × locator resolved to <a href="#contenido" class="skip-link">Saltar al contenido</a>[22m
+    [2m       - unexpected value "inactive"[22m
+
+
+      107 |     await page.keyboard.press('Tab');
+      108 |     const skip = page.getByRole('link', { name: 'Saltar al contenido' });
+    > 109 |     await expect(skip).toBeFocused();
+          |                        ^
+      110 |     await expect(skip).toBeInViewport();
+      111 |     await page.keyboard.press('Enter');
+      112 |     await expect(page.locator('main#contenido')).toBeFocused();
+        at C:\Proyects\Proyects\Tutoria-untrm\e2e\tests\e2e-18-accesibilidad.spec.ts:109:24
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results\e2e-18-accesibilidad-estud-6fa9f-principal-hay-un-solo-main-\test-failed-2.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results\e2e-18-accesibilidad-estud-6fa9f-principal-hay-un-solo-main-\test-failed-3.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #3: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results\e2e-18-accesibilidad-estud-6fa9f-principal-hay-un-solo-main-\test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results\e2e-18-accesibilidad-estud-6fa9f-principal-hay-un-solo-main-\error-context.md
+
+    attachment #5: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results\e2e-18-accesibilidad-estud-6fa9f-principal-hay-un-solo-main-\trace.zip
+    Usage:
+
+        npx playwright show-trace test-results\e2e-18-accesibilidad-estud-6fa9f-principal-hay-un-solo-main-\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  1 failed
+    tests\e2e-18-accesibilidad.spec.ts:102:7 › estudiante › «Saltar al contenido»: con Tab aparece, y con Enter el foco pasa al contenido principal (hay un solo <main>) 
+  50 passed (29.1m)

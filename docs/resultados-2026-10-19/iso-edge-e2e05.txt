@@ -1,0 +1,31 @@
+
+Running 4 tests using 1 worker
+
+  ok 1 tests\e2e-05-informes-y-exportaciones.spec.ts:16:5 › la tutora ve su consolidado de horarios y exporta PDF y Excel (40.0s)
+  ok 2 tests\e2e-05-informes-y-exportaciones.spec.ts:24:5 › la tutora guarda su informe semestral y exporta el PDF (53.7s)
+  x  3 tests\e2e-05-informes-y-exportaciones.spec.ts:42:5 › Vicerrectorado ve el consolidado e indicadores y exporta (5.7s)
+  ok 4 tests\e2e-05-informes-y-exportaciones.spec.ts:57:5 › el consolidado y los indicadores muestran las mismas cifras (2.0s)
+
+
+  1) tests\e2e-05-informes-y-exportaciones.spec.ts:42:5 › Vicerrectorado ve el consolidado e indicadores y exporta 
+
+    Error: browser.newContext: Target page, context or browser has been closed
+    Browser logs:
+
+    <launching> C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe --disable-field-trial-config --disable-background-networking --disable-background-timer-throttling --disable-backgrounding-occluded-windows --disable-back-forward-cache --disable-breakpad --disable-client-side-phishing-detection --disable-component-extensions-with-background-pages --disable-component-update --no-default-browser-check --disable-default-apps --disable-dev-shm-usage --disable-extensions --disable-features=AcceptCHFrame,AvoidUnnecessaryBeforeUnloadCheckSync,DestroyProfileOnBrowserClose,DialMediaRouteProvider,GlobalMediaControls,HttpsUpgrades,LensOverlay,MediaRouter,PaintHolding,ThirdPartyStoragePartitioning,Translate,AutoDeElevate,RenderDocument --enable-features=CDPScreenshotNewSurface --allow-pre-commit-input --disable-hang-monitor --disable-ipc-flooding-protection --disable-popup-blocking --disable-prompt-on-repost --disable-renderer-backgrounding --force-color-profile=srgb --metrics-recording-only --no-first-run --password-store=basic --use-mock-keychain --no-service-autorun --export-tagged-pdf --disable-search-engine-choice-screen --unsafely-disable-devtools-self-xss-warnings --edge-skip-compat-layer-relaunch --enable-automation --headless --hide-scrollbars --mute-audio --blink-settings=primaryHoverType=2,availableHoverTypes=2,primaryPointerType=4,availablePointerTypes=4 --no-sandbox --user-data-dir=C:\Users\chave\AppData\Local\Temp\playwright_chromiumdev_profile-FAGuQv --remote-debugging-pipe --no-startup-window
+    <launched> pid=54120
+    [pid=54120][err] [54120:50460:1019/180307.410:ERROR:chrome\elevation_service\edge_elevation_service_browser_helper.cc:94] LaunchUpdateCmdElevatedAndWait:  hr = 80070002 with exit code: 32
+    [pid=54120][err] [54120:60880:1019/180307.611:ERROR:chrome\browser\task_manager\providers\fallback_task_provider.cc:126] Every renderer should have at least one task provided by a primary task provider. If a "Renderer" fallback task is shown, it is a bug. If you have repro steps, please file a new bug and tag it as a dependency of crbug.com/40528867.
+    [pid=54120][err] [54120:60880:1019/180337.850:ERROR:chrome\browser\task_manager\providers\fallback_task_provider.cc:126] Every renderer should have at least one task provided by a primary task provider. If a "Renderer" fallback task is shown, it is a bug. If you have repro steps, please file a new bug and tag it as a dependency of crbug.com/40528867.
+
+    attachment #1: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results\e2e-05-informes-y-exportac-d734c-ado-e-indicadores-y-exporta\trace.zip
+    Usage:
+
+        npx playwright show-trace test-results\e2e-05-informes-y-exportac-d734c-ado-e-indicadores-y-exporta\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  1 failed
+    tests\e2e-05-informes-y-exportaciones.spec.ts:42:5 › Vicerrectorado ve el consolidado e indicadores y exporta 
+  3 passed (1.9m)

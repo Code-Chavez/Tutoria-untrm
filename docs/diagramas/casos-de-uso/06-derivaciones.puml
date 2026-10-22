@@ -1,0 +1,40 @@
+@startuml
+left to right direction
+skinparam shadowing false
+skinparam defaultFontName Arial
+title Derivación y atención especializada
+actor "Docente tutor" as doc
+actor "Profesional de servicio" as serv
+actor "Administrador (DBU)" as admin
+rectangle "SIT UNTRM" {
+  usecase "DE01\nCrear derivación a un servicio" as DE01
+  usecase "DE02\nConsultar casos autorizados" as DE02
+  usecase "DE03\nRegistrar recepción del caso" as DE03
+  usecase "DE04\nRegistrar atención y observaciones" as DE04
+  usecase "DE05\nCerrar caso derivado" as DE05
+  usecase "DE06\nDescargar constancia de derivación" as DE06
+  usecase "DE07\nAdjuntar constancia firmada" as DE07
+  usecase "DE08\nSupervisar derivaciones de servicios" as DE08
+}
+doc -- DE01
+doc -- DE02
+serv -- DE02
+admin -- DE02
+serv -- DE03
+admin -- DE03
+serv -- DE04
+admin -- DE04
+serv -- DE05
+admin -- DE05
+doc -- DE06
+serv -- DE06
+admin -- DE06
+doc -- DE07
+serv -- DE07
+admin -- DE07
+admin -- DE08
+note bottom
+Alcance restringido por rol, escuela, servicio y periodo.
+Autenticación previa, salvo ingreso y recuperación.
+end note
+@enduml

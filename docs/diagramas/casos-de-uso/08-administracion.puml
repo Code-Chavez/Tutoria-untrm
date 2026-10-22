@@ -1,0 +1,40 @@
+@startuml
+left to right direction
+skinparam shadowing false
+skinparam defaultFontName Arial
+title Administración y supervisión institucional
+actor "Administrador (DBU)" as admin
+actor "Coordinador de tutoría" as coord
+actor "Vicerrectorado" as vice
+actor "Decano" as dec
+rectangle "SIT UNTRM" {
+  usecase "AD01\nGestionar usuarios, roles y servicios" as AD01
+  usecase "AD02\nVincular cuenta del estudiante" as AD02
+  usecase "AD03\nConfigurar correos de escuelas" as AD03
+  usecase "AD04\nGestionar sedes" as AD04
+  usecase "AD05\nGestionar catálogos y parámetros" as AD05
+  usecase "AD06\nConfigurar identidad visual" as AD06
+  usecase "AD07\nConsultar bitácora de auditoría" as AD07
+  usecase "AD08\nConsultar amonestaciones" as AD08
+  usecase "AD09\nEmitir amonestación" as AD09
+}
+admin -- AD01
+admin -- AD02
+coord -- AD02
+admin -- AD03
+coord -- AD03
+admin -- AD04
+vice -- AD04
+admin -- AD05
+admin -- AD06
+admin -- AD07
+admin -- AD08
+coord -- AD08
+dec -- AD08
+admin -- AD09
+dec -- AD09
+note bottom
+Alcance restringido por rol, escuela, servicio y periodo.
+Autenticación previa, salvo ingreso y recuperación.
+end note
+@enduml
