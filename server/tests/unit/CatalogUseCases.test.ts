@@ -45,12 +45,24 @@ describe('Catálogos maestros (HU-48)', () => {
       delete: jest.fn().mockResolvedValue(undefined),
       isDuplicate: jest.fn().mockResolvedValue(false),
       facultyExists: jest.fn().mockResolvedValue(true),
+      highestSchoolCycle: jest.fn().mockResolvedValue(0),
       activateOnlyPeriod: jest.fn().mockResolvedValue(undefined),
       findActivePeriodId: jest.fn().mockResolvedValue(null),
     };
   });
 
   describe('alta', () => {
+    it('rechaza reducir los ciclos si ocultaría estudiantes o asignaciones', async () => {
+      repo.findById.mockResolvedValue(entry({ kind: 'schools', cycleCount: 12 }));
+      repo.highestSchoolCycle.mockResolvedValue(12);
+      await expect(new UpdateCatalogEntryUseCase(repo).execute('schools', 'e1', { cycleCount: 10 })).rejects.toBeInstanceOf(CatalogValidationError);
+      expect(repo.update).not.toHaveBeenCalled();
+    });
+
+    it('permite configurar doce ciclos para una escuela', async () => {
+      await new CreateCatalogEntryUseCase(repo).execute('schools', { name: 'Escuela', facultyId: 'f1', cycleCount: 12 });
+      expect(repo.create).toHaveBeenCalledWith('schools', expect.objectContaining({ cycleCount: 12 }));
+    });
     const create = () => new CreateCatalogEntryUseCase(repo);
 
     it('crea el elemento', async () => {

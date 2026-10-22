@@ -10,7 +10,7 @@ import { SchoolRepository } from '@domain/repositories/SchoolRepository';
 import { TutorAssignmentHistoryRepository } from '@domain/repositories/TutorAssignmentHistoryRepository';
 import { AuditLogRepository } from '@domain/repositories/AuditLogRepository';
 
-export const MAX_CYCLE = 10;
+export const MAX_CYCLE = 14;
 const MOVE_REASON = 'Cambio de tutor del ciclo';
 
 export class NoPeriodForCycleTutorsError extends Error {
@@ -20,8 +20,8 @@ export class NoPeriodForCycleTutorsError extends Error {
   }
 }
 export class InvalidCycleError extends Error {
-  constructor() {
-    super(`El ciclo debe ser un número entero entre 1 y ${MAX_CYCLE}`);
+  constructor(maxCycle = MAX_CYCLE) {
+    super(`El ciclo debe ser un número entero entre 1 y ${maxCycle}`);
     this.name = 'InvalidCycleError';
   }
 }
@@ -103,15 +103,18 @@ export class ListCycleTutorsUseCase {
     private readonly guard: StudentAccessGuard,
     private readonly periods: AcademicPeriodRepository,
     private readonly cycleTutors: CycleTutorRepository,
+    private readonly schools: SchoolRepository,
   ) {}
 
   async execute(actingUserId: string, schoolId: string): Promise<{ periodId: string; periodName: string; cycles: CycleRow[] }> {
     await this.guard.assertSchoolAccess(actingUserId, schoolId);
     const period = await this.periods.findActive();
     if (!period) throw new NoPeriodForCycleTutorsError();
+    const school = await this.schools.findById(schoolId);
+    if (!school) throw new CycleTutorSchoolNotFoundError();
     const [assignments, counts] = await Promise.all([this.cycleTutors.listBySchool(period.id, schoolId), this.cycleTutors.enrolledByCycle(period.id, schoolId)]);
     const byCycle = new Map(assignments.map((a) => [a.cycle, a]));
-    const cycles: CycleRow[] = Array.from({ length: MAX_CYCLE }, (_, i) => i + 1).map((cycle) => {
+    const cycles: CycleRow[] = Array.from({ length: school.cycleCount ?? 0 }, (_, i) => i + 1).map((cycle) => {
       const a = byCycle.get(cycle);
       const c = counts.get(cycle);
       return { cycle, assignment: a ? { tutorId: a.tutorId, isException: a.isException, note: a.note ?? null, acceptanceStatus: a.acceptanceStatus, availability: a.availability ?? null, declineReason: a.declineReason ?? null, respondedAt: a.respondedAt ?? null } : null, enrolled: c?.total ?? 0, withoutTutor: c?.withoutTutor ?? 0 };
@@ -147,6 +150,7 @@ export class SetCycleTutorUseCase {
     if (!period) throw new NoPeriodForCycleTutorsError();
     const school = await this.schools.findById(input.schoolId);
     if (!school) throw new CycleTutorSchoolNotFoundError();
+    if (input.cycle > (school.cycleCount ?? 0)) throw new InvalidCycleError(school.cycleCount ?? 0);
 
     const tutor = await assertActiveTutor(this.users, this.roles, input.tutorId);
     // Solo tutorea a su escuela; un tutor sin escuela registrada no puede ser tutor de un ciclo hasta que se la indiquen.

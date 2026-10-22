@@ -185,6 +185,7 @@ model School {
   id        String   @id @default(uuid())
   name      String
   facultyId String   @map("faculty_id")
+  cycleCount Int     @default(10) @map("cycle_count")
   isActive  Boolean  @default(true) @map("is_active")
   createdAt DateTime @default(now()) @map("created_at")
 

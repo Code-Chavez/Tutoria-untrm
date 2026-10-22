@@ -26,6 +26,14 @@ async function assertValid(
   if (kind === 'schools' && input.facultyId && !(await catalogs.facultyExists(input.facultyId))) {
     throw new CatalogValidationError('La facultad indicada no existe');
   }
+  if (kind === 'schools' && input.cycleCount !== undefined) {
+    if (!Number.isInteger(input.cycleCount) || input.cycleCount < 1 || input.cycleCount > 14) {
+      throw new CatalogValidationError('La cantidad de ciclos debe ser un entero entre 1 y 14');
+    }
+    if (current && input.cycleCount < (await catalogs.highestSchoolCycle(current.id))) {
+      throw new CatalogValidationError('No se puede reducir la cantidad: hay estudiantes o asignaciones en ciclos superiores');
+    }
+  }
   if (kind === 'periods') {
     const start = input.startDate ?? current?.startDate;
     const end = input.endDate ?? current?.endDate;

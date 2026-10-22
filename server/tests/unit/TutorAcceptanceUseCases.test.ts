@@ -119,7 +119,9 @@ describe('aceptación del tutor (fase 4)', () => {
   });
 
   describe('responder', () => {
-    const respond = () => new RespondTutorAcceptanceUseCase(cycleTutors, users, schools, periods, parameters, mailer, audit);
+    const invitations = { execute: jest.fn() };
+    beforeEach(() => { invitations.execute.mockReset(); });
+    const respond = () => new RespondTutorAcceptanceUseCase(cycleTutors, users, schools, periods, parameters, mailer, audit, invitations);
 
     it('al aceptar guarda su disponibilidad y consume el enlace', async () => {
       await respond().execute('tok', { accept: true, availability: [slot] }, '10.0.0.1');
@@ -127,6 +129,26 @@ describe('aceptación del tutor (fase 4)', () => {
       expect(cycleTutors.recordResponse).toHaveBeenCalledWith('a1', { accepted: true, availability: [slot] }, expect.any(Date));
       expect(audit.create.mock.calls[0][0]).toMatchObject({ userId: 't1', action: 'CYCLE_TUTOR_ACCEPTED' });
       expect(mailer.send).not.toHaveBeenCalled();
+    });
+
+    it('ofrece activación solo a una cuenta activa pendiente de crear contraseña', async () => {
+      users.findById.mockResolvedValue({ id: 't1', isActive: true, mustChangePassword: true } as never);
+      invitations.execute.mockResolvedValue({ link: 'https://sit.untrm.edu.pe/activar-cuenta/secret' });
+      await expect(respond().execute('tok', { accept: true, availability: [slot] })).resolves.toEqual({ accepted: true, activationLink: 'https://sit.untrm.edu.pe/activar-cuenta/secret' });
+      expect(invitations.execute).toHaveBeenCalledWith('t1', 't1', undefined);
+      expect(JSON.stringify(audit.create.mock.calls)).not.toContain('/activar-cuenta/secret');
+    });
+
+    it.each([false, true])('no emite activación si la cuenta está activada o deshabilitada (%s)', async (mustChangePassword) => {
+      users.findById.mockResolvedValue({ id: 't1', isActive: !mustChangePassword, mustChangePassword } as never);
+      await expect(respond().execute('tok', { accept: true, availability: [slot] })).resolves.toEqual({ accepted: true });
+      expect(invitations.execute).not.toHaveBeenCalled();
+    });
+
+    it('conserva la aceptación e informa si no se pudo preparar la activación', async () => {
+      users.findById.mockResolvedValue({ id: 't1', isActive: true, mustChangePassword: true } as never);
+      invitations.execute.mockRejectedValue(new Error('unavailable'));
+      await expect(respond().execute('tok', { accept: true, availability: [slot] })).resolves.toEqual({ accepted: true, activationUnavailable: true });
     });
 
     it('al rechazar exige el motivo y avisa a la coordinación del colegio', async () => {
