@@ -13,3 +13,4 @@ La cantidad se guarda en `schools.cycle_count`. Se configura con el rol Administ
 Aplicar las migraciones y regenerar Prisma antes de iniciar la API. La migración `20261020020000_school_cycle_count` conserva el comportamiento previo de las escuelas existentes (10 ciclos) y cualquier ciclo superior que ya tenga estudiantes o asignaciones. No deduce el plan oficial de estudios: el administrador debe revisar cada escuela y guardar su cantidad real. No modifica las listas de estudiantes ni las asignaciones.
 
 La prueba de integración `server/tests/integration/schoolCycles.test.ts` requiere `REQUIRE_DB_TESTS=1` y usa una transacción que revierte todos sus datos temporales.
+`La migración admite instalación limpia: no consulta asignaciones por ciclo hasta comprobar que exista su tabla, creada por una migración posterior. En actualizaciones conserva los ciclos de las asignaciones existentes.`
