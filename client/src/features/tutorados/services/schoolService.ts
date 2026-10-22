@@ -5,6 +5,7 @@ export interface School {
   name: string;
   facultyId: string;
   isActive: boolean;
+  cycleCount?: number;
   coordinatorId?: string | null;
   /** Sede donde se dicta la escuela. */
   campusId?: string | null;

@@ -60,3 +60,13 @@
   color: var(--peligro);
   font-size: var(--fs-sm);
 }
+
+.grid { grid-template-columns: repeat(auto-fit, minmax(min(100%, 320px), 1fr)); }
+.row { padding: 14px 0; flex-wrap: wrap; }
+.name { overflow-wrap: anywhere; flex-basis: 160px; line-height: 1.6; }
+.add { padding-top: 16px; border-top: 1px solid var(--borde); }
+.input { min-height: 44px; box-sizing: border-box; max-width: 100%; }
+@media (max-width: 480px) { .add { align-items: stretch; flex-direction: column; } .add > * { width: 100%; box-sizing: border-box; } }
+.grid { gap: 14px; }
+.row { padding: 9px 0; gap: 8px; }
+.add { padding-top: 10px; gap: 8px; }

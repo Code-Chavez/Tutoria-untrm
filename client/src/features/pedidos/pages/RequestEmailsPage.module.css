@@ -75,3 +75,18 @@
     grid-template-columns: 1fr;
   }
 }
+
+.row { padding: 20px 0; gap: 16px; }
+.name { min-width: 0; overflow-wrap: anywhere; line-height: 1.5; }
+.current { font-size: var(--fs-sm); overflow-wrap: anywhere; }
+.input { min-height: 44px; background: var(--blanco); }
+.edit { flex-wrap: wrap; }
+.hint { font-size: var(--fs-sm); line-height: 1.6; padding: 12px; border-radius: 8px; background: var(--g50); }
+@media (max-width: 480px) { .edit > input { flex-basis: 100%; } .edit > button { width: 100%; } }
+/* Escuela, dirección y acciones en una fila compacta. */
+.row { padding: 12px 0; gap: 10px 16px; grid-template-columns: minmax(180px, .9fr) minmax(0, 1.4fr); }
+.current { font-size: var(--fs-xs); }
+.edit { gap: 6px; }
+.input { min-height: 38px; }
+.hint { margin-top: 10px; padding: 8px 10px; font-size: var(--fs-xs); }
+@media (max-width: 800px) { .row { grid-template-columns: minmax(0, 1fr); } }

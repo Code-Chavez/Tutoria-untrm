@@ -3,6 +3,7 @@ import { useParams, useNavigate, Link } from 'react-router-dom';
 import { getApiErrorMessage } from '@shared/services/apiClient';
 import { authService } from '../services/authService';
 import styles from './LoginPage.module.css';
+import local from './ResetPasswordPage.module.css';
 
 interface ResetPasswordPageProps {
   /** `activate`: primera contraseña de una cuenta nueva (invitación de un solo uso); `reset`: recuperación. */
@@ -19,7 +20,7 @@ const COPY = {
   },
   activate: {
     title: 'Activa tu cuenta',
-    subtitle: 'Crea tu contraseña para entrar al sistema. Este enlace sirve una sola vez; si ya se usó o venció, pide uno nuevo a quien administra el sistema.',
+    subtitle: 'Crea tu contraseña personal para comenzar a usar el sistema de tutoría.',
     submit: 'Activar mi cuenta',
     success: 'Tu cuenta está activa. Ya puedes iniciar sesión con la contraseña que acabas de crear.',
     invalidToken: 'El enlace de activación no es válido.',
@@ -73,10 +74,10 @@ export function ResetPasswordPage({ mode = 'reset' }: ResetPasswordPageProps) {
   };
 
   return (
-    <div className={styles.page}>
-      <main className={styles.card}>
-        <div className={styles.brandRow}>
-          <div className={styles.emblem}>SIT</div>
+    <div className={`${styles.page} ${local.page}`}>
+      <main className={`${styles.card} ${local.card}`}>
+        <div className={local.brand}>
+          <div className={local.emblem}>SIT</div>
           <div>
             <b>UNTRM</b>
             <small>Bienestar Universitario</small>
@@ -85,6 +86,7 @@ export function ResetPasswordPage({ mode = 'reset' }: ResetPasswordPageProps) {
 
         <h1 className={styles.title}>{copy.title}</h1>
         <p className={styles.subtitle}>{copy.subtitle}</p>
+        {mode === 'activate' && <p className={local.notice}>Primer acceso · Este enlace es personal y sirve una sola vez.</p>}
 
         {success ? (
           <div className={styles.success} style={{ padding: '12px', background: '#e6f4ea', color: '#137333', borderRadius: '4px', marginBottom: '16px', fontSize: '14px' }}>
@@ -117,6 +119,8 @@ export function ResetPasswordPage({ mode = 'reset' }: ResetPasswordPageProps) {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   disabled={isSubmitting}
+                  autoComplete="new-password"
+                  aria-describedby="password-help"
                 />
                 <button
                   type="button"
@@ -128,6 +132,7 @@ export function ResetPasswordPage({ mode = 'reset' }: ResetPasswordPageProps) {
                   {showPassword ? <EyeOffIcon /> : <EyeIcon />}
                 </button>
               </div>
+              <p id="password-help" className={local.help}>Usa al menos 8 caracteres.</p>
             </div>
 
             <div className={styles.field}>
@@ -146,6 +151,7 @@ export function ResetPasswordPage({ mode = 'reset' }: ResetPasswordPageProps) {
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
                   disabled={isSubmitting}
+                  autoComplete="new-password"
                 />
               </div>
             </div>
@@ -211,3 +217,4 @@ function AlertIcon() {
     </svg>
   );
 }
+

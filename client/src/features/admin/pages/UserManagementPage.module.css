@@ -11,3 +11,5 @@
   font-size: 13px;
   color: var(--peligro);
 }
+
+.tableCard { border-radius: 12px; }

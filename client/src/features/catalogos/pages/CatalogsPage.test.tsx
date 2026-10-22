@@ -138,4 +138,18 @@ describe('CatalogsPage', () => {
     await user.click(screen.getByRole('tab', { name: 'Periodos' }));
     expect(await screen.findByRole('button', { name: 'Nuevo periodo académico' })).toBeInTheDocument();
   });
+
+  it('permite configurar la cantidad de ciclos al editar una escuela', async () => {
+    mocked.list.mockImplementation(async (kind) => kind === 'schools' ? [entry({ id: 's1', kind, name: 'Sistemas', facultyId: 'f1', cycleCount: 10 })] : kind === 'faculties' ? [entry({ id: 'f1', name: 'Ingeniería' })] : []);
+    mocked.update.mockResolvedValue(entry({ id: 's1', kind: 'schools', name: 'Sistemas', facultyId: 'f1', cycleCount: 12 }));
+    renderPage();
+    await userEvent.click(await screen.findByRole('tab', { name: 'Escuelas' }));
+    await userEvent.click(await screen.findByRole('button', { name: 'Editar Sistemas' }));
+    const input = screen.getByLabelText('Cantidad de ciclos de la escuela');
+    expect(input).toHaveValue(10);
+    await userEvent.clear(input);
+    await userEvent.type(input, '12');
+    await userEvent.click(screen.getByRole('button', { name: 'Guardar cambios' }));
+    await waitFor(() => expect(mocked.update).toHaveBeenCalledWith('schools', 's1', expect.objectContaining({ cycleCount: 12 })));
+  });
 });

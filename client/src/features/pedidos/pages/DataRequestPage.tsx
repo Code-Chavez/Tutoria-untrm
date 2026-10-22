@@ -8,7 +8,7 @@ import { useAuth } from '@features/auth/hooks/useAuth';
 import { useDataRequests, useMarkReceived, useRequestSchools, useSendDataRequest } from '../hooks/useDataRequests';
 import styles from './DataRequestPage.module.css';
 
-const CYCLES = Array.from({ length: 10 }, (_, i) => i + 1);
+
 const fmt = (iso: string) => new Date(iso).toLocaleDateString('es-PE', { dateStyle: 'medium' });
 
 // Todo lo que cambia según la lista que se pide: título, explicación, columnas de la plantilla y a dónde seguir al recibirla.
@@ -65,7 +65,10 @@ export function DataRequestPage() {
   const schools = (schoolsQuery.data ?? []).filter((s) => user?.role === 'Administrador DBU' || s.coordinatorId === user?.id);
   const [chosen, setChosen] = useState('');
   const school = schools.find((s) => s.id === chosen) ?? schools[0];
-  const [cycles, setCycles] = useState<number[]>([]);
+  const availableCycles = Array.from({ length: school?.cycleCount ?? 0 }, (_, index) => index + 1);
+  const [cycleSelection, setCycleSelection] = useState<{ schoolId: string; total: number; values: number[] } | null>(null);
+  const cycles = cycleSelection?.schoolId === school?.id && cycleSelection?.total === availableCycles.length ? cycleSelection.values : availableCycles;
+  const setCycles = (values: number[]) => setCycleSelection({ schoolId: school?.id ?? '', total: availableCycles.length, values });
   // La DBU también pide la lista de docentes tutores (la coordinación solo la de estudiantes).
   const isDbu = user?.role === 'Administrador DBU';
   // Las pantallas de carga llevan aquí con la lista ya elegida (?lista=docentes); la de docentes solo la pide la DBU.
@@ -74,13 +77,17 @@ export function DataRequestPage() {
   const [note, setNote] = useState('');
   const [feedback, setFeedback] = useState<Feedback | null>(null);
 
-  const toggleCycle = (cycle: number) => setCycles((current) => (current.includes(cycle) ? current.filter((c) => c !== cycle) : [...current, cycle]));
+  const toggleCycle = (cycle: number) => setCycles(cycles.includes(cycle) ? cycles.filter((value) => value !== cycle) : [...cycles, cycle].sort((a, b) => a - b));
   const hasEmail = !!school?.requestEmail;
   const copy = COPY[kind];
 
   const submit = async (event: FormEvent) => {
     event.preventDefault();
     if (!school) return;
+    if (kind === 'ESTUDIANTES' && cycles.length === 0) {
+      setFeedback({ type: 'error', text: 'Selecciona al menos un ciclo para enviar el pedido.' });
+      return;
+    }
     setFeedback(null);
     try {
       const { request, sent } = await send.mutateAsync({ schoolId: school.id, cycles: kind === 'DOCENTES' ? [] : cycles, note: note.trim() || undefined, kind });
@@ -96,17 +103,20 @@ export function DataRequestPage() {
   };
 
   return (
-    <div>
+    <div className={styles.page}>
       <PageHeader
         title={copy.title}
         subtitle={copy.subtitle}
         icon={<SendIcon size={24} />}
       />
 
-      {schoolsQuery.isLoading ? null : schools.length === 0 ? (
+      <div className={styles.workspace}>
+      {schoolsQuery.isLoading ? null : schoolsQuery.isError ? (
+        <EmptyState variant="error" icon={<SendIcon size={26} />} title="No se pudieron cargar las escuelas" description={getApiErrorMessage(schoolsQuery.error)} action={<Button onClick={() => schoolsQuery.refetch()}>Reintentar escuelas</Button>} />
+      ) : schools.length === 0 ? (
         <EmptyState icon={<SendIcon size={26} />} title="No tienes escuelas asignadas" description="Solo se piden listas de las escuelas que administras o coordinas." />
       ) : (
-        <Card>
+        <Card className={styles.requestCard}>
           <CardHeader title="Nuevo pedido" description="El pedido sale a nombre tuyo, con copia a tu correo; las respuestas te llegan a ti." />
           <CardBody>
             {feedback && (
@@ -115,7 +125,7 @@ export function DataRequestPage() {
               </p>
             )}
 
-            <form onSubmit={submit}>
+            <form onSubmit={submit} className={styles.formGrid}>
               {isDbu && (
                 <div className={styles.field}>
                   <label htmlFor="req-kind">Qué lista pedir</label>
@@ -125,7 +135,7 @@ export function DataRequestPage() {
                   </SelectField>
                 </div>
               )}
-              <div className={styles.field}>
+              <div className={`${styles.field} ${!isDbu ? styles.fullWidth : ''}`}>
                 <label htmlFor="req-school">Escuela profesional</label>
                 <SelectField id="req-school" value={school?.id ?? ''} onChange={(e) => { setChosen(e.target.value); setFeedback(null); }}>
                   {schools.map((s) => (
@@ -136,7 +146,7 @@ export function DataRequestPage() {
                 </SelectField>
               </div>
 
-              <div className={styles.field}>
+              <div className={`${styles.field} ${styles.recipient}`}>
                 <span className={styles.label}>Se pedirá a</span>
                 {hasEmail ? (
                   <div className={styles.row}>
@@ -156,39 +166,50 @@ export function DataRequestPage() {
               </div>
 
               {kind === 'ESTUDIANTES' && (
-                <fieldset className={styles.field}>
-                <legend className={styles.label}>Ciclos (sin marcar = todos)</legend>
+                <fieldset className={`${styles.field} ${styles.fullWidth}`}>
+                <legend className={styles.label}>Ciclos a solicitar</legend>
+                {availableCycles.length === 0 && <p className={styles.note}>Configura la cantidad de ciclos de esta escuela en Catálogos → Escuelas antes de pedir listas.</p>}
+                <div className={styles.cycleActions}>
+                  <span aria-live="polite">{cycles.length} de {availableCycles.length} seleccionados</span>
+                  <Button type="button" variant="ghost" size="sm" disabled={cycles.length === availableCycles.length} onClick={() => setCycles([...availableCycles])}>Seleccionar todos</Button>
+                  <Button type="button" variant="ghost" size="sm" disabled={cycles.length === 0} onClick={() => setCycles([])}>Quitar selección</Button>
+                </div>
                 <div className={styles.cycles}>
-                  {CYCLES.map((c) => (
+                  {availableCycles.map((c) => (
                     <label key={c} className={styles.cycle}>
                       <input type="checkbox" checked={cycles.includes(c)} onChange={() => toggleCycle(c)} /> {c}
                     </label>
                   ))}
                 </div>
+                {cycles.length === 0 && <p className={styles.note}>Selecciona al menos un ciclo para enviar el pedido.</p>}
               </fieldset>
               )}
 
-              <div className={styles.field}>
+              <div className={`${styles.field} ${styles.fullWidth}`}>
                 <label htmlFor="req-note">Observaciones (opcional)</label>
                 <textarea id="req-note" className={styles.input} rows={3} maxLength={500} value={note} onChange={(e) => setNote(e.target.value)} />
               </div>
 
-              <Button type="submit" variant="primary" loading={send.isPending} disabled={!hasEmail}>
+              <div className={styles.formFooter}>
+              <Button type="submit" variant="primary" loading={send.isPending} disabled={!hasEmail || (kind === 'ESTUDIANTES' && cycles.length === 0)}>
                 Enviar pedido
               </Button>
               <p className={styles.note}>
                 Se adjunta la plantilla Excel con las columnas: {copy.columns}. Cuando recibas el archivo, cárgalo en{' '}
                 <Link to={copy.loadTo}>{copy.loadLabel}</Link>.
               </p>
+              </div>
             </form>
           </CardBody>
         </Card>
       )}
 
-      <Card>
+      <Card className={styles.historyCard}>
         <CardHeader title="Pedidos hechos" description="Para saber qué se pidió, a quién y si ya llegó." />
-        <CardBody>
-          {requestsQuery.isLoading ? null : (requestsQuery.data ?? []).length === 0 ? (
+        <CardBody className={styles.historyBody}>
+          {requestsQuery.isLoading ? null : requestsQuery.isError ? (
+            <div role="alert"><p className={styles.error}>No se pudieron cargar los pedidos.</p><Button onClick={() => requestsQuery.refetch()}>Reintentar pedidos</Button></div>
+          ) : (requestsQuery.data ?? []).length === 0 ? (
             <p className={styles.note}>Todavía no se hizo ningún pedido.</p>
           ) : (
             <ul className={styles.history}>
@@ -217,6 +238,7 @@ export function DataRequestPage() {
           )}
         </CardBody>
       </Card>
+      </div>
       <NextSteps
         title={copy.nextTitle}
         steps={copy.steps}

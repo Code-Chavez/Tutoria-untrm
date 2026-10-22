@@ -4,6 +4,7 @@ import { Link } from 'react-router-dom';
 import { getApiErrorMessage } from '@shared/services/apiClient';
 import { authService } from '../services/authService';
 import styles from './LoginPage.module.css'; // Reutilizamos estilos
+import local from './ResetPasswordPage.module.css';
 
 export function ForgotPasswordPage() {
   const [email, setEmail] = useState('');
@@ -19,7 +20,7 @@ export function ForgotPasswordPage() {
 
     try {
       await authService.forgotPassword(normalizeEmail(email));
-      setSuccess('Si el correo está registrado en nuestro sistema, recibirás un enlace para restablecer tu contraseña. Revisa tu bandeja de entrada o la consola del servidor de desarrollo.');
+      setSuccess('Si el correo está registrado en nuestro sistema, recibirás un enlace para restablecer tu contraseña. Revisa tu bandeja de entrada y la carpeta de correo no deseado.');
     } catch (err) {
       setError(getApiErrorMessage(err));
     } finally {
@@ -28,10 +29,10 @@ export function ForgotPasswordPage() {
   };
 
   return (
-    <div className={styles.page}>
-      <main className={styles.card}>
-        <div className={styles.brandRow}>
-          <div className={styles.emblem}>SIT</div>
+    <div className={`${styles.page} ${local.page} ${local.recovery}`}>
+      <main className={`${styles.card} ${local.card}`}>
+        <div className={local.brand}>
+          <div className={local.emblem}>SIT</div>
           <div>
             <b>UNTRM</b>
             <small>Bienestar Universitario</small>
@@ -44,7 +45,7 @@ export function ForgotPasswordPage() {
         </p>
 
         {success ? (
-          <div className={styles.success} style={{ padding: '12px', background: '#e6f4ea', color: '#137333', borderRadius: '4px', marginBottom: '16px', fontSize: '14px' }}>
+          <div role="status" style={{ padding: '12px', background: '#e6f4ea', color: '#137333', borderRadius: '8px', marginBottom: '16px', fontSize: '14px', lineHeight: 1.6 }}>
             {success}
           </div>
         ) : (

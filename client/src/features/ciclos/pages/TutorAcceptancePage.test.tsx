@@ -37,8 +37,8 @@ describe('TutorAcceptancePage', () => {
     expect(screen.queryByRole('button', { name: 'Enviar respuesta' })).not.toBeInTheDocument();
   });
 
-  it('acepta indicando día, horas y lugar', async () => {
-    mocked.respond.mockResolvedValue();
+  it('acepta indicando día y horas sin pedir lugar', async () => {
+    mocked.respond.mockResolvedValue({ accepted: true });
     renderPage();
 
     await screen.findByLabelText('Acepto');
@@ -46,11 +46,21 @@ describe('TutorAcceptancePage', () => {
     await userEvent.click(screen.getByLabelText('Acepto'));
     expect(screen.getByText(/máximo 10 horas por semana/)).toBeInTheDocument();
     await userEvent.selectOptions(screen.getByLabelText('Día 1'), '3');
-    await userEvent.type(screen.getByLabelText('Lugar 1'), 'Aula 12');
+    expect(screen.queryByLabelText('Lugar 1')).not.toBeInTheDocument();
     await userEvent.click(screen.getByRole('button', { name: 'Enviar respuesta' }));
 
-    await waitFor(() => expect(mocked.respond).toHaveBeenCalledWith('tok123', { accept: true, availability: [{ day: 3, start: '08:00', end: '09:30', place: 'Aula 12' }] }));
+    await waitFor(() => expect(mocked.respond).toHaveBeenCalledWith('tok123', { accept: true, availability: [{ day: 3, start: '08:00', end: '09:30' }] }));
     expect(await screen.findByRole('status')).toHaveTextContent('Su disponibilidad quedó registrada');
+    expect(screen.getByRole('link', { name: 'Ir al sistema' })).toHaveAttribute('href', '/');
+  });
+
+  it('ofrece crear contraseña cuando el servidor indica primer acceso', async () => {
+    mocked.respond.mockResolvedValue({ accepted: true, activationLink: '/activar-cuenta/one-use' });
+    renderPage();
+    await userEvent.click(await screen.findByLabelText('Acepto'));
+    await userEvent.click(screen.getByRole('button', { name: 'Enviar respuesta' }));
+    expect(await screen.findByRole('link', { name: 'Activar mi cuenta y crear contraseña' })).toHaveAttribute('href', '/activar-cuenta/one-use');
+    expect(screen.queryByRole('link', { name: 'Ir al sistema' })).not.toBeInTheDocument();
   });
 
   it('puede agregar y quitar horarios', async () => {
@@ -64,7 +74,7 @@ describe('TutorAcceptancePage', () => {
   });
 
   it('rechaza con su motivo', async () => {
-    mocked.respond.mockResolvedValue();
+    mocked.respond.mockResolvedValue({ accepted: true });
     renderPage();
 
     await userEvent.click(await screen.findByLabelText('No puedo asumirlo'));

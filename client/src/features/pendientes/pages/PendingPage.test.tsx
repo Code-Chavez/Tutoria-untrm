@@ -70,6 +70,25 @@ describe('PendingPage (pendientes institucionales)', () => {
     expect(screen.queryByText(/rechazó la tutoría/)).not.toBeInTheDocument();
   });
 
+  it('combina búsqueda sin tildes y escuela, informa sin coincidencias y permite limpiar', async () => {
+    mocked.list.mockResolvedValue([
+      item({}),
+      item({ schoolId: 'adm', schoolName: 'Administración', title: 'Ciclo sin docente', kind: 'CYCLE_WITHOUT_TUTOR' }),
+    ]);
+    const user = userEvent.setup();
+    renderPage();
+    const search = await screen.findByLabelText('Buscar pendiente');
+    await user.type(search, 'ramirez');
+    expect(screen.getByRole('status')).toHaveTextContent('1 de 2 pendientes');
+    await user.selectOptions(screen.getByLabelText('Escuela profesional'), 'adm');
+    expect(screen.getByText('No hay coincidencias')).toBeInTheDocument();
+    expect(screen.queryByRole('list', { name: 'Pendientes' })).not.toBeInTheDocument();
+    await user.click(screen.getByRole('button', { name: 'Limpiar filtros' }));
+    expect(search).toHaveValue('');
+    expect(screen.getByRole('status')).toHaveTextContent('2 de 2 pendientes');
+    expect(screen.getByRole('region', { name: 'Resultados de pendientes' })).toHaveAttribute('tabindex', '0');
+  });
+
   it('si no se pueden cargar lo dice (no queda una pantalla vacía que parezca «sin pendientes»)', async () => {
     mocked.list.mockRejectedValue(new Error('boom'));
     renderPage();

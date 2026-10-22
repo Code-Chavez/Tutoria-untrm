@@ -25,7 +25,7 @@ export function CatalogsPage() {
   const { entries: faculties } = useCatalog('faculties');
 
   const detail = (entry: CatalogEntry) => {
-    if (entry.kind === 'schools') return faculties.find((f) => f.id === entry.facultyId)?.name ?? '—';
+    if (entry.kind === 'schools') return `${faculties.find((f) => f.id === entry.facultyId)?.name ?? '—'} · ${entry.cycleCount ?? 'Sin configurar'} ciclos`;
     if (entry.kind === 'periods') return `${date(entry.startDate)} – ${date(entry.endDate)}`;
     return entry.code ?? '—';
   };
