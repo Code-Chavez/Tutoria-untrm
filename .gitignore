@@ -47,3 +47,7 @@ server/storage/.env.production
 /server/storage/evidence/
 # Imágenes de contexto generadas descartadas por el usuario
 /client/public/images/contexto/
+# Imágenes y paquetes generados de los diagramas (se regeneran con docs/diagramas/generar_casos_uso.py)
+/docs/diagramas/casos-de-uso/*.png
+/docs/diagramas/casos-de-uso/*.svg
+/docs/diagramas/casos-de-uso/*.zip
