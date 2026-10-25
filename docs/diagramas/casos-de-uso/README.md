@@ -4,7 +4,7 @@ Elaboración: 18/10/2026. Referencia consultada: HEAD local `8c420d1` y archivos
 
 ## Entregables
 
-Cada diagrama tiene una imagen PNG para Word, un SVG vectorial para ampliar sin perder nitidez y una fuente PlantUML `.puml` editable. La representación SVG/PNG usa el mismo catálogo de actores, casos y asociaciones que la fuente. El generador reproducible es `../generar_casos_uso.py` (Python y Pillow).
+Cada diagrama se versiona como fuente PlantUML `.puml` editable. Las imágenes generadas (PNG para Word y SVG vectorial) y el paquete ZIP **no se suben al repositorio**: se regeneran, con el mismo catálogo de actores, casos y asociaciones que la fuente, con el generador reproducible `../generar_casos_uso.py` (Python y Pillow).
 
 | Figura | Contenido | Casos |
 |---|---|---|
