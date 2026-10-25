@@ -11,7 +11,7 @@ import {
   ReopenPeriodUseCase,
 } from '@application/use-cases/periods/PeriodLifecycleUseCases';
 
-const closeSchema = z.object({ confirmName: z.string({ required_error: 'Escriba el nombre del periodo para confirmar' }).trim().min(1, 'Escriba el nombre del periodo para confirmar') });
+const closeSchema = z.object({ confirmName: z.string({ error: (issue) => (issue.input === undefined ? 'Escriba el nombre del periodo para confirmar' : undefined) }).trim().min(1, 'Escriba el nombre del periodo para confirmar') });
 
 export class PeriodController {
   constructor(
@@ -23,7 +23,7 @@ export class PeriodController {
 
   private fail(error: unknown, res: Response) {
     if (error instanceof z.ZodError) {
-      res.status(400).json({ error: error.errors[0]?.message ?? 'Datos de entrada inválidos', details: error.errors });
+      res.status(400).json({ error: error.issues[0]?.message ?? 'Datos de entrada inválidos', details: error.issues });
     } else if (error instanceof PeriodNotFoundError) {
       res.status(404).json({ error: error.message });
     } else if (error instanceof PeriodConfirmationError) {

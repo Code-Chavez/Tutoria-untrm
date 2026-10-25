@@ -73,7 +73,7 @@ export class CycleTutorController {
   };
 
   private fail(res: Response, error: unknown) {
-    if (error instanceof z.ZodError) res.status(400).json({ error: 'Datos de entrada inválidos', details: error.errors });
+    if (error instanceof z.ZodError) res.status(400).json({ error: 'Datos de entrada inválidos', details: error.issues });
     else if (error instanceof InvalidCycleError || error instanceof CycleExceptionError) res.status(400).json({ error: error.message });
     else if (error instanceof StudentAccessDeniedError) res.status(403).json({ error: error.message });
     else if (error instanceof TutorNotFoundError || error instanceof CycleTutorSchoolNotFoundError || error instanceof CycleTutorNotFoundError) res.status(404).json({ error: error.message });

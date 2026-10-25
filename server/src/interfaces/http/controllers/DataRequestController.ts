@@ -31,7 +31,7 @@ export class DataRequestController {
 
   private fail(error: unknown, res: Response) {
     if (error instanceof z.ZodError) {
-      res.status(400).json({ error: error.errors[0]?.message ?? 'Datos de entrada inválidos', details: error.errors });
+      res.status(400).json({ error: error.issues[0]?.message ?? 'Datos de entrada inválidos', details: error.issues });
     } else if (error instanceof StudentAccessDeniedError) {
       res.status(403).json({ error: 'No tienes acceso a esa escuela' });
     } else if (error instanceof SchoolNotFoundError || error instanceof DataRequestNotFoundError) {

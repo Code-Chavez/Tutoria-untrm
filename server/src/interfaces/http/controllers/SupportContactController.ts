@@ -19,7 +19,7 @@ export class SupportContactController {
       res.status(200).json({ message: 'Persona de red de apoyo registrada exitosamente', contact });
     } catch (error) {
       if (error instanceof z.ZodError) {
-        res.status(400).json({ error: 'Datos de entrada inválidos', details: error.errors });
+        res.status(400).json({ error: 'Datos de entrada inválidos', details: error.issues });
       } else if (error instanceof StudentNotFoundError) {
         res.status(404).json({ error: error.message });
       } else {

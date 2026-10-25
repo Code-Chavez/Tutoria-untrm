@@ -27,7 +27,7 @@ export class RoleController {
       res.status(201).json({ message: 'Rol creado exitosamente', role });
     } catch (error) {
       if (error instanceof z.ZodError) {
-        res.status(400).json({ error: 'Datos de entrada inválidos', details: error.errors });
+        res.status(400).json({ error: 'Datos de entrada inválidos', details: error.issues });
       } else if (error instanceof RoleAlreadyExistsError) {
         res.status(409).json({ error: error.message });
       } else {

@@ -20,7 +20,7 @@ const responseSchema = z.object({
 });
 
 function fail(res: Response, error: unknown) {
-  if (error instanceof z.ZodError) res.status(400).json({ error: 'Datos de entrada inválidos', details: error.errors });
+  if (error instanceof z.ZodError) res.status(400).json({ error: 'Datos de entrada inválidos', details: error.issues });
   else if (error instanceof InvalidAvailabilityError) res.status(400).json({ error: error.message });
   else if (error instanceof InvalidAcceptanceLinkError) res.status(404).json({ error: error.message });
   else res.status(500).json({ error: 'Error interno del servidor' });

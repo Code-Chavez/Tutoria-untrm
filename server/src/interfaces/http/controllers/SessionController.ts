@@ -93,7 +93,7 @@ export class SessionController {
       res.status(200).json({ message: 'Asistencia de la sesión registrada', session });
     } catch (error) {
       if (error instanceof z.ZodError) {
-        res.status(400).json({ error: 'Datos de entrada inválidos', details: error.errors });
+        res.status(400).json({ error: 'Datos de entrada inválidos', details: error.issues });
       } else if (error instanceof SessionNotFoundError) {
         res.status(404).json({ error: error.message });
       } else if (error instanceof NotSessionTutorError) {
@@ -140,7 +140,7 @@ export class SessionController {
 
   private handleChangeError(error: unknown, res: Response) {
     if (error instanceof z.ZodError) {
-      res.status(400).json({ error: 'Datos de entrada inválidos', details: error.errors });
+      res.status(400).json({ error: 'Datos de entrada inválidos', details: error.issues });
     } else if (error instanceof SessionNotFoundError) {
       res.status(404).json({ error: error.message });
     } else if (error instanceof NotSessionTutorError) {
@@ -166,7 +166,7 @@ export class SessionController {
       res.status(201).json({ message: 'Sesión programada exitosamente', session });
     } catch (error) {
       if (error instanceof z.ZodError) {
-        res.status(400).json({ error: 'Datos de entrada inválidos', details: error.errors });
+        res.status(400).json({ error: 'Datos de entrada inválidos', details: error.issues });
       } else if (error instanceof StudentNotFoundError || error instanceof TutoringRequestNotFoundError) {
         res.status(404).json({ error: error.message });
       } else if (

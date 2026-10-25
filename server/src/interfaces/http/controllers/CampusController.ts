@@ -62,7 +62,7 @@ export class CampusController {
   };
 
   private fail(res: Response, error: unknown) {
-    if (error instanceof z.ZodError) res.status(400).json({ error: 'Datos de entrada inválidos', details: error.errors });
+    if (error instanceof z.ZodError) res.status(400).json({ error: 'Datos de entrada inválidos', details: error.issues });
     else if (error instanceof InvalidCampusError) res.status(400).json({ error: error.message });
     else if (error instanceof DuplicateCampusError) res.status(409).json({ error: error.message });
     else if (error instanceof CampusNotFoundError || error instanceof SchoolNotFoundForCampusError) res.status(404).json({ error: error.message });
