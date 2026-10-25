@@ -35,7 +35,7 @@ export class SystemParameterController {
       res.status(200).json({ message: 'Parámetro actualizado', parameter });
     } catch (error) {
       if (error instanceof z.ZodError) {
-        res.status(400).json({ error: 'Datos de entrada inválidos', details: error.errors });
+        res.status(400).json({ error: 'Datos de entrada inválidos', details: error.issues });
       } else if (error instanceof InvalidParameterValueError) {
         res.status(400).json({ error: error.message });
       } else if (error instanceof UnknownParameterError) {

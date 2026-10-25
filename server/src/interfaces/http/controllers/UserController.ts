@@ -57,7 +57,7 @@ export class UserController {
       res.status(200).json({ message: 'Rol asignado exitosamente', user });
     } catch (error) {
       if (error instanceof z.ZodError) {
-        res.status(400).json({ error: 'Datos de entrada inválidos', details: error.errors });
+        res.status(400).json({ error: 'Datos de entrada inválidos', details: error.issues });
       } else if (
         error instanceof RoleTargetUserNotFoundError ||
         error instanceof RoleNotFoundError
@@ -80,7 +80,7 @@ export class UserController {
       res.status(201).json({ message: 'Usuario creado exitosamente', user, invitation });
     } catch (error) {
       if (error instanceof z.ZodError) {
-        res.status(400).json({ error: 'Datos de entrada inválidos', details: error.errors });
+        res.status(400).json({ error: 'Datos de entrada inválidos', details: error.issues });
       } else if (error instanceof DuplicateEmailError || error instanceof InvalidAccountEmailError || error instanceof ServiceRequiredError || error instanceof TutorSchoolRequiredError || error instanceof DeanFacultyRequiredError) {
         res.status(400).json({ error: error.message });
       } else if (error instanceof RoleNotFoundError) {
@@ -113,7 +113,7 @@ export class UserController {
       res.status(200).json({ message: 'Usuario actualizado exitosamente', user });
     } catch (error) {
       if (error instanceof z.ZodError) {
-        res.status(400).json({ error: 'Datos de entrada inválidos', details: error.errors });
+        res.status(400).json({ error: 'Datos de entrada inválidos', details: error.issues });
       } else if (error instanceof UserNotFoundError) {
         res.status(404).json({ error: error.message });
       } else if (error instanceof DuplicateEmailError || error instanceof InvalidAccountEmailError || error instanceof ServiceRequiredError || error instanceof TutorSchoolRequiredError || error instanceof DeanFacultyRequiredError) {

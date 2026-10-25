@@ -40,7 +40,7 @@ export class AssignmentController {
       });
     } catch (error) {
       if (error instanceof z.ZodError) {
-        res.status(400).json({ error: 'Datos de entrada inválidos', details: error.errors });
+        res.status(400).json({ error: 'Datos de entrada inválidos', details: error.issues });
       } else if (error instanceof NoStudentsSelectedError) {
         res.status(400).json({ error: error.message });
       } else if (error instanceof TutorNotFoundError || error instanceof StudentNotFoundError) {
@@ -72,7 +72,7 @@ export class AssignmentController {
       res.status(200).json({ message: 'Estudiante reasignado exitosamente', student });
     } catch (error) {
       if (error instanceof z.ZodError) {
-        res.status(400).json({ error: 'Datos de entrada inválidos', details: error.errors });
+        res.status(400).json({ error: 'Datos de entrada inválidos', details: error.issues });
       } else if (error instanceof ReassignReasonRequiredError || error instanceof SameTutorAssignmentError) {
         res.status(400).json({ error: error.message });
       } else if (error instanceof StudentNotFoundError || error instanceof TutorNotFoundError) {
