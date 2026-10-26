@@ -48,20 +48,19 @@ describe('tutor por ciclo (fase 3b)', () => {
     });
   const cyclePath = (cycle: number) => `/api/schools/${schoolA}/cycle-tutors/${cycle}`;
   /**
-   * Foto de las asignaciones de ciclo preexistentes (las que NO son de esta corrida) en el momento de empezar. Otras suites pueden
-   * correr a la vez y crear las suyas en sus propias escuelas: esas no son preexistentes y no se comparan; las de la foto deben
-   * seguir existiendo, sin cambios.
+   * Foto de las asignaciones de ciclo PREEXISTENTES: las que ninguna conexión de prueba creó (el registro de origen de las filas anota las
+   * que crea cualquier suite, esta u otra que corra a la vez, y esas se borran cuando termina quien las creó, así que no cuentan). Las de la
+   * foto deben seguir existiendo, sin cambios.
    */
   const snapshotOf = async (ids?: string[]) =>
     JSON.stringify(
-      (await prisma.cycleTutorAssignment.findMany({ where: { schoolId: { notIn: ownSchoolIds }, ...(ids ? { id: { in: ids } } : {}) }, orderBy: { id: 'asc' } })).map((a) => [
-        a.id,
-        a.schoolId,
-        a.cycle,
-        a.tutorId,
-        a.isException,
-        a.acceptanceStatus,
-      ]),
+      (
+        await prisma.$queryRaw<Array<{ id: string; school_id: string; cycle: number; tutor_id: string; is_exception: boolean; acceptance_status: string }>>`
+          SELECT a.id, a.school_id, a.cycle, a.tutor_id, a.is_exception, a.acceptance_status FROM cycle_tutor_assignments a
+          WHERE NOT EXISTS (SELECT 1 FROM test_row_origin o WHERE o.tbl = 'cycle_tutor_assignments' AND o.row_id = a.id)
+            AND (${ids === undefined} OR a.id = ANY(${ids ?? []}::text[]))
+          ORDER BY a.id`
+      ).map((a) => [a.id, a.school_id, a.cycle, a.tutor_id, a.is_exception, a.acceptance_status]),
     );
 
   beforeAll(async () => {

@@ -1,11 +1,12 @@
 import http from 'http';
 import app from '../../src/app';
 import { prisma } from '../../src/infrastructure/database/prisma';
+import { removeOwnUserTraces } from '../helpers/ownUsers';
 
 /**
  * Sedes y escuela del docente tutor (fase 3a) sobre HTTP real y base de datos real: Vicerrectorado configura las sedes y la sede
- * de cada escuela, un docente tutor se registra con su escuela y solo recibe estudiantes de ella. Usa registros propios y los
- * deja como estaban. Se omite sin base de datos, salvo REQUIRE_DB_TESTS=1.
+ * de cada escuela, un docente tutor se registra con su escuela y solo recibe estudiantes de ella. Usa registros propios (también
+ * dos escuelas propias: no cambia la sede de ninguna escuela real) y los borra. Se omite sin base de datos, salvo REQUIRE_DB_TESTS=1.
  */
 const REQUIRE_DB = process.env.REQUIRE_DB_TESTS === '1';
 jest.setTimeout(180_000);
@@ -30,7 +31,6 @@ describe('sedes y escuela del docente tutor (fase 3a)', () => {
   const tokens = {} as Record<Who, string>;
   let schoolSistemas = '';
   let schoolMecanica = '';
-  let originalCampus: string | null = null;
   let campusId = '';
   let studentId = '';
   let tutorId = '';
@@ -61,21 +61,31 @@ describe('sedes y escuela del docente tutor (fase 3a)', () => {
       const res = await call('POST', '/api/auth/login', undefined, ACCOUNTS[who]);
       tokens[who] = ((await res.json()) as { data: { accessToken: string } }).data.accessToken;
     }
-    const sistemas = await prisma.school.findFirstOrThrow({ where: { name: 'Ingeniería de Sistemas' } });
-    schoolSistemas = sistemas.id;
-    originalCampus = sistemas.campusId;
-    schoolMecanica = (await prisma.school.findFirstOrThrow({ where: { name: 'Ingeniería Mecánica Eléctrica' } })).id;
+    // Dos escuelas propias (con la facultad y la sede de una real, que solo se lee): la prueba cambia la sede de la primera y asigna
+    // un docente a la segunda, sin tocar ninguna escuela que no sea suya. Sus nombres no se usan en ninguna comprobación.
+    const reference = await prisma.school.findFirstOrThrow({ where: { name: 'Ingeniería de Sistemas' } });
+    const own = (name: string) => prisma.school.create({ data: { name: `${name} ${stamp}`, facultyId: reference.facultyId, campusId: reference.campusId } });
+    schoolSistemas = (await own('Escuela de prueba de sedes A')).id;
+    schoolMecanica = (await own('Escuela de prueba de sedes B')).id;
   });
 
   afterAll(async () => {
     const running = server;
     if (running) await new Promise((resolve) => running.close(resolve));
     if (dbUp) {
-      await prisma.school.update({ where: { id: schoolSistemas }, data: { campusId: originalCampus } });
-      await prisma.campus.deleteMany({ where: { name: CAMPUS_NAME } });
-      await prisma.tutorAssignmentHistory.deleteMany({ where: { studentId } });
-      await prisma.student.deleteMany({ where: { studentCode: STUDENT_CODE } });
-      await prisma.user.updateMany({ where: { email: TUTOR_EMAIL }, data: { isActive: false } });
+      // Solo lo creado en esta corrida (también si una prueba falló a medias), en el orden que piden las claves foráneas.
+      const ownSchools = [schoolSistemas, schoolMecanica].filter(Boolean);
+      const students = await prisma.student.findMany({ where: { studentCode: STUDENT_CODE }, select: { id: true } });
+      const tutors = await prisma.user.findMany({ where: { email: TUTOR_EMAIL }, select: { id: true } });
+      const campuses = await prisma.campus.findMany({ where: { name: CAMPUS_NAME }, select: { id: true } });
+      const studentIds = students.map((s) => s.id);
+      const tutorIds = tutors.map((t) => t.id);
+      await prisma.tutorAssignmentHistory.deleteMany({ where: { studentId: { in: studentIds } } });
+      await prisma.student.deleteMany({ where: { id: { in: studentIds } } });
+      await removeOwnUserTraces(prisma, tutorIds, [...ownSchools, ...campuses.map((c) => c.id), ...studentIds]);
+      await prisma.user.deleteMany({ where: { id: { in: tutorIds } } });
+      await prisma.school.deleteMany({ where: { id: { in: ownSchools } } });
+      await prisma.campus.deleteMany({ where: { id: { in: campuses.map((c) => c.id) } } });
     }
     await prisma.$disconnect();
   });

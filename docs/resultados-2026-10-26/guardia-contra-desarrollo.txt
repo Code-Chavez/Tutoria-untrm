@@ -1,0 +1,6 @@
+# El guardia rechaza la base de desarrollo (sit_db) sin modificarla ni instalar nada en ella
+# Comando: DATABASE_URL=.../sit_db REQUIRE_DB_TESTS=1 npx jest --ci tests/integration/cycleTutors (sin TEST_DATABASE_URL)
+Error: Jest: Got error running globalSetup - C:\Proyects\Proyects\Tutoria-untrm\server\tests\support\testDatabaseGlobalSetup.ts, reason: La conexión configurada llega a la base «sit_db», que no es una base de pruebas (su nombre debe terminar en «_test»). 
+    at globalSetup (C:\Proyects\Proyects\Tutoria-untrm\server\tests\support\testDatabaseGlobalSetup.ts:25:15)
+huella de los conteos de todas las tablas de sit_db antes y después: idéntica (cb28d8e7…)
+tablas del registro de origen creadas en sit_db: 0

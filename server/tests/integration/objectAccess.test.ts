@@ -1,6 +1,7 @@
 import http from 'http';
 import app from '../../src/app';
 import { prisma } from '../../src/infrastructure/database/prisma';
+import { removeOwnUserTraces } from '../helpers/ownUsers';
 
 /**
  * Acceso por objeto sobre HTTP y base reales: la matriz de accesos (accessMatrix) prueba el permiso de la ruta; esta prueba
@@ -11,7 +12,8 @@ import { prisma } from '../../src/infrastructure/database/prisma';
  * «Permitido» = la petición supera la autorización (200/201, o un 400/409 del propio caso de uso); «denegado» = 403 o 404 (fuera
  * de alcance no se confirma que exista); en las listas, «permitido» = el objeto aparece. Las modificaciones se prueban con
  * cuerpos válidos y sin efecto sobre los datos reales; quien puede va al final para que quien no puede no encuentre el objeto
- * ya cambiado. Cuentas del seed; todo lo que crea lo borra. Se omite sin base de datos, salvo REQUIRE_DB_TESTS=1.
+ * ya cambiado. Cuentas del seed como actores; las modificaciones del último caso (editar, riesgo, reasignar, vincular portal) se prueban sobre
+ * un estudiante propio de la corrida, no sobre Ana: así ni siquiera una petición sin efecto toca el registro de una persona de la seed. Todo lo que crea lo borra. Se omite sin base de datos, salvo REQUIRE_DB_TESTS=1.
  */
 const REQUIRE_DB = process.env.REQUIRE_DB_TESTS === '1';
 jest.setTimeout(600_000);
@@ -32,7 +34,8 @@ const ACC = {
 } as const;
 type Who = keyof typeof ACC;
 const WHO = Object.keys(ACC) as Who[];
-const MARK = `Acceso por objeto ${Date.now()}`;
+const MARK_ID = Date.now();
+const MARK = `Acceso por objeto ${MARK_ID}`;
 
 type Outcome = { status: number; included?: boolean };
 const classify = ({ status, included }: Outcome): 'permitido' | 'denegado' => {
@@ -48,7 +51,9 @@ describe('acceso por objeto: cada rol solo llega a lo suyo', () => {
   const tok = {} as Record<Who, string>;
   let anaId = '';
   let elenaId = '';
-  let ana: { cycle: number; isAtRisk: boolean; userId: string | null };
+  let ownStudentId = '';
+  let ownStudentUserId = '';
+  let ownStudent: { cycle: number; isAtRisk: boolean; userId: string | null };
   let sid = '';
   let qid = '';
   let rid = '';
@@ -106,8 +111,14 @@ describe('acceso por objeto: cada rol solo llega a lo suyo', () => {
     }
     const student = await prisma.student.findUniqueOrThrow({ where: { studentCode: '20191234' } });
     anaId = student.id;
-    ana = { cycle: student.cycle, isAtRisk: student.isAtRisk, userId: student.userId };
     elenaId = (await prisma.user.findUniqueOrThrow({ where: { email: ACC.tutor[0] } })).id;
+
+    // Estudiante propio (misma escuela y mismo tutor que Ana, y con una cuenta de portal propia) para las modificaciones del último caso.
+    const portalRole = await prisma.role.findFirstOrThrow({ where: { name: 'Tutorado' } });
+    ownStudentUserId = (await prisma.user.create({ data: { email: `acceso-objeto-${MARK_ID}@untrm.edu.pe`, passwordHash: (await prisma.user.findUniqueOrThrow({ where: { id: elenaId } })).passwordHash, firstName: 'Estudiante', lastName: 'Acceso por objeto', roleId: portalRole.id } })).id;
+    const own = await prisma.student.create({ data: { studentCode: `9940${String(MARK_ID).slice(-6)}`, firstName: 'Estudiante', lastName: 'Acceso por objeto', cycle: student.cycle, schoolId: student.schoolId, tutorId: elenaId, userId: ownStudentUserId } });
+    ownStudentId = own.id;
+    ownStudent = { cycle: own.cycle, isAtRisk: own.isAtRisk, userId: own.userId };
 
     const q = await call('ana', 'POST', '/api/tutoring-requests/me', { caseType: 'ACADEMIC', reason: MARK });
     qid = (q.json as { request: { id: string } }).request.id;
@@ -134,6 +145,14 @@ describe('acceso por objeto: cada rol solo llega a lo suyo', () => {
       await prisma.tutorInterview.deleteMany({ where: { studentId: anaId, aspectsDiscussed: MARK } });
       await prisma.tutorFollowUp.deleteMany({ where: { studentId: anaId, reason: MARK } });
       await prisma.supportContact.deleteMany({ where: { studentId: anaId, fullName: 'Prueba de acceso' } });
+      if (ownStudentId) {
+        await prisma.tutorAssignmentHistory.deleteMany({ where: { studentId: ownStudentId } });
+        await prisma.student.deleteMany({ where: { id: ownStudentId } });
+      }
+      if (ownStudentUserId) {
+        await removeOwnUserTraces(prisma, [ownStudentUserId], [ownStudentId]);
+        await prisma.user.deleteMany({ where: { id: ownStudentUserId } });
+      }
     }
     if (server) await new Promise((resolve) => server?.close(resolve));
     await prisma.$disconnect();
@@ -231,14 +250,15 @@ describe('acceso por objeto: cada rol solo llega a lo suyo', () => {
       await verify(async (w) => ({ status: (await call(w, 'PUT', `/api/students/${anaId}/support-contact`, { fullName: 'Prueba de acceso', relationship: 'Madre', phone: '987654321' })).status }), ['admin', 'tutor']);
     });
 
-    it('editar, marcar riesgo, reasignar y vincular el portal de Ana: la DBU y la coordinación de su escuela (la tutora no)', async () => {
+    it('editar, marcar riesgo, reasignar y vincular el portal de un estudiante: la DBU y la coordinación de su escuela (la tutora no)', async () => {
       if (!dbUp) return;
       const owners: Who[] = ['admin', 'coordSis'];
-      await verify(async (w) => ({ status: (await call(w, 'PATCH', `/api/students/${anaId}`, { cycle: ana.cycle })).status }), owners);
-      await verify(async (w) => ({ status: (await call(w, 'PATCH', `/api/students/${anaId}/risk`, { isAtRisk: ana.isAtRisk, ...(ana.isAtRisk ? { reason: 'Prueba de acceso' } : {}) })).status }), owners);
-      await verify(async (w) => ({ status: (await call(w, 'PATCH', `/api/students/${anaId}/reassign`, { newTutorId: elenaId, reason: 'Prueba de acceso' })).status }), owners); // mismo tutor: 400 del caso de uso
-      await verify(async (w) => ({ status: (await call(w, 'POST', '/api/students/assign', { studentIds: [anaId], tutorId: elenaId })).status }), owners); // ya asignado: 409
-      await verify(async (w) => ({ status: (await call(w, 'PATCH', `/api/students/${anaId}/portal-account`, { userId: ana.userId })).status }), owners);
+      const target = ownStudentId; // estudiante propio, con el mismo alcance que Ana (escuela de Sistemas, tutora Elena)
+      await verify(async (w) => ({ status: (await call(w, 'PATCH', `/api/students/${target}`, { cycle: ownStudent.cycle })).status }), owners);
+      await verify(async (w) => ({ status: (await call(w, 'PATCH', `/api/students/${target}/risk`, { isAtRisk: ownStudent.isAtRisk, ...(ownStudent.isAtRisk ? { reason: 'Prueba de acceso' } : {}) })).status }), owners);
+      await verify(async (w) => ({ status: (await call(w, 'PATCH', `/api/students/${target}/reassign`, { newTutorId: elenaId, reason: 'Prueba de acceso' })).status }), owners); // mismo tutor: 400 del caso de uso
+      await verify(async (w) => ({ status: (await call(w, 'POST', '/api/students/assign', { studentIds: [target], tutorId: elenaId })).status }), owners); // ya asignado: 409
+      await verify(async (w) => ({ status: (await call(w, 'PATCH', `/api/students/${target}/portal-account`, { userId: ownStudent.userId })).status }), owners);
     });
   });
 });
