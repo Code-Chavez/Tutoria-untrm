@@ -1,6 +1,6 @@
 # Propuesta: arranque sin seed y base de pruebas que no acepta restos (26/10/2026)
 
-**Estado: propuesta para decidir. No se implementó nada en el código ni se cambió ningún dato.** Se revisó primero lo que ya existe y se propone lo más sencillo que resuelve cada punto. Referencias: PR #170 y #171 (fusionados), #172 (corrección documental, `docs/AUTORREVISION_AISLAMIENTO_PRUEBAS_2026-10-26.md` y `docs/PRUEBAS_DE_INTEGRACION.md` §3.5).
+**Estado: el punto 2 se implementó en la rama `test/refuse-unfinished-test-db-run`; el punto 1 sigue siendo una propuesta para decidir. Esta propuesta no cambió ningún dato.** Se revisó primero lo que ya existe y se propone lo más sencillo que resuelve cada punto. Referencias: PR #170 y #171 (fusionados), #172 (corrección documental, `docs/AUTORREVISION_AISLAMIENTO_PRUEBAS_2026-10-26.md` y `docs/PRUEBAS_DE_INTEGRACION.md` §3.5).
 
 ## Resumen
 

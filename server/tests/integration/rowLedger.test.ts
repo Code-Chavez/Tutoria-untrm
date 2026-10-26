@@ -1,6 +1,6 @@
 import { PrismaClient } from '@prisma/client';
 import { holdGlobalStateLock } from '../support/globalStateLock';
-import { ORIGIN_PREFIX, describeDifferences, dropSnapshot, leftovers, preexistingDifferences, snapshotPreexisting, sweepOrigin, withApplicationName } from '../support/rowLedger';
+import { ORIGIN_PREFIX, describeDifferences, dropSnapshot, findUnfinishedRuns, leftovers, preexistingDifferences, snapshotPreexisting, sweepOrigin, withApplicationName } from '../support/rowLedger';
 
 /**
  * El registro de origen de las filas (tests/support/rowLedger.ts) sobre la base de pruebas real: borra lo que creó una conexión de
@@ -99,5 +99,23 @@ describe('registro de origen de filas de las pruebas', () => {
     expect(sharedHeld).toBe(false); // el exclusivo corre solo
     await releaseExclusive();
     await (await late)();
+  });
+
+  it('encuentra los restos de una corrida interrumpida (su foto y filas sin borrar) y deja de verlos cuando se recupera', async () => {
+    const run = `interrumpida-${stamp}`;
+    const fakeOrigin = `${ORIGIN_PREFIX}${run}:test`;
+    // Lo que deja una corrida que murió: la foto de sus filas preexistentes y una fila creada que nadie borró.
+    await admin.$executeRaw`INSERT INTO test_preexisting (run, tbl, row_id, row_json) VALUES (${run}, 'campuses', ${`x-${stamp}`}, '{}'::jsonb)`;
+    await admin.$executeRaw`INSERT INTO test_row_origin (tbl, row_id, origin) VALUES ('campuses', ${`y-${stamp}`}, ${fakeOrigin})`;
+    try {
+      // Otras suites pueden tener ahora sus propias filas en el registro: solo se mira la corrida ficticia.
+      const found = await findUnfinishedRuns(admin);
+      expect(found.snapshots).toContainEqual({ run, rows: 1 });
+      expect(found.ledgerRows).toBeGreaterThanOrEqual(1);
+    } finally {
+      await admin.$executeRaw`DELETE FROM test_preexisting WHERE run = ${run}`;
+      await admin.$executeRaw`DELETE FROM test_row_origin WHERE origin = ${fakeOrigin}`;
+    }
+    expect((await findUnfinishedRuns(admin)).snapshots.some((s) => s.run === run)).toBe(false);
   });
 });

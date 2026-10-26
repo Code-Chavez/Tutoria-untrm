@@ -19,7 +19,7 @@ Documento de apoyo: `docs/PRUEBAS_DE_INTEGRACION.md`. Evidencia: `docs/resultado
 
 ## 2. Qué NO se garantiza (límites que se mantienen)
 
-1. **Terminación abrupta del proceso** (§1.6): no hay recuperación automática ni detección en la corrida siguiente. Se recupera recreando la base de pruebas (recomendado) o con los comandos de `docs/PRUEBAS_DE_INTEGRACION.md` §3.5. Mejora posible, no hecha: que el `globalSetup` se niegue a empezar si encuentra la foto de una corrida anterior sin cerrar.
+1. **Terminación abrupta del proceso** (§1.6): no hay recuperación automática. *(Actualización: la corrida siguiente ya no acepta esa base en silencio, se detiene con instrucciones; ver `docs/PRUEBAS_DE_INTEGRACION.md` §3.5.)* Se recupera recreando la base de pruebas (recomendado) o con los comandos de `docs/PRUEBAS_DE_INTEGRACION.md` §3.5. Mejora posible, no hecha: que el `globalSetup` se niegue a empezar si encuentra la foto de una corrida anterior sin cerrar.
 2. La mayoría de las suites sigue usando las **cuentas de demostración como actores** (iniciar sesión y comprobar permisos por rol). No se modifican sus datos ni sus permisos y la verificación final lo comprueba, pero siguen siendo una dependencia compartida.
 3. `securityParameters` cambia un parámetro global (§1.5).
 4. El registro solo conoce lo que insertan las conexiones de las pruebas; cualquier otra escritura en la base de pruebas durante una corrida se vería como diferencia. La base de pruebas es exclusiva.

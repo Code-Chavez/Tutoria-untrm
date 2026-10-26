@@ -1,5 +1,5 @@
 import { PrismaClient } from '@prisma/client';
-import { ORIGIN_PREFIX, describeDifferences, dropSnapshot, leftovers, preexistingDifferences, sweepOrigin } from './rowLedger';
+import { ORIGIN_PREFIX, describeDifferences, dropSnapshot, findUnfinishedRuns, leftovers, preexistingDifferences, sweepOrigin } from './rowLedger';
 
 // Verificación final de toda la corrida (solo se ejecuta si el globalSetup comprobó que la base es de pruebas e instaló el registro):
 //  1. red de seguridad: lo que algún archivo no alcanzó a limpiar (p. ej. un proceso que murió) se borra por su origen; lo que siga
@@ -28,7 +28,10 @@ export default async function globalTeardown(): Promise<void> {
     if (parameters.length > 0) differences = await preexistingDifferences(prisma, runId);
     if (parameters.length > 0) problems.push(`Una prueba dejó cambiados parámetros del sistema (se restauraron): ${parameters.map((d) => String(d.before.key)).join(', ')}.`);
     if (differences.length > 0) problems.push(`Filas que ya existían y se borraron o cambiaron de valor:${String.fromCharCode(10)}${describeDifferences(differences)}`);
-    await dropSnapshot(prisma, runId);
+    // La foto se descarta solo si la base quedó limpia (aunque esta corrida falle por haber restaurado un parámetro). Si quedaron filas sin
+    // borrar o diferencias, se CONSERVA: la corrida siguiente se negará a empezar hasta que se recupere la base (ver findUnfinishedRuns).
+    if (differences.length === 0 && (await findUnfinishedRuns(prisma)).ledgerRows === 0) await dropSnapshot(prisma, runId);
+    else problems.push('La base de pruebas quedó marcada como no confiable: la próxima corrida se detendrá hasta que se recupere (docs/PRUEBAS_DE_INTEGRACION.md, sección 3.5).');
   } finally {
     await prisma.$disconnect();
   }
