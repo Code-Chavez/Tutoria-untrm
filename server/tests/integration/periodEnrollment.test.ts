@@ -3,24 +3,29 @@ import ExcelJS from 'exceljs';
 import app from '../../src/app';
 import { prisma } from '../../src/infrastructure/database/prisma';
 import { currentPeriodId } from '../helpers/currentPeriod';
+import { DEMO_PASSWORD, ownUser, removeOwnUserTraces } from '../helpers/ownUsers';
 
 /**
  * Matrícula por periodo y pedido de listas (fase 2) sobre HTTP real y base de datos real: la carga matricula a los nuevos y
  * a los que continúan, el estudiante sin matrícula solo lee, y el correo de pedido de cada escuela lo configura quien la
- * coordina. Usa registros propios y los borra. Se omite sin base de datos, salvo REQUIRE_DB_TESTS=1.
+ * coordina. Usa registros propios (también dos escuelas y sus coordinaciones: no cambia el correo de pedido de ninguna escuela real) y los borra. Se omite sin base de datos, salvo REQUIRE_DB_TESTS=1.
  */
 const REQUIRE_DB = process.env.REQUIRE_DB_TESTS === '1';
 jest.setTimeout(180_000);
 
+const stamp = String(Date.now());
+// «admin» y «tutor» son cuentas de demostración usadas solo para autenticarse (el tutor, para comprobar que se le rechaza); las dos
+// coordinaciones son propias de la corrida y coordinan una escuela propia cada una.
 const ACCOUNTS = {
   admin: { email: '7183255722@untrm.edu.pe', password: 'Admin2026!' },
-  sistemas: { email: 'rosa.mendoza@untrm.edu.pe', password: 'Demo2026!' }, // coordina Ingeniería de Sistemas
-  mecanica: { email: 'carlos.vega@untrm.edu.pe', password: 'Demo2026!' }, // coordina Mecánica Eléctrica
+  sistemas: { email: `matricula-${stamp}-coord-a@untrm.edu.pe`, password: DEMO_PASSWORD }, // coordina la escuela propia A
+  mecanica: { email: `matricula-${stamp}-coord-b@untrm.edu.pe`, password: DEMO_PASSWORD }, // coordina la escuela propia B
   tutor: { email: 'elena.ramirez@untrm.edu.pe', password: 'Demo2026!' },
 } as const;
 type Who = keyof typeof ACCOUNTS;
 
-const stamp = String(Date.now());
+const SCHOOL_NAME = `Escuela de prueba de matrícula A ${stamp}`;
+const OTHER_SCHOOL_NAME = `Escuela de prueba de matrícula B ${stamp}`;
 const NEW_CODE = `9906${stamp.slice(-6)}`;
 const OLD_CODE = `9907${stamp.slice(-6)}`;
 const GATE_CODE = `9908${stamp.slice(-6)}`;
@@ -34,7 +39,8 @@ describe('matrícula por periodo y pedido de listas (fase 2)', () => {
   const tokens = {} as Record<Who, string>;
   let periodId = '';
   let schoolId = '';
-  let originalRequestEmail: string | null = null;
+  const ownSchoolIds: string[] = [];
+  const ownUserIds: string[] = [];
   let studentToken = '';
   let gateStudentId = '';
   let gateUserId = '';
@@ -78,29 +84,42 @@ describe('matrícula por periodo y pedido de listas (fase 2)', () => {
     const address = listening.address();
     if (!address || typeof address === 'string') throw new Error('No address');
     baseUrl = `http://localhost:${address.port}`;
+    // Dos escuelas propias (con la facultad y la sede de una real, que solo se lee) y una coordinación propia para cada una.
+    const reference = await prisma.school.findFirstOrThrow({ where: { name: 'Ingeniería de Sistemas' } });
+    const school = async (name: string, who: 'sistemas' | 'mecanica') => {
+      const created = await prisma.school.create({ data: { name, facultyId: reference.facultyId, campusId: reference.campusId } });
+      ownSchoolIds.push(created.id);
+      const coordinatorId = await ownUser(prisma, { email: ACCOUNTS[who].email, roleName: 'Coordinador', firstName: 'Coordinación', lastName: `Matrícula ${stamp}` });
+      ownUserIds.push(coordinatorId);
+      await prisma.school.update({ where: { id: created.id }, data: { coordinatorId } });
+      return created.id;
+    };
+    schoolId = await school(SCHOOL_NAME, 'sistemas');
+    await school(OTHER_SCHOOL_NAME, 'mecanica');
     for (const who of Object.keys(ACCOUNTS) as Who[]) {
       const res = await call('POST', '/api/auth/login', undefined, ACCOUNTS[who]);
       tokens[who] = ((await res.json()) as { data: { accessToken: string } }).data.accessToken;
     }
     periodId = await currentPeriodId(prisma);
-    const school = await prisma.school.findFirstOrThrow({ where: { name: 'Ingeniería de Sistemas' } });
-    schoolId = school.id;
-    originalRequestEmail = school.requestEmail;
   });
 
   afterAll(async () => {
     const running = server;
     if (running) await new Promise((resolve) => running.close(resolve));
     if (dbUp) {
-      if (createdRequestId) await prisma.dataRequest.deleteMany({ where: { id: createdRequestId } });
-      if (createdTeacherRequestId) await prisma.dataRequest.deleteMany({ where: { id: createdTeacherRequestId } });
-      await prisma.school.update({ where: { id: schoolId }, data: { requestEmail: originalRequestEmail } });
+      // Solo lo creado en esta corrida (también si una prueba falló a medias), en el orden que piden las claves foráneas.
+      const requests = await prisma.dataRequest.findMany({ where: { schoolId: { in: ownSchoolIds } }, select: { id: true } });
+      await prisma.dataRequest.deleteMany({ where: { id: { in: requests.map((r) => r.id) } } });
       const codes = [NEW_CODE, OLD_CODE, GATE_CODE];
       const students = await prisma.student.findMany({ where: { studentCode: { in: codes } }, select: { id: true } });
       const ids = students.map((s) => s.id);
       await prisma.tutoringRequest.deleteMany({ where: { studentId: { in: ids } } });
       await prisma.student.deleteMany({ where: { id: { in: ids } } }); // arrastra su matrícula
-      if (gateUserId) await prisma.user.updateMany({ where: { id: gateUserId }, data: { isActive: false } });
+      const userIds = [...ownUserIds, ...(gateUserId ? [gateUserId] : [])];
+      await removeOwnUserTraces(prisma, userIds, [...ownSchoolIds, ...ids, ...requests.map((r) => r.id)]);
+      await prisma.school.updateMany({ where: { id: { in: ownSchoolIds } }, data: { coordinatorId: null } });
+      await prisma.user.deleteMany({ where: { id: { in: userIds } } });
+      await prisma.school.deleteMany({ where: { id: { in: ownSchoolIds } } });
     }
     await prisma.$disconnect();
   });
@@ -120,8 +139,8 @@ describe('matrícula por periodo y pedido de listas (fase 2)', () => {
     const old = await prisma.student.create({ data: { studentCode: OLD_CODE, firstName: 'Continúa', lastName: 'Prueba', cycle: 2, schoolId, isActive: false } });
 
     const { status, body } = await upload([
-      [NEW_CODE, 'Nuevo', 'Prueba Carga', `nuevo-${stamp}@untrm.edu.pe`, '', '3', 'Ingeniería de Sistemas'],
-      [OLD_CODE, 'Continúa', 'Prueba', '', '', '4', 'Ingeniería de Sistemas'],
+      [NEW_CODE, 'Nuevo', 'Prueba Carga', `nuevo-${stamp}@untrm.edu.pe`, '', '3', SCHOOL_NAME],
+      [OLD_CODE, 'Continúa', 'Prueba', '', '', '4', SCHOOL_NAME],
     ]);
 
     expect(status).toBe(200);
@@ -206,7 +225,7 @@ describe('matrícula por periodo y pedido de listas (fase 2)', () => {
     expect(created).toMatchObject({ toEmail: `pedidos-${stamp}@untrm.edu.pe`, cycles: [3, 4] });
 
     const mine = ((await (await call('GET', '/api/data-requests', 'sistemas')).json()) as { requests: { id: string; schoolName: string }[] }).requests;
-    expect(mine.find((r) => r.id === createdRequestId)).toMatchObject({ schoolName: 'Ingeniería de Sistemas' });
+    expect(mine.find((r) => r.id === createdRequestId)).toMatchObject({ schoolName: SCHOOL_NAME });
     const admin = ((await (await call('GET', '/api/data-requests', 'admin')).json()) as { requests: { id: string }[] }).requests;
     expect(admin.some((r) => r.id === createdRequestId)).toBe(true);
     const other = ((await (await call('GET', '/api/data-requests', 'mecanica')).json()) as { requests: { id: string }[] }).requests;
