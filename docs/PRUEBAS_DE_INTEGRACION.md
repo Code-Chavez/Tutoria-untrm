@@ -71,7 +71,7 @@ Código: `server/tests/support/rowLedger.ts`, `testDatabaseGuard.ts` (por archiv
 
 | Suite | Por qué no puede correr en paralelo |
 |---|---|
-| `securityParameters` | Cambia parámetros de seguridad (intentos de acceso, bloqueo, inactividad) que lee **cada** inicio de sesión de todas las suites. Los restaura en su `afterAll`; si el proceso muriera, `globalTeardown` los restaura. |
+| `securityParameters` | Cambia parámetros de seguridad (intentos de acceso, bloqueo, inactividad) que lee **cada** inicio de sesión de todas las suites. Los restaura en su `afterAll` (corre aunque una prueba falle o lance un error) y, si no lo hiciera, `globalTeardown` los restaura y hace fallar la corrida. **Ninguna de las dos cosas corre si el proceso termina de golpe**: ver §3.5. |
 | `periodClosure` | Cerrar un periodo copia la matrícula de **todos** los estudiantes; si otra suite borraba uno en ese momento fallaba por clave foránea (500 intermitente visto en paralelo). |
 
 Si una suite nueva cambia o recorre estado global, se agrega a esa lista.
@@ -87,6 +87,48 @@ Si una suite nueva cambia o recorre estado global, se agrega a esa lista.
 | El resto (`accessMatrix`, `accountInvitation`, `admonitions`, `attendanceNumbering`, `bootstrap`, `emailOutbox`, `emailValidation`, `evaluationScope`, `notificationLifecycle`, `passwordReset`, `schoolCycles`, `sensitiveAccessAudit`, `sessionNotices`, `signedDocuments`, `tutorImport`, `tutoringRequestCircuit`, `tutoringRequestFollowUp`) | Cuentas de demostración como actores; crean y borran sus propios objetos | No (la verificación final lo comprueba) |
 
 **Límites que se mantienen:** (1) las cuentas de demostración siguen siendo el *actor* de la mayoría de las suites; si se borrara o cambiara una de ellas, la prueba fallaría, no se adaptaría; (2) `securityParameters` modifica un parámetro **global** por diseño (aislado y restaurado, no evitado); (3) el registro solo conoce lo que insertan las conexiones de las pruebas: lo que el *servidor de la aplicación en desarrollo* u otra herramienta cambie en la misma base durante una corrida se vería como diferencia (la base de pruebas es exclusiva: no se usa para otra cosa).
+
+### 3.5 Si una corrida se interrumpe (qué se garantiza y qué no)
+
+Se distinguen dos casos y **solo el primero está cubierto por el código**:
+
+| Caso | Qué pasa | Probado |
+|---|---|---|
+| **Una prueba falla o lanza un error** (excepción, aserción, tiempo agotado) | `afterAll` y `globalTeardown` corren: se borra lo creado, se restauran los parámetros cambiados y la corrida falla si quedó un residuo o un cambio en filas preexistentes | Sí: prueba que falla a propósito (sin residuo) y prueba que deja un residuo a propósito (la corrida termina en error y el parámetro queda restaurado). `docs/resultados-2026-10-26/falla-y-residuo-deliberados.txt` |
+| **El proceso muere de golpe** (SIGKILL, apagón, cierre de la terminal, contenedor reiniciado) | **No corre ningún código de limpieza** (ni `finally`, ni `afterAll`, ni `globalTeardown`). El candado entre archivos **sí** se libera solo (la conexión muere con el proceso). Los parámetros cambiados **quedan cambiados** y las filas creadas **quedan sin borrar** | Sí: `docs/resultados-2026-10-26/terminacion-abrupta.txt` (parámetro en 9 en vez de 5, 1 fila huérfana, candado liberado) |
+
+**Una corrida posterior no lo detecta.** Su foto inicial toma el valor cambiado como «preexistente» y la verificación final pasa; la foto y las filas de la corrida muerta siguen en la base. Por eso, tras una interrupción abrupta, **la base de pruebas no es confiable hasta recuperarla**. No se agregó detección automática (queda como mejora posible: que el `globalSetup` se niegue a empezar si encuentra la foto de una corrida anterior sin cerrar).
+
+**Recuperación (elegir una).**
+
+1. **Recrear la base de pruebas (recomendado; es desechable y sin volumen):**
+
+```bash
+docker compose -f docker-compose.test-db.yml down
+docker compose -f docker-compose.test-db.yml up -d --wait
+cd server && TEST_DATABASE_URL=postgresql://sit_user:sit_pass@localhost:5433/sit_db_test pnpm run test:db:prepare
+```
+
+   En la CI cada ejecución crea una base nueva, así que una interrupción allí no deja nada.
+
+2. **Recuperar una corrida concreta sin recrear** (solo corrige parámetros del sistema y las filas que creó la corrida; cualquier otra fila preexistente que haya cambiado hay que revisarla con el paso 1 de abajo, o recrear la base). Se probó el 26/10/2026 (`terminacion-abrupta.txt`):
+
+```sql
+-- 0) corrida interrumpida: la que tiene foto sin cerrar
+SELECT DISTINCT run FROM test_preexisting;                       -- p. ej. dd84d67a
+-- 1) qué cambió o se borró respecto de la foto
+SELECT tbl, row_id, kind FROM test_diff_rows('dd84d67a');
+-- 2) parámetros del sistema: volver al valor de la foto
+UPDATE system_parameters s SET value = p.row_json->>'value'
+FROM test_preexisting p
+WHERE p.run = 'dd84d67a' AND p.tbl = 'system_parameters' AND p.row_id = s.id AND s.value IS DISTINCT FROM p.row_json->>'value';
+-- 3) filas que creó la corrida (devuelve cuántas no se pudieron borrar)
+SELECT test_sweep_origin('sit-jest:dd84d67a:%');
+-- 4) descartar la foto
+DELETE FROM test_preexisting WHERE run = 'dd84d67a';
+```
+
+   (Se ejecuta con `docker exec -i sit-postgres-test psql -U sit_user -d sit_db_test`, **solo** en la base de pruebas: estas tablas y funciones no existen en desarrollo.)
 
 ## 4. Un caso de la regla de «máximo de dos ciclos»
 
