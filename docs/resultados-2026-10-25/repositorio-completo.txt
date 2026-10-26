@@ -1,0 +1,8 @@
+# Corrida completa desde el repositorio (como la CI): dependencias del lockfile con pnpm 9.15.9, base nueva sit_db_test
+# Comando (desde server/): REQUIRE_DB_TESTS=1 DATABASE_URL=$TEST_DATABASE_URL JWT_SECRET=ci-test-secret NODE_ENV=test npx jest --ci --coverage --coverageReporters=text-summary
+Statements   : 89.56% ( 7327/8181 )
+Lines        : 90.32% ( 6752/7475 )
+Test Suites: 136 passed, 136 total
+Tests:       1196 passed, 1196 total
+Suites de integración que pasaron: 24 de 24
+Omitidas: 0 (el resumen de jest no informa ninguna omitida)

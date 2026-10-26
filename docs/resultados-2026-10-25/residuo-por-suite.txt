@@ -1,0 +1,26 @@
+# Residuo por suite (conteo de todas las tablas antes y después de cada suite, base exclusiva)
+# Medido el 25/10 con el código anterior a la corrección de tutoringRequestFollowUp (fuga de 1 sesión, ya corregida) y de cycleTutors/tutorAcceptance (sin residuo)
+accessMatrix | 22 passed, 22 total | audit_logs +9; refresh_tokens +10
+accountInvitation | 8 passed, 8 total | audit_logs +8; password_reset_tokens +3; refresh_tokens +3; users +1
+admonitions | 7 passed, 7 total | audit_logs +11; password_reset_tokens +1; refresh_tokens +5; users +1
+attendanceNumbering | 2 passed, 2 total | sin residuos
+bootstrap | 3 passed, 3 total | sin residuos
+campusesAndTutorSchool | 7 passed, 7 total | audit_logs +9; password_reset_tokens +1; refresh_tokens +3; users +1
+cycleTutors | 8 passed, 8 total | sin residuos
+emailOutbox | 4 passed, 4 total | sin residuos
+emailValidation | 12 passed, 12 total | audit_logs +7; password_reset_tokens +1; refresh_tokens +3
+evaluationScope | 3 passed, 3 total | audit_logs +3; refresh_tokens +3
+notificationLifecycle | 4 passed, 4 total | audit_logs +1; refresh_tokens +1
+objectAccess | 14 passed, 14 total | audit_logs +58; refresh_tokens +11
+passwordReset | 2 passed, 2 total | audit_logs +5
+periodClosure | 9 passed, 9 total | audit_logs +4; refresh_tokens +3
+periodEnrollment | 10 passed, 10 total | audit_logs +12; password_reset_tokens +1; refresh_tokens +5; users +1
+schoolCycles | 1 passed, 1 total | sin residuos
+securityParameters | 4 passed, 4 total | audit_logs +10; password_reset_tokens +1; refresh_tokens +1; users +1
+sensitiveAccessAudit | 5 passed, 5 total | audit_logs +6; refresh_tokens +2
+sessionNotices | 8 passed, 8 total | audit_logs +5; refresh_tokens +4
+signedDocuments | 9 passed, 9 total | audit_logs +18; refresh_tokens +7
+tutorAcceptance | 6 passed, 6 total | sin residuos
+tutorImport | 3 passed, 3 total | audit_logs +4; password_reset_tokens +1; refresh_tokens +2; users +1
+tutoringRequestCircuit | 6 passed, 6 total | audit_logs +10; refresh_tokens +7
+tutoringRequestFollowUp | 9 passed, 9 total | audit_logs +12; refresh_tokens +4; session_participants +1; sessions +1

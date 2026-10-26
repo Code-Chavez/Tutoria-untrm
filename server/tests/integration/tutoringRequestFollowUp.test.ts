@@ -31,6 +31,8 @@ describe('solicitud de tutoría → sesión o derivación (U01)', () => {
   let studentId = '';
   let otherStudentId = '';
   // Hora lejana y única por corrida: no choca con las sesiones del seed ni con otras pruebas
+  // Tema propio de la corrida: la aplicación CANCELA (no borra) la sesión de quien pierde una carrera, y así se la encuentra para limpiar
+  const TOPIC = `Prueba U01 ${Date.now()}: apoyo en Cálculo`;
   let slot = Date.UTC(2032, 5, 1, 15, 0) + (Date.now() % 1_000_000) * 60_000;
   const nextSlot = () => new Date((slot += 3 * 3_600_000)).toISOString();
 
@@ -61,7 +63,7 @@ describe('solicitud de tutoría → sesión o derivación (U01)', () => {
   const requestOf = (id: string) => prisma.tutoringRequest.findUniqueOrThrow({ where: { id } });
   const sessionBody = (tutoringRequestId?: string, ids: string[] = [studentId]) => ({
     studentIds: ids,
-    topic: 'Prueba U01: apoyo en Cálculo',
+    topic: TOPIC,
     scheduledAt: nextSlot(),
     modality: 'PRESENCIAL',
     location: 'Oficina de tutoría',
@@ -95,10 +97,13 @@ describe('solicitud de tutoría → sesión o derivación (U01)', () => {
 
   afterAll(async () => {
     if (dbUp) {
-      await prisma.notification.deleteMany({ where: { OR: [{ tutoringRequestId: { in: requestIds } }, { referralId: { in: referralIds } }] } });
+      sessionIds.push(...(await prisma.session.findMany({ where: { topic: TOPIC, id: { notIn: sessionIds } }, select: { id: true } })).map((x) => x.id));
+      await prisma.notification.deleteMany({ where: { OR: [{ tutoringRequestId: { in: requestIds } }, { referralId: { in: referralIds } }, { sessionId: { in: sessionIds } }] } });
       await prisma.tutoringRequest.deleteMany({ where: { id: { in: requestIds } } });
-      await prisma.sessionParticipant.deleteMany({ where: { sessionId: { in: sessionIds } } }).catch(() => undefined);
-      await prisma.session.deleteMany({ where: { id: { in: sessionIds } } }).catch(() => undefined);
+      // Cancelar o reprogramar deja historial de cambios: se borra antes de la sesión (antes el error se ignoraba y la sesión quedaba)
+      await prisma.sessionChangeHistory.deleteMany({ where: { sessionId: { in: sessionIds } } });
+      await prisma.sessionParticipant.deleteMany({ where: { sessionId: { in: sessionIds } } });
+      await prisma.session.deleteMany({ where: { id: { in: sessionIds } } });
       await prisma.referralStatusHistory.deleteMany({ where: { referralId: { in: referralIds } } });
       await prisma.studentReferral.deleteMany({ where: { id: { in: referralIds } } });
     }
