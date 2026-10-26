@@ -1,0 +1,22 @@
+# Base de datos EXCLUSIVA para las pruebas de integración del servidor (nombre `sit_db_test`, puerto 5433, sin volumen: se
+# descarta al apagarla). Es distinta de la de desarrollo (`sit_db`, puerto 5432), que las pruebas nunca deben tocar.
+#   docker compose -f docker-compose.test-db.yml up -d
+#   TEST_DATABASE_URL=postgresql://sit_user:sit_pass@localhost:5433/sit_db_test pnpm --dir server run test:db:prepare
+#   TEST_DATABASE_URL=postgresql://sit_user:sit_pass@localhost:5433/sit_db_test pnpm --dir server run test:integration
+services:
+  postgres-test:
+    image: postgres:16-alpine
+    container_name: sit-postgres-test
+    environment:
+      POSTGRES_DB: sit_db_test
+      POSTGRES_USER: sit_user
+      POSTGRES_PASSWORD: sit_pass
+    ports:
+      - "5433:5432"
+    tmpfs:
+      - /var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U sit_user -d sit_db_test"]
+      interval: 5s
+      timeout: 3s
+      retries: 10

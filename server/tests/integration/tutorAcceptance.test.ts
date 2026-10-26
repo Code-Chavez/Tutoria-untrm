@@ -2,24 +2,20 @@ import http from 'http';
 import app from '../../src/app';
 import { prisma } from '../../src/infrastructure/database/prisma';
 import { currentPeriodId } from '../helpers/currentPeriod';
+import { DEMO_PASSWORD, ownUser, removeOwnUserTraces } from '../helpers/ownUsers';
 import { generateSecretToken, hashSecretToken } from '../../src/application/use-cases/auth/secretToken';
 
 /**
  * Aceptación del tutor por ciclo (fase 4) sobre HTTP real y base de datos real: al asignar un ciclo el docente queda pendiente
  * de responder, abre su enlace de un solo uso (sin sesión), acepta con su disponibilidad o rechaza, y el enlace deja de servir.
- * Trabaja en una escuela propia, con docentes propios, que crea y borra: así no comparte el ciclo ni a los docentes con las demás
+ * Trabaja en una escuela propia, con coordinaciones y docentes propios (ninguna cuenta de demostración inicia sesión), que crea y borra: así no comparte el ciclo ni a los docentes con las demás
  * suites de tutor por ciclo (un docente solo atiende un ciclo, y dos suites a la vez se pisarían). Se omite sin base de datos,
  * salvo REQUIRE_DB_TESTS=1.
  */
 const REQUIRE_DB = process.env.REQUIRE_DB_TESTS === '1';
 jest.setTimeout(180_000);
 
-const ACCOUNTS = {
-  admin: { email: '7183255722@untrm.edu.pe', password: 'Admin2026!' },
-  sistemas: { email: 'rosa.mendoza@untrm.edu.pe', password: 'Demo2026!' },
-  mecanica: { email: 'carlos.vega@untrm.edu.pe', password: 'Demo2026!' },
-} as const;
-type Who = keyof typeof ACCOUNTS;
+type Who = 'sistemas' | 'mecanica'; // coordinación de la escuela propia / otra coordinación propia que no coordina esa escuela
 
 const stamp = String(Date.now());
 
@@ -33,6 +29,7 @@ describe('aceptación del tutor por ciclo (fase 4)', () => {
   let schoolName = '';
   let elenaId = ''; // primer docente de la escuela propia
   let jorgeId = ''; // segundo docente de la escuela propia
+  const ownUserIds: string[] = [];
 
   const call = (method: string, path: string, who?: Who, body?: unknown) =>
     fetch(`${baseUrl}${path}`, {
@@ -68,19 +65,27 @@ describe('aceptación del tutor por ciclo (fase 4)', () => {
     const address = listening.address();
     if (!address || typeof address === 'string') throw new Error('No address');
     baseUrl = `http://localhost:${address.port}`;
-    for (const who of Object.keys(ACCOUNTS) as Who[]) {
-      const res = await call('POST', '/api/auth/login', undefined, ACCOUNTS[who]);
-      tokens[who] = ((await res.json()) as { data: { accessToken: string } }).data.accessToken;
-    }
     periodId = await currentPeriodId(prisma);
-    // Escuela propia: misma facultad, sede y coordinadora que Sistemas (la coordinadora de la prueba), sin estudiantes matriculados
+    // Escuela propia: misma facultad y sede que Sistemas, con su propia coordinación, sin estudiantes matriculados
     const sistemas = await prisma.school.findFirstOrThrow({ where: { name: 'Ingeniería de Sistemas' } });
     schoolName = `Escuela de prueba de aceptación ${stamp}`;
-    schoolId = (await prisma.school.create({ data: { name: schoolName, facultyId: sistemas.facultyId, campusId: sistemas.campusId, coordinatorId: sistemas.coordinatorId } })).id;
-    const tutorRole = await prisma.role.findFirstOrThrow({ where: { name: 'Docente Tutor' } });
-    const hash = (await prisma.user.findFirstOrThrow({ where: { email: 'elena.ramirez@untrm.edu.pe' } })).passwordHash;
-    const teacher = async (suffix: string, lastName: string) =>
-      (await prisma.user.create({ data: { email: `acept-${stamp}-${suffix}@untrm.edu.pe`, passwordHash: hash, firstName: 'Docente', lastName, roleId: tutorRole.id, schoolId } })).id;
+    schoolId = (await prisma.school.create({ data: { name: schoolName, facultyId: sistemas.facultyId, campusId: sistemas.campusId } })).id;
+    const coordinator = async (suffix: string) => {
+      const email = `acept-${stamp}-coord-${suffix}@untrm.edu.pe`;
+      ownUserIds.push(await ownUser(prisma, { email, roleName: 'Coordinador', firstName: 'Coordinación', lastName: `Aceptación ${suffix} ${stamp}` }));
+      return { email, password: DEMO_PASSWORD };
+    };
+    const credentials: Record<Who, { email: string; password: string }> = { sistemas: await coordinator('a'), mecanica: await coordinator('b') };
+    await prisma.school.update({ where: { id: schoolId }, data: { coordinatorId: ownUserIds[0] } });
+    for (const who of Object.keys(credentials) as Who[]) {
+      const res = await call('POST', '/api/auth/login', undefined, credentials[who]);
+      tokens[who] = ((await res.json()) as { data: { accessToken: string } }).data.accessToken;
+    }
+    const teacher = async (suffix: string, lastName: string) => {
+      const id = await ownUser(prisma, { email: `acept-${stamp}-${suffix}@untrm.edu.pe`, roleName: 'Docente Tutor', firstName: 'Docente', lastName, schoolId });
+      ownUserIds.push(id);
+      return id;
+    };
     elenaId = await teacher('a', `Aceptación Alfa ${stamp}`);
     jorgeId = await teacher('b', `Aceptación Beta ${stamp}`);
   });
@@ -89,11 +94,12 @@ describe('aceptación del tutor por ciclo (fase 4)', () => {
     const running = server;
     if (running) await new Promise((resolve) => running.close(resolve));
     if (dbUp && schoolId) {
-      const tutors = [elenaId, jorgeId].filter(Boolean);
+      const assignmentIds = (await prisma.cycleTutorAssignment.findMany({ where: { schoolId }, select: { id: true } })).map((a) => a.id);
       await prisma.cycleTutorAssignment.deleteMany({ where: { schoolId } });
-      await prisma.notification.deleteMany({ where: { userId: { in: tutors } } });
-      await prisma.auditLog.deleteMany({ where: { userId: { in: tutors } } }); // la aceptación por enlace deja su bitácora a nombre del docente
-      await prisma.user.deleteMany({ where: { id: { in: tutors } } });
+      // La aceptación por enlace deja su bitácora a nombre del docente; las sesiones iniciadas y los avisos, a nombre de las cuentas propias
+      await removeOwnUserTraces(prisma, ownUserIds, [schoolId, ...assignmentIds]);
+      await prisma.school.update({ where: { id: schoolId }, data: { coordinatorId: null } });
+      await prisma.user.deleteMany({ where: { id: { in: ownUserIds } } });
       await prisma.school.deleteMany({ where: { id: schoolId } });
     }
     await prisma.$disconnect();
