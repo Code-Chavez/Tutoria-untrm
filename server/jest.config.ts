@@ -18,6 +18,7 @@ const config: Config = {
   roots: ['<rootDir>/tests'],
   testMatch: ['**/*.test.ts'],
   testPathIgnorePatterns: integrationAllowed ? ['/node_modules/'] : ['/node_modules/', '/tests/integration/'],
+  globalSetup: '<rootDir>/tests/support/testDatabaseGlobalSetup.ts',
   setupFilesAfterEnv: ['<rootDir>/tests/support/testDatabaseGuard.ts'],
   moduleNameMapper: {
     '^@domain/(.*)$': '<rootDir>/src/domain/$1',

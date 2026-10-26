@@ -5,6 +5,18 @@ Las pruebas de `server/tests/integration/` usan HTTP y base de datos reales y **
 1. **Solo corren contra una base exclusiva de pruebas** (nombre terminado en `_test`), nunca contra la de desarrollo (`sit_db`).
 2. **Cada corrida usa datos propios** y borra únicamente lo que creó, también si una prueba falla.
 
+> **Estado, sin rodeos:** el aislamiento **ya protege la base de desarrollo** (ver §2). La **limpieza de residuos NO está completa**: solo `cycleTutors`, `tutorAcceptance` y las suites que no escriben dejan cero residuo; el resto de las suites sigue dejando sesiones, bitácora y, en algunas, cuentas desactivadas en la **base de pruebas** (detalle medido en el §3). No se debe leer este documento como «todas las integraciones limpian lo que crean».
+
+## 0. Preparar el entorno desde el repositorio (reproducible)
+
+La CI instala con **pnpm 9.15.9** y el lockfile (`server/pnpm-lock.yaml`). Con otra versión mayor de pnpm el resultado puede diferir (pnpm 11 ya no lee el campo `pnpm.overrides` de `package.json`, del que depende la auditoría de dependencias). Requisitos: Node 22, Docker.
+
+```bash
+cd server
+npx -y pnpm@9.15.9 install --frozen-lockfile   # exactamente las versiones del lockfile; falla si el lockfile no coincide
+npx prisma generate
+```
+
 ## 1. Correrlas (base exclusiva)
 
 ```bash
@@ -28,8 +40,10 @@ TEST_DATABASE_URL=postgresql://sit_user:sit_pass@localhost:5433/sit_db_test pnpm
 | Comando | Resultado |
 |---|---|
 | `pnpm test` (habitual) con el `.env` de desarrollo | **Solo corren las unitarias.** Las de integración se omiten con un aviso que explica cómo activarlas. |
-| `REQUIRE_DB_TESTS=1 pnpm test` contra `sit_db` | Cada archivo de integración **falla antes de conectarse** con el mensaje «solo corren contra una base exclusiva de pruebas…». No se escribe nada. |
+| `REQUIRE_DB_TESTS=1 pnpm test` contra `sit_db` | La corrida **aborta en el `globalSetup`** con «La conexión configurada llega a la base «sit_db», que no es una base de pruebas…», antes de ejecutar ninguna prueba. No se escribe nada. |
 | `pnpm run test:integration` o `test:db:prepare` sin `TEST_DATABASE_URL` de una base `…_test` | Se niegan y no hacen nada. |
+
+**La comprobación decisiva es contra la base real, no contra una variable.** Antes de ejecutar la primera prueba (`globalSetup`, `tests/support/testDatabaseGlobalSetup.ts`), la conexión que usará la aplicación (`DATABASE_URL`, ya con `TEST_DATABASE_URL` aplicada) le pregunta al servidor `SELECT current_database()`. Si la respuesta no termina en `_test`, **toda la corrida aborta** sin haber ejecutado ni una prueba (solo se hizo esa consulta de lectura). Además, cada archivo de integración vuelve a comprobar el nombre de la URL antes de crear su cliente. Si no hay conexión, no se puede modificar nada y las pruebas fallan por eso.
 
 La regla vive en `server/tests/support/testDatabase.ts` (con su prueba unitaria `testDatabaseGuard.test.ts`), se aplica en `jest.config.ts` (qué se ejecuta) y en `tests/support/testDatabaseGuard.ts` (defensa por archivo).
 

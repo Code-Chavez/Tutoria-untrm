@@ -32,3 +32,29 @@ export function refusalMessage(url: string | undefined): string {
     'No se ejecutan para no modificar la base de desarrollo.'
   );
 }
+
+/**
+ * Nombre de la base REAL a la que se conecta la aplicación, preguntado al servidor (`current_database()`), no deducido de una
+ * variable: es lo que decide qué datos se modifican. Devuelve null si no se puede conectar (entonces tampoco se puede modificar nada).
+ */
+export async function connectedDatabaseName(url: string | undefined): Promise<string | null> {
+  if (!url) return null;
+  // eslint-disable-next-line @typescript-eslint/no-var-requires
+  const { PrismaClient } = require('@prisma/client') as typeof import('@prisma/client');
+  const prisma = new PrismaClient({ datasourceUrl: url, log: [] });
+  try {
+    const rows = await prisma.$queryRaw<Array<{ name: string }>>`SELECT current_database() AS name`;
+    return rows[0]?.name ?? null;
+  } catch {
+    return null;
+  } finally {
+    await prisma.$disconnect().catch(() => undefined);
+  }
+}
+
+export function connectedRefusalMessage(realName: string): string {
+  return (
+    `La conexión configurada llega a la base «${realName}», que no es una base de pruebas (su nombre debe terminar en «${TEST_DATABASE_SUFFIX}»). ` +
+    'Se detuvo todo antes de ejecutar ninguna prueba para no modificar esa base. Defina TEST_DATABASE_URL (ver docs/PRUEBAS_DE_INTEGRACION.md).'
+  );
+}

@@ -37,6 +37,7 @@ describe('tutor por ciclo (fase 3b)', () => {
   const ownUserIds: string[] = [];
   const ownSchoolIds: string[] = [];
   let foreignBefore = '';
+  let foreignIds: string[] = [];
   const credentials = {} as Record<Who, { email: string; password: string }>;
 
   const call = (method: string, path: string, who: Who, body?: unknown) =>
@@ -46,10 +47,21 @@ describe('tutor por ciclo (fase 3b)', () => {
       body: body ? JSON.stringify(body) : undefined,
     });
   const cyclePath = (cycle: number) => `/api/schools/${schoolA}/cycle-tutors/${cycle}`;
-  /** Foto de las asignaciones de ciclo que NO son de esta corrida: no deben cambiar. */
-  const foreignSnapshot = async () =>
+  /**
+   * Foto de las asignaciones de ciclo preexistentes (las que NO son de esta corrida) en el momento de empezar. Otras suites pueden
+   * correr a la vez y crear las suyas en sus propias escuelas: esas no son preexistentes y no se comparan; las de la foto deben
+   * seguir existiendo, sin cambios.
+   */
+  const snapshotOf = async (ids?: string[]) =>
     JSON.stringify(
-      (await prisma.cycleTutorAssignment.findMany({ where: { schoolId: { notIn: ownSchoolIds } }, orderBy: { id: 'asc' } })).map((a) => [a.id, a.schoolId, a.cycle, a.tutorId, a.isException, a.acceptanceStatus]),
+      (await prisma.cycleTutorAssignment.findMany({ where: { schoolId: { notIn: ownSchoolIds }, ...(ids ? { id: { in: ids } } : {}) }, orderBy: { id: 'asc' } })).map((a) => [
+        a.id,
+        a.schoolId,
+        a.cycle,
+        a.tutorId,
+        a.isException,
+        a.acceptanceStatus,
+      ]),
     );
 
   beforeAll(async () => {
@@ -108,7 +120,8 @@ describe('tutor por ciclo (fase 3b)', () => {
       const student = await prisma.student.create({ data: { studentCode: code, firstName: 'Ciclo', lastName: `Prueba ${code}`, cycle: 10, schoolId: schoolA } });
       await prisma.periodEnrollment.create({ data: { periodId, studentId: student.id, schoolId: schoolA, cycle: 10 } });
     }
-    foreignBefore = await foreignSnapshot();
+    foreignBefore = await snapshotOf();
+    foreignIds = (JSON.parse(foreignBefore) as string[][]).map((row) => row[0]);
   });
 
   afterAll(async () => {
@@ -203,6 +216,6 @@ describe('tutor por ciclo (fase 3b)', () => {
 
   it('las asignaciones preexistentes de otras escuelas (sistema o demostración) quedan intactas', async () => {
     if (!dbUp) return;
-    expect(await foreignSnapshot()).toBe(foreignBefore);
+    expect(await snapshotOf(foreignIds)).toBe(foreignBefore);
   });
 });
