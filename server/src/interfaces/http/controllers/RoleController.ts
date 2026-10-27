@@ -23,7 +23,7 @@ export class RoleController {
   create = async (req: Request, res: Response) => {
     try {
       const data = createRoleSchema.parse(req.body);
-      const role = await this.createRoleUseCase.execute(data);
+      const role = await this.createRoleUseCase.execute(data, req.auth?.sub as string, req.ip);
       res.status(201).json({ message: 'Rol creado exitosamente', role });
     } catch (error) {
       if (error instanceof z.ZodError) {
