@@ -146,6 +146,13 @@ export function PendingPage() {
           </div>) : undefined}
       />
 
+      {/* El resultado de un reenvío va arriba de la lista: abajo quedaba fuera de la vista. */}
+      {feedback && (
+        <p role={feedback.type === 'ok' ? 'status' : 'alert'} className={feedback.type === 'ok' ? styles.feedbackOk : styles.feedbackError}>
+          {feedback.text}
+        </p>
+      )}
+
       {query.isLoading ? (
         <TableSkeleton rows={4} />
       ) : query.isError ? (
@@ -192,11 +199,6 @@ export function PendingPage() {
             })}
           </ul></div>}
         </>
-      )}
-      {feedback && (
-        <p role={feedback.type === 'ok' ? 'status' : 'alert'} className={feedback.type === 'ok' ? styles.feedbackOk : styles.feedbackError}>
-          {feedback.text}
-        </p>
       )}
       <ConfirmDialog
         open={confirming !== null}
