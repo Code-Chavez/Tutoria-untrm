@@ -29,7 +29,7 @@ Dije antes que ni `develop` ni `main` tenían protección de rama. **Era incorre
 
 | # | Cambio | Por qué | Costo / riesgo |
 |---|---|---|---|
-| **P1** | **Comprobar** si los checks «omitidos» por una edición del PR satisfacen las reglas, y según el resultado cambiar `ci.yml` | `ci.yml` también se dispara con `edited` y cada job se omite con un `if`. Observé muchas veces que, tras editar la descripción de un PR, los 9 checks aparecen como *skipping*. Según recuerdo de la documentación de GitHub (no la volví a consultar), un job omitido por una condición se informa como correcto y no impide fusionar aunque el check sea obligatorio. **Hipótesis sin verificar:** que esa ejecución omitida sustituya a un resultado rojo del mismo commit y deje fusionar. | Verificarlo cuesta un PR desechable (ver §4). Si se confirma, la corrección es no usar `edited` en `ci.yml` y recuperar el caso de PR apilado reapuntado con un workflow aparte que relance la CI |
+| **P1** | **Corregir `ci.yml` para que editar un PR no pueda dejarlo fusionable con la CI en rojo** (confirmado, ver §2.1) | `ci.yml` también se dispara con `edited` y cada job se omite con un `if`; esa ejecución omitida sustituye al resultado anterior del mismo commit. Verificado el 27/10/2026 con un PR desechable: con `Server — Test` en fallo el PR estaba `BLOCKED`; tras editar la descripción quedó `CLEAN` y `mergeable_state: clean`. | Opción: quitar `edited` de los tipos de `ci.yml` (así una edición no crea ejecuciones) y recuperar el caso del PR apilado reapuntado con un workflow aparte que relance la CI. Falta probar esa alternativa antes de aplicarla; mientras tanto, **un PR cuya descripción se editó no debe darse por verificado sin relanzar su CI** |
 | **P2** | Hacer **obligatorios** los checks de `pr-checks.yml`: título, descripción y `Validate Feature → develop` (en `develop`) | Hoy el DoD y el formato del título se validan pero no bloquean | Para `Gate — Main Branch Protection` ver P3. Los checks que se omiten según el destino cuentan como correctos (mismo punto que P1) |
 | **P3** | **Ruleset separado para `main`** con `Gate — Main Branch Protection` obligatorio, solo método *merge*, y (si hay un segundo revisor) 1 aprobación | `main` es la rama de versiones: conviene una regla más estricta que `develop`. El Gate ya valida que el origen sea `develop` y el DoD técnico | Dos rulesets que mantener. Con un solo colaborador no se puede exigir aprobación (ver P9) |
 | **P4** | Permitir solo el método **merge** en el ruleset y en los ajustes del repositorio | Es el que se usa y el que exige el flujo de versiones; evita una fusión *squash* accidental que cambie los hashes de los commits | Ninguno conocido |
@@ -41,6 +41,20 @@ Dije antes que ni `develop` ni `main` tenían protección de rama. **Era incorre
 | **P10** | **Salida de emergencia:** decidir entre mantener «nadie puede saltarse la regla» o añadir a `Code-Chavez` como actor de *bypass* solo en modo «pull request», y documentarlo | Con CI intermitente (vi `ECONNRESET` al descargar los motores de Prisma, que obligó a relanzar un job) y sin bypass, una caída de la CI bloquea todo | Con bypass se debilita la garantía; sin bypass, un incidente puede requerir cambiar la regla a mano |
 | **P11** | `CODEOWNERS` | Solo aporta con más de una persona o con `require_code_owner_review` | No hacerlo ahora |
 
+### 2.1 Resultado de la verificación de P1 (27/10/2026, PR desechable #178)
+
+Se creó el PR #178 con una prueba unitaria que falla a propósito (`expect(1).toBe(2)`), se esperó a que la CI terminara y se editó **una vez** la descripción. Se leyó el estado de fusión con `gh pr view --json mergeStateStatus,mergeable` y con la API REST (`mergeable_state`). **No se intentó fusionar**; el PR se cerró sin fusionar y su rama se borró.
+
+| Momento | `Server — Test` | `gh pr checks` | Estado de fusión |
+|---|---|---|---|
+| Tras la primera CI (04:07:34Z), antes de editar | fallo (04:06:56Z) | 1 fallo, resto correcto u omitido | `BLOCKED` / `blocked` |
+| Tras editar la descripción (04:08:26Z) | **omitido** (04:08:02Z) | los 9 checks de `ci.yml` como *skipping* | **`CLEAN`** / `clean`; `mergeable: true` |
+
+Qué se observó: el evento `edited` creó una ejecución nueva de «CI Pipeline» cuyos 9 jobs se omitieron por la condición `if`; para cada nombre de check quedaron dos check-runs del mismo commit (el real y el omitido) y el **más reciente** (el omitido) es el que cuenta. Los checks de `pr-checks.yml` (que no son obligatorios) sí volvieron a ejecutarse y pasaron.
+
+Qué **no** se verificó: no se intentó una fusión real, solo el estado que informa GitHub; no se probó la alternativa propuesta; no se probó con otros eventos (cambio de rama destino, reapertura). Datos completos en `docs/resultados-2026-10-26/checks-omitidos-por-edicion.txt`.
+
+
 **Se mantiene** lo que ya funciona: PR obligatorio, 9 checks, rama al día, conversaciones resueltas, sin borrar ni reescribir. La regla «rama al día» tiene un costo conocido (cada PR apilado hay que actualizarlo y repetir la CI al fusionar el de abajo), pero es lo que garantiza probar la combinación final; se propone mantenerla.
 
 ## 3. Qué depende del plan (GitHub Pro / paquete de estudiantes)
@@ -51,11 +65,11 @@ Dije antes que ni `develop` ni `main` tenían protección de rama. **Era incorre
 
 ## 4. Cómo se verificaría y se aplicaría (nada de esto se ejecutó)
 
-1. **P1 primero, sin tocar ajustes:** crear un PR desechable con una prueba que falle a propósito, esperar al rojo, editar la descripción y leer `mergeStateStatus` (`BLOCKED` o `CLEAN`) con `gh pr view --json mergeStateStatus,statusCheckRollup`. No se fusiona; se cierra y se borra la rama.
+1. **P1 (ya verificado el 27/10/2026, §2.1):** el procedimiento fue un PR desechable con una prueba que falla a propósito, esperar al rojo, editar la descripción y leer `mergeStateStatus` (`BLOCKED` o `CLEAN`) con `gh pr view --json mergeStateStatus,statusCheckRollup`, sin fusionar; luego cerrarlo y borrar la rama. La corrección de `ci.yml` **no** está aplicada ni probada.
 2. Aplicar los cambios de **ruleset** y de ajustes uno por uno (API `rulesets` o interfaz web), anotando el valor anterior para poder revertir; empezar por `enforcement: evaluate` (modo de evaluación) cuando el plan lo permita, que informa qué se habría bloqueado sin bloquear.
 3. Ejemplo de cómo se vería P4 en la API (**ilustrativo, no ejecutado**): en el ruleset 23945612, cambiar `parameters.allowed_merge_methods` de `["merge","squash","rebase"]` a `["merge"]`.
 4. P6/P7/P8 se pueden aplicar sin riesgo para el flujo; P2–P3 y P10 conviene decidirlos junto con el equipo.
 
 ## 5. Qué no se hace en esta propuesta
 
-No se cambia ninguna regla, ajuste, archivo de workflow ni configuración; no se activa ninguna función de seguridad; no se crea ningún PR desechable; no se fusiona ni se despliega nada.
+No se cambia ninguna regla, ajuste, archivo de workflow ni configuración; no se activa ninguna función de seguridad; no se fusiona ni se despliega nada. El único PR desechable que se creó (#178, para verificar P1) se cerró sin fusionar y su rama se borró.
