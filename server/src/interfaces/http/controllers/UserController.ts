@@ -13,7 +13,7 @@ import { DeanFacultyRequiredError } from '@application/use-cases/users/deanFacul
 import { z } from 'zod';
 import { optionalPhone, personName } from '../validators/fields';
 import { EmailPolicy, emailField } from '@application/validation/email';
-import { InvalidAccountEmailError } from '@application/use-cases/users/UserErrors';
+import { InvalidAccountEmailError, LastActiveAdministratorError } from '@application/use-cases/users/UserErrors';
 
 const createUserSchema = z.object({
   // Forma y tamaño aquí; el dominio permitido (RF-01) lo decide el caso de uso con la política del despliegue.
@@ -65,6 +65,8 @@ export class UserController {
         res.status(404).json({ error: error.message });
       } else if (error instanceof ServiceRequiredError || error instanceof TutorSchoolRequiredError || error instanceof DeanFacultyRequiredError) {
         res.status(400).json({ error: error.message });
+      } else if (error instanceof LastActiveAdministratorError) {
+        res.status(409).json({ error: error.message });
       } else {
         res.status(500).json({ error: 'Error interno del servidor' });
       }
@@ -120,6 +122,8 @@ export class UserController {
         res.status(400).json({ error: error.message });
       } else if (error instanceof RoleNotFoundError) {
         res.status(404).json({ error: error.message });
+      } else if (error instanceof LastActiveAdministratorError) {
+        res.status(409).json({ error: error.message });
       } else {
         res.status(500).json({ error: 'Error interno del servidor' });
       }
@@ -134,6 +138,8 @@ export class UserController {
     } catch (error) {
       if (error instanceof UserNotFoundError) {
         res.status(404).json({ error: error.message });
+      } else if (error instanceof LastActiveAdministratorError) {
+        res.status(409).json({ error: error.message });
       } else {
         res.status(500).json({ error: 'Error interno del servidor' });
       }

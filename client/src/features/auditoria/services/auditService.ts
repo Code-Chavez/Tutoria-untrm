@@ -50,6 +50,7 @@ export const ACTION_LABEL: Record<string, string> = {
   INVITATION_ISSUED: 'Invitación de acceso emitida',
   ASSIGN_ROLE: 'Cambio de rol',
   ROLE_CREATED: 'Rol creado',
+  USER_CHANGE_REJECTED: 'Cambio de usuario rechazado',
   PERIOD_CLOSED: 'Periodo cerrado',
   PERIOD_REOPENED: 'Periodo reabierto',
   UPDATE_PARAMETER: 'Parámetro del sistema modificado',
