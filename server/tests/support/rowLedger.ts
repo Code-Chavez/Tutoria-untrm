@@ -180,3 +180,36 @@ export function describeDifferences(diffs: RowDifference[], limit = 15): string 
     .concat(diffs.length > limit ? [`… y ${diffs.length - limit} más`] : [])
     .join('\n');
 }
+
+export interface UnfinishedRuns {
+  /** Corridas cuya foto de filas preexistentes sigue en la base: no terminaron, o terminaron con residuos o cambios. */
+  snapshots: Array<{ run: string; rows: number }>;
+  /** Filas creadas por pruebas que nadie borró. */
+  ledgerRows: number;
+}
+
+/** Restos de corridas anteriores en la base de pruebas. En una base nueva (sin las tablas del registro) no hay ninguno. */
+export async function findUnfinishedRuns(prisma: PrismaClient): Promise<UnfinishedRuns> {
+  const exists = await prisma.$queryRaw<Array<{ snapshots: string | null; ledger: string | null }>>`
+    SELECT to_regclass('public.test_preexisting')::text AS snapshots, to_regclass('public.test_row_origin')::text AS ledger`;
+  const snapshots = exists[0]?.snapshots
+    ? (await prisma.$queryRaw<Array<{ run: string; rows: bigint }>>`SELECT run, count(*) AS rows FROM test_preexisting GROUP BY run ORDER BY run`).map((r) => ({ run: r.run, rows: Number(r.rows) }))
+    : [];
+  const ledger = exists[0]?.ledger ? await prisma.$queryRaw<Array<{ n: bigint }>>`SELECT count(*) AS n FROM test_row_origin` : [];
+  return { snapshots, ledgerRows: Number(ledger[0]?.n ?? 0) };
+}
+
+/** Mensaje con el que se detiene una corrida que encuentra restos. Solo menciona la base y el contenedor de PRUEBAS. */
+export function unfinishedRunsMessage(found: UnfinishedRuns): string {
+  const runs = found.snapshots.map((s) => `${s.run} (${s.rows} filas en la foto)`).join(', ') || 'ninguna foto';
+  return [
+    'La base de pruebas tiene restos de una corrida anterior que se interrumpió o terminó con residuos o cambios inesperados',
+    `(corridas: ${runs}; filas de pruebas sin borrar: ${found.ledgerRows}). No se ejecutó ninguna prueba: aceptar esta base daría por buenos`,
+    'valores que una prueba dejó cambiados. Recupérela y vuelva a ejecutar:',
+    '  - Recrearla (recomendado; es desechable y sin volumen):',
+    '      docker compose -f docker-compose.test-db.yml down',
+    '      docker compose -f docker-compose.test-db.yml up -d --wait',
+    '      (en server/) pnpm run test:db:prepare',
+    '  - O recuperar esa corrida sin recrear: docs/PRUEBAS_DE_INTEGRACION.md, sección 3.5.',
+  ].join(String.fromCharCode(10));
+}
