@@ -114,7 +114,7 @@ Reemplaza y amplía **LEV-R02** de [05](05_REQUISITOS_SIN_DEPENDENCIAS.md) con u
 | Actor | Administrador |
 | Reglas | (1) Se rechaza toda operación que deje 0 cuentas habilitadas: desactivar una cuenta, cambiar su rol, retirar permisos del núcleo a un rol, retirar un alcance necesario, desactivar o borrar un rol. (2) Nadie puede desactivarse si es el único. (3) La comprobación y el cambio van en **una sola transacción** (si dos administradores se desactivan a la vez, falla el segundo). (4) El mínimo es **1** por decisión de trabajo (Q05 = A). (5) El rechazo indica el motivo y qué hacer |
 | Criterios de aceptación | Los de LEV-R02 más: retirar el núcleo de administración a un rol se rechaza si ese rol es el último que lo concede |
-| Dependencias | R10, R11. Estado: **Propuesto** (decisión de trabajo). Número mínimo mayor que 1: pendiente de DBU/TI |
+| Dependencias | **Por partes:** (a) lo relativo a **cuentas** (desactivar, cambiar el rol de una cuenta, autodesactivación) **no depende de R11**: puede hacerse ya con los permisos que existen hoy como núcleo de administración; (b) lo relativo a **editar o borrar roles** (retirar permisos del núcleo, desactivar un rol) depende de R10 y R11. Estado: **Propuesto** (decisión de trabajo). Número mínimo mayor que 1: pendiente de DBU/TI |
 
 ### LEV-R15 · Comportamiento ante cambios con sesión iniciada
 
@@ -167,7 +167,7 @@ Reemplaza y amplía **LEV-R02** de [05](05_REQUISITOS_SIN_DEPENDENCIAS.md) con u
 | E1 | R19 (caracterización) y R10 (catálogo, sin cambiar comportamiento) | — |
 | E2 | R12: tabla de alcances y **migración con comprobación de paridad** (los accesos de hoy no cambian) | E1 |
 | E3 | Sustituir las 43 comprobaciones del servidor por permiso + alcance, módulo por módulo, con R19 en verde en cada paso | E2 |
-| E4 | R14 (último administrador) y R13 (delegación), que ya pueden hacerse sobre E2 | E2 |
+| E4 | R13 (delegación) y R14b (último administrador, parte de roles), sobre E2. **R14a (cuentas) puede entregarse antes, sin depender de E1 a E3** | E2 |
 | E5 | R11, R17, R18 y la pantalla de roles | E3, E4 |
 | E6 | R15 y R16: el cliente por permisos | E3 |
 
