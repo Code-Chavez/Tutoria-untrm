@@ -36,6 +36,9 @@ import { ExcelTutorParser } from './parsers/ExcelTutorParser';
 import { PrismaAdmonitionRepository } from './repositories/PrismaAdmonitionRepository';
 import { AdmonitionScopeResolver, GetAdmonitionFileUseCase, IssueAdmonitionUseCase, ListAdmonishableTutorsUseCase, ListAdmonitionsUseCase } from '@application/use-cases/admonitions/AdmonitionUseCases';
 import { PrismaCycleTutorRepository } from './repositories/PrismaCycleTutorRepository';
+import { PrismaDeclineNoticeRepository } from './repositories/PrismaDeclineNoticeRepository';
+import { DeclineNoticeProcessor } from '@application/use-cases/cycle-tutors/DeclineNoticeProcessor';
+import { ResendDeclineNoticeUseCase } from '@application/use-cases/cycle-tutors/ResendDeclineNoticeUseCase';
 import { CycleTutorApplier, ListCycleTutorsUseCase, RemoveCycleTutorUseCase, SetCycleTutorUseCase } from '@application/use-cases/cycle-tutors/CycleTutorUseCases';
 import { GetInstitutionalPendingUseCase } from '@application/use-cases/pending/GetInstitutionalPendingUseCase';
 import { PrismaCampusRepository } from './repositories/PrismaCampusRepository';
@@ -358,6 +361,12 @@ const changePasswordUseCase = new ChangePasswordUseCase(
 const cycleTutorRepository = new PrismaCycleTutorRepository(prisma);
 const cycleTutorApplier = new CycleTutorApplier(cycleTutorRepository, studentRepository, tutorAssignmentHistoryRepository);
 const listCycleTutorsUseCase = new ListCycleTutorsUseCase(studentAccessGuard, academicPeriodRepository, cycleTutorRepository, schoolRepository);
+// Aviso a la coordinación del rechazo de un docente (LEV-R05): guardado en cola de forma atómica con el rechazo y entregado por el
+// intento inmediato o por el proceso de fondo, que comparten la misma reserva. Sin SMTP el aviso queda en cola y se explica por qué.
+const declineNoticeRepository = new PrismaDeclineNoticeRepository(prisma);
+const declineNoticeDeliveryEnabled = Boolean(env.SMTP_HOST);
+const declineNoticeProcessor = new DeclineNoticeProcessor(declineNoticeRepository, cycleTutorRepository, userRepository, schoolRepository, academicPeriodRepository, mailer, auditLogRepository, declineNoticeDeliveryEnabled);
+const declineNoticeWorker = declineNoticeDeliveryEnabled ? new EmailOutboxWorker(declineNoticeProcessor, 30_000, console, 'avisos de rechazo') : undefined;
 const getInstitutionalPendingUseCase = new GetInstitutionalPendingUseCase(
   studentAccessGuard,
   academicPeriodRepository,
@@ -368,13 +377,18 @@ const getInstitutionalPendingUseCase = new GetInstitutionalPendingUseCase(
   tutoringRequestRepository,
   sessionRepository,
   studentRepository,
+  declineNoticeRepository,
+  declineNoticeDeliveryEnabled,
 );
 const setCycleTutorUseCase = new SetCycleTutorUseCase(studentAccessGuard, academicPeriodRepository, schoolRepository, userRepository, roleRepository, cycleTutorRepository, cycleTutorApplier, auditLogRepository);
 const removeCycleTutorUseCase = new RemoveCycleTutorUseCase(studentAccessGuard, academicPeriodRepository, cycleTutorRepository, auditLogRepository);
 const acceptanceConfig = { publicUrl: env.PUBLIC_APP_URL, ttlHours: env.INVITATION_TTL_HOURS };
 const requestTutorAcceptanceUseCase = new RequestTutorAcceptanceUseCase(studentAccessGuard, academicPeriodRepository, schoolRepository, userRepository, cycleTutorRepository, mailer, auditLogRepository, acceptanceConfig);
 const getTutorAcceptanceUseCase = new GetTutorAcceptanceUseCase(cycleTutorRepository, userRepository, schoolRepository, academicPeriodRepository, systemParameterRepository);
-const respondTutorAcceptanceUseCase = new RespondTutorAcceptanceUseCase(cycleTutorRepository, userRepository, schoolRepository, academicPeriodRepository, systemParameterRepository, mailer, auditLogRepository, issueInvitationUseCase);
+const respondTutorAcceptanceUseCase = new RespondTutorAcceptanceUseCase(cycleTutorRepository, userRepository, systemParameterRepository, declineNoticeRepository, auditLogRepository, issueInvitationUseCase, (attemptId) => {
+  void declineNoticeProcessor.attemptNow(attemptId);
+});
+const resendDeclineNoticeUseCase = new ResendDeclineNoticeUseCase(studentAccessGuard, academicPeriodRepository, schoolRepository, userRepository, cycleTutorRepository, declineNoticeRepository, declineNoticeProcessor, auditLogRepository);
 const createStudentUseCase = new CreateStudentUseCase(studentRepository, schoolRepository, studentAccessGuard, academicPeriodRepository, periodEnrollmentRepository, cycleTutorApplier);
 const updateStudentUseCase = new UpdateStudentUseCase(studentRepository, schoolRepository, studentAccessGuard);
 const listStudentsUseCase = new ListStudentsUseCase(studentRepository, studentAccessGuard);
@@ -798,6 +812,7 @@ export const container = {
     tokenService,
     evidenceStorage,
     emailOutboxWorker,
+    declineNoticeWorker,
   },
   useCases: {
     loginUseCase,
@@ -874,6 +889,7 @@ export const container = {
     requestTutorAcceptanceUseCase,
     getTutorAcceptanceUseCase,
     respondTutorAcceptanceUseCase,
+    resendDeclineNoticeUseCase,
     setCycleTutorUseCase,
     removeCycleTutorUseCase,
     createCampusUseCase,

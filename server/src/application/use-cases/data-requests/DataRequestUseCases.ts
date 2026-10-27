@@ -6,6 +6,7 @@ import { AuditLogRepository } from '@domain/repositories/AuditLogRepository';
 import { DataRequest, DataRequestKind, DataRequestRepository, OperationIdTakenError } from '@domain/repositories/DataRequestRepository';
 import { SchoolContactRepository } from '@domain/repositories/SchoolContactRepository';
 import { Mailer, mailOutcomeOf } from '@application/ports/Mailer';
+import { withDeadline } from '@application/services/sendWithDeadline';
 import {
   contentHash,
   cyclesScope,
@@ -137,27 +138,6 @@ export class OperationIdConflictError extends Error {
     super('El identificador de la operación ya se usó con otros datos. Vuelve a preparar el pedido.');
     this.name = 'OperationIdConflictError';
   }
-}
-
-/**
- * Fin de plazo del envío. Solo deja de ESPERAR: no cancela el transporte SMTP, que sigue hasta sus propios tiempos de espera y
- * puede terminar el envío después. Por eso el vencimiento es un resultado INCIERTO y nunca prueba que el correo no salió.
- */
-class SendTimeoutError extends Error {
-  constructor() {
-    super('Se agotó el tiempo del envío');
-    this.name = 'SendTimeoutError';
-  }
-}
-
-function withDeadline<T>(work: Promise<T>, ms: number): Promise<T> {
-  let timer: NodeJS.Timeout | undefined;
-  const deadline = new Promise<never>((_, reject) => {
-    timer = setTimeout(() => reject(new SendTimeoutError()), ms);
-  });
-  // Si el envío termina después del plazo, su resultado se ignora; esto evita un rechazo sin atender.
-  work.catch(() => undefined);
-  return Promise.race([work, deadline]).finally(() => clearTimeout(timer));
 }
 
 type Reservation = { kind: 'REPLAY'; request: DataRequest } | { kind: 'CREATED'; request: DataRequest; attemptStartedAt: Date };

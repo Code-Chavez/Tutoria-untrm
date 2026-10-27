@@ -16,6 +16,7 @@ async function main() {
       console.log(`SIT API escuchando en puerto ${env.PORT}`);
       console.log(`Entorno: ${env.NODE_ENV}`);
       container.services.emailOutboxWorker?.start();
+      container.services.declineNoticeWorker?.start();
     });
   } catch (error) {
     console.error('Error al iniciar el servidor:', error);

@@ -24,15 +24,20 @@ export class PrismaCycleTutorRepository implements CycleTutorRepository {
     // Mismo docente: se conserva su aceptación. Otro docente: la aceptación empieza de nuevo y el enlace anterior deja de servir.
     const restart =
       existing && existing.tutorId !== input.tutorId
-        ? { acceptanceStatus: 'SIN_SOLICITAR', acceptanceTokenHash: null, acceptanceExpiresAt: null, requestedAt: null, respondedAt: null, declineReason: null, availability: Prisma.DbNull }
+        ? { acceptanceStatus: 'SIN_SOLICITAR', acceptanceTokenHash: null, acceptanceExpiresAt: null, requestedAt: null, respondedAt: null, declineReason: null, availability: Prisma.DbNull, declineNoticeStatus: null, declineNoticeAttemptId: null }
         : {};
     return toAssignment(await this.prisma.cycleTutorAssignment.upsert({ where, update: { ...data, ...restart }, create: input }));
+  }
+
+  async findById(id: string): Promise<CycleTutorAssignment | null> {
+    const row = await this.prisma.cycleTutorAssignment.findUnique({ where: { id } });
+    return row && toAssignment(row);
   }
 
   async requestAcceptance(id: string, tokenHash: string, expiresAt: Date, requestedAt: Date): Promise<void> {
     await this.prisma.cycleTutorAssignment.update({
       where: { id },
-      data: { acceptanceStatus: 'PENDIENTE', acceptanceTokenHash: tokenHash, acceptanceExpiresAt: expiresAt, requestedAt, respondedAt: null, declineReason: null },
+      data: { acceptanceStatus: 'PENDIENTE', acceptanceTokenHash: tokenHash, acceptanceExpiresAt: expiresAt, requestedAt, respondedAt: null, declineReason: null, declineNoticeStatus: null, declineNoticeAttemptId: null },
     });
   }
 

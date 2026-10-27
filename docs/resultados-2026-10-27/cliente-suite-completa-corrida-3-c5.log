@@ -1,0 +1,44 @@
+2026-10-27T22:52:44Z
+
+ RUN  v4.1.10 C:/Proyects/Proyects/Tutoria-untrm/client
+
+ ❯ src/features/entrevistas/components/InterviewFormModal.test.tsx (4 tests | 1 failed) 12524ms
+     × recorre el flujo completo y confirma con el usuario autenticado 5074ms
+ ❯ src/features/tutorados/components/SessionFormModal.test.tsx (6 tests | 1 failed) 16388ms
+     × confirma con el enlace de videollamada al elegir modalidad virtual 5094ms
+Not implemented: navigation to another Document
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/features/entrevistas/components/InterviewFormModal.test.tsx > InterviewFormModal > recorre el flujo completo y confirma con el usuario autenticado
+Error: Test timed out in 5000ms.
+If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".
+ ❯ src/features/entrevistas/components/InterviewFormModal.test.tsx:54:3
+     52|   });
+     53|
+     54|   it('recorre el flujo completo y confirma con el usuario autenticado'…
+       |   ^
+     55|     const onSubmit = vi.fn();
+     56|     const user = userEvent.setup();
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ FAIL  src/features/tutorados/components/SessionFormModal.test.tsx > SessionFormModal > confirma con el enlace de videollamada al elegir modalidad virtual
+Error: Test timed out in 5000ms.
+If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".
+ ❯ src/features/tutorados/components/SessionFormModal.test.tsx:120:3
+    118|   });
+    119|
+    120|   it('confirma con el enlace de videollamada al elegir modalidad virtu…
+       |   ^
+    121|     const onSubmit = vi.fn();
+    122|     const user = userEvent.setup();
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+
+
+ Test Files  2 failed | 85 passed (87)
+      Tests  2 failed | 568 passed (570)
+   Start at  17:52:54
+   Duration  299.44s (transform 58.13s, setup 277.54s, import 267.70s, tests 441.80s, environment 868.78s)
+

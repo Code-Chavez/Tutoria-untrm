@@ -121,7 +121,13 @@ describe('aceptación del tutor (fase 4)', () => {
   describe('responder', () => {
     const invitations = { execute: jest.fn() };
     beforeEach(() => { invitations.execute.mockReset(); });
-    const respond = () => new RespondTutorAcceptanceUseCase(cycleTutors, users, schools, periods, parameters, mailer, audit, invitations);
+    const notices = { recordDecline: jest.fn() };
+    const kick = jest.fn();
+    beforeEach(() => {
+      notices.recordDecline.mockReset().mockResolvedValue({ id: 'n1' });
+      kick.mockReset();
+    });
+    const respond = () => new RespondTutorAcceptanceUseCase(cycleTutors, users, parameters, notices as never, audit, invitations, kick);
 
     it('al aceptar guarda su disponibilidad y consume el enlace', async () => {
       await respond().execute('tok', { accept: true, availability: [slot] }, '10.0.0.1');
@@ -151,23 +157,35 @@ describe('aceptación del tutor (fase 4)', () => {
       await expect(respond().execute('tok', { accept: true, availability: [slot] })).resolves.toEqual({ accepted: true, activationUnavailable: true });
     });
 
-    it('al rechazar exige el motivo y avisa a la coordinación del colegio', async () => {
+    it('al rechazar exige el motivo y guarda el rechazo con su aviso EN_COLA en una sola operación, sin enviar ni esperar ningún correo', async () => {
       await expect(respond().execute('tok', { accept: false, reason: ' ' })).rejects.toBeInstanceOf(InvalidAvailabilityError);
+      expect(notices.recordDecline).not.toHaveBeenCalled();
 
       await respond().execute('tok', { accept: false, reason: 'Licencia por estudios' });
 
-      expect(cycleTutors.recordResponse).toHaveBeenCalledWith('a1', { accepted: false, declineReason: 'Licencia por estudios' }, expect.any(Date));
-      const mail = mailer.send.mock.calls[0][0];
-      expect(mail.to).toBe('coord@untrm.edu.pe');
-      expect(mail.text).toContain('Licencia por estudios');
-      expect(audit.create.mock.calls[0][0]).toMatchObject({ action: 'CYCLE_TUTOR_DECLINED' });
+      expect(notices.recordDecline).toHaveBeenCalledWith('a1', 't1', 'Licencia por estudios', expect.any(Date));
+      expect(cycleTutors.recordResponse).not.toHaveBeenCalled();
+      expect(mailer.send).not.toHaveBeenCalled();
+      expect(audit.create.mock.calls[0][0]).toMatchObject({ userId: 't1', action: 'CYCLE_TUTOR_DECLINED' });
+      expect(kick).toHaveBeenCalledWith('n1');
     });
 
-    it('si el aviso a la coordinación falla, el rechazo igual queda registrado', async () => {
-      mailer.send.mockRejectedValue(new Error('smtp'));
-      jest.spyOn(console, 'error').mockImplementation(() => undefined);
+    it('el intento inmediato es solo una optimización: si falla o se pierde, el rechazo queda igual (el aviso sigue EN_COLA)', async () => {
+      kick.mockImplementation(() => {
+        throw new Error('se perdió');
+      });
 
       await expect(respond().execute('tok', { accept: false, reason: 'Licencia por estudios' })).resolves.toEqual({ accepted: false });
+      expect(notices.recordDecline).toHaveBeenCalledTimes(1);
+    });
+
+    it('si no se puede guardar el rechazo con su aviso, no se registra el rechazo ni se intenta nada', async () => {
+      notices.recordDecline.mockRejectedValue(new Error('base de datos'));
+
+      await expect(respond().execute('tok', { accept: false, reason: 'Licencia por estudios' })).rejects.toThrow('base de datos');
+
+      expect(audit.create).not.toHaveBeenCalled();
+      expect(kick).not.toHaveBeenCalled();
     });
 
     it('un enlace inválido o ya usado no registra nada', async () => {

@@ -1,4 +1,7 @@
-import { EmailOutboxProcessor } from '@application/services/EmailOutboxProcessor';
+/** Lo único que el proceso de fondo necesita de lo que revisa: una revisión que devuelve cuántas entradas atendió. */
+export interface DueProcessor {
+  processDue(): Promise<number>;
+}
 
 /**
  * Proceso de fondo que reintenta los correos pendientes cada `intervalMs`. Evita solaparse consigo mismo y no impide
@@ -9,9 +12,11 @@ export class EmailOutboxWorker {
   private running = false;
 
   constructor(
-    private readonly processor: EmailOutboxProcessor,
+    private readonly processor: DueProcessor,
+    /** Intervalo de REVISIÓN: no es una latencia máxima garantizada (depende de que el proceso esté activo y tenga capacidad). */
     private readonly intervalMs = 30_000,
     private readonly logger: Pick<Console, 'error'> = console,
+    private readonly label = 'correos pendientes',
   ) {}
 
   start(): void {
@@ -33,7 +38,7 @@ export class EmailOutboxWorker {
     try {
       await this.processor.processDue();
     } catch (error) {
-      this.logger.error('[correo] Falló el reintento de correos pendientes:', error);
+      this.logger.error(`[correo] Falló la revisión de ${this.label}:`, error);
     } finally {
       this.running = false;
     }
