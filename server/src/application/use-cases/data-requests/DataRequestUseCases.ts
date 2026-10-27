@@ -4,7 +4,6 @@ import { FacultyRepository } from '@domain/repositories/FacultyRepository';
 import { UserRepository } from '@domain/repositories/UserRepository';
 import { AuditLogRepository } from '@domain/repositories/AuditLogRepository';
 import { DataRequest, DataRequestKind, DataRequestRepository, OperationIdTakenError } from '@domain/repositories/DataRequestRepository';
-import { randomUUID } from 'node:crypto';
 import { SchoolContactRepository } from '@domain/repositories/SchoolContactRepository';
 import { Mailer, mailOutcomeOf } from '@application/ports/Mailer';
 import {
@@ -101,8 +100,8 @@ export interface SendDataRequestInput {
   cycles?: number[];
   note?: string;
   kind?: DataRequestKind;
-  /** Identifica la intención de la persona: repetir la misma operación (p. ej. por perder la respuesta) no envía otro correo. */
-  operationId?: string;
+  /** Identifica la intención de la persona: repetir la misma operación (p. ej. por perder la respuesta) no envía otro correo. Obligatorio. */
+  operationId: string;
   /** Id del pedido equivalente anterior que la persona vio y confirma reenviar. Solo vale para ese pedido. */
   confirmDuplicateOf?: string;
 }
@@ -140,7 +139,10 @@ export class OperationIdConflictError extends Error {
   }
 }
 
-/** Fin de plazo del envío (el correo pudo haber salido: resultado incierto). */
+/**
+ * Fin de plazo del envío. Solo deja de ESPERAR: no cancela el transporte SMTP, que sigue hasta sus propios tiempos de espera y
+ * puede terminar el envío después. Por eso el vencimiento es un resultado INCIERTO y nunca prueba que el correo no salió.
+ */
 class SendTimeoutError extends Error {
   constructor() {
     super('Se agotó el tiempo del envío');
@@ -219,8 +221,7 @@ export class SendDataRequestUseCase {
 
     const key = equivalenceKey({ kind, schoolId: school.id, periodId: period.id, scope: cyclesScope(kind, cycles, school.cycleCount) });
     const hash = contentHash({ kind, schoolId: school.id, periodId: period.id, toEmail: school.requestEmail, cycles, note });
-    // Sin identificador del cliente no hay forma de reconocer una repetición: se genera uno (la equivalencia sigue advirtiendo).
-    const operationId = input.operationId ?? randomUUID();
+    const operationId = input.operationId;
 
     const reservation = await this.reserveOnce(requesterId, key, hash, operationId, input.confirmDuplicateOf, {
       periodId: period.id,

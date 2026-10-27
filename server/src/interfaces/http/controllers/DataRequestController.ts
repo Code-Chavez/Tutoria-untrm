@@ -22,7 +22,8 @@ const sendSchema = z.object({
   note: z.string().trim().max(500, 'Las observaciones no pueden pasar de 500 caracteres').optional(),
   kind: z.enum(['ESTUDIANTES', 'DOCENTES']).optional(),
   // Idempotencia y reenvío confirmado (LEV-R04).
-  operationId: z.string().uuid('El identificador de la operación no es válido').optional(),
+  // Obligatorio: sin él no hay forma de reconocer una repetición. Se rechaza la petición, no se genera uno en el servidor.
+  operationId: z.uuid({ error: (issue) => (issue.input === undefined ? 'Falta el identificador de la operación (operationId): el cliente debe enviarlo para poder reintentar sin duplicar el pedido' : 'El identificador de la operación no es válido') }),
   confirmDuplicateOf: z.string().uuid('El pedido a confirmar no es válido').optional(),
 });
 const emailSchema = z.object({ email: z.string().trim().max(254).nullable() });

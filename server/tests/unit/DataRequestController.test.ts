@@ -72,9 +72,19 @@ describe('DataRequestController.create', () => {
     expect(res.json).toHaveBeenCalledWith({ error: expect.any(String), code: 'OPERATION_ID_CONFLICT' });
   });
 
+  it('sin operationId se rechaza con un mensaje claro y no se llama al caso de uso (no se genera uno en el servidor)', async () => {
+    send.execute.mockClear();
+
+    const res = await call({ schoolId: SCHOOL, cycles: [1] });
+
+    expect(res.status).toHaveBeenCalledWith(400);
+    expect(res.json).toHaveBeenCalledWith(expect.objectContaining({ error: expect.stringContaining('Falta el identificador de la operación (operationId)') }));
+    expect(send.execute).not.toHaveBeenCalled();
+  });
+
   it.each([
     ['identificador que no es UUID', { schoolId: SCHOOL, operationId: 'no-es-uuid' }],
-    ['pedido a confirmar que no es UUID', { schoolId: SCHOOL, confirmDuplicateOf: 'x' }],
+    ['pedido a confirmar que no es UUID', { schoolId: SCHOOL, operationId: OP, confirmDuplicateOf: 'x' }],
   ])('%s -> 400 sin llamar al caso de uso', async (_name, body) => {
     send.execute.mockClear();
 

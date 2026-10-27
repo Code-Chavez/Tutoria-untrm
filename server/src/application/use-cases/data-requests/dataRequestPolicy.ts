@@ -16,8 +16,10 @@ export const DATA_REQUEST_DUPLICATE_WINDOW_MS = DATA_REQUEST_DUPLICATE_WINDOW_MI
 export const DATA_REQUEST_ATTEMPT_MARGIN_MS = 5 * 60_000;
 
 /**
- * Duración máxima de un envío SMTP. Es mucho menor que el margen, de modo que un envío vivo termina (con éxito, fallo o INCIERTO)
- * mucho antes de que otro proceso pueda considerarlo vencido. Se aplica además de los tiempos de espera del transporte.
+ * Tiempo máximo que se ESPERA un envío SMTP. Es mucho menor que el margen, de modo que el resultado (éxito, fallo o INCIERTO) se
+ * registra mucho antes de que otro proceso pueda considerar vencido el intento.
+ * IMPORTANTE: vencer este plazo NO cancela el transporte SMTP (sigue hasta sus propios tiempos de espera y puede terminar el envío
+ * después) y NO prueba que el correo no salió: por eso el resultado es INCIERTO.
  */
 export const DATA_REQUEST_SEND_TIMEOUT_MS = 60_000;
 
