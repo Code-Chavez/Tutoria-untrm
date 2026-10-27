@@ -23,6 +23,8 @@ import { Mailer, MailNotConfiguredError } from '@application/ports/Mailer';
 import { InMemoryDataRequests } from '../helpers/inMemoryDataRequests';
 import { StudentTemplateProvider } from '@application/ports/StudentTemplateProvider';
 
+let opCounter = 0;
+const op = () => `00000000-0000-4000-8000-${String(++opCounter).padStart(12, '0')}`;
 const school = { cycleCount: 10, id: 's1', name: 'Ingeniería de Sistemas', facultyId: 'f1', isActive: true, createdAt: new Date('2026-01-01'), requestEmail: 'registros@untrm.edu.pe' };
 const requester = { id: 'u1', email: 'rosa@untrm.edu.pe', firstName: 'Rosa', lastName: 'Mendoza' };
 
@@ -55,17 +57,17 @@ describe('pedido de listas por correo (fase 2)', () => {
 
   describe('enviar el pedido', () => {
     it('rechaza un ciclo ajeno al plan de la escuela antes de enviar correo', async () => {
-      await expect(send().execute('u1', { schoolId: 's1', cycles: [11] })).rejects.toBeInstanceOf(InvalidDataRequestError);
+      await expect(send().execute('u1', { operationId: op(), schoolId: 's1', cycles: [11] })).rejects.toBeInstanceOf(InvalidDataRequestError);
       expect(mailer.send).not.toHaveBeenCalled();
     });
 
     it('permite pedir el ciclo 12 cuando la escuela tiene doce ciclos', async () => {
       schools.findById.mockResolvedValue({ ...school, cycleCount: 12 });
-      await send().execute('u1', { schoolId: 's1', cycles: [12] });
+      await send().execute('u1', { operationId: op(), schoolId: 's1', cycles: [12] });
       expect(mailer.send).toHaveBeenCalledWith(expect.objectContaining({ text: expect.stringContaining('ciclos 12') }));
     });
     it('envía un correo formal al correo configurado de la escuela, con copia y respuesta a quien pide, y la plantilla adjunta', async () => {
-      const { request: result, replayed } = await send().execute('u1', { schoolId: 's1', cycles: [3, 1, 3], note: 'Con urgencia' });
+      const { request: result, replayed } = await send().execute('u1', { operationId: op(), schoolId: 's1', cycles: [3, 1, 3], note: 'Con urgencia' });
       expect(replayed).toBe(false);
 
       const mail = mailer.send.mock.calls[0][0];
@@ -78,7 +80,7 @@ describe('pedido de listas por correo (fase 2)', () => {
     });
 
     it('sin ciclos pide todos; el correo no lleva datos de estudiantes', async () => {
-      await send().execute('u1', { schoolId: 's1' });
+      await send().execute('u1', { operationId: op(), schoolId: 's1' });
 
       const mail = mailer.send.mock.calls[0][0];
       expect(mail.text).toContain('de todos los ciclos');
@@ -89,7 +91,7 @@ describe('pedido de listas por correo (fase 2)', () => {
     it('sin correo configurado para la escuela se rechaza y se indica configurarlo (no se envía nada)', async () => {
       schools.findById.mockResolvedValue({ ...school, requestEmail: null });
 
-      await expect(send().execute('u1', { schoolId: 's1' })).rejects.toBeInstanceOf(RequestEmailNotConfiguredError);
+      await expect(send().execute('u1', { operationId: op(), schoolId: 's1' })).rejects.toBeInstanceOf(RequestEmailNotConfiguredError);
 
       expect(mailer.send).not.toHaveBeenCalled();
       expect(requests.rows).toHaveLength(0);
@@ -98,7 +100,7 @@ describe('pedido de listas por correo (fase 2)', () => {
     it('si se demuestra que el correo no fue aceptado, el pedido queda registrado como FALLIDO para poder reenviarlo', async () => {
       mailer.send.mockRejectedValue(new MailNotConfiguredError());
 
-      const { request: result } = await send().execute('u1', { schoolId: 's1' });
+      const { request: result } = await send().execute('u1', { operationId: op(), schoolId: 's1' });
 
       expect(result).toMatchObject({ status: 'FALLIDO', error: 'MailNotConfiguredError' });
       expect(audit.create.mock.calls[0][0].details).toMatch(/no enviado/);
@@ -107,7 +109,7 @@ describe('pedido de listas por correo (fase 2)', () => {
     it('respeta el alcance: quien no coordina la escuela no pide', async () => {
       guard.assertSchoolAccess.mockRejectedValue(new StudentAccessDeniedError());
 
-      await expect(send().execute('u2', { schoolId: 's1' })).rejects.toBeInstanceOf(StudentAccessDeniedError);
+      await expect(send().execute('u2', { operationId: op(), schoolId: 's1' })).rejects.toBeInstanceOf(StudentAccessDeniedError);
 
       expect(mailer.send).not.toHaveBeenCalled();
     });
@@ -115,15 +117,15 @@ describe('pedido de listas por correo (fase 2)', () => {
     it('sin periodo vigente no hay para qué periodo pedir', async () => {
       periods.findActive.mockResolvedValue(null);
 
-      await expect(send().execute('u1', { schoolId: 's1' })).rejects.toBeInstanceOf(NoPeriodToRequestError);
+      await expect(send().execute('u1', { operationId: op(), schoolId: 's1' })).rejects.toBeInstanceOf(NoPeriodToRequestError);
     });
 
     it.each([[[0]], [[15]], [[2.5]]])('rechaza ciclos fuera de 1–14 o no enteros (%j)', async (cycles) => {
-      await expect(send().execute('u1', { schoolId: 's1', cycles })).rejects.toBeInstanceOf(InvalidDataRequestError);
+      await expect(send().execute('u1', { operationId: op(), schoolId: 's1', cycles })).rejects.toBeInstanceOf(InvalidDataRequestError);
     });
 
     it('limita las observaciones a 500 caracteres', async () => {
-      await expect(send().execute('u1', { schoolId: 's1', note: 'x'.repeat(501) })).rejects.toBeInstanceOf(InvalidDataRequestError);
+      await expect(send().execute('u1', { operationId: op(), schoolId: 's1', note: 'x'.repeat(501) })).rejects.toBeInstanceOf(InvalidDataRequestError);
     });
   });
 
@@ -137,7 +139,7 @@ describe('pedido de listas por correo (fase 2)', () => {
     });
 
     it('la DBU lo pide con la plantilla de docentes, el texto de docentes y el pedido queda registrado como tal', async () => {
-      const { request: result } = await sendTeachers().execute('u1', { schoolId: 's1', kind: 'DOCENTES' });
+      const { request: result } = await sendTeachers().execute('u1', { operationId: op(), schoolId: 's1', kind: 'DOCENTES' });
 
       const mail = mailer.send.mock.calls[0][0];
       expect(mail.subject).toBe('Solicitud de lista de docentes tutores — Ingeniería de Sistemas — periodo 2026-II');
@@ -152,15 +154,15 @@ describe('pedido de listas por correo (fase 2)', () => {
     it('la coordinación no pide la lista de docentes (solo la DBU crea cuentas) y no se envía nada', async () => {
       guard.scopeFor.mockResolvedValue({ kind: 'SCHOOLS', schoolIds: ['s1'] });
 
-      await expect(sendTeachers().execute('u1', { schoolId: 's1', kind: 'DOCENTES' })).rejects.toBeInstanceOf(TeacherListForbiddenError);
+      await expect(sendTeachers().execute('u1', { operationId: op(), schoolId: 's1', kind: 'DOCENTES' })).rejects.toBeInstanceOf(TeacherListForbiddenError);
 
       expect(mailer.send).not.toHaveBeenCalled();
     });
 
     it('sin plantilla de docentes configurada solo se puede pedir la de estudiantes; por omisión es la de estudiantes', async () => {
-      await expect(send().execute('u1', { schoolId: 's1', kind: 'DOCENTES' })).rejects.toBeInstanceOf(InvalidDataRequestError);
+      await expect(send().execute('u1', { operationId: op(), schoolId: 's1', kind: 'DOCENTES' })).rejects.toBeInstanceOf(InvalidDataRequestError);
 
-      const { request: result } = await send().execute('u1', { schoolId: 's1' });
+      const { request: result } = await send().execute('u1', { operationId: op(), schoolId: 's1' });
       expect(result.kind).toBe('ESTUDIANTES');
     });
   });

@@ -1,3 +1,4 @@
+import { randomUUID } from 'crypto';
 import http from 'http';
 import ExcelJS from 'exceljs';
 import app from '../../src/app';
@@ -197,7 +198,7 @@ describe('matrícula por periodo y pedido de listas (fase 2)', () => {
     if (!dbUp) return;
     await prisma.school.update({ where: { id: schoolId }, data: { requestEmail: null } });
 
-    const res = await call('POST', '/api/data-requests', 'sistemas', { schoolId });
+    const res = await call('POST', '/api/data-requests', 'sistemas', { schoolId, operationId: randomUUID() });
 
     expect(res.status).toBe(409);
     expect(((await res.json()) as { code: string }).code).toBe('REQUEST_EMAIL_NOT_CONFIGURED');
@@ -218,7 +219,7 @@ describe('matrícula por periodo y pedido de listas (fase 2)', () => {
 
   it('el pedido queda registrado (aunque el correo no salga en este entorno), con alcance por escuela, y se marca como recibido', async () => {
     if (!dbUp) return;
-    const res = await call('POST', '/api/data-requests', 'sistemas', { schoolId, cycles: [3, 4], note: 'Prueba automática' });
+    const res = await call('POST', '/api/data-requests', 'sistemas', { schoolId, cycles: [3, 4], note: 'Prueba automática', operationId: randomUUID() });
     expect([201, 502]).toContain(res.status);
     const created = ((await res.json()) as { request: { id: string; toEmail: string; status: string; cycles: number[] } }).request;
     createdRequestId = created.id;
@@ -239,20 +240,20 @@ describe('matrícula por periodo y pedido de listas (fase 2)', () => {
 
   it('la lista de docentes la pide solo la DBU, con su propio tipo de pedido; la coordinación no', async () => {
     if (!dbUp) return;
-    const res = await call('POST', '/api/data-requests', 'admin', { schoolId, kind: 'DOCENTES' });
+    const res = await call('POST', '/api/data-requests', 'admin', { schoolId, kind: 'DOCENTES', operationId: randomUUID() });
     expect([201, 502]).toContain(res.status);
     const created = ((await res.json()) as { request: { id: string; kind: string } }).request;
     createdTeacherRequestId = created.id;
     expect(created.kind).toBe('DOCENTES');
 
-    expect((await call('POST', '/api/data-requests', 'sistemas', { schoolId, kind: 'DOCENTES' })).status).toBe(403);
+    expect((await call('POST', '/api/data-requests', 'sistemas', { schoolId, kind: 'DOCENTES', operationId: randomUUID() })).status).toBe(403);
     const list = ((await (await call('GET', '/api/data-requests', 'admin')).json()) as { requests: { id: string; kind: string }[] }).requests;
     expect(list.find((r) => r.id === createdTeacherRequestId)?.kind).toBe('DOCENTES');
   });
 
   it('un tutor no puede pedir listas ni ver los pedidos', async () => {
     if (!dbUp) return;
-    expect((await call('POST', '/api/data-requests', 'tutor', { schoolId })).status).toBe(403);
+    expect((await call('POST', '/api/data-requests', 'tutor', { schoolId, operationId: randomUUID() })).status).toBe(403);
     expect((await call('GET', '/api/data-requests', 'tutor')).status).toBe(403);
   });
 });

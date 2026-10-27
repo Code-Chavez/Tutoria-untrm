@@ -1,0 +1,830 @@
+2026-10-27T20:25:29Z
+
+ RUN  v4.1.10 C:/Proyects/Proyects/Tutoria-untrm/client
+
+ ❯ src/features/admin/pages/UserManagementPage.test.tsx (2 tests | 1 failed) 3510ms
+     × ante el 409 muestra el mensaje del servidor y la cuenta sigue activa 1965ms
+Not implemented: navigation to another Document
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/features/admin/pages/UserManagementPage.test.tsx > UserManagementPage: desactivar a la última cuenta de administración > ante el 409 muestra el mensaje del servidor y la cuenta sigue activa
+TestingLibraryElementError: Unable to find role="button" and name "Desactivar"
+
+Ignored nodes: comments, script, style
+[36m<body>[39m
+  [36m<div>[39m
+    [36m<div>[39m
+      [36m<div[39m
+        [33mclass[39m=[32m"_header_d06475"[39m
+        [33mdata-ui[39m=[32m"page-header"[39m
+      [36m>[39m
+        [36m<div[39m
+          [33mclass[39m=[32m"_titleWrap_d06475"[39m
+        [36m>[39m
+          [36m<span[39m
+            [33mclass[39m=[32m"_icon_d06475"[39m
+          [36m>[39m
+            [36m<svg[39m
+              [33maria-hidden[39m=[32m"true"[39m
+              [33mfill[39m=[32m"none"[39m
+              [33mheight[39m=[32m"24"[39m
+              [33mstroke[39m=[32m"currentColor"[39m
+              [33mstroke-linecap[39m=[32m"round"[39m
+              [33mstroke-linejoin[39m=[32m"round"[39m
+              [33mstroke-width[39m=[32m"2"[39m
+              [33mviewBox[39m=[32m"0 0 24 24"[39m
+              [33mwidth[39m=[32m"24"[39m
+            [36m>[39m
+              [36m<path[39m
+                [33md[39m=[32m"M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"[39m
+              [36m/>[39m
+              [36m<circle[39m
+                [33mcx[39m=[32m"9"[39m
+                [33mcy[39m=[32m"7"[39m
+                [33mr[39m=[32m"4"[39m
+              [36m/>[39m
+              [36m<path[39m
+                [33md[39m=[32m"M22 21v-2a4 4 0 0 0-3-3.87"[39m
+              [36m/>[39m
+              [36m<path[39m
+                [33md[39m=[32m"M16 3.13a4 4 0 0 1 0 7.75"[39m
+              [36m/>[39m
+            [36m</svg>[39m
+          [36m</span>[39m
+          [36m<div>[39m
+            [36m<h1[39m
+              [33mclass[39m=[32m"_title_d06475"[39m
+            [36m>[39m
+              [0mUsuarios y roles[0m
+            [36m</h1>[39m
+            [36m<p[39m
+              [33mclass[39m=[32m"_subtitle_d06475"[39m
+            [36m>[39m
+              [0mCuentas del sistema y el rol de cada persona. Los catálogos y parámetros tienen su propia sección en el menú.[0m
+            [36m</p>[39m
+          [36m</div>[39m
+        [36m</div>[39m
+        [36m<div[39m
+          [33mclass[39m=[32m"_actions_d06475"[39m
+        [36m>[39m
+          [36m<button[39m
+            [33mclass[39m=[32m"_btn_8e6d2d _secondary_8e6d2d _md_8e6d2d"[39m
+          [36m>[39m
+            [36m<span[39m
+              [33mclass[39m=[32m"_icon_8e6d2d"[39m
+            [36m>[39m
+              [36m<svg[39m
+                [33maria-hidden[39m=[32m"true"[39m
+                [33mfill[39m=[32m"none"[39m
+                [33mheight[39m=[32m"17"[39m
+                [33mstroke[39m=[32m"currentColor"[39m
+                [33mstroke-linecap[39m=[32m"round"[39m
+                [33mstroke-linejoin[39m=[32m"round"[39m
+                [33mstroke-width[39m=[32m"2"[39m
+                [33mviewBox[39m=[32m"0 0 24 24"[39m
+                [33mwidth[39m=[32m"17"[39m
+              [36m>[39m
+                [36m<path[39m
+                  [33md[39m=[32m"M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"[39m
+                [36m/>[39m
+                [36m<path[39m
+                  [33md[39m=[32m"M17 8l-5-5-5 5"[39m
+                [36m/>[39m
+                [36m<path[39m
+                  [33md[39m=[32m"M12 3v12"[39m
+                [36m/>[39m
+              [36m</svg>[39m
+            [36m</span>[39m
+            [36m<span>[39m
+              [0mImportar docentes[0m
+            [36m</span>[39m
+          [36m</button>[39m
+          [36m<button[39m
+            [33mclass[39m=[32m"_btn_8e6d2d _primary_8e6d2d _md_8e6d2d"[39m
+          [36m>[39m
+            [36m<span[39m
+              [33mclass[39m=[32m"_icon_8e6d2d"[39m
+            [36m>[39m
+              [36m<svg[39m
+                [33maria-hidden[39m=[32m"true"[39m
+                [33mfill[39m=[32m"none"[39m
+                [33mheight[39m=[32m"17"[39m
+                [33mstroke[39m=[32m"currentColor"[39m
+                [33mstroke-linecap[39m=[32m"round"[39m
+                [33mstroke-linejoin[39m=[32m"round"[39m
+                [33mstroke-width[39m=[32m"2"[39m
+                [33mviewBox[39m=[32m"0 0 24 24"[39m
+                [33mwidth[39m=[32m"17"[39m
+              [36m>[39m
+                [36m<path[39m
+                  [33md[39m=[32m"M12 5v14M5 12h14"[39m
+                [36m/>[39m
+              [36m</svg>[39m
+            [36m</span>[39m
+            [36m<span>[39m
+              [0mNuevo usuario[0m
+            [36m</span>[39m
+          [36m</button>[39m
+        [36m</div>[39m
+      [36m</div>[39m
+      [36m<div[39m
+        [33mclass[39m=[32m"_tableCard_6270ee"[39m
+      [36m>[39m
+        [36m<div[39m
+          [33mclass[39m=[32m"_bar_5d8d89"[39m
+        [36m>[39m
+          [36m<div[39m
+            [33mclass[39m=[32m"_search_7f13ba _search_5d8d89"[39m
+          [36m>[39m
+            [36m<span[39m
+              [33mclass[39m=[32m"_searchIcon_7f13ba"[39m
+            [36m>[39m
+              [36m<svg[39m
+                [33maria-hidden[39m=[32m"true"[39m
+                [33mfill[39m=[32m"none"[39m
+                [33mheight[39m=[32m"17"[39m
+                [33mstroke[39m=[32m"currentColor"[39m
+                [33mstroke-linecap[39m=[32m"round"[39m
+                [33mstroke-linejoin[39m=[32m"round"[39m
+                [33mstroke-width[39m=[32m"2"[39m
+                [33mviewBox[39m=[32m"0 0 24 24"[39m
+                [33mwidth[39m=[32m"17"[39m
+              [36m>[39m
+                [36m<circle[39m
+                  [33mcx[39m=[32m"11"[39m
+                  [33mcy[39m=[32m"11"[39m
+                  [33mr[39m=[32m"8"[39m
+                [36m/>[39m
+                [36m<path[39m
+                  [33md[39m=[32m"m21 21-4.3-4.3"[39m
+                [36m/>[39m
+              [36m</svg>[39m
+            [36m</span>[39m
+            [36m<input[39m
+              [33maria-label[39m=[32m"Buscar usuario"[39m
+              [33mclass[39m=[32m"_input_7f13ba _withIcon_7f13ba "[39m
+              [33mplaceholder[39m=[32m"Buscar por nombre o correo…"[39m
+              [33mtype[39m=[32m"search"[39m
+              [33mvalue[39m=[32m""[39m
+            [36m/>[39m
+          [36m</div>[39m
+          [36m<div[39m
+            [33mclass[39m=[32m"_selectWrap_7f13ba _select_5d8d89"[39m
+          [36m>[39m
+            [36m<select[39m
+              [33maria-label[39m=[32m"Filtrar por rol"[39m
+              [33mclass[39m=[32m"_input_7f13ba _select_7f13ba "[39m
+            [36m>[39m
+              [36m<option[39m
+                [33mvalue[39m=[32m""[39m
+              [36m>[39m
+                [0mTodos los roles[0m
+              [36m</option>[39m
+            [36m</select>[39m
+            [36m<span[39m
+              [33mclass[39m=[32m"_chevron_7f13ba"[39m
+            [36m>[39m
+              [36m<svg[39m
+                [33maria-hidden[39m=[32m"true"[39m
+                [33mfill[39m=[32m"none"[39m
+                [33mheight[39m=[32m"16"[39m
+                [33mstroke[39m=[32m"currentColor"[39m
+                [33mstroke-linecap[39m=[32m"round"[39m
+                [33mstroke-linejoin[39m=[32m"round"[39m
+                [33mstroke-width[39m=[32m"2"[39m
+                [33mviewBox[39m=[32m"0 0 24 24"[39m
+                [33mwidth[39m=[32m"16"[39m
+              [36m>[39m
+                [36m<path[39m
+                  [33md[39m=[32m"m6 9 6 6 6-6"[39m
+                [36m/>[39m
+              [36m</svg>[39m
+            [36m</span>[39m
+          [36m</div>[39m
+          [36m<div[39m
+            [33mclass[39m=[32m"_selectWrap_7f13ba _select_5d8d89"[39m
+          [36m>[39m
+            [36m<select[39m
+              [33maria-label[39m=[32m"Filtrar por estado"[39m
+              [33mclass[39m=[32m"_input_7f13ba _select_7f13ba "[39m
+            [36m>[39m
+              [36m<option[39m
+                [33mvalue[39m=[32m""[39m
+              [36m>[39m
+                [0mTodos los estados[0m
+              [36m</option>[39m
+              [36m<option[39m
+                [33mvalue[39m=[32m"active"[39m
+              [36m>[39m
+                [0mActivos[0m
+              [36m</option>[39m
+              [36m<option[39m
+                [33mvalue[39m=[32m"inactive"[39m
+              [36m>[39m
+                [0mInactivos[0m
+              [36m</option>[39m
+            [36m</select>[39m
+            [36m<span[39m
+              [33mclass[39m=[32m"_chevron_7f13ba"[39m
+            [36m>[39m
+              [36m<svg[39m
+                [33maria-hidden[39m=[32m"true"[39m
+                [33mfill[39m=[32m"none"[39m
+                [33mheight[39m=[32m"16"[39m
+                [33mstroke[39m=[32m"currentColor"[39m
+                [33mstroke-linecap[39m=[32m"round"[39m
+                [33mstroke-linejoin[39m=[32m"round"[39m
+                [33mstroke-width[39m=[32m"2"[39m
+                [33mviewBox[39m=[32m"0 0 24 24"[39m
+                [33mwidth[39m=[32m"16"[39m
+              [36m>[39m
+                [36m<path[39m
+                  [33md[39m=[32m"m6 9 6 6 6-6"[39m
+                [36m/>[39m
+              [36m</svg>[39m
+            [36m</span>[39m
+          [36m</div>[39m
+        [36m</div>[39m
+        [36m<div[39m
+          [33maria-busy[39m=[32m"true"[39m
+          [33maria-label[39m=[32m"Cargando…"[39m
+          [33mclass[39m=[32m"_wrap_7294a4"[39m
+          [33mrole[39m=[32m"progressbar"[39m
+        [36m>[39m
+          [36m<p[39m
+            [33mclass[39m=[32m"_caption_7294a4"[39m
+          [36m>[39m
+            [0mCargando…[0m
+          [36m</p>[39m
+          [36m<div[39m
+            [33maria-hidden[39m=[32m"true"[39m
+          [36m>[39m
+            [36m<div[39m
+              [33mclass[39m=[32m"_row_7294a4"[39m
+            [36m>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"_cell_7294a4"[39m
+                [33mstyle[39m=[32m"width: 60%;"[39m
+              [36m/>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"_cell_7294a4"[39m
+                [33mstyle[39m=[32m"width: 70%;"[39m
+              [36m/>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"_cell_7294a4"[39m
+                [33mstyle[39m=[32m"width: 80%;"[39m
+              [36m/>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"_cell_7294a4"[39m
+                [33mstyle[39m=[32m"width: 90%;"[39m
+              [36m/>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"_cell_7294a4"[39m
+                [33mstyle[39m=[32m"width: 60%;"[39m
+              [36m/>[39m
+            [36m</div>[39m
+            [36m<div[39m
+              [33mclass[39m=[32m"_row_7294a4"[39m
+            [36m>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"_cell_7294a4"[39m
+                [33mstyle[39m=[32m"width: 70%;"[39m
+              [36m/>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"_cell_7294a4"[39m
+                [33mstyle[39m=[32m"width: 80%;"[39m
+              [36m/>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"_cell_7294a4"[39m
+                [33mstyle[39m=[32m"width: 90%;"[39m
+              [36m/>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"_cell_7294a4"[39m
+                [33mstyle[39m=[32m"width: 60%;"[39m
+              [36m/>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"_cell_7294a4"[39m
+                [33mstyle[39m=[32m"width: 70%;"[39m
+              [36m/>[39m
+            [36m</div>[39m
+            [36m<div[39m
+              [33mclass[39m=[32m"_row_7294a4"[39m
+            [36m>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"_cell_7294a4"[39m
+                [33mstyle[39m=[32m"width: 80%;"[39m
+              [36m/>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"_cell_7294a4"[39m
+                [33mstyle[39m=[32m"width: 90%;"[39m
+              [36m/>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"_cell_7294a4"[39m
+                [33mstyle[39m=[32m"width: 60%;"[39m
+              [36m/>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"_cell_7294a4"[39m
+                [33mstyle[39m=[32m"width: 70%;"[39m
+              [36m/>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"_cell_7294a4"[39m
+                [33mstyle[39m=[32m"width: 80%;"[39m
+              [36m/>[39m
+            [36m</div>[39m
+            [36m<div[39m
+              [33mclass[39m=[32m"_row_7294a4"[39m
+            [36m>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"_cell_7294a4"[39m
+                [33mstyle[39m=[32m"width: 90%;"[39m
+              [36m/>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"_cell_7294a4"[39m
+                [33mstyle[39m=[32m"width: 60%;"[39m
+              [36m/>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"_cell_7294a4"[39m
+                [33mstyle[39m=[32m"width: 70%;"[39m
+              [36m/>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"_cell_7294a4"[39m
+                [33mstyle[39m=[32m"width: 80%;"[39m
+              [36m/>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"_cell_7294a4"[39m
+                [33mstyle[39m=[32m"width: 90%;"[39m
+              [36m/>[39m
+            [36m</div>[39m
+            [36m<div[39m
+              [33mclass[39m=[32m"_row_7294a4"[39m
+            [36m>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"_cell_7294a4"[39m
+                [33mstyle[39m=[32m"width: 60%;"[39m
+              [36m/>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"_cell_7294a4"[39m
+                [33mstyle[39m=[32m"width: 70%;"[39m
+              [36m/>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"_cell_7294a4"[39m
+                [33mstyle[39m=[32m"width: 80%;"[39m
+              [36m/>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"_cell_7294a4"[39m
+                [33mstyle[39m=[32m"width: 90%;"[39m
+              [36m/>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"_cell_7294a4"[39m
+                [33mstyle[39m=[32m"width: 60%;"[39m
+              [36m/>[39m
+            [36m</div>[39m
+            [36m<div[39m
+              [33mclass[39m=[32m"_row_7294a4"[39m
+            [36m>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"_cell_7294a4"[39m
+                [33mstyle[39m=[32m"width: 70%;"[39m
+              [36m/>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"_cell_7294a4"[39m
+                [33mstyle[39m=[32m"width: 80%;"[39m
+              [36m/>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"_cell_7294a4"[39m
+                [33mstyle[39m=[32m"width: 90%;"[39m
+              [36m/>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"_cell_7294a4"[39m
+                [33mstyle[39m=[32m"width: 60%;"[39m
+              [36m/>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"_cell_7294a4"[39m
+                [33mstyle[39m=[32m"width: 70%;"[39m
+              [36m/>[39m
+            [36m</div>[39m
+          [36m</div>[39m
+        [36m</div>[39m
+      [36m</div>[39m
+    [36m</div>[39m
+  [36m</div>[39m
+[36m</body>[39m
+
+Ignored nodes: comments, script, style
+[36m<body>[39m
+  [36m<div>[39m
+    [36m<div>[39m
+      [36m<div[39m
+        [33mclass[39m=[32m"_header_d06475"[39m
+        [33mdata-ui[39m=[32m"page-header"[39m
+      [36m>[39m
+        [36m<div[39m
+          [33mclass[39m=[32m"_titleWrap_d06475"[39m
+        [36m>[39m
+          [36m<span[39m
+            [33mclass[39m=[32m"_icon_d06475"[39m
+          [36m>[39m
+            [36m<svg[39m
+              [33maria-hidden[39m=[32m"true"[39m
+              [33mfill[39m=[32m"none"[39m
+              [33mheight[39m=[32m"24"[39m
+              [33mstroke[39m=[32m"currentColor"[39m
+              [33mstroke-linecap[39m=[32m"round"[39m
+              [33mstroke-linejoin[39m=[32m"round"[39m
+              [33mstroke-width[39m=[32m"2"[39m
+              [33mviewBox[39m=[32m"0 0 24 24"[39m
+              [33mwidth[39m=[32m"24"[39m
+            [36m>[39m
+              [36m<path[39m
+                [33md[39m=[32m"M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"[39m
+              [36m/>[39m
+              [36m<circle[39m
+                [33mcx[39m=[32m"9"[39m
+                [33mcy[39m=[32m"7"[39m
+                [33mr[39m=[32m"4"[39m
+              [36m/>[39m
+              [36m<path[39m
+                [33md[39m=[32m"M22 21v-2a4 4 0 0 0-3-3.87"[39m
+              [36m/>[39m
+              [36m<path[39m
+                [33md[39m=[32m"M16 3.13a4 4 0 0 1 0 7.75"[39m
+              [36m/>[39m
+            [36m</svg>[39m
+          [36m</span>[39m
+          [36m<div>[39m
+            [36m<h1[39m
+              [33mclass[39m=[32m"_title_d06475"[39m
+            [36m>[39m
+              [0mUsuarios y roles[0m
+            [36m</h1>[39m
+            [36m<p[39m
+              [33mclass[39m=[32m"_subtitle_d06475"[39m
+            [36m>[39m
+              [0mCuentas del sistema y el rol de cada persona. Los catálogos y parámetros tienen su propia sección en el menú.[0m
+            [36m</p>[39m
+          [36m</div>[39m
+        [36m</div>[39m
+        [36m<div[39m
+          [33mclass[39m=[32m"_actions_d06475"[39m
+        [36m>[39m
+          [36m<button[39m
+            [33mclass[39m=[32m"_btn_8e6d2d _secondary_8e6d2d _md_8e6d2d"[39m
+          [36m>[39m
+            [36m<span[39m
+              [33mclass[39m=[32m"_icon_8e6d2d"[39m
+            [36m>[39m
+              [36m<svg[39m
+                [33maria-hidden[39m=[32m"true"[39m
+                [33mfill[39m=[32m"none"[39m
+                [33mheight[39m=[32m"17"[39m
+                [33mstroke[39m=[32m"currentColor"[39m
+                [33mstroke-linecap[39m=[32m"round"[39m
+                [33mstroke-linejoin[39m=[32m"round"[39m
+                [33mstroke-width[39m=[32m"2"[39m
+                [33mviewBox[39m=[32m"0 0 24 24"[39m
+                [33mwidth[39m=[32m"17"[39m
+              [36m>[39m
+                [36m<path[39m
+                  [33md[39m=[32m"M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"[39m
+                [36m/>[39m
+                [36m<path[39m
+                  [33md[39m=[32m"M17 8l-5-5-5 5"[39m
+                [36m/>[39m
+                [36m<path[39m
+                  [33md[39m=[32m"M12 3v12"[39m
+                [36m/>[39m
+              [36m</svg>[39m
+            [36m</span>[39m
+            [36m<span>[39m
+              [0mImportar docentes[0m
+            [36m</span>[39m
+          [36m</button>[39m
+          [36m<button[39m
+            [33mclass[39m=[32m"_btn_8e6d2d _primary_8e6d2d _md_8e6d2d"[39m
+          [36m>[39m
+            [36m<span[39m
+              [33mclass[39m=[32m"_icon_8e6d2d"[39m
+            [36m>[39m
+              [36m<svg[39m
+                [33maria-hidden[39m=[32m"true"[39m
+                [33mfill[39m=[32m"none"[39m
+                [33mheight[39m=[32m"17"[39m
+                [33mstroke[39m=[32m"currentColor"[39m
+                [33mstroke-linecap[39m=[32m"round"[39m
+                [33mstroke-linejoin[39m=[32m"round"[39m
+                [33mstroke-width[39m=[32m"2"[39m
+                [33mviewBox[39m=[32m"0 0 24 24"[39m
+                [33mwidth[39m=[32m"17"[39m
+              [36m>[39m
+                [36m<path[39m
+                  [33md[39m=[32m"M12 5v14M5 12h14"[39m
+                [36m/>[39m
+              [36m</svg>[39m
+            [36m</span>[39m
+            [36m<span>[39m
+              [0mNuevo usuario[0m
+            [36m</span>[39m
+          [36m</button>[39m
+        [36m</div>[39m
+      [36m</div>[39m
+      [36m<div[39m
+        [33mclass[39m=[32m"_tableCard_6270ee"[39m
+      [36m>[39m
+        [36m<div[39m
+          [33mclass[39m=[32m"_bar_5d8d89"[39m
+        [36m>[39m
+          [36m<div[39m
+            [33mclass[39m=[32m"_search_7f13ba _search_5d8d89"[39m
+          [36m>[39m
+            [36m<span[39m
+              [33mclass[39m=[32m"_searchIcon_7f13ba"[39m
+            [36m>[39m
+              [36m<svg[39m
+                [33maria-hidden[39m=[32m"true"[39m
+                [33mfill[39m=[32m"none"[39m
+                [33mheight[39m=[32m"17"[39m
+                [33mstroke[39m=[32m"currentColor"[39m
+                [33mstroke-linecap[39m=[32m"round"[39m
+                [33mstroke-linejoin[39m=[32m"round"[39m
+                [33mstroke-width[39m=[32m"2"[39m
+                [33mviewBox[39m=[32m"0 0 24 24"[39m
+                [33mwidth[39m=[32m"17"[39m
+              [36m>[39m
+                [36m<circle[39m
+                  [33mcx[39m=[32m"11"[39m
+                  [33mcy[39m=[32m"11"[39m
+                  [33mr[39m=[32m"8"[39m
+                [36m/>[39m
+                [36m<path[39m
+                  [33md[39m=[32m"m21 21-4.3-4.3"[39m
+                [36m/>[39m
+              [36m</svg>[39m
+            [36m</span>[39m
+            [36m<input[39m
+              [33maria-label[39m=[32m"Buscar usuario"[39m
+              [33mclass[39m=[32m"_input_7f13ba _withIcon_7f13ba "[39m
+              [33mplaceholder[39m=[32m"Buscar por nombre o correo…"[39m
+              [33mtype[39m=[32m"search"[39m
+              [33mvalue[39m=[32m""[39m
+            [36m/>[39m
+          [36m</div>[39m
+          [36m<div[39m
+            [33mclass[39m=[32m"_selectWrap_7f13ba _select_5d8d89"[39m
+          [36m>[39m
+            [36m<select[39m
+              [33maria-label[39m=[32m"Filtrar por rol"[39m
+              [33mclass[39m=[32m"_input_7f13ba _select_7f13ba "[39m
+            [36m>[39m
+              [36m<option[39m
+                [33mvalue[39m=[32m""[39m
+              [36m>[39m
+                [0mTodos los roles[0m
+              [36m</option>[39m
+            [36m</select>[39m
+            [36m<span[39m
+              [33mclass[39m=[32m"_chevron_7f13ba"[39m
+            [36m>[39m
+              [36m<svg[39m
+                [33maria-hidden[39m=[32m"true"[39m
+                [33mfill[39m=[32m"none"[39m
+                [33mheight[39m=[32m"16"[39m
+                [33mstroke[39m=[32m"currentColor"[39m
+                [33mstroke-linecap[39m=[32m"round"[39m
+                [33mstroke-linejoin[39m=[32m"round"[39m
+                [33mstroke-width[39m=[32m"2"[39m
+                [33mviewBox[39m=[32m"0 0 24 24"[39m
+                [33mwidth[39m=[32m"16"[39m
+              [36m>[39m
+                [36m<path[39m
+                  [33md[39m=[32m"m6 9 6 6 6-6"[39m
+                [36m/>[39m
+              [36m</svg>[39m
+            [36m</span>[39m
+          [36m</div>[39m
+          [36m<div[39m
+            [33mclass[39m=[32m"_selectWrap_7f13ba _select_5d8d89"[39m
+          [36m>[39m
+            [36m<select[39m
+              [33maria-label[39m=[32m"Filtrar por estado"[39m
+              [33mclass[39m=[32m"_input_7f13ba _select_7f13ba "[39m
+            [36m>[39m
+              [36m<option[39m
+                [33mvalue[39m=[32m""[39m
+              [36m>[39m
+                [0mTodos los estados[0m
+              [36m</option>[39m
+              [36m<option[39m
+                [33mvalue[39m=[32m"active"[39m
+              [36m>[39m
+                [0mActivos[0m
+              [36m</option>[39m
+              [36m<option[39m
+                [33mvalue[39m=[32m"inactive"[39m
+              [36m>[39m
+                [0mInactivos[0m
+              [36m</option>[39m
+            [36m</select>[39m
+            [36m<span[39m
+              [33mclass[39m=[32m"_chevron_7f13ba"[39m
+            [36m>[39m
+              [36m<svg[39m
+                [33maria-hidden[39m=[32m"true"[39m
+                [33mfill[39m=[32m"none"[39m
+                [33mheight[39m=[32m"16"[39m
+                [33mstroke[39m=[32m"currentColor"[39m
+                [33mstroke-linecap[39m=[32m"round"[39m
+                [33mstroke-linejoin[39m=[32m"round"[39m
+                [33mstroke-width[39m=[32m"2"[39m
+                [33mviewBox[39m=[32m"0 0 24 24"[39m
+                [33mwidth[39m=[32m"16"[39m
+              [36m>[39m
+                [36m<path[39m
+                  [33md[39m=[32m"m6 9 6 6 6-6"[39m
+                [36m/>[39m
+              [36m</svg>[39m
+            [36m</span>[39m
+          [36m</div>[39m
+        [36m</div>[39m
+        [36m<div[39m
+          [33maria-busy[39m=[32m"true"[39m
+          [33maria-label[39m=[32m"Cargando…"[39m
+          [33mclass[39m=[32m"_wrap_7294a4"[39m
+          [33mrole[39m=[32m"progressbar"[39m
+        [36m>[39m
+          [36m<p[39m
+            [33mclass[39m=[32m"_caption_7294a4"[39m
+          [36m>[39m
+            [0mCargando…[0m
+          [36m</p>[39m
+          [36m<div[39m
+            [33maria-hidden[39m=[32m"true"[39m
+          [36m>[39m
+            [36m<div[39m
+              [33mclass[39m=[32m"_row_7294a4"[39m
+            [36m>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"_cell_7294a4"[39m
+                [33mstyle[39m=[32m"width: 60%;"[39m
+              [36m/>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"_cell_7294a4"[39m
+                [33mstyle[39m=[32m"width: 70%;"[39m
+              [36m/>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"_cell_7294a4"[39m
+                [33mstyle[39m=[32m"width: 80%;"[39m
+              [36m/>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"_cell_7294a4"[39m
+                [33mstyle[39m=[32m"width: 90%;"[39m
+              [36m/>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"_cell_7294a4"[39m
+                [33mstyle[39m=[32m"width: 60%;"[39m
+              [36m/>[39m
+            [36m</div>[39m
+            [36m<div[39m
+              [33mclass[39m=[32m"_row_7294a4"[39m
+            [36m>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"_cell_7294a4"[39m
+                [33mstyle[39m=[32m"width: 70%;"[39m
+              [36m/>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"_cell_7294a4"[39m
+                [33mstyle[39m=[32m"width: 80%;"[39m
+              [36m/>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"_cell_7294a4"[39m
+                [33mstyle[39m=[32m"width: 90%;"[39m
+              [36m/>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"_cell_7294a4"[39m
+                [33mstyle[39m=[32m"width: 60%;"[39m
+              [36m/>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"_cell_7294a4"[39m
+                [33mstyle[39m=[32m"width: 70%;"[39m
+              [36m/>[39m
+            [36m</div>[39m
+            [36m<div[39m
+              [33mclass[39m=[32m"_row_7294a4"[39m
+            [36m>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"_cell_7294a4"[39m
+                [33mstyle[39m=[32m"width: 80%;"[39m
+              [36m/>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"_cell_7294a4"[39m
+                [33mstyle[39m=[32m"width: 90%;"[39m
+              [36m/>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"_cell_7294a4"[39m
+                [33mstyle[39m=[32m"width: 60%;"[39m
+              [36m/>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"_cell_7294a4"[39m
+                [33mstyle[39m=[32m"width: 70%;"[39m
+              [36m/>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"_cell_7294a4"[39m
+                [33mstyle[39m=[32m"width: 80%;"[39m
+              [36m/>[39m
+            [36m</div>[39m
+            [36m<div[39m
+              [33mclass[39m=[32m"_row_7294a4"[39m
+            [36m>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"_cell_7294a4"[39m
+                [33mstyle[39m=[32m"width: 90%;"[39m
+              [36m/>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"_cell_7294a4"[39m
+                [33mstyle[39m=[32m"width: 60%;"[39m
+              [36m/>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"_cell_7294a4"[39m
+                [33mstyle[39m=[32m"width: 70%;"[39m
+              [36m/>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"_cell_7294a4"[39m
+                [33mstyle[39m=[32m"width: 80%;"[39m
+              [36m/>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"_cell_7294a4"[39m
+                [33mstyle[39m=[32m"width: 90%;"[39m
+              [36m/>[39m
+            [36m</div>[39m
+            [36m<div[39m
+              [33mclass[39m=[32m"_row_7294a4"[39m
+            [36m>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"_cell_7294a4"[39m
+                [33mstyle[39m=[32m"width: 60%;"[39m
+              [36m/>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"_cell_7294a4"[39m
+                [33mstyle[39m=[32m"width: 70%;"[39m
+              [36m/>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"_cell_7294a4"[39m
+                [33mstyle[39m=[32m"width: 80%;"[39m
+              [36m/>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"_cell_7294a4"[39m
+                [33mstyle[39m=[32m"width: 90%;"[39m
+              [36m/>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"_cell_7294a4"[39m
+                [33mstyle[39m=[32m"width: 60%;"[39m
+              [36m/>[39m
+            [36m</div>[39m
+            [36m<div[39m
+              [33mclass[39m=[32m"_row_7294a4"[39m
+            [36m>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"_cell_7294a4"[39m
+                [33mstyle[39m=[32m"width: 70%;"[39m
+              [36m/>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"_cell_7294a4"[39m
+                [33mstyle[39m=[32m"width: 80%;"[39m
+              [36m/>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"_cell_7294a4"[39m
+                [33mstyle[39m=[32m"width: 90%;"[39m
+              [36m/>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"_cell_7294a4"[39m
+                [33mstyle[39m=[32m"width: 60%;"[39m
+              [36m/>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"_cell_7294a4"[39m
+                [33mstyle[39m=[32m"width: 70%;"[39m
+              [36m/>[39m
+            [36m</div>[39m
+          [36m</div>[39m
+        [36m</div>[39m
+      [36m</div>[39m
+    [36m</div>[39m
+  [36m</div>[39m
+[36m</body>[39m
+ ❯ waitForWrapper node_modules/.pnpm/@testing-library+dom@10.4.1/node_modules/@testing-library/dom/dist/wait-for.js:163:27
+ ❯ node_modules/.pnpm/@testing-library+dom@10.4.1/node_modules/@testing-library/dom/dist/query-helpers.js:86:33
+ ❯ src/features/admin/pages/UserManagementPage.test.tsx:42:35
+     40|     renderPage();
+     41|
+     42|     await user.click(await screen.findByRole('button', { name: 'Desact…
+       |                                   ^
+     43|     const dialog = await screen.findByRole('alertdialog');
+     44|     await user.click(within(dialog).getByRole('button', { name: 'Desac…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed | 86 passed (87)
+      Tests  1 failed | 552 passed (553)
+   Start at  15:25:40
+   Duration  293.17s (transform 39.05s, setup 279.33s, import 250.77s, tests 405.98s, environment 889.19s)
+
