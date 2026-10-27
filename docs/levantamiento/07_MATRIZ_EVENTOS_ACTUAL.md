@@ -80,12 +80,12 @@ Todos **PROPUESTOS**; la política de correo por evento sigue **pendiente de dec
 
 | N.° | Evento propuesto | Realiza | Destinatario | Canal | Especificación | Bloqueado por |
 |---|---|---|---|---|---|---|
-| P01 | Lugar final distinto de la propuesta del solicitante | Docente tutor al programar | Solicitante (estudiante con cuenta) | Aviso (+ correo sin lugar) | [13](13_ESPECIFICACION_LUGAR_DE_LA_TUTORIA.md) R31 | Aprobación de RF/HU |
-| P02 | Cambio de lugar o modalidad de una sesión ya programada (`SESSION_PLACE_CHANGED`) | Docente tutor | Solicitante y participantes con cuenta | Aviso (+ correo sin lugar ni motivo) | [13](13_ESPECIFICACION_LUGAR_DE_LA_TUTORIA.md) R32 | Aprobación de RF/HU |
-| P03 | Pedido de lista recibido, en revisión, cargado, observado o vencido | Coordinación o DBU | Quien pidió; Pendientes institucionales para vencidos | Aviso interno | [12](12_ESPECIFICACION_PEDIDO_DE_LISTAS.md) R21 | Q11 (DBU, escuelas), Q12 |
-| P04 | Concesión o retiro de rol, permiso o alcance; intento rechazado | Administrador | La persona afectada (aviso) y la bitácora | Aviso + bitácora | [11](11_ESPECIFICACION_ROLES_PERMISOS_ALCANCE.md) R13, R18 | RF/HU de roles |
-| P05 | Trámite de certificado iniciado, observado, aprobado, generado, pendiente de firma, firmado incorporado, entregado, anulado o reemitido | Funciones del proceso | Quien debe actuar y el docente al entregarse | Aviso (correo según Q07) | [14](14_ESPECIFICACION_CERTIFICACION.md) §9 | **Q20 a Q22** (quién actúa) |
-| P06 | Aceptación del docente / cambio de su disponibilidad | Docente | Coordinación | Pendiente | H02, H03 | Q08, Q16 |
+| N01 | Lugar final distinto de la propuesta del solicitante | Docente tutor al programar | Solicitante (estudiante con cuenta) | Aviso (+ correo sin lugar) | [13](13_ESPECIFICACION_LUGAR_DE_LA_TUTORIA.md) R31 | Aprobación de RF/HU |
+| N02 | Cambio de lugar o modalidad de una sesión ya programada (`SESSION_PLACE_CHANGED`) | Docente tutor | Solicitante y participantes con cuenta | Aviso (+ correo sin lugar ni motivo) | [13](13_ESPECIFICACION_LUGAR_DE_LA_TUTORIA.md) R32 | Aprobación de RF/HU |
+| N03 | Pedido de lista recibido, en revisión, cargado, observado o vencido | Coordinación o DBU | Quien pidió; Pendientes institucionales para vencidos | Aviso interno | [12](12_ESPECIFICACION_PEDIDO_DE_LISTAS.md) R21 | Q11 (DBU, escuelas), Q12 |
+| N04 | Concesión o retiro de rol, permiso o alcance; intento rechazado | Administrador | La persona afectada (aviso) y la bitácora | Aviso + bitácora | [11](11_ESPECIFICACION_ROLES_PERMISOS_ALCANCE.md) R13, R18 | RF/HU de roles |
+| N05 | Trámite de certificado iniciado, observado, aprobado, generado, pendiente de firma, firmado incorporado, entregado, anulado o reemitido | Funciones del proceso | Quien debe actuar y el docente al entregarse | Aviso (correo según Q07) | [14](14_ESPECIFICACION_CERTIFICACION.md) §9 | **Q20 a Q22** (quién actúa) |
+| N06 | Aceptación del docente / cambio de su disponibilidad | Docente | Coordinación | Pendiente | H02, H03 | Q08, Q16 |
 
 ## 4. Lo que no cubre esta matriz
 

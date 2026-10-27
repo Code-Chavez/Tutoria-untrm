@@ -26,6 +26,7 @@ Este levantamiento sirve para decidir, no para convertir cada duda en una funcio
 | 12 | [Especificación: pedido de listas y carga supervisada](12_ESPECIFICACION_PEDIDO_DE_LISTAS.md) (Q11 A) | 2 | Propuesto |
 | 13 | [Especificación: lugar de la tutoría](13_ESPECIFICACION_LUGAR_DE_LA_TUTORIA.md) (Q17 A) | 2 | Propuesto (cambio de RF/HU por aprobar) |
 | 14 | [Especificación: certificación del docente tutor](14_ESPECIFICACION_CERTIFICACION.md) (Q23 A, Q24) | 2 | Propuesto y **parcialmente bloqueado** (Q20 a Q22) |
+| 15 | [Trazabilidad, preparación para implementar y orden de entregas](15_TRAZABILIDAD_Y_PLAN_DE_ENTREGAS.md) (matriz L/A/I, entregas pequeñas, decisiones a gestionar) | 2 | Propuesto |
 | 08 | [Catálogo de plantillas de correo — sistema actual](08_CATALOGO_PLANTILLAS_CORREO_ACTUAL.md) (13 plantillas y 5 hallazgos) | 2 | Borrador (solo lo implementado) |
 | 09 | [Estados vigentes de solicitud, derivación y designación](09_ESTADOS_ACTUALES_SOLICITUD_Y_DERIVACION.md) | 2 | Borrador (solo lo implementado) |
 | — | Backlog propuesto (HU/TT con dependencias) y plan de pruebas con trazabilidad | 4 | No iniciados |
