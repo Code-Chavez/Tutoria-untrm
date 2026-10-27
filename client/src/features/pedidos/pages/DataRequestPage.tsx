@@ -1,15 +1,24 @@
-import { useState, type FormEvent } from 'react';
+import { useRef, useState, type FormEvent } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
-import { PageHeader, Card, CardHeader, CardBody, Button, Badge, SelectField, EmptyState, NextSteps } from '@shared/components/ui';
+import { PageHeader, Card, CardHeader, CardBody, Button, Badge, SelectField, EmptyState, NextSteps, ConfirmDialog } from '@shared/components/ui';
 import { SendIcon } from '@shared/components/icons';
 import { getApiErrorMessage } from '@shared/services/apiClient';
-import type { DataRequestKind } from '../services/dataRequestService';
+import { isLostResponse, parseSendConflict, type DataRequestKind, type DataRequestStatus, type PreviousRequest } from '../services/dataRequestService';
 import { useAuth } from '@features/auth/hooks/useAuth';
 import { useDataRequests, useMarkReceived, useRequestSchools, useSendDataRequest } from '../hooks/useDataRequests';
 import styles from './DataRequestPage.module.css';
 
 
 const fmt = (iso: string) => new Date(iso).toLocaleDateString('es-PE', { dateStyle: 'medium' });
+const fmtTime = (iso: string) => new Date(iso).toLocaleString('es-PE', { dateStyle: 'medium', timeStyle: 'short' });
+
+// Estado del ENVÍO de cada pedido (no de si la lista ya llegó o se cargó).
+const STATUS_VIEW: Record<DataRequestStatus, { label: string; tone: 'success' | 'warning' | 'info'; hint?: string }> = {
+  PENDIENTE: { label: 'Enviándose', tone: 'info', hint: 'El envío está en curso.' },
+  ENVIADO: { label: 'Enviado', tone: 'success' },
+  FALLIDO: { label: 'Fallido', tone: 'warning', hint: 'El correo no fue aceptado: puedes volver a pedirlo.' },
+  INCIERTO: { label: 'Envío incierto', tone: 'warning', hint: 'No se puede saber si el correo salió. Verifica con la escuela antes de volver a pedirlo.' },
+};
 
 // Todo lo que cambia según la lista que se pide: título, explicación, columnas de la plantilla y a dónde seguir al recibirla.
 const COPY: Record<DataRequestKind, {
@@ -76,10 +85,57 @@ export function DataRequestPage() {
   const [kind, setKind] = useState<DataRequestKind>(isDbu && searchParams.get('lista') === 'docentes' ? 'DOCENTES' : 'ESTUDIANTES');
   const [note, setNote] = useState('');
   const [feedback, setFeedback] = useState<Feedback | null>(null);
+  // Equivalente reciente que el servidor mostró y que la persona debe confirmar expresamente para reenviar.
+  const [duplicate, setDuplicate] = useState<PreviousRequest | null>(null);
+  // Identidad de la operación: se conserva mientras se reintenta lo mismo (p. ej. se perdió la respuesta) y se renueva solo
+  // cuando el servidor respondió algo definitivo o cambia lo que se envía. Así reintentar no duplica y un reenvío deliberado sí es otro.
+  const operation = useRef<{ id: string; fingerprint: string } | null>(null);
+  const submitting = useRef(false);
 
   const toggleCycle = (cycle: number) => setCycles(cycles.includes(cycle) ? cycles.filter((value) => value !== cycle) : [...cycles, cycle].sort((a, b) => a - b));
   const hasEmail = !!school?.requestEmail;
   const copy = COPY[kind];
+
+  const attempt = async (confirmDuplicateOf?: string) => {
+    if (!school || submitting.current) return;
+    submitting.current = true;
+    setFeedback(null);
+    const sentCycles = kind === 'DOCENTES' ? [] : cycles;
+    const fingerprint = JSON.stringify([school.id, kind, sentCycles, note.trim(), confirmDuplicateOf ?? null]);
+    if (operation.current?.fingerprint !== fingerprint) operation.current = { id: crypto.randomUUID(), fingerprint };
+    try {
+      const { request, replayed } = await send.mutateAsync({ schoolId: school.id, cycles: sentCycles, note: note.trim() || undefined, kind, operationId: operation.current.id, confirmDuplicateOf });
+      operation.current = null;
+      setDuplicate(null);
+      setNote('');
+      if (request.status === 'ENVIADO') {
+        setFeedback({ type: 'ok', text: replayed ? `Este pedido ya estaba registrado y enviado a ${request.toEmail}; no se envió otro correo.` : `Pedido enviado a ${request.toEmail}. Recibirás una copia y las respuestas llegarán a tu correo.` });
+      } else if (request.status === 'FALLIDO') {
+        setFeedback({ type: 'error', text: `El pedido quedó registrado pero el correo no salió (${request.error ?? 'error de envío'}). Revisa la configuración del correo o entrega la plantilla por otro medio.` });
+      } else if (request.status === 'INCIERTO') {
+        setFeedback({ type: 'error', text: 'El pedido quedó registrado, pero no se puede saber si el correo salió. Verifica con la escuela antes de volver a pedirlo.' });
+      } else {
+        setFeedback({ type: 'ok', text: 'El pedido se está enviando. Revisa su estado en «Pedidos hechos».' });
+      }
+    } catch (error) {
+      const conflict = parseSendConflict(error);
+      if (conflict?.code === 'DUPLICATE_DATA_REQUEST') {
+        // El servidor no registró nada con esta intención: la confirmación abre una operación nueva.
+        operation.current = null;
+        setDuplicate(conflict.previous);
+      } else if (conflict) {
+        operation.current = null;
+        setDuplicate(null);
+        setFeedback({ type: 'error', text: getApiErrorMessage(error) });
+      } else {
+        // Sin respuesta o error del servidor: no se sabe si se registró; se conserva la identidad para reintentar lo mismo.
+        if (!isLostResponse(error)) operation.current = null;
+        setFeedback({ type: 'error', text: isLostResponse(error) ? `${getApiErrorMessage(error)} Si reintentas lo mismo, no se enviará dos veces.` : getApiErrorMessage(error) });
+      }
+    } finally {
+      submitting.current = false;
+    }
+  };
 
   const submit = async (event: FormEvent) => {
     event.preventDefault();
@@ -88,18 +144,7 @@ export function DataRequestPage() {
       setFeedback({ type: 'error', text: 'Selecciona al menos un ciclo para enviar el pedido.' });
       return;
     }
-    setFeedback(null);
-    try {
-      const { request, sent } = await send.mutateAsync({ schoolId: school.id, cycles: kind === 'DOCENTES' ? [] : cycles, note: note.trim() || undefined, kind });
-      setNote('');
-      setFeedback(
-        sent
-          ? { type: 'ok', text: `Pedido enviado a ${request.toEmail}. Recibirás una copia y las respuestas llegarán a tu correo.` }
-          : { type: 'error', text: `El pedido quedó registrado pero el correo no salió (${request.error ?? 'error de envío'}). Revisa la configuración del correo o entrega la plantilla por otro medio.` },
-      );
-    } catch (error) {
-      setFeedback({ type: 'error', text: getApiErrorMessage(error) });
-    }
+    await attempt();
   };
 
   return (
@@ -219,12 +264,13 @@ export function DataRequestPage() {
                     <strong>
                       {r.schoolName} · {r.periodName} · {r.kind === 'DOCENTES' ? 'Docentes tutores' : 'Estudiantes'}
                     </strong>
-                    <Badge tone={r.status === 'ENVIADO' ? 'success' : 'warning'}>{r.status === 'ENVIADO' ? 'Enviado' : 'Fallido'}</Badge>
+                    <Badge tone={STATUS_VIEW[r.status].tone}>{STATUS_VIEW[r.status].label}</Badge>
                     {r.receivedAt && <Badge tone="info">Recibido el {fmt(r.receivedAt)}</Badge>}
                   </div>
                   <span className={styles.note}>
                     {fmt(r.createdAt)} · a {r.toEmail} · {r.kind === 'DOCENTES' ? 'lista de docentes' : r.cycles.length > 0 ? `ciclos ${r.cycles.join(', ')}` : 'todos los ciclos'}
                   </span>
+                  {STATUS_VIEW[r.status].hint && <span className={styles.note}>{STATUS_VIEW[r.status].hint}</span>}
                   {r.status === 'ENVIADO' && !r.receivedAt && (
                     <div>
                       <Button type="button" variant="secondary" loading={markReceived.isPending} onClick={() => markReceived.mutate(r.id)}>
@@ -242,6 +288,20 @@ export function DataRequestPage() {
       <NextSteps
         title={copy.nextTitle}
         steps={copy.steps}
+      />
+      <ConfirmDialog
+        open={duplicate !== null}
+        tone="danger"
+        title="Ya hay un pedido equivalente"
+        message={
+          duplicate
+            ? `Hace poco (${fmtTime(duplicate.createdAt)}) ya se hizo un pedido equivalente: ${STATUS_VIEW[duplicate.status].label.toLowerCase()}. ¿Quieres pedirlo de nuevo? Se enviará otro correo a la escuela.`
+            : ''
+        }
+        confirmLabel="Pedir de nuevo"
+        loading={send.isPending}
+        onConfirm={() => duplicate && void attempt(duplicate.id)}
+        onCancel={() => setDuplicate(null)}
       />
     </div>
   );

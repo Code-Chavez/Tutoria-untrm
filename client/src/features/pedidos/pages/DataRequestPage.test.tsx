@@ -1,6 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen, waitFor } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { AxiosError } from 'axios';
 import { MemoryRouter } from 'react-router-dom';
 import { QueryClientTestWrapper } from '@shared/test-utils/QueryClientTestWrapper';
 import { AuthContext, type AuthContextValue } from '@features/auth/context/AuthContext';
@@ -8,10 +9,19 @@ import { DataRequestPage } from './DataRequestPage';
 import { dataRequestService, type DataRequest } from '../services/dataRequestService';
 import { schoolService, type School } from '@features/tutorados/services/schoolService';
 
-vi.mock('../services/dataRequestService', () => ({ dataRequestService: { list: vi.fn(), send: vi.fn(), markReceived: vi.fn(), setRequestEmail: vi.fn() } }));
+vi.mock('../services/dataRequestService', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('../services/dataRequestService')>()),
+  dataRequestService: { list: vi.fn(), send: vi.fn(), markReceived: vi.fn(), setRequestEmail: vi.fn() },
+}));
 vi.mock('@features/tutorados/services/schoolService', () => ({ schoolService: { getSchools: vi.fn() } }));
 
 const requests = vi.mocked(dataRequestService);
+const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+
+// Errores de axios con la forma que devuelve el servidor (409 de equivalencia, 422) o sin respuesta (se perdió).
+const httpError = (status: number, data: Record<string, unknown>) => new AxiosError('x', 'ERR_BAD_REQUEST', undefined, undefined, { status, statusText: '', data, headers: {}, config: {} as never });
+const lostResponse = () => new AxiosError('Network Error', 'ERR_NETWORK');
+const previous = (over: Record<string, unknown> = {}) => ({ id: 'prev-1', createdAt: '2026-10-28T12:00:00.000Z', status: 'ENVIADO', ...over });
 const schoolsApi = vi.mocked(schoolService);
 
 const school = (over: Partial<School> = {}): School => ({ cycleCount: 10, id: 's1', name: 'Ingeniería de Sistemas', facultyId: 'f1', isActive: true, coordinatorId: 'coord-1', requestEmail: 'registros@untrm.edu.pe', ...over });
@@ -73,7 +83,7 @@ describe('DataRequestPage (pedido de listas por correo)', () => {
   });
 
   it('envía el pedido con los ciclos marcados y las observaciones, y confirma a quién salió', async () => {
-    requests.send.mockResolvedValue({ request: record(), sent: true });
+    requests.send.mockResolvedValue({ request: record(), replayed: false });
     const user = userEvent.setup();
     renderPage();
     await screen.findByText('registros@untrm.edu.pe');
@@ -84,18 +94,18 @@ describe('DataRequestPage (pedido de listas por correo)', () => {
     await user.type(screen.getByLabelText(/Observaciones/), 'Con urgencia');
     await user.click(screen.getByRole('button', { name: 'Enviar pedido' }));
 
-    await waitFor(() => expect(requests.send).toHaveBeenCalledWith({ schoolId: 's1', cycles: [3, 4], note: 'Con urgencia', kind: 'ESTUDIANTES' }));
+    await waitFor(() => expect(requests.send).toHaveBeenCalledWith({ schoolId: 's1', cycles: [3, 4], note: 'Con urgencia', kind: 'ESTUDIANTES', operationId: expect.stringMatching(UUID), confirmDuplicateOf: undefined }));
     expect(await screen.findByRole('alert')).toHaveTextContent('Pedido enviado a registros@untrm.edu.pe');
   });
 
   it('marca todos por defecto y envía explícitamente los diez ciclos', async () => {
-    requests.send.mockResolvedValue({ request: record(), sent: true });
+    requests.send.mockResolvedValue({ request: record(), replayed: false });
     renderPage();
     await screen.findByText('registros@untrm.edu.pe');
     expect(screen.getAllByRole('checkbox')).toHaveLength(10);
     screen.getAllByRole('checkbox').forEach((checkbox) => expect(checkbox).toBeChecked());
     await userEvent.click(screen.getByRole('button', { name: 'Enviar pedido' }));
-    await waitFor(() => expect(requests.send).toHaveBeenCalledWith({ schoolId: 's1', cycles: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10], note: undefined, kind: 'ESTUDIANTES' }));
+    await waitFor(() => expect(requests.send).toHaveBeenCalledWith({ schoolId: 's1', cycles: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10], note: undefined, kind: 'ESTUDIANTES', operationId: expect.stringMatching(UUID), confirmDuplicateOf: undefined }));
   });
 
   it('lee los ciclos de cada escuela y reinicia la selección al cambiarla', async () => {
@@ -125,7 +135,7 @@ describe('DataRequestPage (pedido de listas por correo)', () => {
   });
 
   it('si el correo no sale lo dice como error pero el pedido queda registrado', async () => {
-    requests.send.mockResolvedValue({ request: record({ status: 'FALLIDO', error: 'MailNotConfiguredError' }), sent: false });
+    requests.send.mockResolvedValue({ request: record({ status: 'FALLIDO', error: 'MailNotConfiguredError' }), replayed: false });
     const user = userEvent.setup();
     renderPage();
     await screen.findByText('registros@untrm.edu.pe');
@@ -168,6 +178,142 @@ describe('DataRequestPage (pedido de listas por correo)', () => {
     await user.click(markButtons[0]);
 
     await waitFor(() => expect(requests.markReceived).toHaveBeenCalledWith('r1'));
+  });
+
+  describe('LEV-R04: repetición, equivalencia y resultado incierto', () => {
+    const sendOnce = async (user = userEvent.setup()) => {
+      renderPage();
+      await screen.findByText('registros@untrm.edu.pe');
+      await user.click(screen.getByRole('button', { name: 'Enviar pedido' }));
+      return user;
+    };
+    const idOf = (call: number) => (requests.send.mock.calls[call][0] as { operationId: string }).operationId;
+
+    it('mientras envía, el botón queda deshabilitado y un segundo clic no envía otra vez', async () => {
+      let finish: (v: { request: DataRequest; replayed: boolean }) => void = () => undefined;
+      requests.send.mockReturnValue(new Promise((resolve) => (finish = resolve)));
+      renderPage();
+      await screen.findByText('registros@untrm.edu.pe');
+
+      await userEvent.click(screen.getByRole('button', { name: 'Enviar pedido' }));
+      await waitFor(() => expect(screen.getByRole('button', { name: /Enviar pedido/ })).toBeDisabled());
+      fireEvent.submit(screen.getByRole('button', { name: /Enviar pedido/ }).closest('form') as HTMLFormElement);
+      // Se deja pasar un instante: un segundo envío (p. ej. Enter con el botón ya deshabilitado) llegaría de forma asíncrona.
+      await new Promise((resolve) => setTimeout(resolve, 50));
+
+      expect(requests.send).toHaveBeenCalledTimes(1);
+      finish({ request: record(), replayed: false });
+      expect(await screen.findByRole('alert')).toHaveTextContent('Pedido enviado');
+    });
+
+    it('si se pierde la respuesta, reintentar lo mismo conserva el identificador; tras un resultado, el siguiente pedido usa otro', async () => {
+      requests.send.mockRejectedValueOnce(lostResponse()).mockResolvedValue({ request: record(), replayed: false });
+      const user = await sendOnce();
+      expect(await screen.findByRole('alert')).toHaveTextContent(/no se enviará dos veces/);
+
+      await user.click(screen.getByRole('button', { name: 'Enviar pedido' }));
+      await screen.findByText(/Pedido enviado a/);
+      expect(idOf(1)).toBe(idOf(0));
+
+      await user.click(screen.getByRole('button', { name: 'Enviar pedido' }));
+      await waitFor(() => expect(requests.send).toHaveBeenCalledTimes(3));
+      expect(idOf(2)).not.toBe(idOf(0));
+    });
+
+    it('si cambia lo que se envía después de un fallo sin respuesta, es otra operación y usa otro identificador', async () => {
+      requests.send.mockRejectedValueOnce(lostResponse()).mockResolvedValue({ request: record(), replayed: false });
+      const user = await sendOnce();
+      await screen.findByRole('alert');
+
+      await user.type(screen.getByLabelText(/Observaciones/), 'Otra nota');
+      await user.click(screen.getByRole('button', { name: 'Enviar pedido' }));
+
+      await waitFor(() => expect(requests.send).toHaveBeenCalledTimes(2));
+      expect(idOf(1)).not.toBe(idOf(0));
+    });
+
+    it('ante la advertencia de equivalencia identifica el pedido anterior; confirmar lo reenvía como operación nueva citando ese pedido', async () => {
+      requests.send.mockRejectedValueOnce(httpError(409, { code: 'DUPLICATE_DATA_REQUEST', error: 'x', previous: previous() })).mockResolvedValue({ request: record(), replayed: false });
+      const user = await sendOnce();
+
+      const dialog = await screen.findByRole('alertdialog');
+      expect(dialog).toHaveTextContent(/Hace poco \(.*\) ya se hizo un pedido equivalente: enviado/);
+      expect(requests.send).toHaveBeenCalledTimes(1);
+
+      await user.click(within(dialog).getByRole('button', { name: 'Pedir de nuevo' }));
+
+      await waitFor(() => expect(requests.send).toHaveBeenCalledTimes(2));
+      expect(requests.send).toHaveBeenLastCalledWith(expect.objectContaining({ confirmDuplicateOf: 'prev-1' }));
+      expect(idOf(1)).not.toBe(idOf(0));
+      await waitFor(() => expect(screen.queryByRole('alertdialog')).not.toBeInTheDocument());
+    });
+
+    it('si mientras el diálogo estaba abierto se registró otro equivalente, la confirmación no vale: se muestra el nuevo pedido', async () => {
+      requests.send
+        .mockRejectedValueOnce(httpError(409, { code: 'DUPLICATE_DATA_REQUEST', error: 'x', previous: previous() }))
+        .mockRejectedValueOnce(httpError(409, { code: 'DUPLICATE_DATA_REQUEST', error: 'x', previous: previous({ id: 'prev-2', status: 'INCIERTO' }) }));
+      const user = await sendOnce();
+      await user.click(within(await screen.findByRole('alertdialog')).getByRole('button', { name: 'Pedir de nuevo' }));
+
+      await waitFor(() => expect(requests.send).toHaveBeenCalledTimes(2));
+      expect(await screen.findByRole('alertdialog')).toHaveTextContent(/envío incierto/);
+      expect(requests.send).toHaveBeenLastCalledWith(expect.objectContaining({ confirmDuplicateOf: 'prev-1' }));
+
+      requests.send.mockResolvedValue({ request: record(), replayed: false });
+      await user.click(within(screen.getByRole('alertdialog')).getByRole('button', { name: 'Pedir de nuevo' }));
+      await waitFor(() => expect(requests.send).toHaveBeenCalledTimes(3));
+      expect(requests.send).toHaveBeenLastCalledWith(expect.objectContaining({ confirmDuplicateOf: 'prev-2' }));
+    });
+
+    it('cancelar el diálogo no envía nada', async () => {
+      requests.send.mockRejectedValueOnce(httpError(409, { code: 'DUPLICATE_DATA_REQUEST', error: 'x', previous: previous() }));
+      const user = await sendOnce();
+
+      await user.click(within(await screen.findByRole('alertdialog')).getByRole('button', { name: 'Cancelar' }));
+
+      expect(screen.queryByRole('alertdialog')).not.toBeInTheDocument();
+      expect(requests.send).toHaveBeenCalledTimes(1);
+    });
+
+    it('un envío equivalente en curso no ofrece confirmar: avisa que hay que esperar su resultado', async () => {
+      requests.send.mockRejectedValueOnce(httpError(409, { code: 'DATA_REQUEST_IN_FLIGHT', error: 'Hay un pedido equivalente enviándose en este momento. Espera su resultado antes de volver a pedirlo.', previous: previous({ status: 'PENDIENTE' }) }));
+      await sendOnce();
+
+      expect(await screen.findByRole('alert')).toHaveTextContent(/enviándose en este momento/);
+      expect(screen.queryByRole('alertdialog')).not.toBeInTheDocument();
+    });
+
+    it('un identificador reutilizado con otros datos (422) muestra el mensaje y la siguiente operación usa otro identificador', async () => {
+      requests.send.mockRejectedValueOnce(httpError(422, { code: 'OPERATION_ID_CONFLICT', error: 'El identificador de la operación ya se usó con otros datos. Vuelve a preparar el pedido.' })).mockResolvedValue({ request: record(), replayed: false });
+      const user = await sendOnce();
+      expect(await screen.findByRole('alert')).toHaveTextContent(/ya se usó con otros datos/);
+
+      await user.click(screen.getByRole('button', { name: 'Enviar pedido' }));
+
+      await waitFor(() => expect(requests.send).toHaveBeenCalledTimes(2));
+      expect(idOf(1)).not.toBe(idOf(0));
+    });
+
+    it('una repetición lo dice y un resultado incierto no se presenta como enviado', async () => {
+      requests.send.mockResolvedValueOnce({ request: record(), replayed: true }).mockResolvedValueOnce({ request: record({ status: 'INCIERTO' }), replayed: false });
+      const user = await sendOnce();
+      expect(await screen.findByRole('alert')).toHaveTextContent(/ya estaba registrado y enviado.*no se envió otro correo/);
+
+      await user.click(screen.getByRole('button', { name: 'Enviar pedido' }));
+
+      expect(await screen.findByText(/no se puede saber si el correo salió/)).toBeInTheDocument();
+      expect(screen.queryByText(/Pedido enviado a/)).not.toBeInTheDocument();
+    });
+
+    it('el historial distingue enviándose y envío incierto, sin ofrecer marcarlos como recibidos', async () => {
+      requests.list.mockResolvedValue([record({ id: 'r1', status: 'PENDIENTE' }), record({ id: 'r2', status: 'INCIERTO' })]);
+      renderPage();
+
+      expect(await screen.findByText('Enviándose')).toBeInTheDocument();
+      expect(screen.getByText('Envío incierto')).toBeInTheDocument();
+      expect(screen.getByText(/Verifica con la escuela antes de volver a pedirlo/)).toBeInTheDocument();
+      expect(screen.queryByRole('button', { name: 'Marcar como recibido' })).not.toBeInTheDocument();
+    });
   });
 
   it('si llega desde la carga de docentes, la DBU ya tiene elegida la lista de docentes tutores', async () => {

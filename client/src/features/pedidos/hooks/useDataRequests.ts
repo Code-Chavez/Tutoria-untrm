@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { schoolService } from '@features/tutorados/services/schoolService';
-import { dataRequestService, type DataRequestKind } from '../services/dataRequestService';
+import { dataRequestService, type SendDataRequestInput } from '../services/dataRequestService';
 
 const REQUESTS_KEY = ['dataRequests'] as const;
 const SCHOOLS_KEY = ['schools', 'request'] as const;
@@ -15,7 +15,7 @@ export function useDataRequests() {
 
 export function useSendDataRequest() {
   const queryClient = useQueryClient();
-  return useMutation({ mutationFn: (input: { schoolId: string; cycles: number[]; note?: string; kind?: DataRequestKind }) => dataRequestService.send(input), onSuccess: () => queryClient.invalidateQueries({ queryKey: REQUESTS_KEY }) });
+  return useMutation({ mutationFn: (input: SendDataRequestInput) => dataRequestService.send(input), onSettled: () => queryClient.invalidateQueries({ queryKey: REQUESTS_KEY }) });
 }
 
 export function useMarkReceived() {

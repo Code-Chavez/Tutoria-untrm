@@ -967,14 +967,32 @@ model DataRequest {
   requestedById String @map("requested_by_id")
   requestedBy   User   @relation("DataRequestRequester", fields: [requestedById], references: [id])
 
-  // ENVIADO = aceptado por el servidor de correo; FALLIDO = no salió (se puede reenviar).
+  // Estado del ENVÍO (no de la recepción ni de la carga de la lista):
+  //   PENDIENTE = guardado, con un intento de envío en curso; ENVIADO = aceptado por el servidor de correo;
+  //   FALLIDO = se demostró que no fue aceptado (se puede reenviar); INCIERTO = no se puede saber si el correo salió.
   status String  @default("ENVIADO")
   error  String?
 
   receivedAt   DateTime? @map("received_at")
   receivedById String?   @map("received_by_id")
 
+  // Idempotencia: la misma persona repitiendo el mismo operationId recibe el resultado ya guardado, no otro envío. contentHash
+  // resume lo que se envía (destinatario, nota, ciclos…) para rechazar un identificador reutilizado con otro contenido.
+  // Nulos en los pedidos anteriores a esta función: no se les atribuye nada que no se pueda acreditar.
+  operationId String? @map("operation_id")
+  contentHash String? @map("content_hash")
+  // Equivalencia para advertir duplicados: tipo, escuela, periodo y alcance (los ciclos normalizados).
+  equivalenceKey String? @map("equivalence_key")
+  // Pedido anterior que la persona confirmó expresamente al reenviar.
+  resendOfId String?       @map("resend_of_id")
+  resendOf   DataRequest?  @relation("DataRequestResend", fields: [resendOfId], references: [id], onDelete: SetNull)
+  resends    DataRequest[] @relation("DataRequestResend")
+  // Inicio del intento de envío en curso (vigencia y protección ante resultados tardíos).
+  attemptStartedAt DateTime? @map("attempt_started_at")
+
+  @@unique([requestedById, operationId])
   @@index([periodId, schoolId])
+  @@index([equivalenceKey, createdAt])
   @@map("data_requests")
 }
 

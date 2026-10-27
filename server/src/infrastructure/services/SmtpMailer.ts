@@ -1,5 +1,6 @@
 import nodemailer, { type Transporter } from 'nodemailer';
 import { MailMessage, Mailer, MailNotConfiguredError } from '@application/ports/Mailer';
+import { toMailSendError } from './smtpOutcome';
 
 export interface SmtpConfig {
   host: string;
@@ -31,7 +32,12 @@ export class SmtpMailer implements Mailer {
   }
 
   async send(message: MailMessage): Promise<void> {
-    await this.transporter.sendMail({ from: this.config.from, ...message });
+    try {
+      await this.transporter.sendMail({ from: this.config.from, ...message });
+    } catch (error) {
+      // Se conserva en qué fase falló: «no aceptado» (demostrado) o «incierto» (pudo haber salido).
+      throw toMailSendError(error);
+    }
   }
 }
 
