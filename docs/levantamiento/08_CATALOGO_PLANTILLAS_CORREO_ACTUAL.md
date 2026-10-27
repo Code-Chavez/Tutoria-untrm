@@ -39,6 +39,8 @@ Todas las plantillas comparten el encabezado institucional (Universidad Nacional
 | C04 | No hay plantilla propia para cada tipo de pedido de lista salvo estudiantes y docentes; no incluye fecha límite, finalidad como campo ni medio de entrega | LEV-D32 | LEV-R06 y Q11–Q12 |
 | C05 | Las plantillas están escritas en el código; **no hay un editor ni versionado de textos** | `server/src/application/services/*Email.ts` | Sin requisito aprobado; se anota como límite |
 
+> **Nota de resolución (C01):** el texto del hallazgo C01 es el histórico del diagnóstico y no se reescribe. **Corregido en el PR #181, commit `00e42f3`** (LEV-R07): el correo de aceptación pide solo días y horas. Pendiente de fusión al momento de esta nota; la CI de ese commit dio 12 comprobaciones aprobadas y 2 omitidas.
+
 ## 4. Lo que este catálogo no cubre
 
 No se envió ningún correo ni se probó contra un SMTP real para escribirlo; los textos y asuntos son los del código. Los textos exactos de cuerpo se omiten salvo cuando importan para una inconsistencia: se pueden leer en los archivos citados.
