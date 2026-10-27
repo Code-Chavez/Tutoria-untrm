@@ -90,14 +90,18 @@ Si una suite nueva cambia o recorre estado global, se agrega a esa lista.
 
 ### 3.5 Si una corrida se interrumpe (qué se garantiza y qué no)
 
-Se distinguen dos casos y **solo el primero está cubierto por el código**:
+Se distinguen dos casos. La limpieza (`afterAll`/`globalTeardown`) solo corre en el primero; en ambos, **la corrida siguiente se detiene si la base quedó contaminada** (ver abajo):
 
 | Caso | Qué pasa | Probado |
 |---|---|---|
-| **Una prueba falla o lanza un error** (excepción, aserción, tiempo agotado) | `afterAll` y `globalTeardown` corren: se borra lo creado, se restauran los parámetros cambiados y la corrida falla si quedó un residuo o un cambio en filas preexistentes | Sí: prueba que falla a propósito (sin residuo) y prueba que deja un residuo a propósito (la corrida termina en error y el parámetro queda restaurado). `docs/resultados-2026-10-26/falla-y-residuo-deliberados.txt` |
+| **Una prueba falla o lanza un error** (excepción, aserción, tiempo agotado) | `afterAll` y `globalTeardown` corren: se borra lo creado, se restauran los parámetros cambiados y la corrida falla si quedó un residuo o un cambio en filas preexistentes; en ese caso la base queda **marcada como no confiable** y la corrida siguiente se detiene | Sí: prueba que falla a propósito (sin residuo) y prueba que deja un residuo a propósito (la corrida termina en error y el parámetro queda restaurado). `docs/resultados-2026-10-26/falla-y-residuo-deliberados.txt` |
 | **El proceso muere de golpe** (SIGKILL, apagón, cierre de la terminal, contenedor reiniciado) | **No corre ningún código de limpieza** (ni `finally`, ni `afterAll`, ni `globalTeardown`). El candado entre archivos **sí** se libera solo (la conexión muere con el proceso). Los parámetros cambiados **quedan cambiados** y las filas creadas **quedan sin borrar** | Sí: `docs/resultados-2026-10-26/terminacion-abrupta.txt` (parámetro en 9 en vez de 5, 1 fila huérfana, candado liberado) |
 
-**Una corrida posterior no lo detecta.** Su foto inicial toma el valor cambiado como «preexistente» y la verificación final pasa; la foto y las filas de la corrida muerta siguen en la base. Por eso, tras una interrupción abrupta, **la base de pruebas no es confiable hasta recuperarla**. No se agregó detección automática (queda como mejora posible: que el `globalSetup` se niegue a empezar si encuentra la foto de una corrida anterior sin cerrar).
+**Una corrida posterior no acepta la base contaminada.** Antes (hasta el PR #171) la aceptaba en silencio: su foto inicial tomaba el valor cambiado como «preexistente» y la verificación final pasaba. Ahora, al empezar, y **solo después** de confirmar con `current_database()` que la base es de pruebas, el `globalSetup` busca restos de una corrida anterior: la foto de filas preexistentes sin cerrar (`test_preexisting`) o filas de pruebas sin borrar (`test_row_origin`). Si hay, **se detiene antes de ejecutar ninguna prueba y sin modificar nada**, con un mensaje que nombra la corrida y los comandos de recuperación (los de abajo; solo mencionan la base y el contenedor de pruebas). Contra la base de desarrollo no llega a consultar esas tablas: el `globalSetup` ya abortó.
+
+La foto también se **conserva** cuando la verificación final de una corrida detecta filas sin borrar o cambios en filas preexistentes (así la siguiente tampoco los acepta); solo se descarta si la base quedó limpia, aunque esa corrida falle por haber tenido que restaurar un parámetro. En una base nueva (sin las tablas) la comprobación no estorba, que es lo que ocurre en la CI. Medido el 26/10/2026 en cinco escenarios: `docs/resultados-2026-10-26/deteccion-de-restos.txt`.
+
+Límites: dos corridas simultáneas contra la misma base de pruebas no están soportadas (la segunda se detiene); si el proceso muere **antes** de que el `globalSetup` tome la foto no queda nada que detectar ni restaurar; lo que alguien cambie a mano en la base de pruebas sin una corrida en curso no se detecta; **no se recrea la base automáticamente** (un proceso de jest no puede recrear un contenedor y hacerlo desde dentro borraría datos y la evidencia de la interrupción): recuperar es una decisión explícita.
 
 **Recuperación (elegir una).**
 

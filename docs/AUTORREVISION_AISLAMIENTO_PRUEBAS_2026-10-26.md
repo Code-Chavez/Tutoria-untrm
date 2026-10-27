@@ -19,7 +19,7 @@ Documento de apoyo: `docs/PRUEBAS_DE_INTEGRACION.md`. Evidencia: `docs/resultado
 
 ## 2. Qué NO se garantiza (límites que se mantienen)
 
-1. **Terminación abrupta del proceso** (§1.6): no hay recuperación automática ni detección en la corrida siguiente. Se recupera recreando la base de pruebas (recomendado) o con los comandos de `docs/PRUEBAS_DE_INTEGRACION.md` §3.5. Mejora posible, no hecha: que el `globalSetup` se niegue a empezar si encuentra la foto de una corrida anterior sin cerrar.
+1. **Terminación abrupta del proceso** (§1.6): no hay recuperación automática. *(Actualización: la corrida siguiente ya no acepta esa base en silencio, se detiene con instrucciones; ver `docs/PRUEBAS_DE_INTEGRACION.md` §3.5.)* Se recupera recreando la base de pruebas (recomendado) o con los comandos de `docs/PRUEBAS_DE_INTEGRACION.md` §3.5. Mejora posible, no hecha: que el `globalSetup` se niegue a empezar si encuentra la foto de una corrida anterior sin cerrar.
 2. La mayoría de las suites sigue usando las **cuentas de demostración como actores** (iniciar sesión y comprobar permisos por rol). No se modifican sus datos ni sus permisos y la verificación final lo comprueba, pero siguen siendo una dependencia compartida.
 3. `securityParameters` cambia un parámetro global (§1.5).
 4. El registro solo conoce lo que insertan las conexiones de las pruebas; cualquier otra escritura en la base de pruebas durante una corrida se vería como diferencia. La base de pruebas es exclusiva.
@@ -40,3 +40,37 @@ Una sola vez, en una corrida local de diagnóstico, la prueba unitaria `BcryptPa
 - Ambos PR tenían como destino `develop`. El #171 dependía del #170 (su rama contiene los commits del #170), por lo que el orden era: fusionar #170; comprobar que el diff restante de #171 fuera solo `ec14f9d` y `c18ef2d`; ejecutar la CI de nuevo sobre la combinación final.
 - Estado verificado el 26/10/2026: #170 se fusionó a las 19:21 UTC y #171 a las 19:23 UTC, ambos por la cuenta `Code-Chavez` (sin fusión automática); `develop` quedó en `0299db1`, cuyo árbol es **idéntico** al de la cabeza de #171 (`c18ef2d`: diferencia de archivos vacía). La CI de `develop` sobre `0299db1` (ejecución 40386370728) pasó completa: 138 suites y 1203 pruebas, 25 suites de integración, y también `Docker — Build Images`.
 - Este documento y la corrección de `PRUEBAS_DE_INTEGRACION.md` §3.3/§3.5 se entregan en un PR posterior (solo documentación), porque la afirmación incorrecta ya estaba en `develop`.
+
+## 6. Autorrevisión del PR #174 (el `globalSetup` se niega a empezar sobre restos)
+
+Cambio: `globalSetup` busca restos de una corrida anterior (foto sin cerrar o filas sin borrar) y se detiene con instrucciones; `globalTeardown` conserva la foto si la verificación final encuentra residuos o cambios. Es una autorrevisión de quien lo implementó.
+
+### 6.1 Qué se comprobó, dónde y con qué alcance
+
+| Qué | Comprobado **localmente** (base `sit_db_test` en mi equipo) | Ejecutado **en la CI** (PR #174) |
+|---|---|---|
+| Base nueva, sin las tablas del registro: la primera corrida pasa | Sí (escenario E1) | **Sí, indirectamente**: la CI crea una base nueva en cada ejecución y toda la suite pasó sobre ella |
+| Terminación abrupta (`SIGKILL`): la corrida siguiente se detiene y no modifica la base | Sí (E2, 0 diferencias fila por fila) | **No**: la CI no mata procesos |
+| Recuperación recreando la base de pruebas | Sí (E3) | No aplica |
+| Residuo deliberado: la corrida falla, conserva la foto y la siguiente se detiene | Sí (E4, repetido con base sembrada verificada) | **No** |
+| Solo un parámetro sin restaurar: falla, se restaura, la siguiente pasa | Sí (E5) | **No** |
+| Contra `sit_db`: el `globalSetup` aborta antes de consultar los restos | Sí (conteos de tablas idénticos; son conteos, no valores) | Prueba unitaria con doble que verifica que no se consultan las tablas de restos (**sí** corre en la CI) |
+| Lógica de decisión (detener / seguir, conservar / descartar la foto) | Pruebas unitarias y de integración | **Sí**: 139 suites y 1211 pruebas, 25 de integración, en el commit `84d47d3` |
+| Mensaje de recuperación sin mencionar desarrollo | Prueba unitaria | **Sí** |
+| Corrida completa en paralelo sin diferencias en las 205 filas preexistentes | Sí (comparación fila por fila) | **No** (la CI no compara fila por fila; su verificación final del `globalTeardown` sí corre y pasó) |
+
+En resumen: los **escenarios de interrupción solo están comprobados localmente**; la CI confirma la lógica (pruebas unitarias e integración), el caso de base nueva y que no rompe nada.
+
+### 6.2 Hallazgos propios de esta revisión
+
+1. **Evidencia inválida y corregida.** En una primera pasada de escenarios, las últimas recreaciones de la base fallaron en silencio (quedó sin seed), por lo que parte de E4 y todo E5 no valían; se repitieron con un script que comprueba que la base quedó sembrada. Mi propio script ocultaba la salida (`>/dev/null`), lo que impidió ver la causa.
+2. **Causa parcial de esa siembra silenciosa, hallada después.** `server/prisma/seed.ts` termina con `main().catch(console.error)`: ante un error el proceso sale con código **0**, por lo que `prepare-test-db.js` imprime «Base de pruebas lista.» y el arranque de desarrollo continúa aun si la siembra falló. Eso explica que el fallo fuera invisible; **qué error concreto ocurrió en aquella siembra no se sabe** (su salida se ocultó). Se corrige en el PR del punto 1 (el seed debe terminar con error y mostrar la causa).
+3. **Falsos positivos posibles.** Dos corridas simultáneas contra la misma base de pruebas harían que la segunda se detenga; no están soportadas. Un reinicio del contenedor de pruebas (sin volumen) deja la base vacía, sin restos.
+4. **El caso «parámetro restaurado»:** la corrida falla pero la base queda limpia y la foto se descarta; es una decisión (no bloquear la base cuando ya está limpia) y está probada.
+
+### 6.3 Lo que no se garantiza
+
+- Si el proceso muere antes de que el `globalSetup` tome la foto, no hay nada que detectar.
+- Lo que alguien cambie a mano en la base de pruebas sin una corrida en curso no se detecta.
+- No se recrea la base automáticamente (decisión documentada en la propuesta).
+- No se ejecutaron las pruebas E2E.
