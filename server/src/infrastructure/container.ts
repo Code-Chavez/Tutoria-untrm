@@ -343,7 +343,7 @@ const updateUserUseCase = new UpdateUserUseCase(userRepository, roleRepository, 
 const toggleUserStatusUseCase = new ToggleUserStatusUseCase(userRepository);
 const listUsersUseCase = new ListUsersUseCase(userRepository);
 const listRolesUseCase = new ListRolesUseCase(roleRepository);
-const createRoleUseCase = new CreateRoleUseCase(roleRepository, auditLogRepository);
+const createRoleUseCase = new CreateRoleUseCase(roleRepository);
 const assignRoleUseCase = new AssignRoleUseCase(userRepository, roleRepository, auditLogRepository, schoolRepository, facultyRepository);
 
 const getProfileUseCase = new GetProfileUseCase(userRepository, roleRepository);
