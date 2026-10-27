@@ -133,6 +133,14 @@ Se revisaron los identificadores, las referencias cruzadas, las decisiones, los 
 
 **Pendiente de verificación (no revisado):** que el recuento de 36 permisos y 7 roles de [06](06_MATRIZ_ROLES_PERMISOS_ACTUAL.md) siga vigente si `develop` cambió después de `c2e0460`; que los nombres de permisos `certificados:*` no choquen con otros que se propongan en el informe.
 
+## 5 bis. Pendientes detectados durante la implementación
+
+Hallazgos que **no** forman parte de ninguna entrega aprobada y se tratan por separado. Cada uno necesita su propia instrucción antes de implementarse.
+
+| N.° | Hallazgo | Evidencia | Estado |
+|---|---|---|---|
+| IMP-1 | **`AssignRoleUseCase` registra como autor de la bitácora al usuario afectado, no a quien hizo el cambio.** Al asignar un rol, la entrada `ASSIGN_ROLE` guarda `userId` = el usuario que recibe el rol y `ipAddress: null`; el actor autenticado no se pasa al caso de uso. La bitácora no permite saber quién cambió el rol de quién | `server/src/application/use-cases/roles/AssignRoleUseCase.ts` (`auditLogs.create({ userId, action: 'ASSIGN_ROLE', … ipAddress: null })`); detectado al preparar C-2. Leído en el código; no reproducido en ejecución | **Pendiente**, sin implementar. Corrección acotada propuesta: pasar el actor y la IP desde el controlador, registrar `userId` = actor con el afectado en `entityId`, y probarlo. No se mezcla con C-2 ni con C-3 |
+
 ## 6. Decisiones que hay que gestionar con la institución
 
 Los **documentos de respaldo** son lo que habría que pedir o recibir por escrito. Los nombres de cargo son los del Protocolo y del diagnóstico; el cargo concreto lo indica la institución.
