@@ -180,16 +180,47 @@ describe('protección de la última cuenta de administración activa', () => {
     }
   });
 
-  it('una operación exitosa conserva su auditoría (autor y cambio); la rechazada no deja registro', async () => {
+  it('una operación exitosa conserva su auditoría (autor y cambio) y no deja ningún registro de rechazo', async () => {
     if (!dbUp) return;
     await setAdmins(true, true);
     await prisma.auditLog.deleteMany({ where: { entity: 'User', entityId: { in: [a, b] } } });
 
     await requestContext.run({ userId: actorId, ipAddress: '10.0.0.9' }, () => repo().update(a, { isActive: false }));
-    await expect(requestContext.run({ userId: actorId }, () => repo().update(b, { isActive: false }))).rejects.toBeInstanceOf(LastActiveAdministratorError);
 
     const entries = await prisma.auditLog.findMany({ where: { entity: 'User', entityId: { in: [a, b] } } });
     expect(entries).toHaveLength(1);
     expect(entries[0]).toMatchObject({ userId: actorId, action: 'UPDATE', entityId: a, details: 'isActive', ipAddress: '10.0.0.9' });
+  });
+
+  it('un intento rechazado queda registrado como tal (actor, cuenta, acción y motivo), persiste tras revertirse y nunca figura como éxito', async () => {
+    if (!dbUp) return;
+    await setAdmins(true, null);
+    await prisma.auditLog.deleteMany({ where: { entity: 'User', entityId: { in: [a, b] } } });
+
+    await expect(requestContext.run({ userId: actorId, ipAddress: '10.0.0.9' }, () => repo().update(a, { isActive: false }))).rejects.toBeInstanceOf(LastActiveAdministratorError);
+    await expect(requestContext.run({ userId: actorId }, () => repo().update(a, { roleId: otherRoleId }))).rejects.toBeInstanceOf(LastActiveAdministratorError);
+
+    // La modificación se revirtió y los registros del rechazo siguen ahí (se escriben fuera de la transacción revertida).
+    expect(await state(a)).toEqual({ isActive: true, roleId: adminRoleId });
+    const entries = await prisma.auditLog.findMany({ where: { entity: 'User', entityId: { in: [a, b] } }, orderBy: { createdAt: 'asc' } });
+    expect(entries).toHaveLength(2);
+    expect(entries.map((e) => e.action)).toEqual(['USER_CHANGE_REJECTED', 'USER_CHANGE_REJECTED']);
+    expect(entries.every((e) => e.userId === actorId && e.entityId === a)).toBe(true);
+    expect(entries[0].details).toBe('Intento rechazado: desactivar la cuenta. Motivo: dejaría al sistema sin una cuenta de administración activa');
+    expect(entries[1].details).toBe('Intento rechazado: cambiar el rol de la cuenta. Motivo: dejaría al sistema sin una cuenta de administración activa');
+    expect(entries[0].ipAddress).toBe('10.0.0.9');
+    // Ninguna actualización exitosa ni correo u otros datos de la cuenta en el detalle.
+    expect(entries.some((e) => e.action === 'UPDATE' || e.action === 'ASSIGN_ROLE')).toBe(false);
+    expect(entries.every((e) => !(e.details ?? '').includes('@'))).toBe(true);
+  });
+
+  it('sin usuario en la petición no hay a quién atribuir el intento: se rechaza igual y no se registra', async () => {
+    if (!dbUp) return;
+    await setAdmins(true, null);
+    await prisma.auditLog.deleteMany({ where: { entity: 'User', entityId: { in: [a, b] } } });
+
+    await expect(repo().update(a, { isActive: false })).rejects.toBeInstanceOf(LastActiveAdministratorError);
+
+    expect(await prisma.auditLog.count({ where: { entity: 'User', entityId: a } })).toBe(0);
   });
 });
