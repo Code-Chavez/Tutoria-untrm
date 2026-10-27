@@ -2,6 +2,8 @@
 
 **Estado: PROPUESTO.** Ninguno está implementado ni aprobado. Son ampliaciones pequeñas, derivadas del [diagnóstico](01_DIAGNOSTICO_ACTUAL.md), que se pueden especificar y luego construir **sin esperar** las decisiones de certificación ni de roles configurables. Identificadores `LEV-R` **provisionales**: no pertenecen al backlog aprobado (los HU/TT/RSK existentes están en [03](03_CONTRASTE_PROTOCOLO_Y_BACKLOG.md)). Fuente única de requisitos del levantamiento: esta carpeta; la documentación integral del informe debe referenciarla.
 
+> **Actualización 27/10/2026.** Con las decisiones de trabajo de [10](10_REGISTRO_DE_DECISIONES.md), las especificaciones de roles y delegación ([11](11_ESPECIFICACION_ROLES_PERMISOS_ALCANCE.md)), pedido de listas ([12](12_ESPECIFICACION_PEDIDO_DE_LISTAS.md)), lugar ([13](13_ESPECIFICACION_LUGAR_DE_LA_TUTORIA.md)) y certificación ([14](14_ESPECIFICACION_CERTIFICACION.md)) amplían o reemplazan algunos de estos requisitos. Este archivo conserva los que no dependen de ninguna decisión.
+
 **Cada requisito indica su estado:** `Propuesto` (se puede aprobar tal cual) o `Propuesto con valor pendiente` (la regla es clara pero un número o un texto lo fija la DBU). Las **prioridades** y los **valores por omisión** son propuestas de trabajo, no decisiones. No se incluyen estimaciones: se harán en la Fase 4, declaradas como propuestas con sus supuestos.
 
 Estructura de cada requisito: identificador, descripción, actor, prioridad (propuesta), origen, datos, reglas, permisos, criterios de aceptación, casos límite y dependencias.
@@ -24,6 +26,8 @@ Estructura de cada requisito: identificador, descripción, actor, prioridad (pro
 | Dependencias | Ninguna. Estado: **Propuesto** |
 
 ## LEV-R02 · Proteger al último administrador y la autodesactivación
+
+> **Ampliado y reemplazado por LEV-R14** de [11](11_ESPECIFICACION_ROLES_PERMISOS_ALCANCE.md) tras la decisión de trabajo Q05 = A: la definición de «administrador habilitado» pasa a basarse en permisos y no en el nombre del rol. Este texto se conserva como antecedente.
 
 | Campo | Contenido |
 |---|---|
@@ -92,7 +96,7 @@ Estructura de cada requisito: identificador, descripción, actor, prioridad (pro
 | Prioridad (propuesta) | Baja |
 | Origen | Encargo C («fecha y hora límite, cuando corresponda»); LEV-D32 |
 | Datos | Fecha y hora límite (opcional), validada como futura y dentro del periodo |
-| Reglas | (1) Es **opcional**; la obligatoriedad por tipo de pedido es una decisión pendiente (Q12). (2) Se incluye en la vista previa (LEV-R03) y en el texto del correo. (3) No genera recordatorios ni cambios de estado automáticos |
+| Reglas | (1) **Ajustada por la decisión de trabajo Q11 = A** ([12](12_ESPECIFICACION_PEDIDO_DE_LISTAS.md)): la fecha límite forma parte del pedido; si es **obligatoria u omisible con motivo, por tipo de pedido**, sigue pendiente (Q12). (2) Se incluye en la vista previa (LEV-R03) y en el texto del correo. (3) No genera recordatorios ni cambios de estado automáticos |
 | Permisos | Los de enviar pedidos |
 | Criterios de aceptación | (1) Sin fecha límite el correo es igual que hoy. (2) Con fecha límite aparece con zona horaria clara. (3) Una fecha pasada se rechaza con mensaje |
 | Casos límite | Zona horaria del servidor frente a la de los destinatarios; periodo que termina antes de la fecha |

@@ -4,9 +4,9 @@
 
 Este levantamiento sirve para decidir, no para convertir cada duda en una funcionalidad. Parte de lo que el sistema **ya hace** y de las decisiones que **ya están pedidas** a la DBU, para no duplicarlas. Terminar el diagnóstico **no** completa el levantamiento: ver los criterios por fase en [04](04_AUTORREVISION_FASE1.md).
 
-## Qué contestar primero
+## Decisiones
 
-→ **[00 · Decisiones P0 en lenguaje sencillo](00_PREGUNTAS_P0_PARA_RESPONDER.md)**: 10 preguntas agrupadas en 4 bloques, con opciones, recomendación y consecuencias. Las otras 21 preguntas están en [02](02_PREGUNTAS_INSTITUCIONALES.md) y no bloquean.
+→ **[10 · Registro de decisiones](10_REGISTRO_DE_DECISIONES.md)**: lo que el responsable del proyecto decidió el 27/10/2026, qué es propuesta del proyecto y qué aprobación institucional o de requisitos sigue pendiente. Las opciones completas están en [00](00_PREGUNTAS_P0_PARA_RESPONDER.md); las otras 21 preguntas, en [02](02_PREGUNTAS_INSTITUCIONALES.md). **Siguen pendientes institucionales Q02, Q20, Q21 y Q22**, y las especificaciones que dependen de ellas permanecen bloqueadas en esa parte.
 
 ## Entregables
 
@@ -21,7 +21,11 @@ Este levantamiento sirve para decidir, no para convertir cada duda en una funcio
 | 06 | [Matriz de roles, permisos y alcance — sistema actual](06_MATRIZ_ROLES_PERMISOS_ACTUAL.md) | 2 | Borrador (solo lo implementado) |
 | 07 | [Matriz de eventos, avisos y correos — sistema actual y huecos](07_MATRIZ_EVENTOS_ACTUAL.md) | 2 | Borrador (implementado + huecos) |
 | — | Especificación general de requisitos | 2 | No iniciada |
-| — | Proceso de certificación (estados y responsables) | 2 | **Bloqueada** por las P0 de certificación |
+| 10 | [Registro de decisiones](10_REGISTRO_DE_DECISIONES.md) (propuestas del proyecto vs. aprobaciones pendientes) | 3 | Borrador |
+| 11 | [Especificación: roles configurables, permisos, alcance y delegación](11_ESPECIFICACION_ROLES_PERMISOS_ALCANCE.md) (Q01 B, Q05 A) | 2 | Propuesto (cambio de RF/HU por aprobar) |
+| 12 | [Especificación: pedido de listas y carga supervisada](12_ESPECIFICACION_PEDIDO_DE_LISTAS.md) (Q11 A) | 2 | Propuesto |
+| 13 | [Especificación: lugar de la tutoría](13_ESPECIFICACION_LUGAR_DE_LA_TUTORIA.md) (Q17 A) | 2 | Propuesto (cambio de RF/HU por aprobar) |
+| 14 | [Especificación: certificación del docente tutor](14_ESPECIFICACION_CERTIFICACION.md) (Q23 A, Q24) | 2 | Propuesto y **parcialmente bloqueado** (Q20 a Q22) |
 | 08 | [Catálogo de plantillas de correo — sistema actual](08_CATALOGO_PLANTILLAS_CORREO_ACTUAL.md) (13 plantillas y 5 hallazgos) | 2 | Borrador (solo lo implementado) |
 | 09 | [Estados vigentes de solicitud, derivación y designación](09_ESTADOS_ACTUALES_SOLICITUD_Y_DERIVACION.md) | 2 | Borrador (solo lo implementado) |
 | — | Backlog propuesto (HU/TT con dependencias) y plan de pruebas con trazabilidad | 4 | No iniciados |

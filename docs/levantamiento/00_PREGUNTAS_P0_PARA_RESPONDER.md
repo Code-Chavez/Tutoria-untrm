@@ -2,6 +2,8 @@
 
 Son **10 preguntas en 4 bloques**, de las 31 del levantamiento (las demás están en [02](02_PREGUNTAS_INSTITUCIONALES.md) y no bloquean). Cada una dice **qué pasa hoy**, **qué significa cada opción** (qué cambia para los usuarios y para el sistema), la **propuesta del equipo** (una propuesta, **no una decisión**) y **quién puede decidirla**. Nada se implementa hasta que haya respuesta. Los bloques van en este orden: **1 Roles y seguridad → 2 Listas → 3 Lugar → 4 Certificación**.
 
+> **27/10/2026: el responsable del proyecto registró sus decisiones de trabajo** (Q01 B, Q05 A, Q11 A, Q17 A como propuesta, Q23 A como propuesta técnica, Q24 A preferida con B sujeta a aprobación; Q02, Q20, Q21 y Q22 **pendientes institucionales**). Están en [10](10_REGISTRO_DE_DECISIONES.md) con lo que cada una necesita para ser una decisión institucional. Este documento conserva las opciones tal como se presentaron.
+
 **Quién decide — convención de este documento.**
 
 | Marca | Significa |
@@ -35,7 +37,7 @@ Son **10 preguntas en 4 bloques**, de las 31 del levantamiento (las demás está
 
 | Opción | Qué significa | Qué cambia | Riesgos y costo |
 |---|---|---|---|
-| **A · Se mantiene lo actual** | «Coordinador» (uno por escuela) y «Decano» (uno por facultad) | Nada; se corrigen RF-04/HU-04 para que digan lo mismo que el sistema | Puede no reflejar la estructura real si existe un coordinador por facultad |
+| **A · Se mantiene lo actual** | «Coordinador» (uno por escuela) y «Decano» (uno por facultad) | Nada en el sistema. **No se modifican el Protocolo ni los RF/HU para hacerlos coincidir con el código**: la discrepancia queda registrada hasta que la institución decida | Puede no reflejar la estructura real si existe un coordinador por facultad |
 | **B · Se separan dos perfiles** | «Coordinador de facultad» y «Responsable de escuela» como roles distintos, como sugiere el Art. 5 | Nuevo alcance por facultad para la coordinación; cambia a quién llegan las solicitudes y qué ve cada pantalla | Más cambios en enrutamiento, permisos y pantallas |
 | **C · Otra estructura** | La que indique la DBU | A definir | A definir |
 
@@ -52,7 +54,7 @@ Son **10 preguntas en 4 bloques**, de las 31 del levantamiento (las demás está
 | **A · Mínimo 1 administrador activo** | Nadie puede desactivar ni degradar al último administrador activo; nadie puede desactivarse si es el único | Un mensaje claro al intentarlo; la regla se aplica en el servidor | Con un solo administrador no hay forma de «cambiar de administrador» sin crear primero a otro |
 | **B · Mínimo 2** | Siempre debe haber al menos dos administradores activos | Igual, con otro número | Exige tener dos cuentas administradoras siempre |
 
-Se propone además que **ningún rol pueda asignar roles de mayor privilegio que el suyo** (importante si se aprueba Q01).
+Se propuso además que ningún rol asigne roles de «mayor privilegio» que el suyo; **esa frase no es una jerarquía precisa** y se reemplazó por reglas de delegación por permiso y por alcance (LEV-R13 en [11](11_ESPECIFICACION_ROLES_PERMISOS_ALCANCE.md)).
 
 **Propuesta del equipo (a confirmar):** A, más la regla de no asignar un rol superior al propio.
 

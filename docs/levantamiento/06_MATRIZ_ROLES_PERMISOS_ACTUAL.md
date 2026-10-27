@@ -92,7 +92,7 @@ Conteo reproducible: ver la sección «Comprobaciones por nombre de rol» del [d
 
 ## 6. Propuesto (no implementado)
 
-Ninguno de estos puntos existe hoy; están especificados en [05](05_REQUISITOS_SIN_DEPENDENCIAS.md) o dependen de decisiones.
+Ninguno de estos puntos existe hoy; están especificados en [11](11_ESPECIFICACION_ROLES_PERMISOS_ALCANCE.md) y [05](05_REQUISITOS_SIN_DEPENDENCIAS.md) o dependen de decisiones. Decisiones de trabajo: [10](10_REGISTRO_DE_DECISIONES.md).
 
 | Propuesta | Estado |
 |---|---|

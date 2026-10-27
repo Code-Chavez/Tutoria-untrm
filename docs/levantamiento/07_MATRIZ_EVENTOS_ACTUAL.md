@@ -37,7 +37,7 @@ sequenceDiagram
   S->>N: crea el aviso interno
   N->>O: encola el correo del aviso (mismo registro)
   S-->>U: responde sin esperar el correo
-  O->>M: envío inmediato; si falla, reintentos a 1, 5, 15 y 60 min
+  O->>M: envío inmediato y, si falla, reintentos a 1, 5, 15 y 60 min
   M-->>D: correo (al quinto fallo seguido queda FALLIDO)
   D->>N: la campana sondea cada 60 s y muestra el aviso (leído / no leído)
 ```
@@ -73,6 +73,19 @@ stateDiagram-v2
 | H06 | Fallo del correo de **rechazo** visible en el sistema | **PROPUESTO** (ver [05](05_REQUISITOS_SIN_DEPENDENCIAS.md)) | Hoy solo queda en el registro del servidor |
 | H07 | Aviso para la persona que programa una sesión cuando el estudiante **no tiene cuenta** | **IMPLEMENTADO** (se le informa a quien hizo el cambio) | Ver E07 |
 | H08 | Notificar acciones **denegadas** (HU-04 lo pide) | Discrepancia documentada (X2 de [03](03_CONTRASTE_PROTOCOLO_Y_BACKLOG.md)) | El servidor responde 403 sin aviso |
+
+## 3 bis. Eventos propuestos por las decisiones de trabajo (no implementados)
+
+Todos **PROPUESTOS**; la política de correo por evento sigue **pendiente de decisión** (Q07), por lo que cada fila indica solo el **aviso interno** y el correo sin datos del caso, como los avisos actuales. Detalle en las especificaciones citadas.
+
+| N.° | Evento propuesto | Realiza | Destinatario | Canal | Especificación | Bloqueado por |
+|---|---|---|---|---|---|---|
+| P01 | Lugar final distinto de la propuesta del solicitante | Docente tutor al programar | Solicitante (estudiante con cuenta) | Aviso (+ correo sin lugar) | [13](13_ESPECIFICACION_LUGAR_DE_LA_TUTORIA.md) R31 | Aprobación de RF/HU |
+| P02 | Cambio de lugar o modalidad de una sesión ya programada (`SESSION_PLACE_CHANGED`) | Docente tutor | Solicitante y participantes con cuenta | Aviso (+ correo sin lugar ni motivo) | [13](13_ESPECIFICACION_LUGAR_DE_LA_TUTORIA.md) R32 | Aprobación de RF/HU |
+| P03 | Pedido de lista recibido, en revisión, cargado, observado o vencido | Coordinación o DBU | Quien pidió; Pendientes institucionales para vencidos | Aviso interno | [12](12_ESPECIFICACION_PEDIDO_DE_LISTAS.md) R21 | Q11 (DBU, escuelas), Q12 |
+| P04 | Concesión o retiro de rol, permiso o alcance; intento rechazado | Administrador | La persona afectada (aviso) y la bitácora | Aviso + bitácora | [11](11_ESPECIFICACION_ROLES_PERMISOS_ALCANCE.md) R13, R18 | RF/HU de roles |
+| P05 | Trámite de certificado iniciado, observado, aprobado, generado, pendiente de firma, firmado incorporado, entregado, anulado o reemitido | Funciones del proceso | Quien debe actuar y el docente al entregarse | Aviso (correo según Q07) | [14](14_ESPECIFICACION_CERTIFICACION.md) §9 | **Q20 a Q22** (quién actúa) |
+| P06 | Aceptación del docente / cambio de su disponibilidad | Docente | Coordinación | Pendiente | H02, H03 | Q08, Q16 |
 
 ## 4. Lo que no cubre esta matriz
 

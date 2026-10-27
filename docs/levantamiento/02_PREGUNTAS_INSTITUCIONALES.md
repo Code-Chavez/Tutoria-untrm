@@ -72,19 +72,6 @@ No se repiten aquí. Siguen abiertas las cinco de `docs/DECISIONES_DBU_COBERTURA
 | LEV-Q30 | **Nombres institucionales** definitivos: «tutorado» o «estudiante», «docente tutor», «coordinación» o «responsable de escuela», «administrador» o «DBU», «decanato» | Lenguaje consistente en pantallas, correos y certificados | DBU | «Estudiante», «Responsable», «docente tutor» (ya aplicados) | P1 |
 | LEV-Q31 | ¿Qué criterio de aceptación de accesibilidad y navegadores se adopta? RNF-USA-01 cita WCAG 2.1 AA «como referencia» y Chrome, Firefox, Edge y Safari; hoy solo Chrome y Edge (un motor) están probados | Define qué se prueba antes de dar por cerrada una función | Product Owner | Límites actuales declarados | P2 |
 
-## Registro de decisiones (para llenar)
+## Registro de decisiones
 
-| Pregunta | Decisión | Fecha | Quién decidió | Respaldo (acta, resolución, correo) |
-|---|---|---|---|---|
-| LEV-Q01 | | | | |
-| LEV-Q02 | | | | |
-| LEV-Q05 | | | | |
-| LEV-Q11 | | | | |
-| LEV-Q17 | | | | |
-| LEV-Q20 | | | | |
-| LEV-Q21 | | | | |
-| LEV-Q22 | | | | |
-| LEV-Q23 | | | | |
-| LEV-Q24 | | | | |
-
-Las decisiones pendientes de `DECISIONES_DBU_COBERTURA_Y_PLAN_2026-10-18.md` se registran en su propia tabla.
+Las decisiones de trabajo del responsable del proyecto (27/10/2026) y lo que falta para que sean decisiones institucionales están en **[10 · Registro de decisiones](10_REGISTRO_DE_DECISIONES.md)**. Las decisiones pendientes de `DECISIONES_DBU_COBERTURA_Y_PLAN_2026-10-18.md` se registran en su propia tabla.
