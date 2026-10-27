@@ -42,8 +42,8 @@ La decisión de trabajo incluye la **fecha límite** en el pedido. Cambia el req
 | Actor | Coordinación o DBU (quien pidió o tiene alcance sobre la escuela) |
 | Prioridad (propuesta) | Media |
 | Origen | Decisión Q11 = A («carga supervisada»); LEV-D33; escenario «escuela sin correo configurado o que falla» |
-| Estados (nuevos marcados) | `ENVIADO` · `FALLIDO` *(existentes)* · **`RECIBIDO`** *(hoy solo `receivedAt`; pasa a ser estado)* · **`EN_REVISION`** · **`CARGADO`** · **`OBSERVADO`** · **`VENCIDO`** *(derivado de la fecha límite)* |
-| Reglas | (1) `RECIBIDO` lo registra una persona con alcance, al recibir el archivo por correo; no es automático. (2) `VENCIDO` se calcula al consultar; **no envía recordatorios** ni cambia datos. (3) `OBSERVADO` conserva el motivo y permite pedir la corrección por el mismo canal. (4) Un pedido `FALLIDO` no puede pasar a `RECIBIDO`. (5) Los estados `FALLIDO` y `VENCIDO` aparecen en Pendientes institucionales |
+| Estados (nuevos marcados) | **Dos ejes separados.** (A) **Envío**: `ENVIADO` · `FALLIDO` *(existentes)* · **`PENDIENTE`** · **`INCIERTO`** *(propuestos en LEV-R04, [05](05_REQUISITOS_SIN_DEPENDENCIAS.md); describen solo el envío del correo)*. (B) **Seguimiento de la lista**, que solo existe para un pedido `ENVIADO`: **`RECIBIDO`** *(hoy solo `receivedAt`; pasa a ser estado)* · **`EN_REVISION`** · **`CARGADO`** · **`OBSERVADO`** · **`VENCIDO`** *(derivado de la fecha límite)*. Un estado de envío nunca implica recepción, revisión ni carga |
+| Reglas | (0) `PENDIENTE` e `INCIERTO` **no** son estados de seguimiento y no pasan a `RECIBIDO` por sí solos. Si una persona podrá registrar la recepción de un pedido `INCIERTO` (la escuela respondió) **queda por definir** al aprobar este requisito; hoy el cliente ofrece «Marcar como recibido» solo para `ENVIADO`. (1) `RECIBIDO` lo registra una persona con alcance, al recibir el archivo por correo; no es automático. (2) `VENCIDO` se calcula al consultar; **no envía recordatorios** ni cambia datos. (3) `OBSERVADO` conserva el motivo y permite pedir la corrección por el mismo canal. (4) Un pedido `FALLIDO` no puede pasar a `RECIBIDO`; uno `PENDIENTE` tampoco. (5) Los estados `FALLIDO` y `VENCIDO` aparecen en Pendientes institucionales |
 | Criterios de aceptación | (1) La lista de pedidos muestra el estado y la fecha límite. (2) Marcar recibido registra quién y cuándo. (3) Un pedido vencido aparece en Pendientes sin generar correos |
 | Dependencias | R06, R20. Estado: **Propuesto**. Migración: `receivedAt` se conserva y se traduce a `RECIBIDO` |
 
@@ -73,11 +73,26 @@ La decisión de trabajo incluye la **fecha límite** en el pedido. Cambia el req
 
 ## 3. Diagramas
 
+Eje A, **estado del envío** (LEV-R04, propuesto salvo ENVIADO y FALLIDO):
+
 ```mermaid
 stateDiagram-v2
-  [*] --> ENVIADO: se envía el pedido (existente)
-  [*] --> FALLIDO: el servidor de correo no lo acepta (existente)
-  FALLIDO --> ENVIADO: reenvío (existente)
+  [*] --> PENDIENTE: se guarda el pedido y empieza el intento (propuesto)
+  PENDIENTE --> ENVIADO: el servidor de correo lo acepta
+  PENDIENTE --> FALLIDO: se demuestra que no lo aceptó
+  PENDIENTE --> INCIERTO: plazo agotado, corte tras DATA o intento sin resultado pasado el margen
+  ENVIADO --> [*]
+  FALLIDO --> [*]
+  INCIERTO --> [*]
+```
+
+*Un reenvío es siempre un pedido NUEVO (otra operación), no un cambio de estado de este. En los datos existentes, «reenvío» significaba volver a pedir.*
+
+Eje B, **seguimiento de la lista** (solo para pedidos `ENVIADO`):
+
+```mermaid
+stateDiagram-v2
+  [*] --> ENVIADO: pedido enviado (existente)
   ENVIADO --> RECIBIDO: una persona registra la recepción (propuesto)
   ENVIADO --> VENCIDO: pasa la fecha límite sin recepción (propuesto, derivado)
   VENCIDO --> RECIBIDO: llega el archivo tarde (propuesto)
@@ -88,7 +103,7 @@ stateDiagram-v2
   CARGADO --> [*]
 ```
 
-*DOC-D07 (estados). Mezcla estados existentes y propuestos, **marcados en cada flecha**; no es una figura del sistema actual.*
+*DOC-D07 (estados), dos figuras (A y B). Mezclan estados existentes y propuestos, **marcados en cada flecha**; no son figuras del sistema actual.*
 
 ```mermaid
 sequenceDiagram

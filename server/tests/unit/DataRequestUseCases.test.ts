@@ -17,9 +17,10 @@ import { SchoolRepository } from '@domain/repositories/SchoolRepository';
 import { FacultyRepository } from '@domain/repositories/FacultyRepository';
 import { UserRepository } from '@domain/repositories/UserRepository';
 import { AuditLogRepository } from '@domain/repositories/AuditLogRepository';
-import { DataRequest, DataRequestRepository } from '@domain/repositories/DataRequestRepository';
+import { DataRequest } from '@domain/repositories/DataRequestRepository';
 import { SchoolContactRepository } from '@domain/repositories/SchoolContactRepository';
-import { Mailer } from '@application/ports/Mailer';
+import { Mailer, MailNotConfiguredError } from '@application/ports/Mailer';
+import { InMemoryDataRequests } from '../helpers/inMemoryDataRequests';
 import { StudentTemplateProvider } from '@application/ports/StudentTemplateProvider';
 
 const school = { cycleCount: 10, id: 's1', name: 'Ingeniería de Sistemas', facultyId: 'f1', isActive: true, createdAt: new Date('2026-01-01'), requestEmail: 'registros@untrm.edu.pe' };
@@ -33,7 +34,7 @@ describe('pedido de listas por correo (fase 2)', () => {
   let users: jest.Mocked<UserRepository>;
   let mailer: jest.Mocked<Mailer>;
   let template: jest.Mocked<StudentTemplateProvider>;
-  let requests: jest.Mocked<DataRequestRepository>;
+  let requests: InMemoryDataRequests;
   let contacts: jest.Mocked<SchoolContactRepository>;
   let audit: jest.Mocked<AuditLogRepository>;
 
@@ -45,12 +46,7 @@ describe('pedido de listas por correo (fase 2)', () => {
     users = { findById: jest.fn().mockResolvedValue(requester) } as unknown as jest.Mocked<UserRepository>;
     mailer = { send: jest.fn().mockResolvedValue(undefined) };
     template = { build: jest.fn().mockResolvedValue(Buffer.from('xlsx')) };
-    requests = {
-      create: jest.fn().mockImplementation(async (d) => ({ id: 'r1', createdAt: new Date(), receivedAt: null, receivedById: null, ...d }) as DataRequest),
-      list: jest.fn().mockResolvedValue([]),
-      findById: jest.fn(),
-      markReceived: jest.fn(),
-    };
+    requests = new InMemoryDataRequests();
     contacts = { setRequestEmail: jest.fn().mockResolvedValue(undefined) };
     audit = { create: jest.fn().mockResolvedValue({}) } as unknown as jest.Mocked<AuditLogRepository>;
   });
@@ -69,7 +65,8 @@ describe('pedido de listas por correo (fase 2)', () => {
       expect(mailer.send).toHaveBeenCalledWith(expect.objectContaining({ text: expect.stringContaining('ciclos 12') }));
     });
     it('envía un correo formal al correo configurado de la escuela, con copia y respuesta a quien pide, y la plantilla adjunta', async () => {
-      const result = await send().execute('u1', { schoolId: 's1', cycles: [3, 1, 3], note: 'Con urgencia' });
+      const { request: result, replayed } = await send().execute('u1', { schoolId: 's1', cycles: [3, 1, 3], note: 'Con urgencia' });
+      expect(replayed).toBe(false);
 
       const mail = mailer.send.mock.calls[0][0];
       expect(mail).toMatchObject({ to: 'registros@untrm.edu.pe', cc: 'rosa@untrm.edu.pe', replyTo: 'rosa@untrm.edu.pe' });
@@ -95,13 +92,13 @@ describe('pedido de listas por correo (fase 2)', () => {
       await expect(send().execute('u1', { schoolId: 's1' })).rejects.toBeInstanceOf(RequestEmailNotConfiguredError);
 
       expect(mailer.send).not.toHaveBeenCalled();
-      expect(requests.create).not.toHaveBeenCalled();
+      expect(requests.rows).toHaveLength(0);
     });
 
-    it('si el correo no sale, el pedido queda registrado como FALLIDO para poder reenviarlo', async () => {
-      mailer.send.mockRejectedValue(Object.assign(new Error('x'), { name: 'MailNotConfiguredError' }));
+    it('si se demuestra que el correo no fue aceptado, el pedido queda registrado como FALLIDO para poder reenviarlo', async () => {
+      mailer.send.mockRejectedValue(new MailNotConfiguredError());
 
-      const result = await send().execute('u1', { schoolId: 's1' });
+      const { request: result } = await send().execute('u1', { schoolId: 's1' });
 
       expect(result).toMatchObject({ status: 'FALLIDO', error: 'MailNotConfiguredError' });
       expect(audit.create.mock.calls[0][0].details).toMatch(/no enviado/);
@@ -140,7 +137,7 @@ describe('pedido de listas por correo (fase 2)', () => {
     });
 
     it('la DBU lo pide con la plantilla de docentes, el texto de docentes y el pedido queda registrado como tal', async () => {
-      const result = await sendTeachers().execute('u1', { schoolId: 's1', kind: 'DOCENTES' });
+      const { request: result } = await sendTeachers().execute('u1', { schoolId: 's1', kind: 'DOCENTES' });
 
       const mail = mailer.send.mock.calls[0][0];
       expect(mail.subject).toBe('Solicitud de lista de docentes tutores — Ingeniería de Sistemas — periodo 2026-II');
@@ -163,7 +160,7 @@ describe('pedido de listas por correo (fase 2)', () => {
     it('sin plantilla de docentes configurada solo se puede pedir la de estudiantes; por omisión es la de estudiantes', async () => {
       await expect(send().execute('u1', { schoolId: 's1', kind: 'DOCENTES' })).rejects.toBeInstanceOf(InvalidDataRequestError);
 
-      const result = await send().execute('u1', { schoolId: 's1' });
+      const { request: result } = await send().execute('u1', { schoolId: 's1' });
       expect(result.kind).toBe('ESTUDIANTES');
     });
   });
@@ -204,33 +201,33 @@ describe('pedido de listas por correo (fase 2)', () => {
     const row = { id: 'r1', schoolId: 's1', periodId: 'p1' } as DataRequest;
 
     it('la DBU ve todos; la coordinación, solo los de sus escuelas; los demás, ninguno', async () => {
-      requests.list.mockResolvedValue([row]);
+      const listSpy = jest.spyOn(requests, 'list').mockResolvedValue([row]);
       const list = () => new ListDataRequestsUseCase(guard as unknown as StudentAccessGuard, schools, periods, requests);
 
       expect((await list().execute('admin'))[0]).toMatchObject({ schoolName: 'Ingeniería de Sistemas', periodName: '2026-II' });
-      expect(requests.list).toHaveBeenLastCalledWith(undefined);
+      expect(listSpy).toHaveBeenLastCalledWith(undefined);
 
       guard.scopeFor.mockResolvedValue({ kind: 'SCHOOLS', schoolIds: ['s1'] });
       await list().execute('coord');
-      expect(requests.list).toHaveBeenLastCalledWith({ schoolIds: ['s1'] });
+      expect(listSpy).toHaveBeenLastCalledWith({ schoolIds: ['s1'] });
 
       guard.scopeFor.mockResolvedValue({ kind: 'TUTOR', tutorId: 't' });
       expect(await list().execute('tutor')).toEqual([]);
     });
 
     it('marca como recibido comprobando el alcance sobre la escuela del pedido', async () => {
-      requests.findById.mockResolvedValue(row);
-      requests.markReceived.mockResolvedValue({ ...row, receivedAt: new Date() });
+      jest.spyOn(requests, 'findById').mockResolvedValue(row);
+      const markSpy = jest.spyOn(requests, 'markReceived').mockResolvedValue({ ...row, receivedAt: new Date() });
       const mark = new MarkDataRequestReceivedUseCase(guard as unknown as StudentAccessGuard, requests);
 
       await mark.execute('coord', 'r1');
 
       expect(guard.assertSchoolAccess).toHaveBeenCalledWith('coord', 's1');
-      expect(requests.markReceived).toHaveBeenCalledWith('r1', 'coord', expect.any(Date));
+      expect(markSpy).toHaveBeenCalledWith('r1', 'coord', expect.any(Date));
     });
 
     it('un pedido que no existe responde no encontrado', async () => {
-      requests.findById.mockResolvedValue(null);
+      jest.spyOn(requests, 'findById').mockResolvedValue(null);
 
       await expect(new MarkDataRequestReceivedUseCase(guard as unknown as StudentAccessGuard, requests).execute('coord', 'x')).rejects.toBeInstanceOf(DataRequestNotFoundError);
     });

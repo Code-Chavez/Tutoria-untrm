@@ -1,11 +1,14 @@
 import { Request, Response } from 'express';
 import { z } from 'zod';
 import {
+  DataRequestInFlightError,
   DataRequestNotFoundError,
+  DuplicateDataRequestError,
   InvalidDataRequestError,
   ListDataRequestsUseCase,
   MarkDataRequestReceivedUseCase,
   NoPeriodToRequestError,
+  OperationIdConflictError,
   RequestEmailNotConfiguredError,
   SendDataRequestUseCase,
   SetSchoolRequestEmailUseCase,
@@ -18,6 +21,9 @@ const sendSchema = z.object({
   cycles: z.array(z.coerce.number().int().min(1).max(14)).max(14).optional(),
   note: z.string().trim().max(500, 'Las observaciones no pueden pasar de 500 caracteres').optional(),
   kind: z.enum(['ESTUDIANTES', 'DOCENTES']).optional(),
+  // Idempotencia y reenvío confirmado (LEV-R04).
+  operationId: z.string().uuid('El identificador de la operación no es válido').optional(),
+  confirmDuplicateOf: z.string().uuid('El pedido a confirmar no es válido').optional(),
 });
 const emailSchema = z.object({ email: z.string().trim().max(254).nullable() });
 
@@ -40,6 +46,12 @@ export class DataRequestController {
       res.status(409).json({ error: error.message, code: 'REQUEST_EMAIL_NOT_CONFIGURED' });
     } else if (error instanceof NoPeriodToRequestError) {
       res.status(409).json({ error: error.message, code: 'NO_OPEN_PERIOD' });
+    } else if (error instanceof DuplicateDataRequestError) {
+      res.status(409).json({ error: error.message, code: 'DUPLICATE_DATA_REQUEST', previous: error.previous });
+    } else if (error instanceof DataRequestInFlightError) {
+      res.status(409).json({ error: error.message, code: 'DATA_REQUEST_IN_FLIGHT', previous: error.previous });
+    } else if (error instanceof OperationIdConflictError) {
+      res.status(422).json({ error: error.message, code: 'OPERATION_ID_CONFLICT' });
     } else if (error instanceof TeacherListForbiddenError) {
       res.status(403).json({ error: error.message });
     } else if (error instanceof InvalidDataRequestError) {
@@ -51,8 +63,18 @@ export class DataRequestController {
 
   create = async (req: Request, res: Response) => {
     try {
-      const request = await this.send.execute(req.auth?.sub as string, sendSchema.parse(req.body), req.ip);
-      res.status(request.status === 'ENVIADO' ? 201 : 502).json({ message: request.status === 'ENVIADO' ? 'Pedido enviado' : 'El pedido quedó registrado pero el correo no salió', request });
+      const { request, replayed } = await this.send.execute(req.auth?.sub as string, sendSchema.parse(req.body), req.ip);
+      // 201 creado y enviado; 200 repetición de una operación ya guardada (no se envió nada); 202 registrado con resultado
+      // incierto o en curso; 502 registrado pero el correo no fue aceptado.
+      const status = replayed ? 200 : request.status === 'ENVIADO' ? 201 : request.status === 'FALLIDO' ? 502 : 202;
+      const message = replayed
+        ? 'La operación ya estaba registrada; no se envió otro correo'
+        : request.status === 'ENVIADO'
+          ? 'Pedido enviado'
+          : request.status === 'FALLIDO'
+            ? 'El pedido quedó registrado pero el correo no salió'
+            : 'El pedido quedó registrado pero no se puede saber si el correo salió';
+      res.status(status).json({ message, request, replayed });
     } catch (error) {
       this.fail(error, res);
     }

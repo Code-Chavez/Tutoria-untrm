@@ -57,20 +57,27 @@ Estructura de cada requisito: identificador, descripción, actor, prioridad (pro
 | Casos límite | Cambio de ciclos entre la vista previa y el envío (se vuelve a previsualizar); periodo no vigente |
 | Dependencias | Ninguna. El canal de entrega (Q11) y los campos obligatorios (Q12) no cambian este requisito. Estado: **Propuesto** |
 
-## LEV-R04 · Prevenir pedidos duplicados por doble clic o reintento
+## LEV-R04 · Prevenir pedidos de lista duplicados: idempotencia y advertencia de equivalencia
+
+> **Reformulado el 28/10/2026** (diseño aprobado por el responsable del proyecto para C-4). El texto anterior hablaba solo de «doble clic» y de una ventana; ahora separa dos mecanismos y define los estados de envío. **Ventana de 10 minutos: valor provisional del proyecto, no política institucional.** Estado: **Propuesto**; implementación en el PR de C-4.
 
 | Campo | Contenido |
 |---|---|
-| Descripción | Enviar dos veces el mismo pedido en poco tiempo no produce dos correos sin que la persona lo confirme |
+| Descripción | Repetir la misma operación (doble clic, reintento por respuesta perdida) nunca crea otro pedido ni otro envío; una operación **nueva** equivalente a un pedido reciente exige confirmación expresa de ese pedido |
 | Actor | Coordinación o Administrador DBU |
 | Prioridad (propuesta) | Media |
-| Origen | Encargo C («prevención de envíos repetidos por doble clic»); LEV-D34 (hoy solo hay estado de carga en el cliente; el servidor no se verificó) |
-| Datos | Escuela, periodo, tipo de lista, ciclos, fecha y hora del pedido anterior |
-| Reglas | (1) El servidor detecta un pedido equivalente (misma escuela, periodo, tipo y ciclos) dentro de una **ventana de tiempo** y pide confirmación explícita; no lo bloquea. (2) El cliente deshabilita el botón mientras envía. (3) La ventana por omisión de trabajo es de **10 minutos**; su valor es una decisión menor pendiente |
-| Permisos | Los de enviar pedidos |
-| Criterios de aceptación | (1) Dos envíos idénticos en el mismo segundo producen un solo correo y una respuesta clara al segundo. (2) Pasada la ventana, se permite un reenvío legítimo. (3) Prueba de integración con peticiones simultáneas |
-| Casos límite | Pedido anterior `FALLIDO` (el reenvío se permite sin confirmación); ciclos distintos (no es duplicado) |
-| Dependencias | Ninguna. Estado: **Propuesto con valor pendiente** (ventana de tiempo) |
+| Origen | Encargo C («prevención de envíos repetidos por doble clic»); LEV-D34 |
+| **Mecanismo 1 · Idempotencia** | Cada intención lleva un `operationId` (UUID generado por el cliente). El servidor lo guarda **por persona**: repetirlo con el mismo contenido devuelve el resultado ya guardado (sin otra fila, otro correo ni otra bitácora), también si era un reenvío confirmado o si el resultado fue FALLIDO o INCIERTO; reutilizarlo con **otro contenido** se rechaza (422); el identificador de otra persona no se ve ni devuelve datos (la búsqueda es solo del solicitante). Una operación hace como máximo **un** intento de envío |
+| **Contenido que se compara** | Tipo de lista, escuela, periodo, **destinatario efectivo** (correo de la escuela), ciclos guardados y **nota**. Si cambia cualquiera con el mismo identificador, es otro contenido |
+| **Mecanismo 2 · Equivalencia** | Dos pedidos son equivalentes si coinciden **tipo, escuela, periodo y alcance**. Alcance: en estudiantes, «ningún ciclo» (que el correo y la lista leen como «todos») y la lista completa de ciclos de la escuela son lo mismo, y el orden o los repetidos no importan; en docentes los ciclos **no aplican** y no se guardan. Dentro de la ventana (**provisional: 10 minutos**) cuentan los pedidos **ENVIADO** (recibidos o no), **INCIERTO** y **PENDIENTE**; **FALLIDO** (fallo demostrado) no cuenta y permite reintentar |
+| Reglas | (1) **PENDIENTE vigente** (intento en curso) **bloquea** todo envío equivalente: la confirmación no lo salta. (2) Un equivalente ENVIADO o INCIERTO responde 409 identificando **ese** pedido (id, fecha, estado); el reenvío es una **operación nueva** (otro `operationId`) con `confirmDuplicateOf` = ese id. (3) Si mientras el diálogo estaba abierto se registró otro equivalente, el id ya no coincide y se advierte de nuevo sobre el nuevo pedido: una confirmación genérica no autoriza una situación nueva. (4) El cliente deshabilita el botón mientras envía; conserva el `operationId` ante una respuesta perdida o un error del servidor y lo renueva solo ante una respuesta definitiva, un cambio de contenido o un reenvío deliberado. (5) Dos solicitudes simultáneas se serializan por clave de equivalencia (candado de transacción corto), nunca con una transacción abierta durante el envío |
+| **Estados de envío** | `PENDIENTE` (guardado, intento en curso), `ENVIADO` (aceptado por el servidor de correo; no es «llegó a la bandeja»), `FALLIDO` (**demostrado** que no fue aceptado: antes de transmitir el mensaje o con respuesta de rechazo del servidor), `INCIERTO` (no se puede demostrar que falló antes de una posible aceptación: tiempo agotado o corte durante o después de DATA, fase desconocida, plazo propio vencido, o un PENDIENTE sin resultado pasado el margen). Son un eje **distinto** de la recepción, revisión y carga de la lista (LEV-R21, [12](12_ESPECIFICACION_PEDIDO_DE_LISTAS.md)) |
+| Plazos | Envío SMTP: máximo **60 s** (además de los tiempos del transporte). Margen del intento: **5 min** (el mismo de la cola de avisos); pasado el margen un PENDIENTE se trata como INCIERTO y un resultado tardío **ya no lo modifica** (actualización condicional al mismo intento y dentro del margen) |
+| **Lo que NO se promete** | **No hay entrega «exactamente una vez».** Si el proveedor acepta el correo y el servidor cae antes de registrar el resultado, el pedido queda PENDIENTE y luego INCIERTO: el correo pudo haber salido y el sistema **no lo reenvía por su cuenta**; reenviar es decisión de la persona, con advertencia. Tampoco se garantiza que el correo llegue a la bandeja |
+| Permisos | Los de enviar pedidos; la comprobación de acceso a la escuela ocurre **antes** de buscar el identificador |
+| Criterios de aceptación | (1) Dos envíos idénticos simultáneos producen un solo correo y una sola fila. (2) Repetir una operación devuelve lo guardado sin otro envío. (3) Mismo identificador con otro contenido: 422. (4) Equivalente dentro de la ventana: 409 con el pedido anterior; confirmarlo envía otra operación; una confirmación obsoleta se rechaza. (5) PENDIENTE vigente: bloqueo sin remedio. (6) FALLIDO: reintento libre; INCIERTO: exige confirmación. (7) Pasada la ventana: se permite. (8) Pruebas de servidor, de integración con peticiones simultáneas y del cliente |
+| Casos límite | Pedido anterior sin identificador (histórico): no se le atribuye ninguno ni cuenta como equivalente; ciclos distintos no son duplicado; docentes con ciclos enviados: se ignoran |
+| Dependencias | Ninguna institucional. **Cambio de datos aditivo** (columnas `operation_id`, `content_hash`, `equivalence_key`, `resend_of_id`, `attempt_started_at`; los pedidos históricos quedan con NULL) y dos estados nuevos. La generalización de la cola de correo para pedidos queda **fuera** de esta entrega |
 
 ## LEV-R05 · Hacer visible el fallo del correo de rechazo del docente
 
