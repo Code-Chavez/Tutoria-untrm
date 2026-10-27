@@ -132,11 +132,14 @@ describe('solicitud de tutoría → sesión o derivación (U01)', () => {
     expect(notes.some((n) => n.message.includes('sesión programada'))).toBe(true);
 
     // No se duplica: una segunda sesión (o derivación) para la misma solicitud se rechaza y no deja nada
-    const before = await prisma.session.count({ where: { tutorId: request.routedToId } });
+    // Solo las sesiones de ESTA corrida (su tema propio): otras suites crean sesiones para la misma tutora de demostración a la vez, y contar todas
+    // las de la tutora hacía fallar la prueba de forma intermitente.
+    const ownSessions = { tutorId: request.routedToId, topic: TOPIC };
+    const before = await prisma.session.count({ where: ownSessions });
     const again = await call('POST', '/api/sessions', tokens.tutor, sessionBody(id));
     expect(again.status).toBe(409);
     expect(((await again.json()) as { error: string }).error).toMatch(/ya tiene una sesión/i);
-    expect(await prisma.session.count({ where: { tutorId: request.routedToId } })).toBe(before);
+    expect(await prisma.session.count({ where: ownSessions })).toBe(before);
     const referral = await call('POST', `/api/students/${studentId}/referrals`, tokens.tutor, referralBody(id));
     expect(referral.status).toBe(409);
   });
