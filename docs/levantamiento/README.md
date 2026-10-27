@@ -17,15 +17,16 @@ Este levantamiento sirve para decidir, no para convertir cada duda en una funcio
 | 02 | [Preguntas y decisiones institucionales](02_PREGUNTAS_INSTITUCIONALES.md) (las 31, con registro de decisiones) | 1 | Borrador |
 | 03 | [Contraste con el Protocolo, el backlog y las estimaciones](03_CONTRASTE_PROTOCOLO_Y_BACKLOG.md), con discrepancias | 1 | Borrador |
 | 04 | [Autorrevisión de la Fase 1](04_AUTORREVISION_FASE1.md): criterios de la fase y del levantamiento completo, evaluados por separado | 1 | Borrador |
-| 05 | [Requisitos propuestos que no dependen de las P0](05_REQUISITOS_SIN_DEPENDENCIAS.md) (6) | 2 | Avance parcial |
+| 05 | [Requisitos propuestos que no dependen de las P0](05_REQUISITOS_SIN_DEPENDENCIAS.md) (7) | 2 | Avance parcial |
 | 06 | [Matriz de roles, permisos y alcance — sistema actual](06_MATRIZ_ROLES_PERMISOS_ACTUAL.md) | 2 | Borrador (solo lo implementado) |
 | 07 | [Matriz de eventos, avisos y correos — sistema actual y huecos](07_MATRIZ_EVENTOS_ACTUAL.md) | 2 | Borrador (implementado + huecos) |
 | — | Especificación general de requisitos | 2 | No iniciada |
 | — | Proceso de certificación (estados y responsables) | 2 | **Bloqueada** por las P0 de certificación |
-| — | Catálogo de plantillas de correo y campos variables | 2 | No iniciado |
+| 08 | [Catálogo de plantillas de correo — sistema actual](08_CATALOGO_PLANTILLAS_CORREO_ACTUAL.md) (13 plantillas y 5 hallazgos) | 2 | Borrador (solo lo implementado) |
+| 09 | [Estados vigentes de solicitud, derivación y designación](09_ESTADOS_ACTUALES_SOLICITUD_Y_DERIVACION.md) | 2 | Borrador (solo lo implementado) |
 | — | Backlog propuesto (HU/TT con dependencias) y plan de pruebas con trazabilidad | 4 | No iniciados |
 
-Las fases 3 (validación con las respuestas) y 4 (plan de implementación) no se inician hasta que existan respuestas a las preguntas que las bloquean; lo que **no** depende de ellas sigue avanzando (05–07).
+Las fases 3 (validación con las respuestas) y 4 (plan de implementación) no se inician hasta que existan respuestas a las preguntas que las bloquean; lo que **no** depende de ellas sigue avanzando (05–09).
 
 ## Convenciones
 
@@ -41,6 +42,13 @@ Las fases 3 (validación con las respuestas) y 4 (plan de implementación) no se
 En todo documento y figura se separan siempre tres estados: **implementado**, **propuesto** y **pendiente de decisión**.
 
 **Identificadores provisionales.** Los existentes son RF-01…RF-50, HU-01…HU-50 (con numeración desfasada en uno respecto de RF a partir de RF-09/HU-08: la bitácora, RF-08, no tiene historia propia), TT-000, TT-001 y TT-100…TT-105, y RSK-001. Aquí se usan `LEV-D` (diagnóstico), `LEV-Q` (preguntas), `LEV-R` (requisitos propuestos) y `E`/`H` (eventos y huecos): **provisionales; no pertenecen al backlog aprobado.**
+
+## Advertencias de lectura
+
+1. **Las 323 horas-hombre y los 164 Story Points son las estimaciones originales de planificación** (juicio de experto, un solo recurso): no son horas ejecutadas ni el presupuesto de las ampliaciones, que no están estimadas.
+2. **La matriz de permisos de [06](06_MATRIZ_ROLES_PERMISOS_ACTUAL.md) describe la configuración inicial del código (la seed)**, no necesariamente los permisos actuales de cada base de datos ni una política institucional aprobada.
+3. **Las funciones existentes sin RF/HU/estimación son brechas de trazabilidad** (ver X4 en [03](03_CONTRASTE_PROTOCOLO_Y_BACKLOG.md)): no se les asigna una aprobación retroactiva.
+4. **Las recomendaciones de [00](00_PREGUNTAS_P0_PARA_RESPONDER.md) son propuestas** hasta que la persona o instancia indicada las confirme.
 
 ## Coordinación con la documentación integral del informe
 

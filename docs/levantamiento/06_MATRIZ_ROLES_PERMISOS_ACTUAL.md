@@ -1,6 +1,6 @@
 # Matriz de roles, permisos y alcance — sistema actual
 
-**Estado de este documento: IMPLEMENTADO** (lo que hace el código hoy, corte `c2e0460`). Las secciones «Propuesto» y «Pendiente de decisión» están separadas al final y **no** describen el sistema actual. Fuente de verdad: este archivo (entregable 3 del levantamiento); la documentación integral del informe debe **referenciarlo** y no repetir la matriz. Etiquetas: [README](README.md).
+**Estado de este documento: IMPLEMENTADO** (lo que hace el código hoy, corte `c2e0460`). **Advertencia de alcance:** la matriz describe la **configuración inicial del código** (la seed), **no necesariamente los permisos que hoy tiene cada base de datos ni una política institucional aprobada**. Comprobación puntual: el 27/10/2026, en modo lectura, los permisos de los siete roles guardados en la base de **desarrollo** coinciden con la seed (36, 17, 16, 3, 2, 4 y 2 permisos, sin extras ni faltantes); eso no dice nada de otras bases (pruebas, piloto, producción), y la coincidencia es la esperable porque la seed vuelve a crear lo que falte. Las secciones «Propuesto» y «Pendiente de decisión» están separadas al final y **no** describen el sistema actual. Fuente de verdad: este archivo (entregable 3 del levantamiento); la documentación integral del informe debe **referenciarlo** y no repetir la matriz. Etiquetas: [README](README.md).
 
 ## 1. Roles sembrados (implementado)
 

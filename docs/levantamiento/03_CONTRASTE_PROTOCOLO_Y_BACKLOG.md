@@ -16,7 +16,7 @@ Borrador para revisión. Para cada necesidad: qué dicen los **artículos del Pr
 | Protocolo, Art. 24.a | **La facultad** emite la amonestación escrita → sustenta el rol Decano |
 | RF-04 | Cinco roles: Administrador DBU, Docente tutor, Tutorado, Profesional de servicio, Vicerrectorado (solo lectura); «solo el Administrador DBU puede asignar o revocar roles» |
 | HU-04 | **Siete** roles: Administrador DBU, Coordinador, **Responsable de escuela**, Docente tutor, Tutorado, Profesional de servicio, Vicerrectorado (lectura); «se deniega y **notifica** toda acción fuera de permisos» |
-| Sprint Backlog y estimación (HU-04) | Prioridad Crítica, 8 Story Points (el Product Backlog suma 164: 50 HU, 8 TT y 1 RSK); tareas T-1.22 (modelos Role/Permission), T-1.23 (middleware `requirePermission()` y «endpoints de roles») y T-1.24 («**Guard de rutas por permiso**» en el frontend): 3 + 3 + 2 = **8 h**. El Sprint Backlog menciona `RoleService` con `assignRole` y `revokeRole` |
+| Sprint Backlog y estimación (HU-04) | Prioridad Crítica, 8 Story Points (el Product Backlog suma 164 de planificación original: 50 HU, 8 TT y 1 RSK); tareas T-1.22 (modelos Role/Permission), T-1.23 (middleware `requirePermission()` y «endpoints de roles») y T-1.24 («**Guard de rutas por permiso**» en el frontend): 3 + 3 + 2 = **8 h estimadas originalmente** (no horas ejecutadas). El Sprint Backlog menciona `RoleService` con `assignRole` y `revokeRole` |
 | Código | 7 roles sembrados (con **Decano**, sin **Responsable de escuela**); permisos finos; `POST /roles` crea nombre y descripción; **un solo rol por usuario; sin `revokeRole`**; el cliente decide el menú con un mapa fijo de nombres de rol |
 
 **Discrepancias:** (1) RF-04 (5 roles) ≠ HU-04 (7, con «Responsable de escuela» y sin Decano) ≠ código (7, con Decano y sin «Responsable de escuela»). (2) T-1.24 pide guardas **por permiso** en el cliente; el cliente usa **nombres de rol**. (3) HU-04 pide **notificar** las acciones denegadas; el servidor responde 403 con mensaje, sin aviso. (4) Ni RF, HU ni la estimación incluyen **crear roles con permisos configurables**; las 8 h estimadas cubren solo la autorización por permisos. (5) El Protocolo no pide roles configurables.
@@ -41,7 +41,7 @@ Borrador para revisión. Para cada necesidad: qué dicen los **artículos del Pr
 | RF / HU / estimación | Búsqueda de «pedido», «lista» y correo masivo: **sin resultados** relacionados; los únicos correos previstos son la recuperación de contraseña (HU-02) |
 | Código | Pedido formal con plantilla, estados enviado/fallido, recepción manual (`DataRequest`) |
 
-**Discrepancia:** una funcionalidad completa (y su estado de datos) existe **sin RF/HU/estimación** que la respalde; su aprobación institucional no consta en los documentos revisados.
+**Brecha de trazabilidad:** una funcionalidad completa (y su estado de datos) existe **sin RF/HU/estimación** que la respalde. Es una brecha de trazabilidad; **no se le asigna aprobación retroactiva**: queda por definir qué requisito, decisión o acta la respalda.
 
 ### D. Primer acceso y aceptación del docente
 
@@ -108,11 +108,11 @@ Borrador para revisión. Para cada necesidad: qué dicen los **artículos del Pr
 | X1 | Lista de roles distinta en RF-04 (5), HU-04 (7 con «Responsable de escuela») y código (7 con Decano) | RF-04, HU-04, `seedBase.ts` | Q01–Q02: qué lista es la vigente y actualizar RF/HU |
 | X2 | HU-04 pide guardas por permiso en el cliente y notificar lo denegado; el cliente usa nombres de rol y no notifica | HU-04, T-1.24, `navigation.ts` | Registrar como deuda técnica o ajustar el criterio |
 | X3 | HU-20 asigna el lugar al docente; la necesidad lo asigna al solicitante | HU-20, RF-21 | Q17: modificar RF/HU si se aprueba |
-| X4 | Funciones existentes sin RF/HU/estimación: pedido de listas, invitación y aceptación del docente, avisos de solicitudes y sesiones, correo por aviso, pendientes institucionales | código, `docs/` | Registrarlas en el backlog como implementadas fuera de plan o retirarlas del alcance |
+| X4 | **Brechas de trazabilidad:** funciones existentes sin RF/HU/estimación (pedido de listas, invitación y aceptación del docente, avisos de solicitudes y sesiones, correo por aviso, pendientes institucionales). Se registran como brechas; **no se les asigna aprobación retroactiva** | código, `docs/` | Decidir, función por función, si se respaldan con un requisito nuevo, con una decisión escrita, o se retiran del alcance |
 | X5 | RF/HU sustituyen la firma por confirmación electrónica; el código añade carga de documento firmado; el certificado de ejemplo usa firma criptográfica | RF-15, RF-23, `SignedDocument`, ejemplo | Q23 |
 | X6 | El Art. 23.a atribuye el reconocimiento a «la facultad» y no menciona certificado, criterios ni firmante | Protocolo, ejemplo | Q20–Q22 |
 | X7 | El límite de «dos ciclos» no figura en el Protocolo (ya documentado) | `DECISIONES_DBU…` | Q (DBU) |
-| X8 | La estimación es de **323 horas-hombre**, con un solo recurso, y el Product Backlog de **164 Story Points**; ninguno contempla las ampliaciones | Estimación de Tareas v2.0 | Nueva estimación en Fase 4, declarada como propuesta |
+| X8 | **Las 323 horas-hombre y los 164 Story Points son las estimaciones originales de planificación** (juicio de experto, un solo recurso): no son horas ejecutadas ni el presupuesto de las ampliaciones, que no están estimadas | Estimación de Tareas v2.0; Product Backlog | Nueva estimación en la Fase 4, declarada como propuesta con sus supuestos |
 
 ## 3. Qué no se contrastó
 

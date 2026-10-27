@@ -98,6 +98,21 @@ Estructura de cada requisito: identificador, descripción, actor, prioridad (pro
 | Casos límite | Zona horaria del servidor frente a la de los destinatarios; periodo que termina antes de la fecha |
 | Dependencias | LEV-R03 (vista previa). Estado: **Propuesto con valor pendiente** (obligatoriedad: Q12) |
 
+## LEV-R07 · Alinear el texto del correo de aceptación con el formulario
+
+| Campo | Contenido |
+|---|---|
+| Descripción | El correo que se envía al designar a un docente (P11) deja de pedirle «el lugar»: debe pedir solo días y horas, como el formulario de aceptación desde TT-103 |
+| Actor | Sistema (texto de la plantilla) |
+| Prioridad (propuesta) | Baja (corrige una inconsistencia; no cambia reglas) |
+| Origen | Hallazgo C01 de [08](08_CATALOGO_PLANTILLAS_CORREO_ACTUAL.md); `CAMBIOS_USUARIO_TT103.md` |
+| Datos | Solo el texto de la plantilla |
+| Reglas | (1) El correo y la pantalla dicen lo mismo. (2) Si más adelante se aprueba que el lugar lo decida el solicitante (Q17), el texto no vuelve a pedirlo al docente |
+| Permisos | No aplica |
+| Criterios de aceptación | (1) El texto del correo no menciona «lugar». (2) Una prueba de la plantilla lo comprueba. (3) El resto del texto no cambia |
+| Casos límite | Correos ya enviados con el texto anterior (no se reenvían) |
+| Dependencias | Ninguna. Estado: **Propuesto** |
+
 ---
 
 ## Lo que NO se especifica todavía (depende de una decisión)

@@ -24,7 +24,7 @@ Derivados del encargo, §1 («Revisión del estado actual») y §5 («Fase 1 —
 | Fase | Contenido (encargo §5) | Estado | Qué falta |
 |---|---|---|---|
 | 1. Inventario | Diagnóstico y preguntas prioritarias | **Borrador entregado** (sección 1) | Revisión externa |
-| 2. Especificación | Requisitos, matrices y escenarios; decisiones que bloquean cada función | **Avance parcial**: matriz de roles y permisos del sistema actual ([06](06_MATRIZ_ROLES_PERMISOS_ACTUAL.md)), matriz de eventos actual y huecos ([07](07_MATRIZ_EVENTOS_ACTUAL.md)) y 6 requisitos que no dependen de decisiones ([05](05_REQUISITOS_SIN_DEPENDENCIAS.md)) | La especificación general de requisitos, el catálogo de plantillas de correo y el proceso de certificación; todo lo que depende de las P0 |
+| 2. Especificación | Requisitos, matrices y escenarios; decisiones que bloquean cada función | **Avance parcial**: matriz de roles y permisos del sistema actual ([06](06_MATRIZ_ROLES_PERMISOS_ACTUAL.md)), matriz de eventos actual y huecos ([07](07_MATRIZ_EVENTOS_ACTUAL.md)) 7 requisitos que no dependen de decisiones ([05](05_REQUISITOS_SIN_DEPENDENCIAS.md)), el catálogo de plantillas de correo actual ([08](08_CATALOGO_PLANTILLAS_CORREO_ACTUAL.md)) y los estados vigentes de solicitud y derivación ([09](09_ESTADOS_ACTUALES_SOLICITUD_Y_DERIVACION.md)) | La especificación general de requisitos y el proceso de certificación; las plantillas de funciones nuevas; todo lo que depende de las P0 |
 | 3. Validación | Incorporar las respuestas de los responsables; registro de decisiones | **No iniciada** | Respuestas a las P0; el registro de decisiones está en blanco |
 | 4. Plan de implementación | Entregas pequeñas, dependencias, riesgos, migraciones, pruebas, estimaciones | **No iniciada** | Backlog propuesto, plan de pruebas y trazabilidad |
 
@@ -40,6 +40,10 @@ Derivados del encargo, §1 («Revisión del estado actual») y §5 («Fase 1 —
 | R4 | Había dicho que `POST /roles` no se audita sin comprobar el interceptor automático | Comprobado: `CRITICAL_MODELS` no incluye `Role`; LEV-D05 con la evidencia |
 | R5 | El uso del término «Responsable de escuela» y de las listas de roles dependía de RF-04 solo | Contrastado con HU-04 y el Art. 5 del Protocolo |
 | R6 | Las recomendaciones de la hoja P0 podían leerse como decisiones | Redactadas como propuesta del equipo y corregidas dos frases (Q01, Q05) |
+| R7 | Las 323 horas y los 164 Story Points se citaban sin aclarar que son estimaciones **originales** de planificación | Aclarado en el README y en [03](03_CONTRASTE_PROTOCOLO_Y_BACKLOG.md): no son horas ejecutadas ni el presupuesto de las ampliaciones |
+| R8 | La matriz de permisos podía leerse como los permisos vigentes o como política aprobada | Advertencia en [06](06_MATRIZ_ROLES_PERMISOS_ACTUAL.md) y en el README: es la configuración inicial del código; se comprobó, en solo lectura, que la base de desarrollo coincide con la seed el 27/10/2026 |
+| R9 | Las funciones existentes sin RF/HU se describían con un lenguaje («implementadas fuera de plan» / «retirarlas») que sugería una aprobación implícita | Reescrito como **brechas de trazabilidad**, sin aprobación retroactiva (X4 en 03) |
+| R10 | Hay una inconsistencia entre el correo de aceptación (pide «el lugar») y el formulario (solo días y horas) que la Fase 1 no había detectado | Documentada en [08](08_CATALOGO_PLANTILLAS_CORREO_ACTUAL.md) (C01) y propuesta como LEV-R07 |
 
 ## 4. Lo que esta autorrevisión no hace
 
