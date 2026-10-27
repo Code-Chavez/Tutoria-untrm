@@ -22,10 +22,11 @@ Recorridos de extremo a extremo con [Playwright](https://playwright.dev) sobre l
 
 ## Cómo correrlas
 
-Necesitan el stack de desarrollo ya levantado y sembrado (cuentas de `docs/ACEPTACION_RELEASE_v0.4.0.md`, paso 0):
+Necesitan el stack de desarrollo ya levantado y sembrado (cuentas de `docs/ACEPTACION_RELEASE_v0.4.0.md`, paso 0). El arranque ya no siembra: en un entorno nuevo hay que sembrar una vez.
 
 ```bash
 docker compose up -d          # desde la raíz del repositorio
+docker compose exec server pnpm run seed     # solo la primera vez (base vacía); no modifica lo que ya existe
 cd e2e
 npx -y pnpm@9.15.9 install
 npx playwright install chromium     # una sola vez; o use un navegador ya instalado (abajo)
@@ -52,6 +53,6 @@ Variables opcionales: `E2E_BASE_URL` (por defecto `http://localhost:5173`) y `E2
 Úselas sobre un entorno recién sembrado para que solo aparezcan datos de demostración:
 
 ```bash
-docker compose down -v && docker compose up -d --build
+docker compose down -v && docker compose up -d --build && docker compose exec server pnpm run seed
 cd e2e && E2E_CHANNEL=chrome npx playwright test -c playwright.manual.config.ts
 ```

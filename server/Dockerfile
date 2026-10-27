@@ -14,10 +14,10 @@ COPY . .
 
 EXPOSE 3000
 
-# Imagen de desarrollo: deja la base lista en cada arranque para que
-# `docker compose up` siempre levante un entorno usable, incluso con un
-# volumen nuevo. El seed es idempotente (todo son upserts).
+# Imagen de desarrollo: en cada arranque genera el cliente y aplica las migraciones (igual que producción: migrar, no sembrar).
+# NO ejecuta el seed: reiniciar el servidor no cambia ningún dato. Un entorno nuevo se inicializa con una orden explícita, una sola vez:
+#   docker compose exec server pnpm run seed
 # `prisma generate` va en el arranque porque `prisma/` y `src/` se montan desde el
 # host: al cambiar de rama el esquema cambia, y un cliente generado al construir la
 # imagen quedaría desfasado (el servidor se queda reiniciando sin escuchar).
-CMD ["sh", "-c", "pnpm prisma generate && pnpm prisma migrate deploy && pnpm run seed && pnpm run dev"]
+CMD ["sh", "-c", "pnpm prisma generate && pnpm prisma migrate deploy && pnpm run dev"]

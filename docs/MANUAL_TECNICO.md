@@ -110,10 +110,13 @@ de datos**, no del contenido del token.
 git clone <url-del-repositorio>
 cd Tutoria-untrm
 docker compose up -d --build
+docker compose exec server pnpm run seed      # SOLO en un entorno nuevo (base vacía): datos de demostración, una vez
 ```
 
-El contenedor del servidor aplica las migraciones y siembra datos de demostración en cada arranque (es idempotente). La primera vez, el servidor tarda
-unos minutos en responder.
+El contenedor del servidor aplica las migraciones en cada arranque, como producción, y **no siembra**: reiniciar el servidor no cambia ningún dato. El
+seed (`prisma/seed.ts`) es una orden explícita que **solo crea lo que falta**: no sobrescribe coordinaciones, sedes, escuelas de docentes, vínculos de
+estudiantes ni matrículas existentes, ni matricula a estudiantes que no son de la seed; si falla, termina con error y muestra la causa. La primera vez,
+el servidor tarda unos minutos en responder.
 
 | Servicio | Dirección |
 |---|---|
@@ -128,7 +131,7 @@ depende qué derivaciones ve y recibe. (Esta asignación se agregó después de 
 **Cuentas de demostración** (solo desarrollo; la guía completa está en `docs/ACEPTACION_RELEASE_v0.4.0.md`): administrador `7183255722@untrm.edu.pe`
 (`Admin2026!`); coordinadores, tutores, profesionales, Vicerrectorado y tutorados con contraseña `Demo2026!`.
 
-Para reiniciar con datos limpios: `docker compose down -v && docker compose up -d --build` (borra los volúmenes).
+Para reiniciar con datos limpios: `docker compose down -v && docker compose up -d --build && docker compose exec server pnpm run seed` (borra los volúmenes y vuelve a sembrar).
 
 **Sin Docker** (opcional): con PostgreSQL en `localhost:5432`:
 
