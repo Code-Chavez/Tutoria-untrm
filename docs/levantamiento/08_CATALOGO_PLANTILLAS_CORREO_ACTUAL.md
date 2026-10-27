@@ -37,7 +37,7 @@ Todas las plantillas comparten el encabezado institucional (Universidad Nacional
 | C02 | P12 incluye el motivo íntegro que escribió el docente en un correo a la coordinación | `tutorAcceptanceEmail.ts` | Pendiente de decisión sobre qué debe viajar por correo (Q07) |
 | C03 | No hay plantilla de aviso de **aceptación** del docente ni de **cambio de disponibilidad** | [07](07_MATRIZ_EVENTOS_ACTUAL.md), H02–H03 | Pendiente de decisión (Q08, Q16) |
 | C04 | No hay plantilla propia para cada tipo de pedido de lista salvo estudiantes y docentes; no incluye fecha límite, finalidad como campo ni medio de entrega | LEV-D32 | LEV-R06 y Q11–Q12 |
-| C05 | Las plantillas están escritas en el código; **no hay un editor ni versionado de textos** | `server/src/application/services/*Email.ts` | Sin requisito aprobado; se anota como límite |
+| C05 | Las plantillas están escritas en el código; **no hay un editor ni versionado de textos** | `server/src/application/services/*Email.ts` | Sin requisito aprobado; se anota como límite |
 
 > **Nota de resolución (C01):** el texto del hallazgo C01 es el histórico del diagnóstico y no se reescribe. **Corregido en el PR #181, commit `00e42f3`** (LEV-R07): el correo de aceptación pide solo días y horas. Pendiente de fusión al momento de esta nota; la CI de ese commit dio 12 comprobaciones aprobadas y 2 omitidas.
 
