@@ -30,7 +30,7 @@ export const UserManagementPage: React.FC = () => {
   const schools = useQuery({ queryKey: ['schools'], queryFn: () => schoolService.getSchools(), staleTime: 60_000 }).data ?? [];
   // La invitación de una cuenta recién creada (o reemitida): el enlace se muestra una sola vez, a quien administra.
   const [issued, setIssued] = useState<{ email: string; invitation: Invitation } | null>(null);
-  const [inviteError, setInviteError] = useState('');
+  const [actionError, setActionError] = useState('');
 
   const [filters, setFilters] = useState<UserFilterValues>(EMPTY_FILTERS);
 
@@ -79,24 +79,27 @@ export const UserManagementPage: React.FC = () => {
   };
 
   const reissue = async (user: User) => {
-    setInviteError('');
+    setActionError('');
     try {
       setIssued({ email: user.email, invitation: await userService.reissueInvitation(user.id) });
       refresh();
     } catch (err) {
-      setInviteError(getApiErrorMessage(err));
+      setActionError(getApiErrorMessage(err));
     }
   };
 
   const confirmToggle = async () => {
     if (!userToToggle) return;
     setToggling(true);
+    setActionError('');
     try {
       await userService.toggleUserStatus(userToToggle.id);
       refresh();
       setUserToToggle(null);
     } catch (err) {
-      console.error('Error toggling status', err);
+      // Por ejemplo, desactivar a la última cuenta de administración activa: el servidor explica el motivo y no cambia nada.
+      setActionError(getApiErrorMessage(err));
+      setUserToToggle(null);
     } finally {
       setToggling(false);
     }
@@ -120,9 +123,9 @@ export const UserManagementPage: React.FC = () => {
         }
       />
 
-      {inviteError && (
+      {actionError && (
         <p role="alert" className={styles.inviteError}>
-          {inviteError}
+          {actionError}
         </p>
       )}
 
