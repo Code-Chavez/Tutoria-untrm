@@ -2,20 +2,36 @@ import { PrismaClient } from '@prisma/client';
 import bcrypt from 'bcryptjs';
 import { seedBase } from '../src/infrastructure/bootstrap/seedBase';
 
-const prisma = new PrismaClient();
-
 // Contraseña compartida por todas las cuentas de prueba (no la del admin).
 const DEMO_PASSWORD = 'Demo2026!';
 
-async function main() {
-  console.log('Seeding database...');
+export interface SeedSummary {
+  /** Cuentas de demostración que esta ejecución CREÓ (las que ya existían no se tocan). */
+  users: number;
+  /** Estudiantes de demostración que esta ejecución CREÓ. */
+  students: number;
+  /** Matrículas que esta ejecución CREÓ (solo de los estudiantes que creó). */
+  enrollments: number;
+}
 
-  // Datos base compartidos con producción (permisos, roles y parámetros).
+/**
+ * Datos de DEMOSTRACIÓN para desarrollo. Es una orden explícita (`pnpm run seed`), no parte del arranque del servidor.
+ *
+ * Solo CREA lo que falta: nunca modifica un dato que ya existe. Lo que se ajusta después de crear una fila (escuela del docente, facultad del
+ * decano, vínculo del estudiante con su cuenta, matrícula) se aplica únicamente a las filas que ESTA ejecución creó. Así, correrlo otra vez sobre
+ * un entorno con datos (coordinaciones, sedes, escuelas de docentes, vínculos y matrículas modificados, o estudiantes propios) no cambia nada.
+ */
+export async function seedDemo(prisma: PrismaClient, options: { bcryptRounds?: number; quiet?: boolean } = {}): Promise<SeedSummary> {
+  const rounds = options.bcryptRounds ?? 12;
+  const log = options.quiet ? () => undefined : (...args: unknown[]) => console.log(...args);
+  log('Seeding database...');
+
+  // Datos base compartidos con producción (permisos, roles y parámetros). Solo crea lo que falta.
   const { adminRole, coordRole, tutorRole, studentRole, serviceRole, viceRole, deanRole } = await seedBase(prisma);
 
   // Administrador de DESARROLLO con contraseña conocida. Producción no usa este seed: crea su primer
   // administrador con `bootstrap` y la contraseña que se defina en el despliegue.
-  const adminPasswordHash = await bcrypt.hash('Admin2026!', 12);
+  const adminPasswordHash = await bcrypt.hash('Admin2026!', rounds);
   await prisma.user.upsert({
     where: { email: '7183255722@untrm.edu.pe' },
     update: {},
@@ -30,7 +46,7 @@ async function main() {
 
   // ── Usuarios de prueba (uno o más por rol, para pruebas manuales) ──────
   // Todos comparten DEMO_PASSWORD ('Demo2026!'); se listan al final del seed.
-  const demoPasswordHash = await bcrypt.hash(DEMO_PASSWORD, 12);
+  const demoPasswordHash = await bcrypt.hash(DEMO_PASSWORD, rounds);
 
   const demoUsersInput: { email: string; firstName: string; lastName: string; phone: string; roleId: string; service?: string }[] = [
     // Coordinador
@@ -54,7 +70,9 @@ async function main() {
   ];
 
   const demoUsers = new Map<string, string>(); // email -> user id
+  const createdUsers = new Set<string>(); // correos de las cuentas que ESTA ejecución creó
   for (const u of demoUsersInput) {
+    const existed = (await prisma.user.findUnique({ where: { email: u.email }, select: { id: true } })) !== null;
     const user = await prisma.user.upsert({
       where: { email: u.email },
       update: {},
@@ -69,14 +87,11 @@ async function main() {
       },
     });
     demoUsers.set(u.email, user.id);
+    if (!existed) createdUsers.add(u.email);
   }
 
-  const tutorIds = [
-    demoUsers.get('elena.ramirez@untrm.edu.pe')!,
-    demoUsers.get('jorge.salazar@untrm.edu.pe')!,
-    demoUsers.get('patricia.nunez@untrm.edu.pe')!,
-    demoUsers.get('miguel.torres@untrm.edu.pe')!,
-  ];
+  const tutorEmails = ['elena.ramirez@untrm.edu.pe', 'jorge.salazar@untrm.edu.pe', 'patricia.nunez@untrm.edu.pe', 'miguel.torres@untrm.edu.pe'];
+  const tutorIds = tutorEmails.map((email) => demoUsers.get(email)!);
 
   // Facultades y escuelas de ejemplo
   const fisme = await prisma.faculty.upsert({
@@ -91,7 +106,10 @@ async function main() {
     create: { name: 'Facultad de Ciencias Económicas y Administrativas' },
   });
 
-  await prisma.user.update({ where: { email: 'decano.fisme@untrm.edu.pe' }, data: { facultyId: fisme.id } });
+  // El decano de la seed pertenece a su facultad: solo si esta ejecución creó la cuenta.
+  if (createdUsers.has('decano.fisme@untrm.edu.pe')) {
+    await prisma.user.update({ where: { email: 'decano.fisme@untrm.edu.pe' }, data: { facultyId: fisme.id } });
+  }
 
   // Coordinadores por escuela (Art. 17.a); Administración de Empresas se deja
   // sin coordinador a propósito, para ejercitar el respaldo a Administrador
@@ -99,32 +117,34 @@ async function main() {
   const coordSistemasId = demoUsers.get('rosa.mendoza@untrm.edu.pe');
   const coordMecanicaId = demoUsers.get('carlos.vega@untrm.edu.pe');
 
-  // Sedes (la migración ya las crea; aquí se garantizan) y escuelas de ejemplo, todas en la sede central
+  // Sedes (la migración ya las crea; aquí se garantizan) y escuelas de ejemplo, todas en la sede central.
+  // Las escuelas se crean con su coordinación y su sede, pero si ya existen NO se reescriben (`update: {}`).
   const campusCentral = await prisma.campus.upsert({ where: { name: 'Sede Central' }, update: {}, create: { name: 'Sede Central' } });
   await prisma.campus.upsert({ where: { name: 'Sede Bagua' }, update: {}, create: { name: 'Sede Bagua' } });
   await prisma.campus.upsert({ where: { name: 'Sede Utcubamba' }, update: {}, create: { name: 'Sede Utcubamba' } });
 
   const schoolSistemas = await prisma.school.upsert({
     where: { name_facultyId: { name: 'Ingeniería de Sistemas', facultyId: fisme.id } },
-    update: { coordinatorId: coordSistemasId, campusId: campusCentral.id },
+    update: {},
     create: { name: 'Ingeniería de Sistemas', facultyId: fisme.id, coordinatorId: coordSistemasId, campusId: campusCentral.id },
   });
 
   const schoolMecanica = await prisma.school.upsert({
     where: { name_facultyId: { name: 'Ingeniería Mecánica Eléctrica', facultyId: fisme.id } },
-    update: { coordinatorId: coordMecanicaId, campusId: campusCentral.id },
+    update: {},
     create: { name: 'Ingeniería Mecánica Eléctrica', facultyId: fisme.id, coordinatorId: coordMecanicaId, campusId: campusCentral.id },
   });
 
   const schoolAdmin = await prisma.school.upsert({
     where: { name_facultyId: { name: 'Administración de Empresas', facultyId: fcea.id } },
-    update: { campusId: campusCentral.id },
+    update: {},
     create: { name: 'Administración de Empresas', facultyId: fcea.id, campusId: campusCentral.id },
   });
 
-  // Cada docente tutor pertenece a la escuela de sus tutorados
-  for (const [tutorId, schoolId] of [[tutorIds[0], schoolSistemas.id], [tutorIds[1], schoolSistemas.id], [tutorIds[2], schoolMecanica.id], [tutorIds[3], schoolAdmin.id]]) {
-    await prisma.user.update({ where: { id: tutorId }, data: { schoolId } });
+  // Cada docente tutor pertenece a la escuela de sus tutorados: solo se asigna a las cuentas que esta ejecución creó.
+  const tutorSchools = [schoolSistemas.id, schoolSistemas.id, schoolMecanica.id, schoolAdmin.id];
+  for (let i = 0; i < tutorEmails.length; i++) {
+    if (createdUsers.has(tutorEmails[i])) await prisma.user.update({ where: { id: tutorIds[i] }, data: { schoolId: tutorSchools[i] } });
   }
 
   // Periodo académico
@@ -174,8 +194,10 @@ async function main() {
     { studentCode: '20191819', firstName: 'Estefany', lastName: 'Bardales Cabrera', phone: '987000012', cycle: 10, schoolId: schoolSistemas.id, isActive: false },
   ];
 
+  const createdStudents: { id: string; code: string; schoolId: string; cycle: number; isActive: boolean }[] = []; // los que ESTA ejecución creó
   for (const s of studentsInput) {
-    await prisma.student.upsert({
+    const existed = (await prisma.student.findUnique({ where: { studentCode: s.studentCode }, select: { id: true } })) !== null;
+    const student = await prisma.student.upsert({
       where: { studentCode: s.studentCode },
       update: {},
       create: {
@@ -194,44 +216,54 @@ async function main() {
         assignedAt: s.assignedAt ?? null,
       },
     });
+    if (!existed) createdStudents.push({ id: student.id, code: s.studentCode, schoolId: s.schoolId, cycle: s.cycle, isActive: s.isActive ?? true });
   }
 
   // Vincula las cuentas Tutorado de prueba a su propio registro de estudiante
   // (mismo studentCode que su correo institucional), habilitando el
-  // autoservicio de solicitud de tutoría desde su cuenta.
+  // autoservicio de solicitud de tutoría desde su cuenta. Solo en los estudiantes que esta ejecución creó.
   const portalLinks: { studentCode: string; email: string }[] = [
     { studentCode: '20191234', email: '20191234@untrm.edu.pe' },
     { studentCode: '20195678', email: '20195678@untrm.edu.pe' },
   ];
   for (const link of portalLinks) {
     const userId = demoUsers.get(link.email);
-    if (userId) {
-      await prisma.student.update({
-        where: { studentCode: link.studentCode },
-        data: { userId },
-      });
+    if (userId && createdStudents.some((s) => s.code === link.studentCode)) {
+      await prisma.student.update({ where: { studentCode: link.studentCode }, data: { userId } });
     }
   }
 
-  // Matrícula de los estudiantes activos en el periodo vigente (sin ella no podrían solicitar tutoría ni evaluar).
-  const demoStudents = await prisma.student.findMany({ where: { isActive: true }, select: { id: true, schoolId: true, cycle: true } });
-  for (const student of demoStudents) {
+  // Matrícula en el periodo vigente (sin ella no podrían solicitar tutoría ni evaluar): solo de los estudiantes activos que ESTA ejecución
+  // creó. No se matricula a los demás estudiantes activos del entorno (no son de la seed).
+  let enrollments = 0;
+  for (const student of createdStudents.filter((s) => s.isActive)) {
     await prisma.periodEnrollment.upsert({
       where: { periodId_studentId: { periodId: period2026II.id, studentId: student.id } },
       update: {},
       create: { periodId: period2026II.id, studentId: student.id, schoolId: student.schoolId, cycle: student.cycle },
     });
+    enrollments++;
   }
 
-  console.log('Seed completed successfully');
-  console.log('');
-  console.log('Cuentas de prueba (todas con contraseña: %s):', DEMO_PASSWORD);
+  const summary: SeedSummary = { users: createdUsers.size, students: createdStudents.length, enrollments };
+  log(`Seed completed successfully: ${summary.users} cuentas, ${summary.students} estudiantes y ${summary.enrollments} matrículas creados; lo que ya existía no se modificó.`);
+  log('');
+  log('Cuentas de prueba (todas con contraseña: %s):', DEMO_PASSWORD);
   for (const u of demoUsersInput) {
-    console.log(`  - ${u.email}`);
+    log(`  - ${u.email}`);
   }
-  console.log('  (Administrador: 7183255722@untrm.edu.pe / Admin2026!)');
+  log('  (Administrador: 7183255722@untrm.edu.pe / Admin2026!)');
+  return summary;
 }
 
-main()
-  .catch(console.error)
-  .finally(() => prisma.$disconnect());
+// Orden explícita (`pnpm run seed`): un fallo TERMINA CON ERROR y muestra la causa, para que ni el comando de preparación de la base de pruebas ni
+// un script lo den por bueno (antes se registraba el error y el proceso salía con código 0).
+if (require.main === module) {
+  const prisma = new PrismaClient();
+  seedDemo(prisma)
+    .catch((error) => {
+      console.error('El seed falló:', error);
+      process.exitCode = 1;
+    })
+    .finally(() => prisma.$disconnect());
+}

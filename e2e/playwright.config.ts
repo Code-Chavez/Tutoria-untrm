@@ -1,6 +1,6 @@
 import { defineConfig } from '@playwright/test';
 
-// Las pruebas corren contra el stack de desarrollo (docker compose up -d), ya migrado y sembrado.
+// Las pruebas corren contra el stack de desarrollo (docker compose up -d), ya migrado y sembrado (docker compose exec server pnpm run seed, una vez).
 // E2E_CHANNEL permite usar un navegador instalado (chrome, msedge) sin descargar el de Playwright.
 export default defineConfig({
   testDir: './tests',
