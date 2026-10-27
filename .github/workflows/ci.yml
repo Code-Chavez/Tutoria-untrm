@@ -6,8 +6,10 @@ on:
   pull_request:
     branches: [develop, main]
     # «edited» también se dispara al cambiar la rama destino: un PR apilado (abierto sobre otra rama de trabajo) queda
-    # reapuntado a develop al fusionarse la de abajo y, sin este tipo, nunca recibiría el CI. Cada job lo filtra para que
-    # solo corra en ese caso y no con cada edición de título o descripción.
+    # reapuntado a develop al fusionarse la de abajo y, sin este tipo, nunca recibiría el CI. Cada edición (también de
+    # título o descripción) ejecuta la CI completa: omitir los jobs en ese caso creaba, para cada check obligatorio, un
+    # resultado «omitido» más reciente que el real, y un PR con un check en rojo pasaba a estar fusionable (verificado con
+    # un PR desechable, docs/resultados-2026-10-26/checks-omitidos-por-edicion.txt).
     types: [opened, synchronize, reopened, edited]
 
 concurrency:
@@ -19,7 +21,6 @@ jobs:
   server-lint:
     name: Server — Lint
     runs-on: ubuntu-latest
-    if: ${{ github.event.action != 'edited' || github.event.changes.base != null }}
     steps:
       - uses: actions/checkout@v4
 
@@ -44,7 +45,6 @@ jobs:
   server-build:
     name: Server — Build
     runs-on: ubuntu-latest
-    if: ${{ github.event.action != 'edited' || github.event.changes.base != null }}
     steps:
       - uses: actions/checkout@v4
 
@@ -73,7 +73,6 @@ jobs:
   server-test:
     name: Server — Test
     runs-on: ubuntu-latest
-    if: ${{ github.event.action != 'edited' || github.event.changes.base != null }}
     services:
       postgres:
         image: postgres:16-alpine
@@ -140,7 +139,6 @@ jobs:
   server-audit:
     name: Server — Audit
     runs-on: ubuntu-latest
-    if: ${{ github.event.action != 'edited' || github.event.changes.base != null }}
     steps:
       - uses: actions/checkout@v4
 
@@ -166,7 +164,6 @@ jobs:
   client-lint:
     name: Client — Lint
     runs-on: ubuntu-latest
-    if: ${{ github.event.action != 'edited' || github.event.changes.base != null }}
     steps:
       - uses: actions/checkout@v4
 
@@ -191,7 +188,6 @@ jobs:
   client-audit:
     name: Client — Audit
     runs-on: ubuntu-latest
-    if: ${{ github.event.action != 'edited' || github.event.changes.base != null }}
     steps:
       - uses: actions/checkout@v4
 
@@ -216,7 +212,6 @@ jobs:
   client-test:
     name: Client — Test
     runs-on: ubuntu-latest
-    if: ${{ github.event.action != 'edited' || github.event.changes.base != null }}
     steps:
       - uses: actions/checkout@v4
 
@@ -249,7 +244,6 @@ jobs:
   client-build:
     name: Client — Type Check & Build
     runs-on: ubuntu-latest
-    if: ${{ github.event.action != 'edited' || github.event.changes.base != null }}
     steps:
       - uses: actions/checkout@v4
 
@@ -279,7 +273,6 @@ jobs:
   backup-drill:
     name: Backup — Restore drill
     runs-on: ubuntu-latest
-    if: ${{ github.event.action != 'edited' || github.event.changes.base != null }}
     services:
       postgres:
         image: postgres:16-alpine
