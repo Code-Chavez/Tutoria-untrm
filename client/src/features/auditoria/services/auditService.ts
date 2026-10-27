@@ -49,6 +49,7 @@ export const ACTION_LABEL: Record<string, string> = {
   CHANGE_PASSWORD: 'Cambio de contraseña',
   INVITATION_ISSUED: 'Invitación de acceso emitida',
   ASSIGN_ROLE: 'Cambio de rol',
+  ROLE_CREATED: 'Rol creado',
   PERIOD_CLOSED: 'Periodo cerrado',
   PERIOD_REOPENED: 'Periodo reabierto',
   UPDATE_PARAMETER: 'Parámetro del sistema modificado',
@@ -74,6 +75,7 @@ export const ACTION_LABEL: Record<string, string> = {
 
 export const ENTITY_LABEL: Record<string, string> = {
   User: 'Usuario',
+  Role: 'Rol',
   Faculty: 'Facultad',
   School: 'Escuela profesional',
   AcademicPeriod: 'Periodo académico',

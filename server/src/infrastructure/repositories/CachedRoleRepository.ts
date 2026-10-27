@@ -1,5 +1,5 @@
 import { Role } from '@domain/entities/Role';
-import { RoleRepository } from '@domain/repositories/RoleRepository';
+import { RoleCreationAudit, RoleRepository } from '@domain/repositories/RoleRepository';
 import { TtlCache } from '@infrastructure/cache/TtlCache';
 
 // Los roles y sus permisos solo cambian al sembrar o crear un rol; 30 s de desfase es aceptable y evita 3 consultas por petición.
@@ -31,8 +31,8 @@ export class CachedRoleRepository implements RoleRepository {
     return this.inner.findAll();
   }
 
-  async create(data: { name: string; description: string }): Promise<Role> {
-    const role = await this.inner.create(data);
+  async create(data: { name: string; description: string }, audit?: RoleCreationAudit): Promise<Role> {
+    const role = await this.inner.create(data, audit);
     this.byId.clear();
     this.byName.clear();
     return role;

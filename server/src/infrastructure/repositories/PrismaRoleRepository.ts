@@ -1,6 +1,6 @@
 import { PrismaClient } from '@prisma/client';
 import { Role } from '@domain/entities/Role';
-import { RoleRepository } from '@domain/repositories/RoleRepository';
+import { RoleCreationAudit, RoleRepository } from '@domain/repositories/RoleRepository';
 
 const withPermissions = {
   permissions: { include: { permission: true } },
@@ -48,10 +48,24 @@ export class PrismaRoleRepository implements RoleRepository {
     return roles.map(toDomain);
   }
 
-  async create(data: { name: string; description: string }): Promise<Role> {
-    const role = await this.prisma.role.create({
-      data,
-      include: withPermissions,
+  async create(data: { name: string; description: string }, audit?: RoleCreationAudit): Promise<Role> {
+    if (!audit) {
+      const role = await this.prisma.role.create({ data, include: withPermissions });
+      return toDomain(role);
+    }
+    const role = await this.prisma.$transaction(async (tx) => {
+      const created = await tx.role.create({ data, include: withPermissions });
+      await tx.auditLog.create({
+        data: {
+          userId: audit.userId,
+          action: 'ROLE_CREATED',
+          entity: 'Role',
+          entityId: created.id,
+          details: `Rol «${created.name}»`,
+          ipAddress: audit.ipAddress,
+        },
+      });
+      return created;
     });
     return toDomain(role);
   }
