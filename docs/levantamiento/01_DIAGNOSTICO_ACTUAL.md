@@ -19,20 +19,48 @@ Borrador para revisión. Corte del código: `develop` en `c2e0460`. Etiquetas y 
 
 | ID | Hallazgo | Estado | Evidencia |
 |---|---|---|---|
-| LEV-D01 | 7 roles sembrados: Administrador DBU, Coordinador, Docente Tutor, Tutorado, Profesional de Servicio, Vicerrectorado, Decano. RF-04 enumera 5 (sin Coordinador ni Decano) | **[CONFIRMAR]** | `server/src/infrastructure/bootstrap/seedBase.ts`; RF-04 |
+| LEV-D01 | 7 roles sembrados: Administrador DBU, Coordinador, Docente Tutor, Tutorado, Profesional de Servicio, Vicerrectorado, Decano. **RF-04 enumera 5** (sin Coordinador ni Decano) y **HU-04 enumera 7 distintos** (con «Responsable de escuela» y sin Decano). Las tres listas no coinciden | **[CONFIRMAR]** | `server/src/infrastructure/bootstrap/seedBase.ts`; RF-04; HU-04; [03](03_CONTRASTE_PROTOCOLO_Y_BACKLOG.md) |
 | LEV-D02 | 36 permisos finos con la forma `recurso:acción` (p. ej. `users:write`, `referrals:read`, `admin:system`). Las acciones del encargo (consultar, registrar, modificar, aprobar, emitir, firmar, descargar, administrar) no existen como vocabulario uniforme: hoy hay `read`, `write`, `delete`, `import`, `export`, `manage`, `respond`, `self`, `system` | **[PARCIAL]** | `seedBase.ts` (lista de permisos) |
 | LEV-D03 | La autorización de cada ruta consulta los permisos del rol en la base, con una caché de 30 s; la cuenta (activa, rol vigente) se lee en cada petición | **[EXISTE]** | `server/src/interfaces/http/middleware/authorize.ts`, `…/security/rolePermissions.ts`, `…/middleware/authenticate.ts` |
 | LEV-D04 | Los permisos de un rol solo cambian al sembrar: **no hay endpoint ni pantalla** para asignar o retirar permisos de un rol, ni para editar o desactivar un rol | **[FALTA]** | `rolePermissions.ts` (comentario «solo cambian al sembrar»); `role.routes.ts` |
-| LEV-D05 | Existe `GET /roles` y `POST /roles` (exige `admin:system`): crea un rol con **nombre y descripción, sin permisos**. No se registra en la bitácora | **[PARCIAL]** | `server/src/interfaces/http/routes/role.routes.ts`, `…/use-cases/roles/CreateRoleUseCase.ts` (sin llamada a auditoría) |
+| LEV-D05 | Existe `GET /roles` y `POST /roles` (exige `admin:system`): crea un rol con **nombre y descripción, sin permisos**. **No se registra en la bitácora**: ni el caso de uso lo hace ni el interceptor automático (solo audita `User`, `Faculty`, `School`, `AcademicPeriod` y `CatalogItem`) | **[PARCIAL]** | `server/src/interfaces/http/routes/role.routes.ts`, `…/use-cases/roles/CreateRoleUseCase.ts` (sin llamada a auditoría), `server/src/infrastructure/database/auditEntry.ts` (`CRITICAL_MODELS`) |
 | LEV-D06 | Un usuario tiene **un solo rol**; asignar reemplaza el vigente (`PUT /users/:id/role`, `admin:system`) y registra `ASSIGN_ROLE` en la bitácora | **[EXISTE]** | `…/use-cases/roles/AssignRoleUseCase.ts`, `user.routes.ts` |
 | LEV-D07 | **El alcance (propios, escuela, facultad, institución) se decide por el NOMBRE del rol**, no por un dato configurable: `StudentAccessGuard.scopeFor` hace un `switch` por nombre (DBU → todo; Coordinador → escuelas que coordina por `School.coordinatorId`; Docente Tutor → sus asignados; cualquier otro → ninguno). Un rol nuevo obtiene alcance **ninguno**: no hereda acceso | **[EXISTE]** (y es seguro por defecto) | `server/src/application/access/StudentAccessGuard.ts` |
-| LEV-D08 | Comprobaciones por nombre de rol dispersas: **43 ocurrencias en 22 archivos del servidor** (inicio, derivaciones, enrutamiento de solicitudes, evaluación, amonestaciones, informes…) y **19 archivos del cliente** más un mapa fijo de 7 roles que decide el menú (`ROLE_CODES`) | **[PARCIAL]**: un rol nuevo no entra a esas rutas, pero tampoco se puede dar acceso configurable | `grep` sobre `server/src` y `client/src`; `client/src/shared/components/layout/navigation.ts` |
+| LEV-D08 | Comprobaciones por nombre de rol dispersas: **43 ocurrencias en 22 archivos del servidor** (34 de ellas en forma de comparación) y **68 ocurrencias en 17 archivos del cliente** (19 archivos con la expresión ampliada), más un mapa fijo de 7 roles que decide el menú (`ROLE_CODES`). Comando, alcance y commit en la sección «Comprobaciones por nombre de rol: recuento y método» | **[PARCIAL]**: un rol nuevo no entra a esas rutas, pero tampoco se puede dar acceso configurable | `git grep` en `c2e0460`; `client/src/shared/components/layout/navigation.ts` |
 | LEV-D09 | El menú y las pantallas del cliente se deciden con el nombre de rol del token; el servidor vuelve a comprobar cada petición. Qué ve el usuario con sesión iniciada tras un cambio de rol hasta renovar el token **no se probó** | **[CONFIRMAR]** | `navigation.ts`; comportamiento no verificado |
 | LEV-D10 | **Sin protección del último administrador ni de la auto-desactivación:** `ToggleUserStatusUseCase.execute(id)` no recibe quién actúa y no cuenta administradores activos; `AssignRoleUseCase` tampoco comprueba si deja al sistema sin un administrador habilitado | **[FALTA]** | `server/src/application/use-cases/users/ToggleUserStatusUseCase.ts`, `roles/AssignRoleUseCase.ts` |
 | LEV-D11 | Anti-escalamiento: crear usuarios exige `users:write` y asignar rol exige `admin:system`; hoy solo el Administrador DBU tiene ambos, así que no hay escalamiento posible **con los roles actuales**. Con roles configurables, un rol con `users:write` podría crear cuentas de cualquier rol: **sin regla** que lo impida | **[FALTA]** (riesgo futuro) | `user.routes.ts`; `CreateUserUseCase.ts` |
 | LEV-D12 | «Acceso total» y «acceso medio» **no aparecen** en ningún documento revisado (RF, HU, RNF, `docs/`): la necesidad viene del encargo | **[CONFIRMAR]** | búsqueda en `docs/`, `doc/` y los textos de RF/HU |
 | LEV-D13 | Perfiles: estudiante = rol Tutorado; docente tutor = rol; **psicología, salud, asistencia social, psicopedagogía y escuela son un atributo `service` de un mismo rol** (Profesional de Servicio); coordinación = rol Coordinador por escuela; decanato = rol Decano con `facultyId`; administración = rol. **No existe «dirección de escuela»** como rol distinto de «Coordinador» | **[CONFIRMAR]** frente al Protocolo, Art. 5, que nombra al «Coordinador del sistema de tutoría de las facultades» y al «Responsable del sistema de tutoría de las escuelas profesionales» | `seedBase.ts`; `…/users/serviceAssignment.ts`; Protocolo Art. 5 |
 | LEV-D14 | Cambios de rol y permisos retirados: `authenticate` lee de la base la cuenta (activa y con su rol vigente) en **cada petición**, así que un cambio de rol o una baja aplican en la siguiente; los permisos de ese rol tienen una caché de 30 s; el alcance sobre estudiantes lo calcula `StudentAccessGuard` desde el usuario y su rol (no se verificó si esa ruta tiene su propia caché). No se cierran las sesiones al cambiar el rol | **[EXISTE]** con el desfase indicado (≤ 30 s en permisos) | `authenticate.ts`, `rolePermissions.ts` |
+
+### Comprobaciones por nombre de rol: recuento y método
+
+Hubo dos cifras distintas en mensajes anteriores («45 en 21 archivos» y luego «43 en 22»). **La primera era una estimación mía a partir de una lista parcial y es incorrecta; la cifra verificada es la segunda.** Cómo se obtiene, para que sea reproducible:
+
+Se ejecutan desde la raíz del repositorio (`R` es la expresión de los siete nombres; las rutas excluyen la seed y las pruebas):
+
+```bash
+R="'(Administrador DBU|Coordinador|Docente Tutor|Tutorado|Profesional de Servicio|Vicerrectorado|Decano)'"
+
+# Servidor: ocurrencias (43) y archivos (22)
+git grep -nE "$R" c2e0460 -- 'server/src/*.ts' ':!server/src/infrastructure/bootstrap/seedBase.ts' | wc -l
+git grep -lE "$R" c2e0460 -- 'server/src/*.ts' ':!server/src/infrastructure/bootstrap/seedBase.ts' | wc -l
+
+# Servidor: las que están en forma de comparación (34)
+git grep -nE "(===|!==|case|includes\(|\[)[^;]*$R|$R[^;]*(===|!==)" c2e0460 -- 'server/src/*.ts' ':!server/src/infrastructure/bootstrap/seedBase.ts' | wc -l
+
+# Cliente, sin pruebas: ocurrencias (68) y archivos (17)
+git grep -nE "$R" c2e0460 -- 'client/src/*.ts' 'client/src/*.tsx' ':!client/src/**/*.test.*' | wc -l
+git grep -lE "$R" c2e0460 -- 'client/src/*.ts' 'client/src/*.tsx' ':!client/src/**/*.test.*' | wc -l
+
+# Cliente con la expresión ampliada (roleName, role ===): archivos (19)
+git grep -lE "$R|roleName|role(Name)? *===" c2e0460 -- 'client/src/*.ts' 'client/src/*.tsx' ':!client/src/**/*.test.*' | wc -l
+```
+
+Resultados en `c2e0460` (verificados el 27/10/2026): **43 / 22 / 34** en el servidor y **68 / 17 / 19** en el cliente.
+
+**Alcance y límites:** cuenta *texto*, no *decisiones de acceso*: una ocurrencia puede ser una etiqueta o una asignación y no una comprobación. Las 34 «comparaciones» son una aproximación por patrón, no una auditoría línea por línea. No incluye nombres de rol en minúsculas ni códigos (`'dbu'`, `'coord'`) del cliente.
 
 **Contraste con el Protocolo.** Art. 5 enumera como responsables: Vicerrectorado Académico, DBU, Dirección de Gestión Docente, Curricular y Educación Virtual, coordinador del sistema de tutoría de las facultades, responsable del sistema de tutoría de las escuelas profesionales, docentes tutores y tutorandos. El código no tiene un rol para «Dirección de Gestión Docente…» ni para «responsable de escuela» distinto de Coordinador. **No se propone agregar ni eliminar autoridades por su nombre** hasta contrastar su participación efectiva (preguntas Q02–Q03).
 
@@ -88,9 +116,9 @@ Borrador para revisión. Corte del código: `develop` en `c2e0460`. Etiquetas y 
 |---|---|---|---|
 | LEV-D60 | **No existe** ninguna función de certificados de tutores (ni modelo, ni rutas, ni pantallas). «Constancia» en el código es la **constancia de derivación** (Anexo 6), otra cosa | **[FALTA]** | búsqueda de `certificad`/`constancia` en `server/src` y `client/src` |
 | LEV-D61 | Protocolo Art. 23.a: «La facultad **puede** otorgar reconocimientos formales, como premios o menciones honoríficas, a los docentes tutores destacados». No nombra «certificado», ni umbrales, ni a quién corresponde firmar | **[PROTOCOLO]** + **[CONFIRMAR]** | Protocolo Art. 23 |
-| LEV-D62 | Según el encargo, el ejemplo lo emite el **director de escuela** y cita una **Resolución de Decanato**. Eso **no basta** para concluir quién emite todos los certificados; el Art. 23.a asigna el reconocimiento a «la facultad» | **[CONFIRMAR]** | encargo; Protocolo Art. 23.a |
+| LEV-D62 | **Observación documentada de la referencia (revisión visual hecha por Codex y relatada por el usuario; yo no la realicé):** aparecen **director de Escuela, Resolución de Decanato, docente, escuela, facultad, semestre, ciudad, fecha y número de registro**. Eso **no basta** para concluir quién emite todos los certificados; el Art. 23.a asigna el reconocimiento a «la facultad» | **[CONFIRMAR]** | observación de Codex (no reproducible por mí); Protocolo Art. 23.a |
 | LEV-D63 | Insumos que el sistema ya registra y que podrían servir de evidencia **sin que nadie los haya aprobado como criterio**: sesiones y asistencia, informe semestral (sin estados), evaluación del estudiante (agregada), amonestaciones, aceptación de tutoría. Ninguno está definido como requisito de certificación | **[PARCIAL]** como datos; **[CONFIRMAR]** como criterio | `prisma/schema.prisma`; módulos de informes, evaluación y amonestaciones |
-| LEV-D64 | Estructura técnica del archivo de ejemplo (sin reproducirlo): una página horizontal (≈ 840 × 594 pt), **sin texto extraíble** (el contenido visible es una imagen), con un campo de **firma digital** (`/Sig`, subfiltro `ETSI.CAdES.detached`), 3 revisiones del archivo, y datos de firma (nombre, motivo, lugar, contacto, fecha). **No se leyó su contenido ni se verificó la autenticidad o vigencia de la firma** | **[CONFIRMAR]** | inspección técnica local con `pypdf` (solo estructura) |
+| LEV-D64 | **Mi inspección (solo estructura técnica, sin reproducir el archivo):** una página horizontal (≈ 840 × 594 pt), **sin texto extraíble** (el contenido visible es una imagen), con un campo de **firma digital** (`/Sig`, subfiltro `ETSI.CAdES.detached`), 3 revisiones del archivo y datos de firma (nombre, motivo, lugar, contacto, fecha). **No leí su contenido (los campos de LEV-D62 son la observación de Codex) y la autenticidad y vigencia de la firma NO están validadas** | **[CONFIRMAR]** | inspección técnica local con `pypdf` (solo estructura) |
 | LEV-D65 | Numeración, duplicados, vista previa, entrega, descarga, anulación, reemisión y consulta de autenticidad: nada existe | **[FALTA]** | — |
 
 ## G. Firma digital y plantilla institucional

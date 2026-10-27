@@ -1,6 +1,6 @@
 # Preguntas y decisiones institucionales pendientes (Fase 1)
 
-Borrador para revisión. Priorización por **impacto sobre el diseño**: **P0** bloquea empezar a especificar esa función o la deja insegura; **P1** cambia la especificación pero no impide empezar; **P2** se resuelve en la validación. «Mientras tanto» es una **suposición de trabajo**, no una decisión. Etiquetas y fuentes: [README](README.md); evidencia: [01_DIAGNOSTICO_ACTUAL](01_DIAGNOSTICO_ACTUAL.md).
+Borrador para revisión. **Las 10 preguntas P0 están explicadas con opciones, recomendación y consecuencias en [00](00_PREGUNTAS_P0_PARA_RESPONDER.md); responder allí.** Priorización por **impacto sobre el diseño**: **P0** bloquea empezar a especificar esa función o la deja insegura; **P1** cambia la especificación pero no impide empezar; **P2** se resuelve en la validación. «Mientras tanto» es una **suposición de trabajo**, no una decisión. Etiquetas y fuentes: [README](README.md); evidencia: [01_DIAGNOSTICO_ACTUAL](01_DIAGNOSTICO_ACTUAL.md).
 
 ## Decisiones ya pedidas a la DBU y todavía sin respuesta
 
