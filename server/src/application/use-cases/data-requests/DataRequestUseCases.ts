@@ -233,6 +233,8 @@ export class SendDataRequestUseCase {
       // Lo que no se puede demostrar como «no aceptado» (incluido el plazo agotado) queda INCIERTO.
       status = mailOutcomeOf(e) === 'NOT_ACCEPTED' ? 'FALLIDO' : 'INCIERTO';
       error = e instanceof Error ? e.name : 'desconocido';
+      // El detalle técnico queda en el registro del servidor; la respuesta HTTP no lo expone (ver toPublicRequest).
+      console.error('[pedido de listas] el correo no salió', { requestId: pending.id, schoolId: school.id, status, reason: error, detail: e instanceof Error ? e.message : String(e) });
     }
 
     const notBefore = new Date(this.now().getTime() - DATA_REQUEST_ATTEMPT_MARGIN_MS);

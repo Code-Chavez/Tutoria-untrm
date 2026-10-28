@@ -1,6 +1,6 @@
 import http from 'http';
 import { prisma } from '../../src/infrastructure/database/prisma';
-import { MailMessage, MailSendError } from '../../src/application/ports/Mailer';
+import { MailMessage, MailNotConfiguredError, MailSendError } from '../../src/application/ports/Mailer';
 import { ownUser, removeOwnUserTraces, DEMO_PASSWORD } from '../helpers/ownUsers';
 
 /**
@@ -265,5 +265,30 @@ describe('pedidos de lista por HTTP: idempotencia y equivalencia', () => {
     const again = await post('a', ask([9], { operationId: uuid(72) }));
     expect(again.status).toBe(200);
     expect((await json(again)).request.status).toBe('INCIERTO');
+  });
+
+  it('si el correo no está configurado, la respuesta y el historial explican la causa sin el nombre interno del error, que queda en el registro del servidor', async () => {
+    if (!dbUp) return;
+    const logged = jest.spyOn(console, 'error').mockImplementation(() => undefined);
+    try {
+      mockMail.handler = async () => {
+        throw new MailNotConfiguredError();
+      };
+      const res = await post('a', ask([10], { operationId: uuid(80) }));
+      expect(res.status).toBe(502);
+      const body = await json(res);
+      expect(body.request.status).toBe('FALLIDO');
+      expect(body.request.error).toBe('El envío de correo no está configurado en el sistema');
+      expect(JSON.stringify(body)).not.toMatch(/MailNotConfiguredError/);
+
+      const list = await fetch(`${baseUrl}/api/data-requests`, { headers: { Authorization: `Bearer ${tokens.a}` } });
+      expect(JSON.stringify(await json(list))).not.toMatch(/MailNotConfiguredError/);
+
+      // El detalle técnico sí queda en el registro del servidor y en la base (diagnóstico).
+      expect(logged).toHaveBeenCalledWith('[pedido de listas] el correo no salió', expect.objectContaining({ reason: 'MailNotConfiguredError', status: 'FALLIDO' }));
+      expect((await prisma.dataRequest.findUniqueOrThrow({ where: { id: body.request.id } })).error).toBe('MailNotConfiguredError');
+    } finally {
+      logged.mockRestore();
+    }
   });
 });
