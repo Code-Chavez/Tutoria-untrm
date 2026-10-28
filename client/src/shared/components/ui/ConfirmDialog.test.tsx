@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from 'vitest';
-import { render, screen } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { useState } from 'react';
 import { ConfirmDialog } from './ConfirmDialog';
@@ -162,5 +162,51 @@ describe('ConfirmDialog (F1: foco y teclado)', () => {
 
     await user.tab();
     expect(screen.getByRole('alertdialog').contains(document.activeElement)).toBe(true);
+  });
+
+  describe('confirmación recién pulsada, antes de que el padre active `loading`', () => {
+    const Controlled = ({ loading, onConfirm, onCancel }: { loading: boolean; onConfirm: () => void; onCancel: () => void }) => (
+      <ConfirmDialog open tone="danger" title="Desactivar usuario" message="¿Confirmas?" confirmLabel="Desactivar" loading={loading} onConfirm={onConfirm} onCancel={onCancel} />
+    );
+
+    it('Escape, el fondo y «Cancelar» no cancelan en ese intervalo, un segundo «confirmar» no repite, y al terminar la operación vuelven a funcionar', () => {
+      const onConfirm = vi.fn();
+      const onCancel = vi.fn();
+      const { rerender } = render(<Controlled loading={false} onConfirm={onConfirm} onCancel={onCancel} />);
+
+      fireEvent.click(screen.getByRole('button', { name: 'Desactivar' }));
+      // La petición ya salió pero el padre todavía no pasó `loading` a verdadero.
+      fireEvent.keyDown(window, { key: 'Escape' });
+      fireEvent.click(screen.getByRole('button', { name: 'Cancelar' }));
+      fireEvent.click(screen.getByRole('alertdialog').parentElement as HTMLElement);
+      fireEvent.click(screen.getByRole('button', { name: 'Desactivar' }));
+      expect(onCancel).not.toHaveBeenCalled();
+      expect(onConfirm).toHaveBeenCalledTimes(1);
+
+      rerender(<Controlled loading onConfirm={onConfirm} onCancel={onCancel} />);
+      fireEvent.keyDown(window, { key: 'Escape' });
+      expect(onCancel).not.toHaveBeenCalled();
+
+      rerender(<Controlled loading={false} onConfirm={onConfirm} onCancel={onCancel} />); // la operación terminó
+      fireEvent.keyDown(window, { key: 'Escape' });
+      expect(onCancel).toHaveBeenCalledTimes(1);
+    });
+
+    it('si el padre nunca activa `loading` (confirmación síncrona), el diálogo vuelve a poder cancelarse tras el margen', () => {
+      vi.useFakeTimers();
+      try {
+        const onCancel = vi.fn();
+        render(<Controlled loading={false} onConfirm={vi.fn()} onCancel={onCancel} />);
+        fireEvent.click(screen.getByRole('button', { name: 'Desactivar' }));
+        fireEvent.keyDown(window, { key: 'Escape' });
+        expect(onCancel).not.toHaveBeenCalled();
+
+        vi.advanceTimersByTime(300);
+        fireEvent.keyDown(window, { key: 'Escape' });
+        expect(onCancel).toHaveBeenCalledTimes(1);
+      } finally {
+        vi.useRealTimers();
+      }
+    });
   });
 });

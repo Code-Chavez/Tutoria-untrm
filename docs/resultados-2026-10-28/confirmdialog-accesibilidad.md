@@ -31,7 +31,16 @@ No se reescribe ningún resultado histórico; esto es lo que muestran los regist
 | `ConfirmDialog.test.tsx` (10) | foco inicial en «Cancelar» sin ejecutar la acción; nombre y descripción; Tab/Shift+Tab contenidos; fondo `inert` y restablecido; Escape y «Cancelar» devuelven el foco al botón de origen; confirmar solo por acción explícita; botón de origen retirado (sin error); carga: Escape, fondo y «Cancelar» sin efecto, `aria-busy`, foco no perdido; **orden** (el fondo deja de ser inerte antes de devolver el foco) |
 | `useDialog.test.tsx` (+1) | botón que se deshabilitó con su petición: el foco vuelve a él |
 
-Suite del cliente completa en local con `--maxWorkers=2` (solo para ejecutarla; no es una recomendación ni un cambio de configuración): **88 archivos y 581 pruebas pasaron**. Una primera pasada con el mismo ajuste terminó con 2 archivos sin arrancar (`Failed to start forks worker`, máquina muy cargada; 86 archivos y 555 pruebas pasaron) y otras dos pasadas con los trabajadores por defecto tuvieron los tiempos agotados de 5 s ya conocidos (`CycleTutorsPage`, `GroupSessionFormModal`, ver [la investigación](../resultados-2026-10-27/cliente-fallos-intermitentes-investigacion.md)) en pruebas que no usan `ConfirmDialog`. Se informa tal cual: no se repitió hasta obtener verde, se repitió el archivo no arrancado dentro de la suite completa.
+Corridas locales de la suite del cliente sobre el código **anterior** a la corrección de la carrera descrita abajo, registradas tal cual (la causa de los fallos intermitentes sigue **no determinada**; véase [la investigación](../resultados-2026-10-27/cliente-fallos-intermitentes-investigacion.md)):
+
+| Corrida | Resultado |
+|---|---|
+| Subconjunto de 12 carpetas, trabajadores por defecto, 1.ª | 4 fallos en 3 archivos; **no se conservaron los nombres** (causa no determinada) |
+| El mismo subconjunto, 2.ª (con JSON) | 2 fallos de 5 s: `CycleTutorsPage` «si el docente ya tiene otro ciclo…» y `GroupSessionFormModal` «confirma con el enlace de videollamada…» (causa no determinada); ninguna usa `ConfirmDialog` |
+| Suite completa, `--maxWorkers=2`, 1.ª | 86 archivos y 555 pruebas pasaron y **2 archivos no arrancaron** (`Failed to start forks worker`; causa no determinada, máquina muy cargada) |
+| Suite completa, `--maxWorkers=2`, 2.ª | **88 archivos y 581 pruebas pasaron** |
+
+`--maxWorkers=2` es solo una **opción de línea de comandos** de esa ejecución; no se cambió la configuración del proyecto (`vitest.config.ts`) ni se recomienda como solución. Una corrida completa aprobada se registra como tal, **sin** borrar las que fallaron. Con la corrección posterior (carrera de «Escape», ver abajo) se ejecutaron los **151 tests** de `shared`, `pedidos`, `pendientes`, `admin`, `catalogos`, `identidad`, `periodo`, `planificacion` y `tutorados/pages`: pasaron; no se repitió la suite completa (la CI del PR la ejecuta).
 
 Las dos pruebas de orden y de botón deshabilitado **fallan** si se revierte la corrección correspondiente (comprobado quitándola temporalmente). Límite: jsdom no aplica `inert` al foco ni al árbol de accesibilidad y no suelta el foco de un botón que se deshabilita; por eso esas dos propiedades se comprobaron también en un navegador real (abajo) y la prueba simula el segundo comportamiento con `blur()` explícito.
 
@@ -57,6 +66,20 @@ Datos de la verificación: una asignación y un pedido ficticios (`*verif*`/`a11
 - **Un solo navegador** (el integrado). No se probó en Firefox, Safari ni con lector de pantalla; WebKit/Safari no enfoca los botones al hacer clic con el ratón, así que allí el foco no puede volver a un botón activado con ratón (limitación conocida del hook, no del diálogo).
 - `inert` exige navegadores recientes; en uno sin soporte el fondo no queda bloqueado (aún así Tab queda contenido por el hook y `aria-modal` indica el modo).
 - Los modales de formulario que muestran un `ConfirmDialog` encima siguen escuchando Escape en `window` cada uno; hoy ningún flujo de C-3/C-4/C-5 los anida. No se verificó el anidamiento.
-- Una anomalía **no reproducida** al probar la carga de C-4 con un retraso de 4 s: en una corrida los botones aparecieron habilitados y Escape cerró el diálogo; repetida con 8 s se comportó como en C-3 y C-5. No se pudo explicar (posible desfase del instante de la lectura).
-- **Observación fuera de alcance** (no corregida): el mensaje de C-4 cuando el correo no está configurado muestra el nombre técnico del error (`MailNotConfiguredError`) a la persona usuaria. Conviene un texto sin nombres internos.
-- No se cambiaron tiempos, el calentamiento de `getComputedStyle` ni el número de trabajadores.
+- **Anomalía de C-4 con retraso de 4 s: explicada, era un defecto real y está corregido.** Reproducida con tiempos medidos (petición retenida 4 000 ms; teclas reales): al confirmar «Pedir de nuevo», `loading` llega del padre **unos 130 ms después** (en esta máquina) de que la petición ya salió; Escape y un segundo Intro pulsados en ese intervalo cancelaban el diálogo o se perdían. Con la pausa mayor del recorrido anterior no ocurría, por eso «no se reprodujo». Consecuencia del defecto: el diálogo se cerraba con la petición aún en curso y el resultado llegaba después por el mensaje de la página (no se duplicó el envío). Corrección: `ConfirmDialog` registra la confirmación al instante (un `ref`) y bloquea Escape, fondo, «Cancelar» y un segundo «confirmar» hasta que `loading` pasa de verdadero a falso, cambia el mensaje o, si el padre nunca activa `loading`, pasan 300 ms. Pruebas deterministas: `ConfirmDialog.test.tsx` (2, fallan sin la corrección) y `DataRequestPage.test.tsx` (1, con la petición controlada por una promesa).
+  Medido después de la corrección, con la misma secuencia (petición retenida 4 000 ms):
+
+  | t (ms) | Evento |
+  |---|---|
+  | 6 539 | Intro: confirmar; la petición sale |
+  | 6 547 | Escape (8 ms después): sin efecto |
+  | 6 564 | Segundo Intro: sin efecto (una sola petición `POST`) |
+  | 6 671 | el diálogo pasa a `aria-busy`, ambos botones deshabilitados, foco dentro |
+  | 10 704 | termina la petición (respuesta recibida) |
+  | 10 806 | el diálogo se cierra, **102 ms después** de terminar la petición |
+
+  Que el diálogo vuelva a habilitarse o se cierre después de que la petición termina es el comportamiento correcto y no un defecto.
+- **Observación fuera de alcance (corrección separada y pequeña, no incluida aquí):** el mensaje de C-4 sin correo configurado muestra el nombre técnico del error (`MailNotConfiguredError`). Se propone una explicación comprensible con el siguiente paso, dejando el detalle técnico en el registro del servidor.
+- **Limitaciones aceptadas por ahora** (no se amplían): diálogos anidados y lector de pantalla **no verificados**; un solo navegador.
+- **Cinco pantallas con `ConfirmDialog` sin revisión manual con teclado:** `CatalogsPage`, `BrandingPage`, `PeriodClosurePage`, `WorkPlanPage` y `StudentsPage` (cubiertas solo por las pruebas del componente compartido y por sus pruebas de pantalla existentes).
+- Se mantienen sin cambios los tiempos, el calentamiento de `getComputedStyle` y la configuración de trabajadores.

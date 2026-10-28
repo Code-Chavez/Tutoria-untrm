@@ -265,6 +265,36 @@ describe('DataRequestPage (pedido de listas por correo)', () => {
       expect(requests.send).toHaveBeenLastCalledWith(expect.objectContaining({ confirmDuplicateOf: 'prev-2' }));
     });
 
+    it('confirmar el equivalente: mientras la petición sigue pendiente no se puede confirmar otra vez ni cerrar con Escape, y el diálogo se cierra solo cuando termina', async () => {
+      let finish: (v: { request: DataRequest; replayed: boolean }) => void = () => undefined;
+      requests.send
+        .mockRejectedValueOnce(httpError(409, { code: 'DUPLICATE_DATA_REQUEST', error: 'x', previous: previous() }))
+        .mockReturnValueOnce(new Promise((resolve) => (finish = resolve)));
+      const user = await sendOnce();
+      const dialog = await screen.findByRole('alertdialog');
+      await user.keyboard('{Tab}{Enter}'); // «Pedir de nuevo» con el teclado
+
+      await waitFor(() => expect(requests.send).toHaveBeenCalledTimes(2));
+      await waitFor(() => expect(dialog).toHaveAttribute('aria-busy', 'true'));
+      expect(within(dialog).getByRole('button', { name: 'Pedir de nuevo' })).toBeDisabled();
+      expect(within(dialog).getByRole('button', { name: 'Cancelar' })).toBeDisabled();
+
+      // Pendiente: ni Escape, ni Enter/Espacio, ni clic en el fondo, ni otro clic en «Pedir de nuevo» tienen efecto.
+      await user.keyboard('{Escape}');
+      await user.keyboard('{Enter}');
+      await user.keyboard(' ');
+      await user.click(within(dialog).getByRole('button', { name: 'Pedir de nuevo' }));
+      await user.click(dialog.parentElement as HTMLElement);
+      await new Promise((resolve) => setTimeout(resolve, 50));
+      expect(screen.getByRole('alertdialog')).toBeInTheDocument();
+      expect(requests.send).toHaveBeenCalledTimes(2);
+
+      // Solo al terminar la petición el diálogo se cierra (y deja de estar ocupado).
+      finish({ request: record(), replayed: false });
+      await waitFor(() => expect(screen.queryByRole('alertdialog')).not.toBeInTheDocument());
+      expect(requests.send).toHaveBeenCalledTimes(2);
+    });
+
     it('cancelar el diálogo no envía nada', async () => {
       requests.send.mockRejectedValueOnce(httpError(409, { code: 'DUPLICATE_DATA_REQUEST', error: 'x', previous: previous() }));
       const user = await sendOnce();
