@@ -1,6 +1,8 @@
 # Fallos intermitentes de la suite completa del cliente (observados al preparar C-3 y C-4)
 
-**Estado: causa NO determinada.** Este archivo conserva lo observado. No afirma que fueran causados por la carga de la máquina: que un archivo pase al ejecutarlo solo **no demuestra** esa causa. No se cambió ninguna aserción ni ningún tiempo de espera.
+**Actualización:** la investigación con experimentos controlados está en [cliente-fallos-intermitentes-investigacion.md](cliente-fallos-intermitentes-investigacion.md) (dos mecanismos medidos, un grupo indeterminado). Lo que sigue es el registro original.
+
+**Estado original: causa NO determinada.** Este archivo conserva lo observado. No afirma que fueran causados por la carga de la máquina: que un archivo pase al ejecutarlo solo **no demuestra** esa causa. No se cambió ninguna aserción ni ningún tiempo de espera.
 
 ## Qué se observó
 
