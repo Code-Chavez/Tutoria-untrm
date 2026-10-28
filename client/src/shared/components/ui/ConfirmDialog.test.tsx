@@ -1,10 +1,10 @@
 import { describe, it, expect, vi } from 'vitest';
-import { fireEvent, render, screen } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { useState } from 'react';
 import { ConfirmDialog } from './ConfirmDialog';
 
-function Host({ onConfirm = vi.fn(), loading = false, removeOpenerOnOpen = false }: { onConfirm?: () => void; loading?: boolean; removeOpenerOnOpen?: boolean }) {
+function Host({ onConfirm = vi.fn(async () => undefined), loading = false, removeOpenerOnOpen = false }: { onConfirm?: () => Promise<unknown>; loading?: boolean; removeOpenerOnOpen?: boolean }) {
   const [open, setOpen] = useState(false);
   const [showOpener, setShowOpener] = useState(true);
   return (
@@ -38,7 +38,7 @@ function Host({ onConfirm = vi.fn(), loading = false, removeOpenerOnOpen = false
 
 describe('ConfirmDialog (F1: foco y teclado)', () => {
   it('al abrirse el foco entra en el diálogo, en «Cancelar», y no ejecuta la acción', async () => {
-    const onConfirm = vi.fn();
+    const onConfirm = vi.fn(async () => undefined);
     const user = userEvent.setup();
     render(<Host onConfirm={onConfirm} />);
     await user.click(screen.getByRole('button', { name: 'Desactivar a Ana' }));
@@ -124,7 +124,7 @@ describe('ConfirmDialog (F1: foco y teclado)', () => {
   });
 
   it('confirmar solo ocurre por una acción explícita sobre «Desactivar»', async () => {
-    const onConfirm = vi.fn();
+    const onConfirm = vi.fn(async () => undefined);
     const user = userEvent.setup();
     render(<Host onConfirm={onConfirm} />);
     await user.click(screen.getByRole('button', { name: 'Desactivar a Ana' }));
@@ -164,49 +164,72 @@ describe('ConfirmDialog (F1: foco y teclado)', () => {
     expect(screen.getByRole('alertdialog').contains(document.activeElement)).toBe(true);
   });
 
-  describe('confirmación recién pulsada, antes de que el padre active `loading`', () => {
-    const Controlled = ({ loading, onConfirm, onCancel }: { loading: boolean; onConfirm: () => void; onCancel: () => void }) => (
+  describe('contrato de onConfirm: el bloqueo dura lo que dure la promesa, no lo que tarde el padre en actualizar `loading`', () => {
+    const Controlled = ({ loading = false, onConfirm, onCancel }: { loading?: boolean; onConfirm: () => Promise<unknown>; onCancel: () => void }) => (
       <ConfirmDialog open tone="danger" title="Desactivar usuario" message="¿Confirmas?" confirmLabel="Desactivar" loading={loading} onConfirm={onConfirm} onCancel={onCancel} />
     );
-
-    it('Escape, el fondo y «Cancelar» no cancelan en ese intervalo, un segundo «confirmar» no repite, y al terminar la operación vuelven a funcionar', () => {
-      const onConfirm = vi.fn();
-      const onCancel = vi.fn();
-      const { rerender } = render(<Controlled loading={false} onConfirm={onConfirm} onCancel={onCancel} />);
-
-      fireEvent.click(screen.getByRole('button', { name: 'Desactivar' }));
-      // La petición ya salió pero el padre todavía no pasó `loading` a verdadero.
+    const attemptToLeave = (onConfirm: ReturnType<typeof vi.fn>) => {
       fireEvent.keyDown(window, { key: 'Escape' });
       fireEvent.click(screen.getByRole('button', { name: 'Cancelar' }));
       fireEvent.click(screen.getByRole('alertdialog').parentElement as HTMLElement);
       fireEvent.click(screen.getByRole('button', { name: 'Desactivar' }));
-      expect(onCancel).not.toHaveBeenCalled();
       expect(onConfirm).toHaveBeenCalledTimes(1);
+    };
 
-      rerender(<Controlled loading onConfirm={onConfirm} onCancel={onCancel} />);
-      fireEvent.keyDown(window, { key: 'Escape' });
-      expect(onCancel).not.toHaveBeenCalled();
-
-      rerender(<Controlled loading={false} onConfirm={onConfirm} onCancel={onCancel} />); // la operación terminó
-      fireEvent.keyDown(window, { key: 'Escape' });
-      expect(onCancel).toHaveBeenCalledTimes(1);
-    });
-
-    it('si el padre nunca activa `loading` (confirmación síncrona), el diálogo vuelve a poder cancelarse tras el margen', () => {
+    it('con la operación pendiente mucho más de 300 ms y `loading` sin actualizar, Escape, «Cancelar», el fondo y una segunda confirmación siguen bloqueados; al resolverse se liberan', async () => {
       vi.useFakeTimers();
       try {
+        let resolve: () => void = () => undefined;
+        const onConfirm = vi.fn(() => new Promise<void>((done) => (resolve = done)));
         const onCancel = vi.fn();
-        render(<Controlled loading={false} onConfirm={vi.fn()} onCancel={onCancel} />);
+        render(<Controlled onConfirm={onConfirm} onCancel={onCancel} />);
+
         fireEvent.click(screen.getByRole('button', { name: 'Desactivar' }));
-        fireEvent.keyDown(window, { key: 'Escape' });
+        await vi.advanceTimersByTimeAsync(10_000); // el padre no actualizó `loading` y la operación sigue pendiente
+        attemptToLeave(onConfirm);
         expect(onCancel).not.toHaveBeenCalled();
 
-        vi.advanceTimersByTime(300);
+        resolve();
+        await vi.advanceTimersByTimeAsync(0);
         fireEvent.keyDown(window, { key: 'Escape' });
         expect(onCancel).toHaveBeenCalledTimes(1);
       } finally {
         vi.useRealTimers();
       }
+    });
+
+    it('si la promesa se rechaza, el bloqueo se libera', async () => {
+      const onConfirm = vi.fn(() => Promise.reject(new Error('falló')));
+      const onCancel = vi.fn();
+      render(<Controlled onConfirm={onConfirm} onCancel={onCancel} />);
+
+      fireEvent.click(screen.getByRole('button', { name: 'Desactivar' }));
+      fireEvent.keyDown(window, { key: 'Escape' });
+      expect(onCancel).not.toHaveBeenCalled();
+
+      await waitFor(() => {
+        fireEvent.keyDown(window, { key: 'Escape' });
+        expect(onCancel).toHaveBeenCalled();
+      });
+    });
+
+    it('si onConfirm lanza un error síncrono, el bloqueo se libera', () => {
+      const failure = new Error('síncrono');
+      const onConfirm = vi.fn((): Promise<unknown> => {
+        throw failure;
+      });
+      const onCancel = vi.fn();
+      const swallow = (event: ErrorEvent) => event.preventDefault();
+      window.addEventListener('error', swallow);
+      try {
+        render(<Controlled onConfirm={onConfirm} onCancel={onCancel} />);
+        fireEvent.click(screen.getByRole('button', { name: 'Desactivar' }));
+        fireEvent.keyDown(window, { key: 'Escape' });
+      } finally {
+        window.removeEventListener('error', swallow);
+      }
+      expect(onConfirm).toHaveBeenCalledTimes(1);
+      expect(onCancel).toHaveBeenCalledTimes(1);
     });
   });
 });

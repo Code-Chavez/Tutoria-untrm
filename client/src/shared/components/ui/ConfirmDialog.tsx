@@ -14,7 +14,11 @@ interface ConfirmDialogProps {
   cancelLabel?: string;
   tone?: 'primary' | 'danger';
   loading?: boolean;
-  onConfirm: () => void;
+  /**
+   * Debe devolver la promesa de la operación: el diálogo mantiene bloqueados Escape, el fondo, «Cancelar» y otra
+   * confirmación hasta que se resuelva o rechace (y también si lanza un error síncrono). `loading` solo pinta el estado.
+   */
+  onConfirm: () => Promise<unknown>;
   onCancel: () => void;
 }
 
@@ -23,13 +27,10 @@ type PanelProps = Omit<ConfirmDialogProps, 'open'>;
 /**
  * Se monta solo mientras el diálogo está abierto: así el foco inicial, su contención y su devolución
  * al botón que lo abrió (useDialogFocus) corresponden exactamente a cada apertura.
- * Mientras `loading` la operación está en curso y no se puede cancelar: Escape, el fondo y
- * «Cancelar» quedan sin efecto. `loading` llega del padre unos milisegundos DESPUÉS de pulsar «confirmar»; en ese
- * intervalo la petición ya salió, por eso la confirmación se registra al instante en un ref (`confirming`) y se
- * suelta cuando `loading` pasa de verdadero a falso, cuando cambia el mensaje o, si el padre nunca lo activa, tras CONFIRM_GRACE_MS.
+ * La operación en curso no se puede cancelar: el bloqueo (`confirming`) se activa en el mismo instante de confirmar y se
+ * suelta solo cuando la promesa que devuelve `onConfirm` se resuelve o rechaza, sin depender de cuándo el padre actualice
+ * `loading` ni de ningún plazo.
  */
-const CONFIRM_GRACE_MS = 300;
-
 const ConfirmPanel: React.FC<PanelProps> = ({
   title,
   message,
@@ -49,25 +50,6 @@ const ConfirmPanel: React.FC<PanelProps> = ({
   const dialogRef = useDialogFocus<HTMLDivElement>();
 
   const confirming = useRef(false);
-  const sawLoading = useRef(false);
-  const graceTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
-  useEffect(() => () => clearTimeout(graceTimer.current), []);
-  useEffect(() => {
-    if (loading) {
-      sawLoading.current = true;
-      clearTimeout(graceTimer.current);
-    } else if (sawLoading.current) {
-      sawLoading.current = false;
-      confirming.current = false;
-    }
-  }, [loading]);
-
-  useEffect(() => {
-    // Un mensaje nuevo es un resultado nuevo (p. ej. otro pedido equivalente): ya se puede decidir de nuevo.
-    clearTimeout(graceTimer.current);
-    confirming.current = false;
-    sawLoading.current = false;
-  }, [message]);
 
   const cancel = useCallback(() => {
     if (!loading && !confirming.current) onCancel();
@@ -76,10 +58,19 @@ const ConfirmPanel: React.FC<PanelProps> = ({
   const confirm = () => {
     if (loading || confirming.current) return;
     confirming.current = true;
-    graceTimer.current = setTimeout(() => {
+    const release = () => {
       confirming.current = false;
-    }, CONFIRM_GRACE_MS);
-    onConfirm();
+    };
+    let operation: Promise<unknown> | undefined;
+    try {
+      operation = onConfirm();
+    } catch (error) {
+      release();
+      throw error;
+    }
+    // Un valor que no es promesa (no cumple el contrato) no deja la operación en curso: se libera de inmediato.
+    if (operation && typeof operation.then === 'function') operation.then(release, release);
+    else release();
   };
 
   useEffect(() => {
