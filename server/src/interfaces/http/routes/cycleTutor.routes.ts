@@ -10,6 +10,7 @@ const controller = new CycleTutorController(
   container.useCases.setCycleTutorUseCase,
   container.useCases.removeCycleTutorUseCase,
   container.useCases.requestTutorAcceptanceUseCase,
+  container.useCases.resendDeclineNoticeUseCase,
 );
 const requireAuth = authenticate(container.services.tokenService);
 
@@ -17,6 +18,8 @@ const requireAuth = authenticate(container.services.tokenService);
 router.get('/schools/:schoolId/cycle-tutors', requireAuth, authorize(['students:write']), controller.index);
 router.put('/schools/:schoolId/cycle-tutors/:cycle', requireAuth, authorize(['students:write']), controller.set);
 router.post('/schools/:schoolId/cycle-tutors/:cycle/acceptance-request', requireAuth, authorize(['students:write']), controller.resend);
+// Reenviar solo el aviso del rechazo a la coordinación (mismo permiso y alcance que reenviar la aceptación).
+router.post('/schools/:schoolId/cycle-tutors/:cycle/decline-notice/resend', requireAuth, authorize(['students:write']), controller.resendDeclineNotice);
 router.delete('/schools/:schoolId/cycle-tutors/:cycle', requireAuth, authorize(['students:write']), controller.remove);
 
 export default router;

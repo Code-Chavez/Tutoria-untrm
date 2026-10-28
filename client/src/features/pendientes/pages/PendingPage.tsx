@@ -1,10 +1,10 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { useQuery } from '@tanstack/react-query';
-import { Badge, EmptyState, PageHeader, SelectField, TableSkeleton } from '@shared/components/ui';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { Badge, Button, ConfirmDialog, EmptyState, PageHeader, SelectField, TableSkeleton } from '@shared/components/ui';
 import { InboxIcon } from '@shared/components/icons';
 import { getApiErrorMessage } from '@shared/services/apiClient';
-import { pendingService, type PendingItem, type PendingKind } from '../services/pendingService';
+import { isLostResponse, parseResendConflict, pendingService, type DeclineNotice, type PendingItem, type PendingKind, type PreviousAttempt } from '../services/pendingService';
 import styles from './PendingPage.module.css';
 
 const KIND_LABEL: Record<PendingKind, { label: string; tone: 'danger' | 'warning' | 'info'; action: string }> = {
@@ -16,6 +16,39 @@ const KIND_LABEL: Record<PendingKind, { label: string; tone: 'danger' | 'warning
   CANCELLED_SESSION_NO_FOLLOWUP: { label: 'Cita cancelada', tone: 'info', action: 'Abrir la solicitud' },
 };
 
+// Qué se muestra de cada estado del aviso por correo a la coordinación. Dice solo lo que se sabe del ENVÍO: nunca «se avisó» ni «lo recibió».
+const noticeText = (notice: DeclineNotice): { text: string; tone: 'ok' | 'warn' | 'info' } => {
+  const to = notice.recipientName ? ` a ${notice.recipientName}` : '';
+  switch (notice.status) {
+    case 'ENVIADO':
+      return { text: `El servidor de correo aceptó el aviso${to}. Eso no garantiza que haya llegado a su bandeja ni que lo haya leído.`, tone: 'ok' };
+    case 'EN_COLA':
+      return notice.deliveryEnabled
+        ? { text: 'El aviso por correo está en la cola de envío y aún no se ha intentado. Si pasa mucho tiempo, avise a la administración: el proceso de envío podría no estar activo.', tone: 'info' }
+        : {
+            text: 'El aviso por correo no se envió porque el envío de correos no está configurado en el sistema. Queda en espera y saldrá solo cuando se configure el correo (SMTP). Siguiente paso: pida a la administración que lo configure.',
+            tone: 'warn',
+          };
+    case 'ENVIANDO':
+      return { text: 'El aviso por correo se está enviando.', tone: 'info' };
+    case 'FALLIDO':
+      return { text: `El servidor de correo no aceptó el aviso${to}. Puede reenviarlo.`, tone: 'warn' };
+    case 'INCIERTO':
+      return { text: `No se puede saber si el aviso${to} salió. Puede haber llegado. Si lo reenvía, es posible que se reciba dos veces.`, tone: 'warn' };
+    case 'SIN_REGISTRO':
+      return { text: 'Este rechazo es anterior al registro de avisos: no se sabe si se envió el aviso por correo.', tone: 'warn' };
+    case 'SIN_DESTINATARIO':
+      return { text: 'No se realizó el envío porque no hay un destinatario habilitado.', tone: 'warn' };
+    case 'DATOS_INCOMPLETOS':
+      return { text: 'No se realizó el envío porque faltan o son inconsistentes datos necesarios (escuela, periodo o docente).', tone: 'warn' };
+    default:
+      return { text: 'El aviso ya no corresponde: la designación cambió después del rechazo.', tone: 'info' };
+  }
+};
+
+const fmtDateTime = (iso: string | null) => (iso ? new Date(iso).toLocaleString('es-PE', { dateStyle: 'medium', timeStyle: 'short' }) : '');
+const itemKey = (item: PendingItem) => `${item.schoolId}|${item.cycle}`;
+
 const daysSince = (iso: string) => Math.max(0, Math.floor((Date.now() - new Date(iso).getTime()) / 86_400_000));
 const waiting = (iso: string) => {
   const days = daysSince(iso);
@@ -25,6 +58,15 @@ const waiting = (iso: string) => {
 // Lo que la coordinación y la DBU deben mirar aunque nadie se lo avise: la pantalla solo muestra y lleva a donde se resuelve.
 export function PendingPage() {
   const query = useQuery({ queryKey: ['institutional-pending'], queryFn: () => pendingService.list(), retry: false });
+  const queryClient = useQueryClient();
+  const [feedback, setFeedback] = useState<{ type: 'ok' | 'error'; text: string } | null>(null);
+  // Reenvío de un aviso incierto: el diálogo identifica el intento mostrado; solo ESE intento se confirma.
+  const [confirming, setConfirming] = useState<{ item: PendingItem; previous: PreviousAttempt } | null>(null);
+  const [busy, setBusy] = useState<string | null>(null);
+  // Cierre síncrono: dos clics seguidos llegan antes de que el estado se vuelva a dibujar.
+  const sending = useRef(false);
+  // Identidad de cada operación de reenvío: se conserva al perder la respuesta y se renueva ante una respuesta definitiva o un cambio.
+  const operations = useRef(new Map<string, { id: string; fingerprint: string }>());
   const [kind, setKind] = useState<'ALL' | PendingKind>('ALL');
   const [search, setSearch] = useState('');
   const [school, setSchool] = useState('ALL');
@@ -34,6 +76,54 @@ export function PendingPage() {
     (kind === 'ALL' || item.kind === kind) && (school === 'ALL' || item.schoolId === school) &&
     normalize([item.title, item.detail, item.schoolName, KIND_LABEL[item.kind].label, item.cycle ? 'ciclo ' + item.cycle : ''].join(' ')).includes(normalize(search.trim())));
 
+
+  const resend = async (item: PendingItem, confirmAttemptId?: string | null) => {
+    const key = itemKey(item);
+    if (sending.current || item.cycle === null) return;
+    sending.current = true;
+    setBusy(key);
+    setFeedback(null);
+    const confirm = confirmAttemptId === undefined ? undefined : { attemptId: confirmAttemptId };
+    const fingerprint = JSON.stringify([key, item.notice?.attemptId ?? null, confirm ?? null]);
+    const known = operations.current.get(key);
+    const operation = known && known.fingerprint === fingerprint ? known : { id: crypto.randomUUID(), fingerprint };
+    operations.current.set(key, operation);
+    try {
+      const { attempt, replayed } = await pendingService.resendDeclineNotice(item.schoolId, item.cycle, { operationId: operation.id, confirmPrevious: confirm });
+      operations.current.delete(key);
+      setConfirming(null);
+      const who = attempt.recipientName ? ` a ${attempt.recipientName}` : '';
+      const text =
+        attempt.status === 'ENVIADO'
+          ? `${replayed ? 'Esta operación ya estaba registrada. ' : ''}El servidor de correo aceptó el aviso${who}. Eso no garantiza que haya llegado a su bandeja.`
+          : attempt.status === 'FALLIDO'
+            ? 'El servidor de correo no aceptó el aviso. Puede volver a intentarlo.'
+            : attempt.status === 'INCIERTO'
+              ? 'No se puede saber si el aviso salió: puede haber llegado. Revise antes de reenviarlo otra vez.'
+              : attempt.status === 'EN_COLA' || attempt.status === 'ENVIANDO'
+                ? 'El aviso se está enviando. Revise su estado en unos instantes.'
+                : 'No se realizó el envío. Revise el estado del aviso.';
+      setFeedback({ type: attempt.status === 'ENVIADO' ? 'ok' : 'error', text });
+    } catch (error) {
+      const conflict = parseResendConflict(error);
+      if (conflict?.code === 'CONFIRMATION_REQUIRED' && conflict.previous) {
+        // El servidor no registró nada con esta intención: la confirmación abre una operación nueva sobre el intento que muestra.
+        operations.current.delete(key);
+        setConfirming({ item, previous: conflict.previous });
+      } else if (conflict) {
+        operations.current.delete(key);
+        setConfirming(null);
+        setFeedback({ type: 'error', text: getApiErrorMessage(error) });
+      } else {
+        if (!isLostResponse(error)) operations.current.delete(key);
+        setFeedback({ type: 'error', text: isLostResponse(error) ? `${getApiErrorMessage(error)} Si lo reintenta, el aviso no se enviará dos veces.` : getApiErrorMessage(error) });
+      }
+    } finally {
+      sending.current = false;
+      setBusy(null);
+      void queryClient.invalidateQueries({ queryKey: ['institutional-pending'] });
+    }
+  };
 
   return (
     <div className={styles.page}>
@@ -55,6 +145,13 @@ export function PendingPage() {
             </SelectField>
           </div>) : undefined}
       />
+
+      {/* El resultado de un reenvío va arriba de la lista: abajo quedaba fuera de la vista. */}
+      {feedback && (
+        <p role={feedback.type === 'ok' ? 'status' : 'alert'} className={feedback.type === 'ok' ? styles.feedbackOk : styles.feedbackError}>
+          {feedback.text}
+        </p>
+      )}
 
       {query.isLoading ? (
         <TableSkeleton rows={4} />
@@ -79,6 +176,16 @@ export function PendingPage() {
                     <div className={styles.itemHeading}><Badge tone={copy.tone}>{copy.label}</Badge>
                     <p className={styles.title}>{item.title}</p></div>
                     <p className={styles.detail}>{item.detail}</p>
+                    {item.notice && (
+                      <div className={styles.notice} data-tone={noticeText(item.notice).tone}>
+                        <p>{noticeText(item.notice).text}</p>
+                        {item.notice.canResend && (
+                          <Button type="button" variant="secondary" loading={busy === itemKey(item)} onClick={() => (item.notice?.needsConfirmation ? setConfirming({ item, previous: { attemptId: item.notice.attemptId, status: item.notice.status === 'SIN_REGISTRO' ? null : item.notice.status, at: item.notice.at } }) : void resend(item))}>
+                            Reenviar aviso
+                          </Button>
+                        )}
+                      </div>
+                    )}
                   </div>
                     <p className={styles.meta}>
                       {item.schoolName}
@@ -93,6 +200,20 @@ export function PendingPage() {
           </ul></div>}
         </>
       )}
+      <ConfirmDialog
+        open={confirming !== null}
+        tone="danger"
+        title="Reenviar el aviso"
+        message={
+          confirming
+            ? `No se puede saber si el aviso anterior${confirming.previous.at ? ` (${fmtDateTime(confirming.previous.at)})` : ''} salió. Puede haber llegado. Si lo reenvía, la coordinación podría recibirlo dos veces. Solo se reenvía el aviso: el rechazo del docente no cambia.`
+            : ''
+        }
+        confirmLabel="Reenviar aviso"
+        loading={busy !== null}
+        onConfirm={() => confirming && void resend(confirming.item, confirming.previous.attemptId)}
+        onCancel={() => setConfirming(null)}
+      />
     </div>
   );
 }

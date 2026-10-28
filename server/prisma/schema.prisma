@@ -1023,10 +1023,51 @@ model CycleTutorAssignment {
   declineReason       String?   @map("decline_reason")
   // Días, horas y lugar de atención que fija el docente: [{ day: 1-6, start: "HH:MM", end: "HH:MM", place?: string }]
   availability        Json?
+  // Resumen del aviso a la coordinación cuando el docente rechazó (EN_COLA, ENVIANDO, ENVIADO, FALLIDO, INCIERTO, SIN_DESTINATARIO,
+  // DATOS_INCOMPLETOS, OBSOLETO) y el último intento. Nulos en los rechazos anteriores a esta función: «sin registro», no «sin enviar».
+  declineNoticeStatus    String?                @map("decline_notice_status")
+  declineNoticeAttemptId String?                @map("decline_notice_attempt_id")
+  declineNoticeAttempts  DeclineNoticeAttempt[]
 
   @@unique([periodId, schoolId, cycle])
   @@index([periodId, tutorId])
   @@map("cycle_tutor_assignments")
+}
+
+// Un INTENTO de avisar a la coordinación del rechazo de un docente: el original (lo encola el propio rechazo, de forma atómica) o un
+// reenvío pedido por una persona (con identidad de operación). El resumen vive en la designación; aquí queda cada intento, con el
+// destinatario al que se intentó y su resultado. Sin tokens ni mensajes de error: solo un código corto.
+model DeclineNoticeAttempt {
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now()) @map("created_at")
+
+  assignmentId String                @map("assignment_id")
+  assignment   CycleTutorAssignment @relation(fields: [assignmentId], references: [id], onDelete: Cascade)
+  kind         String // ORIGINAL | REENVIO
+  // EN_COLA (nunca se intentó) → ENVIANDO (intento en curso) → ENVIADO | FALLIDO (demostrado) | INCIERTO | SIN_DESTINATARIO | DATOS_INCOMPLETOS | OBSOLETO
+  status       String                @default("EN_COLA")
+
+  // A qué rechazo corresponde: si la designación cambió, el intento es obsoleto.
+  tutorId    String   @map("tutor_id")
+  declinedAt DateTime @map("declined_at")
+
+  operationId       String? @map("operation_id")
+  requestedById     String? @map("requested_by_id")
+  reason            String?
+  previousAttemptId String? @map("previous_attempt_id")
+  previousAttempt   DeclineNoticeAttempt?  @relation("DeclineNoticeChain", fields: [previousAttemptId], references: [id], onDelete: SetNull)
+  nextAttempts      DeclineNoticeAttempt[] @relation("DeclineNoticeChain")
+
+  recipientUserId String?   @map("recipient_user_id")
+  recipientEmail  String?   @map("recipient_email")
+  startedAt       DateTime? @map("started_at")
+  finishedAt      DateTime? @map("finished_at")
+  errorCode       String?   @map("error_code")
+
+  @@unique([requestedById, operationId])
+  @@index([status, createdAt])
+  @@index([assignmentId, createdAt])
+  @@map("decline_notice_attempts")
 }
 
 // Amonestación a un docente tutor por incumplir su labor de tutoría (Art. del protocolo): la emite el Decano de su facultad y

@@ -73,7 +73,7 @@ export function TutorAcceptancePage() {
           <>
             <h1 className={styles.title}>{step.accepted ? '¡Gracias por aceptar!' : 'Respuesta registrada'}</h1>
             <p role="status" className={styles.subtitle}>
-              {step.accepted ? 'Su disponibilidad quedó registrada y la coordinación ya puede verla.' : 'Se avisó a la coordinación para que asigne a otro docente.'}
+              {step.accepted ? 'Su disponibilidad quedó registrada y la coordinación ya puede verla.' : 'Tu respuesta quedó registrada y está disponible para los responsables de tutoría.'}
             </p>
             {step.activationLink ? <>
               <p className={local.hint}>Es tu primer acceso: crea tu contraseña con este enlace de un solo uso. Después podrás iniciar sesión con tu correo y tu nueva contraseña.</p>

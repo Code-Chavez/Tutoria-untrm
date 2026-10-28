@@ -50,6 +50,8 @@ export const ACTION_LABEL: Record<string, string> = {
   INVITATION_ISSUED: 'Invitación de acceso emitida',
   ASSIGN_ROLE: 'Cambio de rol',
   ROLE_CREATED: 'Rol creado',
+  CYCLE_TUTOR_DECLINE_NOTICE_RESEND: 'Reenvío del aviso de rechazo',
+  CYCLE_TUTOR_DECLINE_NOTICE_RESULT: 'Resultado del aviso de rechazo',
   USER_CHANGE_REJECTED: 'Cambio de usuario rechazado',
   PERIOD_CLOSED: 'Periodo cerrado',
   PERIOD_REOPENED: 'Periodo reabierto',

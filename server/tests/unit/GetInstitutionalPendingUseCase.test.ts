@@ -16,6 +16,7 @@ type Assignment = {
   createdAt: Date;
 };
 
+const noticeRepo = (map: Map<string, unknown> = new Map()) => ({ latestByAssignments: jest.fn().mockResolvedValue(map) });
 function build(opts: {
   scope?: { kind: 'ALL' } | { kind: 'SCHOOLS'; schoolIds: string[] } | { kind: 'TUTOR'; tutorId: string } | { kind: 'NONE' };
   assignments?: Record<string, Assignment[]>;
@@ -24,9 +25,12 @@ function build(opts: {
   audit?: { action: string; entityId: string; details: string; createdAt: Date }[];
   requests?: { id: string; studentId: string; sessionId: string | null; status: string }[];
   sessions?: Record<string, { cancelledAt: Date | null; cancelReason?: string | null }>;
+  notices?: Map<string, unknown>;
+  deliveryEnabled?: boolean;
+  coordinator?: { isActive: boolean; email: string } | null;
 }) {
   const schools = [
-    { id: 'sys', name: 'Ingeniería de Sistemas' },
+    { id: 'sys', name: 'Ingeniería de Sistemas', coordinatorId: 'coord' },
     { id: 'mec', name: 'Mecánica Eléctrica' },
   ];
   const students: Record<string, { id: string; schoolId: string; cycle: number; firstName: string; lastName: string }> = {
@@ -41,7 +45,10 @@ function build(opts: {
     enrolledByCycle: jest.fn().mockImplementation(async (_p: string, s: string) => new Map(opts.enrolled?.[s] ?? [])),
   };
   const users = {
-    findById: jest.fn().mockImplementation(async (id: string) => ({ id, firstName: id, lastName: 'Docente', isActive: !(opts.inactive ?? []).includes(id) })),
+    findById: jest.fn().mockImplementation(async (id: string) => {
+      const base: { id: string; firstName: string; lastName: string; isActive: boolean; email: string } = { id, firstName: id, lastName: 'Docente', isActive: !(opts.inactive ?? []).includes(id), email: `${id}@untrm.edu.pe` };
+      return id === 'coord' ? { ...base, ...(opts.coordinator === null ? { isActive: false } : (opts.coordinator ?? {})) } : base;
+    }),
   };
   const audit = { findAll: jest.fn().mockResolvedValue(opts.audit ?? []) };
   const requests = { findAll: jest.fn().mockResolvedValue(opts.requests ?? []) };
@@ -57,6 +64,8 @@ function build(opts: {
     requests as never,
     sessions as never,
     studentRepo as never,
+    noticeRepo(opts.notices) as never,
+    opts.deliveryEnabled ?? true,
     () => NOW,
   );
   return { run: () => useCase.execute('u1'), periods };
@@ -172,5 +181,61 @@ describe('pendientes institucionales', () => {
     const b = build({ assignments: { sys: [a({ acceptanceStatus: 'RECHAZADA' })] } });
     b.periods.findActive.mockResolvedValue(null);
     expect((await b.run()).items).toEqual([]);
+  });
+
+  describe('aviso por correo del rechazo (LEV-R05)', () => {
+    const rejected = [a({ id: 'a1', acceptanceStatus: 'RECHAZADA', respondedAt: day(5), declineReason: 'Licencia' })];
+    const attempt = (over: Record<string, unknown>) => ({ id: 'n1', kind: 'ORIGINAL', status: 'ENVIADO', createdAt: day(5), startedAt: day(5), finishedAt: day(5), recipientUserId: 'coord', ...over });
+    const noticeOf = async (notices?: Map<string, unknown>, extra: { deliveryEnabled?: boolean; coordinator?: { isActive: boolean; email: string } | null } = {}) =>
+      (await build({ assignments: { sys: rejected }, notices, ...extra }).run()).items.find((i) => i.kind === 'DESIGNATION_REJECTED')?.notice;
+
+    it('un rechazo anterior a la función no se presenta como enviado ni como fallido: SIN_REGISTRO y exige confirmar', async () => {
+      expect(await noticeOf()).toMatchObject({ status: 'SIN_REGISTRO', attemptId: null, canResend: true, needsConfirmation: true });
+    });
+
+    it('el rechazo sigue siendo UN solo ítem de Pendientes, con el estado del aviso dentro (sin duplicar)', async () => {
+      const r = await build({ assignments: { sys: rejected }, notices: new Map([['a1', attempt({})]]) }).run();
+
+      expect(r.items.filter((i) => i.kind === 'DESIGNATION_REJECTED')).toHaveLength(1);
+      expect(r.items).toHaveLength(1);
+    });
+
+    it.each([
+      ['ENVIADO', { status: 'ENVIADO' }, { canResend: false, needsConfirmation: false }],
+      ['FALLIDO', { status: 'FALLIDO' }, { canResend: true, needsConfirmation: false }],
+      ['INCIERTO', { status: 'INCIERTO' }, { canResend: true, needsConfirmation: true }],
+      ['EN_COLA', { status: 'EN_COLA', startedAt: null, finishedAt: null }, { canResend: false, needsConfirmation: false }],
+      ['ENVIANDO vigente', { status: 'ENVIANDO', finishedAt: null, startedAt: day(0) }, { canResend: false, needsConfirmation: false }],
+      ['SIN_DESTINATARIO', { status: 'SIN_DESTINATARIO' }, { canResend: true, needsConfirmation: false }],
+    ])('%s', async (_name, change, expected) => {
+      const notice = await noticeOf(new Map([['a1', attempt(change)]]));
+
+      expect(notice).toMatchObject({ status: change.status, attemptId: 'n1', deliveryEnabled: true, ...expected });
+    });
+
+    it('un intento ENVIANDO que superó el margen se muestra INCIERTO', async () => {
+      const notice = await noticeOf(new Map([['a1', attempt({ status: 'ENVIANDO', finishedAt: null, startedAt: day(1) })]]));
+
+      expect(notice).toMatchObject({ status: 'INCIERTO', canResend: true, needsConfirmation: true });
+    });
+
+    it('sin envío de correo configurado no se puede reenviar y se indica (el aviso espera en cola)', async () => {
+      const notice = await noticeOf(new Map([['a1', attempt({ status: 'EN_COLA', startedAt: null, finishedAt: null })]]), { deliveryEnabled: false });
+
+      expect(notice).toMatchObject({ status: 'EN_COLA', deliveryEnabled: false, canResend: false });
+    });
+
+    it('sin un destinatario habilitado ahora no se ofrece reenviar, aunque el último intento haya fallado', async () => {
+      const notice = await noticeOf(new Map([['a1', attempt({ status: 'FALLIDO' })]]), { coordinator: null });
+
+      expect(notice).toMatchObject({ status: 'FALLIDO', canResend: false });
+    });
+
+    it('no expone datos técnicos: ni códigos de error ni el correo del destinatario', async () => {
+      const notice = await noticeOf(new Map([['a1', attempt({ status: 'FALLIDO', errorCode: 'ECONNECTION', recipientEmail: 'coord@untrm.edu.pe' })]]));
+
+      expect(JSON.stringify(notice)).not.toMatch(/ECONNECTION|coord@untrm|errorCode|recipientEmail/);
+      expect(notice?.recipientName).toBe('coord Docente');
+    });
   });
 });

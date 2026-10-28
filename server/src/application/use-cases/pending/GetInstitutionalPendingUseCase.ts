@@ -2,6 +2,8 @@ import { StudentAccessGuard } from '@application/access/StudentAccessGuard';
 import { AcademicPeriodRepository } from '@domain/repositories/AcademicPeriodRepository';
 import { AuditLogRepository } from '@domain/repositories/AuditLogRepository';
 import { CycleTutorRepository } from '@domain/repositories/CycleTutorRepository';
+import { DeclineNoticeAttempt, DeclineNoticeRepository } from '@domain/repositories/DeclineNoticeRepository';
+import { DECLINE_NOTICE_ATTEMPT_MARGIN_MS } from '@application/use-cases/cycle-tutors/DeclineNoticeProcessor';
 import { SchoolRepository } from '@domain/repositories/SchoolRepository';
 import { SessionRepository } from '@domain/repositories/SessionRepository';
 import { StudentRepository } from '@domain/repositories/StudentRepository';
@@ -17,6 +19,24 @@ export type PendingKind =
   | 'CYCLE_WITHOUT_TUTOR'
   | 'CANCELLED_SESSION_NO_FOLLOWUP';
 
+/**
+ * Estado del aviso por correo a la coordinación de un rechazo (LEV-R05). Solo para quien administra o coordina: no lleva datos
+ * técnicos. `status` SIN_REGISTRO = rechazo anterior a esta función: no se sabe si se avisó.
+ */
+export interface DeclineNoticeView {
+  status: DeclineNoticeAttempt['status'] | 'SIN_REGISTRO';
+  attemptId: string | null;
+  kind: DeclineNoticeAttempt['kind'] | null;
+  at: string | null;
+  recipientName: string | null;
+  /** Hay envío de correo configurado en el sistema (si no, un aviso EN_COLA espera a que se configure). */
+  deliveryEnabled: boolean;
+  /** Se puede reenviar ahora (solo el aviso; el rechazo no se toca). */
+  canResend: boolean;
+  /** El reenvío exige confirmar el intento mostrado (resultado incierto o sin registro). */
+  needsConfirmation: boolean;
+}
+
 export interface PendingItem {
   kind: PendingKind;
   schoolId: string;
@@ -28,6 +48,8 @@ export interface PendingItem {
   since: string;
   /** Ruta de la aplicación donde se resuelve. */
   link: string;
+  /** Solo en DESIGNATION_REJECTED: el aviso por correo a la coordinación. */
+  notice?: DeclineNoticeView;
 }
 
 const FAILED_MAIL_MARK = '(correo no enviado)';
@@ -48,6 +70,8 @@ export class GetInstitutionalPendingUseCase {
     private readonly requests: TutoringRequestRepository,
     private readonly sessions: SessionRepository,
     private readonly students: StudentRepository,
+    private readonly notices: DeclineNoticeRepository,
+    private readonly declineNoticeDelivery: boolean,
     private readonly now: () => Date = () => new Date(),
   ) {}
 
@@ -81,6 +105,10 @@ export class GetInstitutionalPendingUseCase {
 
       for (const school of schools) {
         const assignments = await this.cycleTutors.listBySchool(period.id, school.id);
+        const rejectedIds = assignments.filter((a) => a.acceptanceStatus === 'RECHAZADA').map((a) => a.id);
+        const attempts = await this.notices.latestByAssignments(rejectedIds);
+        const coordinator = school.coordinatorId ? await this.users.findById(school.coordinatorId) : null;
+        const hasRecipient = !!coordinator && coordinator.isActive && !!coordinator.email;
         for (const a of assignments) {
           const base = { schoolId: school.id, schoolName: school.name, cycle: a.cycle, link: '/asignacion' };
           const who = await tutor(a.tutorId);
@@ -92,6 +120,7 @@ export class GetInstitutionalPendingUseCase {
               title: `${who.name} rechazó la tutoría del ${place}`,
               detail: a.declineReason ? `Motivo: ${a.declineReason}` : 'No indicó un motivo. El ciclo necesita otro docente.',
               since: (a.respondedAt ?? a.createdAt).toISOString(),
+              notice: await this.noticeView(attempts.get(a.id) ?? null, hasRecipient, now),
             });
           } else if (a.acceptanceStatus === 'PENDIENTE') {
             const attempt = lastAttempt.get(a.id);
@@ -162,5 +191,28 @@ export class GetInstitutionalPendingUseCase {
 
     items.sort((a, b) => a.since.localeCompare(b.since)); // lo que lleva más tiempo esperando, primero
     return { items };
+  }
+
+  private async noticeView(attempt: DeclineNoticeAttempt | null, hasRecipient: boolean, now: Date): Promise<DeclineNoticeView> {
+    const deliveryEnabled = this.declineNoticeDelivery;
+    if (!attempt) {
+      // Rechazo anterior a esta función: no se sabe si se avisó. No se le atribuye ningún resultado.
+      return { status: 'SIN_REGISTRO', attemptId: null, kind: null, at: null, recipientName: null, deliveryEnabled, canResend: deliveryEnabled && hasRecipient, needsConfirmation: true };
+    }
+    // Un intento en curso que superó el margen se muestra como INCIERTO aunque nadie lo haya reescrito todavía.
+    const expired = attempt.status === 'ENVIANDO' && attempt.startedAt !== null && attempt.startedAt.getTime() < now.getTime() - DECLINE_NOTICE_ATTEMPT_MARGIN_MS;
+    const status = expired ? 'INCIERTO' : attempt.status;
+    const recipient = attempt.recipientUserId ? await this.users.findById(attempt.recipientUserId) : null;
+    const resendable = status === 'FALLIDO' || status === 'INCIERTO' || status === 'DATOS_INCOMPLETOS' || status === 'OBSOLETO' || status === 'SIN_DESTINATARIO';
+    return {
+      status,
+      attemptId: attempt.id,
+      kind: attempt.kind,
+      at: (attempt.finishedAt ?? attempt.startedAt ?? attempt.createdAt).toISOString(),
+      recipientName: recipient ? `${recipient.firstName} ${recipient.lastName}` : null,
+      deliveryEnabled,
+      canResend: deliveryEnabled && resendable && hasRecipient,
+      needsConfirmation: status === 'INCIERTO',
+    };
   }
 }
