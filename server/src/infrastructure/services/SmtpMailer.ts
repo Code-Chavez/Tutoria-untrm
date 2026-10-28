@@ -23,7 +23,8 @@ export class SmtpMailer implements Mailer {
   /**
    * Un transporte por envío: así el registro de órdenes SMTP que ve este envío es solo suyo y se sabe con certeza si llegó a
    * enviarse DATA. Nodemailer no entrega esa fase en el error (informa `command: 'CONN'` en cortes y tiempos agotados aunque el
-   * cuerpo ya se haya enviado), por eso se observa con `transactionLog` + un `logger` propio que no escribe nada.
+   * cuerpo ya se haya enviado), por eso se observa con `transactionLog` + un `logger` propio. Ese logger recibe cada orden SMTP (con destinatarios y, según el caso, datos de autenticación), así que
+   * NO guarda ni imprime nada de lo que recibe: solo compara con `DATA` y levanta un booleano (hay una prueba que lo vigila).
    */
   private transportFor(progress: SmtpProgress): Transporter {
     const { config } = this;

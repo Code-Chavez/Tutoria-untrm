@@ -161,3 +161,52 @@ describe('classifySmtpError con la fase observada', () => {
     expect(classifySmtpError({ code: 'EMESSAGE', responseCode: 554 }, { dataStarted: true })).toBe('NOT_ACCEPTED');
   });
 });
+
+describe('SmtpMailer: el registro que observa la fase no conserva ni imprime datos del correo', () => {
+  const SECRET = 'clave-secreta-de-prueba';
+  const RECIPIENT = 'persona.destino@example.com';
+  const BODY = 'contenido-confidencial-del-correo';
+
+  const captureOutput = () => {
+    const written: string[] = [];
+    const record = (chunk: unknown) => {
+      written.push(typeof chunk === 'string' ? chunk : String(chunk));
+      return true;
+    };
+    const spies = [
+      jest.spyOn(process.stdout, 'write').mockImplementation(record),
+      jest.spyOn(process.stderr, 'write').mockImplementation(record),
+      ...(['log', 'info', 'warn', 'error', 'debug', 'trace'] as const).map((method) => jest.spyOn(console, method).mockImplementation((...args: unknown[]) => void written.push(args.map(String).join(' ')))),
+    ];
+    return { written, restore: () => spies.forEach((spy) => spy.mockRestore()) };
+  };
+
+  it('en un envío aceptado no escribe nada en consola ni en la salida estándar', async () => {
+    const port = await startFakeSmtp({ afterBody: 'accept' });
+    const output = captureOutput();
+    try {
+      await mailerFor(port).send({ to: RECIPIENT, subject: 'Asunto', text: BODY });
+    } finally {
+      output.restore();
+    }
+    expect(output.written.join('\n')).toBe('');
+  });
+
+  it('en un fallo con credenciales configuradas, ni la consola ni el error exponen la clave, el destinatario o el contenido', async () => {
+    const port = await startFakeSmtp({ afterBody: 'close' });
+    const mailer = new SmtpMailer({ host: '127.0.0.1', port, secure: false, user: 'usuario-prueba', pass: SECRET, from: 'sit@example.com', timeouts: { connection: 800, greeting: 800, socket: 800 } });
+    const output = captureOutput();
+    let failure: unknown;
+    try {
+      await mailer.send({ to: RECIPIENT, subject: 'Asunto', text: BODY });
+    } catch (error) {
+      failure = error;
+    } finally {
+      output.restore();
+    }
+    expect(failure).toBeInstanceOf(MailSendError);
+    expect(output.written.join('\n')).toBe('');
+    const serialized = JSON.stringify(failure, Object.getOwnPropertyNames(failure));
+    for (const sensitive of [SECRET, RECIPIENT, BODY]) expect(serialized).not.toContain(sensitive);
+  });
+});
