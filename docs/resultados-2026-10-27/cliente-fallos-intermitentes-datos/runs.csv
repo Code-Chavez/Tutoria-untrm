@@ -1,0 +1,42 @@
+iso-InterviewFormModal-1,2026-10-28T00:06:22Z,2026-10-28T00:07:03Z,0,src/features/entrevistas/components/InterviewFormModal.test.tsx
+iso-SessionFormModal-1,2026-10-28T00:07:03Z,2026-10-28T00:07:35Z,0,src/features/tutorados/components/SessionFormModal.test.tsx
+iso-CycleTutorsPage-1,2026-10-28T00:07:35Z,2026-10-28T00:08:15Z,1,src/features/ciclos/pages/CycleTutorsPage.test.tsx
+iso-SemesterReportPage-1,2026-10-28T00:08:16Z,2026-10-28T00:08:45Z,0,src/features/informes/pages/SemesterReportPage.test.tsx
+iso-ReportFilters-1,2026-10-28T00:08:45Z,2026-10-28T00:09:20Z,0,src/shared/reportFilters/ReportFilters.test.tsx
+iso-UserManagementPage-1,2026-10-28T00:09:20Z,2026-10-28T00:09:49Z,0,src/features/admin/pages/UserManagementPage.test.tsx
+iso-InterviewFormModal-2,2026-10-28T00:09:49Z,2026-10-28T00:10:25Z,0,src/features/entrevistas/components/InterviewFormModal.test.tsx
+iso-SessionFormModal-2,2026-10-28T00:10:25Z,2026-10-28T00:10:57Z,0,src/features/tutorados/components/SessionFormModal.test.tsx
+iso-CycleTutorsPage-2,2026-10-28T00:10:58Z,2026-10-28T00:11:35Z,0,src/features/ciclos/pages/CycleTutorsPage.test.tsx
+iso-SemesterReportPage-2,2026-10-28T00:11:35Z,2026-10-28T00:12:05Z,0,src/features/informes/pages/SemesterReportPage.test.tsx
+iso-ReportFilters-2,2026-10-28T00:12:06Z,2026-10-28T00:12:37Z,0,src/shared/reportFilters/ReportFilters.test.tsx
+iso-UserManagementPage-2,2026-10-28T00:12:37Z,2026-10-28T00:13:06Z,0,src/features/admin/pages/UserManagementPage.test.tsx
+iso-InterviewFormModal-3,2026-10-28T00:13:06Z,2026-10-28T00:13:38Z,0,src/features/entrevistas/components/InterviewFormModal.test.tsx
+iso-SessionFormModal-3,2026-10-28T00:13:38Z,2026-10-28T00:14:11Z,0,src/features/tutorados/components/SessionFormModal.test.tsx
+iso-CycleTutorsPage-3,2026-10-28T00:14:11Z,2026-10-28T00:14:52Z,0,src/features/ciclos/pages/CycleTutorsPage.test.tsx
+iso-SemesterReportPage-3,2026-10-28T00:14:52Z,2026-10-28T00:15:24Z,0,src/features/informes/pages/SemesterReportPage.test.tsx
+iso-ReportFilters-3,2026-10-28T00:15:24Z,2026-10-28T00:15:55Z,0,src/shared/reportFilters/ReportFilters.test.tsx
+iso-UserManagementPage-3,2026-10-28T00:15:55Z,2026-10-28T00:16:27Z,0,src/features/admin/pages/UserManagementPage.test.tsx
+iso-InterviewFormModal-4,2026-10-28T00:16:28Z,2026-10-28T00:17:18Z,0,src/features/entrevistas/components/InterviewFormModal.test.tsx
+iso-SessionFormModal-4,2026-10-28T00:17:19Z,2026-10-28T00:17:58Z,0,src/features/tutorados/components/SessionFormModal.test.tsx
+iso-CycleTutorsPage-4,2026-10-28T00:17:58Z,2026-10-28T00:18:52Z,0,src/features/ciclos/pages/CycleTutorsPage.test.tsx
+iso-SemesterReportPage-4,2026-10-28T00:18:52Z,2026-10-28T00:19:29Z,0,src/features/informes/pages/SemesterReportPage.test.tsx
+iso-ReportFilters-4,2026-10-28T00:19:30Z,2026-10-28T00:20:06Z,0,src/shared/reportFilters/ReportFilters.test.tsx
+iso-UserManagementPage-4,2026-10-28T00:20:07Z,2026-10-28T00:20:48Z,0,src/features/admin/pages/UserManagementPage.test.tsx
+iso-InterviewFormModal-5,2026-10-28T00:20:48Z,2026-10-28T00:21:29Z,0,src/features/entrevistas/components/InterviewFormModal.test.tsx
+iso-SessionFormModal-5,2026-10-28T00:21:29Z,2026-10-28T00:22:11Z,0,src/features/tutorados/components/SessionFormModal.test.tsx
+iso-CycleTutorsPage-5,2026-10-28T00:22:11Z,2026-10-28T00:22:58Z,0,src/features/ciclos/pages/CycleTutorsPage.test.tsx
+iso-SemesterReportPage-5,2026-10-28T00:22:58Z,2026-10-28T00:23:36Z,0,src/features/informes/pages/SemesterReportPage.test.tsx
+iso-ReportFilters-5,2026-10-28T00:23:36Z,2026-10-28T00:24:13Z,0,src/shared/reportFilters/ReportFilters.test.tsx
+iso-UserManagementPage-5,2026-10-28T00:24:14Z,2026-10-28T00:24:53Z,1,src/features/admin/pages/UserManagementPage.test.tsx
+subset-1,2026-10-28T00:24:53Z,2026-10-28T00:25:55Z,1,src/features/entrevistas/components/InterviewFormModal.test.tsx src/features/tutorados/components/SessionFormModal.test.tsx src/features/ciclos/pages/CycleTutorsPage.test.tsx src/features/informes/pages/SemesterReportPage.test.tsx src/shared/reportFilters/ReportFilters.test.tsx src/features/admin/pages/UserManagementPage.test.tsx
+subset-2,2026-10-28T00:25:55Z,2026-10-28T00:26:52Z,1,src/features/entrevistas/components/InterviewFormModal.test.tsx src/features/tutorados/components/SessionFormModal.test.tsx src/features/ciclos/pages/CycleTutorsPage.test.tsx src/features/informes/pages/SemesterReportPage.test.tsx src/shared/reportFilters/ReportFilters.test.tsx src/features/admin/pages/UserManagementPage.test.tsx
+subset-3,2026-10-28T00:26:53Z,2026-10-28T00:27:50Z,1,src/features/entrevistas/components/InterviewFormModal.test.tsx src/features/tutorados/components/SessionFormModal.test.tsx src/features/ciclos/pages/CycleTutorsPage.test.tsx src/features/informes/pages/SemesterReportPage.test.tsx src/shared/reportFilters/ReportFilters.test.tsx src/features/admin/pages/UserManagementPage.test.tsx
+subset-4,2026-10-28T00:27:50Z,2026-10-28T00:28:54Z,1,src/features/entrevistas/components/InterviewFormModal.test.tsx src/features/tutorados/components/SessionFormModal.test.tsx src/features/ciclos/pages/CycleTutorsPage.test.tsx src/features/informes/pages/SemesterReportPage.test.tsx src/shared/reportFilters/ReportFilters.test.tsx src/features/admin/pages/UserManagementPage.test.tsx
+subset-5,2026-10-28T00:28:54Z,2026-10-28T00:29:47Z,0,src/features/entrevistas/components/InterviewFormModal.test.tsx src/features/tutorados/components/SessionFormModal.test.tsx src/features/ciclos/pages/CycleTutorsPage.test.tsx src/features/informes/pages/SemesterReportPage.test.tsx src/shared/reportFilters/ReportFilters.test.tsx src/features/admin/pages/UserManagementPage.test.tsx
+full-default-1,2026-10-28T00:29:47Z,2026-10-28T00:36:23Z,1,
+full-default-2,2026-10-28T00:36:23Z,2026-10-28T00:42:58Z,1,
+full-default-3,2026-10-28T00:42:58Z,2026-10-28T00:49:28Z,1,
+full-w2-1,2026-10-28T00:49:28Z,2026-10-28T01:04:33Z,0,--maxWorkers=2
+full-w2-2,2026-10-28T01:04:33Z,2026-10-28T01:20:19Z,0,--maxWorkers=2
+full-seq-1,2026-10-28T01:20:19Z,2026-10-28T01:50:41Z,0,--no-file-parallelism
+DONE

@@ -1,0 +1,21 @@
+CORRIDA 2026-10-28T02:15:31.242Z
+#1 render 268 ms | findByRole (hasta encontrar) 2060 ms | getComputedStyle 30 llamadas, 970 ms
+#2 render 55 ms | findByRole (hasta encontrar) 698 ms | getComputedStyle 25 llamadas, 159 ms
+#3 render 78 ms | findByRole (hasta encontrar) 508 ms | getComputedStyle 30 llamadas, 96 ms
+#4 render 68 ms | findByRole (hasta encontrar) 1060 ms | getComputedStyle 30 llamadas, 203 ms
+#5 render 78 ms | findByRole (hasta encontrar) 396 ms | getComputedStyle 25 llamadas, 75 ms
+#6 render 48 ms | findByRole (hasta encontrar) 339 ms | getComputedStyle 25 llamadas, 48 ms
+CORRIDA 2026-10-28T02:16:14.012Z
+#1 render 354 ms | findByRole (hasta encontrar) 1763 ms | getComputedStyle 30 llamadas, 857 ms
+#2 render 73 ms | findByRole (hasta encontrar) 564 ms | getComputedStyle 30 llamadas, 71 ms
+#3 render 54 ms | findByRole (hasta encontrar) 446 ms | getComputedStyle 30 llamadas, 72 ms
+#4 render 49 ms | findByRole (hasta encontrar) 343 ms | getComputedStyle 25 llamadas, 61 ms
+#5 render 35 ms | findByRole (hasta encontrar) 272 ms | getComputedStyle 30 llamadas, 47 ms
+#6 render 38 ms | findByRole (hasta encontrar) 233 ms | getComputedStyle 30 llamadas, 33 ms
+CORRIDA 2026-10-28T02:16:55.688Z
+#1 render 237 ms | findByRole (hasta encontrar) 1602 ms | getComputedStyle 30 llamadas, 806 ms
+#2 render 56 ms | findByRole (hasta encontrar) 434 ms | getComputedStyle 25 llamadas, 77 ms
+#3 render 96 ms | findByRole (hasta encontrar) 337 ms | getComputedStyle 30 llamadas, 58 ms
+#4 render 36 ms | findByRole (hasta encontrar) 262 ms | getComputedStyle 30 llamadas, 48 ms
+#5 render 38 ms | findByRole (hasta encontrar) 239 ms | getComputedStyle 25 llamadas, 40 ms
+#6 render 31 ms | findByRole (hasta encontrar) 209 ms | getComputedStyle 25 llamadas, 38 ms
