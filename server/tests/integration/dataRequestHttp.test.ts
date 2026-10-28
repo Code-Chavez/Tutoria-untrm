@@ -244,7 +244,11 @@ describe('pedidos de lista por HTTP: idempotencia y equivalencia', () => {
     };
     const failed = await post('a', ask([8], { operationId: uuid(70) }));
     expect(failed.status).toBe(502);
-    expect((await json(failed)).request.status).toBe('FALLIDO');
+    const failedBody = await json(failed);
+    expect(failedBody.request.status).toBe('FALLIDO');
+    // Sin una causa conocida no se expone ningún texto técnico: el cliente usa su mensaje general.
+    expect(failedBody.request.error).toBeNull();
+    expect(JSON.stringify(failedBody)).not.toMatch(/MailSendError/);
 
     mockMail.handler = async () => undefined;
     const retry = await post('a', ask([8], { operationId: uuid(71) }));
@@ -255,7 +259,11 @@ describe('pedidos de lista por HTTP: idempotencia y equivalencia', () => {
     };
     const uncertain = await post('a', ask([9], { operationId: uuid(72) }));
     expect(uncertain.status).toBe(202);
-    expect((await json(uncertain)).request.status).toBe('INCIERTO');
+    const uncertainBody = await json(uncertain);
+    expect(uncertainBody.request.status).toBe('INCIERTO');
+    // Un resultado incierto nunca expone el nombre del error ni sugiere una causa: no se sabe si el correo salió.
+    expect(uncertainBody.request.error).toBeNull();
+    expect(JSON.stringify(uncertainBody)).not.toMatch(/Error|ESOCKET|corte/);
 
     mockMail.handler = async () => undefined;
     const warned = await post('a', ask([9], { operationId: uuid(73) }));
