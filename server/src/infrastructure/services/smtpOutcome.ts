@@ -39,8 +39,15 @@ export function classifySmtpError(error: unknown, progress?: SmtpProgress): Mail
   return 'UNCERTAIN';
 }
 
+/**
+ * El mensaje de nodemailer puede repetir lo que respondió el servidor, p. ej. «550 5.1.1 <persona@dominio> user unknown»:
+ * trae direcciones de correo (datos personales). Se retiran antes de que el mensaje salga de esta capa.
+ */
+const EMAIL_IN_TEXT = /[^\s<>"'(),;:]+@[^\s<>"'(),;:]+/g;
+export const redactMailText = (text: string) => text.replace(EMAIL_IN_TEXT, '[correo]');
+
 export function toMailSendError(error: unknown, progress?: SmtpProgress): MailSendError {
   const e = (typeof error === 'object' && error !== null ? error : {}) as SmtpLikeError;
-  const message = typeof e.message === 'string' ? e.message : 'Error al enviar el correo';
+  const message = typeof e.message === 'string' ? redactMailText(e.message) : 'Error al enviar el correo';
   return new MailSendError(message, classifySmtpError(error, progress), typeof e.code === 'string' ? e.code : undefined);
 }

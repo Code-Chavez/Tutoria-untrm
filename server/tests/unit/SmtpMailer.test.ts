@@ -1,7 +1,7 @@
 import net from 'net';
 import { MailMessage, MailSendError } from '../../src/application/ports/Mailer';
 import { SmtpMailer } from '../../src/infrastructure/services/SmtpMailer';
-import { classifySmtpError } from '../../src/infrastructure/services/smtpOutcome';
+import { classifySmtpError, redactMailText } from '../../src/infrastructure/services/smtpOutcome';
 
 /**
  * Clasificación del resultado de un envío SMTP con un servidor SMTP real en el proceso (net.createServer), no con errores
@@ -11,7 +11,7 @@ import { classifySmtpError } from '../../src/infrastructure/services/smtpOutcome
 type Scenario = {
   /** Qué hace el servidor falso en cada fase. */
   greeting?: 'normal' | 'silent' | 'close';
-  rcpt?: 'ok' | 'reject' | 'silent';
+  rcpt?: 'ok' | 'reject' | 'reject-echoing-address' | 'silent';
   data?: 'ok' | 'close-before-354';
   afterBody?: 'accept' | 'close' | 'silent' | 'reject' | 'keep-alive-no-reply';
 };
@@ -46,6 +46,7 @@ function startFakeSmtp(scenario: Scenario): Promise<number> {
         else if (command.startsWith('MAIL')) socket.write('250 OK\r\n');
         else if (command.startsWith('RCPT')) {
           if (scenario.rcpt === 'reject') socket.write('550 no such user\r\n');
+          else if (scenario.rcpt === 'reject-echoing-address') socket.write(`550 5.1.1 ${line.slice(8)} user unknown\r\n`);
           else if (scenario.rcpt !== 'silent') socket.write('250 OK\r\n');
         } else if (command.startsWith('DATA')) {
           if (scenario.data === 'close-before-354') socket.destroy();
@@ -208,5 +209,26 @@ describe('SmtpMailer: el registro que observa la fase no conserva ni imprime dat
     expect(output.written.join('\n')).toBe('');
     const serialized = JSON.stringify(failure, Object.getOwnPropertyNames(failure));
     for (const sensitive of [SECRET, RECIPIENT, BODY]) expect(serialized).not.toContain(sensitive);
+  });
+
+  it('el mensaje del error no repite direcciones de correo aunque el servidor las incluya en su respuesta', async () => {
+    const port = await startFakeSmtp({ rcpt: 'reject-echoing-address' });
+    const mailer = new SmtpMailer({ host: '127.0.0.1', port, secure: false, from: 'sit@example.com', timeouts: { connection: 800, greeting: 800, socket: 800 } });
+    let failure: unknown;
+    try {
+      await mailer.send({ to: RECIPIENT, subject: 'Asunto', text: BODY });
+    } catch (error) {
+      failure = error;
+    }
+    expect(failure).toBeInstanceOf(MailSendError);
+    expect((failure as MailSendError).outcome).toBe('NOT_ACCEPTED');
+    const serialized = JSON.stringify(failure, Object.getOwnPropertyNames(failure));
+    expect(serialized).not.toContain(RECIPIENT);
+    expect(serialized).not.toMatch(/@/);
+  });
+
+  it('redactMailText sustituye cualquier dirección por [correo]', () => {
+    expect(redactMailText('550 5.1.1 <ana.perez@untrm.edu.pe> user unknown; copia a b@c.org')).toBe('550 5.1.1 <[correo]> user unknown; copia a [correo]');
+    expect(redactMailText('Timeout')).toBe('Timeout');
   });
 });
