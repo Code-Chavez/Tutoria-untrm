@@ -94,6 +94,34 @@ Entorno: servidor real (`ts-node`, puerto 3998) y cliente Vite (5175) con ese co
 | C-3, desactivar la única cuenta de administración con la petición retenida 12 s: Escape, clic en «Cancelar», Intro | Igual: una sola petición `PATCH`; Escape, «Cancelar» e Intro sin efecto; al llegar el 409 real el diálogo se cerró (+54 ms), el foco quedó en el botón «Desactivar» de origen y el mensaje salió en `role="alert"` |
 | Tras ese error, volver a operar | Intro desde el botón enfocado reabre el diálogo; Tab + Intro lanzan una segunda petición real (`PATCH` n.º 2) y el diálogo vuelve a quedar ocupado; al terminar (409) se cierra de nuevo con el foco en el origen |
 
-Observación: un clic con el ratón sobre el fondo o sobre un botón deshabilitado mientras hay una operación en curso saca el foco del diálogo (queda en `<body>`) hasta la siguiente pulsación de Tab, que lo devuelve al diálogo; al terminar, el foco vuelve al botón de origen. No se corrigió.
+Observación (corregida después, ver «Foco al pulsar el fondo…»): un clic con el ratón sobre el fondo o sobre un botón deshabilitado mientras hay una operación en curso sacaba el foco del diálogo (quedaba en `<body>`) hasta la siguiente pulsación de Tab.
 
 Límites: un solo navegador; C-5 no se repitió con la versión final (solo el cambio del envoltorio `async` en `PendingPage`, cubierto por sus pruebas de pantalla); diálogos anidados y lector de pantalla no verificados; cinco pantallas sin revisión manual (`CatalogsPage`, `BrandingPage`, `PeriodClosurePage`, `WorkPlanPage`, `StudentsPage`).
+
+## Foco al pulsar el fondo o un botón deshabilitado durante la operación (commit `381c98d`)
+
+**Defecto:** durante una operación, un clic en el fondo o en un botón deshabilitado dejaba el foco en `<body>` (visto en la verificación anterior).
+**Corrección:** mientras haya una operación en curso, `mousedown` dentro del diálogo no cambia el foco (`preventDefault`) y, como respaldo, si el foco sale del diálogo se devuelve al propio diálogo (`onBlur` + `queueMicrotask`). No toca el bloqueo: Escape, «Cancelar» y una segunda confirmación siguen sin efecto.
+**Prueba** (`ConfirmDialog.test.tsx`, con `user-event` y clics reales sobre el fondo, el botón «Cancelar» deshabilitado y el botón de confirmar deshabilitado): el foco sigue dentro, `onCancel` no se llama y `onConfirm` se llamó una sola vez. Falla si se quitan los dos manejadores.
+**Navegador** (sobre la integración de #193, #194 y #195, commit local `c370a60`; `sit_db_test`; petición retenida 12 s; C-3 con el 409 real): clic en el fondo, clic en «Cancelar» deshabilitado, clic en el botón de confirmar deshabilitado y Escape; el registro de foco (cada 30 ms) **nunca** marcó «fuera»; una sola petición `PATCH`; el diálogo se cerró 99 ms después de terminar la petición, con el foco en el botón «Desactivar» de origen y el mensaje en `role="alert"`.
+
+## C-5 con el contrato final del diálogo, sobre la integración (resultado SMTP incierto)
+
+Entorno: integración local `c370a60` = `develop` + #195 (`09f176a`) + #194 (`e5f9ff3`) + #193 (`eed83d8`); servidor real contra `sit_db_test` con un SMTP falso local que acepta el cuerpo y **corta la conexión sin respuesta final** (cuenta conexiones y cuerpos; no sale nada a la red); datos ficticios (una designación rechazada «sin registro», coordinación ficticia) que se borraron después.
+
+| Paso | Observado |
+|---|---|
+| *Pendientes*, «Reenviar aviso» con el teclado, Tab + Intro en el diálogo | Una sola petición `POST …/decline-notice/resend`; respuesta **202**; diálogo ocupado durante la petición (foco dentro) y cerrado al terminar; foco de vuelta en «Reenviar aviso» |
+| Resultado mostrado | «No se puede saber si el aviso salió: puede haber llegado. Revise antes de reenviarlo otra vez.» y, en el ítem, «No se puede saber si el aviso a *(coordinación)* salió. Puede haber llegado. Si lo reenvía, es posible que se reciba dos veces.» **Sin** datos técnicos en la página (búsqueda de `MailSendError`, `ESOCKET`, `ETIMEDOUT`, `Timeout`, `SIN_RESULTADO`, `SIN_REGISTRO`, `INCIERTO`, direcciones, `token`: nada) |
+| Base de datos tras ≈ 85 s (más de dos pasadas del proceso de fondo) | **Un** intento `REENVIO` con estado `INCIERTO` (motivo `SIN_REGISTRO_PREVIO`) |
+| SMTP falso tras ≈ 85 s | **1 conexión y 1 cuerpo recibido**: no hubo reenvío automático |
+
+Este caso solo es posible con #195: antes de esa corrección un corte tras el cuerpo se clasificaba como `FALLIDO`.
+Límites: un solo navegador; un solo caso de incierto (corte tras el cuerpo; no se repitió con silencio/tiempo agotado); el estado `INCIERTO` quedó guardado con el código interno `MailSendError` en la base (no se muestra a la persona usuaria).
+
+## Dependencias entre #193, #194 y #195, y orden de fusión propuesto
+
+- No comparten archivos en conflicto: #193 (cliente: `ConfirmDialog`, hooks, `DataRequestPage`/`PendingPage` solo el envoltorio `async` de `onConfirm`); #194 (mensaje: `DataRequestPage`, controlador y caso de uso de pedidos, `MANUAL_TECNICO.md`); #195 (`SmtpMailer`, `smtpOutcome`, `MANUAL_TECNICO.md`). El posible conflicto del manual se resolvió moviendo la nota de #195 a su **propia viñeta** (commit `09f176a`), así ya no toca la línea que edita #194.
+- Se probaron las tres fusiones sobre `develop` (`c370a60`) y los pares (`git merge-tree`): **sin conflictos en ningún orden**.
+- **Orden propuesto: #195 → #194 → #193.** #195 es solo servidor y es el que hace posible un resultado `INCIERTO` real; #194 cambia los textos de ese resultado (su mensaje de «incierto» solo se alcanza de forma real con #195); #193 es solo de cliente y toca `DataRequestPage` y `PendingPage` (el envoltorio `async`), por eso va al final, ya sobre los mensajes. Ninguno depende de otro para compilar: el orden no es obligatorio, es el más natural.
+- Comprobado sobre la integración: `tsc` y `eslint` (cliente y `npm run lint` del servidor, 0 errores) limpios; pruebas del cliente de las carpetas afectadas 154 de 155 pasaron (la fallida, de `DataRequestPage`, «envía el pedido con los ciclos marcados…», pasó 28/28 al repetir el archivo solo; causa de la falla aislada **no determinada**, como las intermitencias ya registradas); pruebas del servidor `SmtpMailer`, `DataRequest*`, `DeclineNotice*`, `ResendDeclineNotice*`: 137/137.
