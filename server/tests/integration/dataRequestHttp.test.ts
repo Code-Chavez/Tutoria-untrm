@@ -294,6 +294,8 @@ describe('pedidos de lista por HTTP: idempotencia y equivalencia', () => {
 
       // El detalle técnico sí queda en el registro del servidor y en la base (diagnóstico).
       expect(logged).toHaveBeenCalledWith('[pedido de listas] el correo no salió', expect.objectContaining({ reason: 'MailNotConfiguredError', status: 'FALLIDO' }));
+      // El registro no lleva el mensaje del error (podría traer direcciones de correo).
+      expect(JSON.stringify(logged.mock.calls)).not.toMatch(/@/);
       expect((await prisma.dataRequest.findUniqueOrThrow({ where: { id: body.request.id } })).error).toBe('MailNotConfiguredError');
     } finally {
       logged.mockRestore();

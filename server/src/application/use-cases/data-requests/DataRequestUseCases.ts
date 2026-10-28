@@ -233,8 +233,9 @@ export class SendDataRequestUseCase {
       // Lo que no se puede demostrar como «no aceptado» (incluido el plazo agotado) queda INCIERTO.
       status = mailOutcomeOf(e) === 'NOT_ACCEPTED' ? 'FALLIDO' : 'INCIERTO';
       error = e instanceof Error ? e.name : 'desconocido';
-      // El detalle técnico queda en el registro del servidor; la respuesta HTTP no lo expone (ver toPublicRequest).
-      console.error('[pedido de listas] el correo no salió', { requestId: pending.id, schoolId: school.id, status, reason: error, detail: e instanceof Error ? e.message : String(e) });
+      // Para diagnóstico queda en el registro del servidor solo el nombre y el código de la causa: el mensaje de nodemailer puede traer
+      // direcciones de correo (datos personales) y no se registra. La respuesta HTTP tampoco lo expone (ver toPublicRequest).
+      console.error('[pedido de listas] el correo no salió', { requestId: pending.id, schoolId: school.id, status, reason: error, code: typeof (e as { code?: unknown })?.code === 'string' ? (e as { code: string }).code : undefined });
     }
 
     const notBefore = new Date(this.now().getTime() - DATA_REQUEST_ATTEMPT_MARGIN_MS);
