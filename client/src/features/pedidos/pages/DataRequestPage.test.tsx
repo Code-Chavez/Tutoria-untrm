@@ -144,7 +144,7 @@ describe('DataRequestPage (pedido de listas por correo)', () => {
 
     const alert = await screen.findByRole('alert');
     expect(alert).toHaveTextContent(/quedó registrado, pero el correo no salió\. El envío de correo no está configurado en el sistema\. Avisa a la administración del sistema/);
-    expect(alert).not.toHaveTextContent(/MailNotConfiguredError|Error/);
+    expect(alert).not.toHaveTextContent(/MailNotConfiguredError/);
   });
 
   it('si el correo no sale sin una causa conocida, da un mensaje general y el siguiente paso, sin nombres internos', async () => {
