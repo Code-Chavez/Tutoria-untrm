@@ -34,3 +34,12 @@
 .scrollArea:focus-visible, .searchField input:focus-visible, .clear:focus-visible { outline: 3px solid var(--azul-med); outline-offset: 2px; }
 @media (min-width: 1900px) { .list { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
 @media (max-width: 650px) { .searchBar { grid-template-columns: minmax(0, 1fr); } .clear { justify-self: start; } .scrollArea { max-height: none; overflow: visible; } }
+
+/* Aviso por correo a la coordinación de un rechazo (LEV-R05). */
+.notice { display: grid; gap: 8px; justify-items: start; margin-top: 8px; padding: 8px 10px; border: 1px solid var(--borde); border-radius: 8px; background: var(--g50); }
+.notice p { margin: 0; font-size: var(--fs-xs); line-height: 1.5; color: var(--g800, var(--g700)); overflow-wrap: anywhere; }
+.notice[data-tone='warn'] { border-color: #e0b04a; background: #fff8e8; }
+.notice[data-tone='ok'] { border-color: #8cc79b; background: #f1faf3; }
+.feedbackOk, .feedbackError { margin: 12px 0 0; padding: 10px 12px; border-radius: 8px; font-size: var(--fs-xs); line-height: 1.5; }
+.feedbackOk { border: 1px solid #8cc79b; background: #f1faf3; color: #14532d; }
+.feedbackError { border: 1px solid #e0a0a0; background: #fdf1f1; color: #7f1d1d; }

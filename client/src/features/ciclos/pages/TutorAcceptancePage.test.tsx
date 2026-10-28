@@ -82,7 +82,10 @@ describe('TutorAcceptancePage', () => {
     await userEvent.click(screen.getByRole('button', { name: 'Enviar respuesta' }));
 
     await waitFor(() => expect(mocked.respond).toHaveBeenCalledWith('tok123', { accept: false, reason: 'Licencia por estudios' }));
-    expect(await screen.findByRole('status')).toHaveTextContent('Se avisó a la coordinación');
+    const status = await screen.findByRole('status');
+    expect(status).toHaveTextContent('Tu respuesta quedó registrada y está disponible para los responsables de tutoría.');
+    // No afirma que se avisó a nadie ni que existe coordinación o que se asignará a otro docente.
+    expect(status).not.toHaveTextContent(/avisó|coordinación|asigne|otro docente/i);
   });
 
   it('muestra el motivo real si el servidor rechaza la disponibilidad', async () => {

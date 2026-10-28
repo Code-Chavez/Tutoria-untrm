@@ -39,6 +39,7 @@ export interface CycleStudent {
 export interface CycleTutorRepository {
   listBySchool(periodId: string, schoolId: string): Promise<CycleTutorAssignment[]>;
   find(periodId: string, schoolId: string, cycle: number): Promise<CycleTutorAssignment | null>;
+  findById(id: string): Promise<CycleTutorAssignment | null>;
   /** Ciclos (de cualquier escuela) que atiende un tutor en el periodo. */
   listByTutor(periodId: string, tutorId: string): Promise<CycleTutorAssignment[]>;
   /** Fija el tutor del ciclo (reemplaza al anterior). */

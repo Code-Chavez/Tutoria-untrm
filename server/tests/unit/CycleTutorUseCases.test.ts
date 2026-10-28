@@ -45,6 +45,7 @@ describe('tutor por ciclo (fase 3b)', () => {
     cycleTutors = {
       listBySchool: jest.fn().mockResolvedValue([]),
       find: jest.fn().mockResolvedValue(assignment()),
+      findById: jest.fn().mockResolvedValue(assignment()),
       listByTutor: jest.fn().mockResolvedValue([]),
       upsert: jest.fn().mockImplementation(async (i) => assignment(i)),
       remove: jest.fn().mockResolvedValue(true),

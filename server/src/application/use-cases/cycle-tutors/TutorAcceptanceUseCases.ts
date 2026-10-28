@@ -2,11 +2,12 @@ import { IssueInvitationUseCase } from '@application/use-cases/users/IssueInvita
 import { StudentAccessGuard } from '@application/access/StudentAccessGuard';
 import { Mailer } from '@application/ports/Mailer';
 import { generateSecretToken, hashSecretToken } from '@application/use-cases/auth/secretToken';
-import { buildTutorAcceptanceEmail, buildTutorDeclinedEmail } from '@application/services/tutorAcceptanceEmail';
+import { buildTutorAcceptanceEmail } from '@application/services/tutorAcceptanceEmail';
 import { findParameterDefinition } from '@application/use-cases/system-parameters/parameterDefinitions';
 import { AcademicPeriodRepository } from '@domain/repositories/AcademicPeriodRepository';
 import { AuditLogRepository } from '@domain/repositories/AuditLogRepository';
 import { AvailabilitySlot, CycleTutorAssignment, CycleTutorRepository } from '@domain/repositories/CycleTutorRepository';
+import { DeclineNoticeRepository } from '@domain/repositories/DeclineNoticeRepository';
 import { SchoolRepository } from '@domain/repositories/SchoolRepository';
 import { SystemParameterRepository } from '@domain/repositories/SystemParameterRepository';
 import { UserRepository } from '@domain/repositories/UserRepository';
@@ -184,30 +185,34 @@ export interface AcceptanceResponse {
   reason?: string;
 }
 
-/** El docente responde con su enlace: acepta con su disponibilidad o rechaza con un motivo (se avisa a la coordinación). */
+/**
+ * El docente responde con su enlace: acepta con su disponibilidad o rechaza con un motivo. Al rechazar, el rechazo y el aviso a la
+ * coordinación (EN_COLA) se guardan en UNA sola operación atómica y la respuesta NO espera el correo: el aviso lo entrega el intento
+ * inmediato (que solo es una optimización) o, si ese se pierde o el correo no está disponible, el proceso de fondo (LEV-R05).
+ */
 export class RespondTutorAcceptanceUseCase {
   constructor(
     private readonly cycleTutors: CycleTutorRepository,
     private readonly users: UserRepository,
-    private readonly schools: SchoolRepository,
-    private readonly periods: AcademicPeriodRepository,
     private readonly parameters: SystemParameterRepository,
-    private readonly mailer: Mailer,
+    private readonly notices: DeclineNoticeRepository,
     private readonly audit: AuditLogRepository,
     private readonly invitations: Pick<IssueInvitationUseCase, 'execute'>,
+    /** Intento inmediato del aviso recién encolado; nunca se espera. Su pérdida es inocua: lo EN_COLA lo recupera el proceso de fondo. */
+    private readonly onDeclineQueued: (attemptId: string) => void = () => undefined,
   ) {}
 
   async execute(token: string, response: AcceptanceResponse, ip?: string | null): Promise<{ accepted: boolean; activationLink?: string; activationUnavailable?: boolean }> {
     const assignment = await loadByToken(this.cycleTutors, token);
     const now = new Date();
+    let queued: string | null = null;
     if (response.accept) {
       const availability = validateAvailability(response.availability, await maxWeeklyHours(this.parameters));
       await this.cycleTutors.recordResponse(assignment.id, { accepted: true, availability }, now);
     } else {
       const reason = response.reason?.trim() ?? '';
       if (reason.length < 5) throw new InvalidAvailabilityError('Indique brevemente el motivo por el que no puede asumir el ciclo');
-      await this.cycleTutors.recordResponse(assignment.id, { accepted: false, declineReason: reason.slice(0, 500) }, now);
-      await this.notifyCoordinator(assignment, reason);
+      queued = (await this.notices.recordDecline(assignment.id, assignment.tutorId, reason.slice(0, 500), now)).id;
     }
     await this.audit.create({
       userId: assignment.tutorId,
@@ -217,6 +222,13 @@ export class RespondTutorAcceptanceUseCase {
       details: `ciclo ${assignment.cycle}`,
       ipAddress: ip ?? null,
     });
+    if (queued) {
+      try {
+        this.onDeclineQueued(queued);
+      } catch {
+        // Solo es una optimización: el aviso sigue EN_COLA y lo toma el proceso de fondo.
+      }
+    }
     if (response.accept) {
       const tutor = await this.users.findById(assignment.tutorId);
       if (tutor?.isActive && tutor.mustChangePassword) {
@@ -230,18 +242,5 @@ export class RespondTutorAcceptanceUseCase {
       }
     }
     return { accepted: response.accept };
-  }
-
-  private async notifyCoordinator(assignment: CycleTutorAssignment, reason: string): Promise<void> {
-    try {
-      const [tutor, school, period] = await Promise.all([this.users.findById(assignment.tutorId), this.schools.findById(assignment.schoolId), this.periods.findById(assignment.periodId)]);
-      const coordinator = school?.coordinatorId ? await this.users.findById(school.coordinatorId) : null;
-      if (!tutor || !school || !period || !coordinator) return;
-      await this.mailer.send(
-        buildTutorDeclinedEmail({ coordinatorEmail: coordinator.email, tutorName: `${tutor.firstName} ${tutor.lastName}`, school: school.name, cycle: assignment.cycle, period: period.name, reason }),
-      );
-    } catch (error) {
-      console.error('No se pudo avisar a la coordinación del rechazo', { assignmentId: assignment.id, reason: error instanceof Error ? error.name : 'desconocido' });
-    }
   }
 }
