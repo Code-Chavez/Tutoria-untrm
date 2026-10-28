@@ -198,6 +198,31 @@ describe('ConfirmDialog (F1: foco y teclado)', () => {
       }
     });
 
+    it('un clic en el fondo o en un botón deshabilitado durante la operación no saca el foco del diálogo ni desbloquea nada', async () => {
+      const user = userEvent.setup();
+      let resolve: () => void = () => undefined;
+      const onConfirm = vi.fn(() => new Promise<void>((done) => (resolve = done)));
+      const onCancel = vi.fn();
+      const { rerender } = render(<Controlled onConfirm={onConfirm} onCancel={onCancel} />);
+
+      await user.click(screen.getByRole('button', { name: 'Desactivar' }));
+      rerender(<Controlled loading onConfirm={onConfirm} onCancel={onCancel} />);
+      const dialog = screen.getByRole('alertdialog');
+      await waitFor(() => expect(dialog).toHaveFocus());
+
+      await user.click(dialog.parentElement as HTMLElement); // el fondo
+      expect(dialog.contains(document.activeElement)).toBe(true);
+      await user.click(screen.getByRole('button', { name: 'Cancelar' })); // deshabilitado
+      expect(dialog.contains(document.activeElement)).toBe(true);
+      await user.click(screen.getByRole('button', { name: 'Desactivar' })); // «Confirmar», también deshabilitado: otra petición no sale
+      expect(dialog.contains(document.activeElement)).toBe(true);
+      await user.keyboard('{Escape}');
+
+      expect(onCancel).not.toHaveBeenCalled();
+      expect(onConfirm).toHaveBeenCalledTimes(1);
+      resolve();
+    });
+
     it('si la promesa se rechaza, el bloqueo se libera', async () => {
       const onConfirm = vi.fn(() => Promise.reject(new Error('falló')));
       const onCancel = vi.fn();

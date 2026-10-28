@@ -55,6 +55,16 @@ const ConfirmPanel: React.FC<PanelProps> = ({
     if (!loading && !confirming.current) onCancel();
   }, [loading, onCancel]);
 
+  const busy = () => loading || confirming.current;
+  // Un clic en el fondo o en un botón deshabilitado durante la operación no debe sacar el foco del diálogo.
+  const keepFocusInside = (event: React.MouseEvent) => {
+    if (busy()) event.preventDefault();
+  };
+  const refocusIfLeft = (event: React.FocusEvent) => {
+    const next = event.relatedTarget as Node | null;
+    if (busy() && !(next && dialogRef.current?.contains(next))) queueMicrotask(() => dialogRef.current?.focus());
+  };
+
   const confirm = () => {
     if (loading || confirming.current) return;
     confirming.current = true;
@@ -91,7 +101,7 @@ const ConfirmPanel: React.FC<PanelProps> = ({
 
   return (
     <div ref={setRoot}>
-      <div className={styles.overlay} onClick={cancel}>
+      <div className={styles.overlay} onClick={cancel} onMouseDown={keepFocusInside}>
         <div
           ref={dialogRef}
           className={styles.dialog}
@@ -102,6 +112,7 @@ const ConfirmPanel: React.FC<PanelProps> = ({
           aria-busy={loading || undefined}
           tabIndex={-1}
           onClick={(e) => e.stopPropagation()}
+          onBlur={refocusIfLeft}
         >
           <div className={`${styles.iconWrap} ${styles[tone]}`}>
             <AlertTriangleIcon size={22} />
