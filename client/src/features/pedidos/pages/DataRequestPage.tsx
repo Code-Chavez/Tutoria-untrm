@@ -111,7 +111,7 @@ export function DataRequestPage() {
       if (request.status === 'ENVIADO') {
         setFeedback({ type: 'ok', text: replayed ? `Este pedido ya estaba registrado y enviado a ${request.toEmail}; no se envió otro correo.` : `Pedido enviado a ${request.toEmail}. Recibirás una copia y las respuestas llegarán a tu correo.` });
       } else if (request.status === 'FALLIDO') {
-        setFeedback({ type: 'error', text: `El pedido quedó registrado pero el correo no salió (${request.error ?? 'error de envío'}). Revisa la configuración del correo o entrega la plantilla por otro medio.` });
+        setFeedback({ type: 'error', text: request.error ? `El pedido quedó registrado, pero el correo no salió. ${request.error}. Avisa a la administración del sistema o entrega la plantilla por otro medio.` : 'El pedido quedó registrado, pero el correo no salió. Puedes volver a intentarlo más tarde o entregar la plantilla por otro medio.' });
       } else if (request.status === 'INCIERTO') {
         setFeedback({ type: 'error', text: 'El pedido quedó registrado, pero no se puede saber si el correo salió. Verifica con la escuela antes de volver a pedirlo.' });
       } else {
@@ -300,7 +300,9 @@ export function DataRequestPage() {
         }
         confirmLabel="Pedir de nuevo"
         loading={send.isPending}
-        onConfirm={() => duplicate && void attempt(duplicate.id)}
+        onConfirm={async () => {
+          if (duplicate) await attempt(duplicate.id);
+        }}
         onCancel={() => setDuplicate(null)}
       />
     </div>

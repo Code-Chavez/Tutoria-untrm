@@ -134,15 +134,41 @@ describe('DataRequestPage (pedido de listas por correo)', () => {
     expect(screen.getByRole('button', { name: 'Enviar pedido' })).toBeEnabled();
   });
 
-  it('si el correo no sale lo dice como error pero el pedido queda registrado', async () => {
-    requests.send.mockResolvedValue({ request: record({ status: 'FALLIDO', error: 'MailNotConfiguredError' }), replayed: false });
+  it('si el correo no sale lo dice como error, explica la causa y el siguiente paso, y el pedido queda registrado', async () => {
+    requests.send.mockResolvedValue({ request: record({ status: 'FALLIDO', error: 'El envío de correo no está configurado en el sistema' }), replayed: false });
     const user = userEvent.setup();
     renderPage();
     await screen.findByText('registros@untrm.edu.pe');
 
     await user.click(screen.getByRole('button', { name: 'Enviar pedido' }));
 
-    expect(await screen.findByRole('alert')).toHaveTextContent(/quedó registrado pero el correo no salió \(MailNotConfiguredError\)/);
+    const alert = await screen.findByRole('alert');
+    expect(alert).toHaveTextContent(/quedó registrado, pero el correo no salió\. El envío de correo no está configurado en el sistema\. Avisa a la administración del sistema/);
+    expect(alert).not.toHaveTextContent(/MailNotConfiguredError/);
+  });
+
+  it('si el correo no sale sin una causa conocida, da un mensaje general y el siguiente paso, sin nombres internos', async () => {
+    requests.send.mockResolvedValue({ request: record({ status: 'FALLIDO', error: null }), replayed: false });
+    const user = userEvent.setup();
+    renderPage();
+    await screen.findByText('registros@untrm.edu.pe');
+
+    await user.click(screen.getByRole('button', { name: 'Enviar pedido' }));
+
+    expect(await screen.findByRole('alert')).toHaveTextContent('El pedido quedó registrado, pero el correo no salió. Puedes volver a intentarlo más tarde o entregar la plantilla por otro medio.');
+  });
+
+  it('un resultado incierto solo dice que no se sabe si el correo salió y no recomienda reenviar ni otra vía, aunque llegue un texto de causa', async () => {
+    requests.send.mockResolvedValue({ request: record({ status: 'INCIERTO', error: 'El envío de correo no está configurado en el sistema' }), replayed: false });
+    const user = userEvent.setup();
+    renderPage();
+    await screen.findByText('registros@untrm.edu.pe');
+
+    await user.click(screen.getByRole('button', { name: 'Enviar pedido' }));
+
+    const alert = await screen.findByRole('alert');
+    expect(alert).toHaveTextContent('no se puede saber si el correo salió. Verifica con la escuela antes de volver a pedirlo.');
+    expect(alert).not.toHaveTextContent(/otro medio|volver a intentarlo|no está configurado/);
   });
 
   it('sin correo configurado solo avisa y ofrece un botón que lleva a configurarlo; no deja enviar', async () => {
@@ -263,6 +289,36 @@ describe('DataRequestPage (pedido de listas por correo)', () => {
       await user.click(within(screen.getByRole('alertdialog')).getByRole('button', { name: 'Pedir de nuevo' }));
       await waitFor(() => expect(requests.send).toHaveBeenCalledTimes(3));
       expect(requests.send).toHaveBeenLastCalledWith(expect.objectContaining({ confirmDuplicateOf: 'prev-2' }));
+    });
+
+    it('confirmar el equivalente: mientras la petición sigue pendiente no se puede confirmar otra vez ni cerrar con Escape, y el diálogo se cierra solo cuando termina', async () => {
+      let finish: (v: { request: DataRequest; replayed: boolean }) => void = () => undefined;
+      requests.send
+        .mockRejectedValueOnce(httpError(409, { code: 'DUPLICATE_DATA_REQUEST', error: 'x', previous: previous() }))
+        .mockReturnValueOnce(new Promise((resolve) => (finish = resolve)));
+      const user = await sendOnce();
+      const dialog = await screen.findByRole('alertdialog');
+      await user.keyboard('{Tab}{Enter}'); // «Pedir de nuevo» con el teclado
+
+      await waitFor(() => expect(requests.send).toHaveBeenCalledTimes(2));
+      await waitFor(() => expect(dialog).toHaveAttribute('aria-busy', 'true'));
+      expect(within(dialog).getByRole('button', { name: 'Pedir de nuevo' })).toBeDisabled();
+      expect(within(dialog).getByRole('button', { name: 'Cancelar' })).toBeDisabled();
+
+      // Pendiente: ni Escape, ni Enter/Espacio, ni clic en el fondo, ni otro clic en «Pedir de nuevo» tienen efecto.
+      await user.keyboard('{Escape}');
+      await user.keyboard('{Enter}');
+      await user.keyboard(' ');
+      await user.click(within(dialog).getByRole('button', { name: 'Pedir de nuevo' }));
+      await user.click(dialog.parentElement as HTMLElement);
+      await new Promise((resolve) => setTimeout(resolve, 50));
+      expect(screen.getByRole('alertdialog')).toBeInTheDocument();
+      expect(requests.send).toHaveBeenCalledTimes(2);
+
+      // Solo al terminar la petición el diálogo se cierra (y deja de estar ocupado).
+      finish({ request: record(), replayed: false });
+      await waitFor(() => expect(screen.queryByRole('alertdialog')).not.toBeInTheDocument());
+      expect(requests.send).toHaveBeenCalledTimes(2);
     });
 
     it('cancelar el diálogo no envía nada', async () => {

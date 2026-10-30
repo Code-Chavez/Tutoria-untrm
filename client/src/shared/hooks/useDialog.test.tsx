@@ -26,6 +26,29 @@ function Host() {
   );
 }
 
+function HostWithPendingOpener() {
+  const [open, setOpen] = useState(false);
+  const [pending, setPending] = useState(false);
+  return (
+    <div>
+      <button
+        disabled={pending}
+        onClick={(event) => {
+          setPending(true); // como un botón `loading`: se deshabilita y el navegador le quita el foco (jsdom no lo hace solo)
+          event.currentTarget.blur();
+          setTimeout(() => {
+            setOpen(true);
+            setPending(false);
+          }, 0);
+        }}
+      >
+        Enviar
+      </button>
+      {open && <Dialog onClose={() => setOpen(false)} />}
+    </div>
+  );
+}
+
 describe('useDialog (UI-06)', () => {
   it('lleva el foco al primer campo, lo mantiene dentro con Tab y lo devuelve al cerrar con Escape', async () => {
     const user = userEvent.setup();
@@ -53,5 +76,18 @@ describe('useDialog (UI-06)', () => {
     render(<Dialog onClose={onClose} />);
     await user.keyboard('{Escape}');
     expect(onClose).toHaveBeenCalled();
+  });
+
+  it('si el botón que abre el diálogo se deshabilitó mientras corría la petición, el foco vuelve a él al cerrar', async () => {
+    const user = userEvent.setup();
+    render(<HostWithPendingOpener />);
+    const opener = screen.getByRole('button', { name: 'Enviar' });
+    await user.click(opener);
+    await screen.findByRole('dialog');
+    expect(document.activeElement).not.toBe(opener); // el diálogo tomó el foco
+
+    await user.keyboard('{Escape}');
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+    expect(opener).toHaveFocus();
   });
 });

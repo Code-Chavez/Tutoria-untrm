@@ -211,7 +211,9 @@ export function PendingPage() {
         }
         confirmLabel="Reenviar aviso"
         loading={busy !== null}
-        onConfirm={() => confirming && void resend(confirming.item, confirming.previous.attemptId)}
+        onConfirm={async () => {
+          if (confirming) await resend(confirming.item, confirming.previous.attemptId);
+        }}
         onCancel={() => setConfirming(null)}
       />
     </div>

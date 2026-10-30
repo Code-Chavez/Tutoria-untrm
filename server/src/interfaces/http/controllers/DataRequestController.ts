@@ -28,6 +28,16 @@ const sendSchema = z.object({
 });
 const emailSchema = z.object({ email: z.string().trim().max(254).nullable() });
 
+/**
+ * `error` se guarda con el nombre técnico de la causa (para diagnóstico y bitácora) y NUNCA se expone así: a la persona usuaria solo
+ * llega una explicación comprensible de las causas conocidas; el resto va sin texto y el cliente usa su mensaje genérico.
+ */
+const NOT_CONFIGURED_TEXT = 'El envío de correo no está configurado en el sistema';
+export function toPublicRequest<T extends { error?: string | null }>(request: T): T {
+  if (!request.error) return request;
+  return { ...request, error: request.error === 'MailNotConfiguredError' ? NOT_CONFIGURED_TEXT : null };
+}
+
 export class DataRequestController {
   constructor(
     private readonly send: SendDataRequestUseCase,
@@ -75,7 +85,7 @@ export class DataRequestController {
           : request.status === 'FALLIDO'
             ? 'El pedido quedó registrado pero el correo no salió'
             : 'El pedido quedó registrado pero no se puede saber si el correo salió';
-      res.status(status).json({ message, request, replayed });
+      res.status(status).json({ message, request: toPublicRequest(request), replayed });
     } catch (error) {
       this.fail(error, res);
     }
@@ -83,7 +93,7 @@ export class DataRequestController {
 
   index = async (req: Request, res: Response) => {
     try {
-      res.status(200).json({ requests: await this.list.execute(req.auth?.sub as string) });
+      res.status(200).json({ requests: (await this.list.execute(req.auth?.sub as string)).map(toPublicRequest) });
     } catch (error) {
       this.fail(error, res);
     }
@@ -91,7 +101,7 @@ export class DataRequestController {
 
   markReceived = async (req: Request, res: Response) => {
     try {
-      res.status(200).json({ request: await this.received.execute(req.auth?.sub as string, req.params.id as string) });
+      res.status(200).json({ request: toPublicRequest(await this.received.execute(req.auth?.sub as string, req.params.id as string)) });
     } catch (error) {
       this.fail(error, res);
     }
