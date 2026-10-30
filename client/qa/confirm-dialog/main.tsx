@@ -20,6 +20,7 @@ function Check(){
   return <main style={{maxWidth:700,margin:'32px auto',padding:20}}>
     <h1>Comprobación de interfaz SIT</h1>
     <p>Esta página usa el diálogo real del sistema. Solo simula una operación; no tiene acceso a cuentas, base de datos ni correo.</p>
+    <p>{window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'Tu dispositivo solicita reducir el movimiento. La rueda puede quedar quieta; la operación sigue funcionando.' : 'Tu dispositivo permite las animaciones. La rueda debería girar durante la espera.'}</p>
     <p>1. Abre el aviso. 2. Cancela y vuelve a abrirlo. 3. Confirma y espera tres segundos. Durante la espera no debe cerrarse ni iniciar otra operación.</p>
     <label><input type="checkbox" checked={fail} onChange={e=>setFail(e.target.checked)}/> Simular un error</label>
     <p><button onClick={()=>setOpen(true)}>Abrir confirmación</button></p>
