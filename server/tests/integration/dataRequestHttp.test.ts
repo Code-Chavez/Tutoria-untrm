@@ -1,6 +1,6 @@
 import http from 'http';
 import { prisma } from '../../src/infrastructure/database/prisma';
-import { MailMessage, MailSendError } from '../../src/application/ports/Mailer';
+import { MailMessage, MailNotConfiguredError, MailSendError } from '../../src/application/ports/Mailer';
 import { ownUser, removeOwnUserTraces, DEMO_PASSWORD } from '../helpers/ownUsers';
 
 /**
@@ -244,7 +244,11 @@ describe('pedidos de lista por HTTP: idempotencia y equivalencia', () => {
     };
     const failed = await post('a', ask([8], { operationId: uuid(70) }));
     expect(failed.status).toBe(502);
-    expect((await json(failed)).request.status).toBe('FALLIDO');
+    const failedBody = await json(failed);
+    expect(failedBody.request.status).toBe('FALLIDO');
+    // Sin una causa conocida no se expone ningún texto técnico: el cliente usa su mensaje general.
+    expect(failedBody.request.error).toBeNull();
+    expect(JSON.stringify(failedBody)).not.toMatch(/MailSendError/);
 
     mockMail.handler = async () => undefined;
     const retry = await post('a', ask([8], { operationId: uuid(71) }));
@@ -255,7 +259,11 @@ describe('pedidos de lista por HTTP: idempotencia y equivalencia', () => {
     };
     const uncertain = await post('a', ask([9], { operationId: uuid(72) }));
     expect(uncertain.status).toBe(202);
-    expect((await json(uncertain)).request.status).toBe('INCIERTO');
+    const uncertainBody = await json(uncertain);
+    expect(uncertainBody.request.status).toBe('INCIERTO');
+    // Un resultado incierto nunca expone el nombre del error ni sugiere una causa: no se sabe si el correo salió.
+    expect(uncertainBody.request.error).toBeNull();
+    expect(JSON.stringify(uncertainBody)).not.toMatch(/Error|ESOCKET|corte/);
 
     mockMail.handler = async () => undefined;
     const warned = await post('a', ask([9], { operationId: uuid(73) }));
@@ -265,5 +273,32 @@ describe('pedidos de lista por HTTP: idempotencia y equivalencia', () => {
     const again = await post('a', ask([9], { operationId: uuid(72) }));
     expect(again.status).toBe(200);
     expect((await json(again)).request.status).toBe('INCIERTO');
+  });
+
+  it('si el correo no está configurado, la respuesta y el historial explican la causa sin el nombre interno del error, que queda en el registro del servidor', async () => {
+    if (!dbUp) return;
+    const logged = jest.spyOn(console, 'error').mockImplementation(() => undefined);
+    try {
+      mockMail.handler = async () => {
+        throw new MailNotConfiguredError();
+      };
+      const res = await post('a', ask([10], { operationId: uuid(80) }));
+      expect(res.status).toBe(502);
+      const body = await json(res);
+      expect(body.request.status).toBe('FALLIDO');
+      expect(body.request.error).toBe('El envío de correo no está configurado en el sistema');
+      expect(JSON.stringify(body)).not.toMatch(/MailNotConfiguredError/);
+
+      const list = await fetch(`${baseUrl}/api/data-requests`, { headers: { Authorization: `Bearer ${tokens.a}` } });
+      expect(JSON.stringify(await json(list))).not.toMatch(/MailNotConfiguredError/);
+
+      // El detalle técnico sí queda en el registro del servidor y en la base (diagnóstico).
+      expect(logged).toHaveBeenCalledWith('[pedido de listas] el correo no salió', expect.objectContaining({ reason: 'MailNotConfiguredError', status: 'FALLIDO' }));
+      // El registro no lleva el mensaje del error (podría traer direcciones de correo).
+      expect(JSON.stringify(logged.mock.calls)).not.toMatch(/@/);
+      expect((await prisma.dataRequest.findUniqueOrThrow({ where: { id: body.request.id } })).error).toBe('MailNotConfiguredError');
+    } finally {
+      logged.mockRestore();
+    }
   });
 });
