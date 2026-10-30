@@ -1,0 +1,99 @@
+{
+  "date": "2026-10-29",
+  "baseCommit": "cfe2953e73ee8b884521fe62c2a80f82ddfe6373",
+  "clientFull": {
+    "coverageReportGenerated": false,
+    "command": "node node_modules/vitest/vitest.mjs run --coverage --reporter=default --reporter=json --outputFile.json=../tmp/dod-2026-10-29/client-full.json",
+    "failure": "UserManagementPage: no encuentra Desactivar mientras se muestra la carga; causa no demostrada",
+    "passed": 587,
+    "files": 88,
+    "failed": 1
+  },
+  "clientScope": {
+    "files": 3,
+    "passed": 45,
+    "coverage": [
+      {
+        "File": "src\\features\\pedidos\\pages\\DataRequestPage.tsx",
+        "Lines": 93.67,
+        "Branches": 83.33,
+        "Functions": 88.46
+      },
+      {
+        "File": "src\\shared\\components\\ui\\ConfirmDialog.tsx",
+        "Lines": 97.44,
+        "Branches": 90.0,
+        "Functions": 92.86
+      },
+      {
+        "File": "src\\shared\\hooks\\useDialog.ts",
+        "Lines": 95.74,
+        "Branches": 80.0,
+        "Functions": 100.0
+      },
+      {
+        "File": "src\\shared\\hooks\\useInertBackground.ts",
+        "Lines": 100.0,
+        "Branches": 100.0,
+        "Functions": 100.0
+      },
+      {
+        "File": "src\\application\\use-cases\\data-requests\\DataRequestUseCases.ts",
+        "Lines": 99.29,
+        "Branches": 86.05,
+        "Functions": 100.0
+      },
+      {
+        "File": "src\\infrastructure\\services\\SmtpMailer.ts",
+        "Lines": 100.0,
+        "Branches": 83.33,
+        "Functions": 100.0
+      },
+      {
+        "File": "src\\infrastructure\\services\\smtpOutcome.ts",
+        "Lines": 100.0,
+        "Branches": 83.33,
+        "Functions": 100.0
+      },
+      {
+        "File": "src\\interfaces\\http\\controllers\\DataRequestController.ts",
+        "Lines": 92.86,
+        "Branches": 90.24,
+        "Functions": 100.0
+      }
+    ],
+    "failed": 0,
+    "scope": "ConfirmDialog, useDialog, useInertBackground, DataRequestPage"
+  },
+  "serverFull": {
+    "failure": "seedCommands: Prisma devuelve Schema engine error, no P1001 ni el texto esperado",
+    "environment": "sit_db_test; REQUIRE_DB_TESTS=1; no desarrollo",
+    "integrationFailed": 0,
+    "command": "node node_modules/jest/bin/jest.js --ci --coverage --runInBand --json --outputFile=../tmp/dod-2026-10-29/server-full.json",
+    "passed": 1415,
+    "integrationTests": 235,
+    "failed": 1,
+    "files": 157,
+    "integrationFiles": 34
+  },
+  "audits": {
+    "serverExactCiExit": 0,
+    "serverNote": "Una moderada ignorada por configuración existente; JSON devuelve exit 1 y conserva ese resultado",
+    "clientExit": 0,
+    "pnpm": "9.15.9"
+  },
+  "rawLogs": "tmp/dod-2026-10-29; completos y locales, no publicados",
+  "ui": {
+    "browser": "IAB Chromium; no equivale a cuatro navegadores",
+    "manualScreens": [
+      "BrandingPage",
+      "CatalogsPage",
+      "StudentsPage",
+      "PeriodClosurePage",
+      "WorkPlanPage"
+    ],
+    "mobile": "375x812; diálogo de identidad dentro del viewport y scrollWidth=375",
+    "scope": "Apertura por teclado, foco inicial, Tab o Shift+Tab, Escape y devolución de foco; sin confirmar acciones",
+    "fixtures": "sit_db_test; estado del periodo restaurado; escuela, facultad y plan sintéticos eliminados; no archivos ni firmas institucionales"
+  }
+}

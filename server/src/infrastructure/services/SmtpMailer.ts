@@ -1,6 +1,6 @@
 import nodemailer, { type Transporter } from 'nodemailer';
 import { MailMessage, Mailer, MailNotConfiguredError } from '@application/ports/Mailer';
-import { toMailSendError } from './smtpOutcome';
+import { SmtpProgress, toMailSendError } from './smtpOutcome';
 
 export interface SmtpConfig {
   host: string;
@@ -12,31 +12,47 @@ export interface SmtpConfig {
   user?: string;
   pass?: string;
   from: string;
+  /** Plazos de nodemailer en ms; solo se cambian en las pruebas. */
+  timeouts?: { connection: number; greeting: number; socket: number };
 }
 
 /** Envío por SMTP: sirve para el correo institucional o cualquier proveedor que lo ofrezca. */
 export class SmtpMailer implements Mailer {
-  private readonly transporter: Transporter;
+  constructor(private readonly config: SmtpConfig) {}
 
-  constructor(private readonly config: SmtpConfig) {
-    this.transporter = nodemailer.createTransport({
+  /**
+   * Un transporte por envío: así el registro de órdenes SMTP que ve este envío es solo suyo y se sabe con certeza si llegó a
+   * enviarse DATA. Nodemailer no entrega esa fase en el error (informa `command: 'CONN'` en cortes y tiempos agotados aunque el
+   * cuerpo ya se haya enviado), por eso se observa con `transactionLog` + un `logger` propio. Ese logger recibe cada orden SMTP (con destinatarios y, según el caso, datos de autenticación), así que
+   * NO guarda ni imprime nada de lo que recibe: solo compara con `DATA` y levanta un booleano (hay una prueba que lo vigila).
+   */
+  private transportFor(progress: SmtpProgress): Transporter {
+    const { config } = this;
+    const noop = () => undefined;
+    const observe = (entry: { tnx?: unknown } | undefined, message?: unknown) => {
+      if (entry?.tnx === 'client' && typeof message === 'string' && message.trim().toUpperCase() === 'DATA') progress.dataStarted = true;
+    };
+    return nodemailer.createTransport({
       host: config.host,
       port: config.port,
       secure: config.secure,
       ...(config.requireTls && !config.secure ? { requireTLS: true } : {}),
       ...(config.user ? { auth: { user: config.user, pass: config.pass ?? '' } } : {}),
-      connectionTimeout: 10_000,
-      greetingTimeout: 10_000,
-      socketTimeout: 20_000,
+      connectionTimeout: config.timeouts?.connection ?? 10_000,
+      greetingTimeout: config.timeouts?.greeting ?? 10_000,
+      socketTimeout: config.timeouts?.socket ?? 20_000,
+      transactionLog: true,
+      logger: { trace: noop, debug: observe, info: noop, warn: noop, error: noop, fatal: noop },
     });
   }
 
   async send(message: MailMessage): Promise<void> {
+    const progress: SmtpProgress = { dataStarted: false };
     try {
-      await this.transporter.sendMail({ from: this.config.from, ...message });
+      await this.transportFor(progress).sendMail({ from: this.config.from, ...message });
     } catch (error) {
       // Se conserva en qué fase falló: «no aceptado» (demostrado) o «incierto» (pudo haber salido).
-      throw toMailSendError(error);
+      throw toMailSendError(error, progress);
     }
   }
 }
