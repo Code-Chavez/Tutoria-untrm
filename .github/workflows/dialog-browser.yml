@@ -1,0 +1,42 @@
+name: Dialog browser contract
+
+on:
+  pull_request:
+    branches: [develop]
+    types: [opened, synchronize, reopened]
+    paths:
+      - 'client/src/shared/components/ui/**'
+      - 'client/src/shared/hooks/useDialog*'
+      - 'client/src/shared/hooks/useInertBackground*'
+      - 'client/qa/confirm-dialog/**'
+      - 'client/pnpm-lock.yaml'
+      - 'e2e/pnpm-lock.yaml'
+      - 'e2e/dialog-tests/**'
+      - 'e2e/fixtures/serve-dialog.cjs'
+      - 'e2e/playwright.dialog.config.ts'
+      - '.github/workflows/dialog-browser.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  firefox:
+    name: Dialog — Firefox Linux
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9.15.9
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20.19.5
+      - name: Install client dependencies
+        run: pnpm --dir client install --frozen-lockfile
+      - name: Install browser test dependencies
+        run: pnpm --dir e2e install --frozen-lockfile
+      - name: Install Firefox in the disposable runner
+        run: pnpm --dir e2e exec playwright install --with-deps firefox
+      - name: Verify real dialog contract
+        run: pnpm --dir e2e exec playwright test --config playwright.dialog.config.ts
