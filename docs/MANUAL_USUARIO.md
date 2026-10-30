@@ -2,9 +2,9 @@
 
 **Sistema de Información para la Sistematización de los Procesos de Acompañamiento de Tutoría Universitaria**
 Universidad Nacional Toribio Rodríguez de Mendoza de Amazonas · Dirección de Bienestar Universitario (DBU)
-Versión del documento: 1.0 (octubre de 2026) · Software: 0.4.1
+Borrador de actualización: 30 de octubre de 2026 · Software: 1.0.0-beta.1
 
-Este manual explica, para cada tipo de persona que usa el sistema, **qué puede hacer y cómo hacerlo**. Las imágenes son del sistema con datos de demostración (personas y casos ficticios). Los nombres entre comillas o en *cursiva*
+Este manual explica, para cada tipo de persona que usa el sistema, **qué puede hacer y cómo hacerlo**. Los ejemplos utilizan datos de demostración (personas y casos ficticios). Los nombres entre comillas o en *cursiva*
 son los que aparecen en pantalla. Si necesita instalar o mantener el sistema, vea `docs/MANUAL_TECNICO.md`.
 
 ## Contenido
@@ -20,6 +20,27 @@ son los que aparecen en pantalla. Si necesita instalar o mantener el sistema, ve
 9. [Glosario](#9-glosario)
 
 ## 1. Antes de empezar
+
+### Confirmaciones y operaciones en curso (borrador de actualización)
+
+Cuando una acción necesita confirmación, el foco pasa a **Cancelar**. Puede recorrer los controles con Tab y Shift+Tab. Antes de confirmar, Escape o Cancelar cierra el aviso sin ejecutar la acción. Al confirmar, espere el resultado: mientras la operación siga pendiente, otra confirmación, Escape, Cancelar y un clic fuera del cuadro no ejecutan ni cancelan la operación. Al cerrarse el cuadro, el foco vuelve al control de origen si sigue disponible. Si se informa un error, lea el mensaje antes de volver a intentarlo.
+
+**Movimiento reducido.** Si el dispositivo tiene activada esta preferencia, la rueda de carga puede permanecer quieta. La operación sigue en curso y el resultado se muestra al terminar. No es necesario desactivar una preferencia de accesibilidad para usar el sistema.
+
+### Resultado de los pedidos de listas (borrador de actualización)
+
+En **Periodo académico → Pedir listas**, revise la escuela, el destinatario, los ciclos y las observaciones antes de pulsar **Enviar pedido**. El resultado del envío se distingue de la recepción de la lista:
+
+| Estado | Significado y siguiente paso |
+|---|---|
+| Enviándose | El envío sigue en curso. Espere y revise el historial antes de hacer otro pedido. |
+| Enviado | El servidor de correo aceptó el mensaje. Esto no garantiza entrega en la bandeja ni lectura. |
+| Fallido | El envío no fue aceptado. Si falta configurar el correo, avise a la administración. Siga la indicación de la pantalla para volver a intentar o entregar la plantilla por el canal acordado con la escuela. |
+| Envío incierto | El mensaje pudo haber salido. Verifique con la escuela antes de repetirlo; no asuma que hubo un fallo confirmado. |
+
+Si aparece un pedido equivalente reciente, el cuadro identifica el anterior y solicita confirmar **Pedir de nuevo**. Confirmar inicia otro pedido que podría duplicar un correo ya recibido; Cancelar conserva el pedido anterior. Un pedido equivalente todavía en curso no puede saltarse con esa confirmación. Si se pierde la respuesta de la pantalla, reintentar el mismo contenido conserva la identidad de la operación para evitar un segundo envío de esa misma operación.
+
+Estas instrucciones documentan el comportamiento de los cambios #193–#195; no implican aprobación del Product Owner ni verificación de todos los navegadores.
 
 ### 1.1 Qué ve cada persona
 
