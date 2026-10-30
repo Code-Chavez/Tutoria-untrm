@@ -300,7 +300,9 @@ export function DataRequestPage() {
         }
         confirmLabel="Pedir de nuevo"
         loading={send.isPending}
-        onConfirm={() => duplicate && void attempt(duplicate.id)}
+        onConfirm={async () => {
+          if (duplicate) await attempt(duplicate.id);
+        }}
         onCancel={() => setDuplicate(null)}
       />
     </div>
