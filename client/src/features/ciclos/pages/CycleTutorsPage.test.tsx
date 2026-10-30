@@ -25,7 +25,8 @@ const renderPage = () =>
 
 describe('CycleTutorsPage', () => {
   beforeEach(() => {
-    vi.clearAllMocks();
+    // Un escenario abortado puede dejar respuestas Once sin consumir: limpiar llamadas no vacía esa cola.
+    vi.resetAllMocks();
     vi.mocked(schoolService.getSchools).mockResolvedValue([{ id: 's1', name: 'Ingeniería de Sistemas', facultyId: 'f1', isActive: true }]);
     vi.mocked(assignmentService.getTutorWorkload).mockResolvedValue([
       { tutorId: 't1', fullName: 'Elena Ramírez', email: 'e@untrm.edu.pe', assignedCount: 0, schoolId: 's1' },

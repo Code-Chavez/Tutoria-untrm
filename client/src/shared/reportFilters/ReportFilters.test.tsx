@@ -42,7 +42,9 @@ describe('ReportFilters', () => {
   it('muestra los cinco controles con las opciones del alcance del rol', async () => {
     render(<Harness />);
 
-    expect(await screen.findByRole('option', { name: 'Ciclo 4' })).toBeInTheDocument();
+    // Esperar los datos sin calcular accesibilidad sobre el estado todavía pendiente; el rol se comprueba después.
+    await screen.findByText('Ciclo 4', { selector: 'option' });
+    expect(screen.getByRole('option', { name: 'Ciclo 4' })).toBeInTheDocument();
     ['Semestre', 'Facultad', 'Escuela Profesional', 'Ciclo', 'Tutor'].forEach((label) =>
       expect(screen.getByLabelText(label)).toBeInTheDocument(),
     );
