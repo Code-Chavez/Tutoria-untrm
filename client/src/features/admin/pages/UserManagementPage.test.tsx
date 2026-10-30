@@ -39,7 +39,9 @@ describe('UserManagementPage: desactivar a la última cuenta de administración'
     const user = userEvent.setup();
     renderPage();
 
-    await user.click(await screen.findByRole('button', { name: 'Desactivar' }));
+    // Esperar el dato evita que una búsqueda de accesibilidad costosa sobre el esqueleto bloquee el render pendiente.
+    await screen.findByText(admin.email);
+    await user.click(screen.getByRole('button', { name: 'Desactivar' }));
     const dialog = await screen.findByRole('alertdialog');
     await user.click(within(dialog).getByRole('button', { name: 'Desactivar' }));
 
@@ -57,7 +59,8 @@ describe('UserManagementPage: desactivar a la última cuenta de administración'
     const user = userEvent.setup();
     renderPage();
 
-    await user.click(await screen.findByRole('button', { name: 'Desactivar' }));
+    await screen.findByText(admin.email);
+    await user.click(screen.getByRole('button', { name: 'Desactivar' }));
     await user.click(within(await screen.findByRole('alertdialog')).getByRole('button', { name: 'Desactivar' }));
 
     await vi.waitFor(() => expect(mocked.getUsers.mock.calls.length).toBeGreaterThan(1));

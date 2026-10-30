@@ -6,6 +6,7 @@
  */
 const { spawnSync } = require('node:child_process');
 const path = require('node:path');
+const { PrismaClient } = require('@prisma/client');
 
 const url = process.env.TEST_DATABASE_URL;
 const name = (() => {
@@ -26,7 +27,28 @@ const run = (cmd, args) => {
   const result = spawnSync(cmd, args, { cwd: root, env, stdio: 'inherit', shell: process.platform === 'win32' });
   if (result.status !== 0) process.exit(result.status ?? 1);
 };
-console.log(`Base de pruebas: ${name}`);
-run('npx', ['prisma', 'migrate', 'deploy']);
-run('npx', ['ts-node', '-r', 'tsconfig-paths/register', 'prisma/seed.ts']);
-console.log('Base de pruebas lista.');
+
+async function main() {
+  console.log(`Base de pruebas: ${name}`);
+  // El motor de migraciones puede perder el diagnóstico de conexión en Windows. Comprobarla antes da una causa estable y
+  // evita iniciar migraciones/seed si la base no responde. No se imprime el error libre, que podría incluir credenciales.
+  const prisma = new PrismaClient({ datasourceUrl: url });
+  try {
+    await prisma.$connect();
+  } catch (error) {
+    const code = typeof error?.errorCode === 'string' && /^P\d{4}$/.test(error.errorCode) ? error.errorCode : 'sin código';
+    console.error(`No se pudo conectar con la base de pruebas (${code}). No se ejecutaron migraciones ni seed.`);
+    process.exitCode = 1;
+    return;
+  } finally {
+    await prisma.$disconnect();
+  }
+  run('npx', ['prisma', 'migrate', 'deploy']);
+  run('npx', ['ts-node', '-r', 'tsconfig-paths/register', 'prisma/seed.ts']);
+  console.log('Base de pruebas lista.');
+}
+
+main().catch(() => {
+  console.error('No se pudo preparar la base de pruebas.');
+  process.exitCode = 1;
+});
