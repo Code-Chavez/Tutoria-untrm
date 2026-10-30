@@ -1,6 +1,6 @@
 # Revisión de DoD-SIT-001: PR #193–#196
 
-Fecha: 29 de octubre de 2026. Estado: **entrega pendiente; no autorizada para fusión ni despliegue**.
+Fecha de la revisión inicial: 29 de octubre de 2026. Los estados y fallos iniciales se conservan como históricos. El cierre técnico y las aclaraciones aprobadas el 30/10/2026 están en el [registro de entrega](../seguimiento/REGISTRO_ENTREGA_TECNICA_2026-10-30.md). No se autorizó fusión ni despliegue.
 
 ## Base revisada
 
@@ -15,7 +15,7 @@ Revisión técnica asistida por Codex, no aprobación del PO ni certificación l
 
 En la consulta inicial los cuatro PR estaban abiertos y su último resultado por nombre de check era 12 SUCCESS y 2 SKIPPED. Repeticiones de un mismo check no se suman. Esta evidencia es del commit consultado y no se traslada automáticamente a futuros commits.
 
-## Matriz de cumplimiento
+## Matriz de cumplimiento al corte inicial (histórica)
 
 | Criterio | #193 | #194 | #195 | #196 |
 |---|---|---|---|---|
@@ -89,7 +89,7 @@ Una activación mediante la acción AX de clic no enfocó el botón de origen en
 
 Se completó el recorrido básico de apertura/cancelación en las cinco pantallas antes pendientes; no se repitieron aquí las operaciones de confirmación/carga/error en las ocho pantallas, ni se comparó visualmente contra una versión anterior. Siguen pendientes lector de pantalla, diálogos anidados, dispositivo físico y navegadores adicionales. No se marca C-08 completo.
 
-## Pendientes de cierre
+## Pendientes detectados en la revisión inicial (ver resolución en el registro del 30/10)
 
 1. Investigar por separado el fallo de UserManagementPage y el diagnóstico de seedCommands; no hay suite local completa aprobada en esta revisión.
 2. IMP-3 permanece abierto; el timeout previo de WorkPlanPage también conserva su evidencia independiente.

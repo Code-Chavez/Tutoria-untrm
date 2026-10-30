@@ -2,9 +2,9 @@
 
 **Sistema de Información para la Sistematización de los Procesos de Acompañamiento de Tutoría Universitaria**
 Universidad Nacional Toribio Rodríguez de Mendoza de Amazonas · Dirección de Bienestar Universitario (DBU)
-Versión del documento: 1.0 (octubre de 2026) · Software: 0.4.1
+Borrador de actualización: 30 de octubre de 2026 · Software: 1.0.0-beta.1
 
-Este manual explica, para cada tipo de persona que usa el sistema, **qué puede hacer y cómo hacerlo**. Las imágenes son del sistema con datos de demostración (personas y casos ficticios). Los nombres entre comillas o en *cursiva*
+Este manual explica, para cada tipo de persona que usa el sistema, **qué puede hacer y cómo hacerlo**. Los ejemplos utilizan datos de demostración (personas y casos ficticios). Los nombres entre comillas o en *cursiva*
 son los que aparecen en pantalla. Si necesita instalar o mantener el sistema, vea `docs/MANUAL_TECNICO.md`.
 
 ## Contenido
@@ -24,6 +24,8 @@ son los que aparecen en pantalla. Si necesita instalar o mantener el sistema, ve
 ### Confirmaciones y operaciones en curso (borrador de actualización)
 
 Cuando una acción necesita confirmación, el foco pasa a **Cancelar**. Puede recorrer los controles con Tab y Shift+Tab. Antes de confirmar, Escape o Cancelar cierra el aviso sin ejecutar la acción. Al confirmar, espere el resultado: mientras la operación siga pendiente, otra confirmación, Escape, Cancelar y un clic fuera del cuadro no ejecutan ni cancelan la operación. Al cerrarse el cuadro, el foco vuelve al control de origen si sigue disponible. Si se informa un error, lea el mensaje antes de volver a intentarlo.
+
+**Movimiento reducido.** Si el dispositivo tiene activada esta preferencia, la rueda de carga puede permanecer quieta. La operación sigue en curso y el resultado se muestra al terminar. No es necesario desactivar una preferencia de accesibilidad para usar el sistema.
 
 ### Resultado de los pedidos de listas (borrador de actualización)
 
