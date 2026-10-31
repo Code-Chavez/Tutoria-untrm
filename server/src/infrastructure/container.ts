@@ -30,6 +30,7 @@ import { PrismaStudentReferralRepository } from './repositories/PrismaStudentRef
 import { PrismaSystemParameterRepository } from './repositories/PrismaSystemParameterRepository';
 import { PrismaSupportContactRepository } from './repositories/PrismaSupportContactRepository';
 import { PrismaSchoolRepository } from './repositories/PrismaSchoolRepository';
+import { PrismaUserAccessPolicyRepository } from './repositories/PrismaUserAccessPolicyRepository';
 import { ImportTutorsUseCase } from '@application/use-cases/users/ImportTutorsUseCase';
 import { GetTutorAcceptanceUseCase, RequestTutorAcceptanceUseCase, RespondTutorAcceptanceUseCase } from '@application/use-cases/cycle-tutors/TutorAcceptanceUseCases';
 import { ExcelTutorParser } from './parsers/ExcelTutorParser';
@@ -103,7 +104,7 @@ const tokenService = new JwtTokenService();
 const evidenceStorage = new LocalEvidenceStorage();
 
 // Política única de alcance sobre los tutorados (Art. 9.a y 14.c): la usan todos los casos de uso que tocan datos de un estudiante.
-const studentAccessGuard = new StudentAccessGuard(userRepository, roleRepository, schoolRepository, studentRepository);
+const studentAccessGuard = new StudentAccessGuard(userRepository, roleRepository, schoolRepository, studentRepository, new PrismaUserAccessPolicyRepository(prisma));
 
 const loginUseCase = new LoginUseCase(
   userRepository,

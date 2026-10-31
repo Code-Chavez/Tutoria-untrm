@@ -87,6 +87,8 @@ client/src/
 
 **Catálogo de permisos (LEV-R10, incorporación del 31/10/2026).** `GET /api/roles/permissions` requiere token de acceso y permiso `admin:system`. Devuelve `200 { permissions: [{ code, description }] }`, sin usuarios ni datos personales; responde `401` sin autenticación o con cuenta inactiva y `403` sin el permiso. Su fuente es `server/src/domain/permissionCatalog.ts`, compartida con `seedBase`. Esta consulta no crea permisos ni asigna acceso; la edición de roles y sus alcances pertenece a las entregas siguientes de [implementación](levantamiento/16_IMPLEMENTACION_ROLES_Y_ALCANCES.md).
 
+**Alcance persistido (LEV-R12, avance).** La migración `20261031120000_user_access_policies` debe aplicarse y Prisma regenerarse antes de ejecutar el servidor actualizado. Añade `user_access_policies`, con una política por usuario vinculada a su rol, y restricciones de coherencia. No hay relleno automático: sin política, `StudentAccessGuard` conserva la regla histórica. Cambiar `users.role_id` invalida cualquier política previa mediante un disparador, dejando `NONE` y aumentando su revisión. Los alcances de servicio no conceden expedientes individuales. No existe todavía una API de edición de políticas; los otros mecanismos de alcance se migrarán por separado. Esta tabla no reemplaza los permisos de cada endpoint.
+
 | Rol | Alcance |
 |---|---|
 | Administrador DBU | Todo el sistema. |

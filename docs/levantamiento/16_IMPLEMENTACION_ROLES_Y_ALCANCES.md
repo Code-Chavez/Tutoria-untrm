@@ -32,3 +32,16 @@ Requisitos: LEV-R10 y LEV-R19, especificados en [11](11_ESPECIFICACION_ROLES_PER
 5. Actualizar menús y sesión activa cuando cambien permisos; probar servidor y cliente conjuntamente.
 
 No se anuncia ninguna de estas cinco partes como implementada por incorporar el catálogo. Los requisitos de lugar, correos y certificación mantienen su propia trazabilidad.
+
+## Segunda entrega: persistencia y resolución del alcance (N-2, avance)
+
+- Migración aditiva `20261031120000_user_access_policies`: política por usuario, vinculada al rol vigente; no rellena ni modifica las cuentas históricas.
+- Alcances representados: ninguno, estudiantes asignados al propio usuario, varias escuelas, varias facultades, institución y servicio. Cada política usa una familia de alcance; un servicio no concede acceso a expedientes individuales mediante el guardia de estudiantes.
+- `StudentAccessGuard` consulta la política persistida. Sin una política mantiene su regla histórica. Una política de otro rol, un rol sin permisos o una cuenta inactiva no concede acceso.
+- Una restricción de base rechaza combinaciones incoherentes. Un disparador invalida la política cuando cambia el rol, incluso si el cambio se hace por otra ruta o después se vuelve al rol anterior.
+- La migración y el cliente Prisma se prepararon en la base exclusiva de pruebas y en el entorno local de desarrollo. No se crean políticas para usuarios reales ni se activa una edición desde la interfaz en esta entrega.
+- **Límite:** esta resolución se integra en el guardia de estudiantes y sus consumidores; todavía no sustituye las reglas particulares de planes, evaluación, facultades y derivaciones. No es aún el modelo completo de autorización configurable.
+
+Verificación previa a la integración en el contenedor: TypeScript y lint sin errores; 74/74 pruebas unitarias de alcance, y una corrida de cuatro suites con 90/90 pruebas (incluye paridad de cuentas históricas, persistencia, aislamiento entre facultades, cambios de rol y rechazo de políticas inválidas). Los JSON y registros completos permanecen locales en `tmp/roles-scope-*.json` y `tmp/roles-scope-*.log`.
+
+Después de conectar el repositorio al contenedor de dependencias: TypeScript y lint sin errores; tres suites de integración (`userAccessPolicy`, `objectAccess`, `permissionCatalogHttp`) con 30/30 pruebas. Una corrida separada de instalación nueva (`bootstrap`) pasó 3/3 con la nueva migración. Los recuentos corresponden a corridas diferentes y no se suman como casos únicos. La base de desarrollo conserva cero políticas: no se alteró el alcance de ninguna cuenta. No se ejecutó la suite completa del servidor ni se validó una interfaz de edición, que todavía no existe.
