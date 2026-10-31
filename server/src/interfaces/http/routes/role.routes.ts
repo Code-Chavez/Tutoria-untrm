@@ -11,6 +11,7 @@ const roleController = new RoleController(
 );
 
 router.use('/roles', authenticate(container.services.tokenService));
+router.get('/roles/permissions', authorize(['admin:system']), roleController.listPermissions);
 router.get('/roles', roleController.list);
 // Crear roles es una operación de administración del sistema (solo DBU).
 router.post('/roles', authorize(['admin:system']), roleController.create);

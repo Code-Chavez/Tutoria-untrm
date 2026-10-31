@@ -1,5 +1,7 @@
 # Trazabilidad, preparación para implementar y orden de entregas
 
+**Actualización del 31/10/2026:** el responsable del proyecto pidió comenzar el desarrollo de los requisitos pendientes. El avance técnico de roles y alcances se registra en [16](16_IMPLEMENTACION_ROLES_Y_ALCANCES.md). Las afirmaciones históricas de «no autorizado» y «ninguna prueba escrita» de este plan describen su corte original; no acreditan el estado actual de implementación. Las decisiones institucionales siguen separadas de la autorización técnica.
+
 **Estado: PROPUESTO.** Consolida los requisitos de [05](05_REQUISITOS_SIN_DEPENDENCIAS.md), [11](11_ESPECIFICACION_ROLES_PERMISOS_ALCANCE.md), [12](12_ESPECIFICACION_PEDIDO_DE_LISTAS.md), [13](13_ESPECIFICACION_LUGAR_DE_LA_TUTORIA.md) y [14](14_ESPECIFICACION_CERTIFICACION.md). **No es una aprobación ni un compromiso de plazo.** Cada requisito se define en **un solo archivo** (el de su columna «Fuente»); esta tabla solo lo enlaza. Las decisiones están en [10](10_REGISTRO_DE_DECISIONES.md); las etiquetas, en el [README](README.md).
 
 ## 1. Cómo leer las tres categorías

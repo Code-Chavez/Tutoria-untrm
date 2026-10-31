@@ -4,8 +4,13 @@ import { ListRolesUseCase } from '@application/use-cases/roles/ListRolesUseCase'
 import { CreateRoleUseCase } from '@application/use-cases/roles/CreateRoleUseCase';
 import { RoleAlreadyExistsError } from '@application/use-cases/roles/RoleErrors';
 import { createRoleSchema } from '../validators/role.validators';
+import { PERMISSION_CATALOG } from '@domain/permissionCatalog';
 
 export class RoleController {
+  listPermissions = (_req: Request, res: Response) => {
+    res.status(200).json({ permissions: PERMISSION_CATALOG });
+  };
+
   constructor(
     private readonly listRolesUseCase: ListRolesUseCase,
     private readonly createRoleUseCase: CreateRoleUseCase,

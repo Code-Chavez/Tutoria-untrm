@@ -85,6 +85,8 @@ client/src/
 
 ### 2.3 Modelo de roles
 
+**Catálogo de permisos (LEV-R10, incorporación del 31/10/2026).** `GET /api/roles/permissions` requiere token de acceso y permiso `admin:system`. Devuelve `200 { permissions: [{ code, description }] }`, sin usuarios ni datos personales; responde `401` sin autenticación o con cuenta inactiva y `403` sin el permiso. Su fuente es `server/src/domain/permissionCatalog.ts`, compartida con `seedBase`. Esta consulta no crea permisos ni asigna acceso; la edición de roles y sus alcances pertenece a las entregas siguientes de [implementación](levantamiento/16_IMPLEMENTACION_ROLES_Y_ALCANCES.md).
+
 | Rol | Alcance |
 |---|---|
 | Administrador DBU | Todo el sistema. |
