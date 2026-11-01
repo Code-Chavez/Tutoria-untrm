@@ -1,0 +1,162 @@
+
+ RUN  v4.1.10 C:/Proyects/Proyects/Tutoria-untrm/client
+
+ ✓ src/features/admin/pages/UserManagementPage.test.tsx (2 tests) 3417ms
+     ✓ ante el 409 muestra el mensaje del servidor y la cuenta sigue activa  2598ms
+     ✓ si la operación se acepta, no hay mensaje de error y se recarga la lista  800ms
+ ✓ src/features/planificacion/pages/WorkPlanPage.test.tsx (3 tests) 5430ms
+     ✓ avisa si el usuario no tiene escuelas asignadas  364ms
+     ✓ con una sola escuela la carga sola y envía el plan con filas limpias  3947ms
+     ✓ editar un plan aprobado pide confirmar y lo guarda como nueva revisión (A12)  1105ms
+ ✓ src/features/periodo/pages/PeriodClosurePage.test.tsx (6 tests) 5929ms
+     ✓ muestra por defecto el periodo vigente con su vista previa y lo que quedará pendiente  1175ms
+     ✓ para cerrar hay que escribir el nombre exacto del periodo; recién entonces se habilita  2136ms
+     ✓ un periodo cerrado muestra su resumen guardado y permite reabrirlo si no hay otro vigente  796ms
+     ✓ no deja reabrir un periodo cerrado mientras otro está vigente  521ms
+     ✓ muestra el motivo si el servidor rechaza el cierre  1157ms
+ ✓ src/features/pedidos/pages/RequestEmailsPage.test.tsx (7 tests) 6549ms
+     ✓ la coordinación ve solo sus escuelas, con su correo o «Sin configurar»  664ms
+     ✓ guarda el correo de una escuela y lo confirma  2275ms
+     ✓ puede quitar un correo y muestra el motivo real si el servidor rechaza el guardado  1054ms
+     ✓ con el correo ya configurado se ve el correo y un botón «Editar»; al pulsarlo se corrige y se guarda  1863ms
+     ✓ «Cancelar» cierra la edición sin cambiar nada, y llegar con ?escuela=… abre esa escuela para editar  373ms
+stderr | src/features/pendientes/pages/PendingPage.test.tsx > PendingPage (pendientes institucionales) > aviso por correo del rechazo (LEV-R05) > dos clics seguidos (antes de que la pantalla se redibuje) no envían dos veces
+An update to PendingPage inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+An update to PendingPage inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+An update to PendingPage inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+ ✓ src/features/pendientes/pages/PendingPage.test.tsx (22 tests) 9726ms
+     ✓ muestra qué pasó, dónde, desde cuándo y a dónde ir a resolverlo  1207ms
+     ✓ se puede filtrar por tipo y los conteos salen de lo que hay  777ms
+     ✓ combina búsqueda sin tildes y escuela, informa sin coincidencias y permite limpiar  1561ms
+       ✓ un FALLIDO se reenvía con un clic, con identidad de operación; el rechazo no cambia y el mensaje no promete más de lo aceptado  589ms
+       ✓ si se pierde la respuesta, reintentar conserva el identificador; tras una respuesta definitiva, el siguiente reenvío usa otro  834ms
+       ✓ un resultado incierto abre un diálogo que identifica el intento anterior; confirmar reenvía confirmando ESE intento; cancelar no envía  1305ms
+       ✓ un rechazo sin registro previo se confirma como «sin registro» (attemptId nulo)  500ms
+       ✓ si el intento mostrado ya no es el último, el servidor responde con el actual y la confirmación antigua no vale  828ms
+ ✓ src/features/catalogos/pages/CatalogsPage.test.tsx (9 tests) 9567ms
+     ✓ lista la facultad con su estado y cuántos registros la usan  822ms
+     ✓ no deja eliminar lo que está en uso, pero sí lo que no  1351ms
+     ✓ elimina tras confirmar  1249ms
+     ✓ activa y desactiva sin pasar por el formulario  538ms
+     ✓ crea una facultad nueva  1615ms
+     ✓ muestra el error de la API (p. ej. duplicado) sin cerrar el formulario  1171ms
+     ✓ en los ciclos el código se pide al crear y no se puede editar después  784ms
+     ✓ los botones de alta respetan el género de cada catálogo (UI-08)  758ms
+     ✓ permite configurar la cantidad de ciclos al editar una escuela  1266ms
+ ✓ src/features/pedidos/pages/DataRequestPage.test.tsx (28 tests) 20464ms
+     ✓ la coordinación solo ve sus escuelas, con el correo al que se pedirá  1251ms
+     ✓ la DBU ve todas las escuelas  406ms
+     ✓ envía el pedido con los ciclos marcados y las observaciones, y confirma a quién salió  2929ms
+     ✓ marca todos por defecto y envía explícitamente los diez ciclos  755ms
+     ✓ lee los ciclos de cada escuela y reinicia la selección al cambiarla  1279ms
+     ✓ sin selección impide enviar y permite recuperar todos los ciclos  1225ms
+     ✓ si el correo no sale lo dice como error, explica la causa y el siguiente paso, y el pedido queda registrado  441ms
+     ✓ si el correo no sale sin una causa conocida, da un mensaje general y el siguiente paso, sin nombres internos  494ms
+     ✓ un resultado incierto solo dice que no se sabe si el correo salió y no recomienda reenviar ni otra vía, aunque llegue un texto de causa  432ms
+     ✓ sin correo configurado solo avisa y ofrece un botón que lleva a configurarlo; no deja enviar  406ms
+     ✓ con el correo configurado lo muestra y «Editar correo» lleva a la configuración (aquí no se edita)  345ms
+     ✓ muestra el historial y permite marcar como recibido un pedido enviado  542ms
+       ✓ mientras envía, el botón queda deshabilitado y un segundo clic no envía otra vez  668ms
+       ✓ si se pierde la respuesta, reintentar lo mismo conserva el identificador; tras un resultado, el siguiente pedido usa otro  912ms
+       ✓ si cambia lo que se envía después de un fallo sin respuesta, es otra operación y usa otro identificador  1383ms
+       ✓ ante la advertencia de equivalencia identifica el pedido anterior; confirmar lo reenvía como operación nueva citando ese pedido  652ms
+       ✓ si mientras el diálogo estaba abierto se registró otro equivalente, la confirmación no vale: se muestra el nuevo pedido  785ms
+       ✓ confirmar el equivalente: mientras la petición sigue pendiente no se puede confirmar otra vez ni cerrar con Escape, y el diálogo se cierra solo cuando termina  1053ms
+       ✓ cancelar el diálogo no envía nada  798ms
+       ✓ un envío equivalente en curso no ofrece confirmar: avisa que hay que esperar su resultado  589ms
+       ✓ un identificador reutilizado con otros datos (422) muestra el mensaje y la siguiente operación usa otro identificador  824ms
+       ✓ una repetición lo dice y un resultado incierto no se presenta como enviado  529ms
+     ✓ U13: al pedir docentes cambian título, plantilla, destino y siguientes pasos; al volver a estudiantes, también  952ms
+ ✓ src/features/admin/components/UserFormModal.test.tsx (12 tests) 4953ms
+     ✓ solo pide el servicio cuando el rol es Profesional de Servicio  663ms
+     ✓ envía el servicio elegido junto con el rol  887ms
+     ✓ en otro rol no envía servicio, aunque se hubiera elegido antes  418ms
+     ✓ muestra el motivo que envía la API y no cierra el formulario  403ms
+     ✓ envía la escuela elegida; en otro rol no envía escuela aunque se hubiera elegido antes  493ms
+     ✓ envía la facultad elegida y no envía escuela  446ms
+     ✓ un correo de otro dominio se rechaza al instante, sin llegar a enviarse  335ms
+     ✓ envía el correo en su forma única (sin espacios y en minúsculas)  390ms
+     ✓ una cuenta anterior a la regla (otro dominio) se edita sin tocar su correo; cambiarlo a otro dominio no se permite  555ms
+ ✓ src/shared/components/ui/ActionMenu.test.tsx (4 tests) 3035ms
+     ✓ abre con etiquetas visibles agrupadas y estado expandido  1085ms
+     ✓ se recorre solo con teclado: flechas, Enter y Escape devuelve el foco  829ms
+     ✓ elegir una opción ejecuta su acción y cierra el menú dejando el foco en el botón  445ms
+     ✓ un clic fuera lo cierra  648ms
+ ✓ src/features/tutorados/pages/BulkImportPage.test.tsx (3 tests) 3064ms
+     ✓ rechaza archivos que no son .xlsx  961ms
+     ✓ importa y muestra el reporte con errores por fila  1559ms
+     ✓ descarga la plantilla  530ms
+ ✓ src/shared/components/ui/ConfirmDialog.test.tsx (14 tests) 7017ms
+     ✓ al abrirse el foco entra en el diálogo, en «Cancelar», y no ejecuta la acción  1170ms
+     ✓ tiene nombre accesible (título) y descripción (mensaje)  403ms
+     ✓ Tab y Shift+Tab no salen del diálogo  1646ms
+     ✓ el contenido de fondo queda inerte mientras está abierto y se restablece al cerrar  473ms
+     ✓ confirmar solo ocurre por una acción explícita sobre «Desactivar»  324ms
+     ✓ cargando: la operación no se puede cancelar (Escape, fondo y «Cancelar» sin efecto) y el foco no se pierde  732ms
+       ✓ un clic en el fondo o en un botón deshabilitado durante la operación no saca el foco del diálogo ni desbloquea nada  947ms
+ ✓ src/features/identidad/pages/BrandingPage.test.tsx (9 tests) 7935ms
+     ✓ muestra la identidad vigente y deja "Guardar" desactivado sin cambios  1111ms
+     ✓ guarda los cambios y los aplica a todo el sistema  1344ms
+     ✓ avisa y no deja guardar un color principal demasiado claro  1008ms
+     ✓ avisa si el color no tiene el formato #RRGGBB  877ms
+     ✓ la vista previa usa los colores elegidos sin cambiar todavía el resto de la interfaz  737ms
+     ✓ muestra el error del servidor al guardar  1326ms
+     ✓ sube un logotipo válido  559ms
+     ✓ restablece la identidad institucional tras confirmar  781ms
+ ✓ src/features/planificacion/components/WorkPlanResolutionCard.test.tsx (5 tests) 1947ms
+     ✓ indica que el plan no es vigente mientras no haya resolución  760ms
+     ✓ muestra la revisión pendiente de resolución y lista la versión aprobada anterior (A12)  655ms
+ ✓ src/features/periodo/components/PeriodStatusBanner.test.tsx (5 tests) 897ms
+     ✓ avisa del solo lectura cuando no hay un periodo abierto  791ms
+ ✓ src/shared/components/ui/TableSkeleton.test.tsx (4 tests) 1236ms
+     ✓ dice qué se carga, de forma visible y accesible, no solo con filas grises  685ms
+     ✓ si tarda más de lo normal lo avisa y ofrece reintentar  362ms
+ ✓ src/features/pedidos/components/RequestListBanner.test.tsx (3 tests) 852ms
+     ✓ en la carga de estudiantes lleva a «Pedir listas» con la lista de estudiantes elegida  720ms
+ ✓ src/shared/hooks/useDialog.test.tsx (3 tests) 1896ms
+     ✓ lleva el foco al primer campo, lo mantiene dentro con Tab y lo devuelve al cerrar con Escape  1633ms
+ ✓ src/shared/components/ui/NextSteps.test.tsx (2 tests) 866ms
+     ✓ muestra cada paso como un enlace con su explicación  769ms
+ ✓ src/features/admin/components/InvitationDialog.test.tsx (3 tests) 1085ms
+     ✓ con el correo enviado avisa que no se generó ninguna clave y muestra el enlace de un solo uso  325ms
+     ✓ si el correo no salió, lo dice como alerta y pide entregar el enlace por un medio privado  432ms
+     ✓ se cierra con «Entendido»  315ms
+ ✓ src/features/admin/components/UserTable.test.tsx (2 tests) 1021ms
+     ✓ solo la cuenta pendiente ofrece emitir una invitación nueva, y lo hace para esa cuenta  720ms
+ ✓ src/shared/hooks/useIdleTimer.test.ts (4 tests) 185ms
+ ✓ src/shared/hooks/useDraft.test.tsx (5 tests) 158ms
+
+ Test Files  22 passed (22)
+      Tests  155 passed (155)
+   Start at  12:02:53
+   Duration  79.25s (transform 25.10s, setup 69.19s, import 83.70s, tests 97.23s, environment 205.37s)
+
+JSON report written to <carpeta-de-resultados>/group-1.json
