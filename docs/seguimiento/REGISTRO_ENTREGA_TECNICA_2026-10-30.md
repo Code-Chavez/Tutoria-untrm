@@ -48,10 +48,10 @@ El usuario autorizó el 30/10/2026:
 
 Estado verificado en GitHub al 1/11/2026 (hora local; las marcas de fusión están en UTC). «Fusionado» es un hecho del repositorio; **no** equivale a desplegado ni a versión estable, y este repositorio no registra ningún despliegue.
 
-| PR | Contenido | Fusionado en `develop` (UTC) | CI del commit final antes de fusionar |
+| PR | Contenido | Fusionado en `develop` (UTC) | CI del último commit de la rama que se leyó en la preparación |
 |---|---|---|---|
-| [#197](https://github.com/Code-Chavez/Tutoria-untrm/pull/197) | plantilla DoD, manual y este registro | 30/10 15:53 | leída al fusionar según el registro de la entrega |
-| [#198](https://github.com/Code-Chavez/Tutoria-untrm/pull/198) | preparación y aislamiento de pruebas | 30/10 15:59 | ídem |
+| [#197](https://github.com/Code-Chavez/Tutoria-untrm/pull/197) | plantilla DoD, manual y este registro | 30/10 15:53 | no verificada en esta actualización |
+| [#198](https://github.com/Code-Chavez/Tutoria-untrm/pull/198) | preparación y aislamiento de pruebas | 30/10 15:59 | no verificada en esta actualización |
 | [#195](https://github.com/Code-Chavez/Tutoria-untrm/pull/195) | clasificación SMTP por fase | 30/10 16:02 | 12 aprobadas, 2 omitidas |
 | [#194](https://github.com/Code-Chavez/Tutoria-untrm/pull/194) | mensajes públicos del envío fallido o incierto | 30/10 16:06 | 12 aprobadas, 2 omitidas |
 | [#193](https://github.com/Code-Chavez/Tutoria-untrm/pull/193) | accesibilidad del diálogo de confirmación | 30/10 16:30 | 12 aprobadas, 2 omitidas |
@@ -61,7 +61,7 @@ Estado verificado en GitHub al 1/11/2026 (hora local; las marcas de fusión est�
 | [#201](https://github.com/Code-Chavez/Tutoria-untrm/pull/201) | perfil de la prueba objetivo de IMP-3 | 2/11 00:20 | 12 aprobadas, 2 omitidas |
 | [#202](https://github.com/Code-Chavez/Tutoria-untrm/pull/202) | cierre de IMP-3 como riesgo aceptado | 2/11 00:26 | 12 aprobadas, 2 omitidas |
 
-No quedan PR abiertos (comprobado). La CI de `develop` en los commits de fusión `6763f2d`, `3959d1c` y `e04e470` terminó en éxito; la del commit `0fbde0d` (fusión de #202) seguía **en curso** al redactar esto y su resultado no se afirma aquí.
+La columna de CI recoge lo leído sobre la rama durante la preparación; si la rama se actualizó con `develop` después (merge de actualización) antes de fusionar, la CI de ese último commit no se vuelve a afirmar aquí. No quedan PR abiertos (comprobado). La CI de `develop` en los commits de fusión `6763f2d`, `3959d1c` y `e04e470` terminó en éxito; la del commit `0fbde0d` (fusión de #202) seguía **en curso** al redactar esto y su resultado no se afirma aquí.
 
 ### Cambios de estado respecto a la sección anterior
 
