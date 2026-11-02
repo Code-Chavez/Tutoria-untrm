@@ -39,6 +39,7 @@ import { SectionHome, SectionShell } from '@shared/components/layout/SectionShel
 import { RequestEmailsPage } from '@features/pedidos/pages/RequestEmailsPage';
 import { CycleTutorsPage } from '@features/ciclos/pages/CycleTutorsPage';
 import { PendingPage } from '@features/pendientes/pages/PendingPage';
+import { RolesPage } from '@features/admin/pages/RolesPage';
 import { CampusesPage } from '@features/sedes/pages/CampusesPage';
 import { ParametersPage } from '@features/parametros/pages/ParametersPage';
 import { BrandingPage } from '@features/identidad/pages/BrandingPage';
@@ -205,6 +206,14 @@ export default function App() {
                 element={
                   <RequireRole roles={['Administrador DBU']}>
                     <UserManagementPage />
+                  </RequireRole>
+                }
+              />
+              <Route
+                path="roles"
+                element={
+                  <RequireRole roles={['Administrador DBU']}>
+                    <RolesPage />
                   </RequireRole>
                 }
               />
