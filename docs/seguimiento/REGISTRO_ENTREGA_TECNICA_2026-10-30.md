@@ -98,7 +98,7 @@ No quedan PR abiertos (comprobado). La CI de `develop` terminó en éxito en `0d
 
 1. **Desplegado/estable:** no hay despliegue ni versión estable registrados.
 2. **Aprobaciones institucionales:** visto bueno de la DBU o de producto; decisiones institucionales pendientes (correo completo del motivo, destinatarios, avisos adicionales, Q07).
-3. **Verificaciones no hechas:** SMTP real, STARTTLS y TLS implícito; servidor institucional; lector de pantalla; diálogos anidados; solo un navegador en la revisión de las cinco pantallas (el componente sí se verificó en cuatro, #193).
+3. **Verificaciones no hechas:** SMTP real, STARTTLS y TLS implícito; servidor institucional; lector de pantalla; diálogos superpuestos (ningún flujo actual los produce; el comportamiento ante ellos se corrigió y se probó con pruebas de componente el 2/11/2026, sin verificación en navegador: `docs/resultados-2026-11-02/dialogos-superpuestos.md`); solo un navegador en la revisión de las cinco pantallas (el componente sí se verificó en cuatro, #193).
 4. **Observación menor, sin corregir:** tras borrar un elemento en `CatalogsPage` o reabrir el periodo en `PeriodClosurePage` el control de origen desaparece y el foco queda en `<body>` (esperado, pero podría llevarse a un elemento cercano).
 5. **Datos históricos:** pedidos y avisos `FALLIDO` anteriores a #195 que pudieron ser inciertos; no se reclasifican.
 6. **Suite local:** la intermitencia por CPU saturada (IMP-3) se acepta, no se resolvió; «sin regresiones» no se afirma por una CI verde. Las dos excepciones de auditoría del servidor se revisan antes de la v1.0.0.

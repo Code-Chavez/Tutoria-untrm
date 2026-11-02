@@ -3,6 +3,7 @@ import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { useState } from 'react';
 import { ConfirmDialog } from './ConfirmDialog';
+import { useDialog } from '@shared/hooks/useDialog';
 
 function Host({ onConfirm = vi.fn(async () => undefined), loading = false, removeOpenerOnOpen = false }: { onConfirm?: () => Promise<unknown>; loading?: boolean; removeOpenerOnOpen?: boolean }) {
   const [open, setOpen] = useState(false);
@@ -256,5 +257,32 @@ describe('ConfirmDialog (F1: foco y teclado)', () => {
       expect(onConfirm).toHaveBeenCalledTimes(1);
       expect(onCancel).toHaveBeenCalledTimes(1);
     });
+  });
+
+  it('abierto sobre un modal de formulario: Escape cierra solo la confirmación y el modal conserva el foco al volver', async () => {
+    const user = userEvent.setup();
+    const onCloseModal = vi.fn();
+    function ModalWithConfirm() {
+      const ref = useDialog(onCloseModal);
+      const [confirming, setConfirming] = useState(false);
+      return (
+        <>
+          <div role="dialog" aria-modal="true" aria-label="Formulario" ref={ref} tabIndex={-1}>
+            <input aria-label="Nombre" />
+            <button onClick={() => setConfirming(true)}>Eliminar</button>
+          </div>
+          <ConfirmDialog open={confirming} title="Eliminar" message="¿Seguro?" onConfirm={async () => undefined} onCancel={() => setConfirming(false)} />
+        </>
+      );
+    }
+    render(<ModalWithConfirm />);
+    await user.click(screen.getByRole('button', { name: 'Eliminar' }));
+    expect(screen.getByRole('alertdialog')).toBeInTheDocument();
+
+    await user.keyboard('{Escape}');
+
+    expect(screen.queryByRole('alertdialog')).not.toBeInTheDocument();
+    expect(onCloseModal).not.toHaveBeenCalled();
+    expect(screen.getByRole('button', { name: 'Eliminar' })).toHaveFocus();
   });
 });
