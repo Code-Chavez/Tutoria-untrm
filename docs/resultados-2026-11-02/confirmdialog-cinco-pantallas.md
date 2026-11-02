@@ -36,3 +36,11 @@ Los clics sobre el fondo y sobre los botones deshabilitados durante la operació
 ## Límites
 
 Un solo navegador (Chromium integrado); sin lector de pantalla; diálogos anidados no verificados; peticiones retenidas con un parche local, no una red lenta real; `WorkPlanPage` con un plan ficticio cuyo guardado falla por validación (no se vio un guardado correcto); `StudentsPage` solo con el menú de acciones de una fila; una sola pasada por pantalla (sin repeticiones); los datos de prueba quedan en una base sin volumen que se descarta al apagarla. No se cambió ningún código.
+
+## Corrección de F3 (2/11/2026, PR de seguimiento)
+
+`WorkPlanPage.handleSave` ya no cierra el diálogo al confirmar: lo cierra en un `finally`, al terminar el guardado (con éxito o con error), de modo que el diálogo queda ocupado y con el foco dentro mientras se guarda, como en las otras cuatro pantallas.
+
+- **Prueba que detecta el defecto** (`WorkPlanPage.test.tsx`, «F3: al confirmar la revisión el diálogo sigue abierto y ocupado…», guardado controlado por una promesa): **falla antes del cambio** (el diálogo ya no estaba `aria-busy`/abierto) y **pasa después**; comprueba además una sola llamada a `save`, que Escape, Intro y el clic en el fondo no cierran ni repiten, el mensaje de éxito y que el foco vuelve al botón.
+- **Navegador real** (misma configuración que arriba, plan ficticio ahora con un objetivo específico para que el guardado sea válido; petición retenida 8 s): una sola `PUT`; Escape, clic en el fondo, Intro y Espacio sin efecto; el diálogo pasó a `aria-busy` ≈ 30 ms después de confirmar; al responder 200 se cerró 17 ms después y el foco quedó en el botón «Guardar como nueva revisión» (que a continuación pasa a llamarse «Guardar plan» porque el plan queda como revisión en edición; el foco se mantiene en ese mismo botón); mensaje «Cambios guardados como nueva revisión…» en `role="status"`.
+- **Límites:** el camino de error (400) no se repitió en el navegador tras el cambio (lo cubre el mismo `finally`, sin prueba específica); un solo navegador y una sola pasada.
