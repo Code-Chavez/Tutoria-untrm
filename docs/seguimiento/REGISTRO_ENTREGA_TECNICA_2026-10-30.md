@@ -76,3 +76,30 @@ La columna de CI recoge lo leído sobre la rama durante la preparación; si la r
 4. **Datos históricos:** los pedidos y avisos que quedaron `FALLIDO` antes de #195 pudieron ser inciertos; no se reclasifican (no se puede demostrar cuáles).
 5. **Estado de la suite local:** la intermitencia por CPU saturada se acepta, no se resolvió; «sin regresiones» sigue sin afirmarse por una CI verde.
 6. **Fuera de esta entrega:** roles configurables (existe trabajo en una rama local `codex/roles-permissions-foundation`, no revisada aquí), certificación y piloto.
+
+## Actualización de estado — 2 de noviembre de 2026
+
+Verificado en GitHub (marcas de fusión en UTC). «Fusionado» no equivale a desplegado ni a versión estable; no se registra ningún despliegue.
+
+| PR | Contenido | Fusionado en `develop` (UTC) | CI del último commit de la rama que se leyó |
+|---|---|---|---|
+| [#203](https://github.com/Code-Chavez/Tutoria-untrm/pull/203) | actualización de este registro (1/11) | 2/11 (ver GitHub) | 12 aprobadas, 2 omitidas (`8206b6f`) |
+| [#204](https://github.com/Code-Chavez/Tutoria-untrm/pull/204) | revisión con teclado del diálogo de confirmación en las cinco pantallas restantes | 2/11 00:52 | 12 aprobadas, 2 omitidas (`3444676`) |
+| [#205](https://github.com/Code-Chavez/Tutoria-untrm/pull/205) | corrección de F3 en `WorkPlanPage` | 2/11 01:10 | 12 aprobadas, 2 omitidas (`aba71fe`) |
+
+No quedan PR abiertos (comprobado). La CI de `develop` terminó en éxito en `0d7d6f5` y `4acf4a9`; la del commit de fusión de #205 (`8334c21`) seguía **en curso** al redactar esto y su resultado no se afirma aquí.
+
+### Cambios de estado
+
+- **Pantallas con `ConfirmDialog` revisadas con teclado:** las cinco que faltaban (`CatalogsPage`, `BrandingPage`, `PeriodClosurePage`, `StudentsPage`, `WorkPlanPage`) en un navegador, contra la base de pruebas: foco, trampa de Tab, fondo inerte, Escape, «Cancelar» y bloqueo durante la operación correctos (informe: `docs/resultados-2026-11-02/confirmdialog-cinco-pantallas.md`).
+- **F3 corregido** (`WorkPlanPage` cerraba el diálogo al confirmar y el foco quedaba en `<body>`): el diálogo permanece ocupado hasta que termina el guardado y el foco vuelve al botón. Prueba que falla antes y pasa después, y verificación en navegador real. El camino de error (400) no se repitió en el navegador tras el cambio.
+
+### Pendientes que impiden llamar a esta entrega «cerrada» sin matices (vigentes)
+
+1. **Desplegado/estable:** no hay despliegue ni versión estable registrados.
+2. **Aprobaciones institucionales:** visto bueno de la DBU o de producto; decisiones institucionales pendientes (correo completo del motivo, destinatarios, avisos adicionales, Q07).
+3. **Verificaciones no hechas:** SMTP real, STARTTLS y TLS implícito; servidor institucional; lector de pantalla; diálogos anidados; solo un navegador en la revisión de las cinco pantallas (el componente sí se verificó en cuatro, #193).
+4. **Observación menor, sin corregir:** tras borrar un elemento en `CatalogsPage` o reabrir el periodo en `PeriodClosurePage` el control de origen desaparece y el foco queda en `<body>` (esperado, pero podría llevarse a un elemento cercano).
+5. **Datos históricos:** pedidos y avisos `FALLIDO` anteriores a #195 que pudieron ser inciertos; no se reclasifican.
+6. **Suite local:** la intermitencia por CPU saturada (IMP-3) se acepta, no se resolvió; «sin regresiones» no se afirma por una CI verde. Las dos excepciones de auditoría del servidor se revisan antes de la v1.0.0.
+7. **Fuera de esta entrega:** roles configurables (hay una rama local `codex/roles-permissions-foundation`, no revisada aquí), certificación y piloto.
