@@ -1,0 +1,50 @@
+CORRIDA 2026-11-02T00:13:46.055Z
+render: 87 ms
+findByText correo: 103 ms
+click Quitar selección: 430 ms
+click ciclo 3: 141 ms
+click ciclo 4: 124 ms
+paste 12 caracteres: 155 ms
+click Enviar pedido: 173 ms
+waitFor send: 16 ms
+findByRole alert: 32 ms
+CORRIDA 2026-11-02T00:14:04.873Z
+render: 84 ms
+findByText correo: 93 ms
+click Quitar selección: 399 ms
+click ciclo 3: 157 ms
+click ciclo 4: 141 ms
+paste 12 caracteres: 156 ms
+click Enviar pedido: 172 ms
+waitFor send: 15 ms
+findByRole alert: 15 ms
+CORRIDA 2026-11-02T00:14:21.918Z
+render: 88 ms
+findByText correo: 94 ms
+click Quitar selección: 415 ms
+click ciclo 3: 156 ms
+click ciclo 4: 123 ms
+paste 12 caracteres: 123 ms
+click Enviar pedido: 169 ms
+waitFor send: 15 ms
+findByRole alert: 15 ms
+CORRIDA 2026-11-02T00:14:42.504Z
+render: 122 ms
+findByText correo: 145 ms
+click Quitar selección: 790 ms
+click ciclo 3: 158 ms
+click ciclo 4: 159 ms
+paste 12 caracteres: 174 ms
+click Enviar pedido: 326 ms
+waitFor send: 6 ms
+findByRole alert: 31 ms
+CORRIDA 2026-11-02T00:15:02.782Z
+render: 106 ms
+findByText correo: 108 ms
+click Quitar selección: 454 ms
+click ciclo 3: 157 ms
+click ciclo 4: 144 ms
+paste 12 caracteres: 221 ms
+click Enviar pedido: 222 ms
+waitFor send: 12 ms
+findByRole alert: 46 ms
