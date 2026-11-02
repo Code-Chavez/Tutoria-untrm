@@ -27,6 +27,12 @@ export class CachedRoleRepository implements RoleRepository {
     return this.byName.getOrLoad(name, () => this.inner.findByName(name));
   }
 
+  /** Olvida lo guardado: los cambios de un rol rigen desde la siguiente lectura. */
+  clear(): void {
+    this.byId.clear();
+    this.byName.clear();
+  }
+
   findAll(): Promise<Role[]> {
     return this.inner.findAll();
   }

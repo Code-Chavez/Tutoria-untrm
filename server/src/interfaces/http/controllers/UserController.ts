@@ -5,7 +5,7 @@ import { UpdateUserUseCase, UserNotFoundError } from '@application/use-cases/use
 import { ToggleUserStatusUseCase } from '@application/use-cases/users/ToggleUserStatusUseCase';
 import { ListUsersUseCase } from '@application/use-cases/users/ListUsersUseCase';
 import { AssignRoleUseCase } from '@application/use-cases/roles/AssignRoleUseCase';
-import { RoleNotFoundError, RoleTargetUserNotFoundError } from '@application/use-cases/roles/RoleErrors';
+import { RoleInactiveError, RoleNotFoundError, RoleTargetUserNotFoundError } from '@application/use-cases/roles/RoleErrors';
 import { assignRoleSchema } from '../validators/role.validators';
 import { ServiceRequiredError } from '@application/use-cases/users/serviceAssignment';
 import { TutorSchoolRequiredError } from '@application/use-cases/users/tutorSchool';
@@ -65,7 +65,7 @@ export class UserController {
         res.status(404).json({ error: error.message });
       } else if (error instanceof ServiceRequiredError || error instanceof TutorSchoolRequiredError || error instanceof DeanFacultyRequiredError) {
         res.status(400).json({ error: error.message });
-      } else if (error instanceof LastActiveAdministratorError) {
+      } else if (error instanceof LastActiveAdministratorError || error instanceof RoleInactiveError) {
         res.status(409).json({ error: error.message });
       } else {
         res.status(500).json({ error: 'Error interno del servidor' });
@@ -87,6 +87,8 @@ export class UserController {
         res.status(400).json({ error: error.message });
       } else if (error instanceof RoleNotFoundError) {
         res.status(404).json({ error: error.message });
+      } else if (error instanceof RoleInactiveError) {
+        res.status(409).json({ error: error.message });
       } else {
         res.status(500).json({ error: 'Error interno del servidor' });
       }
@@ -122,7 +124,7 @@ export class UserController {
         res.status(400).json({ error: error.message });
       } else if (error instanceof RoleNotFoundError) {
         res.status(404).json({ error: error.message });
-      } else if (error instanceof LastActiveAdministratorError) {
+      } else if (error instanceof LastActiveAdministratorError || error instanceof RoleInactiveError) {
         res.status(409).json({ error: error.message });
       } else {
         res.status(500).json({ error: 'Error interno del servidor' });
@@ -138,7 +140,7 @@ export class UserController {
     } catch (error) {
       if (error instanceof UserNotFoundError) {
         res.status(404).json({ error: error.message });
-      } else if (error instanceof LastActiveAdministratorError) {
+      } else if (error instanceof LastActiveAdministratorError || error instanceof RoleInactiveError) {
         res.status(409).json({ error: error.message });
       } else {
         res.status(500).json({ error: 'Error interno del servidor' });

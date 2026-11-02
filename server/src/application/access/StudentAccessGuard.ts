@@ -4,6 +4,7 @@ import { UserRepository } from '@domain/repositories/UserRepository';
 import { RoleRepository } from '@domain/repositories/RoleRepository';
 import { SchoolRepository } from '@domain/repositories/SchoolRepository';
 import { StudentRepository } from '@domain/repositories/StudentRepository';
+import { UserAccessPolicyRepository } from '@domain/repositories/UserAccessPolicyRepository';
 import { StudentAccessDeniedError, StudentNotFoundError } from '@application/use-cases/students/StudentErrors';
 
 /**
@@ -38,12 +39,30 @@ export class StudentAccessGuard {
     private readonly roles: RoleRepository,
     private readonly schools: SchoolRepository,
     private readonly students: StudentRepository,
+    private readonly accessPolicies?: UserAccessPolicyRepository,
   ) {}
 
   async scopeFor(requesterId: string): Promise<StudentScope> {
     const user = await this.users.findById(requesterId);
     if (!user || user.isActive === false) return { kind: 'NONE' };
     const role = await this.roles.findById(user.roleId);
+    if (!role) return { kind: 'NONE' };
+    const policy = await this.accessPolicies?.findByUserId(requesterId);
+    if (policy) {
+      // Una política anterior no acompaña a la cuenta cuando cambia de rol.
+      if (policy.roleId !== user.roleId || role.permissions.length === 0) return { kind: 'NONE' };
+      switch (policy.kind) {
+        case 'INSTITUTION': return { kind: 'ALL' };
+        case 'OWN': return { kind: 'TUTOR', tutorId: requesterId };
+        case 'SCHOOLS': return { kind: 'SCHOOLS', schoolIds: policy.schoolIds };
+        case 'FACULTIES': {
+          const schools = await this.schools.findAll();
+          return { kind: 'SCHOOLS', schoolIds: schools.filter((school) => policy.facultyIds.includes(school.facultyId)).map((school) => school.id) };
+        }
+        // Un servicio tiene un circuito de derivaciones separado: no hereda expedientes individuales.
+        default: return { kind: 'NONE' };
+      }
+    }
     switch (role?.name) {
       case 'Administrador DBU':
         return { kind: 'ALL' };

@@ -2,7 +2,7 @@ import { UserRepository } from '@domain/repositories/UserRepository';
 import { User } from '@domain/entities/User';
 import { PasswordHasher } from '@application/ports/PasswordHasher';
 import { RoleRepository } from '@domain/repositories/RoleRepository';
-import { RoleNotFoundError } from '@application/use-cases/roles/RoleErrors';
+import { RoleNotFoundError, assertRoleActive } from '@application/use-cases/roles/RoleErrors';
 import { SchoolRepository } from '@domain/repositories/SchoolRepository';
 import { resolveService } from './serviceAssignment';
 import { FacultyRepository } from '@domain/repositories/FacultyRepository';
@@ -39,6 +39,7 @@ export class CreateUserUseCase {
     // 2. El rol manda: un Profesional de Servicio necesita su servicio; los demás roles no tienen
     const role = await this.roles.findById(data.roleId);
     if (!role) throw new RoleNotFoundError(data.roleId);
+    assertRoleActive(role);
     const service = resolveService(role.name, data.service);
     const schoolId = await resolveTutorSchool(this.schools, role.name, data.schoolId);
     const facultyId = await resolveDeanFaculty(this.faculties, role.name, data.facultyId);

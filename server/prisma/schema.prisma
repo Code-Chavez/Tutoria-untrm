@@ -27,6 +27,7 @@ model User {
 
   roleId String @map("role_id")
   role   Role   @relation(fields: [roleId], references: [id])
+  accessPolicy UserAccessPolicy?
 
   // Para el Profesional de Servicio (HU-30), indica a qué servicio pertenece
   service String?
@@ -79,11 +80,32 @@ model Role {
   name        String   @unique
   description String
   createdAt   DateTime @default(now()) @map("created_at")
+  /// Roles base (los sembrados): protegidos; solo se pueden ver y copiar como plantilla.
+  isBase      Boolean  @default(false) @map("is_base")
+  /// Un rol desactivado no concede permisos ni se puede asignar.
+  isActive    Boolean  @default(true) @map("is_active")
 
   users       User[]
+  accessPolicies UserAccessPolicy[]
   permissions RolePermission[]
 
   @@map("roles")
+}
+
+// No se crean políticas para las cuentas históricas: conservan su alcance vigente hasta una asignación explícita.
+model UserAccessPolicy {
+  id         String @id @default(uuid())
+  userId     String @unique @map("user_id")
+  roleId     String @map("role_id")
+  kind       String
+  schoolIds  String[] @default([]) @map("school_ids")
+  facultyIds String[] @default([]) @map("faculty_ids")
+  service    String?
+  revision   Int @default(0)
+  user       User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  role       Role @relation(fields: [roleId], references: [id], onDelete: Restrict)
+
+  @@map("user_access_policies")
 }
 
 model Permission {

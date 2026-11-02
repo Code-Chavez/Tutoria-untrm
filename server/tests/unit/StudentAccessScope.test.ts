@@ -36,6 +36,27 @@ describe('Alcance sobre los tutorados con la política real (A03, Art. 9.a y 14.
   });
 
   describe('scopeFor / scopeCovers', () => {
+    it('un rol nuevo con permisos no hereda acceso individual por tener el mismo permiso de lectura', async () => {
+      w.roles.findById.mockResolvedValue({
+        id: 'custom-role', name: 'Revisor de escuela', description: 'Rol de prueba', createdAt: new Date(),
+        permissions: [{ id: 'read', code: 'students:read', description: 'Consultar estudiantes' }],
+      });
+      expect(await w.guard.scopeFor('tutorA1')).toEqual({ kind: 'NONE' });
+      await expect(w.guard.assertAccess('tutorA1', 'a1')).rejects.toBeInstanceOf(StudentNotFoundError);
+    });
+
+    it('un rol inexistente no deja usar el alcance anterior de la cuenta', async () => {
+      w.roles.findById.mockResolvedValue(null);
+      expect(await w.guard.scopeFor('dbu')).toEqual({ kind: 'NONE' });
+    });
+
+    it('el decano no obtiene acceso individual por su cargo', async () => {
+      w.roles.findById.mockResolvedValue({
+        id: 'dean-role', name: 'Decano', description: 'Rol de prueba', permissions: [], createdAt: new Date(),
+      });
+      expect(await w.guard.scopeFor('dbu')).toEqual({ kind: 'NONE' });
+    });
+
     it.each([
       ['dbu', 'ALL'],
       ['coordA', 'SCHOOLS'],

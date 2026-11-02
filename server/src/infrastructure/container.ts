@@ -1,6 +1,10 @@
 import { prisma } from './database/prisma';
 import { PrismaUserRepository } from './repositories/PrismaUserRepository';
 import { CachedRoleRepository } from '@infrastructure/repositories/CachedRoleRepository';
+import { PrismaRoleAdminRepository } from '@infrastructure/repositories/PrismaRoleAdminRepository';
+import { UpdateRoleUseCase } from '@application/use-cases/roles/UpdateRoleUseCase';
+import { SetRoleActiveUseCase } from '@application/use-cases/roles/SetRoleActiveUseCase';
+import { clearRolePermissionCache } from '@infrastructure/security/rolePermissions';
 import { PrismaRoleRepository } from './repositories/PrismaRoleRepository';
 import { PrismaSignedDocumentRepository } from './repositories/PrismaSignedDocumentRepository';
 import {
@@ -30,6 +34,7 @@ import { PrismaStudentReferralRepository } from './repositories/PrismaStudentRef
 import { PrismaSystemParameterRepository } from './repositories/PrismaSystemParameterRepository';
 import { PrismaSupportContactRepository } from './repositories/PrismaSupportContactRepository';
 import { PrismaSchoolRepository } from './repositories/PrismaSchoolRepository';
+import { PrismaUserAccessPolicyRepository } from './repositories/PrismaUserAccessPolicyRepository';
 import { ImportTutorsUseCase } from '@application/use-cases/users/ImportTutorsUseCase';
 import { GetTutorAcceptanceUseCase, RequestTutorAcceptanceUseCase, RespondTutorAcceptanceUseCase } from '@application/use-cases/cycle-tutors/TutorAcceptanceUseCases';
 import { ExcelTutorParser } from './parsers/ExcelTutorParser';
@@ -103,7 +108,7 @@ const tokenService = new JwtTokenService();
 const evidenceStorage = new LocalEvidenceStorage();
 
 // Política única de alcance sobre los tutorados (Art. 9.a y 14.c): la usan todos los casos de uso que tocan datos de un estudiante.
-const studentAccessGuard = new StudentAccessGuard(userRepository, roleRepository, schoolRepository, studentRepository);
+const studentAccessGuard = new StudentAccessGuard(userRepository, roleRepository, schoolRepository, studentRepository, new PrismaUserAccessPolicyRepository(prisma));
 
 const loginUseCase = new LoginUseCase(
   userRepository,
@@ -346,7 +351,15 @@ const updateUserUseCase = new UpdateUserUseCase(userRepository, roleRepository, 
 const toggleUserStatusUseCase = new ToggleUserStatusUseCase(userRepository);
 const listUsersUseCase = new ListUsersUseCase(userRepository);
 const listRolesUseCase = new ListRolesUseCase(roleRepository);
-const createRoleUseCase = new CreateRoleUseCase(roleRepository);
+// Un cambio de rol rige desde la siguiente petición: se vacían la caché de roles y la de permisos.
+const onRoleChanged = () => {
+  roleRepository.clear();
+  clearRolePermissionCache();
+};
+const roleAdminRepository = new PrismaRoleAdminRepository(prisma);
+const createRoleUseCase = new CreateRoleUseCase(roleRepository, roleAdminRepository, onRoleChanged);
+const updateRoleUseCase = new UpdateRoleUseCase(roleRepository, roleAdminRepository, onRoleChanged);
+const setRoleActiveUseCase = new SetRoleActiveUseCase(roleRepository, roleAdminRepository, onRoleChanged);
 const assignRoleUseCase = new AssignRoleUseCase(userRepository, roleRepository, auditLogRepository, schoolRepository, facultyRepository);
 
 const getProfileUseCase = new GetProfileUseCase(userRepository, roleRepository);
@@ -843,6 +856,8 @@ export const container = {
     listUsersUseCase,
     listRolesUseCase,
     createRoleUseCase,
+    updateRoleUseCase,
+    setRoleActiveUseCase,
     assignRoleUseCase,
     getProfileUseCase,
     updateProfileUseCase,
