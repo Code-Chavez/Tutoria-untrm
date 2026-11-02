@@ -59,3 +59,15 @@ Rama `feat/roles-permissions-api` (sobre N-1 y N-2). **Solo servidor; no hay pan
 Verificación local: `tsc` y `npm run lint` sin errores; 1 257 pruebas unitarias y de integración seleccionadas (`tests/unit` completo, `userAccessPolicy`, `permissionCatalogHttp`) más `roleAdminHttp` (12 pruebas HTTP reales sobre `sit_db_test`: permisos, rol base, `admin:system`, efecto inmediato, desactivar/asignar, bitácora) y `roleCreationAudit`; `authorize` ahora prueba el rol desactivado. No se ejecutó la suite completa del servidor.
 
 **Límites:** sin pantalla ni asignación de alcance (siguientes entregas); un rol base solo se puede copiar (si la DBU necesita ajustar un rol base se decidirá aparte); la lista de permisos no delegables es provisional; la protección del último administrador ya existe para cuentas (#186) y aquí queda garantizada porque `admin:system` solo lo tienen los roles base, que no se pueden modificar.
+
+## Cuarta entrega: alcance por persona (N-4, LEV-R12, API)
+
+Rama `feat/user-access-scope-api`. **Solo servidor; sin migración** (usa `user_access_policies` de N-2).
+
+- `GET /api/users/:id/access` devuelve el rol actual, el alcance guardado (`kind`, `schoolIds`, `facultyIds`, `service`, `revision`), su origen (`STORED`, `DEFAULT` si no se configuró y rige el comportamiento del rol, `OUTDATED` defensivo) y si es configurable. `PUT /api/users/:id/access` lo define: `NONE`, `OWN` (propios), `SCHOOLS`, `FACULTIES`, `INSTITUTION` o `SERVICE`. Ambas exigen `admin:system`.
+- **Reglas:** `SCHOOLS`/`FACULTIES` exigen al menos una escuela/facultad existente y `SERVICE` un servicio válido (400 `ACCESS_SCOPE_INVALID`); los datos que el tipo no usa se descartan; nadie cambia su propio alcance; el tutorado no se amplía y la administración conserva `INSTITUTION` (409 `ACCESS_SCOPE_NOT_CONFIGURABLE`). El alcance solo limita datos, no concede permisos.
+- Al cambiar el rol de una cuenta, la base invalida el alcance (queda en `NONE`, revisión +1) hasta que se defina de nuevo; así un alcance no acompaña a una persona a un rol con más poder.
+- **Bitácora** `USER_ACCESS_UPDATED` en la misma transacción (rol, alcance anterior → nuevo). La revisión sube en cada cambio.
+- El efecto es inmediato: `StudentAccessGuard` lee la política en cada petición, sin caché.
+
+**Límites:** sin pantalla (siguiente entrega); asignar rol y alcance sigue siendo dos llamadas (la pantalla las unirá); no se probó por HTTP que el alcance filtre listados (lo cubren las pruebas de `StudentAccessGuard` de N-2); `SERVICE` hoy no da acceso a expedientes individuales (circuito de derivaciones separado); falta confirmar con la DBU qué roles admiten qué alcance (Q02/Q04/Q06).

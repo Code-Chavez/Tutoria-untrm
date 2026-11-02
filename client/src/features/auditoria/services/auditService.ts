@@ -52,6 +52,7 @@ export const ACTION_LABEL: Record<string, string> = {
   ROLE_CREATED: 'Rol creado',
   ROLE_UPDATED: 'Rol modificado',
   ROLE_ACTIVATED: 'Rol activado',
+  USER_ACCESS_UPDATED: 'Alcance modificado',
   ROLE_DEACTIVATED: 'Rol desactivado',
   CYCLE_TUTOR_DECLINE_NOTICE_RESEND: 'Reenvío del aviso de rechazo',
   CYCLE_TUTOR_DECLINE_NOTICE_RESULT: 'Resultado del aviso de rechazo',

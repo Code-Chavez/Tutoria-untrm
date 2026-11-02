@@ -5,7 +5,7 @@ import { buildWorld, ROLE_OF, STUDENTS } from '../helpers/world';
 
 function build() {
   const world = buildWorld();
-  const policies = { findByUserId: jest.fn<Promise<UserAccessPolicy | null>, [string]>().mockResolvedValue(null) };
+  const policies = { findByUserId: jest.fn<Promise<UserAccessPolicy | null>, [string]>().mockResolvedValue(null), save: jest.fn() };
   const guard = new StudentAccessGuard(world.users, world.roles, world.schools, world.students, policies);
   return { ...world, policies, configuredGuard: guard };
 }

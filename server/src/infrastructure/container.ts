@@ -108,7 +108,8 @@ const tokenService = new JwtTokenService();
 const evidenceStorage = new LocalEvidenceStorage();
 
 // Política única de alcance sobre los tutorados (Art. 9.a y 14.c): la usan todos los casos de uso que tocan datos de un estudiante.
-const studentAccessGuard = new StudentAccessGuard(userRepository, roleRepository, schoolRepository, studentRepository, new PrismaUserAccessPolicyRepository(prisma));
+const userAccessPolicyRepository = new PrismaUserAccessPolicyRepository(prisma);
+const studentAccessGuard = new StudentAccessGuard(userRepository, roleRepository, schoolRepository, studentRepository, userAccessPolicyRepository);
 
 const loginUseCase = new LoginUseCase(
   userRepository,
@@ -225,6 +226,7 @@ import { ListUsersUseCase } from '@application/use-cases/users/ListUsersUseCase'
 import { ListRolesUseCase } from '@application/use-cases/roles/ListRolesUseCase';
 import { CreateRoleUseCase } from '@application/use-cases/roles/CreateRoleUseCase';
 import { AssignRoleUseCase } from '@application/use-cases/roles/AssignRoleUseCase';
+import { GetUserAccessUseCase, SetUserAccessUseCase } from '@application/use-cases/users/UserAccessScopeUseCases';
 import { GetProfileUseCase } from '@application/use-cases/profile/GetProfileUseCase';
 import { UpdateProfileUseCase } from '@application/use-cases/profile/UpdateProfileUseCase';
 import { ChangePasswordUseCase } from '@application/use-cases/profile/ChangePasswordUseCase';
@@ -361,6 +363,9 @@ const createRoleUseCase = new CreateRoleUseCase(roleRepository, roleAdminReposit
 const updateRoleUseCase = new UpdateRoleUseCase(roleRepository, roleAdminRepository, onRoleChanged);
 const setRoleActiveUseCase = new SetRoleActiveUseCase(roleRepository, roleAdminRepository, onRoleChanged);
 const assignRoleUseCase = new AssignRoleUseCase(userRepository, roleRepository, auditLogRepository, schoolRepository, facultyRepository);
+
+const getUserAccessUseCase = new GetUserAccessUseCase(userRepository, roleRepository, userAccessPolicyRepository);
+const setUserAccessUseCase = new SetUserAccessUseCase(userRepository, roleRepository, schoolRepository, facultyRepository, userAccessPolicyRepository);
 
 const getProfileUseCase = new GetProfileUseCase(userRepository, roleRepository);
 const updateProfileUseCase = new UpdateProfileUseCase(userRepository, roleRepository);
@@ -859,6 +864,8 @@ export const container = {
     updateRoleUseCase,
     setRoleActiveUseCase,
     assignRoleUseCase,
+    getUserAccessUseCase,
+    setUserAccessUseCase,
     getProfileUseCase,
     updateProfileUseCase,
     changePasswordUseCase,
