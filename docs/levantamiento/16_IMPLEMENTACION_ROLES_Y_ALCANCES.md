@@ -71,3 +71,17 @@ Rama `feat/user-access-scope-api`. **Solo servidor; sin migración** (usa `user_
 - El efecto es inmediato: `StudentAccessGuard` lee la política en cada petición, sin caché.
 
 **Límites:** sin pantalla (siguiente entrega); asignar rol y alcance sigue siendo dos llamadas (la pantalla las unirá); no se probó por HTTP que el alcance filtre listados (lo cubren las pruebas de `StudentAccessGuard` de N-2); `SERVICE` hoy no da acceso a expedientes individuales (circuito de derivaciones separado); falta confirmar con la DBU qué roles admiten qué alcance (Q02/Q04/Q06).
+
+## Quinta entrega: pantalla «Roles y permisos» (N-5, LEV-R11, cliente)
+
+Rama `feat/roles-permissions-screen`. Solo cliente, sin cambios de servidor. Ruta `/roles` (pestaña «Roles y permisos» en Configuración, solo `Administrador DBU`).
+
+- Lista de roles con su condición (Base / Personalizado / Desactivado), cuentas y permisos. Al elegir uno se ven sus permisos agrupados por área, con el código de cada uno.
+- **Roles base:** solo lectura (casillas bloqueadas) y el botón «Crear a partir de este rol»; el sistema restablece sus permisos, por eso no se editan.
+- **Rol personalizado:** editar descripción y permisos («Guardar cambios» solo con cambios), copiar, desactivar (confirmación; bloqueado con cuentas, con el motivo a la vista) y activar.
+- **Nuevo rol** (vacío o copiando otro): nombre y descripción obligatorios; `admin:system` aparece bloqueado y no se envía (no delegable). Los errores del servidor se muestran tal cual.
+- Los cambios invalidan las consultas de roles y usuarios.
+
+Verificación local: `tsc`, `eslint` y 71 pruebas de cliente (`features/admin` y `layout`, incluida la nueva `RolesPage.test.tsx` con 7). **No se revisó en navegador contra el servidor** (la pila Docker del usuario monta otra rama).
+
+**Límites:** el formulario de usuarios aún no filtra roles desactivados (el servidor los rechaza con 409); la asignación de rol y alcance por persona llega en la entrega siguiente; el menú por permisos, después.

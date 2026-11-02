@@ -30,6 +30,7 @@ const SETTINGS_NAV = {
   '/evaluacion/configuracion': { icon: CalendarIcon, description: 'Abrir o cerrar la evaluación por escuela' },
   '/catalogos': { icon: ClipboardIcon, description: 'Configurar facultades, escuelas y periodos' },
   '/users': { icon: UsersIcon, description: 'Gestionar cuentas, roles y accesos' },
+  '/roles': { icon: UsersIcon, description: 'Crear roles y elegir sus permisos' },
   '/parametros': { icon: SlidersIcon, description: 'Ajustar las reglas generales del sistema' },
   '/identidad': { icon: PaletteIcon, description: 'Personalizar la identidad visual' },
   '/auditoria': { icon: ActivityIcon, description: 'Consultar las acciones registradas' },
@@ -84,7 +85,7 @@ export function SectionShell({ section }: { section: SectionKey }) {
     const groups = section === 'periodo'
       ? [{ label: 'Organización', items: organization }, { label: 'Seguimiento y cierre', items: followUp }]
       : [{ label: 'Organización', items: tabs.filter((tab) => ['/correos-escuelas', '/sedes', '/catalogos', '/evaluacion/configuracion'].includes(tab.path)) },
-         { label: 'Sistema y acceso', items: tabs.filter((tab) => ['/users', '/parametros', '/identidad', '/auditoria'].includes(tab.path)) }];
+         { label: 'Sistema y acceso', items: tabs.filter((tab) => ['/users', '/roles', '/parametros', '/identidad', '/auditoria'].includes(tab.path)) }];
     const selectorId = section === 'periodo' ? 'period-task' : 'settings-task';
     return <div className={section === 'configuracion' ? styles.period + ' ' + styles.settings : styles.period} data-section={SECTIONS[section].title} data-tabs={tabs.map((tab) => tab.label).join('|')}>
       <div className={styles.mobilePeriodNav}>

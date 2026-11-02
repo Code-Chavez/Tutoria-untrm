@@ -53,6 +53,7 @@ export const SECTIONS: Record<'periodo' | 'informes' | 'configuracion', Section>
       { label: 'Evaluación de tutoría', path: '/evaluacion/configuracion', roles: ['dbu'] },
       { label: 'Catálogos', path: '/catalogos', roles: ['dbu'] },
       { label: 'Usuarios y roles', path: '/users', roles: ['dbu'] },
+      { label: 'Roles y permisos', path: '/roles', roles: ['dbu'] },
       { label: 'Parámetros', path: '/parametros', roles: ['dbu'] },
       { label: 'Identidad visual', path: '/identidad', roles: ['dbu'] },
       { label: 'Bitácora de auditoría', path: '/auditoria', roles: ['dbu'] },
