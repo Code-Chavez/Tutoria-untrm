@@ -1,0 +1,35 @@
+
+ RUN  v4.1.10 C:/tmp/wt-imp3-docs/client
+
+ ✓ src/features/pedidos/pages/DataRequestPage.test.tsx (28 tests) 27870ms
+     ✓ la coordinación solo ve sus escuelas, con el correo al que se pedirá  900ms
+     ✓ envía el pedido con los ciclos marcados y las observaciones, y confirma a quién salió  4181ms
+     ✓ marca todos por defecto y envía explícitamente los diez ciclos  1173ms
+     ✓ lee los ciclos de cada escuela y reinicia la selección al cambiarla  1458ms
+     ✓ sin selección impide enviar y permite recuperar todos los ciclos  1726ms
+     ✓ si el correo no sale lo dice como error, explica la causa y el siguiente paso, y el pedido queda registrado  1175ms
+     ✓ si el correo no sale sin una causa conocida, da un mensaje general y el siguiente paso, sin nombres internos  3525ms
+     ✓ un resultado incierto solo dice que no se sabe si el correo salió y no recomienda reenviar ni otra vía, aunque llegue un texto de causa  1029ms
+     ✓ sin correo configurado solo avisa y ofrece un botón que lleva a configurarlo; no deja enviar  853ms
+     ✓ con el correo configurado lo muestra y «Editar correo» lleva a la configuración (aquí no se edita)  496ms
+     ✓ muestra el historial y permite marcar como recibido un pedido enviado  570ms
+       ✓ mientras envía, el botón queda deshabilitado y un segundo clic no envía otra vez  588ms
+       ✓ si se pierde la respuesta, reintentar lo mismo conserva el identificador; tras un resultado, el siguiente pedido usa otro  730ms
+       ✓ si cambia lo que se envía después de un fallo sin respuesta, es otra operación y usa otro identificador  1035ms
+       ✓ ante la advertencia de equivalencia identifica el pedido anterior; confirmar lo reenvía como operación nueva citando ese pedido  549ms
+       ✓ si mientras el diálogo estaba abierto se registró otro equivalente, la confirmación no vale: se muestra el nuevo pedido  702ms
+       ✓ confirmar el equivalente: mientras la petición sigue pendiente no se puede confirmar otra vez ni cerrar con Escape, y el diálogo se cierra solo cuando termina  1152ms
+       ✓ cancelar el diálogo no envía nada  643ms
+       ✓ un envío equivalente en curso no ofrece confirmar: avisa que hay que esperar su resultado  433ms
+       ✓ un identificador reutilizado con otros datos (422) muestra el mensaje y la siguiente operación usa otro identificador  975ms
+       ✓ una repetición lo dice y un resultado incierto no se presenta como enviado  765ms
+       ✓ el historial distingue enviándose y envío incierto, sin ofrecer marcarlos como recibidos  430ms
+     ✓ si llega desde la carga de docentes, la DBU ya tiene elegida la lista de docentes tutores  323ms
+     ✓ U13: al pedir docentes cambian título, plantilla, destino y siguientes pasos; al volver a estudiantes, también  1623ms
+
+ Test Files  1 passed (1)
+      Tests  28 passed (28)
+   Start at  14:38:04
+   Duration  52.01s (transform 3.14s, setup 3.49s, import 6.98s, tests 27.87s, environment 11.66s)
+
+JSON report written to <carpeta-de-resultados>/dev-stress4-1.json

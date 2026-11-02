@@ -1,0 +1,28 @@
+
+ RUN  v4.1.10 C:/tmp/wt-imp3-docs/client
+
+⎯⎯⎯⎯⎯⎯ Unhandled Errors ⎯⎯⎯⎯⎯⎯
+
+Vitest caught 1 unhandled error during the test run.
+This might cause false positive tests. Resolve unhandled errors to make sure your tests are not affected.
+
+⎯⎯⎯⎯⎯⎯ Unhandled Error ⎯⎯⎯⎯⎯⎯⎯
+Error: [vitest-pool]: Failed to start forks worker for test files C:/tmp/wt-imp3-docs/client/src/features/pedidos/pages/DataRequestPage.test.tsx.
+ ❯ ../../../Proyects/Proyects/Tutoria-untrm/client/node_modules/.pnpm/vitest@4.1.10_@vitest+coverage-v8@4.1.10_jsdom@29.1.1_vite@6.4.3/node_modules/vitest/dist/chunks/cli-api.BK8pd4xc.js:3465:94
+ ❯ Pool.schedule ../../../Proyects/Proyects/Tutoria-untrm/client/node_modules/.pnpm/vitest@4.1.10_@vitest+coverage-v8@4.1.10_jsdom@29.1.1_vite@6.4.3/node_modules/vitest/dist/chunks/cli-api.BK8pd4xc.js:3465:5
+
+Caused by: Error: [vitest-pool-runner]: Timeout waiting for worker to respond
+ ❯ Timeout.<anonymous> ../../../Proyects/Proyects/Tutoria-untrm/client/node_modules/.pnpm/vitest@4.1.10_@vitest+coverage-v8@4.1.10_jsdom@29.1.1_vite@6.4.3/node_modules/vitest/dist/chunks/cli-api.BK8pd4xc.js:3041:58
+ ❯ listOnTimeout node:internal/timers:588:17
+ ❯ processTimers node:internal/timers:523:7
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯
+
+
+ Test Files  no tests
+      Tests  no tests
+     Errors  1 error
+   Start at  14:47:28
+   Duration  60.45s (transform 0ms, setup 0ms, import 0ms, tests 0ms, environment 0ms)
+
+JSON report written to <carpeta-de-resultados>/dev-stress4-4.json

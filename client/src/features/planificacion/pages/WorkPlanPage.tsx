@@ -209,7 +209,6 @@ function WorkPlanEditor({ schoolId, plan }: { schoolId: string; plan: WorkPlan |
     setForm((f) => ({ ...f, [table]: f[table].filter((_, idx) => idx !== i) }));
 
   const handleSave = async () => {
-    setConfirmRevision(false);
     setMessage(null);
     try {
       await save.mutateAsync(toContent(form));
@@ -221,6 +220,9 @@ function WorkPlanEditor({ schoolId, plan }: { schoolId: string; plan: WorkPlan |
       });
     } catch (err) {
       setMessage({ type: 'error', text: getApiErrorMessage(err) });
+    } finally {
+      // El diálogo de confirmación se cierra al terminar (no al confirmar): mientras se guarda queda ocupado y conserva el foco.
+      setConfirmRevision(false);
     }
   };
 

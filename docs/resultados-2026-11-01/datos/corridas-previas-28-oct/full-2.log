@@ -1,0 +1,3469 @@
+
+ RUN  v4.1.10 C:/Proyects/Proyects/Tutoria-untrm/client
+
+ ❯ src/scratch-drp/profile.test.tsx (0 test)
+ ❯ src/features/entrevistas/components/InterviewFormModal.test.tsx (4 tests | 4 failed) 11731ms
+     × exige al menos un motivo antes de avanzar 5243ms
+     × recorre el flujo completo y confirma con el usuario autenticado 5058ms
+     × exige apellidos, vínculo y celular si se empieza a llenar la red de apoyo 979ms
+     × envía el contacto de red de apoyo cuando se completa 424ms
+stderr | src/features/pedidos/pages/DataRequestPage.test.tsx > DataRequestPage (pedido de listas por correo) > sin selección impide enviar y permite recuperar todos los ciclos
+An update to DataRequestPage inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+ ❯ src/features/planificacion/pages/WorkPlanPage.test.tsx (3 tests | 2 failed) 12962ms
+     ✓ avisa si el usuario no tiene escuelas asignadas  660ms
+     × con una sola escuela la carga sola y envía el plan con filas limpias 5689ms
+     × editar un plan aprobado pide confirmar y lo guarda como nueva revisión (A12) 6548ms
+ ❯ src/features/tutorados/components/GroupSessionFormModal.test.tsx (5 tests | 4 failed) 24950ms
+     ✓ exige fecha, hora y tema antes de validar la selección  3614ms
+     × exige al menos dos estudiantes seleccionados 5490ms
+     × exige el lugar de una sesión grupal presencial (por defecto) 5373ms
+     × confirma con dos o más estudiantes seleccionados y el lugar (presencial) 5268ms
+     × confirma con el enlace de videollamada al elegir modalidad virtual 5043ms
+ ❯ src/features/ciclos/pages/CycleTutorsPage.test.tsx (9 tests | 3 failed) 27555ms
+     × ofrece solo los docentes de la escuela y asigna al elegido 5135ms
+     ✓ abre la ayuda en un diálogo y devuelve el foco al cerrarlo con Escape  1208ms
+     ✓ permite descartar una selección sin modificar las asignaciones  2472ms
+     ✓ prioriza ciclos con estudiantes y permite consultar los vacíos y las vistas sin resultados  4823ms
+     × si el docente ya tiene otro ciclo pide el motivo y registra la excepción 5020ms
+     × registra un motivo sugerido sin exigir texto y descarta el texto de Otro al cambiar de motivo 2783ms
+     ✓ muestra un ciclo con tutor como excepción y permite quitarlo  2677ms
+     ✓ muestra si el docente aceptó (con su disponibilidad), rechazó (con su motivo) o está pendiente, y permite reenviar el correo  2376ms
+     ✓ muestra primero los ciclos sin tutor (con estudiantes), luego los rechazados, y al final los ya resueltos  990ms
+stderr | src/features/evaluacion/pages/EvaluationPage.test.tsx > EvaluationPage > escala y avance (U08, U07) > lo respondido y lo escrito se conserva al volver, y se puede descartar
+An update to EvaluationPage inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+ ❯ src/features/pedidos/pages/DataRequestPage.test.tsx (25 tests | 2 failed) 41493ms
+     ✓ la coordinación solo ve sus escuelas, con el correo al que se pedirá  3034ms
+     ✓ la DBU ve todas las escuelas  889ms
+     × envía el pedido con los ciclos marcados y las observaciones, y confirma a quién salió 5444ms
+     ✓ marca todos por defecto y envía explícitamente los diez ciclos  2453ms
+     × lee los ciclos de cada escuela y reinicia la selección al cambiarla 5842ms
+     ✓ sin selección impide enviar y permite recuperar todos los ciclos  2775ms
+     ✓ si el correo no sale lo dice como error pero el pedido queda registrado  1230ms
+     ✓ sin correo configurado solo avisa y ofrece un botón que lleva a configurarlo; no deja enviar  1181ms
+     ✓ con el correo configurado lo muestra y «Editar correo» lleva a la configuración (aquí no se edita)  919ms
+     ✓ muestra el historial y permite marcar como recibido un pedido enviado  1075ms
+       ✓ mientras envía, el botón queda deshabilitado y un segundo clic no envía otra vez  1512ms
+       ✓ si se pierde la respuesta, reintentar lo mismo conserva el identificador; tras un resultado, el siguiente pedido usa otro  1752ms
+       ✓ si cambia lo que se envía después de un fallo sin respuesta, es otra operación y usa otro identificador  2612ms
+       ✓ ante la advertencia de equivalencia identifica el pedido anterior; confirmar lo reenvía como operación nueva citando ese pedido  1332ms
+       ✓ si mientras el diálogo estaba abierto se registró otro equivalente, la confirmación no vale: se muestra el nuevo pedido  1639ms
+       ✓ cancelar el diálogo no envía nada  783ms
+       ✓ un envío equivalente en curso no ofrece confirmar: avisa que hay que esperar su resultado  977ms
+       ✓ un identificador reutilizado con otros datos (422) muestra el mensaje y la siguiente operación usa otro identificador  1152ms
+       ✓ una repetición lo dice y un resultado incierto no se presenta como enviado  1092ms
+       ✓ el historial distingue enviándose y envío incierto, sin ofrecer marcarlos como recibidos  405ms
+     ✓ si llega desde la carga de docentes, la DBU ya tiene elegida la lista de docentes tutores 213ms
+     ✓ U13: al pedir docentes cambian título, plantilla, destino y siguientes pasos; al volver a estudiantes, también  1410ms
+     ✓ el historial dice de qué lista es cada pedido  454ms
+     ✓ la lista de estudiantes es la de siempre, y la coordinación ni siquiera ve la opción de docentes  335ms
+     ✓ una coordinación que llega con ?lista=docentes sigue pidiendo estudiantes, sin selector  961ms
+stderr | src/features/solicitudes/pages/TutoringRequestsInboxPage.test.tsx > TutoringRequestsInboxPage (R01) > lo pendiente primero y a la vista (U04, U09) > busca por estudiante, código o motivo sin importar tildes
+An update to TutoringRequestsInboxPage inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+ ❯ src/features/evaluacion/pages/EvaluationPage.test.tsx (9 tests | 1 failed) 68643ms
+     ✓ muestra que la evaluación no está disponible si no hay periodo o tutor  642ms
+     ✓ muestra que ya se respondió el cuestionario del periodo 67ms
+     ✓ exige responder los 20 ítems antes de enviar  3956ms
+     × envía el cuestionario completo con los campos abiertos 20121ms
+       ✓ la leyenda de la escala está ANTES de la primera pregunta, con el nombre completo de cada opción  1216ms
+       ✓ cada opción dice su nombre completo, no solo la sigla  4603ms
+       ✓ lo respondido y lo escrito se conserva al volver, y se puede descartar  12525ms
+       ✓ al enviar no queda borrador  14311ms
+       ✓ «Ir a la primera que falta» lleva a la siguiente pregunta sin responder, sin perder lo respondido  10999ms
+ ❯ src/features/solicitudes/pages/TutoringRequestsInboxPage.test.tsx (22 tests | 1 failed) 36507ms
+     ✓ lista las solicitudes con tutorado, tipo, motivo, destinatario y estado  2011ms
+     ✓ el filtro por estado cambia la vista sin volver a consultar (se trae todo una vez)  1543ms
+     ✓ pasa la solicitud a en atención  2388ms
+     ✓ atenderla exige la respuesta y luego la envía  2569ms
+     ✓ una solicitud atendida se consulta (con la respuesta) pero no se vuelve a modificar  1025ms
+     ✓ sin solicitudes explica qué verás aquí 148ms
+     ✓ con ?solicitud=<id> (desde un aviso) abre esa solicitud 204ms
+     ✓ si la solicitud del aviso ya no está disponible, lo explica 176ms
+       ✓ si cierra la ventana sin querer, al volver a abrir la solicitud recupera lo escrito  2199ms
+       ✓ al guardar la respuesta no queda borrador  1237ms
+       ✓ el docente tutor ve «Programar sesión» y «Derivar a un servicio»; quien no programa ni deriva, no  1763ms
+       ✓ programar la sesión parte de la solicitud: tutorado y motivo ya vienen, y la sesión se crea vinculada a ella  4052ms
+       ✓ derivar parte de la solicitud: el motivo ya viene y la derivación se crea vinculada a ella  2661ms
+       × si el servidor la rechaza (p. ej. ya tiene sesión), el formulario sigue abierto y dice por qué 5173ms
+       ✓ una solicitud ya vinculada lo dice en la tabla y en el detalle, y no ofrece crear otra atención  714ms
+     ✓ con la cita cancelada la solicitud lo dice y vuelve a ofrecer programar otra sesión o derivar  1244ms
+       ✓ abre en «Por atender»: la pendiente más antigua primero, con cuánto lleva esperando, y las atendidas recientes no la tapan  912ms
+       ✓ cada vista muestra cuántas hay  961ms
+       ✓ con ?estado=pendientes (un contador del inicio) abre ya filtrada; un valor desconocido cae en «Por atender»  1292ms
+       ✓ busca por estudiante, código o motivo sin importar tildes  2840ms
+       ✓ si no hay nada por atender lo dice y ofrece ver todas, en vez de una pantalla vacía sin explicación  729ms
+       ✓ un aviso abre su solicitud aunque ya esté atendida y fuera de la vista actual; cerrar conserva el filtro  609ms
+stderr | src/features/solicitudes/pages/MyTutoringRequestPage.test.tsx > MyTutoringRequestPage > exige describir el motivo antes de enviar
+Query data cannot be undefined. Please make sure to return a value other than undefined from your query function. Affected query key: ["tutoringRequests","recipient"]
+
+stderr | src/features/solicitudes/pages/MyTutoringRequestPage.test.tsx > MyTutoringRequestPage > registra la solicitud y muestra a quién se enrutó
+Query data cannot be undefined. Please make sure to return a value other than undefined from your query function. Affected query key: ["tutoringRequests","recipient"]
+
+stderr | src/features/pendientes/pages/PendingPage.test.tsx > PendingPage (pendientes institucionales) > aviso por correo del rechazo (LEV-R05) > dos clics seguidos (antes de que la pantalla se redibuje) no envían dos veces
+An update to PendingPage inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+An update to PendingPage inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+An update to PendingPage inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+ ✓ src/features/pendientes/pages/PendingPage.test.tsx (22 tests) 21026ms
+     ✓ sin pendientes lo dice con claridad  541ms
+     ✓ muestra qué pasó, dónde, desde cuándo y a dónde ir a resolverlo  1307ms
+     ✓ se puede filtrar por tipo y los conteos salen de lo que hay  3035ms
+     ✓ combina búsqueda sin tildes y escuela, informa sin coincidencias y permite limpiar  2640ms
+       ✓ FALLIDO: dice solo lo que se sabe del envío  365ms
+       ✓ INCIERTO: dice solo lo que se sabe del envío  551ms
+       ✓ SIN_REGISTRO: dice solo lo que se sabe del envío  580ms
+       ✓ un FALLIDO se reenvía con un clic, con identidad de operación; el rechazo no cambia y el mensaje no promete más de lo aceptado  1398ms
+       ✓ si se pierde la respuesta, reintentar conserva el identificador; tras una respuesta definitiva, el siguiente reenvío usa otro  2778ms
+       ✓ un resultado incierto abre un diálogo que identifica el intento anterior; confirmar reenvía confirmando ESE intento; cancelar no envía  2284ms
+       ✓ un rechazo sin registro previo se confirma como «sin registro» (attemptId nulo)  831ms
+       ✓ si el intento mostrado ya no es el último, el servidor responde con el actual y la confirmación antigua no vale  1143ms
+       ✓ un envío en curso o un aviso ya aceptado muestran el mensaje del servidor, sin diálogo  921ms
+       ✓ dos clics seguidos (antes de que la pantalla se redibuje) no envían dos veces  1227ms
+stderr | src/features/solicitudes/pages/MyTutoringRequestPage.test.tsx > MyTutoringRequestPage > borrador: no se pierde lo escrito (U07) > al volver a la pantalla recupera lo que había escrito y lo avisa; descartar lo borra
+Query data cannot be undefined. Please make sure to return a value other than undefined from your query function. Affected query key: ["tutoringRequests","recipient"]
+
+ ✓ src/features/catalogos/pages/CatalogsPage.test.tsx (9 tests) 19418ms
+     ✓ lista la facultad con su estado y cuántos registros la usan  777ms
+     ✓ no deja eliminar lo que está en uso, pero sí lo que no  2623ms
+     ✓ elimina tras confirmar  2963ms
+     ✓ activa y desactiva sin pasar por el formulario  950ms
+     ✓ crea una facultad nueva  2673ms
+     ✓ muestra el error de la API (p. ej. duplicado) sin cerrar el formulario  1985ms
+     ✓ en los ciclos el código se pide al crear y no se puede editar después  1890ms
+     ✓ los botones de alta respetan el género de cada catálogo (UI-08)  1711ms
+     ✓ permite configurar la cantidad de ciclos al editar una escuela  3694ms
+stderr | src/features/solicitudes/pages/MyTutoringRequestPage.test.tsx > MyTutoringRequestPage > borrador: no se pierde lo escrito (U07) > al volver a la pantalla recupera lo que había escrito y lo avisa; descartar lo borra
+Query data cannot be undefined. Please make sure to return a value other than undefined from your query function. Affected query key: ["tutoringRequests","recipient"]
+
+stderr | src/features/solicitudes/pages/MyTutoringRequestPage.test.tsx > MyTutoringRequestPage > borrador: no se pierde lo escrito (U07) > el borrador es de esa persona: otra cuenta en la misma pestaña no lo ve
+Query data cannot be undefined. Please make sure to return a value other than undefined from your query function. Affected query key: ["tutoringRequests","recipient"]
+
+stderr | src/features/solicitudes/pages/MyTutoringRequestPage.test.tsx > MyTutoringRequestPage > borrador: no se pierde lo escrito (U07) > el borrador es de esa persona: otra cuenta en la misma pestaña no lo ve
+Query data cannot be undefined. Please make sure to return a value other than undefined from your query function. Affected query key: ["tutoringRequests","recipient"]
+
+stderr | src/features/solicitudes/pages/MyTutoringRequestPage.test.tsx > MyTutoringRequestPage > borrador: no se pierde lo escrito (U07) > al enviar con éxito no queda borrador
+Query data cannot be undefined. Please make sure to return a value other than undefined from your query function. Affected query key: ["tutoringRequests","recipient"]
+
+ ❯ src/features/auth/components/LoginPage.test.tsx (7 tests | 2 failed) 24224ms
+     × envía las credenciales ingresadas al servicio de autenticación 5150ms
+     × redirige al panel principal tras un login exitoso 2576ms
+     ✓ persiste la sesión para sobrevivir a una recarga  3257ms
+     ✓ muestra el mensaje de error que devuelve la API  3765ms
+     ✓ no deja la sesión iniciada cuando el login falla  3991ms
+     ✓ alterna la visibilidad de la contraseña sin perder lo escrito  1343ms
+     ✓ deshabilita el botón mientras la petición está en curso  4078ms
+ ❯ src/features/solicitudes/pages/MyTutoringRequestPage.test.tsx (23 tests | 1 failed) 30630ms
+     ✓ exige describir el motivo antes de enviar  1805ms
+     ✓ registra la solicitud y muestra a quién se enrutó  3455ms
+       × al volver a la pantalla recupera lo que había escrito y lo avisa; descartar lo borra 5218ms
+       ✓ el borrador es de esa persona: otra cuenta en la misma pestaña no lo ve  1252ms
+       ✓ al enviar con éxito no queda borrador  2512ms
+       ✓ antes de enviar dice quién la recibirá, con su nombre  649ms
+       ✓ sin tutor explica quién la recibe y no deja al estudiante sin saber qué hacer 170ms
+       ✓ sin nadie que pueda recibirla lo dice, no promete atención, no deja enviar y conserva lo escrito  4473ms
+       ✓ después de enviar nombra a quien la recibió  2502ms
+     ✓ muestra el historial con el estado y la respuesta recibida (R01)  386ms
+       ✓ cita vigente: fecha y lugar, y enlace a «Mis sesiones» 290ms
+       ✓ cita cancelada: lo dice, que la solicitud sigue abierta y qué esperar (sin plazos ni pedirla de nuevo) 146ms
+       ✓ nueva cita que reemplaza a una cancelada: lo dice con la fecha nueva 207ms
+       ✓ no muestra notas ni datos reservados de la sesión 131ms
+     ✓ sin solicitudes lo dice 141ms
+       ✓ muestra quién solicita 55ms
+       ✓ ofrece frases de ejemplo según el motivo y las inserta en el cuadro, editables  2158ms
+       ✓ al cambiar el motivo cambian los ejemplos  917ms
+       ✓ si ya hay texto, el ejemplo se agrega en otra línea sin borrar lo escrito  1642ms
+       ✓ un ejemplo solo no basta para enviar: hay que completarlo (no manda texto prellenado sin querer)  541ms
+       ✓ explica que no se puede solicitar y deshabilita el formulario, pero deja ver el historial  726ms
+       ✓ sin figurar en la carga del periodo vigente: explica, deshabilita y deja ver el historial  926ms
+       ✓ con el periodo abierto el formulario funciona normalmente 287ms
+ ❯ src/features/tutorados/components/SessionFormModal.test.tsx (6 tests | 3 failed) 23213ms
+     ✓ dice lo que de verdad pasa con el aviso: lo recibe quien tiene cuenta del portal, y a quien no se le avisa por otro medio (U06)  1195ms
+     ✓ exige fecha y hora antes de confirmar  3506ms
+     ✓ exige el tema antes de confirmar  3071ms
+     × exige el lugar en una sesión presencial (por defecto) 5239ms
+     × confirma con la fecha/hora combinadas en ISO y el lugar (presencial) 5021ms
+     × confirma con el enlace de videollamada al elegir modalidad virtual 5137ms
+ ❯ src/features/derivaciones/components/ReferralFormModal.test.tsx (5 tests | 2 failed) 17504ms
+     ✓ exige marcar al menos un aspecto antes de confirmar  1946ms
+     ✓ exige el motivo antes de confirmar  1377ms
+     ✓ pre-selecciona y envía el servicio sugerido automáticamente (HU-29)  3943ms
+     × envía el checklist, motivo y servicio elegidos 5042ms
+     × permite desmarcar un aspecto ya marcado 5117ms
+ ✓ src/features/derivaciones/pages/ReferralsPage.test.tsx (10 tests) 16800ms
+     ✓ con ?caso=<id> abre el detalle de ese caso  1613ms
+     ✓ si el caso ya no está disponible para la cuenta, lo explica en vez de quedar en silencio  1967ms
+     ✓ abre en «Pendientes»: primero lo que falta por recibir, sin los cerrados ni los atendidos  2639ms
+     ✓ «Por recibir: 1» del inicio abre solo ese caso, y el contador de la bandeja coincide  1120ms
+     ✓ cada contador del inicio tiene su vista: en trámite, atendidos, cerrados y abiertas  2958ms
+     ✓ se cambia de vista con los botones, quitando el filtro se ven todos y los cerrados quedan al final  1995ms
+     ✓ busca por estudiante, código o servicio, y avisa si nada coincide  2916ms
+     ✓ si no hay pendientes lo dice y ofrece ver todos; un caso de un aviso abre aunque esté cerrado y fuera de la vista  1069ms
+ ❯ src/features/seguimiento/components/FollowUpFormModal.test.tsx (5 tests | 1 failed) 18745ms
+     ✓ exige motivo antes de confirmar  1711ms
+     ✓ exige acuerdos antes de confirmar  2140ms
+     ✓ confirma sin datos de docente cuando el acuerdo es con el propio tutorado  4658ms
+     ✓ exige nombre, curso y ciclo cuando el acuerdo es con un docente  4812ms
+     × envía los datos del docente cuando se completan 5360ms
+ ✓ src/features/informes/pages/ConsolidatedReportPage.test.tsx (5 tests) 13054ms
+     ✓ muestra escuelas, subtotal por facultad y total general  3024ms
+     ✓ al combinar semestre, facultad y ciclo consulta con todos los filtros, sin recargar  3720ms
+     ✓ "Limpiar filtros" restablece todos los controles  2521ms
+     ✓ las exportaciones reutilizan los filtros elegidos  1980ms
+     ✓ exporta a Excel y PDF con los filtros vigentes  1748ms
+ ✓ src/features/tutorados/components/TutoringRequestModal.test.tsx (4 tests) 12602ms
+     ✓ exige motivo antes de confirmar  1846ms
+     ✓ confirma con el origen "estudiante" por defecto  2346ms
+     ✓ exige nombre y curso cuando el origen es docente de asignatura  3401ms
+     ✓ envía los datos del docente cuando se completan  4949ms
+ ✓ src/features/sesiones/components/SessionDetailModal.test.tsx (22 tests) 11681ms
+     ✓ enlaza la sesión virtual solo si el enlace es http(s)  2209ms
+     ✓ no permite registrar asistencia antes de que empiece la sesión  706ms
+     ✓ permite registrar asistencia de una sesión ya realizada sin registro previo  986ms
+     ✓ muestra la asistencia ya confirmada sin botón de registro  300ms
+     ✓ oculta el registro de asistencia cuando se alcanzó el máximo de 8  318ms
+     ✓ permite reprogramar y cancelar una sesión próxima o en curso  915ms
+     ✓ no permite reprogramar ni cancelar una sesión ya realizada  705ms
+     ✓ permite adjuntar una nueva evidencia  431ms
+     ✓ descarga una evidencia al hacer clic en su nombre  579ms
+       ✓ en una sesión grupal ya iniciada permite marcar quiénes asistieron y guardarlo  1038ms
+       ✓ muestra lo ya registrado y permite corregirlo  759ms
+       ✓ antes de que empiece la sesión grupal no se pasa lista  483ms
+       ✓ en una individual sin asistencia se puede marcar la inasistencia  425ms
+       ✓ con la asistencia confirmada la sesión figura como «Realizada»  407ms
+ ✓ src/shared/components/layout/Sidebar.test.tsx (11 tests) 11973ms
+     ✓ ningún acceso queda como «Próx.» sin destino  1044ms
+     ✓ el tutor llega a entrevista, seguimiento y derivación eligiendo al tutorado  2410ms
+     ✓ solo el acceso de la acción actual queda marcado, no «Tutorados»  820ms
+     ✓ el tutorado tiene su agenda en «Mis sesiones»  314ms
+     ✓ el coordinador no ve «Casos derivados» (no tiene visibilidad de casos individuales)  677ms
+       ✓ «Periodo académico», «Informes» y «Configuración» son una sola entrada cada una (las pestañas están dentro de la sección)  1038ms
+       ✓ estando en una pestaña, la entrada de su sección queda marcada  677ms
+       ✓ «Configuración» no tiene título de grupo (es una entrada suelta) y quien no configura nada no la ve  858ms
+       ✓ los grupos de trabajo parten abiertos y se pliegan con un clic, y vuelven a abrirse  2187ms
+       ✓ «Inicio» no se pliega (es una sola entrada)  438ms
+       ✓ el grupo de la página actual no se oculta aunque se haya plegado, y recuerda los demás  1363ms
+ ✓ src/features/dashboard/components/DashboardPage.test.tsx (12 tests) 6607ms
+     ✓ muestra los indicadores propios del rol y el periodo vigente (no uno fijo)  666ms
+     ✓ los indicadores con detalle enlazan a su vista y los demás no  1665ms
+       ✓ Tutorado: accesos propios, alertas=Solicitar tutoría,Mis sesiones,Evaluar tutoría, actividad=false  361ms
+       ✓ Docente Tutor: accesos propios, alertas=Ver estudiantes,Mi calendario,Solicitudes de tutoría,Casos derivados, actividad=true  455ms
+       ✓ Coordinador: accesos propios, alertas=Registrar estudiante,Carga de estudiantes,Solicitudes de tutoría,Plan semestral, actividad=true  1019ms
+       ✓ Administrador DBU: accesos propios, alertas=Usuarios y roles,Seguimiento de derivaciones,Solicitudes de tutoría, actividad=true  1359ms
+ ✓ src/features/sesiones/components/RescheduleSessionModal.test.tsx (3 tests) 5830ms
+     ✓ exige fecha, hora y motivo antes de confirmar  1295ms
+     ✓ exige el motivo antes de confirmar  1809ms
+     ✓ confirma con la nueva fecha/hora en ISO y el motivo  2678ms
+ ✓ src/features/identidad/pages/BrandingPage.test.tsx (9 tests) 8639ms
+     ✓ muestra la identidad vigente y deja "Guardar" desactivado sin cambios  1318ms
+     ✓ guarda los cambios y los aplica a todo el sistema  2010ms
+     ✓ avisa y no deja guardar un color principal demasiado claro  1023ms
+     ✓ avisa si el color no tiene el formato #RRGGBB  751ms
+     ✓ la vista previa usa los colores elegidos sin cambiar todavía el resto de la interfaz  672ms
+     ✓ muestra el error del servidor al guardar  1023ms
+     ✓ sube un logotipo válido  325ms
+     ✓ restablece la identidad institucional tras confirmar  1223ms
+ ✓ src/features/amonestaciones/pages/AdmonitionsPage.test.tsx (5 tests) 8524ms
+     ✓ lista las amonestaciones con su motivo y permite descargar el documento  1712ms
+     ✓ el Decano registra una amonestación con docente, fecha, motivo y documento  3685ms
+     ✓ muestra el motivo real si el servidor la rechaza y deja abierto el formulario  2727ms
+ ✓ src/features/admin/components/UserFormModal.test.tsx (12 tests) 8485ms
+     ✓ solo pide el servicio cuando el rol es Profesional de Servicio  704ms
+     ✓ envía el servicio elegido junto con el rol  1502ms
+     ✓ en otro rol no envía servicio, aunque se hubiera elegido antes  828ms
+     ✓ muestra el motivo que envía la API y no cierra el formulario  1309ms
+     ✓ envía la escuela elegida; en otro rol no envía escuela aunque se hubiera elegido antes  898ms
+     ✓ envía la facultad elegida y no envía escuela  533ms
+     ✓ un correo de otro dominio se rechaza al instante, sin llegar a enviarse  824ms
+     ✓ envía el correo en su forma única (sin espacios y en minúsculas)  653ms
+     ✓ una cuenta anterior a la regla (otro dominio) se edita sin tocar su correo; cambiarlo a otro dominio no se permite  534ms
+ ❯ src/features/auth/components/ResetPasswordPage.test.tsx (4 tests | 1 failed) 10407ms
+     × en modo activación explica que el enlace sirve una sola vez y envía el token del enlace 5302ms
+     ✓ exige que las dos contraseñas coincidan y un mínimo de 8 caracteres antes de enviar  2646ms
+     ✓ muestra el motivo del servidor si el enlace ya se usó o venció  2250ms
+     ✓ en modo recuperación conserva su texto 169ms
+ ✓ src/features/profile/pages/ProfilePage.test.tsx (4 tests) 9016ms
+     ✓ muestra los datos del perfil tras cargar  426ms
+     ✓ guarda los cambios de contacto  3083ms
+     ✓ no envía el cambio de contraseña si la confirmación no coincide  2585ms
+     ✓ cambia la contraseña cuando los datos son válidos  2875ms
+ ❯ src/features/periodo/pages/PeriodClosurePage.test.tsx (6 tests | 1 failed) 14267ms
+     ✓ muestra por defecto el periodo vigente con su vista previa y lo que quedará pendiente  3205ms
+     ✓ sin periodo vigente propone el más reciente (el que se cerró último), no el primero de la lista  530ms
+     × para cerrar hay que escribir el nombre exacto del periodo; recién entonces se habilita 5112ms
+     ✓ un periodo cerrado muestra su resumen guardado y permite reabrirlo si no hay otro vigente  2636ms
+     ✓ no deja reabrir un periodo cerrado mientras otro está vigente  868ms
+     ✓ muestra el motivo si el servidor rechaza el cierre  1896ms
+ ❯ src/features/tutorados/components/StudentFormModal.test.tsx (2 tests | 1 failed) 9487ms
+     × rechaza un código universitario con formato inválido 5164ms
+     ✓ envía los datos de filiación cuando el formulario es válido  4299ms
+ ✓ src/features/sesiones/pages/SessionsCalendarPage.test.tsx (4 tests) 9035ms
+     ✓ muestra ambas sesiones del mes en la vista mensual  1456ms
+     ✓ abre el detalle con los participantes al hacer clic en una sesión grupal  2364ms
+     ✓ en la vista semanal solo muestra las sesiones de la semana actual  2534ms
+     ✓ registra quiénes asistieron a una sesión grupal ya realizada y actualiza el detalle (A07)  2661ms
+ ✓ src/features/evaluacion/pages/EvaluationWindowsPage.test.tsx (6 tests) 12251ms
+     ✓ explica el alcance del cierre y permite cancelar sin cambiar el estado  3807ms
+     ✓ solo cierra la escuela elegida después de confirmar y actualiza su estado  2001ms
+     ✓ explica los requisitos antes de habilitar y conserva la regla de una respuesta por periodo  2381ms
+     ✓ mantiene el diálogo con el error y permite reintentar sin mostrar éxito falso  1526ms
+     ✓ impide cerrar el diálogo y repetir el envío mientras se está guardando  1476ms
+     ✓ filtra por escuela y estado sin modificar la configuración  1011ms
+ ✓ src/features/pedidos/pages/RequestEmailsPage.test.tsx (7 tests) 9990ms
+     ✓ la coordinación ve solo sus escuelas, con su correo o «Sin configurar»  631ms
+     ✓ guarda el correo de una escuela y lo confirma  3064ms
+     ✓ puede quitar un correo y muestra el motivo real si el servidor rechaza el guardado  1553ms
+     ✓ con el correo ya configurado se ve el correo y un botón «Editar»; al pulsarlo se corrige y se guarda  3484ms
+     ✓ «Cancelar» cierra la edición sin cambiar nada, y llegar con ?escuela=… abre esa escuela para editar  801ms
+ ❯ src/features/informes/pages/SemesterReportPage.test.tsx (3 tests | 1 failed) 10613ms
+     ✓ muestra el borrador autollenado y bloquea exportar hasta guardar  2172ms
+     × guarda lo editado y descarta filas vacías 5686ms
+     ✓ con informe guardado permite exportar y "Volver a autollenar" restaura el borrador  2730ms
+ ❯ src/shared/reportFilters/ReportFilters.test.tsx (5 tests | 1 failed) 9825ms
+     × muestra los cinco controles con las opciones del alcance del rol 1461ms
+     ✓ convierte lo elegido en parámetros y omite los controles en "todos"  2060ms
+     ✓ al cambiar de facultad descarta la escuela que ya no le pertenece  1718ms
+     ✓ mantiene la escuela si pertenece a la facultad elegida  1853ms
+     ✓ "Limpiar filtros" aparece solo con filtros activos y los restablece  2625ms
+ ✓ src/features/ciclos/pages/TutorAcceptancePage.test.tsx (6 tests) 9703ms
+     ✓ un enlace inválido o vencido muestra el motivo y nada más  1153ms
+     ✓ acepta indicando día y horas sin pedir lugar  2629ms
+     ✓ ofrece crear contraseña cuando el servidor indica primer acceso  1269ms
+     ✓ puede agregar y quitar horarios  1444ms
+     ✓ rechaza con su motivo  2222ms
+     ✓ muestra el motivo real si el servidor rechaza la disponibilidad  910ms
+ ✓ src/features/docentes/pages/TeacherBulkImportPage.test.tsx (5 tests) 7175ms
+     ✓ explica las columnas y deja descargar la plantilla; sin archivo no deja importar  2496ms
+     ✓ importa y muestra cuántos se crearon, las filas con error y qué sigue  1987ms
+     ✓ si el correo no salió, entrega el enlace de ese docente para llevárselo por otro medio  1219ms
+     ✓ rechaza un archivo que no es .xlsx  572ms
+     ✓ muestra el motivo real si el servidor rechaza el archivo  839ms
+ ✓ src/shared/components/layout/SectionShell.test.tsx (11 tests) 7346ms
+     ✓ permite plegar un grupo sin abandonar la pantalla actual y volver a desplegarlo  3332ms
+     ✓ conserva la descripción accesible y permite descartar la ayuda con Escape  391ms
+     ✓ la guía avanza solo por los pasos permitidos del rol y permite volver  1192ms
+     ✓ muestra las pestañas del rol y, debajo, la pantalla de la pestaña actual (marcada)  691ms
+     ✓ Configuración usa grupos laterales y permite navegar también con el selector móvil  954ms
+ ✓ src/features/sedes/pages/CampusesPage.test.tsx (5 tests) 9168ms
+     ✓ lista las sedes con su estado y la sede de cada escuela  3006ms
+     ✓ cambia la sede de una escuela  695ms
+     ✓ agrega una sede nueva y limpia el campo  3304ms
+     ✓ desactiva una sede  541ms
+     ✓ muestra el motivo real si el servidor rechaza el cambio  1537ms
+ ✓ src/features/tutorados/components/TutoradoTable.test.tsx (5 tests) 6207ms
+     ✓ el tutor ve dos botones y el resto, con etiqueta, en «Más»  1851ms
+     ✓ coordinación ve Editar a la vista y la gestión en «Más»  1297ms
+     ✓ la DBU (tutora y gestora) conserva todas las acciones  1077ms
+     ✓ elegir una acción del menú llama a su manejador con el estudiante  1072ms
+     ✓ un estudiante en riesgo ofrece «Quitar riesgo» y sin tutor no se puede reasignar  866ms
+ ✓ src/features/indicadores/pages/IndicatorsPage.test.tsx (4 tests) 7789ms
+     ✓ muestra los indicadores clave y los gráficos  3308ms
+     ✓ muestra un guion si aún no hay respuestas de evaluación  575ms
+     ✓ al elegir un tutor vuelve a consultar con ese filtro  2796ms
+     ✓ ofrece reintentar si falla la carga  1052ms
+ ✓ src/features/parametros/pages/ParametersPage.test.tsx (7 tests) 10506ms
+     ✓ agrupa los parámetros y marca los que usan el valor predeterminado  2390ms
+     ✓ guarda un valor válido  3151ms
+     ✓ no deja guardar un valor fuera de rango y lo explica  1656ms
+     ✓ "Guardar" está desactivado mientras no haya cambios  1047ms
+     ✓ restablece el valor predeterminado solo si el valor actual es distinto  972ms
+     ✓ muestra el error que devuelve la API  1070ms
+ ✓ src/features/notificaciones/components/NotificationBell.test.tsx (5 tests) 3129ms
+     ✓ un aviso de derivación abre ese caso concreto  1208ms
+     ✓ un aviso de sesión lleva a la agenda: «Mis sesiones» al estudiante, el calendario al personal (U06)  713ms
+     ✓ un aviso de solicitud abre la solicitud al personal y el historial al estudiante  646ms
+     ✓ «Marcar todas como leídas» las marca en pantalla y en el servidor  497ms
+ ❯ src/features/admin/pages/UserManagementPage.test.tsx (2 tests | 1 failed) 3310ms
+     × ante el 409 muestra el mensaje del servidor y la cuenta sigue activa 1857ms
+     ✓ si la operación se acepta, no hay mensaje de error y se recarga la lista  1437ms
+ ✓ src/features/tutorados/components/ReassignModal.test.tsx (4 tests) 4067ms
+     ✓ excluye al tutor actual de las opciones  929ms
+     ✓ exige motivo antes de confirmar  849ms
+     ✓ confirma con el tutor y el motivo elegidos  2003ms
+ ✓ src/features/derivaciones/components/ReferralDetailModal.test.tsx (13 tests) 5620ms
+       ✓ el profesional del servicio destino ve el formulario y solo los estados siguientes  474ms
+     ✓ tras avanzar el caso, la lista y el estado que se enviaría vuelven a coincidir  1635ms
+       ✓ el encabezado y el botón dicen la tarea, sin códigos de historia de usuario  638ms
+       ✓ cada paso se llama por lo que se hace: recibir, iniciar atención, registrar atención, cerrar  1080ms
+     ✓ exige observaciones al seleccionar el estado CERRADO  364ms
+     ✓ llama a referralService.updateStatus al guardar cambios con observaciones  399ms
+ ✓ src/features/sesiones/components/CancelSessionModal.test.tsx (2 tests) 4660ms
+     ✓ exige el motivo antes de confirmar  2041ms
+     ✓ confirma con el motivo escrito  2587ms
+ ✓ src/features/expediente/pages/ExpedientePage.test.tsx (8 tests) 6539ms
+     ✓ muestra la línea de tiempo consolidada del estudiante  2251ms
+     ✓ no muestra la sección de red de apoyo si el backend la omite (sin permiso)  960ms
+     ✓ muestra la asistencia confirmada de una sesión individual (HU-22)  501ms
+     ✓ ofrece la hoja de asistencia (Anexo N° 4) para imprimir y adjuntar firmada, según el rol (A14)  1971ms
+ ✓ src/features/informes/pages/ScheduleAttendanceReportPage.test.tsx (5 tests) 6684ms
+     ✓ carga automáticamente el consolidado propio cuando el rol es Docente Tutor  2427ms
+     ✓ muestra el selector de tutor y no carga nada hasta elegir uno (Coordinador)  1231ms
+     ✓ genera el consolidado del tutor elegido al hacer clic (Coordinador)  1294ms
+     ✓ permite exportar a PDF y Excel cuando el rol tiene permiso  1484ms
+ ✓ src/features/tutorados/components/LinkPortalAccountModal.test.tsx (5 tests) 4378ms
+     ✓ parte de "Sin vincular" cuando el estudiante no tiene cuenta  431ms
+     ✓ envía el userId elegido al guardar  2606ms
+     ✓ envía null al guardar sin seleccionar cuenta  1151ms
+ ✓ src/shared/components/ui/ActionMenu.test.tsx (4 tests) 3609ms
+     ✓ abre con etiquetas visibles agrupadas y estado expandido  1897ms
+     ✓ se recorre solo con teclado: flechas, Enter y Escape devuelve el foco  633ms
+     ✓ elegir una opción ejecuta su acción y cierra el menú dejando el foco en el botón  617ms
+     ✓ un clic fuera lo cierra  429ms
+ ✓ src/features/tutorados/components/RiskModal.test.tsx (2 tests) 5177ms
+     ✓ exige un motivo antes de confirmar  3262ms
+     ✓ confirma con el motivo escrito  1880ms
+ ✓ src/shared/components/ExportButtons.test.tsx (4 tests) 2612ms
+     ✓ muestra PDF y Excel por defecto y descarga en el formato elegido  1615ms
+     ✓ avisa del error si la descarga falla y vuelve a habilitar el botón  484ms
+     ✓ no permite exportar mientras esté deshabilitado  341ms
+ ✓ src/features/sesiones/pages/MySessionsPage.test.tsx (9 tests) 2739ms
+     ✓ muestra fecha, modalidad y lugar de una sesión presencial próxima  563ms
+     ✓ una sesión virtual enlaza la videollamada y no abre enlaces que no sean http(s)  822ms
+     ✓ si falla la consulta lo dice y permite reintentar  355ms
+ ✓ src/features/tutorados/pages/BulkImportPage.test.tsx (3 tests) 4170ms
+     ✓ rechaza archivos que no son .xlsx  2042ms
+     ✓ importa y muestra el reporte con errores por fila  1681ms
+     ✓ descarga la plantilla  423ms
+ ✓ src/features/auditoria/pages/AuditLogPage.test.tsx (4 tests) 3477ms
+     ✓ muestra autor, fecha, acción, entidad, campos modificados e IP  1208ms
+     ✓ al filtrar vuelve a la primera página y consulta con esos filtros  988ms
+     ✓ distingue «sin registros» de «sin resultados para esos filtros»  846ms
+     ✓ un error de la API se informa con opción de reintentar  404ms
+ ✓ src/shared/components/ui/TableSkeleton.test.tsx (4 tests) 2232ms
+     ✓ dice qué se carga, de forma visible y accesible, no solo con filas grises  1366ms
+     ✓ si tarda más de lo normal lo avisa y ofrece reintentar  606ms
+ ✓ src/features/planificacion/components/WorkPlanResolutionCard.test.tsx (5 tests) 2996ms
+     ✓ indica que el plan no es vigente mientras no haya resolución  1051ms
+     ✓ muestra la revisión pendiente de resolución y lista la versión aprobada anterior (A12)  1005ms
+     ✓ muestra el plan vigente y permite descargar la resolución  594ms
+ ✓ src/shared/hooks/useDialog.test.tsx (2 tests) 2044ms
+     ✓ lleva el foco al primer campo, lo mantiene dentro con Tab y lo devuelve al cerrar con Escape  1883ms
+ ✓ src/features/firmados/components/SignedDocumentsPanel.test.tsx (5 tests) 2257ms
+     ✓ sin documentos lo dice; con documentos muestra quién, cuándo y la huella  451ms
+     ✓ adjunta un PDF válido  772ms
+     ✓ quien no puede adjuntar solo consulta y descarga  626ms
+ ✓ src/features/pedidos/components/RequestListBanner.test.tsx (3 tests) 1538ms
+     ✓ en la carga de estudiantes lleva a «Pedir listas» con la lista de estudiantes elegida  1325ms
+ ✓ src/features/admin/components/InvitationDialog.test.tsx (3 tests) 1365ms
+     ✓ con el correo enviado avisa que no se generó ninguna clave y muestra el enlace de un solo uso  422ms
+     ✓ si el correo no salió, lo dice como alerta y pide entregar el enlace por un medio privado  522ms
+     ✓ se cierra con «Entendido»  405ms
+ ✓ src/shared/components/ui/NextSteps.test.tsx (2 tests) 1204ms
+     ✓ muestra cada paso como un enlace con su explicación  1117ms
+ ✓ src/features/dashboard/components/RiskAlerts.test.tsx (5 tests) 627ms
+ ✓ src/features/dashboard/components/RecentActivity.test.tsx (2 tests) 848ms
+     ✓ lista movimientos reales con su autor y enlaza a la bitácora  765ms
+ ✓ src/shared/components/RequireRole.test.tsx (2 tests) 1177ms
+     ✓ muestra el contenido cuando el rol está autorizado  988ms
+ ✓ src/features/admin/components/UserTable.test.tsx (2 tests) 1664ms
+     ✓ distingue activa, pendiente de activación e inactiva  381ms
+     ✓ solo la cuenta pendiente ofrece emitir una invitación nueva, y lo hace para esa cuenta  1261ms
+ ✓ src/shared/components/ProtectedRoute.test.tsx (5 tests) 1332ms
+     ✓ redirige al login cuando no hay sesión  1072ms
+ ✓ src/features/periodo/components/PeriodStatusBanner.test.tsx (5 tests) 2312ms
+     ✓ avisa del solo lectura cuando no hay un periodo abierto  2086ms
+ ✓ src/features/auth/context/AuthProvider.test.tsx (9 tests) 666ms
+     ✓ al salir descarta todo lo que la cuenta anterior tenía en caché  302ms
+ ✓ src/features/auth/components/SessionTimeout.test.tsx (2 tests) 352ms
+     ✓ avisa antes del cierre con el plazo configurado, no con el del entorno  305ms
+ ✓ src/shared/theme/BrandingProvider.test.tsx (6 tests) 503ms
+     ✓ aplica la paleta como variables CSS, el nombre corto como título y el logotipo personalizado  334ms
+ ✓ src/shared/hooks/useIdleTimer.test.ts (4 tests) 242ms
+ ✓ src/shared/hooks/useDraft.test.tsx (5 tests) 199ms
+Not implemented: navigation to another Document
+ ✓ src/shared/services/downloadFile.test.ts (3 tests) 139ms
+ ✓ src/shared/components/layout/navigation.test.ts (23 tests) 126ms
+ ✓ src/shared/services/apiClient.test.ts (8 tests) 108ms
+ ✓ src/shared/theme/palette.test.ts (7 tests) 71ms
+ ✓ src/features/sesiones/utils/sessionStatus.test.ts (8 tests) 51ms
+ ✓ src/shared/utils/drafts.test.ts (6 tests) 52ms
+ ✓ src/shared/utils/email.test.ts (5 tests) 49ms
+ ✓ src/features/derivaciones/utils/referralInbox.test.ts (6 tests) 59ms
+ ✓ src/features/dashboard/components/homeAccess.test.ts (3 tests) 46ms
+ ✓ src/features/sesiones/utils/calendar.test.ts (7 tests) 53ms
+ ✓ src/features/solicitudes/utils/requestInbox.test.ts (5 tests) 44ms
+ ✓ src/features/solicitudes/utils/requestRecipient.test.ts (3 tests) 29ms
+ ✓ src/shared/utils/roleLabel.test.ts (8 tests) 60ms
+ ✓ src/features/sesiones/utils/sessionNotice.test.ts (3 tests) 61ms
+ ✓ src/shared/utils/inbox.test.ts (3 tests) 54ms
+
+⎯⎯⎯⎯⎯⎯ Failed Suites 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/scratch-drp/profile.test.tsx [ src/scratch-drp/profile.test.tsx ]
+Error: Transform failed with 1 error:
+C:/Proyects/Proyects/Tutoria-untrm/client/src/scratch-drp/profile.test.tsx:97:12: ERROR: Unterminated string literal
+  Plugin: vite:esbuild
+  File: C:/Proyects/Proyects/Tutoria-untrm/client/src/scratch-drp/profile.test.tsx:97:12
+  
+  [33mUnterminated string literal[39m
+  95 |      step('findByRole alert');
+  96 |      appendFileSync('C:/tmp/runs/drp/profile.txt', `CORRIDA ${new Date().toISOString()}
+  97 |  ${log.join('
+     |              ^
+  98 |  ')}
+  99 |  `);
+  
+ ❯ failureErrorWithLog node_modules/.pnpm/esbuild@0.25.12/node_modules/esbuild/lib/main.js:1467:15
+ ❯ node_modules/.pnpm/esbuild@0.25.12/node_modules/esbuild/lib/main.js:736:50
+ ❯ responseCallbacks.<computed> node_modules/.pnpm/esbuild@0.25.12/node_modules/esbuild/lib/main.js:603:9
+ ❯ handleIncomingPacket node_modules/.pnpm/esbuild@0.25.12/node_modules/esbuild/lib/main.js:658:12
+ ❯ Socket.readFromStdout node_modules/.pnpm/esbuild@0.25.12/node_modules/esbuild/lib/main.js:581:7
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/33]⎯
+
+
+⎯⎯⎯⎯⎯⎯ Failed Tests 32 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/shared/reportFilters/ReportFilters.test.tsx > ReportFilters > muestra los cinco controles con las opciones del alcance del rol
+TestingLibraryElementError: Unable to find role="option" and name "Ciclo 4"
+
+Ignored nodes: comments, script, style
+[36m<body>[39m
+  [36m<div>[39m
+    [36m<div[39m
+      [33mclass[39m=[32m"_card_7523f3 _padded_7523f3 _filters_8aaa73"[39m
+    [36m>[39m
+      [36m<div[39m
+        [33mclass[39m=[32m"_field_8aaa73"[39m
+      [36m>[39m
+        [36m<label[39m
+          [33mfor[39m=[32m"rf-period"[39m
+        [36m>[39m
+          [0mSemestre[0m
+        [36m</label>[39m
+        [36m<div[39m
+          [33mclass[39m=[32m"_selectWrap_7f13ba "[39m
+        [36m>[39m
+          [36m<select[39m
+            [33mclass[39m=[32m"_input_7f13ba _select_7f13ba "[39m
+            [33mid[39m=[32m"rf-period"[39m
+          [36m>[39m
+            [36m<option[39m
+              [33mvalue[39m=[32m""[39m
+            [36m>[39m
+              [0mPeriodo activo[0m
+            [36m</option>[39m
+          [36m</select>[39m
+          [36m<span[39m
+            [33mclass[39m=[32m"_chevron_7f13ba"[39m
+          [36m>[39m
+            [36m<svg[39m
+              [33maria-hidden[39m=[32m"true"[39m
+              [33mfill[39m=[32m"none"[39m
+              [33mheight[39m=[32m"16"[39m
+              [33mstroke[39m=[32m"currentColor"[39m
+              [33mstroke-linecap[39m=[32m"round"[39m
+              [33mstroke-linejoin[39m=[32m"round"[39m
+              [33mstroke-width[39m=[32m"2"[39m
+              [33mviewBox[39m=[32m"0 0 24 24"[39m
+              [33mwidth[39m=[32m"16"[39m
+            [36m>[39m
+              [36m<path[39m
+                [33md[39m=[32m"m6 9 6 6 6-6"[39m
+              [36m/>[39m
+            [36m</svg>[39m
+          [36m</span>[39m
+        [36m</div>[39m
+      [36m</div>[39m
+      [36m<div[39m
+        [33mclass[39m=[32m"_field_8aaa73"[39m
+      [36m>[39m
+        [36m<label[39m
+          [33mfor[39m=[32m"rf-faculty"[39m
+        [36m>[39m
+          [0mFacultad[0m
+        [36m</label>[39m
+        [36m<div[39m
+          [33mclass[39m=[32m"_selectWrap_7f13ba "[39m
+        [36m>[39m
+          [36m<select[39m
+            [33mclass[39m=[32m"_input_7f13ba _select_7f13ba "[39m
+            [33mid[39m=[32m"rf-faculty"[39m
+          [36m>[39m
+            [36m<option[39m
+              [33mvalue[39m=[32m""[39m
+            [36m>[39m
+              [0mTodas las facultades[0m
+            [36m</option>[39m
+          [36m</select>[39m
+          [36m<span[39m
+            [33mclass[39m=[32m"_chevron_7f13ba"[39m
+          [36m>[39m
+            [36m<svg[39m
+              [33maria-hidden[39m=[32m"true"[39m
+              [33mfill[39m=[32m"none"[39m
+              [33mheight[39m=[32m"16"[39m
+              [33mstroke[39m=[32m"currentColor"[39m
+              [33mstroke-linecap[39m=[32m"round"[39m
+              [33mstroke-linejoin[39m=[32m"round"[39m
+              [33mstroke-width[39m=[32m"2"[39m
+              [33mviewBox[39m=[32m"0 0 24 24"[39m
+              [33mwidth[39m=[32m"16"[39m
+            [36m>[39m
+              [36m<path[39m
+                [33md[39m=[32m"m6 9 6 6 6-6"[39m
+              [36m/>[39m
+            [36m</svg>[39m
+          [36m</span>[39m
+        [36m</div>[39m
+      [36m</div>[39m
+      [36m<div[39m
+        [33mclass[39m=[32m"_field_8aaa73"[39m
+      [36m>[39m
+        [36m<label[39m
+          [33mfor[39m=[32m"rf-school"[39m
+        [36m>[39m
+          [0mEscuela Profesional[0m
+        [36m</label>[39m
+        [36m<div[39m
+          [33mclass[39m=[32m"_selectWrap_7f13ba "[39m
+        [36m>[39m
+          [36m<select[39m
+            [33mclass[39m=[32m"_input_7f13ba _select_7f13ba "[39m
+            [33mid[39m=[32m"rf-school"[39m
+          [36m>[39m
+            [36m<option[39m
+              [33mvalue[39m=[32m""[39m
+            [36m>[39m
+              [0mTodas las escuelas[0m
+            [36m</option>[39m
+          [36m</select>[39m
+          [36m<span[39m
+            [33mclass[39m=[32m"_chevron_7f13ba"[39m
+          [36m>[39m
+            [36m<svg[39m
+              [33maria-hidden[39m=[32m"true"[39m
+              [33mfill[39m=[32m"none"[39m
+              [33mheight[39m=[32m"16"[39m
+              [33mstroke[39m=[32m"currentColor"[39m
+              [33mstroke-linecap[39m=[32m"round"[39m
+              [33mstroke-linejoin[39m=[32m"round"[39m
+              [33mstroke-width[39m=[32m"2"[39m
+              [33mviewBox[39m=[32m"0 0 24 24"[39m
+              [33mwidth[39m=[32m"16"[39m
+            [36m>[39m
+              [36m<path[39m
+                [33md[39m=[32m"m6 9 6 6 6-6"[39m
+              [36m/>[39m
+            [36m</svg>[39m
+          [36m</span>[39m
+        [36m</div>[39m
+      [36m</div>[39m
+      [36m<div[39m
+        [33mclass[39m=[32m"_field_8aaa73"[39m
+      [36m>[39m
+        [36m<label[39m
+          [33mfor[39m=[32m"rf-cycle"[39m
+        [36m>[39m
+          [0mCiclo[0m
+        [36m</label>[39m
+        [36m<div[39m
+          [33mclass[39m=[32m"_selectWrap_7f13ba "[39m
+        [36m>[39m
+          [36m<select[39m
+            [33mclass[39m=[32m"_input_7f13ba _select_7f13ba "[39m
+            [33mid[39m=[32m"rf-cycle"[39m
+          [36m>[39m
+            [36m<option[39m
+              [33mvalue[39m=[32m""[39m
+            [36m>[39m
+              [0mTodos los ciclos[0m
+            [36m</option>[39m
+          [36m</select>[39m
+          [36m<span[39m
+            [33mclass[39m=[32m"_chevron_7f13ba"[39m
+          [36m>[39m
+            [36m<svg[39m
+              [33maria-hidden[39m=[32m"true"[39m
+              [33mfill[39m=[32m"none"[39m
+              [33mheight[39m=[32m"16"[39m
+              [33mstroke[39m=[32m"currentColor"[39m
+              [33mstroke-linecap[39m=[32m"round"[39m
+              [33mstroke-linejoin[39m=[32m"round"[39m
+              [33mstroke-width[39m=[32m"2"[39m
+              [33mviewBox[39m=[32m"0 0 24 24"[39m
+              [33mwidth[39m=[32m"16"[39m
+            [36m>[39m
+              [36m<path[39m
+                [33md[39m=[32m"m6 9 6 6 6-6"[39m
+              [36m/>[39m
+            [36m</svg>[39m
+          [36m</span>[39m
+        [36m</div>[39m
+      [36m</div>[39m
+      [36m<div[39m
+        [33mclass[39m=[32m"_field_8aaa73"[39m
+      [36m>[39m
+        [36m<label[39m
+          [33mfor[39m=[32m"rf-tutor"[39m
+        [36m>[39m
+          [0mTutor[0m
+        [36m</label>[39m
+        [36m<div[39m
+          [33mclass[39m=[32m"_selectWrap_7f13ba "[39m
+        [36m>[39m
+          [36m<select[39m
+            [33mclass[39m=[32m"_input_7f13ba _select_7f13ba "[39m
+            [33mid[39m=[32m"rf-tutor"[39m
+          [36m>[39m
+            [36m<option[39m
+              [33mvalue[39m=[32m""[39m
+            [36m>[39m
+              [0mTodos los tutores[0m
+            [36m</option>[39m
+          [36m</select>[39m
+          [36m<span[39m
+            [33mclass[39m=[32m"_chevron_7f13ba"[39m
+          [36m>[39m
+            [36m<svg[39m
+              [33maria-hidden[39m=[32m"true"[39m
+              [33mfill[39m=[32m"none"[39m
+              [33mheight[39m=[32m"16"[39m
+              [33mstroke[39m=[32m"currentColor"[39m
+              [33mstroke-linecap[39m=[32m"round"[39m
+              [33mstroke-linejoin[39m=[32m"round"[39m
+              [33mstroke-width[39m=[32m"2"[39m
+              [33mviewBox[39m=[32m"0 0 24 24"[39m
+              [33mwidth[39m=[32m"16"[39m
+            [36m>[39m
+              [36m<path[39m
+                [33md[39m=[32m"m6 9 6 6 6-6"[39m
+              [36m/>[39m
+            [36m</svg>[39m
+          [36m</span>[39m
+        [36m</div>[39m
+      [36m</div>[39m
+    [36m</div>[39m
+    [36m<output[39m
+      [33mdata-testid[39m=[32m"params"[39m
+    [36m>[39m
+      [0m{}[0m
+    [36m</output>[39m
+  [36m</div>[39m
+[36m</body>[39m
+
+Ignored nodes: comments, script, style
+[36m<body>[39m
+  [36m<div>[39m
+    [36m<div[39m
+      [33mclass[39m=[32m"_card_7523f3 _padded_7523f3 _filters_8aaa73"[39m
+    [36m>[39m
+      [36m<div[39m
+        [33mclass[39m=[32m"_field_8aaa73"[39m
+      [36m>[39m
+        [36m<label[39m
+          [33mfor[39m=[32m"rf-period"[39m
+        [36m>[39m
+          [0mSemestre[0m
+        [36m</label>[39m
+        [36m<div[39m
+          [33mclass[39m=[32m"_selectWrap_7f13ba "[39m
+        [36m>[39m
+          [36m<select[39m
+            [33mclass[39m=[32m"_input_7f13ba _select_7f13ba "[39m
+            [33mid[39m=[32m"rf-period"[39m
+          [36m>[39m
+            [36m<option[39m
+              [33mvalue[39m=[32m""[39m
+            [36m>[39m
+              [0mPeriodo activo[0m
+            [36m</option>[39m
+          [36m</select>[39m
+          [36m<span[39m
+            [33mclass[39m=[32m"_chevron_7f13ba"[39m
+          [36m>[39m
+            [36m<svg[39m
+              [33maria-hidden[39m=[32m"true"[39m
+              [33mfill[39m=[32m"none"[39m
+              [33mheight[39m=[32m"16"[39m
+              [33mstroke[39m=[32m"currentColor"[39m
+              [33mstroke-linecap[39m=[32m"round"[39m
+              [33mstroke-linejoin[39m=[32m"round"[39m
+              [33mstroke-width[39m=[32m"2"[39m
+              [33mviewBox[39m=[32m"0 0 24 24"[39m
+              [33mwidth[39m=[32m"16"[39m
+            [36m>[39m
+              [36m<path[39m
+                [33md[39m=[32m"m6 9 6 6 6-6"[39m
+              [36m/>[39m
+            [36m</svg>[39m
+          [36m</span>[39m
+        [36m</div>[39m
+      [36m</div>[39m
+      [36m<div[39m
+        [33mclass[39m=[32m"_field_8aaa73"[39m
+      [36m>[39m
+        [36m<label[39m
+          [33mfor[39m=[32m"rf-faculty"[39m
+        [36m>[39m
+          [0mFacultad[0m
+        [36m</label>[39m
+        [36m<div[39m
+          [33mclass[39m=[32m"_selectWrap_7f13ba "[39m
+        [36m>[39m
+          [36m<select[39m
+            [33mclass[39m=[32m"_input_7f13ba _select_7f13ba "[39m
+            [33mid[39m=[32m"rf-faculty"[39m
+          [36m>[39m
+            [36m<option[39m
+              [33mvalue[39m=[32m""[39m
+            [36m>[39m
+              [0mTodas las facultades[0m
+            [36m</option>[39m
+          [36m</select>[39m
+          [36m<span[39m
+            [33mclass[39m=[32m"_chevron_7f13ba"[39m
+          [36m>[39m
+            [36m<svg[39m
+              [33maria-hidden[39m=[32m"true"[39m
+              [33mfill[39m=[32m"none"[39m
+              [33mheight[39m=[32m"16"[39m
+              [33mstroke[39m=[32m"currentColor"[39m
+              [33mstroke-linecap[39m=[32m"round"[39m
+              [33mstroke-linejoin[39m=[32m"round"[39m
+              [33mstroke-width[39m=[32m"2"[39m
+              [33mviewBox[39m=[32m"0 0 24 24"[39m
+              [33mwidth[39m=[32m"16"[39m
+            [36m>[39m
+              [36m<path[39m
+                [33md[39m=[32m"m6 9 6 6 6-6"[39m
+              [36m/>[39m
+            [36m</svg>[39m
+          [36m</span>[39m
+        [36m</div>[39m
+      [36m</div>[39m
+      [36m<div[39m
+        [33mclass[39m=[32m"_field_8aaa73"[39m
+      [36m>[39m
+        [36m<label[39m
+          [33mfor[39m=[32m"rf-school"[39m
+        [36m>[39m
+          [0mEscuela Profesional[0m
+        [36m</label>[39m
+        [36m<div[39m
+          [33mclass[39m=[32m"_selectWrap_7f13ba "[39m
+        [36m>[39m
+          [36m<select[39m
+            [33mclass[39m=[32m"_input_7f13ba _select_7f13ba "[39m
+            [33mid[39m=[32m"rf-school"[39m
+          [36m>[39m
+            [36m<option[39m
+              [33mvalue[39m=[32m""[39m
+            [36m>[39m
+              [0mTodas las escuelas[0m
+            [36m</option>[39m
+          [36m</select>[39m
+          [36m<span[39m
+            [33mclass[39m=[32m"_chevron_7f13ba"[39m
+          [36m>[39m
+            [36m<svg[39m
+              [33maria-hidden[39m=[32m"true"[39m
+              [33mfill[39m=[32m"none"[39m
+              [33mheight[39m=[32m"16"[39m
+              [33mstroke[39m=[32m"currentColor"[39m
+              [33mstroke-linecap[39m=[32m"round"[39m
+              [33mstroke-linejoin[39m=[32m"round"[39m
+              [33mstroke-width[39m=[32m"2"[39m
+              [33mviewBox[39m=[32m"0 0 24 24"[39m
+              [33mwidth[39m=[32m"16"[39m
+            [36m>[39m
+              [36m<path[39m
+                [33md[39m=[32m"m6 9 6 6 6-6"[39m
+              [36m/>[39m
+            [36m</svg>[39m
+          [36m</span>[39m
+        [36m</div>[39m
+      [36m</div>[39m
+      [36m<div[39m
+        [33mclass[39m=[32m"_field_8aaa73"[39m
+      [36m>[39m
+        [36m<label[39m
+          [33mfor[39m=[32m"rf-cycle"[39m
+        [36m>[39m
+          [0mCiclo[0m
+        [36m</label>[39m
+        [36m<div[39m
+          [33mclass[39m=[32m"_selectWrap_7f13ba "[39m
+        [36m>[39m
+          [36m<select[39m
+            [33mclass[39m=[32m"_input_7f13ba _select_7f13ba "[39m
+            [33mid[39m=[32m"rf-cycle"[39m
+          [36m>[39m
+            [36m<option[39m
+              [33mvalue[39m=[32m""[39m
+            [36m>[39m
+              [0mTodos los ciclos[0m
+            [36m</option>[39m
+          [36m</select>[39m
+          [36m<span[39m
+            [33mclass[39m=[32m"_chevron_7f13ba"[39m
+          [36m>[39m
+            [36m<svg[39m
+              [33maria-hidden[39m=[32m"true"[39m
+              [33mfill[39m=[32m"none"[39m
+              [33mheight[39m=[32m"16"[39m
+              [33mstroke[39m=[32m"currentColor"[39m
+              [33mstroke-linecap[39m=[32m"round"[39m
+              [33mstroke-linejoin[39m=[32m"round"[39m
+              [33mstroke-width[39m=[32m"2"[39m
+              [33mviewBox[39m=[32m"0 0 24 24"[39m
+              [33mwidth[39m=[32m"16"[39m
+            [36m>[39m
+              [36m<path[39m
+                [33md[39m=[32m"m6 9 6 6 6-6"[39m
+              [36m/>[39m
+            [36m</svg>[39m
+          [36m</span>[39m
+        [36m</div>[39m
+      [36m</div>[39m
+      [36m<div[39m
+        [33mclass[39m=[32m"_field_8aaa73"[39m
+      [36m>[39m
+        [36m<label[39m
+          [33mfor[39m=[32m"rf-tutor"[39m
+        [36m>[39m
+          [0mTutor[0m
+        [36m</label>[39m
+        [36m<div[39m
+          [33mclass[39m=[32m"_selectWrap_7f13ba "[39m
+        [36m>[39m
+          [36m<select[39m
+            [33mclass[39m=[32m"_input_7f13ba _select_7f13ba "[39m
+            [33mid[39m=[32m"rf-tutor"[39m
+          [36m>[39m
+            [36m<option[39m
+              [33mvalue[39m=[32m""[39m
+            [36m>[39m
+              [0mTodos los tutores[0m
+            [36m</option>[39m
+          [36m</select>[39m
+          [36m<span[39m
+            [33mclass[39m=[32m"_chevron_7f13ba"[39m
+          [36m>[39m
+            [36m<svg[39m
+              [33maria-hidden[39m=[32m"true"[39m
+              [33mfill[39m=[32m"none"[39m
+              [33mheight[39m=[32m"16"[39m
+              [33mstroke[39m=[32m"currentColor"[39m
+              [33mstroke-linecap[39m=[32m"round"[39m
+              [33mstroke-linejoin[39m=[32m"round"[39m
+              [33mstroke-width[39m=[32m"2"[39m
+              [33mviewBox[39m=[32m"0 0 24 24"[39m
+              [33mwidth[39m=[32m"16"[39m
+            [36m>[39m
+              [36m<path[39m
+                [33md[39m=[32m"m6 9 6 6 6-6"[39m
+              [36m/>[39m
+            [36m</svg>[39m
+          [36m</span>[39m
+        [36m</div>[39m
+      [36m</div>[39m
+    [36m</div>[39m
+    [36m<output[39m
+      [33mdata-testid[39m=[32m"params"[39m
+    [36m>[39m
+      [0m{}[0m
+    [36m</output>[39m
+  [36m</div>[39m
+[36m</body>[39m
+ ❯ waitForWrapper node_modules/.pnpm/@testing-library+dom@10.4.1/node_modules/@testing-library/dom/dist/wait-for.js:163:27
+ ❯ node_modules/.pnpm/@testing-library+dom@10.4.1/node_modules/@testing-library/dom/dist/query-helpers.js:86:33
+ ❯ src/shared/reportFilters/ReportFilters.test.tsx:45:25
+     43|     render(<Harness />);
+     44|
+     45|     expect(await screen.findByRole('option', { name: 'Ciclo 4' })).toB…
+       |                         ^
+     46|     ['Semestre', 'Facultad', 'Escuela Profesional', 'Ciclo', 'Tutor'].…
+     47|       expect(screen.getByLabelText(label)).toBeInTheDocument(),
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/33]⎯
+
+ FAIL  src/features/admin/pages/UserManagementPage.test.tsx > UserManagementPage: desactivar a la última cuenta de administración > ante el 409 muestra el mensaje del servidor y la cuenta sigue activa
+TestingLibraryElementError: Unable to find role="button" and name "Desactivar"
+
+Ignored nodes: comments, script, style
+[36m<body>[39m
+  [36m<div>[39m
+    [36m<div>[39m
+      [36m<div[39m
+        [33mclass[39m=[32m"_header_d06475"[39m
+        [33mdata-ui[39m=[32m"page-header"[39m
+      [36m>[39m
+        [36m<div[39m
+          [33mclass[39m=[32m"_titleWrap_d06475"[39m
+        [36m>[39m
+          [36m<span[39m
+            [33mclass[39m=[32m"_icon_d06475"[39m
+          [36m>[39m
+            [36m<svg[39m
+              [33maria-hidden[39m=[32m"true"[39m
+              [33mfill[39m=[32m"none"[39m
+              [33mheight[39m=[32m"24"[39m
+              [33mstroke[39m=[32m"currentColor"[39m
+              [33mstroke-linecap[39m=[32m"round"[39m
+              [33mstroke-linejoin[39m=[32m"round"[39m
+              [33mstroke-width[39m=[32m"2"[39m
+              [33mviewBox[39m=[32m"0 0 24 24"[39m
+              [33mwidth[39m=[32m"24"[39m
+            [36m>[39m
+              [36m<path[39m
+                [33md[39m=[32m"M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"[39m
+              [36m/>[39m
+              [36m<circle[39m
+                [33mcx[39m=[32m"9"[39m
+                [33mcy[39m=[32m"7"[39m
+                [33mr[39m=[32m"4"[39m
+              [36m/>[39m
+              [36m<path[39m
+                [33md[39m=[32m"M22 21v-2a4 4 0 0 0-3-3.87"[39m
+              [36m/>[39m
+              [36m<path[39m
+                [33md[39m=[32m"M16 3.13a4 4 0 0 1 0 7.75"[39m
+              [36m/>[39m
+            [36m</svg>[39m
+          [36m</span>[39m
+          [36m<div>[39m
+            [36m<h1[39m
+              [33mclass[39m=[32m"_title_d06475"[39m
+            [36m>[39m
+              [0mUsuarios y roles[0m
+            [36m</h1>[39m
+            [36m<p[39m
+              [33mclass[39m=[32m"_subtitle_d06475"[39m
+            [36m>[39m
+              [0mCuentas del sistema y el rol de cada persona. Los catálogos y parámetros tienen su propia sección en el menú.[0m
+            [36m</p>[39m
+          [36m</div>[39m
+        [36m</div>[39m
+        [36m<div[39m
+          [33mclass[39m=[32m"_actions_d06475"[39m
+        [36m>[39m
+          [36m<button[39m
+            [33mclass[39m=[32m"_btn_8e6d2d _secondary_8e6d2d _md_8e6d2d"[39m
+          [36m>[39m
+            [36m<span[39m
+              [33mclass[39m=[32m"_icon_8e6d2d"[39m
+            [36m>[39m
+              [36m<svg[39m
+                [33maria-hidden[39m=[32m"true"[39m
+                [33mfill[39m=[32m"none"[39m
+                [33mheight[39m=[32m"17"[39m
+                [33mstroke[39m=[32m"currentColor"[39m
+                [33mstroke-linecap[39m=[32m"round"[39m
+                [33mstroke-linejoin[39m=[32m"round"[39m
+                [33mstroke-width[39m=[32m"2"[39m
+                [33mviewBox[39m=[32m"0 0 24 24"[39m
+                [33mwidth[39m=[32m"17"[39m
+              [36m>[39m
+                [36m<path[39m
+                  [33md[39m=[32m"M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"[39m
+                [36m/>[39m
+                [36m<path[39m
+                  [33md[39m=[32m"M17 8l-5-5-5 5"[39m
+                [36m/>[39m
+                [36m<path[39m
+                  [33md[39m=[32m"M12 3v12"[39m
+                [36m/>[39m
+              [36m</svg>[39m
+            [36m</span>[39m
+            [36m<span>[39m
+              [0mImportar docentes[0m
+            [36m</span>[39m
+          [36m</button>[39m
+          [36m<button[39m
+            [33mclass[39m=[32m"_btn_8e6d2d _primary_8e6d2d _md_8e6d2d"[39m
+          [36m>[39m
+            [36m<span[39m
+              [33mclass[39m=[32m"_icon_8e6d2d"[39m
+            [36m>[39m
+              [36m<svg[39m
+                [33maria-hidden[39m=[32m"true"[39m
+                [33mfill[39m=[32m"none"[39m
+                [33mheight[39m=[32m"17"[39m
+                [33mstroke[39m=[32m"currentColor"[39m
+                [33mstroke-linecap[39m=[32m"round"[39m
+                [33mstroke-linejoin[39m=[32m"round"[39m
+                [33mstroke-width[39m=[32m"2"[39m
+                [33mviewBox[39m=[32m"0 0 24 24"[39m
+                [33mwidth[39m=[32m"17"[39m
+              [36m>[39m
+                [36m<path[39m
+                  [33md[39m=[32m"M12 5v14M5 12h14"[39m
+                [36m/>[39m
+              [36m</svg>[39m
+            [36m</span>[39m
+            [36m<span>[39m
+              [0mNuevo usuario[0m
+            [36m</span>[39m
+          [36m</button>[39m
+        [36m</div>[39m
+      [36m</div>[39m
+      [36m<div[39m
+        [33mclass[39m=[32m"_tableCard_6270ee"[39m
+      [36m>[39m
+        [36m<div[39m
+          [33mclass[39m=[32m"_bar_5d8d89"[39m
+        [36m>[39m
+          [36m<div[39m
+            [33mclass[39m=[32m"_search_7f13ba _search_5d8d89"[39m
+          [36m>[39m
+            [36m<span[39m
+              [33mclass[39m=[32m"_searchIcon_7f13ba"[39m
+            [36m>[39m
+              [36m<svg[39m
+                [33maria-hidden[39m=[32m"true"[39m
+                [33mfill[39m=[32m"none"[39m
+                [33mheight[39m=[32m"17"[39m
+                [33mstroke[39m=[32m"currentColor"[39m
+                [33mstroke-linecap[39m=[32m"round"[39m
+                [33mstroke-linejoin[39m=[32m"round"[39m
+                [33mstroke-width[39m=[32m"2"[39m
+                [33mviewBox[39m=[32m"0 0 24 24"[39m
+                [33mwidth[39m=[32m"17"[39m
+              [36m>[39m
+                [36m<circle[39m
+                  [33mcx[39m=[32m"11"[39m
+                  [33mcy[39m=[32m"11"[39m
+                  [33mr[39m=[32m"8"[39m
+                [36m/>[39m
+                [36m<path[39m
+                  [33md[39m=[32m"m21 21-4.3-4.3"[39m
+                [36m/>[39m
+              [36m</svg>[39m
+            [36m</span>[39m
+            [36m<input[39m
+              [33maria-label[39m=[32m"Buscar usuario"[39m
+              [33mclass[39m=[32m"_input_7f13ba _withIcon_7f13ba "[39m
+              [33mplaceholder[39m=[32m"Buscar por nombre o correo…"[39m
+              [33mtype[39m=[32m"search"[39m
+              [33mvalue[39m=[32m""[39m
+            [36m/>[39m
+          [36m</div>[39m
+          [36m<div[39m
+            [33mclass[39m=[32m"_selectWrap_7f13ba _select_5d8d89"[39m
+          [36m>[39m
+            [36m<select[39m
+              [33maria-label[39m=[32m"Filtrar por rol"[39m
+              [33mclass[39m=[32m"_input_7f13ba _select_7f13ba "[39m
+            [36m>[39m
+              [36m<option[39m
+                [33mvalue[39m=[32m""[39m
+              [36m>[39m
+                [0mTodos los roles[0m
+              [36m</option>[39m
+            [36m</select>[39m
+            [36m<span[39m
+              [33mclass[39m=[32m"_chevron_7f13ba"[39m
+            [36m>[39m
+              [36m<svg[39m
+                [33maria-hidden[39m=[32m"true"[39m
+                [33mfill[39m=[32m"none"[39m
+                [33mheight[39m=[32m"16"[39m
+                [33mstroke[39m=[32m"currentColor"[39m
+                [33mstroke-linecap[39m=[32m"round"[39m
+                [33mstroke-linejoin[39m=[32m"round"[39m
+                [33mstroke-width[39m=[32m"2"[39m
+                [33mviewBox[39m=[32m"0 0 24 24"[39m
+                [33mwidth[39m=[32m"16"[39m
+              [36m>[39m
+                [36m<path[39m
+                  [33md[39m=[32m"m6 9 6 6 6-6"[39m
+                [36m/>[39m
+              [36m</svg>[39m
+            [36m</span>[39m
+          [36m</div>[39m
+          [36m<div[39m
+            [33mclass[39m=[32m"_selectWrap_7f13ba _select_5d8d89"[39m
+          [36m>[39m
+            [36m<select[39m
+              [33maria-label[39m=[32m"Filtrar por estado"[39m
+              [33mclass[39m=[32m"_input_7f13ba _select_7f13ba "[39m
+            [36m>[39m
+              [36m<option[39m
+                [33mvalue[39m=[32m""[39m
+              [36m>[39m
+                [0mTodos los estados[0m
+              [36m</option>[39m
+              [36m<option[39m
+                [33mvalue[39m=[32m"active"[39m
+              [36m>[39m
+                [0mActivos[0m
+              [36m</option>[39m
+              [36m<option[39m
+                [33mvalue[39m=[32m"inactive"[39m
+              [36m>[39m
+                [0mInactivos[0m
+              [36m</option>[39m
+            [36m</select>[39m
+            [36m<span[39m
+              [33mclass[39m=[32m"_chevron_7f13ba"[39m
+            [36m>[39m
+              [36m<svg[39m
+                [33maria-hidden[39m=[32m"true"[39m
+                [33mfill[39m=[32m"none"[39m
+                [33mheight[39m=[32m"16"[39m
+                [33mstroke[39m=[32m"currentColor"[39m
+                [33mstroke-linecap[39m=[32m"round"[39m
+                [33mstroke-linejoin[39m=[32m"round"[39m
+                [33mstroke-width[39m=[32m"2"[39m
+                [33mviewBox[39m=[32m"0 0 24 24"[39m
+                [33mwidth[39m=[32m"16"[39m
+              [36m>[39m
+                [36m<path[39m
+                  [33md[39m=[32m"m6 9 6 6 6-6"[39m
+                [36m/>[39m
+              [36m</svg>[39m
+            [36m</span>[39m
+          [36m</div>[39m
+        [36m</div>[39m
+        [36m<div[39m
+          [33maria-busy[39m=[32m"true"[39m
+          [33maria-label[39m=[32m"Cargando…"[39m
+          [33mclass[39m=[32m"_wrap_7294a4"[39m
+          [33mrole[39m=[32m"progressbar"[39m
+        [36m>[39m
+          [36m<p[39m
+            [33mclass[39m=[32m"_caption_7294a4"[39m
+          [36m>[39m
+            [0mCargando…[0m
+          [36m</p>[39m
+          [36m<div[39m
+            [33maria-hidden[39m=[32m"true"[39m
+          [36m>[39m
+            [36m<div[39m
+              [33mclass[39m=[32m"_row_7294a4"[39m
+            [36m>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"_cell_7294a4"[39m
+                [33mstyle[39m=[32m"width: 60%;"[39m
+              [36m/>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"_cell_7294a4"[39m
+                [33mstyle[39m=[32m"width: 70%;"[39m
+              [36m/>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"_cell_7294a4"[39m
+                [33mstyle[39m=[32m"width: 80%;"[39m
+              [36m/>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"_cell_7294a4"[39m
+                [33mstyle[39m=[32m"width: 90%;"[39m
+              [36m/>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"_cell_7294a4"[39m
+                [33mstyle[39m=[32m"width: 60%;"[39m
+              [36m/>[39m
+            [36m</div>[39m
+            [36m<div[39m
+              [33mclass[39m=[32m"_row_7294a4"[39m
+            [36m>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"_cell_7294a4"[39m
+                [33mstyle[39m=[32m"width: 70%;"[39m
+              [36m/>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"_cell_7294a4"[39m
+                [33mstyle[39m=[32m"width: 80%;"[39m
+              [36m/>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"_cell_7294a4"[39m
+                [33mstyle[39m=[32m"width: 90%;"[39m
+              [36m/>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"_cell_7294a4"[39m
+                [33mstyle[39m=[32m"width: 60%;"[39m
+              [36m/>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"_cell_7294a4"[39m
+                [33mstyle[39m=[32m"width: 70%;"[39m
+              [36m/>[39m
+            [36m</div>[39m
+            [36m<div[39m
+              [33mclass[39m=[32m"_row_7294a4"[39m
+            [36m>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"_cell_7294a4"[39m
+                [33mstyle[39m=[32m"width: 80%;"[39m
+              [36m/>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"_cell_7294a4"[39m
+                [33mstyle[39m=[32m"width: 90%;"[39m
+              [36m/>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"_cell_7294a4"[39m
+                [33mstyle[39m=[32m"width: 60%;"[39m
+              [36m/>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"_cell_7294a4"[39m
+                [33mstyle[39m=[32m"width: 70%;"[39m
+              [36m/>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"_cell_7294a4"[39m
+                [33mstyle[39m=[32m"width: 80%;"[39m
+              [36m/>[39m
+            [36m</div>[39m
+            [36m<div[39m
+              [33mclass[39m=[32m"_row_7294a4"[39m
+            [36m>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"_cell_7294a4"[39m
+                [33mstyle[39m=[32m"width: 90%;"[39m
+              [36m/>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"_cell_7294a4"[39m
+                [33mstyle[39m=[32m"width: 60%;"[39m
+              [36m/>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"_cell_7294a4"[39m
+                [33mstyle[39m=[32m"width: 70%;"[39m
+              [36m/>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"_cell_7294a4"[39m
+                [33mstyle[39m=[32m"width: 80%;"[39m
+              [36m/>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"_cell_7294a4"[39m
+                [33mstyle[39m=[32m"width: 90%;"[39m
+              [36m/>[39m
+            [36m</div>[39m
+            [36m<div[39m
+              [33mclass[39m=[32m"_row_7294a4"[39m
+            [36m>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"_cell_7294a4"[39m
+                [33mstyle[39m=[32m"width: 60%;"[39m
+              [36m/>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"_cell_7294a4"[39m
+                [33mstyle[39m=[32m"width: 70%;"[39m
+              [36m/>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"_cell_7294a4"[39m
+                [33mstyle[39m=[32m"width: 80%;"[39m
+              [36m/>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"_cell_7294a4"[39m
+                [33mstyle[39m=[32m"width: 90%;"[39m
+              [36m/>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"_cell_7294a4"[39m
+                [33mstyle[39m=[32m"width: 60%;"[39m
+              [36m/>[39m
+            [36m</div>[39m
+            [36m<div[39m
+              [33mclass[39m=[32m"_row_7294a4"[39m
+            [36m>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"_cell_7294a4"[39m
+                [33mstyle[39m=[32m"width: 70%;"[39m
+              [36m/>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"_cell_7294a4"[39m
+                [33mstyle[39m=[32m"width: 80%;"[39m
+              [36m/>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"_cell_7294a4"[39m
+                [33mstyle[39m=[32m"width: 90%;"[39m
+              [36m/>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"_cell_7294a4"[39m
+                [33mstyle[39m=[32m"width: 60%;"[39m
+              [36m/>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"_cell_7294a4"[39m
+                [33mstyle[39m=[32m"width: 70%;"[39m
+              [36m/>[39m
+            [36m</div>[39m
+          [36m</div>[39m
+        [36m</div>[39m
+      [36m</div>[39m
+    [36m</div>[39m
+  [36m</div>[39m
+[36m</body>[39m
+
+Ignored nodes: comments, script, style
+[36m<body>[39m
+  [36m<div>[39m
+    [36m<div>[39m
+      [36m<div[39m
+        [33mclass[39m=[32m"_header_d06475"[39m
+        [33mdata-ui[39m=[32m"page-header"[39m
+      [36m>[39m
+        [36m<div[39m
+          [33mclass[39m=[32m"_titleWrap_d06475"[39m
+        [36m>[39m
+          [36m<span[39m
+            [33mclass[39m=[32m"_icon_d06475"[39m
+          [36m>[39m
+            [36m<svg[39m
+              [33maria-hidden[39m=[32m"true"[39m
+              [33mfill[39m=[32m"none"[39m
+              [33mheight[39m=[32m"24"[39m
+              [33mstroke[39m=[32m"currentColor"[39m
+              [33mstroke-linecap[39m=[32m"round"[39m
+              [33mstroke-linejoin[39m=[32m"round"[39m
+              [33mstroke-width[39m=[32m"2"[39m
+              [33mviewBox[39m=[32m"0 0 24 24"[39m
+              [33mwidth[39m=[32m"24"[39m
+            [36m>[39m
+              [36m<path[39m
+                [33md[39m=[32m"M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"[39m
+              [36m/>[39m
+              [36m<circle[39m
+                [33mcx[39m=[32m"9"[39m
+                [33mcy[39m=[32m"7"[39m
+                [33mr[39m=[32m"4"[39m
+              [36m/>[39m
+              [36m<path[39m
+                [33md[39m=[32m"M22 21v-2a4 4 0 0 0-3-3.87"[39m
+              [36m/>[39m
+              [36m<path[39m
+                [33md[39m=[32m"M16 3.13a4 4 0 0 1 0 7.75"[39m
+              [36m/>[39m
+            [36m</svg>[39m
+          [36m</span>[39m
+          [36m<div>[39m
+            [36m<h1[39m
+              [33mclass[39m=[32m"_title_d06475"[39m
+            [36m>[39m
+              [0mUsuarios y roles[0m
+            [36m</h1>[39m
+            [36m<p[39m
+              [33mclass[39m=[32m"_subtitle_d06475"[39m
+            [36m>[39m
+              [0mCuentas del sistema y el rol de cada persona. Los catálogos y parámetros tienen su propia sección en el menú.[0m
+            [36m</p>[39m
+          [36m</div>[39m
+        [36m</div>[39m
+        [36m<div[39m
+          [33mclass[39m=[32m"_actions_d06475"[39m
+        [36m>[39m
+          [36m<button[39m
+            [33mclass[39m=[32m"_btn_8e6d2d _secondary_8e6d2d _md_8e6d2d"[39m
+          [36m>[39m
+            [36m<span[39m
+              [33mclass[39m=[32m"_icon_8e6d2d"[39m
+            [36m>[39m
+              [36m<svg[39m
+                [33maria-hidden[39m=[32m"true"[39m
+                [33mfill[39m=[32m"none"[39m
+                [33mheight[39m=[32m"17"[39m
+                [33mstroke[39m=[32m"currentColor"[39m
+                [33mstroke-linecap[39m=[32m"round"[39m
+                [33mstroke-linejoin[39m=[32m"round"[39m
+                [33mstroke-width[39m=[32m"2"[39m
+                [33mviewBox[39m=[32m"0 0 24 24"[39m
+                [33mwidth[39m=[32m"17"[39m
+              [36m>[39m
+                [36m<path[39m
+                  [33md[39m=[32m"M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"[39m
+                [36m/>[39m
+                [36m<path[39m
+                  [33md[39m=[32m"M17 8l-5-5-5 5"[39m
+                [36m/>[39m
+                [36m<path[39m
+                  [33md[39m=[32m"M12 3v12"[39m
+                [36m/>[39m
+              [36m</svg>[39m
+            [36m</span>[39m
+            [36m<span>[39m
+              [0mImportar docentes[0m
+            [36m</span>[39m
+          [36m</button>[39m
+          [36m<button[39m
+            [33mclass[39m=[32m"_btn_8e6d2d _primary_8e6d2d _md_8e6d2d"[39m
+          [36m>[39m
+            [36m<span[39m
+              [33mclass[39m=[32m"_icon_8e6d2d"[39m
+            [36m>[39m
+              [36m<svg[39m
+                [33maria-hidden[39m=[32m"true"[39m
+                [33mfill[39m=[32m"none"[39m
+                [33mheight[39m=[32m"17"[39m
+                [33mstroke[39m=[32m"currentColor"[39m
+                [33mstroke-linecap[39m=[32m"round"[39m
+                [33mstroke-linejoin[39m=[32m"round"[39m
+                [33mstroke-width[39m=[32m"2"[39m
+                [33mviewBox[39m=[32m"0 0 24 24"[39m
+                [33mwidth[39m=[32m"17"[39m
+              [36m>[39m
+                [36m<path[39m
+                  [33md[39m=[32m"M12 5v14M5 12h14"[39m
+                [36m/>[39m
+              [36m</svg>[39m
+            [36m</span>[39m
+            [36m<span>[39m
+              [0mNuevo usuario[0m
+            [36m</span>[39m
+          [36m</button>[39m
+        [36m</div>[39m
+      [36m</div>[39m
+      [36m<div[39m
+        [33mclass[39m=[32m"_tableCard_6270ee"[39m
+      [36m>[39m
+        [36m<div[39m
+          [33mclass[39m=[32m"_bar_5d8d89"[39m
+        [36m>[39m
+          [36m<div[39m
+            [33mclass[39m=[32m"_search_7f13ba _search_5d8d89"[39m
+          [36m>[39m
+            [36m<span[39m
+              [33mclass[39m=[32m"_searchIcon_7f13ba"[39m
+            [36m>[39m
+              [36m<svg[39m
+                [33maria-hidden[39m=[32m"true"[39m
+                [33mfill[39m=[32m"none"[39m
+                [33mheight[39m=[32m"17"[39m
+                [33mstroke[39m=[32m"currentColor"[39m
+                [33mstroke-linecap[39m=[32m"round"[39m
+                [33mstroke-linejoin[39m=[32m"round"[39m
+                [33mstroke-width[39m=[32m"2"[39m
+                [33mviewBox[39m=[32m"0 0 24 24"[39m
+                [33mwidth[39m=[32m"17"[39m
+              [36m>[39m
+                [36m<circle[39m
+                  [33mcx[39m=[32m"11"[39m
+                  [33mcy[39m=[32m"11"[39m
+                  [33mr[39m=[32m"8"[39m
+                [36m/>[39m
+                [36m<path[39m
+                  [33md[39m=[32m"m21 21-4.3-4.3"[39m
+                [36m/>[39m
+              [36m</svg>[39m
+            [36m</span>[39m
+            [36m<input[39m
+              [33maria-label[39m=[32m"Buscar usuario"[39m
+              [33mclass[39m=[32m"_input_7f13ba _withIcon_7f13ba "[39m
+              [33mplaceholder[39m=[32m"Buscar por nombre o correo…"[39m
+              [33mtype[39m=[32m"search"[39m
+              [33mvalue[39m=[32m""[39m
+            [36m/>[39m
+          [36m</div>[39m
+          [36m<div[39m
+            [33mclass[39m=[32m"_selectWrap_7f13ba _select_5d8d89"[39m
+          [36m>[39m
+            [36m<select[39m
+              [33maria-label[39m=[32m"Filtrar por rol"[39m
+              [33mclass[39m=[32m"_input_7f13ba _select_7f13ba "[39m
+            [36m>[39m
+              [36m<option[39m
+                [33mvalue[39m=[32m""[39m
+              [36m>[39m
+                [0mTodos los roles[0m
+              [36m</option>[39m
+            [36m</select>[39m
+            [36m<span[39m
+              [33mclass[39m=[32m"_chevron_7f13ba"[39m
+            [36m>[39m
+              [36m<svg[39m
+                [33maria-hidden[39m=[32m"true"[39m
+                [33mfill[39m=[32m"none"[39m
+                [33mheight[39m=[32m"16"[39m
+                [33mstroke[39m=[32m"currentColor"[39m
+                [33mstroke-linecap[39m=[32m"round"[39m
+                [33mstroke-linejoin[39m=[32m"round"[39m
+                [33mstroke-width[39m=[32m"2"[39m
+                [33mviewBox[39m=[32m"0 0 24 24"[39m
+                [33mwidth[39m=[32m"16"[39m
+              [36m>[39m
+                [36m<path[39m
+                  [33md[39m=[32m"m6 9 6 6 6-6"[39m
+                [36m/>[39m
+              [36m</svg>[39m
+            [36m</span>[39m
+          [36m</div>[39m
+          [36m<div[39m
+            [33mclass[39m=[32m"_selectWrap_7f13ba _select_5d8d89"[39m
+          [36m>[39m
+            [36m<select[39m
+              [33maria-label[39m=[32m"Filtrar por estado"[39m
+              [33mclass[39m=[32m"_input_7f13ba _select_7f13ba "[39m
+            [36m>[39m
+              [36m<option[39m
+                [33mvalue[39m=[32m""[39m
+              [36m>[39m
+                [0mTodos los estados[0m
+              [36m</option>[39m
+              [36m<option[39m
+                [33mvalue[39m=[32m"active"[39m
+              [36m>[39m
+                [0mActivos[0m
+              [36m</option>[39m
+              [36m<option[39m
+                [33mvalue[39m=[32m"inactive"[39m
+              [36m>[39m
+                [0mInactivos[0m
+              [36m</option>[39m
+            [36m</select>[39m
+            [36m<span[39m
+              [33mclass[39m=[32m"_chevron_7f13ba"[39m
+            [36m>[39m
+              [36m<svg[39m
+                [33maria-hidden[39m=[32m"true"[39m
+                [33mfill[39m=[32m"none"[39m
+                [33mheight[39m=[32m"16"[39m
+                [33mstroke[39m=[32m"currentColor"[39m
+                [33mstroke-linecap[39m=[32m"round"[39m
+                [33mstroke-linejoin[39m=[32m"round"[39m
+                [33mstroke-width[39m=[32m"2"[39m
+                [33mviewBox[39m=[32m"0 0 24 24"[39m
+                [33mwidth[39m=[32m"16"[39m
+              [36m>[39m
+                [36m<path[39m
+                  [33md[39m=[32m"m6 9 6 6 6-6"[39m
+                [36m/>[39m
+              [36m</svg>[39m
+            [36m</span>[39m
+          [36m</div>[39m
+        [36m</div>[39m
+        [36m<div[39m
+          [33maria-busy[39m=[32m"true"[39m
+          [33maria-label[39m=[32m"Cargando…"[39m
+          [33mclass[39m=[32m"_wrap_7294a4"[39m
+          [33mrole[39m=[32m"progressbar"[39m
+        [36m>[39m
+          [36m<p[39m
+            [33mclass[39m=[32m"_caption_7294a4"[39m
+          [36m>[39m
+            [0mCargando…[0m
+          [36m</p>[39m
+          [36m<div[39m
+            [33maria-hidden[39m=[32m"true"[39m
+          [36m>[39m
+            [36m<div[39m
+              [33mclass[39m=[32m"_row_7294a4"[39m
+            [36m>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"_cell_7294a4"[39m
+                [33mstyle[39m=[32m"width: 60%;"[39m
+              [36m/>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"_cell_7294a4"[39m
+                [33mstyle[39m=[32m"width: 70%;"[39m
+              [36m/>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"_cell_7294a4"[39m
+                [33mstyle[39m=[32m"width: 80%;"[39m
+              [36m/>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"_cell_7294a4"[39m
+                [33mstyle[39m=[32m"width: 90%;"[39m
+              [36m/>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"_cell_7294a4"[39m
+                [33mstyle[39m=[32m"width: 60%;"[39m
+              [36m/>[39m
+            [36m</div>[39m
+            [36m<div[39m
+              [33mclass[39m=[32m"_row_7294a4"[39m
+            [36m>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"_cell_7294a4"[39m
+                [33mstyle[39m=[32m"width: 70%;"[39m
+              [36m/>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"_cell_7294a4"[39m
+                [33mstyle[39m=[32m"width: 80%;"[39m
+              [36m/>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"_cell_7294a4"[39m
+                [33mstyle[39m=[32m"width: 90%;"[39m
+              [36m/>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"_cell_7294a4"[39m
+                [33mstyle[39m=[32m"width: 60%;"[39m
+              [36m/>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"_cell_7294a4"[39m
+                [33mstyle[39m=[32m"width: 70%;"[39m
+              [36m/>[39m
+            [36m</div>[39m
+            [36m<div[39m
+              [33mclass[39m=[32m"_row_7294a4"[39m
+            [36m>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"_cell_7294a4"[39m
+                [33mstyle[39m=[32m"width: 80%;"[39m
+              [36m/>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"_cell_7294a4"[39m
+                [33mstyle[39m=[32m"width: 90%;"[39m
+              [36m/>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"_cell_7294a4"[39m
+                [33mstyle[39m=[32m"width: 60%;"[39m
+              [36m/>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"_cell_7294a4"[39m
+                [33mstyle[39m=[32m"width: 70%;"[39m
+              [36m/>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"_cell_7294a4"[39m
+                [33mstyle[39m=[32m"width: 80%;"[39m
+              [36m/>[39m
+            [36m</div>[39m
+            [36m<div[39m
+              [33mclass[39m=[32m"_row_7294a4"[39m
+            [36m>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"_cell_7294a4"[39m
+                [33mstyle[39m=[32m"width: 90%;"[39m
+              [36m/>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"_cell_7294a4"[39m
+                [33mstyle[39m=[32m"width: 60%;"[39m
+              [36m/>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"_cell_7294a4"[39m
+                [33mstyle[39m=[32m"width: 70%;"[39m
+              [36m/>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"_cell_7294a4"[39m
+                [33mstyle[39m=[32m"width: 80%;"[39m
+              [36m/>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"_cell_7294a4"[39m
+                [33mstyle[39m=[32m"width: 90%;"[39m
+              [36m/>[39m
+            [36m</div>[39m
+            [36m<div[39m
+              [33mclass[39m=[32m"_row_7294a4"[39m
+            [36m>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"_cell_7294a4"[39m
+                [33mstyle[39m=[32m"width: 60%;"[39m
+              [36m/>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"_cell_7294a4"[39m
+                [33mstyle[39m=[32m"width: 70%;"[39m
+              [36m/>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"_cell_7294a4"[39m
+                [33mstyle[39m=[32m"width: 80%;"[39m
+              [36m/>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"_cell_7294a4"[39m
+                [33mstyle[39m=[32m"width: 90%;"[39m
+              [36m/>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"_cell_7294a4"[39m
+                [33mstyle[39m=[32m"width: 60%;"[39m
+              [36m/>[39m
+            [36m</div>[39m
+            [36m<div[39m
+              [33mclass[39m=[32m"_row_7294a4"[39m
+            [36m>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"_cell_7294a4"[39m
+                [33mstyle[39m=[32m"width: 70%;"[39m
+              [36m/>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"_cell_7294a4"[39m
+                [33mstyle[39m=[32m"width: 80%;"[39m
+              [36m/>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"_cell_7294a4"[39m
+                [33mstyle[39m=[32m"width: 90%;"[39m
+              [36m/>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"_cell_7294a4"[39m
+                [33mstyle[39m=[32m"width: 60%;"[39m
+              [36m/>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"_cell_7294a4"[39m
+                [33mstyle[39m=[32m"width: 70%;"[39m
+              [36m/>[39m
+            [36m</div>[39m
+          [36m</div>[39m
+        [36m</div>[39m
+      [36m</div>[39m
+    [36m</div>[39m
+  [36m</div>[39m
+[36m</body>[39m
+ ❯ waitForWrapper node_modules/.pnpm/@testing-library+dom@10.4.1/node_modules/@testing-library/dom/dist/wait-for.js:163:27
+ ❯ node_modules/.pnpm/@testing-library+dom@10.4.1/node_modules/@testing-library/dom/dist/query-helpers.js:86:33
+ ❯ src/features/admin/pages/UserManagementPage.test.tsx:42:35
+     40|     renderPage();
+     41|
+     42|     await user.click(await screen.findByRole('button', { name: 'Desact…
+       |                                   ^
+     43|     const dialog = await screen.findByRole('alertdialog');
+     44|     await user.click(within(dialog).getByRole('button', { name: 'Desac…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/33]⎯
+
+ FAIL  src/features/auth/components/LoginPage.test.tsx > LoginPage > envía las credenciales ingresadas al servicio de autenticación
+Error: Test timed out in 5000ms.
+If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".
+ ❯ src/features/auth/components/LoginPage.test.tsx:53:3
+     51|   });
+     52|
+     53|   it('envía las credenciales ingresadas al servicio de autenticación',…
+       |   ^
+     54|     loginMock.mockResolvedValue(loginResult);
+     55|     renderLogin();
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/33]⎯
+
+ FAIL  src/features/auth/components/LoginPage.test.tsx > LoginPage > redirige al panel principal tras un login exitoso
+TestingLibraryElementError: Unable to find a label with the text of: /contraseña/i
+
+Ignored nodes: comments, script, style
+[36m<body>[39m
+  [36m<div>[39m
+    [36m<h1>[39m
+      [0mPanel principal[0m
+    [36m</h1>[39m
+  [36m</div>[39m
+[36m</body>[39m
+ ❯ Object.getElementError node_modules/.pnpm/@testing-library+dom@10.4.1/node_modules/@testing-library/dom/dist/config.js:37:19
+ ❯ getAllByLabelText node_modules/.pnpm/@testing-library+dom@10.4.1/node_modules/@testing-library/dom/dist/queries/label-text.js:111:38
+ ❯ node_modules/.pnpm/@testing-library+dom@10.4.1/node_modules/@testing-library/dom/dist/query-helpers.js:52:17
+ ❯ node_modules/.pnpm/@testing-library+dom@10.4.1/node_modules/@testing-library/dom/dist/query-helpers.js:95:19
+ ❯ fillAndSubmit src/features/auth/components/LoginPage.test.tsx:44:26
+     42|   const user = userEvent.setup();
+     43|   await user.type(screen.getByLabelText(/correo institucional/i), emai…
+     44|   await user.type(screen.getByLabelText(/contraseña/i), password);
+       |                          ^
+     45|   await user.click(screen.getByRole('button', { name: /ingresar/i }));
+     46| }
+ ❯ src/features/auth/components/LoginPage.test.tsx:71:5
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/33]⎯
+
+ FAIL  src/features/auth/components/ResetPasswordPage.test.tsx > ResetPasswordPage > en modo activación explica que el enlace sirve una sola vez y envía el token del enlace
+Error: Test timed out in 5000ms.
+If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".
+ ❯ src/features/auth/components/ResetPasswordPage.test.tsx:24:3
+     22|   beforeEach(() => vi.clearAllMocks());
+     23|
+     24|   it('en modo activación explica que el enlace sirve una sola vez y en…
+       |   ^
+     25|     mocked.resetPassword.mockResolvedValue(undefined);
+     26|     const user = userEvent.setup();
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[6/33]⎯
+
+ FAIL  src/features/ciclos/pages/CycleTutorsPage.test.tsx > CycleTutorsPage > ofrece solo los docentes de la escuela y asigna al elegido
+Error: Test timed out in 5000ms.
+If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".
+ ❯ src/features/ciclos/pages/CycleTutorsPage.test.tsx:37:3
+     35|   });
+     36|
+     37|   it('ofrece solo los docentes de la escuela y asigna al elegido', asy…
+       |   ^
+     38|     mocked.set.mockResolvedValue({ assigned: 8, moved: 0 });
+     39|     renderPage();
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[7/33]⎯
+
+ FAIL  src/features/ciclos/pages/CycleTutorsPage.test.tsx > CycleTutorsPage > si el docente ya tiene otro ciclo pide el motivo y registra la excepción
+Error: Test timed out in 5000ms.
+If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".
+ ❯ src/features/ciclos/pages/CycleTutorsPage.test.tsx:82:3
+     80|   });
+     81|
+     82|   it('si el docente ya tiene otro ciclo pide el motivo y registra la e…
+       |   ^
+     83|     mocked.set
+     84|       .mockRejectedValueOnce(Object.assign(new Error('x'), { isAxiosEr…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[8/33]⎯
+
+ FAIL  src/features/ciclos/pages/CycleTutorsPage.test.tsx > CycleTutorsPage > registra un motivo sugerido sin exigir texto y descarta el texto de Otro al cambiar de motivo
+TestingLibraryElementError: Unable to find a label with the text of: Motivo de la excepción
+
+Ignored nodes: comments, script, style
+[36m<body>[39m
+  [36m<div>[39m
+    [36m<div[39m
+      [33mclass[39m=[32m"_page_893ceb"[39m
+    [36m>[39m
+      [36m<div[39m
+        [33mclass[39m=[32m"_header_d06475"[39m
+        [33mdata-ui[39m=[32m"page-header"[39m
+      [36m>[39m
+        [36m<div[39m
+          [33mclass[39m=[32m"_titleWrap_d06475"[39m
+        [36m>[39m
+          [36m<span[39m
+            [33mclass[39m=[32m"_icon_d06475"[39m
+          [36m>[39m
+            [36m<svg[39m
+              [33maria-hidden[39m=[32m"true"[39m
+              [33mfill[39m=[32m"none"[39m
+              [33mheight[39m=[32m"24"[39m
+              [33mstroke[39m=[32m"currentColor"[39m
+              [33mstroke-linecap[39m=[32m"round"[39m
+              [33mstroke-linejoin[39m=[32m"round"[39m
+              [33mstroke-width[39m=[32m"2"[39m
+              [33mviewBox[39m=[32m"0 0 24 24"[39m
+              [33mwidth[39m=[32m"24"[39m
+            [36m>[39m
+              [36m<path[39m
+                [33md[39m=[32m"M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"[39m
+              [36m/>[39m
+              [36m<circle[39m
+                [33mcx[39m=[32m"9"[39m
+                [33mcy[39m=[32m"7"[39m
+                [33mr[39m=[32m"4"[39m
+              [36m/>[39m
+              [36m<path[39m
+                [33md[39m=[32m"M19 8v6M22 11h-6"[39m
+              [36m/>[39m
+            [36m</svg>[39m
+          [36m</span>[39m
+          [36m<div>[39m
+            [36m<h1[39m
+              [33mclass[39m=[32m"_title_d06475"[39m
+            [36m>[39m
+              [0mAsignación por ciclo[0m
+            [36m</h1>[39m
+            [36m<p[39m
+              [33mclass[39m=[32m"_subtitle_d06475"[39m
+            [36m>[39m
+              [0mElige una escuela, revisa sus ciclos y guarda el docente que atenderá a cada uno.[0m
+            [36m</p>[39m
+          [36m</div>[39m
+        [36m</div>[39m
+        [36m<div[39m
+          [33mclass[39m=[32m"_actions_d06475"[39m
+        [36m>[39m
+          [36m<div[39m
+            [33mclass[39m=[32m"_controls_893ceb"[39m
+          [36m>[39m
+            [36m<div[39m
+              [33mclass[39m=[32m"_picker_893ceb"[39m
+            [36m>[39m
+              [36m<div[39m
+                [33mclass[39m=[32m"_pickerMeta_893ceb"[39m
+              [36m>[39m
+                [36m<label[39m
+                  [33mfor[39m=[32m"cycle-school"[39m
+                [36m>[39m
+                  [0mEscuela profesional[0m
+                [36m</label>[39m
+                [36m<span>[39m
+                  [0mPeriodo [0m
+                  [0m2026-II[0m
+                  [0m · [0m
+                  [0m1[0m
+                  [0m docente[0m
+                [36m</span>[39m
+              [36m</div>[39m
+              [36m<div[39m
+                [33mclass[39m=[32m"_selectWrap_7f13ba "[39m
+              [36m>[39m
+                [36m<select[39m
+                  [33mclass[39m=[32m"_input_7f13ba _select_7f13ba "[39m
+                  [33mid[39m=[32m"cycle-school"[39m
+                [36m>[39m
+                  [36m<option[39m
+                    [33mvalue[39m=[32m"s1"[39m
+                  [36m>[39m
+                    [0mIngeniería de Sistemas[0m
+                  [36m</option>[39m
+                [36m</select>[39m
+                [36m<span[39m
+                  [33mclass[39m=[32m"_chevron_7f13ba"[39m
+                [36m>[39m
+                  [36m<svg[39m
+                    [33maria-hidden[39m=[32m"true"[39m
+                    [33mfill[39m=[32m"none"[39m
+                    [33mheight[39m=[32m"16"[39m
+                    [33mstroke[39m=[32m"currentColor"[39m
+                    [33mstroke-linecap[39m=[32m"round"[39m
+                    [33mstroke-linejoin[39m=[32m"round"[39m
+                    [33mstroke-width[39m=[32m"2"[39m
+                    [33mviewBox[39m=[32m"0 0 24 24"[39m
+                    [33mwidth[39m=[32m"16"[39m
+                  [36m>[39m
+                    [36m<path[39m
+                      [33md[39m=[32m"m6 9 6 6 6-6"[39m
+                    [36m/>[39m
+                  [36m</svg>[39m
+                [36m</span>[39m
+              [36m</div>[39m
+            [36m</div>[39m
+            [36m<button[39m
+              [33maria-haspopup[39m=[32m"dialog"[39m
+              [33mclass[39m=[32m"_btn_8e6d2d _secondary_8e6d2d _sm_8e6d2d"[39m
+            [36m>[39m
+              [36m<span>[39m
+                [0mCómo asignar un docente[0m
+              [36m</span>[39m
+            [36m</button>[39m
+          [36m</div>[39m
+        [36m</div>[39m
+      [36m</div>[39m
+      [36m<p[39m
+        [33mclass[39m=[32m"_ok_893ceb"[39m
+        [33mrole[39m=[32m"status"[39m
+      [36m>[39m
+        [0mCiclo 1: 0 estudiante(s) asignados.[0m
+      [36m</p>[39m
+      [36m<div[39m
+        [33mclass[39m=[32m"_card_7523f3  "[39m
+      [36m>[39m
+        [36m<div[39m
+          [33mclass[39m=[32m"_body_7523f3 "[39m
+          [33mdata-ui[39m=[32m"card-body"[39m
+        [36m>[39m
+          [36m<div[39m
+            [33maria-label[39m=[32m"Resumen de asignaciones"[39m
+            [33mclass[39m=[32m"_summary_893ceb"[39m
+          [36m>[39m
+            [36m<div>[39m
+              [36m<strong>[39m
+                [0m8[0m
+              [36m</strong>[39m
+              [36m<span>[39m
+                [0mEstudiantes[0m
+              [36m</span>[39m
+            [36m</div>[39m
+            [36m<div>[39m
+              [36m<strong>[39m
+                [0m1[0m
+              [36m</strong>[39m
+              [36m<span>[39m
+                [0mCiclos sin docente[0m
+              [36m</span>[39m
+            [36m</div>[39m
+            [36m<div>[39m
+              [36m<strong>[39m
+                [0m0[0m
+              [36m</strong>[39m
+              [36m<span>[39m
+                [0mPor responder[0m
+              [36m</span>[39m
+            [36m</div>[39m
+            [36m<div>[39m
+              [36m<strong>[39m
+                [0m0[0m
+              [36m</strong>[39m
+              [36m<span>[39m
+                [0mCon aceptación[0m
+              [36m</span>[39m
+            [36m</div>[39m
+          [36m</div>[39m
+          [36m<div[39m
+            [33mclass[39m=[32m"_toolbar_893ceb"[39m
+          [36m>[39m
+            [36m<div[39m
+              [33maria-label[39m=[32m"Mostrar ciclos"[39m
+              [33mclass[39m=[32m"_filters_893ceb"[39m
+              [33mrole[39m=[32m"group"[39m
+            [36m>[39m
+              [36m<button[39m
+                [33maria-pressed[39m=[32m"true"[39m
+                [33mtype[39m=[32m"button"[39m
+              [36m>[39m
+                [0mCon estudiantes[0m
+              [36m</button>[39m
+              [36m<button[39m
+                [33maria-pressed[39m=[32m"false"[39m
+                [33mtype[39m=[32m"button"[39m
+              [36m>[39m
+                [0mNecesitan revisión[0m
+              [36m</button>[39m
+              [36m<button[39m
+                [33maria-pressed[39m=[32m"false"[39m
+                [33mtype[39m=[32m"button"[39m
+              [36m>[39m
+                [0mCon aceptación[0m
+              [36m</button>[39m
+              [36m<button[39m
+                [33maria-pressed[39m=[32m"false"[39m
+                [33mtype[39m=[32m"button"[39m
+              [36m>[39m
+                [0mTodos los ciclos[0m
+              [36m</button>[39m
+            [36m</div>[39m
+            [36m<p[39m
+              [33mclass[39m=[32m"_resultCount_893ceb"[39m
+            [36m>[39m
+              [0m1[0m
+              [0m / [0m
+              [0m10[0m
+              [0m ciclos[0m
+            [36m</p>[39m
+          [36m</div>[39m
+          [36m<p[39m
+            [33mclass[39m=[32m"_saveHint_893ceb"[39m
+          [36m>[39m
+            [0mElige un docente y confirma con «Guardar asignación».[0m
+          [36m</p>[39m
+          [36m<ul[39m
+            [33mclass[39m=[32m"_list_893ceb"[39m
+          [36m>[39m
+            [36m<li[39m
+              [33maria-label[39m=[32m"Asignación del ciclo 1"[39m
+              [33mclass[39m=[32m"_row_893ceb"[39m
+            [36m>[39m
+              [36m<div[39m
+                [33mclass[39m=[32m"_rowHeading_893ceb"[39m
+              [36m>[39m
+                [36m<h3[39m
+                  [33mclass[39m=[32m"_cycle_893ceb"[39m
+                [36m>[39m
+                  [0mCiclo [0m
+                  [0m1[0m
+                [36m</h3>[39m
+                [36m<span[39m
+                  [33mclass[39m=[32m"_count_893ceb"[39m
+                [36m>[39m
+                  [0m8[0m
+                  [0m estudiante[0m
+                  [0ms[0m
+                [36m</span>[39m
+              [36m</div>[39m
+              [36m<div[39m
+                [33mclass[39m=[32m"_tutorCell_893ceb"[39m
+              [36m>[39m
+                [36m<label[39m
+                  [33mclass[39m=[32m"_selectLabel_893ceb"[39m
+                  [33mfor[39m=[32m"cycle-tutor-1"[39m
+                [36m>[39m
+                  [0mDocente para este ciclo[0m
+                [36m</label>[39m
+                [36m<div[39m
+                  [33mclass[39m=[32m"_selectWrap_7f13ba "[39m
+                [36m>[39m
+                  [36m<select[39m
+                    [33maria-label[39m=[32m"Tutor del ciclo 1"[39m
+                    [33mclass[39m=[32m"_input_7f13ba _select_7f13ba "[39m
+                    [33mid[39m=[32m"cycle-tutor-1"[39m
+                  [36m>[39m
+                    [36m<option[39m
+                      [33mvalue[39m=[32m""[39m
+                    [36m>[39m
+                      [0mElige un docente…[0m
+                    [36m</option>[39m
+                    [36m<option[39m
+                      [33mvalue[39m=[32m"t1"[39m
+                    [36m>[39m
+                      [0mElena Ramírez[0m
+                      [0m · [0m
+                      [0m0[0m
+                      [0m estudiantes asignados[0m
+                    [36m</option>[39m
+                  [36m</select>[39m
+                  [36m<span[39m
+                    [33mclass[39m=[32m"_chevron_7f13ba"[39m
+                  [36m>[39m
+                    [36m<svg[39m
+                      [33maria-hidden[39m=[32m"true"[39m
+                      [33mfill[39m=[32m"none"[39m
+                      [33mheight[39m=[32m"16"[39m
+                      [33mstroke[39m=[32m"currentColor"[39m
+                      [33mstroke-linecap[39m=[32m"round"[39m
+                      [33mstroke-linejoin[39m=[32m"round"[39m
+                      [33mstroke-width[39m=[32m"2"[39m
+                      [33mviewBox[39m=[32m"0 0 24 24"[39m
+                      [33mwidth[39m=[32m"16"[39m
+                    [36m>[39m
+                      [36m<path[39m
+                        [33md[39m=[32m"m6 9 6 6 6-6"[39m
+                      [36m/>[39m
+                    [36m</svg>[39m
+                  [36m</span>[39m
+                [36m</div>[39m
+              [36m</div>[39m
+              [36m<div[39m
+                [33mclass[39m=[32m"_statusCell_893ceb"[39m
+              [36m>[39m
+                [36m<div[39m
+                  [33mclass[39m=[32m"_statuses_893ceb"[39m
+                [36m>[39m
+                  [36m<span[39m
+                    [33mclass[39m=[32m"_status_893ceb"[39m
+                  [36m>[39m
+                    [36m<span[39m
+                      [33mclass[39m=[32m"_badge_06b43f _danger_06b43f"[39m
+                    [36m>[39m
+                      [0mSin docente de ciclo[0m
+                    [36m</span>[39m
+                  [36m</span>[39m
+                [36m</div>[39m
+                [36m<div[39m
+                  [33mclass[39m=[32m"_rowActions_893ceb"[39m
+                [36m/>[39m
+              [36m</div>[39m
+            [36m</li>[39m
+          [36m</ul>[39m
+        [36m</div>[39m
+      [36m</div>[39m
+    [36m</div>[39m
+  [36m</div>[39m
+[36m</body>[39m
+
+Ignored nodes: comments, script, style
+[36m<body>[39m
+  [36m<div>[39m
+    [36m<div[39m
+      [33mclass[39m=[32m"_page_893ceb"[39m
+    [36m>[39m
+      [36m<div[39m
+        [33mclass[39m=[32m"_header_d06475"[39m
+        [33mdata-ui[39m=[32m"page-header"[39m
+      [36m>[39m
+        [36m<div[39m
+          [33mclass[39m=[32m"_titleWrap_d06475"[39m
+        [36m>[39m
+          [36m<span[39m
+            [33mclass[39m=[32m"_icon_d06475"[39m
+          [36m>[39m
+            [36m<svg[39m
+              [33maria-hidden[39m=[32m"true"[39m
+              [33mfill[39m=[32m"none"[39m
+              [33mheight[39m=[32m"24"[39m
+              [33mstroke[39m=[32m"currentColor"[39m
+              [33mstroke-linecap[39m=[32m"round"[39m
+              [33mstroke-linejoin[39m=[32m"round"[39m
+              [33mstroke-width[39m=[32m"2"[39m
+              [33mviewBox[39m=[32m"0 0 24 24"[39m
+              [33mwidth[39m=[32m"24"[39m
+            [36m>[39m
+              [36m<path[39m
+                [33md[39m=[32m"M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"[39m
+              [36m/>[39m
+              [36m<circle[39m
+                [33mcx[39m=[32m"9"[39m
+                [33mcy[39m=[32m"7"[39m
+                [33mr[39m=[32m"4"[39m
+              [36m/>[39m
+              [36m<path[39m
+                [33md[39m=[32m"M19 8v6M22 11h-6"[39m
+              [36m/>[39m
+            [36m</svg>[39m
+          [36m</span>[39m
+          [36m<div>[39m
+            [36m<h1[39m
+              [33mclass[39m=[32m"_title_d06475"[39m
+            [36m>[39m
+              [0mAsignación por ciclo[0m
+            [36m</h1>[39m
+            [36m<p[39m
+              [33mclass[39m=[32m"_subtitle_d06475"[39m
+            [36m>[39m
+              [0mElige una escuela, revisa sus ciclos y guarda el docente que atenderá a cada uno.[0m
+            [36m</p>[39m
+          [36m</div>[39m
+        [36m</div>[39m
+        [36m<div[39m
+          [33mclass[39m=[32m"_actions_d06475"[39m
+        [36m>[39m
+          [36m<div[39m
+            [33mclass[39m=[32m"_controls_893ceb"[39m
+          [36m>[39m
+            [36m<div[39m
+              [33mclass[39m=[32m"_picker_893ceb"[39m
+            [36m>[39m
+              [36m<div[39m
+                [33mclass[39m=[32m"_pickerMeta_893ceb"[39m
+              [36m>[39m
+                [36m<label[39m
+                  [33mfor[39m=[32m"cycle-school"[39m
+                [36m>[39m
+                  [0mEscuela profesional[0m
+                [36m</label>[39m
+                [36m<span>[39m
+                  [0mPeriodo [0m
+                  [0m2026-II[0m
+                  [0m · [0m
+                  [0m1[0m
+                  [0m docente[0m
+                [36m</span>[39m
+              [36m</div>[39m
+              [36m<div[39m
+                [33mclass[39m=[32m"_selectWrap_7f13ba "[39m
+              [36m>[39m
+                [36m<select[39m
+                  [33mclass[39m=[32m"_input_7f13ba _select_7f13ba "[39m
+                  [33mid[39m=[32m"cycle-school"[39m
+                [36m>[39m
+                  [36m<option[39m
+                    [33mvalue[39m=[32m"s1"[39m
+                  [36m>[39m
+                    [0mIngeniería de Sistemas[0m
+                  [36m</option>[39m
+                [36m</select>[39m
+                [36m<span[39m
+                  [33mclass[39m=[32m"_chevron_7f13ba"[39m
+                [36m>[39m
+                  [36m<svg[39m
+                    [33maria-hidden[39m=[32m"true"[39m
+                    [33mfill[39m=[32m"none"[39m
+                    [33mheight[39m=[32m"16"[39m
+                    [33mstroke[39m=[32m"currentColor"[39m
+                    [33mstroke-linecap[39m=[32m"round"[39m
+                    [33mstroke-linejoin[39m=[32m"round"[39m
+                    [33mstroke-width[39m=[32m"2"[39m
+                    [33mviewBox[39m=[32m"0 0 24 24"[39m
+                    [33mwidth[39m=[32m"16"[39m
+                  [36m>[39m
+                    [36m<path[39m
+                      [33md[39m=[32m"m6 9 6 6 6-6"[39m
+                    [36m/>[39m
+                  [36m</svg>[39m
+                [36m</span>[39m
+              [36m</div>[39m
+            [36m</div>[39m
+            [36m<button[39m
+              [33maria-haspopup[39m=[32m"dialog"[39m
+              [33mclass[39m=[32m"_btn_8e6d2d _secondary_8e6d2d _sm_8e6d2d"[39m
+            [36m>[39m
+              [36m<span>[39m
+                [0mCómo asignar un docente[0m
+              [36m</span>[39m
+            [36m</button>[39m
+          [36m</div>[39m
+        [36m</div>[39m
+      [36m</div>[39m
+      [36m<p[39m
+        [33mclass[39m=[32m"_ok_893ceb"[39m
+        [33mrole[39m=[32m"status"[39m
+      [36m>[39m
+        [0mCiclo 1: 0 estudiante(s) asignados.[0m
+      [36m</p>[39m
+      [36m<div[39m
+        [33mclass[39m=[32m"_card_7523f3  "[39m
+      [36m>[39m
+        [36m<div[39m
+          [33mclass[39m=[32m"_body_7523f3 "[39m
+          [33mdata-ui[39m=[32m"card-body"[39m
+        [36m>[39m
+          [36m<div[39m
+            [33maria-label[39m=[32m"Resumen de asignaciones"[39m
+            [33mclass[39m=[32m"_summary_893ceb"[39m
+          [36m>[39m
+            [36m<div>[39m
+              [36m<strong>[39m
+                [0m8[0m
+              [36m</strong>[39m
+              [36m<span>[39m
+                [0mEstudiantes[0m
+              [36m</span>[39m
+            [36m</div>[39m
+            [36m<div>[39m
+              [36m<strong>[39m
+                [0m1[0m
+              [36m</strong>[39m
+              [36m<span>[39m
+                [0mCiclos sin docente[0m
+              [36m</span>[39m
+            [36m</div>[39m
+            [36m<div>[39m
+              [36m<strong>[39m
+                [0m0[0m
+              [36m</strong>[39m
+              [36m<span>[39m
+                [0mPor responder[0m
+              [36m</span>[39m
+            [36m</div>[39m
+            [36m<div>[39m
+              [36m<strong>[39m
+                [0m0[0m
+              [36m</strong>[39m
+              [36m<span>[39m
+                [0mCon aceptación[0m
+              [36m</span>[39m
+            [36m</div>[39m
+          [36m</div>[39m
+          [36m<div[39m
+            [33mclass[39m=[32m"_toolbar_893ceb"[39m
+          [36m>[39m
+            [36m<div[39m
+              [33maria-label[39m=[32m"Mostrar ciclos"[39m
+              [33mclass[39m=[32m"_filters_893ceb"[39m
+              [33mrole[39m=[32m"group"[39m
+            [36m>[39m
+              [36m<button[39m
+                [33maria-pressed[39m=[32m"true"[39m
+                [33mtype[39m=[32m"button"[39m
+              [36m>[39m
+                [0mCon estudiantes[0m
+              [36m</button>[39m
+              [36m<button[39m
+                [33maria-pressed[39m=[32m"false"[39m
+                [33mtype[39m=[32m"button"[39m
+              [36m>[39m
+                [0mNecesitan revisión[0m
+              [36m</button>[39m
+              [36m<button[39m
+                [33maria-pressed[39m=[32m"false"[39m
+                [33mtype[39m=[32m"button"[39m
+              [36m>[39m
+                [0mCon aceptación[0m
+              [36m</button>[39m
+              [36m<button[39m
+                [33maria-pressed[39m=[32m"false"[39m
+                [33mtype[39m=[32m"button"[39m
+              [36m>[39m
+                [0mTodos los ciclos[0m
+              [36m</button>[39m
+            [36m</div>[39m
+            [36m<p[39m
+              [33mclass[39m=[32m"_resultCount_893ceb"[39m
+            [36m>[39m
+              [0m1[0m
+              [0m / [0m
+              [0m10[0m
+              [0m ciclos[0m
+            [36m</p>[39m
+          [36m</div>[39m
+          [36m<p[39m
+            [33mclass[39m=[32m"_saveHint_893ceb"[39m
+          [36m>[39m
+            [0mElige un docente y confirma con «Guardar asignación».[0m
+          [36m</p>[39m
+          [36m<ul[39m
+            [33mclass[39m=[32m"_list_893ceb"[39m
+          [36m>[39m
+            [36m<li[39m
+              [33maria-label[39m=[32m"Asignación del ciclo 1"[39m
+              [33mclass[39m=[32m"_row_893ceb"[39m
+            [36m>[39m
+              [36m<div[39m
+                [33mclass[39m=[32m"_rowHeading_893ceb"[39m
+              [36m>[39m
+                [36m<h3[39m
+                  [33mclass[39m=[32m"_cycle_893ceb"[39m
+                [36m>[39m
+                  [0mCiclo [0m
+                  [0m1[0m
+                [36m</h3>[39m
+                [36m<span[39m
+                  [33mclass[39m=[32m"_count_893ceb"[39m
+                [36m>[39m
+                  [0m8[0m
+                  [0m estudiante[0m
+                  [0ms[0m
+                [36m</span>[39m
+              [36m</div>[39m
+              [36m<div[39m
+                [33mclass[39m=[32m"_tutorCell_893ceb"[39m
+              [36m>[39m
+                [36m<label[39m
+                  [33mclass[39m=[32m"_selectLabel_893ceb"[39m
+                  [33mfor[39m=[32m"cycle-tutor-1"[39m
+                [36m>[39m
+                  [0mDocente para este ciclo[0m
+                [36m</label>[39m
+                [36m<div[39m
+                  [33mclass[39m=[32m"_selectWrap_7f13ba "[39m
+                [36m>[39m
+                  [36m<select[39m
+                    [33maria-label[39m=[32m"Tutor del ciclo 1"[39m
+                    [33mclass[39m=[32m"_input_7f13ba _select_7f13ba "[39m
+                    [33mid[39m=[32m"cycle-tutor-1"[39m
+                  [36m>[39m
+                    [36m<option[39m
+                      [33mvalue[39m=[32m""[39m
+                    [36m>[39m
+                      [0mElige un docente…[0m
+                    [36m</option>[39m
+                    [36m<option[39m
+                      [33mvalue[39m=[32m"t1"[39m
+                    [36m>[39m
+                      [0mElena Ramírez[0m
+                      [0m · [0m
+                      [0m0[0m
+                      [0m estudiantes asignados[0m
+                    [36m</option>[39m
+                  [36m</select>[39m
+                  [36m<span[39m
+                    [33mclass[39m=[32m"_chevron_7f13ba"[39m
+                  [36m>[39m
+                    [36m<svg[39m
+                      [33maria-hidden[39m=[32m"true"[39m
+                      [33mfill[39m=[32m"none"[39m
+                      [33mheight[39m=[32m"16"[39m
+                      [33mstroke[39m=[32m"currentColor"[39m
+                      [33mstroke-linecap[39m=[32m"round"[39m
+                      [33mstroke-linejoin[39m=[32m"round"[39m
+                      [33mstroke-width[39m=[32m"2"[39m
+                      [33mviewBox[39m=[32m"0 0 24 24"[39m
+                      [33mwidth[39m=[32m"16"[39m
+                    [36m>[39m
+                      [36m<path[39m
+                        [33md[39m=[32m"m6 9 6 6 6-6"[39m
+                      [36m/>[39m
+                    [36m</svg>[39m
+                  [36m</span>[39m
+                [36m</div>[39m
+              [36m</div>[39m
+              [36m<div[39m
+                [33mclass[39m=[32m"_statusCell_893ceb"[39m
+              [36m>[39m
+                [36m<div[39m
+                  [33mclass[39m=[32m"_statuses_893ceb"[39m
+                [36m>[39m
+                  [36m<span[39m
+                    [33mclass[39m=[32m"_status_893ceb"[39m
+                  [36m>[39m
+                    [36m<span[39m
+                      [33mclass[39m=[32m"_badge_06b43f _danger_06b43f"[39m
+                    [36m>[39m
+                      [0mSin docente de ciclo[0m
+                    [36m</span>[39m
+                  [36m</span>[39m
+                [36m</div>[39m
+                [36m<div[39m
+                  [33mclass[39m=[32m"_rowActions_893ceb"[39m
+                [36m/>[39m
+              [36m</div>[39m
+            [36m</li>[39m
+          [36m</ul>[39m
+        [36m</div>[39m
+      [36m</div>[39m
+    [36m</div>[39m
+  [36m</div>[39m
+[36m</body>[39m
+ ❯ waitForWrapper node_modules/.pnpm/@testing-library+dom@10.4.1/node_modules/@testing-library/dom/dist/wait-for.js:163:27
+ ❯ node_modules/.pnpm/@testing-library+dom@10.4.1/node_modules/@testing-library/dom/dist/query-helpers.js:86:33
+ ❯ src/features/ciclos/pages/CycleTutorsPage.test.tsx:114:33
+    112|     await userEvent.selectOptions(await screen.findByLabelText('Tutor …
+    113|     await userEvent.click(screen.getByRole('button', { name: 'Guardar …
+    114|     const reason = await screen.findByLabelText('Motivo de la excepció…
+       |                                 ^
+    115|     await userEvent.selectOptions(reason, 'OTHER');
+    116|     await userEvent.type(screen.getByLabelText('Describe el motivo'), …
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[9/33]⎯
+
+ FAIL  src/features/derivaciones/components/ReferralFormModal.test.tsx > ReferralFormModal > envía el checklist, motivo y servicio elegidos
+Error: Test timed out in 5000ms.
+If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".
+ ❯ src/features/derivaciones/components/ReferralFormModal.test.tsx:61:3
+     59|   });
+     60|
+     61|   it('envía el checklist, motivo y servicio elegidos', async () => {
+       |   ^
+     62|     const onSubmit = vi.fn();
+     63|     const user = userEvent.setup();
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[10/33]⎯
+
+ FAIL  src/features/derivaciones/components/ReferralFormModal.test.tsx > ReferralFormModal > permite desmarcar un aspecto ya marcado
+Error: Test timed out in 5000ms.
+If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".
+ ❯ src/features/derivaciones/components/ReferralFormModal.test.tsx:82:3
+     80|   });
+     81|
+     82|   it('permite desmarcar un aspecto ya marcado', async () => {
+       |   ^
+     83|     const onSubmit = vi.fn();
+     84|     const user = userEvent.setup();
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[11/33]⎯
+
+ FAIL  src/features/entrevistas/components/InterviewFormModal.test.tsx > InterviewFormModal > exige al menos un motivo antes de avanzar
+Error: Test timed out in 5000ms.
+If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".
+ ❯ src/features/entrevistas/components/InterviewFormModal.test.tsx:33:3
+     31|
+     32| describe('InterviewFormModal', () => {
+     33|   it('exige al menos un motivo antes de avanzar', async () => {
+       |   ^
+     34|     const user = userEvent.setup();
+     35|     render(
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[12/33]⎯
+
+ FAIL  src/features/entrevistas/components/InterviewFormModal.test.tsx > InterviewFormModal > recorre el flujo completo y confirma con el usuario autenticado
+Error: Test timed out in 5000ms.
+If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".
+ ❯ src/features/entrevistas/components/InterviewFormModal.test.tsx:54:3
+     52|   });
+     53|
+     54|   it('recorre el flujo completo y confirma con el usuario autenticado'…
+       |   ^
+     55|     const onSubmit = vi.fn();
+     56|     const user = userEvent.setup();
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[13/33]⎯
+
+ FAIL  src/features/entrevistas/components/InterviewFormModal.test.tsx > InterviewFormModal > exige apellidos, vínculo y celular si se empieza a llenar la red de apoyo
+TestingLibraryElementError: Unable to find a label with the text of: /apellidos y nombres/i
+
+Ignored nodes: comments, script, style
+[36m<body>[39m
+  [36m<div>[39m
+    [36m<div[39m
+      [33mclass[39m=[32m"_overlay_1eb377"[39m
+    [36m>[39m
+      [36m<div[39m
+        [33maria-label[39m=[32m"Entrevista inicial tutorial"[39m
+        [33maria-modal[39m=[32m"true"[39m
+        [33mclass[39m=[32m"_dialog_1eb377"[39m
+        [33mrole[39m=[32m"dialog"[39m
+        [33mtabindex[39m=[32m"-1"[39m
+      [36m>[39m
+        [36m<div[39m
+          [33mclass[39m=[32m"_header_1eb377"[39m
+        [36m>[39m
+          [36m<span[39m
+            [33mclass[39m=[32m"_icon_1eb377"[39m
+          [36m>[39m
+            [36m<svg[39m
+              [33maria-hidden[39m=[32m"true"[39m
+              [33mfill[39m=[32m"none"[39m
+              [33mheight[39m=[32m"20"[39m
+              [33mstroke[39m=[32m"currentColor"[39m
+              [33mstroke-linecap[39m=[32m"round"[39m
+              [33mstroke-linejoin[39m=[32m"round"[39m
+              [33mstroke-width[39m=[32m"2"[39m
+              [33mviewBox[39m=[32m"0 0 24 24"[39m
+              [33mwidth[39m=[32m"20"[39m
+            [36m>[39m
+              [36m<rect[39m
+                [33mheight[39m=[32m"4"[39m
+                [33mrx[39m=[32m"1"[39m
+                [33mwidth[39m=[32m"8"[39m
+                [33mx[39m=[32m"8"[39m
+                [33my[39m=[32m"2"[39m
+              [36m/>[39m
+              [36m<path[39m
+                [33md[39m=[32m"M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"[39m
+              [36m/>[39m
+              [36m<path[39m
+                [33md[39m=[32m"M9 12h6M9 16h4"[39m
+              [36m/>[39m
+            [36m</svg>[39m
+          [36m</span>[39m
+          [36m<div[39m
+            [33mclass[39m=[32m"_headText_1eb377"[39m
+          [36m>[39m
+            [36m<h2>[39m
+              [0mEntrevista inicial tutorial[0m
+            [36m</h2>[39m
+            [36m<p>[39m
+              [0mAna[0m
+              [0m [0m
+              [0mTorres[0m
+              [0m · [0m
+              [0m20191234[0m
+              [0m · [0m
+              [0mIngeniería de Sistemas[0m
+              [0m · Ciclo[0m
+              [0m [0m
+              [0m5[0m
+            [36m</p>[39m
+          [36m</div>[39m
+          [36m<button[39m
+            [33maria-label[39m=[32m"Cerrar"[39m
+            [33mclass[39m=[32m"_close_1eb377"[39m
+          [36m>[39m
+            [36m<svg[39m
+              [33maria-hidden[39m=[32m"true"[39m
+              [33mfill[39m=[32m"none"[39m
+              [33mheight[39m=[32m"18"[39m
+              [33mstroke[39m=[32m"currentColor"[39m
+              [33mstroke-linecap[39m=[32m"round"[39m
+              [33mstroke-linejoin[39m=[32m"round"[39m
+              [33mstroke-width[39m=[32m"2"[39m
+              [33mviewBox[39m=[32m"0 0 24 24"[39m
+              [33mwidth[39m=[32m"18"[39m
+            [36m>[39m
+              [36m<path[39m
+                [33md[39m=[32m"M18 6 6 18M6 6l12 12"[39m
+              [36m/>[39m
+            [36m</svg>[39m
+          [36m</button>[39m
+        [36m</div>[39m
+        [36m<div[39m
+          [33mclass[39m=[32m"_body_1eb377"[39m
+        [36m>[39m
+          [36m<ol[39m
+            [33maria-label[39m=[32m"Progreso de la entrevista"[39m
+            [33mclass[39m=[32m"_stepper_c63984"[39m
+          [36m>[39m
+            [36m<li[39m
+              [33mclass[39m=[32m"_step_c63984 _done_c63984"[39m
+            [36m>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"_bullet_c63984"[39m
+              [36m>[39m
+                [36m<svg[39m
+                  [33maria-hidden[39m=[32m"true"[39m
+                  [33mfill[39m=[32m"none"[39m
+                  [33mheight[39m=[32m"15"[39m
+                  [33mstroke[39m=[32m"currentColor"[39m
+                  [33mstroke-linecap[39m=[32m"round"[39m
+                  [33mstroke-linejoin[39m=[32m"round"[39m
+                  [33mstroke-width[39m=[32m"2"[39m
+                  [33mviewBox[39m=[32m"0 0 24 24"[39m
+                  [33mwidth[39m=[32m"15"[39m
+                [36m>[39m
+                  [36m<path[39m
+                    [33md[39m=[32m"M20 6 9 17l-5-5"[39m
+                  [36m/>[39m
+                [36m</svg>[39m
+              [36m</span>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"_label_c63984"[39m
+              [36m>[39m
+                [0mFiliación[0m
+              [36m</span>[39m
+              [36m<span[39m
+                [33maria-hidden[39m=[32m"true"[39m
+                [33mclass[39m=[32m"_line_c63984"[39m
+              [36m/>[39m
+            [36m</li>[39m
+            [36m<li[39m
+              [33mclass[39m=[32m"_step_c63984 _done_c63984"[39m
+            [36m>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"_bullet_c63984"[39m
+              [36m>[39m
+                [36m<svg[39m
+                  [33maria-hidden[39m=[32m"true"[39m
+                  [33mfill[39m=[32m"none"[39m
+                  [33mheight[39m=[32m"15"[39m
+                  [33mstroke[39m=[32m"currentColor"[39m
+                  [33mstroke-linecap[39m=[32m"round"[39m
+                  [33mstroke-linejoin[39m=[32m"round"[39m
+                  [33mstroke-width[39m=[32m"2"[39m
+                  [33mviewBox[39m=[32m"0 0 24 24"[39m
+                  [33mwidth[39m=[32m"15"[39m
+                [36m>[39m
+                  [36m<path[39m
+                    [33md[39m=[32m"M20 6 9 17l-5-5"[39m
+                  [36m/>[39m
+                [36m</svg>[39m
+              [36m</span>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"_label_c63984"[39m
+              [36m>[39m
+                [0mRed de apoyo[0m
+              [36m</span>[39m
+              [36m<span[39m
+                [33maria-hidden[39m=[32m"true"[39m
+                [33mclass[39m=[32m"_line_c63984"[39m
+              [36m/>[39m
+            [36m</li>[39m
+            [36m<li[39m
+              [33mclass[39m=[32m"_step_c63984 _active_c63984"[39m
+            [36m>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"_bullet_c63984"[39m
+              [36m>[39m
+                [0m3[0m
+              [36m</span>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"_label_c63984"[39m
+              [36m>[39m
+                [0mMotivo[0m
+              [36m</span>[39m
+              [36m<span[39m
+                [33maria-hidden[39m=[32m"true"[39m
+                [33mclass[39m=[32m"_line_c63984"[39m
+              [36m/>[39m
+            [36m</li>[39m
+            [36m<li[39m
+              [33mclass[39m=[32m"_step_c63984 undefined"[39m
+            [36m>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"_bullet_c63984"[39m
+              [36m>[39m
+                [0m4[0m
+              [36m</span>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"_label_c63984"[39m
+              [36m>[39m
+                [0mAspectos[0m
+              [36m</span>[39m
+              [36m<span[39m
+                [33maria-hidden[39m=[32m"true"[39m
+                [33mclass[39m=[32m"_line_c63984"[39m
+              [36m/>[39m
+            [36m</li>[39m
+            [36m<li[39m
+              [33mclass[39m=[32m"_step_c63984 undefined"[39m
+            [36m>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"_bullet_c63984"[39m
+              [36m>[39m
+                [0m5[0m
+              [36m</span>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"_label_c63984"[39m
+              [36m>[39m
+                [0mAcuerdos[0m
+              [36m</span>[39m
+            [36m</li>[39m
+          [36m</ol>[39m
+          [36m<div>[39m
+            [36m<p[39m
+              [33mclass[39m=[32m"_sectionHint_1eb377"[39m
+            [36m>[39m
+              [0mMarca al menos un motivo de la entrevista (Anexo N° 3, sección III).[0m
+            [36m</p>[39m
+            [36m<div[39m
+              [33mclass[39m=[32m"_checks_1eb377"[39m
+            [36m>[39m
+              [36m<label[39m
+                [33mclass[39m=[32m"_check_1eb377"[39m
+              [36m>[39m
+                [36m<input[39m
+                  [33mtype[39m=[32m"checkbox"[39m
+                [36m/>[39m
+                [0mAcadémica[0m
+              [36m</label>[39m
+              [36m<label[39m
+                [33mclass[39m=[32m"_check_1eb377"[39m
+              [36m>[39m
+                [36m<input[39m
+                  [33mtype[39m=[32m"checkbox"[39m
+                [36m/>[39m
+                [0mPersonal-emocional[0m
+              [36m</label>[39m
+              [36m<label[39m
+                [33mclass[39m=[32m"_check_1eb377"[39m
+              [36m>[39m
+                [36m<input[39m
+                  [33mtype[39m=[32m"checkbox"[39m
+                [36m/>[39m
+                [0mVocacional-profesional[0m
+              [36m</label>[39m
+            [36m</div>[39m
+            [36m<div[39m
+              [33mclass[39m=[32m"_field_1eb377"[39m
+            [36m>[39m
+              [36m<label[39m
+                [33mfor[39m=[32m"motiveDetail"[39m
+              [36m>[39m
+                [0mDetalle (opcional)[0m
+              [36m</label>[39m
+              [36m<textarea[39m
+                [33mclass[39m=[32m"_textarea_1eb377"[39m
+                [33mid[39m=[32m"motiveDetail"[39m
+                [33mrows[39m=[32m"3"[39m
+              [36m/>[39m
+            [36m</div>[39m
+          [36m</div>[39m
+        [36m</div>[39m
+        [36m<div[39m
+          [33mclass[39m=[32m"_actions_1eb377"[39m
+        [36m>[39m
+          [36m<button[39m
+            [33mclass[39m=[32m"_btn_8e6d2d _secondary_8e6d2d _md_8e6d2d"[39m
+          [36m>[39m
+            [36m<span>[39m
+              [0mAtrás[0m
+            [36m</span>[39m
+          [36m</button>[39m
+          [36m<button[39m
+            [33mclass[39m=[32m"_btn_8e6d2d _primary_8e6d2d _md_8e6d2d"[39m
+          [36m>[39m
+            [36m<span>[39m
+              [0mSiguiente[0m
+            [36m</span>[39m
+          [36m</button>[39m
+        [36m</div>[39m
+      [36m</div>[39m
+    [36m</div>[39m
+  [36m</div>[39m
+[36m</body>[39m
+ ❯ Object.getElementError node_modules/.pnpm/@testing-library+dom@10.4.1/node_modules/@testing-library/dom/dist/config.js:37:19
+ ❯ getAllByLabelText node_modules/.pnpm/@testing-library+dom@10.4.1/node_modules/@testing-library/dom/dist/queries/label-text.js:111:38
+ ❯ node_modules/.pnpm/@testing-library+dom@10.4.1/node_modules/@testing-library/dom/dist/query-helpers.js:52:17
+ ❯ node_modules/.pnpm/@testing-library+dom@10.4.1/node_modules/@testing-library/dom/dist/query-helpers.js:95:19
+ ❯ src/features/entrevistas/components/InterviewFormModal.test.tsx:103:28
+    101|
+    102|     await goToStep(user, 1); // → Red de apoyo
+    103|     await user.type(screen.getByLabelText(/apellidos y nombres/i), 'Ma…
+       |                            ^
+    104|     await user.click(screen.getByRole('button', { name: /siguiente/i }…
+    105|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[14/33]⎯
+
+ FAIL  src/features/entrevistas/components/InterviewFormModal.test.tsx > InterviewFormModal > envía el contacto de red de apoyo cuando se completa
+TestingLibraryElementError: Unable to find a label with the text of: /apellidos y nombres/i
+
+Ignored nodes: comments, script, style
+[36m<body>[39m
+  [36m<div>[39m
+    [36m<div[39m
+      [33mclass[39m=[32m"_overlay_1eb377"[39m
+    [36m>[39m
+      [36m<div[39m
+        [33maria-label[39m=[32m"Entrevista inicial tutorial"[39m
+        [33maria-modal[39m=[32m"true"[39m
+        [33mclass[39m=[32m"_dialog_1eb377"[39m
+        [33mrole[39m=[32m"dialog"[39m
+        [33mtabindex[39m=[32m"-1"[39m
+      [36m>[39m
+        [36m<div[39m
+          [33mclass[39m=[32m"_header_1eb377"[39m
+        [36m>[39m
+          [36m<span[39m
+            [33mclass[39m=[32m"_icon_1eb377"[39m
+          [36m>[39m
+            [36m<svg[39m
+              [33maria-hidden[39m=[32m"true"[39m
+              [33mfill[39m=[32m"none"[39m
+              [33mheight[39m=[32m"20"[39m
+              [33mstroke[39m=[32m"currentColor"[39m
+              [33mstroke-linecap[39m=[32m"round"[39m
+              [33mstroke-linejoin[39m=[32m"round"[39m
+              [33mstroke-width[39m=[32m"2"[39m
+              [33mviewBox[39m=[32m"0 0 24 24"[39m
+              [33mwidth[39m=[32m"20"[39m
+            [36m>[39m
+              [36m<rect[39m
+                [33mheight[39m=[32m"4"[39m
+                [33mrx[39m=[32m"1"[39m
+                [33mwidth[39m=[32m"8"[39m
+                [33mx[39m=[32m"8"[39m
+                [33my[39m=[32m"2"[39m
+              [36m/>[39m
+              [36m<path[39m
+                [33md[39m=[32m"M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"[39m
+              [36m/>[39m
+              [36m<path[39m
+                [33md[39m=[32m"M9 12h6M9 16h4"[39m
+              [36m/>[39m
+            [36m</svg>[39m
+          [36m</span>[39m
+          [36m<div[39m
+            [33mclass[39m=[32m"_headText_1eb377"[39m
+          [36m>[39m
+            [36m<h2>[39m
+              [0mEntrevista inicial tutorial[0m
+            [36m</h2>[39m
+            [36m<p>[39m
+              [0mAna[0m
+              [0m [0m
+              [0mTorres[0m
+              [0m · [0m
+              [0m20191234[0m
+              [0m · [0m
+              [0mIngeniería de Sistemas[0m
+              [0m · Ciclo[0m
+              [0m [0m
+              [0m5[0m
+            [36m</p>[39m
+          [36m</div>[39m
+          [36m<button[39m
+            [33maria-label[39m=[32m"Cerrar"[39m
+            [33mclass[39m=[32m"_close_1eb377"[39m
+          [36m>[39m
+            [36m<svg[39m
+              [33maria-hidden[39m=[32m"true"[39m
+              [33mfill[39m=[32m"none"[39m
+              [33mheight[39m=[32m"18"[39m
+              [33mstroke[39m=[32m"currentColor"[39m
+              [33mstroke-linecap[39m=[32m"round"[39m
+              [33mstroke-linejoin[39m=[32m"round"[39m
+              [33mstroke-width[39m=[32m"2"[39m
+              [33mviewBox[39m=[32m"0 0 24 24"[39m
+              [33mwidth[39m=[32m"18"[39m
+            [36m>[39m
+              [36m<path[39m
+                [33md[39m=[32m"M18 6 6 18M6 6l12 12"[39m
+              [36m/>[39m
+            [36m</svg>[39m
+          [36m</button>[39m
+        [36m</div>[39m
+        [36m<div[39m
+          [33mclass[39m=[32m"_body_1eb377"[39m
+        [36m>[39m
+          [36m<ol[39m
+            [33maria-label[39m=[32m"Progreso de la entrevista"[39m
+            [33mclass[39m=[32m"_stepper_c63984"[39m
+          [36m>[39m
+            [36m<li[39m
+              [33mclass[39m=[32m"_step_c63984 _done_c63984"[39m
+            [36m>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"_bullet_c63984"[39m
+              [36m>[39m
+                [36m<svg[39m
+                  [33maria-hidden[39m=[32m"true"[39m
+                  [33mfill[39m=[32m"none"[39m
+                  [33mheight[39m=[32m"15"[39m
+                  [33mstroke[39m=[32m"currentColor"[39m
+                  [33mstroke-linecap[39m=[32m"round"[39m
+                  [33mstroke-linejoin[39m=[32m"round"[39m
+                  [33mstroke-width[39m=[32m"2"[39m
+                  [33mviewBox[39m=[32m"0 0 24 24"[39m
+                  [33mwidth[39m=[32m"15"[39m
+                [36m>[39m
+                  [36m<path[39m
+                    [33md[39m=[32m"M20 6 9 17l-5-5"[39m
+                  [36m/>[39m
+                [36m</svg>[39m
+              [36m</span>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"_label_c63984"[39m
+              [36m>[39m
+                [0mFiliación[0m
+              [36m</span>[39m
+              [36m<span[39m
+                [33maria-hidden[39m=[32m"true"[39m
+                [33mclass[39m=[32m"_line_c63984"[39m
+              [36m/>[39m
+            [36m</li>[39m
+            [36m<li[39m
+              [33mclass[39m=[32m"_step_c63984 _done_c63984"[39m
+            [36m>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"_bullet_c63984"[39m
+              [36m>[39m
+                [36m<svg[39m
+                  [33maria-hidden[39m=[32m"true"[39m
+                  [33mfill[39m=[32m"none"[39m
+                  [33mheight[39m=[32m"15"[39m
+                  [33mstroke[39m=[32m"currentColor"[39m
+                  [33mstroke-linecap[39m=[32m"round"[39m
+                  [33mstroke-linejoin[39m=[32m"round"[39m
+                  [33mstroke-width[39m=[32m"2"[39m
+                  [33mviewBox[39m=[32m"0 0 24 24"[39m
+                  [33mwidth[39m=[32m"15"[39m
+                [36m>[39m
+                  [36m<path[39m
+                    [33md[39m=[32m"M20 6 9 17l-5-5"[39m
+                  [36m/>[39m
+                [36m</svg>[39m
+              [36m</span>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"_label_c63984"[39m
+              [36m>[39m
+                [0mRed de apoyo[0m
+              [36m</span>[39m
+              [36m<span[39m
+                [33maria-hidden[39m=[32m"true"[39m
+                [33mclass[39m=[32m"_line_c63984"[39m
+              [36m/>[39m
+            [36m</li>[39m
+            [36m<li[39m
+              [33mclass[39m=[32m"_step_c63984 _active_c63984"[39m
+            [36m>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"_bullet_c63984"[39m
+              [36m>[39m
+                [0m3[0m
+              [36m</span>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"_label_c63984"[39m
+              [36m>[39m
+                [0mMotivo[0m
+              [36m</span>[39m
+              [36m<span[39m
+                [33maria-hidden[39m=[32m"true"[39m
+                [33mclass[39m=[32m"_line_c63984"[39m
+              [36m/>[39m
+            [36m</li>[39m
+            [36m<li[39m
+              [33mclass[39m=[32m"_step_c63984 undefined"[39m
+            [36m>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"_bullet_c63984"[39m
+              [36m>[39m
+                [0m4[0m
+              [36m</span>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"_label_c63984"[39m
+              [36m>[39m
+                [0mAspectos[0m
+              [36m</span>[39m
+              [36m<span[39m
+                [33maria-hidden[39m=[32m"true"[39m
+                [33mclass[39m=[32m"_line_c63984"[39m
+              [36m/>[39m
+            [36m</li>[39m
+            [36m<li[39m
+              [33mclass[39m=[32m"_step_c63984 undefined"[39m
+            [36m>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"_bullet_c63984"[39m
+              [36m>[39m
+                [0m5[0m
+              [36m</span>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"_label_c63984"[39m
+              [36m>[39m
+                [0mAcuerdos[0m
+              [36m</span>[39m
+            [36m</li>[39m
+          [36m</ol>[39m
+          [36m<div>[39m
+            [36m<p[39m
+              [33mclass[39m=[32m"_sectionHint_1eb377"[39m
+            [36m>[39m
+              [0mMarca al menos un motivo de la entrevista (Anexo N° 3, sección III).[0m
+            [36m</p>[39m
+            [36m<div[39m
+              [33mclass[39m=[32m"_checks_1eb377"[39m
+            [36m>[39m
+              [36m<label[39m
+                [33mclass[39m=[32m"_check_1eb377"[39m
+              [36m>[39m
+                [36m<input[39m
+                  [33mtype[39m=[32m"checkbox"[39m
+                [36m/>[39m
+                [0mAcadémica[0m
+              [36m</label>[39m
+              [36m<label[39m
+                [33mclass[39m=[32m"_check_1eb377"[39m
+              [36m>[39m
+                [36m<input[39m
+                  [33mtype[39m=[32m"checkbox"[39m
+                [36m/>[39m
+                [0mPersonal-emocional[0m
+              [36m</label>[39m
+              [36m<label[39m
+                [33mclass[39m=[32m"_check_1eb377"[39m
+              [36m>[39m
+                [36m<input[39m
+                  [33mtype[39m=[32m"checkbox"[39m
+                [36m/>[39m
+                [0mVocacional-profesional[0m
+              [36m</label>[39m
+            [36m</div>[39m
+            [36m<div[39m
+              [33mclass[39m=[32m"_field_1eb377"[39m
+            [36m>[39m
+              [36m<label[39m
+                [33mfor[39m=[32m"motiveDetail"[39m
+              [36m>[39m
+                [0mDetalle (opcional)[0m
+              [36m</label>[39m
+              [36m<textarea[39m
+                [33mclass[39m=[32m"_textarea_1eb377"[39m
+                [33mid[39m=[32m"motiveDetail"[39m
+                [33mrows[39m=[32m"3"[39m
+              [36m/>[39m
+            [36m</div>[39m
+          [36m</div>[39m
+        [36m</div>[39m
+        [36m<div[39m
+          [33mclass[39m=[32m"_actions_1eb377"[39m
+        [36m>[39m
+          [36m<button[39m
+            [33mclass[39m=[32m"_btn_8e6d2d _secondary_8e6d2d _md_8e6d2d"[39m
+          [36m>[39m
+            [36m<span>[39m
+              [0mAtrás[0m
+            [36m</span>[39m
+          [36m</button>[39m
+          [36m<button[39m
+            [33mclass[39m=[32m"_btn_8e6d2d _primary_8e6d2d _md_8e6d2d"[39m
+          [36m>[39m
+            [36m<span>[39m
+              [0mSiguiente[0m
+            [36m</span>[39m
+          [36m</button>[39m
+        [36m</div>[39m
+      [36m</div>[39m
+    [36m</div>[39m
+  [36m</div>[39m
+[36m</body>[39m
+ ❯ Object.getElementError node_modules/.pnpm/@testing-library+dom@10.4.1/node_modules/@testing-library/dom/dist/config.js:37:19
+ ❯ getAllByLabelText node_modules/.pnpm/@testing-library+dom@10.4.1/node_modules/@testing-library/dom/dist/queries/label-text.js:111:38
+ ❯ node_modules/.pnpm/@testing-library+dom@10.4.1/node_modules/@testing-library/dom/dist/query-helpers.js:52:17
+ ❯ node_modules/.pnpm/@testing-library+dom@10.4.1/node_modules/@testing-library/dom/dist/query-helpers.js:95:19
+ ❯ src/features/entrevistas/components/InterviewFormModal.test.tsx:122:28
+    120|
+    121|     await goToStep(user, 1); // → Red de apoyo
+    122|     await user.type(screen.getByLabelText(/apellidos y nombres/i), 'Ma…
+       |                            ^
+    123|     await user.type(screen.getByLabelText(/parentesco/i), 'Madre');
+    124|     await user.type(screen.getByLabelText(/celular/i), '987654321');
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[15/33]⎯
+
+ FAIL  src/features/evaluacion/pages/EvaluationPage.test.tsx > EvaluationPage > envía el cuestionario completo con los campos abiertos
+Error: Test timed out in 20000ms.
+If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".
+ ❯ src/features/evaluacion/pages/EvaluationPage.test.tsx:79:3
+     77|   });
+     78|
+     79|   it(
+       |   ^
+     80|     'envía el cuestionario completo con los campos abiertos',
+     81|     async () => {
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[16/33]⎯
+
+ FAIL  src/features/informes/pages/SemesterReportPage.test.tsx > SemesterReportPage > guarda lo editado y descarta filas vacías
+Error: Test timed out in 5000ms.
+If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".
+ ❯ src/features/informes/pages/SemesterReportPage.test.tsx:70:3
+     68|   });
+     69|
+     70|   it('guarda lo editado y descarta filas vacías', async () => {
+       |   ^
+     71|     mocked.getMine.mockResolvedValue(view());
+     72|     mocked.saveMine.mockResolvedValue({} as never);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[17/33]⎯
+
+ FAIL  src/features/pedidos/pages/DataRequestPage.test.tsx > DataRequestPage (pedido de listas por correo) > envía el pedido con los ciclos marcados y las observaciones, y confirma a quién salió
+Error: Test timed out in 5000ms.
+If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".
+ ❯ src/features/pedidos/pages/DataRequestPage.test.tsx:85:3
+     83|   });
+     84|
+     85|   it('envía el pedido con los ciclos marcados y las observaciones, y c…
+       |   ^
+     86|     requests.send.mockResolvedValue({ request: record(), replayed: fal…
+     87|     const user = userEvent.setup();
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[18/33]⎯
+
+ FAIL  src/features/pedidos/pages/DataRequestPage.test.tsx > DataRequestPage (pedido de listas por correo) > lee los ciclos de cada escuela y reinicia la selección al cambiarla
+Error: Test timed out in 5000ms.
+If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".
+ ❯ src/features/pedidos/pages/DataRequestPage.test.tsx:111:3
+    109|   });
+    110|
+    111|   it('lee los ciclos de cada escuela y reinicia la selección al cambia…
+       |   ^
+    112|     schoolsApi.getSchools.mockResolvedValue([school({ cycleCount: 12 }…
+    113|     renderPage();
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[19/33]⎯
+
+ FAIL  src/features/periodo/pages/PeriodClosurePage.test.tsx > PeriodClosurePage (fase 1) > para cerrar hay que escribir el nombre exacto del periodo; recién entonces se habilita
+Error: Test timed out in 5000ms.
+If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".
+ ❯ src/features/periodo/pages/PeriodClosurePage.test.tsx:80:3
+     78|   });
+     79|
+     80|   it('para cerrar hay que escribir el nombre exacto del periodo; recié…
+       |   ^
+     81|     mocked.close.mockResolvedValue(closure({ state: 'CERRADO', isPrevi…
+     82|     const user = userEvent.setup();
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[20/33]⎯
+
+ FAIL  src/features/planificacion/pages/WorkPlanPage.test.tsx > WorkPlanPage > con una sola escuela la carga sola y envía el plan con filas limpias
+Error: Test timed out in 5000ms.
+If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".
+ ❯ src/features/planificacion/pages/WorkPlanPage.test.tsx:39:3
+     37|   });
+     38|
+     39|   it('con una sola escuela la carga sola y envía el plan con filas lim…
+       |   ^
+     40|     mocked.getOverview.mockResolvedValue({
+     41|       periodName: '2026-II',
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[21/33]⎯
+
+ FAIL  src/features/planificacion/pages/WorkPlanPage.test.tsx > WorkPlanPage > editar un plan aprobado pide confirmar y lo guarda como nueva revisión (A12)
+Error: Test timed out in 5000ms.
+If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".
+ ❯ src/features/planificacion/pages/WorkPlanPage.test.tsx:68:3
+     66|   });
+     67|
+     68|   it('editar un plan aprobado pide confirmar y lo guarda como nueva re…
+       |   ^
+     69|     mocked.getOverview.mockResolvedValue({
+     70|       periodName: '2026-II',
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[22/33]⎯
+
+ FAIL  src/features/seguimiento/components/FollowUpFormModal.test.tsx > FollowUpFormModal > envía los datos del docente cuando se completan
+Error: Test timed out in 5000ms.
+If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".
+ ❯ src/features/seguimiento/components/FollowUpFormModal.test.tsx:77:3
+     75|   });
+     76|
+     77|   it('envía los datos del docente cuando se completan', async () => {
+       |   ^
+     78|     const onSubmit = vi.fn();
+     79|     const user = userEvent.setup();
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[23/33]⎯
+
+ FAIL  src/features/solicitudes/pages/MyTutoringRequestPage.test.tsx > MyTutoringRequestPage > borrador: no se pierde lo escrito (U07) > al volver a la pantalla recupera lo que había escrito y lo avisa; descartar lo borra
+Error: Test timed out in 5000ms.
+If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".
+ ❯ src/features/solicitudes/pages/MyTutoringRequestPage.test.tsx:120:5
+    118|
+    119|   describe('borrador: no se pierde lo escrito (U07)', () => {
+    120|     it('al volver a la pantalla recupera lo que había escrito y lo avi…
+       |     ^
+    121|       const user = userEvent.setup();
+    122|       const first = renderPage();
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[24/33]⎯
+
+ FAIL  src/features/solicitudes/pages/TutoringRequestsInboxPage.test.tsx > TutoringRequestsInboxPage (R01) > continuidad: de la solicitud a la sesión o la derivación (U01) > si el servidor la rechaza (p. ej. ya tiene sesión), el formulario sigue abierto y dice por qué
+Error: Test timed out in 5000ms.
+If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".
+ ❯ src/features/solicitudes/pages/TutoringRequestsInboxPage.test.tsx:245:5
+
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[25/33]⎯
+
+ FAIL  src/features/tutorados/components/GroupSessionFormModal.test.tsx > GroupSessionFormModal > exige al menos dos estudiantes seleccionados
+Error: Test timed out in 5000ms.
+If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".
+ ❯ src/features/tutorados/components/GroupSessionFormModal.test.tsx:76:3
+     74|   });
+     75|
+     76|   it('exige al menos dos estudiantes seleccionados', async () => {
+       |   ^
+     77|     const onSubmit = renderModal();
+     78|     const user = userEvent.setup();
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[26/33]⎯
+
+ FAIL  src/features/tutorados/components/GroupSessionFormModal.test.tsx > GroupSessionFormModal > exige el lugar de una sesión grupal presencial (por defecto)
+Error: Test timed out in 5000ms.
+If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".
+ ❯ src/features/tutorados/components/GroupSessionFormModal.test.tsx:90:3
+     88|   });
+     89|
+     90|   it('exige el lugar de una sesión grupal presencial (por defecto)', a…
+       |   ^
+     91|     const onSubmit = renderModal();
+     92|     const user = userEvent.setup();
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[27/33]⎯
+
+ FAIL  src/features/tutorados/components/GroupSessionFormModal.test.tsx > GroupSessionFormModal > confirma con dos o más estudiantes seleccionados y el lugar (presencial)
+Error: Test timed out in 5000ms.
+If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".
+ ❯ src/features/tutorados/components/GroupSessionFormModal.test.tsx:105:3
+    103|   });
+    104|
+    105|   it('confirma con dos o más estudiantes seleccionados y el lugar (pre…
+       |   ^
+    106|     const onSubmit = renderModal();
+    107|     const user = userEvent.setup();
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[28/33]⎯
+
+ FAIL  src/features/tutorados/components/GroupSessionFormModal.test.tsx > GroupSessionFormModal > confirma con el enlace de videollamada al elegir modalidad virtual
+Error: Test timed out in 5000ms.
+If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".
+ ❯ src/features/tutorados/components/GroupSessionFormModal.test.tsx:127:3
+    125|   });
+    126|
+    127|   it('confirma con el enlace de videollamada al elegir modalidad virtu…
+       |   ^
+    128|     const onSubmit = renderModal();
+    129|     const user = userEvent.setup();
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[29/33]⎯
+
+ FAIL  src/features/tutorados/components/SessionFormModal.test.tsx > SessionFormModal > exige el lugar en una sesión presencial (por defecto)
+Error: Test timed out in 5000ms.
+If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".
+ ❯ src/features/tutorados/components/SessionFormModal.test.tsx:71:3
+     69|   });
+     70|
+     71|   it('exige el lugar en una sesión presencial (por defecto)', async ()…
+       |   ^
+     72|     const onSubmit = vi.fn();
+     73|     const user = userEvent.setup();
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[30/33]⎯
+
+ FAIL  src/features/tutorados/components/SessionFormModal.test.tsx > SessionFormModal > confirma con la fecha/hora combinadas en ISO y el lugar (presencial)
+Error: Test timed out in 5000ms.
+If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".
+ ❯ src/features/tutorados/components/SessionFormModal.test.tsx:92:3
+     90|   });
+     91|
+     92|   it('confirma con la fecha/hora combinadas en ISO y el lugar (presenc…
+       |   ^
+     93|     const onSubmit = vi.fn();
+     94|     const user = userEvent.setup();
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[31/33]⎯
+
+ FAIL  src/features/tutorados/components/SessionFormModal.test.tsx > SessionFormModal > confirma con el enlace de videollamada al elegir modalidad virtual
+Error: Test timed out in 5000ms.
+If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".
+ ❯ src/features/tutorados/components/SessionFormModal.test.tsx:120:3
+    118|   });
+    119|
+    120|   it('confirma con el enlace de videollamada al elegir modalidad virtu…
+       |   ^
+    121|     const onSubmit = vi.fn();
+    122|     const user = userEvent.setup();
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[32/33]⎯
+
+ FAIL  src/features/tutorados/components/StudentFormModal.test.tsx > StudentFormModal > rechaza un código universitario con formato inválido
+Error: Test timed out in 5000ms.
+If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".
+ ❯ src/features/tutorados/components/StudentFormModal.test.tsx:26:3
+     24|
+     25| describe('StudentFormModal', () => {
+     26|   it('rechaza un código universitario con formato inválido', async () …
+       |   ^
+     27|     const user = userEvent.setup();
+     28|     const { onSubmit } = setup();
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[33/33]⎯
+
+
+ Test Files  19 failed | 69 passed (88)
+      Tests  32 failed | 538 passed (570)
+   Start at  11:36:31
+   Duration  576.94s (transform 99.99s, setup 611.23s, import 629.42s, tests 720.31s, environment 1798.17s)
+
+JSON report written to C:/tmp/runs/drp/full-2.json
