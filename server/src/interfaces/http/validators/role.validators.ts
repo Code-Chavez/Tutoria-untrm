@@ -25,5 +25,12 @@ export const assignRoleSchema = z.object({
   facultyId: z.string().uuid('La facultad debe ser un UUID válido').nullable().optional(),
 });
 
+export const setUserAccessSchema = z.object({
+  kind: z.enum(['NONE', 'OWN', 'SCHOOLS', 'FACULTIES', 'INSTITUTION', 'SERVICE']),
+  schoolIds: z.array(z.string().uuid('La escuela debe ser un UUID válido')).max(200).optional(),
+  facultyIds: z.array(z.string().uuid('La facultad debe ser un UUID válido')).max(50).optional(),
+  service: z.enum(['ESCUELA', 'PSICOPEDAGOGIA', 'PSICOLOGIA', 'ASISTENCIA_SOCIAL', 'SALUD']).nullable().optional(),
+});
+
 export type CreateRoleBody = z.infer<typeof createRoleSchema>;
 export type AssignRoleBody = z.infer<typeof assignRoleSchema>;

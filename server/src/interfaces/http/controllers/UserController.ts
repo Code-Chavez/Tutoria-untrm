@@ -6,7 +6,9 @@ import { ToggleUserStatusUseCase } from '@application/use-cases/users/ToggleUser
 import { ListUsersUseCase } from '@application/use-cases/users/ListUsersUseCase';
 import { AssignRoleUseCase } from '@application/use-cases/roles/AssignRoleUseCase';
 import { RoleInactiveError, RoleNotFoundError, RoleTargetUserNotFoundError } from '@application/use-cases/roles/RoleErrors';
-import { assignRoleSchema } from '../validators/role.validators';
+import { assignRoleSchema, setUserAccessSchema } from '../validators/role.validators';
+import { GetUserAccessUseCase, SetUserAccessUseCase } from '@application/use-cases/users/UserAccessScopeUseCases';
+import { AccessScopeInvalidError, AccessScopeNotConfigurableError } from '@application/use-cases/users/userAccessScope';
 import { ServiceRequiredError } from '@application/use-cases/users/serviceAssignment';
 import { TutorSchoolRequiredError } from '@application/use-cases/users/tutorSchool';
 import { DeanFacultyRequiredError } from '@application/use-cases/users/deanFaculty';
@@ -42,7 +44,41 @@ export class UserController {
     private readonly assignRoleUseCase: AssignRoleUseCase,
     private readonly issueInvitationUseCase: IssueInvitationUseCase,
     private readonly emailPolicy: EmailPolicy,
+    private readonly getUserAccessUseCase?: GetUserAccessUseCase,
+    private readonly setUserAccessUseCase?: SetUserAccessUseCase,
   ) {}
+
+  private failAccess(error: unknown, res: Response) {
+    if (error instanceof z.ZodError) {
+      res.status(400).json({ error: error.issues[0]?.message ?? 'Datos de entrada inválidos', details: error.issues });
+    } else if (error instanceof RoleTargetUserNotFoundError || error instanceof RoleNotFoundError) {
+      res.status(404).json({ error: error.message });
+    } else if (error instanceof AccessScopeInvalidError) {
+      res.status(400).json({ error: error.message, code: 'ACCESS_SCOPE_INVALID' });
+    } else if (error instanceof AccessScopeNotConfigurableError) {
+      res.status(409).json({ error: error.message, code: 'ACCESS_SCOPE_NOT_CONFIGURABLE' });
+    } else {
+      res.status(500).json({ error: 'Error interno del servidor' });
+    }
+  }
+
+  getAccess = async (req: Request, res: Response) => {
+    try {
+      res.status(200).json({ access: await this.getUserAccessUseCase!.execute(req.params.id as string) });
+    } catch (error) {
+      this.failAccess(error, res);
+    }
+  };
+
+  setAccess = async (req: Request, res: Response) => {
+    try {
+      const data = setUserAccessSchema.parse(req.body);
+      const access = await this.setUserAccessUseCase!.execute(req.params.id as string, data, req.auth?.sub as string, req.ip ?? null);
+      res.status(200).json({ message: 'Alcance actualizado', access });
+    } catch (error) {
+      this.failAccess(error, res);
+    }
+  };
 
   // Los formularios muestran y validan el dominio permitido con la misma política que aplica el servidor.
   getEmailPolicy = (_req: Request, res: Response) => {
