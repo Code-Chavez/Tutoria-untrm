@@ -3,7 +3,7 @@ import { createPortal } from 'react-dom';
 import styles from './ConfirmDialog.module.css';
 import { Button } from './Button';
 import { AlertTriangleIcon } from '@shared/components/icons';
-import { useDialogFocus } from '@shared/hooks/useDialog';
+import { isTopDialog, useDialogFocus } from '@shared/hooks/useDialog';
 import { useInertBackground } from '@shared/hooks/useInertBackground';
 
 interface ConfirmDialogProps {
@@ -93,11 +93,11 @@ const ConfirmPanel: React.FC<PanelProps> = ({
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') cancel();
+      if (e.key === 'Escape' && isTopDialog(dialogRef.current)) cancel();
     };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
-  }, [cancel]);
+  }, [cancel, dialogRef]);
 
   return (
     <div ref={setRoot}>

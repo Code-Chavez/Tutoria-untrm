@@ -19,6 +19,16 @@ if (typeof document !== 'undefined') {
 }
 
 /**
+ * Pila de diálogos abiertos (el último es el de arriba). Con dos diálogos superpuestos solo el de arriba debe responder
+ * al teclado: sin esto, un Escape cerraría los dos y la trampa de Tab del de abajo competiría con la del de arriba.
+ */
+const openDialogs: HTMLElement[] = [];
+/** ¿Es `dialog` el diálogo de más arriba? (también es cierto si no hay ninguno registrado: no se bloquea nada). */
+export function isTopDialog(dialog: HTMLElement | null): boolean {
+  return openDialogs.length === 0 || openDialogs[openDialogs.length - 1] === dialog;
+}
+
+/**
  * Foco de un diálogo modal: al abrir pasa al primer campo (o al propio diálogo), Tab y Shift+Tab
  * no salen de él y al cerrar el foco vuelve al control que lo abrió. Devuelve el ref que se
  * asigna al elemento con role="dialog".
@@ -29,6 +39,7 @@ export function useDialogFocus<T extends HTMLElement = HTMLDivElement>() {
   useEffect(() => {
     const dialog = ref.current;
     if (!dialog) return;
+    openDialogs.push(dialog);
     const active = document.activeElement;
     const opener = active instanceof HTMLElement && active !== document.body ? active : lastFocused;
 
@@ -37,7 +48,7 @@ export function useDialogFocus<T extends HTMLElement = HTMLDivElement>() {
     (first ?? dialog).focus();
 
     const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key !== 'Tab') return;
+      if (event.key !== 'Tab' || !isTopDialog(dialog)) return;
       const focusable = items();
       if (focusable.length === 0) {
         event.preventDefault();
@@ -62,6 +73,8 @@ export function useDialogFocus<T extends HTMLElement = HTMLDivElement>() {
 
     return () => {
       document.removeEventListener('keydown', onKeyDown);
+      const at = openDialogs.lastIndexOf(dialog);
+      if (at >= 0) openDialogs.splice(at, 1);
       if (opener?.isConnected && !opener.matches(':disabled')) opener.focus();
     };
   }, []);
@@ -75,11 +88,11 @@ export function useDialog<T extends HTMLElement = HTMLDivElement>(onClose: () =>
 
   useEffect(() => {
     const onKey = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') onClose();
+      if (event.key === 'Escape' && isTopDialog(ref.current)) onClose();
     };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
-  }, [onClose]);
+  }, [onClose, ref]);
 
   return ref;
 }
