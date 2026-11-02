@@ -16,7 +16,7 @@ Una copia instrumentada de la prueba («envía el pedido con los ciclos marcados
 | escribir 12 caracteres (`user.type`) | 385 |
 | clic «Enviar pedido» | 172 |
 | esperar el envío + `findByRole('alert')` | 31 |
-| **Total por corrida (mediana de 5)** | **1 525** (rango 1 434–2 340; la primera corrida, 2 340, incluye el calentamiento del disco/caché) |
+| **Total por corrida (mediana de 5)** | **1 525** (rango 1 434–2 340; la primera corrida fue la más lenta, sin causa determinada) |
 
 Con `paste`: total mediano **1 261 ms** (−264 ms, −17 %); el paso de escritura baja de 385 a 156 ms.
 
