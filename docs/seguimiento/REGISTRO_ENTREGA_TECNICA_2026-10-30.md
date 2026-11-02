@@ -83,7 +83,7 @@ Verificado en GitHub (marcas de fusión en UTC). «Fusionado» no equivale a des
 
 | PR | Contenido | Fusionado en `develop` (UTC) | CI del último commit de la rama que se leyó |
 |---|---|---|---|
-| [#203](https://github.com/Code-Chavez/Tutoria-untrm/pull/203) | actualización de este registro (1/11) | 2/11 (ver GitHub) | 12 aprobadas, 2 omitidas (`8206b6f`) |
+| [#203](https://github.com/Code-Chavez/Tutoria-untrm/pull/203) | actualización de este registro (1/11) | 2/11 00:37 | 12 aprobadas, 2 omitidas (`8206b6f`) |
 | [#204](https://github.com/Code-Chavez/Tutoria-untrm/pull/204) | revisión con teclado del diálogo de confirmación en las cinco pantallas restantes | 2/11 00:52 | 12 aprobadas, 2 omitidas (`3444676`) |
 | [#205](https://github.com/Code-Chavez/Tutoria-untrm/pull/205) | corrección de F3 en `WorkPlanPage` | 2/11 01:10 | 12 aprobadas, 2 omitidas (`aba71fe`) |
 
