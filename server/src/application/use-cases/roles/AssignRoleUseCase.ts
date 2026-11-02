@@ -2,7 +2,7 @@ import { User } from '@domain/entities/User';
 import { UserRepository } from '@domain/repositories/UserRepository';
 import { RoleRepository } from '@domain/repositories/RoleRepository';
 import { AuditLogRepository } from '@domain/repositories/AuditLogRepository';
-import { RoleNotFoundError, RoleTargetUserNotFoundError } from './RoleErrors';
+import { RoleNotFoundError, RoleTargetUserNotFoundError, assertRoleActive } from './RoleErrors';
 import { SchoolRepository } from '@domain/repositories/SchoolRepository';
 import { resolveService } from '../users/serviceAssignment';
 import { FacultyRepository } from '@domain/repositories/FacultyRepository';
@@ -32,6 +32,7 @@ export class AssignRoleUseCase {
     if (!role) {
       throw new RoleNotFoundError(roleId);
     }
+    if (roleId !== user.roleId) assertRoleActive(role);
 
     // Al pasar a Profesional de Servicio hay que indicar el servicio; al salir de ese rol, se descarta.
     const newSchoolId = await resolveTutorSchool(this.schools, role.name, schoolId !== undefined ? schoolId : user.schoolId);

@@ -22,43 +22,43 @@ export async function seedBase(prisma: PrismaClient) {
   const adminRole = await prisma.role.upsert({
     where: { name: 'Administrador DBU' },
     update: {},
-    create: { name: 'Administrador DBU', description: 'Administrador de la Dirección de Bienestar Universitario' },
+    create: { isBase: true, name: 'Administrador DBU', description: 'Administrador de la Dirección de Bienestar Universitario' },
   });
 
   const coordRole = await prisma.role.upsert({
     where: { name: 'Coordinador' },
     update: {},
-    create: { name: 'Coordinador', description: 'Coordinador de tutoría de escuela profesional' },
+    create: { isBase: true, name: 'Coordinador', description: 'Coordinador de tutoría de escuela profesional' },
   });
 
   const tutorRole = await prisma.role.upsert({
     where: { name: 'Docente Tutor' },
     update: {},
-    create: { name: 'Docente Tutor', description: 'Docente tutor asignado a estudiantes' },
+    create: { isBase: true, name: 'Docente Tutor', description: 'Docente tutor asignado a estudiantes' },
   });
 
   const studentRole = await prisma.role.upsert({
     where: { name: 'Tutorado' },
     update: {},
-    create: { name: 'Tutorado', description: 'Estudiante tutorado' },
+    create: { isBase: true, name: 'Tutorado', description: 'Estudiante tutorado' },
   });
 
   const serviceRole = await prisma.role.upsert({
     where: { name: 'Profesional de Servicio' },
     update: {},
-    create: { name: 'Profesional de Servicio', description: 'Profesional de servicio especializado (Psicología, etc.)' },
+    create: { isBase: true, name: 'Profesional de Servicio', description: 'Profesional de servicio especializado (Psicología, etc.)' },
   });
 
   const viceRole = await prisma.role.upsert({
     where: { name: 'Vicerrectorado' },
     update: {},
-    create: { name: 'Vicerrectorado', description: 'Vicerrectorado académico (solo lectura)' },
+    create: { isBase: true, name: 'Vicerrectorado', description: 'Vicerrectorado académico (solo lectura)' },
   });
 
   const deanRole = await prisma.role.upsert({
     where: { name: 'Decano' },
     update: {},
-    create: { name: 'Decano', description: 'Decano de facultad: amonesta a los docentes tutores de su facultad' },
+    create: { isBase: true, name: 'Decano', description: 'Decano de facultad: amonesta a los docentes tutores de su facultad' },
   });
 
   // Asignar permisos a roles

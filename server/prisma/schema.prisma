@@ -80,6 +80,10 @@ model Role {
   name        String   @unique
   description String
   createdAt   DateTime @default(now()) @map("created_at")
+  /// Roles base (los sembrados): protegidos; solo se pueden ver y copiar como plantilla.
+  isBase      Boolean  @default(false) @map("is_base")
+  /// Un rol desactivado no concede permisos ni se puede asignar.
+  isActive    Boolean  @default(true) @map("is_active")
 
   users       User[]
   accessPolicies UserAccessPolicy[]

@@ -48,7 +48,7 @@ describe('Catálogo de permisos (LEV-R10)', () => {
   it('el endpoint entrega el catálogo sin consultar usuarios ni datos personales', () => {
     const json = jest.fn();
     const status = jest.fn().mockReturnValue({ json });
-    const controller = new RoleController({} as never, {} as never);
+    const controller = new RoleController({} as never, {} as never, {} as never, {} as never);
     controller.listPermissions({} as Request, { status } as unknown as Response);
     expect(status).toHaveBeenCalledWith(200);
     expect(json).toHaveBeenCalledWith({ permissions: PERMISSION_CATALOG });

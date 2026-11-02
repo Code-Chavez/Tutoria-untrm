@@ -5,10 +5,12 @@ import { AppError } from '@infrastructure/middleware/errorHandler';
 // lógica de permisos sin base de datos.
 const findUnique = jest.fn();
 const findPermissions = jest.fn();
+const findRole = jest.fn();
 jest.mock('@infrastructure/database/prisma', () => ({
   prisma: {
     user: { findUnique: (...args: unknown[]) => findUnique(...args) },
     rolePermission: { findMany: (...args: unknown[]) => findPermissions(...args) },
+    role: { findUnique: (...args: unknown[]) => findRole(...args) },
   },
 }));
 
@@ -29,10 +31,23 @@ describe('authorize middleware (requirePermission)', () => {
   beforeEach(() => {
     findUnique.mockReset();
     findPermissions.mockReset();
+    findRole.mockReset();
+    findRole.mockResolvedValue({ isActive: true });
     clearRolePermissionCache();
   });
 
   const auth = { sub: 'user-1', email: 'x@untrm.edu.pe', role: 'Docente Tutor' };
+
+  it('un rol desactivado no concede ningún permiso aunque conserve sus filas (LEV-R11)', async () => {
+    findRole.mockResolvedValue({ isActive: false });
+    findPermissions.mockResolvedValue(rows(['students:read']));
+
+    const { promise, next } = runMiddleware(['students:read'], auth, 'role-off');
+    await promise;
+
+    expect(next.mock.calls[0][0]).toBeInstanceOf(AppError);
+    expect((next.mock.calls[0][0] as AppError).statusCode).toBe(403);
+  });
 
   it('responde 403 si el rol no tiene el permiso requerido', async () => {
     findPermissions.mockResolvedValue(rows(['students:read']));

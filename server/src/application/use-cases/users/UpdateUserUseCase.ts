@@ -1,7 +1,7 @@
 import { UserRepository } from '@domain/repositories/UserRepository';
 import { User } from '@domain/entities/User';
 import { RoleRepository } from '@domain/repositories/RoleRepository';
-import { RoleNotFoundError } from '@application/use-cases/roles/RoleErrors';
+import { RoleNotFoundError, assertRoleActive } from '@application/use-cases/roles/RoleErrors';
 import { SchoolRepository } from '@domain/repositories/SchoolRepository';
 import { resolveService } from './serviceAssignment';
 import { FacultyRepository } from '@domain/repositories/FacultyRepository';
@@ -58,6 +58,7 @@ export class UpdateUserUseCase {
       const roleId = data.roleId ?? existingUser.roleId;
       const role = await this.roles.findById(roleId);
       if (!role) throw new RoleNotFoundError(roleId);
+      if (data.roleId !== undefined && data.roleId !== existingUser.roleId) assertRoleActive(role);
       changes.service = resolveService(role.name, data.service !== undefined ? data.service : existingUser.service);
     }
 

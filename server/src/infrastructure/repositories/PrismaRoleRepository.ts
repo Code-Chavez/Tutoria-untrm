@@ -11,6 +11,9 @@ type PrismaRoleWithPermissions = {
   name: string;
   description: string;
   createdAt: Date;
+  isBase?: boolean;
+  isActive?: boolean;
+  _count?: { users: number };
   permissions: { permission: { id: string; code: string; description: string } }[];
 };
 
@@ -20,6 +23,9 @@ function toDomain(role: PrismaRoleWithPermissions): Role {
     name: role.name,
     description: role.description,
     createdAt: role.createdAt,
+    isBase: role.isBase,
+    isActive: role.isActive,
+    ...(role._count ? { userCount: role._count.users } : {}),
     permissions: role.permissions.map((rp) => rp.permission),
   };
 }
@@ -44,7 +50,7 @@ export class PrismaRoleRepository implements RoleRepository {
   }
 
   async findAll(): Promise<Role[]> {
-    const roles = await this.prisma.role.findMany({ include: withPermissions });
+    const roles = await this.prisma.role.findMany({ include: { ...withPermissions, _count: { select: { users: true } } }, orderBy: { name: 'asc' } });
     return roles.map(toDomain);
   }
 

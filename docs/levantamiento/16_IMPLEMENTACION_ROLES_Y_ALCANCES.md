@@ -45,3 +45,17 @@ No se anuncia ninguna de estas cinco partes como implementada por incorporar el 
 Verificación previa a la integración en el contenedor: TypeScript y lint sin errores; 74/74 pruebas unitarias de alcance, y una corrida de cuatro suites con 90/90 pruebas (incluye paridad de cuentas históricas, persistencia, aislamiento entre facultades, cambios de rol y rechazo de políticas inválidas). Los JSON y registros completos permanecen locales en `tmp/roles-scope-*.json` y `tmp/roles-scope-*.log`.
 
 Después de conectar el repositorio al contenedor de dependencias: TypeScript y lint sin errores; tres suites de integración (`userAccessPolicy`, `objectAccess`, `permissionCatalogHttp`) con 30/30 pruebas. Una corrida separada de instalación nueva (`bootstrap`) pasó 3/3 con la nueva migración. Los recuentos corresponden a corridas diferentes y no se suman como casos únicos. La base de desarrollo conserva cero políticas: no se alteró el alcance de ninguna cuenta. No se ejecutó la suite completa del servidor ni se validó una interfaz de edición, que todavía no existe.
+
+## Tercera entrega: API de roles configurables (N-3, LEV-R11 primera parte)
+
+Rama `feat/roles-permissions-api` (sobre N-1 y N-2). **Solo servidor; no hay pantalla todavía** (el cliente solo gana tres etiquetas de bitácora).
+
+- Migración aditiva `20261102120000_roles_base_and_active`: `roles.is_base` y `roles.is_active`; los siete roles sembrados quedan como **base**; no cambia permisos ni cuentas.
+- `POST /api/roles` acepta `permissions` (códigos del catálogo) y/o `copyFromRoleId` (plantilla). `PUT /api/roles/:id` reemplaza descripción y/o permisos. `PATCH /api/roles/:id/status` `{ isActive }` activa o desactiva. Todas exigen `admin:system`. `GET /api/roles` ahora informa `isBase`, `isActive` y `userCount`.
+- **Reglas:** los permisos se eligen solo del catálogo (400 si no existe); `admin:system` **no es delegable** (403; valor provisional a confirmar con la DBU/TI, LEV-R13) y nadie otorga un permiso que no tiene; los roles base no se modifican ni se desactivan (409 `ROLE_PROTECTED`; el seed reaparecería sus permisos); no se desactiva un rol con cuentas (409 `ROLE_IN_USE`); un rol desactivado no concede permisos (ni con la caché) y no se puede asignar a una cuenta (409).
+- **Efecto inmediato:** al crear, editar o desactivar un rol se vacían la caché de roles y la de permisos; el cambio rige desde la siguiente petición.
+- **Bitácora** en la misma transacción que el cambio: `ROLE_CREATED`, `ROLE_UPDATED` (con lo añadido y lo quitado), `ROLE_ACTIVATED`, `ROLE_DEACTIVATED`.
+
+Verificación local: `tsc` y `npm run lint` sin errores; 1 257 pruebas unitarias y de integración seleccionadas (`tests/unit` completo, `userAccessPolicy`, `permissionCatalogHttp`) más `roleAdminHttp` (12 pruebas HTTP reales sobre `sit_db_test`: permisos, rol base, `admin:system`, efecto inmediato, desactivar/asignar, bitácora) y `roleCreationAudit`; `authorize` ahora prueba el rol desactivado. No se ejecutó la suite completa del servidor.
+
+**Límites:** sin pantalla ni asignación de alcance (siguientes entregas); un rol base solo se puede copiar (si la DBU necesita ajustar un rol base se decidirá aparte); la lista de permisos no delegables es provisional; la protección del último administrador ya existe para cuentas (#186) y aquí queda garantizada porque `admin:system` solo lo tienen los roles base, que no se pueden modificar.
