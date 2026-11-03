@@ -1,7 +1,9 @@
-import React, { useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { getApiErrorMessage } from '@shared/services/apiClient';
 import { roleDisplayName } from '@shared/utils/roleLabel';
 import { useDialog } from '@shared/hooks/useDialog';
+import { useDraft } from '@shared/hooks/useDraft';
+import { removeDraft } from '@shared/utils/drafts';
 import styles from './UserFormModal.module.css';
 import { User, CreateUserData, UpdateUserData } from '../services/userService';
 import { Role } from '../services/roleService';
@@ -23,6 +25,8 @@ interface UserFormModalProps {
   onClose: () => void;
   onSubmit: (data: CreateUserData | UpdateUserData) => Promise<void>;
   userToEdit: User | null;
+  /** Quien edita: con él, lo escrito se guarda como borrador de la pestaña y se recupera al recargar (no se envía al servidor). */
+  draftOwnerId?: string;
   roles: Role[];
   schools: School[];
   faculties: { id: string; name: string }[];
@@ -32,26 +36,33 @@ export const UserFormModal: React.FC<UserFormModalProps> = ({
   onClose,
   onSubmit,
   userToEdit,
+  draftOwnerId,
   roles,
   schools,
   faculties,
 }) => {
   // El componente se remonta (vía `key`) cuando cambia el usuario a editar,
   // así que el estado inicial se deriva del prop sin necesidad de un efecto.
-  const [formData, setFormData] = useState<CreateUserData>(() =>
-    userToEdit
-      ? {
-          email: userToEdit.email,
-          firstName: userToEdit.firstName,
-          lastName: userToEdit.lastName,
-          roleId: userToEdit.roleId,
-          phone: userToEdit.phone || '',
-          service: userToEdit.service ?? '',
-          schoolId: userToEdit.schoolId ?? '',
-          facultyId: userToEdit.facultyId ?? '',
-        }
-      : { email: '', firstName: '', lastName: '', roleId: '', phone: '', service: '', schoolId: '', facultyId: '' },
+  const initial = useMemo<CreateUserData>(
+    () =>
+      userToEdit
+        ? {
+            email: userToEdit.email,
+            firstName: userToEdit.firstName,
+            lastName: userToEdit.lastName,
+            roleId: userToEdit.roleId,
+            phone: userToEdit.phone || '',
+            service: userToEdit.service ?? '',
+            schoolId: userToEdit.schoolId ?? '',
+            facultyId: userToEdit.facultyId ?? '',
+          }
+        : { email: '', firstName: '', lastName: '', roleId: '', phone: '', service: '', schoolId: '', facultyId: '' },
+    [userToEdit],
   );
+  // Sin cambios respecto de lo guardado en el servidor no hay borrador que conservar.
+  const unchanged = useCallback((value: CreateUserData) => JSON.stringify(value) === JSON.stringify(initial), [initial]);
+  const draftKey = `user-form.${userToEdit?.id ?? 'nuevo'}`;
+  const { value: formData, setValue: setFormData, restored, discard } = useDraft<CreateUserData>(draftOwnerId, draftKey, initial, unchanged);
   const [loading, setLoading] = useState(false);
   const [submitError, setSubmitError] = useState('');
   const allowedDomains = useEmailPolicy();
@@ -82,6 +93,8 @@ export const UserFormModal: React.FC<UserFormModalProps> = ({
     try {
       setLoading(true);
       await onSubmit({ ...formData, email, service: isServiceRole ? formData.service || null : null, schoolId: isTutorRole ? formData.schoolId || null : null, facultyId: isDeanRole ? formData.facultyId || null : null });
+      // Guardado en el servidor: el borrador ya no hace falta (la ventana se cierra; no se reinicia lo que se ve).
+      if (draftOwnerId) removeDraft(draftOwnerId, draftKey);
       onClose();
     } catch (error) {
       // Se muestra el motivo real que envía la API (p. ej. «el correo ya está registrado»), no un aviso genérico.
@@ -110,6 +123,14 @@ export const UserFormModal: React.FC<UserFormModalProps> = ({
         </div>
 
         <form onSubmit={handleSubmit}>
+          {restored && (
+            <p role="status" className={styles.help}>
+              Recuperamos lo que estabas escribiendo.{' '}
+              <button type="button" className={styles.cancelButton} onClick={discard}>
+                Descartar
+              </button>
+            </p>
+          )}
           {submitError && (
             <p role="alert" className={styles.submitError}>
               {submitError}

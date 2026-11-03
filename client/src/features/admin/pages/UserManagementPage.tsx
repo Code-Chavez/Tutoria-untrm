@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import { catalogService } from '@features/catalogos/services/catalogService';
@@ -13,6 +13,8 @@ import { UserAccessDialog } from '../components/UserAccessDialog';
 import { roleDisplayName } from '@shared/utils/roleLabel';
 import { getApiErrorMessage } from '@shared/services/apiClient';
 import { useUsers } from '../hooks/useUsers';
+import { useUrlParams } from '@shared/hooks/useUrlParams';
+import { useAuth } from '@features/auth/hooks/useAuth';
 import {
   PageHeader,
   Button,
@@ -33,12 +35,35 @@ export const UserManagementPage: React.FC = () => {
   const [issued, setIssued] = useState<{ email: string; invitation: Invitation } | null>(null);
   const [actionError, setActionError] = useState('');
 
-  const [filters, setFilters] = useState<UserFilterValues>(EMPTY_FILTERS);
+  // Lo que conviene conservar al recargar o compartir el enlace vive en la URL: los filtros (q, rol, estado) y qué ventana está
+  // abierta y sobre quién (nuevo, editar, acceso, confirmar). Lo que se escribe en el formulario se recupera como borrador.
+  const url = useUrlParams();
+  const { user: me } = useAuth();
+  const [search, roleId, status] = [url.get('q'), url.get('rol'), url.get('estado')];
+  const filters = useMemo<UserFilterValues>(() => ({ search, roleId, status }), [search, roleId, status]);
+  const setFilters = (next: UserFilterValues) => url.set({ q: next.search, rol: next.roleId, estado: next.status }, { replace: true });
 
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [userToEdit, setUserToEdit] = useState<User | null>(null);
-  const [userToToggle, setUserToToggle] = useState<User | null>(null);
-  const [userForAccess, setUserForAccess] = useState<User | null>(null);
+  const byId = (id: string) => users.find((u) => u.id === id) ?? null;
+  const creating = url.get('nuevo') === '1';
+  const userToEdit = byId(url.get('editar'));
+  const userForAccess = byId(url.get('acceso'));
+  const userToToggle = byId(url.get('confirmar'));
+  const isModalOpen = creating || userToEdit !== null;
+  const setUserForAccess = (user: User | null) => url.set({ acceso: user?.id ?? null }, { replace: user === null });
+  const setUserToToggle = (user: User | null) => url.set({ confirmar: user?.id ?? null }, { replace: user === null });
+
+  // Un enlace a un registro que ya no existe (o que la persona no ve) no deja una ventana fantasma: se limpia el parámetro.
+  const dialogIds = [url.get('editar'), url.get('acceso'), url.get('confirmar')].join('|');
+  useEffect(() => {
+    if (loading || error) return;
+    const gone: Record<string, null> = {};
+    for (const key of ['editar', 'acceso', 'confirmar']) {
+      const id = url.get(key);
+      if (id && !users.some((u) => u.id === id)) gone[key] = null;
+    }
+    if (Object.keys(gone).length > 0) url.set(gone, { replace: true });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [loading, error, users, dialogIds]);
   const [toggling, setToggling] = useState(false);
 
   const roleName = (roleId: string) => {
@@ -60,15 +85,9 @@ export const UserManagementPage: React.FC = () => {
     });
   }, [users, filters]);
 
-  const handleOpenModal = (user?: User) => {
-    setUserToEdit(user || null);
-    setIsModalOpen(true);
-  };
+  const handleOpenModal = (user?: User) => url.set(user ? { editar: user.id, nuevo: null } : { nuevo: '1', editar: null });
 
-  const handleCloseModal = () => {
-    setIsModalOpen(false);
-    setUserToEdit(null);
-  };
+  const handleCloseModal = () => url.set({ editar: null, nuevo: null }, { replace: true });
 
   const handleSubmit = async (data: CreateUserData | UpdateUserData) => {
     if (userToEdit) {
@@ -174,6 +193,7 @@ export const UserManagementPage: React.FC = () => {
       {isModalOpen && (
         <UserFormModal
           key={userToEdit?.id ?? 'new'}
+          draftOwnerId={me?.id}
           onClose={handleCloseModal}
           onSubmit={handleSubmit}
           userToEdit={userToEdit}
