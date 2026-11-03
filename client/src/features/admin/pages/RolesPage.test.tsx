@@ -2,6 +2,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { AxiosError } from 'axios';
+import { MemoryRouter, useLocation } from 'react-router-dom';
 import { QueryClientTestWrapper } from '@shared/test-utils/QueryClientTestWrapper';
 import { RolesPage } from './RolesPage';
 import { roleService, type Role } from '../services/roleService';
@@ -9,6 +10,7 @@ import { roleService, type Role } from '../services/roleService';
 vi.mock('../services/roleService', () => ({
   roleService: { getRoles: vi.fn(), getPermissionCatalog: vi.fn(), create: vi.fn(), update: vi.fn(), setActive: vi.fn() },
 }));
+vi.mock('@features/auth/hooks/useAuth', () => ({ useAuth: () => ({ user: { id: 'me' } }) }));
 const mocked = vi.mocked(roleService);
 
 const perm = (code: string, description: string) => ({ code, description });
@@ -17,10 +19,18 @@ const adminRole: Role = { id: 'r-admin', name: 'Administrador DBU', description:
 const custom: Role = { id: 'r-rev', name: 'Revisor', description: 'Solo lectura', isBase: false, isActive: true, userCount: 0, permissions: [CATALOG[0]!] };
 const inUse: Role = { id: 'r-uso', name: 'Con cuentas', description: 'En uso', isBase: false, isActive: true, userCount: 3, permissions: [CATALOG[2]!] };
 
-const renderPage = () =>
+function Where() {
+  const { search } = useLocation();
+  return <span aria-label="url">{search}</span>;
+}
+
+const renderPage = (url = '/roles') =>
   render(
     <QueryClientTestWrapper>
-      <RolesPage />
+      <MemoryRouter initialEntries={[url]}>
+        <RolesPage />
+        <Where />
+      </MemoryRouter>
     </QueryClientTestWrapper>,
   );
 
@@ -32,6 +42,7 @@ const pickRole = async (user: ReturnType<typeof userEvent.setup>, name: string) 
 describe('RolesPage', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    sessionStorage.clear();
     mocked.getRoles.mockResolvedValue([adminRole, custom, inUse]);
     mocked.getPermissionCatalog.mockResolvedValue(CATALOG);
   });
@@ -129,5 +140,57 @@ describe('RolesPage', () => {
     await user.click(within(dialog).getByRole('button', { name: 'Desactivar' }));
 
     expect(mocked.setActive).toHaveBeenCalledWith('r-rev', false);
+  });
+
+  describe('el estado de la pantalla vive en la URL', () => {
+    it('elegir un rol y crear a partir de otro ponen su estado en la URL', async () => {
+      const user = userEvent.setup();
+      renderPage();
+      await pickRole(user, 'Revisor');
+      expect(screen.getByLabelText('url')).toHaveTextContent('rol=r-rev');
+
+      await user.click(screen.getByRole('button', { name: 'Copiar' }));
+      expect(screen.getByLabelText('url')).toHaveTextContent('nuevo=1');
+      expect(screen.getByLabelText('url')).toHaveTextContent('copiar=r-rev');
+      expect(await screen.findByRole('button', { name: 'Crear rol' })).toBeInTheDocument();
+    });
+
+    it('un enlace con el rol abre su detalle; uno con un rol inexistente se limpia', async () => {
+      const first = renderPage('/roles?rol=r-rev');
+      expect(await screen.findByRole('heading', { name: 'Revisor' })).toBeInTheDocument();
+      first.unmount();
+
+      renderPage('/roles?rol=nada&copiar=nada');
+      await screen.findByText('Administrador DBU');
+      await vi.waitFor(() => expect(screen.getByLabelText('url')).toBeEmptyDOMElement());
+    });
+
+    it('los cambios sin guardar de un rol se recuperan al recargar y se pueden descartar', async () => {
+      const user = userEvent.setup();
+      const first = renderPage('/roles?rol=r-rev');
+      await user.click(await screen.findByLabelText(/Ver informes/));
+      first.unmount();
+
+      renderPage('/roles?rol=r-rev');
+      expect(await screen.findByLabelText(/Ver informes/)).toBeChecked();
+      expect(screen.getByText(/Recuperamos los cambios que no habías guardado/)).toBeInTheDocument();
+      await user.click(screen.getByRole('button', { name: 'Descartar' }));
+      expect(screen.getByLabelText(/Ver informes/)).not.toBeChecked();
+    });
+
+    it('lo escrito en un rol nuevo se recupera al recargar', async () => {
+      const user = userEvent.setup();
+      const first = renderPage('/roles?nuevo=1');
+      await user.type(await screen.findByLabelText('Nombre del rol'), 'Auditor interno');
+      first.unmount();
+
+      renderPage('/roles?nuevo=1');
+      expect(await screen.findByLabelText('Nombre del rol')).toHaveValue('Auditor interno');
+    });
+
+    it('la confirmación de desactivar también está en la URL', async () => {
+      renderPage('/roles?rol=r-rev&confirmar=1');
+      expect(await screen.findByRole('alertdialog')).toBeInTheDocument();
+    });
   });
 });
