@@ -3,7 +3,8 @@ import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { AxiosError } from 'axios';
 import { QueryClientTestWrapper } from '@shared/test-utils/QueryClientTestWrapper';
-import { UserAccessDialog, describeScope } from './UserAccessDialog';
+import { UserAccessDialog } from './UserAccessDialog';
+import { describeScope } from '../accessScope';
 import { userService, type User, type UserAccess } from '../services/userService';
 import type { Role } from '../services/roleService';
 
