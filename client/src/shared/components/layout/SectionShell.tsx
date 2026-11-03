@@ -39,7 +39,7 @@ const SETTINGS_NAV = {
 /** Entrada de la sección: lleva a la primera pestaña que la persona puede usar. */
 export function SectionHome({ section }: { section: SectionKey }) {
   const { user } = useAuth();
-  const first = tabsFor(section, user ? ROLE_CODES[user.role] : undefined)[0];
+  const first = tabsFor(section, user ? ROLE_CODES[user.role] : undefined, user?.permissions)[0];
   return <Navigate to={first?.path ?? '/'} replace />;
 }
 
@@ -48,7 +48,7 @@ export function SectionShell({ section }: { section: SectionKey }) {
   const { user } = useAuth();
   const { pathname } = useLocation();
   const navigate = useNavigate();
-  const tabs = tabsFor(section, user ? ROLE_CODES[user.role] : undefined);
+  const tabs = tabsFor(section, user ? ROLE_CODES[user.role] : undefined, user?.permissions);
   const periodSteps = tabs.filter((tab) => tab.path !== '/pendientes');
   const stepIndex = periodSteps.findIndex((tab) => tab.path === pathname);
   const help = section === 'periodo' ? PERIOD_HELP[pathname] : undefined;

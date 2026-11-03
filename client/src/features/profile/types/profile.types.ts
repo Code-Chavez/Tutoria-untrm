@@ -7,6 +7,8 @@ export interface UserProfile {
   photoUrl: string | null;
   role: string;
   service?: string | null;
+  /** Permisos que concede su rol hoy. */
+  permissions?: string[];
 }
 
 export interface UpdateProfilePayload {

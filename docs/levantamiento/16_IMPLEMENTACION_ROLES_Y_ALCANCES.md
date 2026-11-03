@@ -98,3 +98,17 @@ Rama `feat/user-role-scope-assignment`. Solo cliente; usa `GET/PUT /api/users/:i
 Verificación local: `tsc`, `eslint` y 35 pruebas de `features/admin` (incluidas `UserAccessDialog.test.tsx`, la fila de `UserTable` y los roles desactivados de `UserFormModal`). No se revisó en navegador contra el servidor.
 
 **Límites:** rol y alcance siguen siendo dos pasos (editar usuario y luego «Rol y alcance»); la tabla no muestra el alcance de cada fila; el menú y la sesión por permisos llegan en la entrega siguiente.
+
+## Séptima entrega: menú, pestañas y rutas por permisos (N-7, LEV-R11/R12, servidor y cliente)
+
+Rama `feat/permission-based-session`. Sin migración.
+
+- **Servidor:** el inicio de sesión y `GET /api/profile` devuelven `permissions` (códigos que concede el rol hoy; un rol desactivado no concede ninguno). Es solo información para armar la pantalla: cada ruta sigue autorizándose por su cuenta.
+- **Cliente:** `shared/routePermissions.ts` fija el permiso que abre cada pantalla (el mismo que exige el servidor a su API principal). **Los siete roles base se siguen viendo por su rol, sin cambios**; una cuenta con un **rol personalizado** (sin código de rol) ve las entradas del menú, las pestañas de Configuración/Periodo/Informes y las rutas que alguno de sus permisos abre (`RequireRole` acepta `permissions`; las rutas de estudiante y «Seguimiento DBU» son solo de su rol base). El panel de inicio lo ven todos.
+- Al abrir la aplicación se consulta `GET /api/profile` y se actualizan el rol y los permisos guardados en la sesión (la DBU puede haberlos editado); si no hay respuesta se conserva lo guardado.
+- «Roles y permisos»: el detalle se acomoda mejor en pantallas medianas (lista de ancho fijo y detalle al lado hasta 1 100 px).
+- «Rol y alcance»: sin alcance configurado ya no presenta «ninguno» como si fuera lo vigente; no se guarda nada hasta elegir uno.
+
+Verificación local: `tsc` y `eslint` (cliente y servidor) sin errores; `tests/unit` del servidor (127 suites, 1 235 pruebas, incluida `grantedPermissions`); 114 pruebas de cliente en `features/auth` y `shared/components` (menú por permisos, `RequireRole`, actualización de permisos) y 35 de `features/admin`. Con la pila Docker del proyecto `tutoria-untrm` levantada desde esta rama: inicio de sesión con `permissions`, pantalla «Roles y permisos» y ventana «Rol y alcance» revisadas en el navegador con datos reales (solo lectura). **No se probó en el navegador una cuenta con rol personalizado** ni el cierre de sesión por permisos.
+
+**Límites:** el panel de inicio (accesos rápidos y alertas) sigue por rol: un rol personalizado ve el panel vacío; el mapa pantalla→permiso es una aproximación al permiso principal de cada API (una pantalla con varias llamadas puede mostrar partes que el servidor rechace con 403); falta confirmar con la DBU el conjunto de permisos que debe tener un rol típico.

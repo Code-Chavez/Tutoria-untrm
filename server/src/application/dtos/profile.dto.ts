@@ -7,6 +7,8 @@ export interface ProfileOutput {
   photoUrl: string | null;
   role: string;
   service?: string | null;
+  /** Permisos que concede su rol hoy (para el menú del cliente). */
+  permissions?: string[];
 }
 
 export interface UpdateProfileInput {

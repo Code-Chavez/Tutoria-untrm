@@ -41,6 +41,9 @@ describe('UserAccessDialog', () => {
     expect(await screen.findByText(/Sin alcance definido/)).toBeInTheDocument();
     expect(screen.getByText(/Ver tutorados/)).toBeInTheDocument();
     expect(screen.getByText(/Ver informes/)).toBeInTheDocument();
+    // Lo que muestra el selector no es lo vigente: no hay nada que guardar hasta que se elija un alcance.
+    expect(screen.getByText(/Elija un alcance para definirlo/)).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Guardar alcance' })).toBeDisabled();
   });
 
   it('define un alcance por escuelas: exige elegir al menos una y envía las elegidas', async () => {
