@@ -3,37 +3,14 @@ import { PageHeader, Card, CardHeader, CardBody, Button, Badge, EmptyState, Conf
 import { SettingsIcon } from '@shared/components/icons';
 import { getApiErrorMessage } from '@shared/services/apiClient';
 import { useCreateRole, usePermissionCatalog, useRoleList, useSetRoleActive, useUpdateRole } from '../hooks/useRoles';
-import type { Permission, Role } from '../services/roleService';
+import type { Role } from '../services/roleService';
+import { groupPermissions } from '../permissionGroups';
 import styles from './RolesPage.module.css';
 
 // Permisos que ningún rol creado aquí puede incluir (el servidor también lo rechaza): la administración del sistema no se delega.
 const NON_DELEGABLE = ['admin:system'];
 
-const GROUP_LABELS: Record<string, string> = {
-  admin: 'Administración del sistema',
-  admonitions: 'Amonestaciones',
-  audit: 'Bitácora de auditoría',
-  branding: 'Identidad visual',
-  campuses: 'Sedes',
-  catalogs: 'Catálogos',
-  'consolidated-reports': 'Informe consolidado',
-  evaluation: 'Evaluación de tutoría',
-  followups: 'Seguimientos',
-  indicators: 'Indicadores',
-  interviews: 'Entrevistas iniciales',
-  parameters: 'Parámetros',
-  referrals: 'Derivaciones',
-  reports: 'Informes',
-  'semester-reports': 'Informes semestrales',
-  sessions: 'Sesiones de tutoría',
-  students: 'Tutorados',
-  'support-contacts': 'Contactos de apoyo',
-  'tutoring-requests': 'Solicitudes de tutoría',
-  users: 'Usuarios',
-  'work-plans': 'Planes de trabajo',
-};
 
-const groupOf = (code: string) => code.split(':')[0] ?? code;
 const roleCodes = (role: Role) => (role.permissions ?? []).map((p) => p.code);
 const sameSet = (a: Set<string>, b: string[]) => a.size === b.length && b.every((code) => a.has(code));
 const toggled = (set: Set<string>, code: string) => {
@@ -70,11 +47,7 @@ export function RolesPage() {
   const catalog = useMemo(() => catalogQuery.data ?? [], [catalogQuery.data]);
   const selected = roles.find((r) => r.id === selectedId) ?? null;
 
-  const groups = useMemo(() => {
-    const map = new Map<string, Permission[]>();
-    for (const permission of catalog) map.set(groupOf(permission.code), [...(map.get(groupOf(permission.code)) ?? []), permission]);
-    return [...map.entries()].map(([key, items]) => ({ key, title: GROUP_LABELS[key] ?? key, items }));
-  }, [catalog]);
+  const groups = useMemo(() => groupPermissions(catalog), [catalog]);
 
   const clearMessages = () => {
     setError('');

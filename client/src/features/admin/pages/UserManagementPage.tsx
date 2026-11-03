@@ -9,6 +9,7 @@ import { InvitationDialog } from '../components/InvitationDialog';
 import { UserFormModal } from '../components/UserFormModal';
 import { UserFilters, UserFilterValues } from '../components/UserFilters';
 import { UserTable } from '../components/UserTable';
+import { UserAccessDialog } from '../components/UserAccessDialog';
 import { roleDisplayName } from '@shared/utils/roleLabel';
 import { getApiErrorMessage } from '@shared/services/apiClient';
 import { useUsers } from '../hooks/useUsers';
@@ -37,6 +38,7 @@ export const UserManagementPage: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [userToEdit, setUserToEdit] = useState<User | null>(null);
   const [userToToggle, setUserToToggle] = useState<User | null>(null);
+  const [userForAccess, setUserForAccess] = useState<User | null>(null);
   const [toggling, setToggling] = useState(false);
 
   const roleName = (roleId: string) => {
@@ -163,6 +165,7 @@ export const UserManagementPage: React.FC = () => {
             roleName={roleName}
             onEdit={handleOpenModal}
             onToggleStatus={setUserToToggle}
+            onAccess={setUserForAccess}
             onReissueInvitation={reissue}
           />
         )}
@@ -177,6 +180,17 @@ export const UserManagementPage: React.FC = () => {
           roles={roles}
           schools={schools}
           faculties={faculties}
+        />
+      )}
+
+      {userForAccess && (
+        <UserAccessDialog
+          key={userForAccess.id}
+          user={userForAccess}
+          role={roles.find((r) => r.id === userForAccess.roleId)}
+          schools={schools}
+          faculties={faculties}
+          onClose={() => setUserForAccess(null)}
         />
       )}
 

@@ -1,6 +1,6 @@
 import React from 'react';
 import { Badge, IconButton } from '@shared/components/ui';
-import { PencilIcon, BanIcon, CheckCircleIcon, SendIcon } from '@shared/components/icons';
+import { PencilIcon, BanIcon, CheckCircleIcon, SendIcon, ShieldCheckIcon } from '@shared/components/icons';
 import { User } from '../services/userService';
 import table from '@shared/components/ui/DataTable.module.css';
 import { REFERRAL_SERVICE_LABEL, type ReferralService } from '@features/derivaciones/services/referralService';
@@ -10,6 +10,8 @@ interface UserTableProps {
   roleName: (roleId: string) => string;
   onEdit: (user: User) => void;
   onToggleStatus: (user: User) => void;
+  /** Abre «Rol y alcance»: lo que puede hacer la persona y hasta dónde llega. */
+  onAccess: (user: User) => void;
   /** Emite una invitación nueva (cuenta pendiente de activación, o enlace vencido o perdido). */
   onReissueInvitation: (user: User) => void;
 }
@@ -23,6 +25,7 @@ export const UserTable: React.FC<UserTableProps> = ({
   roleName,
   onEdit,
   onToggleStatus,
+  onAccess,
   onReissueInvitation,
 }) => (
   <div className={table.scroll}>
@@ -72,6 +75,9 @@ export const UserTable: React.FC<UserTableProps> = ({
               <div className={table.actions}>
                 <IconButton label="Editar usuario" onClick={() => onEdit(user)}>
                   <PencilIcon size={16} />
+                </IconButton>
+                <IconButton label="Rol y alcance" onClick={() => onAccess(user)}>
+                  <ShieldCheckIcon size={16} />
                 </IconButton>
                 {user.isActive && user.mustChangePassword && (
                   <IconButton label="Emitir invitación nueva" onClick={() => onReissueInvitation(user)}>

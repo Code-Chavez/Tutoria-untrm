@@ -35,6 +35,20 @@ function setup(onSubmit = vi.fn().mockResolvedValue(undefined)) {
   return onSubmit;
 }
 
+describe('UserFormModal: roles desactivados', () => {
+  it('no ofrece roles desactivados, salvo el que la cuenta ya tiene', () => {
+    const withInactive = [...roles, { id: 'r-off', name: 'Revisor', isActive: false }, { id: 'r-off2', name: 'Auditor', isActive: false }] as Role[];
+    const editing = { id: 'u1', email: 'a@untrm.edu.pe', firstName: 'A', lastName: 'B', roleId: 'r-off2', isActive: true } as User;
+    render(
+      <QueryClientTestWrapper>
+        <UserFormModal onClose={vi.fn()} onSubmit={vi.fn()} userToEdit={editing} roles={withInactive} schools={schools} faculties={faculties} />
+      </QueryClientTestWrapper>,
+    );
+    expect(screen.queryByRole('option', { name: 'Revisor' })).not.toBeInTheDocument();
+    expect(screen.getByRole('option', { name: 'Auditor' })).toBeInTheDocument();
+  });
+});
+
 describe('UserFormModal: servicio del Profesional de Servicio', () => {
   it('solo pide el servicio cuando el rol es Profesional de Servicio', () => {
     setup();
