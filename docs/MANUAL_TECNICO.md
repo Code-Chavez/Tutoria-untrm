@@ -344,6 +344,10 @@ Git Flow: `feature/*`, `fix/*` y `docs/*` se integran en `develop` por *pull req
 (`vX.Y.Z`) y se devuelven a `develop` (merge de `main` a `develop` con **commit de merge**, no *squash*). Los commits siguen *Conventional Commits*. Cada PR
 incluye el DoD (DoD-SIT-001). Detalle en `README.md`.
 
+### Estado de la pantalla en la URL (convención, 3/11/2026)
+
+Lo que conviene conservar al recargar, compartir el enlace o volver con «atrás» vive en la URL, no en el estado del componente: los **filtros** (`?q=…&rol=…&estado=…`) y **qué ventana está abierta y sobre qué registro** (`?nuevo=1`, `?editar=<id>`, `?acceso=<id>`, `?confirmar=<id>`). El hook `shared/hooks/useUrlParams` lee y cambia solo los parámetros indicados y respeta los demás; abrir una ventana crea una entrada del historial, y escribir un filtro o cerrar la reemplaza. Un parámetro que apunta a un registro que ya no existe se limpia. Lo que la persona estaba **escribiendo** no va a la URL (podría incluir datos personales): se guarda como borrador de la pestaña (`useDraft`, ver «Borradores») y se recupera al recargar. Aplicado primero a «Usuarios y roles»; el resto de pantallas se migra por etapas.
+
 ## 14. Limitaciones conocidas
 
 - Los tokens de sesión se guardan en `localStorage` del navegador (riesgo bajo con la política de contenido actual; ver informe de seguridad).
