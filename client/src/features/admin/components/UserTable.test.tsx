@@ -7,7 +7,7 @@ import type { User } from '../services/userService';
 const user = (over: Partial<User> = {}): User => ({ id: 'u1', email: 'ana@untrm.edu.pe', firstName: 'Ana', lastName: 'Ruiz', roleId: 'r1', isActive: true, ...over });
 
 const renderTable = (users: User[], onReissueInvitation = vi.fn()) =>
-  render(<UserTable users={users} roleName={() => 'Docente'} onEdit={vi.fn()} onToggleStatus={vi.fn()} onReissueInvitation={onReissueInvitation} />);
+  render(<UserTable users={users} roleName={() => 'Docente'} onEdit={vi.fn()} onToggleStatus={vi.fn()} onAccess={vi.fn()} onReissueInvitation={onReissueInvitation} />);
 
 describe('UserTable: cuentas pendientes de activación', () => {
   it('distingue activa, pendiente de activación e inactiva', () => {
@@ -27,5 +27,14 @@ describe('UserTable: cuentas pendientes de activación', () => {
     await userEvent.setup().click(buttons[0]);
 
     expect(onReissue).toHaveBeenCalledWith(expect.objectContaining({ id: '2' }));
+  });
+});
+
+describe('UserTable: rol y alcance', () => {
+  it('cada cuenta ofrece abrir «Rol y alcance» y lo hace para esa cuenta', async () => {
+    const onAccess = vi.fn();
+    render(<UserTable users={[user({ id: '7' })]} roleName={() => 'Docente'} onEdit={vi.fn()} onToggleStatus={vi.fn()} onAccess={onAccess} onReissueInvitation={vi.fn()} />);
+    await userEvent.setup().click(screen.getByRole('button', { name: 'Rol y alcance' }));
+    expect(onAccess).toHaveBeenCalledWith(expect.objectContaining({ id: '7' }));
   });
 });

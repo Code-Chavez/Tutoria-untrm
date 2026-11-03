@@ -49,7 +49,30 @@ export interface UpdateUserData {
   facultyId?: string | null;
 }
 
+export type AccessKind = 'NONE' | 'OWN' | 'SCHOOLS' | 'FACULTIES' | 'INSTITUTION' | 'SERVICE';
+
+/** Alcance de datos de una persona con su rol (LEV-R12). */
+export interface UserAccess {
+  userId: string;
+  role: { id: string; name: string };
+  policy: { kind: AccessKind; schoolIds: string[]; facultyIds: string[]; service: string | null; revision: number } | null;
+  /** STORED: configurado; DEFAULT: sin configurar (rige el comportamiento del rol); OUTDATED: quedó de un rol anterior. */
+  source: 'STORED' | 'DEFAULT' | 'OUTDATED';
+  configurable: boolean;
+}
+
+export interface AccessInput {
+  kind: AccessKind;
+  schoolIds?: string[];
+  facultyIds?: string[];
+  service?: string | null;
+}
+
 export const userService = {
+  getAccess: async (id: string): Promise<UserAccess> => (await apiClient.get<{ access: UserAccess }>(`/users/${id}/access`)).data.access,
+
+  setAccess: async (id: string, input: AccessInput): Promise<UserAccess> => (await apiClient.put<{ access: UserAccess }>(`/users/${id}/access`, input)).data.access,
+
   /** Dominios de correo permitidos para las cuentas (RF-01): la misma política que aplica el servidor. */
   getEmailPolicy: async (): Promise<string[]> => {
     const response = await apiClient.get<{ allowedDomains: string[] }>('/users/email-policy');

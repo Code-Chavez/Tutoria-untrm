@@ -85,3 +85,16 @@ Rama `feat/roles-permissions-screen`. Solo cliente, sin cambios de servidor. Rut
 Verificación local: `tsc`, `eslint` y 71 pruebas de cliente (`features/admin` y `layout`, incluida la nueva `RolesPage.test.tsx` con 7). **No se revisó en navegador contra el servidor** (la pila Docker del usuario monta otra rama).
 
 **Límites:** el formulario de usuarios aún no filtra roles desactivados (el servidor los rechaza con 409); la asignación de rol y alcance por persona llega en la entrega siguiente; el menú por permisos, después.
+
+## Sexta entrega: rol y alcance por persona en «Usuarios y roles» (N-6, LEV-R12, cliente)
+
+Rama `feat/user-role-scope-assignment`. Solo cliente; usa `GET/PUT /api/users/:id/access` (N-4) y los roles de N-3.
+
+- Cada fila de «Usuarios y roles» tiene la acción **«Rol y alcance»**: una ventana que resume **qué puede hacer** la persona (permisos de su rol agrupados por área) y deja definir **hasta dónde llega** (ninguno, propios, escuelas, facultades, institución o servicio) con una frase en vivo («Con esto: …»).
+- Avisa cuando rige el valor por defecto del rol y cuando el alcance quedó en «ninguno» tras cambiar de rol. No deja editar el propio alcance, el del estudiante ni el de la administración, con el motivo a la vista; los errores del servidor se muestran tal cual.
+- El **rol** se sigue cambiando con «Editar usuario» (ya existía y pide servicio/escuela/facultad cuando el rol lo exige); ese formulario ya no ofrece roles desactivados (salvo el que la cuenta ya tiene).
+- Se extrajo `permissionGroups.ts` (áreas y etiquetas) para compartirlo con «Roles y permisos».
+
+Verificación local: `tsc`, `eslint` y 35 pruebas de `features/admin` (incluidas `UserAccessDialog.test.tsx`, la fila de `UserTable` y los roles desactivados de `UserFormModal`). No se revisó en navegador contra el servidor.
+
+**Límites:** rol y alcance siguen siendo dos pasos (editar usuario y luego «Rol y alcance»); la tabla no muestra el alcance de cada fila; el menú y la sesión por permisos llegan en la entrega siguiente.

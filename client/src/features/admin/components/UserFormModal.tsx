@@ -183,7 +183,7 @@ export const UserFormModal: React.FC<UserFormModalProps> = ({
               required
             >
               <option value="">Seleccione un rol...</option>
-              {roles.map((role) => (
+              {roles.filter((role) => role.isActive !== false || role.id === userToEdit?.roleId).map((role) => (
                 <option key={role.id} value={role.id}>
                   {roleDisplayName(role.name)}
                 </option>
