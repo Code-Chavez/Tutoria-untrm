@@ -39,6 +39,7 @@ import { SectionHome, SectionShell } from '@shared/components/layout/SectionShel
 import { RequestEmailsPage } from '@features/pedidos/pages/RequestEmailsPage';
 import { CycleTutorsPage } from '@features/ciclos/pages/CycleTutorsPage';
 import { PendingPage } from '@features/pendientes/pages/PendingPage';
+import { ROUTE_PERMISSIONS } from '@shared/routePermissions';
 import { RolesPage } from '@features/admin/pages/RolesPage';
 import { CampusesPage } from '@features/sedes/pages/CampusesPage';
 import { ParametersPage } from '@features/parametros/pages/ParametersPage';
@@ -69,7 +70,7 @@ export default function App() {
                 path="informes"
                 element={
                   <RequireRole
-                    roles={['Docente Tutor', 'Coordinador', 'Administrador DBU']}
+                    roles={['Docente Tutor', 'Coordinador', 'Administrador DBU']} permissions={ROUTE_PERMISSIONS['/informes']}
                   >
                     <ScheduleAttendanceReportPage />
                   </RequireRole>
@@ -78,7 +79,7 @@ export default function App() {
               <Route
                 path="informes/semestral"
                 element={
-                  <RequireRole roles={['Docente Tutor']}>
+                  <RequireRole roles={['Docente Tutor']} permissions={ROUTE_PERMISSIONS['/informes/semestral']}>
                     <SemesterReportPage />
                   </RequireRole>
                 }
@@ -86,7 +87,7 @@ export default function App() {
               <Route
                 path="informes/consolidado"
                 element={
-                  <RequireRole roles={['Administrador DBU', 'Vicerrectorado']}>
+                  <RequireRole roles={['Administrador DBU', 'Vicerrectorado']} permissions={ROUTE_PERMISSIONS['/informes/consolidado']}>
                     <ConsolidatedReportPage />
                   </RequireRole>
                 }
@@ -94,7 +95,7 @@ export default function App() {
               <Route
                 path="indicadores"
                 element={
-                  <RequireRole roles={['Administrador DBU', 'Coordinador', 'Vicerrectorado']}>
+                  <RequireRole roles={['Administrador DBU', 'Coordinador', 'Vicerrectorado']} permissions={ROUTE_PERMISSIONS['/indicadores']}>
                     <IndicatorsPage />
                   </RequireRole>
                 }
@@ -102,7 +103,7 @@ export default function App() {
               <Route
                 path="evaluacion/resultados"
                 element={
-                  <RequireRole roles={['Administrador DBU', 'Coordinador']}>
+                  <RequireRole roles={['Administrador DBU', 'Coordinador']} permissions={ROUTE_PERMISSIONS['/evaluacion/resultados']}>
                     <EvaluationStatisticsPage />
                   </RequireRole>
                 }
@@ -110,7 +111,7 @@ export default function App() {
               <Route
                 path="evaluacion/sugerencias"
                 element={
-                  <RequireRole roles={['Administrador DBU', 'Coordinador']}>
+                  <RequireRole roles={['Administrador DBU', 'Coordinador']} permissions={ROUTE_PERMISSIONS['/evaluacion/sugerencias']}>
                     <EvaluationSuggestionsPage />
                   </RequireRole>
                 }
@@ -122,7 +123,7 @@ export default function App() {
               <Route
                 path="pedir-listas"
                 element={
-                  <RequireRole roles={['Administrador DBU', 'Coordinador']}>
+                  <RequireRole roles={['Administrador DBU', 'Coordinador']} permissions={ROUTE_PERMISSIONS['/pedir-listas']}>
                     <DataRequestPage />
                   </RequireRole>
                 }
@@ -130,7 +131,7 @@ export default function App() {
               <Route
                 path="carga-masiva"
                 element={
-                  <RequireRole roles={['Coordinador', 'Administrador DBU']}>
+                  <RequireRole roles={['Coordinador', 'Administrador DBU']} permissions={ROUTE_PERMISSIONS['/carga-masiva']}>
                     <BulkImportPage />
                   </RequireRole>
                 }
@@ -138,7 +139,7 @@ export default function App() {
               <Route
                 path="carga-docentes"
                 element={
-                  <RequireRole roles={['Administrador DBU']}>
+                  <RequireRole roles={['Administrador DBU']} permissions={ROUTE_PERMISSIONS['/carga-docentes']}>
                     <TeacherBulkImportPage />
                   </RequireRole>
                 }
@@ -146,7 +147,7 @@ export default function App() {
               <Route
                 path="asignacion"
                 element={
-                  <RequireRole roles={['Administrador DBU', 'Coordinador']}>
+                  <RequireRole roles={['Administrador DBU', 'Coordinador']} permissions={ROUTE_PERMISSIONS['/asignacion']}>
                     <CycleTutorsPage />
                   </RequireRole>
                 }
@@ -154,7 +155,7 @@ export default function App() {
               <Route
                 path="cierre-periodo"
                 element={
-                  <RequireRole roles={['Administrador DBU']}>
+                  <RequireRole roles={['Administrador DBU']} permissions={ROUTE_PERMISSIONS['/cierre-periodo']}>
                     <PeriodClosurePage />
                   </RequireRole>
                 }
@@ -162,7 +163,7 @@ export default function App() {
               <Route
                 path="pendientes"
                 element={
-                  <RequireRole roles={['Coordinador', 'Administrador DBU']}>
+                  <RequireRole roles={['Coordinador', 'Administrador DBU']} permissions={ROUTE_PERMISSIONS['/pendientes']}>
                     <PendingPage />
                   </RequireRole>
                 }
@@ -172,7 +173,7 @@ export default function App() {
               <Route
                 path="correos-escuelas"
                 element={
-                  <RequireRole roles={['Administrador DBU', 'Coordinador']}>
+                  <RequireRole roles={['Administrador DBU', 'Coordinador']} permissions={ROUTE_PERMISSIONS['/correos-escuelas']}>
                     <RequestEmailsPage />
                   </RequireRole>
                 }
@@ -180,7 +181,7 @@ export default function App() {
               <Route
                 path="sedes"
                 element={
-                  <RequireRole roles={['Administrador DBU', 'Vicerrectorado']}>
+                  <RequireRole roles={['Administrador DBU', 'Vicerrectorado']} permissions={ROUTE_PERMISSIONS['/sedes']}>
                     <CampusesPage />
                   </RequireRole>
                 }
@@ -188,7 +189,7 @@ export default function App() {
               <Route
                 path="evaluacion/configuracion"
                 element={
-                  <RequireRole roles={['Administrador DBU']}>
+                  <RequireRole roles={['Administrador DBU']} permissions={ROUTE_PERMISSIONS['/evaluacion/configuracion']}>
                     <EvaluationWindowsPage />
                   </RequireRole>
                 }
@@ -196,7 +197,7 @@ export default function App() {
               <Route
                 path="catalogos"
                 element={
-                  <RequireRole roles={['Administrador DBU']}>
+                  <RequireRole roles={['Administrador DBU']} permissions={ROUTE_PERMISSIONS['/catalogos']}>
                     <CatalogsPage />
                   </RequireRole>
                 }
@@ -204,7 +205,7 @@ export default function App() {
               <Route
                 path="users"
                 element={
-                  <RequireRole roles={['Administrador DBU']}>
+                  <RequireRole roles={['Administrador DBU']} permissions={ROUTE_PERMISSIONS['/users']}>
                     <UserManagementPage />
                   </RequireRole>
                 }
@@ -212,7 +213,7 @@ export default function App() {
               <Route
                 path="roles"
                 element={
-                  <RequireRole roles={['Administrador DBU']}>
+                  <RequireRole roles={['Administrador DBU']} permissions={ROUTE_PERMISSIONS['/roles']}>
                     <RolesPage />
                   </RequireRole>
                 }
@@ -220,7 +221,7 @@ export default function App() {
               <Route
                 path="parametros"
                 element={
-                  <RequireRole roles={['Administrador DBU']}>
+                  <RequireRole roles={['Administrador DBU']} permissions={ROUTE_PERMISSIONS['/parametros']}>
                     <ParametersPage />
                   </RequireRole>
                 }
@@ -228,7 +229,7 @@ export default function App() {
               <Route
                 path="identidad"
                 element={
-                  <RequireRole roles={['Administrador DBU']}>
+                  <RequireRole roles={['Administrador DBU']} permissions={ROUTE_PERMISSIONS['/identidad']}>
                     <BrandingPage />
                   </RequireRole>
                 }
@@ -236,7 +237,7 @@ export default function App() {
               <Route
                 path="auditoria"
                 element={
-                  <RequireRole roles={['Administrador DBU']}>
+                  <RequireRole roles={['Administrador DBU']} permissions={ROUTE_PERMISSIONS['/auditoria']}>
                     <AuditLogPage />
                   </RequireRole>
                 }
@@ -246,7 +247,7 @@ export default function App() {
               <Route
                 path="amonestaciones"
                 element={
-                  <RequireRole roles={['Administrador DBU', 'Coordinador', 'Decano']}>
+                  <RequireRole roles={['Administrador DBU', 'Coordinador', 'Decano']} permissions={ROUTE_PERMISSIONS['/amonestaciones']}>
                     <AdmonitionsPage />
                   </RequireRole>
                 }
@@ -254,7 +255,7 @@ export default function App() {
               <Route
                 path="plan-semestral"
                 element={
-                  <RequireRole roles={['Administrador DBU', 'Coordinador']}>
+                  <RequireRole roles={['Administrador DBU', 'Coordinador']} permissions={ROUTE_PERMISSIONS['/plan-semestral']}>
                     <WorkPlanPage />
                   </RequireRole>
                 }
@@ -262,7 +263,7 @@ export default function App() {
               <Route
                 path="tutorados"
                 element={
-                  <RequireRole roles={['Docente Tutor', 'Coordinador', 'Administrador DBU']}>
+                  <RequireRole roles={['Docente Tutor', 'Coordinador', 'Administrador DBU']} permissions={ROUTE_PERMISSIONS['/tutorados']}>
                     <StudentsPage />
                   </RequireRole>
                 }
@@ -271,7 +272,7 @@ export default function App() {
               <Route
                 path="expediente/:id"
                 element={
-                  <RequireRole roles={['Docente Tutor', 'Coordinador', 'Administrador DBU']}>
+                  <RequireRole roles={['Docente Tutor', 'Coordinador', 'Administrador DBU']} permissions={ROUTE_PERMISSIONS['/tutorados']}>
                     <ExpedientePage />
                   </RequireRole>
                 }
@@ -279,7 +280,7 @@ export default function App() {
               <Route
                 path="sesiones"
                 element={
-                  <RequireRole roles={['Docente Tutor']}>
+                  <RequireRole roles={['Docente Tutor']} permissions={ROUTE_PERMISSIONS['/sesiones']}>
                     <SessionsCalendarPage />
                   </RequireRole>
                 }
@@ -287,7 +288,7 @@ export default function App() {
               <Route
                 path="solicitudes"
                 element={
-                  <RequireRole roles={['Docente Tutor', 'Coordinador', 'Administrador DBU']}>
+                  <RequireRole roles={['Docente Tutor', 'Coordinador', 'Administrador DBU']} permissions={ROUTE_PERMISSIONS['/solicitudes']}>
                     <TutoringRequestsInboxPage />
                   </RequireRole>
                 }
@@ -319,7 +320,7 @@ export default function App() {
               <Route
                 path="derivaciones"
                 element={
-                  <RequireRole roles={['Docente Tutor', 'Profesional de Servicio', 'Administrador DBU']}>
+                  <RequireRole roles={['Docente Tutor', 'Profesional de Servicio', 'Administrador DBU']} permissions={ROUTE_PERMISSIONS['/derivaciones']}>
                     <ReferralsPage />
                   </RequireRole>
                 }

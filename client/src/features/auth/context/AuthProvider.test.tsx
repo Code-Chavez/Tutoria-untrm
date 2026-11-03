@@ -7,10 +7,14 @@ import { AuthProvider } from './AuthProvider';
 import { useAuth } from '../hooks/useAuth';
 import { authService } from '../services/authService';
 import { readDraft, writeDraft } from '@shared/utils/drafts';
+import { profileService } from '@features/profile/services/profileService';
 
 vi.mock('../services/authService', () => ({ authService: { login: vi.fn(), logout: vi.fn().mockResolvedValue(undefined) } }));
 
+vi.mock('@features/profile/services/profileService', () => ({ profileService: { get: vi.fn() } }));
+
 const mocked = vi.mocked(authService);
+const mockedProfile = vi.mocked(profileService);
 
 let loginError: unknown = null;
 
@@ -51,6 +55,7 @@ describe('AuthProvider: aislamiento de datos entre cuentas (A05)', () => {
     localStorage.clear();
     sessionStorage.clear();
     queryClient.clear();
+    mockedProfile.get.mockRejectedValue(new Error('sin red'));
   });
 
   it('al salir descarta todo lo que la cuenta anterior tenía en caché', async () => {
@@ -192,5 +197,43 @@ describe('AuthProvider: borradores y privacidad (U07)', () => {
 
     expect(readDraft('u1', 'solicitud')).toBeNull();
     expect(readDraft('u2', 'solicitud')).toEqual({ reason: 'de la segunda' });
+  });
+});
+
+describe('AuthProvider: rol y permisos vigentes al abrir la aplicación', () => {
+  const stored = { id: 'u1', email: 'a@untrm.edu.pe', firstName: 'Ana', lastName: 'R', role: 'Revisor', permissions: ['students:read'] };
+  const Perms = () => {
+    const { user } = useAuth();
+    return <span data-testid="perms">{user ? `${user.role}:${(user.permissions ?? []).join(',')}` : 'nadie'}</span>;
+  };
+  const renderPerms = () =>
+    render(
+      <QueryClientProvider client={queryClient}>
+        <AuthProvider>
+          <Perms />
+        </AuthProvider>
+      </QueryClientProvider>,
+    );
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+    localStorage.clear();
+    localStorage.setItem('sit.accessToken', 't');
+    localStorage.setItem('sit.refreshToken', 'r');
+    localStorage.setItem('sit.user', JSON.stringify(stored));
+  });
+
+  it('actualiza el rol y los permisos guardados con los vigentes en el servidor', async () => {
+    mockedProfile.get.mockResolvedValue({ id: 'u1', email: stored.email, firstName: 'Ana', lastName: 'R', phone: null, photoUrl: null, role: 'Revisor', permissions: ['students:read', 'reports:read'] });
+    renderPerms();
+    expect(await screen.findByText('Revisor:students:read,reports:read')).toBeInTheDocument();
+    expect(JSON.parse(localStorage.getItem('sit.user') ?? '{}').permissions).toEqual(['students:read', 'reports:read']);
+  });
+
+  it('si no se puede consultar, conserva lo guardado', async () => {
+    mockedProfile.get.mockRejectedValue(new Error('sin red'));
+    renderPerms();
+    await act(async () => undefined);
+    expect(screen.getByTestId('perms')).toHaveTextContent('Revisor:students:read');
   });
 });

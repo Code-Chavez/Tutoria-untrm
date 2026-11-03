@@ -1,6 +1,7 @@
 import { UserRepository } from '@domain/repositories/UserRepository';
 import { RoleRepository } from '@domain/repositories/RoleRepository';
 import { ProfileOutput } from '@application/dtos/profile.dto';
+import { grantedPermissionCodes } from '../auth/grantedPermissions';
 import { ProfileUserNotFoundError } from './ProfileErrors';
 
 export class GetProfileUseCase {
@@ -26,6 +27,7 @@ export class GetProfileUseCase {
       photoUrl: user.photoUrl ?? null,
       role: role?.name ?? 'Desconocido',
       service: user.service,
+      permissions: grantedPermissionCodes(role),
     };
   }
 }

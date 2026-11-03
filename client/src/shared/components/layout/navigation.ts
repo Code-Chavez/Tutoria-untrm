@@ -17,7 +17,8 @@ import {
   AlertTriangleIcon,
 } from '@shared/components/icons';
 
-import { SECTIONS } from './sections';
+import { SECTIONS, sectionPermissions } from './sections';
+import { ROUTE_PERMISSIONS } from '../../routePermissions';
 
 export type RoleCode = 'tutor' | 'coord' | 'dbu' | 'serv' | 'est' | 'vice' | 'dec';
 
@@ -41,6 +42,8 @@ export interface NavItem {
   /** Acción que abre la lista de estudiantes en modo «elegir estudiante» (?accion=…). */
   action?: string;
   roles?: RoleCode[]; // sin roles = visible para todos
+  /** Con un rol personalizado (sin código), la entrada se ve si tiene alguno de estos permisos. Sin permisos, solo los roles base la ven. */
+  permissions?: readonly string[];
   /** Otras direcciones que también dejan esta entrada activa (las pestañas de una sección). */
   alsoPaths?: string[];
 }
@@ -80,13 +83,13 @@ export const NAV: NavGroup[] = [
     title: 'Atención a estudiantes',
     items: [
       // El expediente se abre desde la lista de estudiantes («Ver expediente»); mientras se ve uno, esta entrada queda activa.
-      { label: 'Estudiantes', Icon: GraduationCapIcon, path: '/tutorados', alsoPaths: ['/expediente'], action: '', roles: ['tutor', 'coord', 'dbu'] },
-      { label: 'Entrevista inicial', Icon: ClipboardIcon, path: '/tutorados', action: 'entrevista', roles: ['tutor'] },
-      { label: 'Sesiones', Icon: CalendarIcon, path: '/sesiones', roles: ['tutor'] },
-      { label: 'Seguimiento', Icon: ActivityIcon, path: '/tutorados', action: 'seguimiento', roles: ['tutor'] },
-      { label: 'Derivar caso', Icon: SendIcon, path: '/tutorados', action: 'derivar', roles: ['tutor'] },
-      { label: 'Solicitudes de tutoría', Icon: MessageSquareIcon, path: '/solicitudes', roles: ['tutor', 'coord', 'dbu'] },
-      { label: 'Casos derivados', Icon: InboxIcon, path: '/derivaciones', roles: ['tutor', 'serv', 'dbu'] },
+      { label: 'Estudiantes', Icon: GraduationCapIcon, path: '/tutorados', alsoPaths: ['/expediente'], action: '', roles: ['tutor', 'coord', 'dbu'], permissions: ROUTE_PERMISSIONS['/tutorados'] },
+      { label: 'Entrevista inicial', Icon: ClipboardIcon, path: '/tutorados', action: 'entrevista', roles: ['tutor'], permissions: ['interviews:write'] },
+      { label: 'Sesiones', Icon: CalendarIcon, path: '/sesiones', roles: ['tutor'], permissions: ROUTE_PERMISSIONS['/sesiones'] },
+      { label: 'Seguimiento', Icon: ActivityIcon, path: '/tutorados', action: 'seguimiento', roles: ['tutor'], permissions: ['followups:write'] },
+      { label: 'Derivar caso', Icon: SendIcon, path: '/tutorados', action: 'derivar', roles: ['tutor'], permissions: ['referrals:write'] },
+      { label: 'Solicitudes de tutoría', Icon: MessageSquareIcon, path: '/solicitudes', roles: ['tutor', 'coord', 'dbu'], permissions: ROUTE_PERMISSIONS['/solicitudes'] },
+      { label: 'Casos derivados', Icon: InboxIcon, path: '/derivaciones', roles: ['tutor', 'serv', 'dbu'], permissions: ROUTE_PERMISSIONS['/derivaciones'] },
       {
         label: 'Seguimiento DBU',
         title: 'Seguimiento de derivaciones',
@@ -101,17 +104,17 @@ export const NAV: NavGroup[] = [
     // planificación, los informes (otra pantalla con pestañas) y las amonestaciones.
     title: 'Gestión',
     items: [
-      { label: SECTIONS.periodo.title, Icon: RefreshIcon, path: SECTIONS.periodo.path, alsoPaths: sectionPaths('periodo'), roles: ['coord', 'dbu'] },
-      { label: 'Plan semestral', Icon: CalendarRangeIcon, path: '/plan-semestral', roles: ['coord', 'dbu'] },
-      { label: SECTIONS.informes.title, Icon: ReportIcon, path: SECTIONS.informes.path, alsoPaths: sectionPaths('informes'), roles: ['tutor', 'coord', 'dbu', 'vice'] },
-      { label: 'Amonestaciones', Icon: AlertTriangleIcon, path: '/amonestaciones', roles: ['dec', 'dbu', 'coord'] },
+      { label: SECTIONS.periodo.title, Icon: RefreshIcon, path: SECTIONS.periodo.path, alsoPaths: sectionPaths('periodo'), roles: ['coord', 'dbu'], permissions: sectionPermissions('periodo') },
+      { label: 'Plan semestral', Icon: CalendarRangeIcon, path: '/plan-semestral', roles: ['coord', 'dbu'], permissions: ROUTE_PERMISSIONS['/plan-semestral'] },
+      { label: SECTIONS.informes.title, Icon: ReportIcon, path: SECTIONS.informes.path, alsoPaths: sectionPaths('informes'), roles: ['tutor', 'coord', 'dbu', 'vice'], permissions: sectionPermissions('informes') },
+      { label: 'Amonestaciones', Icon: AlertTriangleIcon, path: '/amonestaciones', roles: ['dec', 'dbu', 'coord'], permissions: ROUTE_PERMISSIONS['/amonestaciones'] },
     ],
   },
   {
     // Todo lo que se configura, en una sola pantalla con pestañas (correos, sedes, catálogos, usuarios, parámetros…).
     title: '',
     fixed: true,
-    items: [{ label: SECTIONS.configuracion.title, Icon: SettingsIcon, path: SECTIONS.configuracion.path, alsoPaths: sectionPaths('configuracion'), roles: ['coord', 'dbu', 'vice'] }],
+    items: [{ label: SECTIONS.configuracion.title, Icon: SettingsIcon, path: SECTIONS.configuracion.path, alsoPaths: sectionPaths('configuracion'), roles: ['coord', 'dbu', 'vice'], permissions: sectionPermissions('configuracion') }],
   },
 ];
 

@@ -4,6 +4,7 @@ import { useAuth } from '@features/auth/hooks/useAuth';
 import { useBranding } from '@shared/theme/BrandingProvider';
 import { ChevronDownIcon, ChevronRightIcon, CloseIcon } from '@shared/components/icons';
 import { getRoleLabel } from '@shared/utils/roleLabel';
+import { hasAnyPermission } from '../../routePermissions';
 import { findActiveItem, NAV, ROLE_CODES, type NavGroup, type NavItem } from './navigation';
 import styles from './Sidebar.module.css';
 
@@ -36,8 +37,9 @@ export function Sidebar({ drawerOpen, onClose }: SidebarProps) {
   const { pathname, search } = useLocation();
   const currentAction = new URLSearchParams(search).get('accion') ?? '';
 
+  // Los roles base se ven por su rol; una cuenta con rol personalizado (sin código), por los permisos que este le concede.
   const canSee = (item: NavItem) =>
-    !item.roles || (roleCode !== undefined && item.roles.includes(roleCode));
+    !item.roles || (roleCode !== undefined ? item.roles.includes(roleCode) : hasAnyPermission(user?.permissions, item.permissions));
 
   // Una sola entrada activa: la más específica entre las visibles para este rol.
   const visibleItems = NAV.flatMap((group) => group.items.filter(canSee));

@@ -52,6 +52,12 @@ function AccessForm({ user, role, schools, faculties, access, onClose }: Props &
   const [draft, setDraft] = useState<Draft>(() => initialDraft(access));
   const [error, setError] = useState('');
   const [saved, setSaved] = useState(false);
+  // Sin alcance configurado, lo que muestra el selector no es lo vigente (rige el comportamiento del rol): hasta que se toque, no hay nada que guardar.
+  const [touched, setTouched] = useState(access.source !== 'DEFAULT');
+  const change = (next: Draft) => {
+    setTouched(true);
+    setDraft(next);
+  };
 
   const groups = useMemo(() => groupPermissions(role?.permissions ?? []), [role]);
   const isSelf = me?.id === user.id;
@@ -112,7 +118,7 @@ function AccessForm({ user, role, schools, faculties, access, onClose }: Props &
         {reason && <p className={styles.muted}>{reason}</p>}
 
         <label htmlFor="access-kind">Alcance</label>
-        <select id="access-kind" className={styles.select} value={draft.kind} disabled={!editable} onChange={(e) => setDraft({ ...draft, kind: e.target.value as AccessKind })}>
+        <select id="access-kind" className={styles.select} value={draft.kind} disabled={!editable} onChange={(e) => change({ ...draft, kind: e.target.value as AccessKind })}>
           {(Object.keys(KIND_LABELS) as AccessKind[]).map((kind) => (
             <option key={kind} value={kind}>
               {KIND_LABELS[kind]}
@@ -125,7 +131,7 @@ function AccessForm({ user, role, schools, faculties, access, onClose }: Props &
             <legend>Escuelas</legend>
             {schools.map((school) => (
               <label key={school.id}>
-                <input type="checkbox" checked={draft.schoolIds.includes(school.id)} onChange={() => setDraft({ ...draft, schoolIds: toggled(draft.schoolIds, school.id) })} /> {school.name}
+                <input type="checkbox" checked={draft.schoolIds.includes(school.id)} onChange={() => change({ ...draft, schoolIds: toggled(draft.schoolIds, school.id) })} /> {school.name}
               </label>
             ))}
           </fieldset>
@@ -135,7 +141,7 @@ function AccessForm({ user, role, schools, faculties, access, onClose }: Props &
             <legend>Facultades</legend>
             {faculties.map((faculty) => (
               <label key={faculty.id}>
-                <input type="checkbox" checked={draft.facultyIds.includes(faculty.id)} onChange={() => setDraft({ ...draft, facultyIds: toggled(draft.facultyIds, faculty.id) })} /> {faculty.name}
+                <input type="checkbox" checked={draft.facultyIds.includes(faculty.id)} onChange={() => change({ ...draft, facultyIds: toggled(draft.facultyIds, faculty.id) })} /> {faculty.name}
               </label>
             ))}
           </fieldset>
@@ -143,7 +149,7 @@ function AccessForm({ user, role, schools, faculties, access, onClose }: Props &
         {draft.kind === 'SERVICE' && (
           <>
             <label htmlFor="access-service">Servicio</label>
-            <select id="access-service" className={styles.select} value={draft.service} disabled={!editable} onChange={(e) => setDraft({ ...draft, service: e.target.value })}>
+            <select id="access-service" className={styles.select} value={draft.service} disabled={!editable} onChange={(e) => change({ ...draft, service: e.target.value })}>
               <option value="">Seleccione un servicio...</option>
               {SERVICES.map((service) => (
                 <option key={service} value={service}>
@@ -155,7 +161,13 @@ function AccessForm({ user, role, schools, faculties, access, onClose }: Props &
         )}
 
         <p className={styles.summary} aria-live="polite">
-          <strong>Con esto:</strong> {describeScope(draft, schools, faculties)}
+          {touched ? (
+            <>
+              <strong>Con esto:</strong> {describeScope(draft, schools, faculties)}
+            </>
+          ) : (
+            'Rige el comportamiento por defecto de su rol. Elija un alcance para definirlo.'
+          )}
         </p>
         <p className={styles.muted}>El alcance solo limita los datos que ve; no concede permisos. Rige desde su siguiente acción.</p>
       </section>
@@ -172,7 +184,7 @@ function AccessForm({ user, role, schools, faculties, access, onClose }: Props &
       )}
       <div className={styles.actions}>
         {editable && (
-          <Button onClick={submit} loading={save.isPending} disabled={!complete}>
+          <Button onClick={submit} loading={save.isPending} disabled={!complete || !touched}>
             Guardar alcance
           </Button>
         )}

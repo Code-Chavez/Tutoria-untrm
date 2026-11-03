@@ -15,6 +15,8 @@ export interface LoginOutput {
     lastName: string;
     role: string;
     service?: string | null;
+    /** Permisos que concede su rol: el cliente los usa para armar el menú; el servidor autoriza cada ruta por su cuenta. */
+    permissions: string[];
     mustChangePassword: boolean;
   };
 }

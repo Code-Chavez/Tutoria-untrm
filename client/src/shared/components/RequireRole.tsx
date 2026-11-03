@@ -1,10 +1,14 @@
 import { type ReactNode } from 'react';
 import { Navigate } from 'react-router-dom';
 import { useAuth } from '@features/auth/hooks/useAuth';
+import { ROLE_CODES } from './layout/navigation';
+import { hasAnyPermission } from '../routePermissions';
 
 interface RequireRoleProps {
   /** Roles autorizados a ver el contenido (por nombre, como viene en el JWT). */
   roles: string[];
+  /** Para una cuenta con rol personalizado (que no está en `roles`): basta uno de estos permisos. Sin él, solo los roles base entran. */
+  permissions?: readonly string[];
   children: ReactNode;
 }
 
@@ -13,10 +17,11 @@ interface RequireRoleProps {
  * autorización real la impone el servidor (middleware authorize) contra la base
  * de datos. Si el rol no está permitido, redirige a /unauthorized.
  */
-export function RequireRole({ roles, children }: RequireRoleProps) {
+export function RequireRole({ roles, permissions, children }: RequireRoleProps) {
   const { user } = useAuth();
 
-  if (!user || !roles.includes(user.role)) {
+  const allowed = !!user && (ROLE_CODES[user.role] !== undefined ? roles.includes(user.role) : hasAnyPermission(user.permissions, permissions));
+  if (!allowed) {
     return <Navigate to="/unauthorized" replace />;
   }
 
