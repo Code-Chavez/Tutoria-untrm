@@ -16,7 +16,7 @@ import {
 import { useHomePanel } from '../hooks/useHomePanel';
 import type { HomeKpi } from '../services/homePanelService';
 import { QuickActions } from './QuickActions';
-import { ALERT_ROLES, quickActionsFor } from './homeAccess';
+import { canSeeRecentActivity, canSeeRiskAlerts, quickActionsFor } from './homeAccess';
 import { getRoleLabel } from '@shared/utils/roleLabel';
 import { RecentActivity } from './RecentActivity';
 import { RiskAlerts } from './RiskAlerts';
@@ -66,9 +66,9 @@ export function DashboardPage() {
 
   const firstName = user?.firstName ?? '';
   // Solo se muestra lo que la persona puede usar: sin tarjetas vacías ni «sin acceso» (R02).
-  const hasQuickActions = quickActionsFor(user?.role).length > 0;
-  const canSeeAlerts = !!user && ALERT_ROLES.includes(user.role);
-  const canSeeActivity = user?.role === 'Administrador DBU';
+  const hasQuickActions = quickActionsFor(user?.role, user?.permissions).length > 0;
+  const canSeeAlerts = canSeeRiskAlerts(user?.role, user?.permissions);
+  const canSeeActivity = canSeeRecentActivity(user?.role, user?.permissions);
 
   return (
     <div>

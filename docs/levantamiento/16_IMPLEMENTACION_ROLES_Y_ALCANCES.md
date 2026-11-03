@@ -112,3 +112,13 @@ Rama `feat/permission-based-session`. Sin migración.
 Verificación local: `tsc` y `eslint` (cliente y servidor) sin errores; `tests/unit` del servidor (127 suites, 1 235 pruebas, incluida `grantedPermissions`); 114 pruebas de cliente en `features/auth` y `shared/components` (menú por permisos, `RequireRole`, actualización de permisos) y 35 de `features/admin`. Con la pila Docker del proyecto `tutoria-untrm` levantada desde esta rama: inicio de sesión con `permissions`, pantalla «Roles y permisos» y ventana «Rol y alcance» revisadas en el navegador con datos reales (solo lectura). **No se probó en el navegador una cuenta con rol personalizado** ni el cierre de sesión por permisos.
 
 **Límites:** el panel de inicio (accesos rápidos y alertas) sigue por rol: un rol personalizado ve el panel vacío; el mapa pantalla→permiso es una aproximación al permiso principal de cada API (una pantalla con varias llamadas puede mostrar partes que el servidor rechace con 403); falta confirmar con la DBU el conjunto de permisos que debe tener un rol típico.
+
+## Octava entrega: panel de inicio para roles personalizados (N-8, LEV-R11, cliente)
+
+Rama `feat/home-panel-custom-roles`. Solo cliente; cierra el límite de la entrega anterior.
+
+- **Acciones rápidas:** un rol personalizado ve los accesos cuyo destino abre alguno de sus permisos (el mismo mapa `routePermissions.ts` del menú; «Registrar estudiante» pide `students:write`), sin repetir un destino que dos roles base ofrecen con distinta descripción. Los accesos exclusivos de un rol base (estudiante, «Seguimiento de derivaciones») no se ofrecen.
+- **Alertas de riesgo:** `students:read` y `sessions:read`. **Actividad reciente:** `audit:read`. Los roles base siguen por su rol, sin cambios.
+- Los indicadores (KPI) del servidor siguen siendo por rol base: un rol personalizado no los tiene (queda la bienvenida, las acciones y los bloques que sus permisos abren).
+
+Verificación local: `tsc`, `eslint` y 28 pruebas de `features/dashboard` (nuevas: accesos por permisos, sin repetidos, rol base intacto, alertas y actividad; panel con rol personalizado). No se probó en navegador.

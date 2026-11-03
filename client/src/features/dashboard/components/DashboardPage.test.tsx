@@ -18,8 +18,9 @@ vi.mock('../services/homePanelService', () => ({ homePanelService: { getPanel: v
 vi.mock('./RiskAlerts', () => ({ RiskAlerts: () => <div>bloque de alertas</div> }));
 vi.mock('./RecentActivity', () => ({ RecentActivity: () => <div>bloque de actividad</div> }));
 let mockRole = 'Docente Tutor';
+let mockPermissions: string[] | undefined;
 vi.mock('@features/auth/hooks/useAuth', () => ({
-  useAuth: () => ({ user: { firstName: 'Elena', lastName: 'Ramírez', role: mockRole } }),
+  useAuth: () => ({ user: { firstName: 'Elena', lastName: 'Ramírez', role: mockRole, permissions: mockPermissions } }),
 }));
 
 const mocked = vi.mocked(homePanelService);
@@ -47,6 +48,7 @@ describe('DashboardPage (paneles por rol)', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mockRole = 'Docente Tutor';
+    mockPermissions = undefined;
   });
 
   it('muestra los indicadores propios del rol y el periodo vigente (no uno fijo)', async () => {
@@ -116,6 +118,31 @@ describe('DashboardPage (paneles por rol)', () => {
       renderPage();
       await screen.findByText('Acciones rápidas');
       expect(screen.queryByText('Alertas de inasistencia y riesgo')).not.toBeInTheDocument();
+    });
+
+    it('un rol personalizado ve los accesos, las alertas y la actividad que sus permisos abren', async () => {
+      mockRole = 'Revisor';
+      mockPermissions = ['students:read', 'sessions:read', 'audit:read', 'reports:read'];
+      mocked.getPanel.mockResolvedValue({ role: 'Revisor', periodName: '2026-II', kpis: [] });
+      renderPage();
+
+      expect(await screen.findByText('Acciones rápidas')).toBeInTheDocument();
+      expect(screen.getByRole('link', { name: /Ver estudiantes/ })).toBeInTheDocument();
+      expect(screen.getByRole('link', { name: /Mi calendario/ })).toBeInTheDocument();
+      expect(screen.queryByRole('link', { name: /Cierre de periodo/ })).not.toBeInTheDocument();
+      expect(screen.getByText('bloque de alertas')).toBeInTheDocument();
+      expect(screen.getByText('bloque de actividad')).toBeInTheDocument();
+    });
+
+    it('un rol personalizado con un solo permiso de lectura no ve alertas ni actividad', async () => {
+      mockRole = 'Revisor';
+      mockPermissions = ['students:read'];
+      mocked.getPanel.mockResolvedValue({ role: 'Revisor', periodName: '2026-II', kpis: [] });
+      renderPage();
+
+      expect(await screen.findByText('Acciones rápidas')).toBeInTheDocument();
+      expect(screen.queryByText('bloque de alertas')).not.toBeInTheDocument();
+      expect(screen.queryByText('bloque de actividad')).not.toBeInTheDocument();
     });
 
     it('un rol desconocido no muestra una tarjeta de acciones vacía', async () => {

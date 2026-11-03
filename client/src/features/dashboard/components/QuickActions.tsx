@@ -8,7 +8,7 @@ import styles from './QuickActions.module.css';
 // lleva su número de paso, para que se vea qué sigue después de qué.
 export function QuickActions() {
   const { user } = useAuth();
-  const groups = quickActionGroupsFor(user?.role);
+  const groups = quickActionGroupsFor(user?.role, user?.permissions);
 
   if (groups.length === 0) return null;
 
