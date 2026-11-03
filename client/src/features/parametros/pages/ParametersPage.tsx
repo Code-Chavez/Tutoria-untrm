@@ -1,17 +1,22 @@
-import { useState } from 'react';
+import { useCallback, useState } from 'react';
 import { PageHeader, Card, Button, Badge, EmptyState, TableSkeleton } from '@shared/components/ui';
 import { SettingsIcon } from '@shared/components/icons';
 import { getApiErrorMessage } from '@shared/services/apiClient';
+import { useDraft } from '@shared/hooks/useDraft';
+import { useAuth } from '@features/auth/hooks/useAuth';
 import { useParameters, useUpdateParameter } from '../hooks/useParameters';
 import type { SystemParameter } from '../services/parameterService';
 import styles from './ParametersPage.module.css';
 
 // Parámetros del sistema (HU-49): duración y número de sesiones, plazos y
 // umbrales de alerta. Cada cambio rige de inmediato y queda en la bitácora.
-function ParameterRow({ parameter }: { parameter: SystemParameter }) {
+function ParameterRow({ parameter, draftOwnerId }: { parameter: SystemParameter; draftOwnerId?: string }) {
   const update = useUpdateParameter();
   // El borrador se parte del valor vigente; se remonta con `key` si el servidor lo cambia.
-  const [draft, setDraft] = useState(String(parameter.value));
+  // Lo que se escribió y no se guardó se conserva como borrador de la pestaña: recargar no lo pierde.
+  const current = String(parameter.value);
+  const unchanged = useCallback((value: string) => value === current, [current]);
+  const { value: draft, setValue: setDraft } = useDraft(draftOwnerId, `parameter.${parameter.key}`, current, unchanged);
   const [message, setMessage] = useState<{ type: 'ok' | 'error'; text: string } | null>(null);
 
   const dirty = draft !== String(parameter.value);
@@ -90,6 +95,7 @@ function ParameterRow({ parameter }: { parameter: SystemParameter }) {
 
 export function ParametersPage() {
   const { parameters, loading, error, refresh } = useParameters();
+  const { user } = useAuth();
   const groups = [...new Set(parameters.map((p) => p.group))];
 
   return (
@@ -118,7 +124,7 @@ export function ParametersPage() {
               {parameters
                 .filter((p) => p.group === group)
                 .map((p) => (
-                  <ParameterRow key={`${p.key}-${p.value}`} parameter={p} />
+                  <ParameterRow key={`${p.key}-${p.value}`} parameter={p} draftOwnerId={user?.id} />
                 ))}
             </ul>
           </Card>

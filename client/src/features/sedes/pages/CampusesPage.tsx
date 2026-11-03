@@ -1,7 +1,9 @@
-import { useState, type FormEvent } from 'react';
+import { useCallback, useState, type FormEvent } from 'react';
 import { PageHeader, Card, CardHeader, CardBody, Button, Badge, SelectField, EmptyState, NextSteps, TableSkeleton } from '@shared/components/ui';
 import { MapPinIcon } from '@shared/components/icons';
 import { getApiErrorMessage } from '@shared/services/apiClient';
+import { useDraft } from '@shared/hooks/useDraft';
+import { useAuth } from '@features/auth/hooks/useAuth';
 import { useCampuses, useCreateCampus, useSetSchoolCampus, useUpdateCampus } from '../hooks/useCampuses';
 import styles from './CampusesPage.module.css';
 
@@ -12,7 +14,10 @@ export function CampusesPage() {
   const create = useCreateCampus();
   const update = useUpdateCampus();
   const setCampus = useSetSchoolCampus();
-  const [name, setName] = useState('');
+  const { user } = useAuth();
+  // El nombre de la sede nueva que se estaba escribiendo se conserva como borrador de la pestaña.
+  const nameIsEmpty = useCallback((value: string) => value.trim() === '', []);
+  const { value: name, setValue: setName, discard: clearName } = useDraft<string>(user?.id, 'campus-name', '', nameIsEmpty);
   const [error, setError] = useState('');
 
   const campuses = overview.data?.campuses ?? [];
@@ -32,7 +37,7 @@ export function CampusesPage() {
     event.preventDefault();
     void run(async () => {
       await create.mutateAsync(name);
-      setName('');
+      clearName();
     });
   };
 

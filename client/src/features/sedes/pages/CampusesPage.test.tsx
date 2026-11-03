@@ -8,6 +8,7 @@ import { campusService } from '../services/campusService';
 vi.mock('../services/campusService', () => ({
   campusService: { overview: vi.fn(), create: vi.fn(), update: vi.fn(), setSchoolCampus: vi.fn() },
 }));
+vi.mock('@features/auth/hooks/useAuth', () => ({ useAuth: () => ({ user: { id: 'me' } }) }));
 const mocked = vi.mocked(campusService);
 
 const overview = {
@@ -29,6 +30,7 @@ const renderPage = () =>
 describe('CampusesPage', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    sessionStorage.clear();
     mocked.overview.mockResolvedValue(overview);
   });
 
@@ -60,6 +62,15 @@ describe('CampusesPage', () => {
 
     await waitFor(() => expect(mocked.create).toHaveBeenCalledWith('Sede Condorcanqui'));
     await waitFor(() => expect(input).toHaveValue(''));
+  });
+
+  it('el nombre de la sede nueva que se estaba escribiendo se recupera al recargar', async () => {
+    const first = renderPage();
+    await userEvent.type(await screen.findByLabelText('Nueva sede'), 'Sede Utcubamba');
+    first.unmount();
+
+    renderPage();
+    expect(await screen.findByLabelText('Nueva sede')).toHaveValue('Sede Utcubamba');
   });
 
   it('desactiva una sede', async () => {
