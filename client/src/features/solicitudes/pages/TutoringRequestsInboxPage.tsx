@@ -1,6 +1,6 @@
 import { useCallback, useState } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
-import { useSearchParams } from 'react-router-dom';
+import { useUrlParams } from '@shared/hooks/useUrlParams';
 import { getApiErrorMessage } from '@shared/services/apiClient';
 import { useAuth } from '@features/auth/hooks/useAuth';
 import { useStudents } from '@features/tutorados/hooks/useStudents';
@@ -181,62 +181,49 @@ export function TutoringRequestsInboxPage() {
   // Se trae todo y se filtra aquí: la vista inicial es «Por atender» (lo que espera respuesta) y cada contador del inicio
   // abre la bandeja ya filtrada con ?estado=… (U04, U09).
   const { requests: all, loading, error, refresh } = useTutoringRequestsInbox();
-  const [selected, setSelected] = useState<TutoringRequestView | null>(null);
-  const [search, setSearch] = useState('');
-  const [searchParams, setSearchParams] = useSearchParams();
-  const filter = parseFilterParam(searchParams.get('estado'), REQUEST_FILTERS, DEFAULT_REQUEST_FILTER);
-  const changeFilter = (next: RequestFilter) =>
-    setSearchParams(
-      (prev) => {
-        const params = new URLSearchParams(prev);
-        params.set('estado', next);
-        return params;
-      },
-      { replace: true },
-    );
+  // La vista (?estado=), la búsqueda (?q=), la solicitud abierta (?solicitud=<id>) y las ventanas de seguimiento (?programar=<id>,
+  // ?derivar=<id>) viven en la URL: recargar o compartir el enlace vuelve al mismo lugar.
+  const url = useUrlParams();
+  const search = url.get('q');
+  const setSearch = (value: string) => url.set({ q: value }, { replace: true });
+  const filter = parseFilterParam(url.get('estado'), REQUEST_FILTERS, DEFAULT_REQUEST_FILTER);
+  const changeFilter = (next: RequestFilter) => url.set({ estado: next }, { replace: true });
   const counts = countRequests(all);
   const requests = viewRequests(all, filter, search);
   // Un aviso llega con ?solicitud=<id>: se abre esa solicitud (esté en la vista que esté), o se explica que ya no está disponible (R03).
-  const requestedId = searchParams.get('solicitud');
+  const requestedId = url.get('solicitud');
   const requested = requestedId ? all.find((r) => r.id === requestedId) ?? null : null;
   const unavailable = !!requestedId && !loading && !error && !requested;
-  const clearRequested = () =>
-    setSearchParams(
-      (prev) => {
-        const params = new URLSearchParams(prev);
-        params.delete('solicitud');
-        return params;
-      },
-      { replace: true },
-    );
-  const open = selected ?? requested;
+  const clearRequested = () => url.set({ solicitud: null }, { replace: true });
+  const open = requested;
 
   // Programar una sesión o derivar el caso parte de la solicitud: el estudiante y el motivo ya vienen cargados.
   const { user } = useAuth();
   const canFollowUp = user?.role === 'Docente Tutor';
   const { students } = useStudents();
   const queryClient = useQueryClient();
-  const [followUp, setFollowUp] = useState<{ kind: 'session' | 'referral'; request: TutoringRequestView } | null>(null);
+  const scheduleId = url.get('programar');
+  const referId = url.get('derivar');
+  const followUpRequest = all.find((r) => r.id === (scheduleId || referId)) ?? null;
+  const followUp: { kind: 'session' | 'referral'; request: TutoringRequestView } | null = followUpRequest ? { kind: scheduleId ? 'session' : 'referral', request: followUpRequest } : null;
   const [followUpBusy, setFollowUpBusy] = useState(false);
   const [followUpError, setFollowUpError] = useState('');
   const [feedback, setFeedback] = useState('');
   const followUpStudent = followUp ? students.find((s) => s.id === followUp.request.studentId) : undefined;
   const closeFollowUp = () => {
-    setFollowUp(null);
+    url.set({ programar: null, derivar: null }, { replace: true });
     setFollowUpError('');
   };
   const startFollowUp = (kind: 'session' | 'referral', r: TutoringRequestView) => {
-    setSelected(null);
-    if (requestedId) clearRequested();
     setFollowUpError('');
-    setFollowUp({ kind, request: r });
+    url.set({ solicitud: null, programar: kind === 'session' ? r.id : null, derivar: kind === 'referral' ? r.id : null });
   };
   const finishFollowUp = async (done: () => Promise<string>) => {
     setFollowUpBusy(true);
     setFollowUpError('');
     try {
       setFeedback(await done());
-      setFollowUp(null);
+      url.set({ programar: null, derivar: null }, { replace: true });
       await queryClient.invalidateQueries({ queryKey: ['tutoringRequests'] });
     } catch (err) {
       setFollowUpError(getApiErrorMessage(err));
@@ -367,7 +354,7 @@ export function TutoringRequestsInboxPage() {
                       {followUpLabel(r) && <span className={styles.followUpTag}>{followUpLabel(r)}</span>}
                     </td>
                     <td className={`${table.right} ${table.cardAction}`}>
-                      <Button size="sm" variant={r.status === 'ATENDIDA' ? 'ghost' : 'secondary'} onClick={() => setSelected(r)}>
+                      <Button size="sm" variant={r.status === 'ATENDIDA' ? 'ghost' : 'secondary'} onClick={() => url.set({ solicitud: r.id })}>
                         {r.status === 'ATENDIDA' ? 'Ver' : 'Atender'}
                       </Button>
                     </td>
@@ -385,10 +372,7 @@ export function TutoringRequestsInboxPage() {
           request={open}
           onSchedule={canFollowUp ? () => startFollowUp('session', open) : undefined}
           onRefer={canFollowUp ? () => startFollowUp('referral', open) : undefined}
-          onClose={() => {
-            setSelected(null);
-            if (requestedId) clearRequested();
-          }}
+          onClose={clearRequested}
         />
       )}
 

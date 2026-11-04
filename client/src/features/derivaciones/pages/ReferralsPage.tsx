@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { useUrlParams } from '@shared/hooks/useUrlParams';
 import { PageHeader, EmptyState, TableSkeleton, Button, InboxToolbar } from '@shared/components/ui';
 import { SendIcon, InboxIcon, SearchIcon } from '@shared/components/icons';
 import { parseFilterParam, waitingText } from '@shared/utils/inbox';
@@ -21,35 +21,20 @@ export function ReferralsPage() {
   // Se trae todo y se filtra aquí: la vista inicial son los casos pendientes y cada contador del inicio abre la bandeja ya filtrada (?estado=…).
   const { referrals: all, loading, error, refresh } = useReferrals();
   const updateReferralInCache = useUpdateReferralInCache();
-  const [selectedReferral, setSelectedReferral] = useState<StudentReferral | null>(null);
   const [downloading, setDownloading] = useState<string | null>(null);
   // Un aviso llega con ?caso=<id>: se abre ese caso, o se explica que ya no está disponible para esta cuenta (R03).
-  const [searchParams, setSearchParams] = useSearchParams();
-  const [search, setSearch] = useState('');
-  const filter = parseFilterParam(searchParams.get('estado'), REFERRAL_FILTERS, DEFAULT_REFERRAL_FILTER);
-  const changeFilter = (next: ReferralFilter) =>
-    setSearchParams(
-      (prev) => {
-        const params = new URLSearchParams(prev);
-        params.set('estado', next);
-        return params;
-      },
-      { replace: true },
-    );
+  // La vista (?estado=), la búsqueda (?q=) y el caso abierto (?caso=<id>) viven en la URL: recargar o compartir el enlace vuelve al mismo lugar.
+  const url = useUrlParams();
+  const search = url.get('q');
+  const setSearch = (value: string) => url.set({ q: value }, { replace: true });
+  const filter = parseFilterParam(url.get('estado'), REFERRAL_FILTERS, DEFAULT_REFERRAL_FILTER);
+  const changeFilter = (next: ReferralFilter) => url.set({ estado: next }, { replace: true });
   const counts = countReferrals(all);
   const referrals = viewReferrals(all, filter, search);
-  const requestedId = searchParams.get('caso');
+  const requestedId = url.get('caso');
   const requested = requestedId ? all.find((r) => r.id === requestedId) ?? null : null;
   const unavailable = !!requestedId && !loading && !error && !requested;
-  const clearRequested = () =>
-    setSearchParams(
-      (prev) => {
-        const params = new URLSearchParams(prev);
-        params.delete('caso');
-        return params;
-      },
-      { replace: true },
-    );
+  const clearRequested = () => url.set({ caso: null }, { replace: true });
 
   const handleDownload = async (id: string) => {
     try {
@@ -62,14 +47,9 @@ export function ReferralsPage() {
     }
   };
 
-  const openDetails = (referral: StudentReferral) => {
-    setSelectedReferral(referral);
-  };
+  const openDetails = (referral: StudentReferral) => url.set({ caso: referral.id });
 
-  const closeDetails = () => {
-    setSelectedReferral(null);
-    if (requestedId) clearRequested();
-  };
+  const closeDetails = clearRequested;
 
   return (
     <div className={styles.page}>
@@ -198,16 +178,7 @@ export function ReferralsPage() {
         )}
       </div>
 
-      {(selectedReferral ?? requested) && (
-        <ReferralDetailModal
-          referral={(selectedReferral ?? requested) as StudentReferral}
-          onClose={closeDetails}
-          onStatusUpdated={(updatedRef) => {
-            updateReferralInCache(updatedRef);
-            setSelectedReferral(updatedRef);
-          }}
-        />
-      )}
+      {requested && <ReferralDetailModal referral={requested} onClose={closeDetails} onStatusUpdated={updateReferralInCache} />}
     </div>
   );
 }

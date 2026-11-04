@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { sessionNoticeText } from '@features/sesiones/utils/sessionNotice';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
+import { useUrlParams } from '@shared/hooks/useUrlParams';
 import styles from './StudentsPage.module.css';
 import {
   Student,
@@ -84,67 +85,94 @@ const PICK_TEXT: Record<PickAction, { button: string; help: string }> = {
 export const StudentsPage: React.FC = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
-  const [searchParams, setSearchParams] = useSearchParams();
+  const url = useUrlParams();
   const canWrite = user ? WRITE_ROLES.includes(user.role) : false;
   const canConductInterview = user ? INTERVIEW_ROLES.includes(user.role) : false;
 
   const { students, schools, tutors, loading, error, refresh } = useStudents();
 
-  const requestedAction = searchParams.get('accion');
+  const requestedAction = url.get('accion');
   const pickAction: PickAction | null =
     canConductInterview && (requestedAction === 'entrevista' || requestedAction === 'seguimiento' || requestedAction === 'derivar')
       ? requestedAction
       : null;
-  const clearPickAction = () => setSearchParams({});
+  const clearPickAction = () => url.set({ accion: null }, { replace: true });
 
   // «Registrar estudiante» del panel de inicio llega con ?accion=nuevo y abre directamente el alta.
   const wantsNewStudent = canWrite && requestedAction === 'nuevo';
 
-  const [filters, setFilters] = useState<StudentFilterValues>(EMPTY_FILTERS);
-  const [page, setPage] = useState(1);
+  // Lo que conviene conservar al recargar o compartir el enlace vive en la URL: los filtros (q, escuela, ciclo, estado), la página
+  // (pagina) y la ventana abierta con el estudiante sobre el que se abrió (?dialogo=<ventana>&estudiante=<id>).
+  const [q, schoolParam, cycleParam, statusParam] = [url.get('q'), url.get('escuela'), url.get('ciclo'), url.get('estado')];
+  const filters = useMemo<StudentFilterValues>(() => ({ search: q, schoolId: schoolParam, cycle: cycleParam, status: statusParam }), [q, schoolParam, cycleParam, statusParam]);
+  const page = Math.max(1, Number.parseInt(url.get('pagina'), 10) || 1);
+  const setPage = (next: number) => url.set({ pagina: next > 1 ? String(next) : null }, { replace: true });
 
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [studentToEdit, setStudentToEdit] = useState<Student | null>(null);
+  const dialog = url.get('dialogo');
+  const dialogStudentId = url.get('estudiante');
+  const studentFor = (name: string): Student | null => (dialog === name ? (students.find((s) => s.id === dialogStudentId) ?? null) : null);
+  const dialogSetter = (name: string) => (student: Student | null) =>
+    url.set(student ? { dialogo: name, estudiante: student.id } : { dialogo: null, estudiante: null }, { replace: student === null });
+
+  const studentToEdit = studentFor('editar');
+  const isModalOpen = dialog === 'nuevo' || studentToEdit !== null;
+  const groupSessionOpen = dialog === 'sesion-grupal';
+  const setGroupSessionOpen = (open: boolean) => url.set({ dialogo: open ? 'sesion-grupal' : null, estudiante: null }, { replace: !open });
+
+  // Un enlace a un estudiante que ya no existe (o que la persona no ve) no deja una ventana fantasma: se limpia el parámetro.
+  useEffect(() => {
+    if (loading || error) return;
+    if (dialogStudentId && !students.some((s) => s.id === dialogStudentId)) url.set({ dialogo: null, estudiante: null }, { replace: true });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [loading, error, students, dialogStudentId]);
 
   // Marcado de riesgo (HU-11).
-  const [studentToMark, setStudentToMark] = useState<Student | null>(null);
-  const [studentToUnmark, setStudentToUnmark] = useState<Student | null>(null);
+  const studentToMark = studentFor('riesgo');
+  const setStudentToMark = dialogSetter('riesgo');
+  const studentToUnmark = studentFor('sin-riesgo');
+  const setStudentToUnmark = dialogSetter('sin-riesgo');
   const [riskLoading, setRiskLoading] = useState(false);
 
   // Reasignación individual (HU-13).
-  const [studentToReassign, setStudentToReassign] = useState<Student | null>(null);
+  const studentToReassign = studentFor('reasignar');
+  const setStudentToReassign = dialogSetter('reasignar');
   const [reassignLoading, setReassignLoading] = useState(false);
   const [reassignError, setReassignError] = useState('');
 
   // Entrevista inicial tutorial (HU-14).
-  const [studentForInterview, setStudentForInterview] = useState<Student | null>(null);
+  const studentForInterview = studentFor('entrevista');
+  const setStudentForInterview = dialogSetter('entrevista');
   const [interviewLoading, setInterviewLoading] = useState(false);
   const [interviewError, setInterviewError] = useState('');
 
   // Solicitud de tutoría (HU-17).
-  const [studentForRequest, setStudentForRequest] = useState<Student | null>(null);
+  const studentForRequest = studentFor('solicitud');
+  const setStudentForRequest = dialogSetter('solicitud');
   const [requestLoading, setRequestLoading] = useState(false);
   const [requestError, setRequestError] = useState('');
   const [requestFeedback, setRequestFeedback] = useState<React.ReactNode>('');
 
   // Programación de sesión individual (HU-18) o grupal (HU-19).
-  const [studentForSession, setStudentForSession] = useState<Student | null>(null);
-  const [groupSessionOpen, setGroupSessionOpen] = useState(false);
+  const studentForSession = studentFor('sesion');
+  const setStudentForSession = dialogSetter('sesion');
   const [sessionLoading, setSessionLoading] = useState(false);
   const [sessionError, setSessionError] = useState('');
 
   // Ficha de seguimiento (HU-24).
-  const [studentForFollowUp, setStudentForFollowUp] = useState<Student | null>(null);
+  const studentForFollowUp = studentFor('seguimiento');
+  const setStudentForFollowUp = dialogSetter('seguimiento');
   const [followUpLoading, setFollowUpLoading] = useState(false);
   const [followUpError, setFollowUpError] = useState('');
 
   // Ficha de derivación (HU-28, Anexo N°6).
-  const [studentForReferral, setStudentForReferral] = useState<Student | null>(null);
+  const studentForReferral = studentFor('derivar');
+  const setStudentForReferral = dialogSetter('derivar');
   const [referralLoading, setReferralLoading] = useState(false);
   const [referralError, setReferralError] = useState('');
 
   // Vinculación de cuenta de portal (autoservicio de solicitud de tutoría).
-  const [studentToLink, setStudentToLink] = useState<Student | null>(null);
+  const studentToLink = studentFor('vincular');
+  const setStudentToLink = dialogSetter('vincular');
   const [linkLoading, setLinkLoading] = useState(false);
   const [linkError, setLinkError] = useState('');
   const [tutoradoAccounts, setTutoradoAccounts] = useState<PortalAccountOption[]>([]);
@@ -211,20 +239,12 @@ export const StudentsPage: React.FC = () => {
 
   // Reinicia la página cuando cambian los filtros.
   const handleFilters = (next: StudentFilterValues) => {
-    setFilters(next);
-    setPage(1);
+    url.set({ q: next.search, escuela: next.schoolId, ciclo: next.cycle, estado: next.status, pagina: null }, { replace: true });
   };
 
-  const handleOpenModal = (student?: Student) => {
-    setStudentToEdit(student || null);
-    setIsModalOpen(true);
-  };
+  const handleOpenModal = (student?: Student) => url.set(student ? { dialogo: 'editar', estudiante: student.id } : { dialogo: 'nuevo', estudiante: null });
 
-  const handleCloseModal = () => {
-    setIsModalOpen(false);
-    setStudentToEdit(null);
-    if (wantsNewStudent) setSearchParams({}, { replace: true });
-  };
+  const handleCloseModal = () => url.set({ dialogo: null, estudiante: null, ...(wantsNewStudent && { accion: null }) }, { replace: true });
 
   const handleSubmit = async (data: CreateStudentData | UpdateStudentData) => {
     if (studentToEdit) {

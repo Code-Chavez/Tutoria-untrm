@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { MemoryRouter } from 'react-router-dom';
+import { MemoryRouter, useLocation } from 'react-router-dom';
 import { QueryClientTestWrapper } from '@shared/test-utils/QueryClientTestWrapper';
 import { ReferralsPage } from './ReferralsPage';
 import { referralService, type StudentReferral } from '../services/referralService';
@@ -155,5 +155,50 @@ describe('ReferralsPage: lo pendiente primero y a la vista (U09)', () => {
     renderAt('/derivaciones');
     await screen.findByText('Caso n1');
     expect(screen.getAllByText(/Espera desde hace \d+ días?|Espera desde hoy/).length).toBe(3);
+  });
+});
+
+function Where() {
+  const { search } = useLocation();
+  return <span aria-label="url">{search}</span>;
+}
+
+describe('ReferralsPage: el estado de la bandeja vive en la URL', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    mocked.getReferrals.mockResolvedValue([referral]);
+  });
+
+  const renderWithUrl = (url: string) =>
+    render(
+      <MemoryRouter initialEntries={[url]}>
+        <QueryClientTestWrapper>
+          <ReferralsPage />
+          <Where />
+        </QueryClientTestWrapper>
+      </MemoryRouter>,
+    );
+
+  it('abrir un caso lo pone en la URL (?caso=) y cerrarlo lo quita, conservando la vista y la búsqueda', async () => {
+    const user = userEvent.setup();
+    renderWithUrl('/derivaciones?estado=todos&q=psico');
+    await user.click(await screen.findByTitle('Ver Detalles'));
+    expect(screen.getByLabelText('url')).toHaveTextContent('caso=ref-1');
+    expect(await screen.findByRole('dialog', { name: 'Detalle de derivación' })).toBeInTheDocument();
+
+    await user.click(within(screen.getByRole('dialog', { name: 'Detalle de derivación' })).getAllByRole('button', { name: 'Cerrar' })[0]!);
+    await waitFor(() => expect(screen.getByLabelText('url')).not.toHaveTextContent('caso='));
+    expect(screen.getByLabelText('url')).toHaveTextContent('q=psico');
+  });
+
+  it('escribir en la búsqueda la pone en la URL y un enlace con ?q= la trae escrita', async () => {
+    const user = userEvent.setup();
+    const first = renderWithUrl('/derivaciones');
+    await user.type(await screen.findByRole('searchbox'), 'psico');
+    expect(screen.getByLabelText('url')).toHaveTextContent('q=psico');
+    first.unmount();
+
+    renderWithUrl('/derivaciones?q=psico');
+    expect(await screen.findByRole('searchbox')).toHaveValue('psico');
   });
 });
