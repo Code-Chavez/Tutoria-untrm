@@ -1,19 +1,26 @@
 import React, { useEffect, useState } from 'react';
 import { useDialogFocus } from '@shared/hooks/useDialog';
+import { useDraftForm } from '@shared/hooks/useDraftForm';
+import { DraftNotice } from '@shared/components/ui';
 import { Button } from '@shared/components/ui';
 import { AlertTriangleIcon, CloseIcon } from '@shared/components/icons';
 import { Student } from '../services/studentService';
 import styles from './RiskModal.module.css';
 
 interface RiskModalProps {
+  /** Quien escribe y la clave del borrador: con ellos, lo escrito se guarda en la pestaña y se recupera al recargar. */
+  draftOwnerId?: string;
+  draftKey?: string;
   student: Student;
   loading?: boolean;
   onConfirm: (reason: string) => void;
   onCancel: () => void;
 }
 
-export const RiskModal: React.FC<RiskModalProps> = ({ student, loading, onConfirm, onCancel }) => {
-  const [reason, setReason] = useState(student.riskReason ?? '');
+export const RiskModal: React.FC<RiskModalProps> = ({ student, loading, draftOwnerId, draftKey, onConfirm, onCancel }) => {
+  const { form, set, restored, discard } = useDraftForm(draftOwnerId, draftKey ?? `riesgo.${student.id}`, { reason: student.riskReason ?? '' });
+  const { reason } = form;
+  const setReason = (v: typeof form.reason) => set({ reason: v });
   const [error, setError] = useState('');
 
   const dialogRef = useDialogFocus();
@@ -60,6 +67,7 @@ export const RiskModal: React.FC<RiskModalProps> = ({ student, loading, onConfir
         </div>
 
         <div className={styles.body}>
+          {restored && <DraftNotice onDiscard={discard} />}
           <label htmlFor="riskReason" className={styles.label}>
             Motivo del riesgo
           </label>

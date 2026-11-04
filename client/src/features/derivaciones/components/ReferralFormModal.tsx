@@ -1,5 +1,8 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useDialogFocus } from '@shared/hooks/useDialog';
+import { useDraft } from '@shared/hooks/useDraft';
+import { DraftNotice } from '@shared/components/ui';
+import { referralDraftKey } from '@shared/utils/drafts';
 import { Button, SelectField } from '@shared/components/ui';
 import { SendIcon, CloseIcon, InfoIcon } from '@shared/components/icons';
 import { Student } from '@features/tutorados/services/studentService';
@@ -21,8 +24,19 @@ interface ReferralFormModalProps {
   defaultReason?: string;
   /** Texto que explica de dónde viene esta derivación (la solicitud que atiende). */
   context?: string;
+  /** Quien deriva: con su id, lo escrito se guarda como borrador de la pestaña y se recupera al recargar. */
+  draftOwnerId?: string;
+  /** Distingue borradores de una misma ficha según de dónde se abre (p. ej. la solicitud que atiende). */
+  draftScope?: string;
   onSubmit: (data: CreateReferralData) => void;
   onCancel: () => void;
+}
+
+interface ReferralDraft {
+  checked: ReferralAspectCode[];
+  reason: string;
+  manualService: ReferralService | '';
+  receivingInstance: string;
 }
 
 const CATEGORIES = ['Académicos', 'Sociales', 'Apariencia', 'Salud mental'] as const;
@@ -44,17 +58,25 @@ export const ReferralFormModal: React.FC<ReferralFormModalProps> = ({
   serverError,
   defaultReason,
   context,
+  draftOwnerId,
+  draftScope,
   onSubmit,
   onCancel,
 }) => {
-  const [checked, setChecked] = useState<Set<ReferralAspectCode>>(new Set());
-  const [reason, setReason] = useState(defaultReason ?? '');
+  const initial = useMemo<ReferralDraft>(
+    () => ({ checked: [], reason: defaultReason ?? '', manualService: '', receivingInstance: '' }),
+    [defaultReason],
+  );
+  const unchanged = useCallback((v: ReferralDraft) => JSON.stringify(v) === JSON.stringify(initial), [initial]);
+  const { value: form, setValue: setForm, restored, discard } = useDraft(draftOwnerId, referralDraftKey(student.id, draftScope), initial, unchanged);
+  const checked = useMemo(() => new Set(form.checked), [form.checked]);
+  const { reason, receivingInstance } = form;
+  const set = (patch: Partial<ReferralDraft>) => setForm((f) => ({ ...f, ...patch }));
   // El tutor puede elegir cualquiera de los 5 servicios sin restricción
   // (HU-29): mientras no lo toque, el select sigue la sugerencia calculada
   // en vivo a partir de los aspectos marcados; en cuanto elige uno, esa
   // elección manual prevalece aunque cambien los aspectos.
-  const [manualService, setManualService] = useState<ReferralService | ''>('');
-  const [receivingInstance, setReceivingInstance] = useState('');
+  const manualService = form.manualService;
   const [error, setError] = useState('');
 
   const suggestedService = useMemo(() => suggestReferralService([...checked]), [checked]);
@@ -70,12 +92,7 @@ export const ReferralFormModal: React.FC<ReferralFormModalProps> = ({
   }, [onCancel]);
 
   const toggleAspect = (code: ReferralAspectCode) => {
-    setChecked((prev) => {
-      const next = new Set(prev);
-      if (next.has(code)) next.delete(code);
-      else next.add(code);
-      return next;
-    });
+    setForm((f) => ({ ...f, checked: f.checked.includes(code) ? f.checked.filter((c) => c !== code) : [...f.checked, code] }));
     setError('');
   };
 
@@ -127,6 +144,7 @@ export const ReferralFormModal: React.FC<ReferralFormModalProps> = ({
         </div>
 
         <div className={styles.body}>
+          {restored && <DraftNotice onDiscard={discard} />}
           {context && (
             <div className={styles.hint}>
               <InfoIcon size={16} />
@@ -162,7 +180,7 @@ export const ReferralFormModal: React.FC<ReferralFormModalProps> = ({
               maxLength={1000}
               placeholder="Describe brevemente la situación observada…"
               onChange={(e) => {
-                setReason(e.target.value);
+                set({ reason: e.target.value });
                 setError('');
               }}
             />
@@ -174,7 +192,7 @@ export const ReferralFormModal: React.FC<ReferralFormModalProps> = ({
               id="referralService"
               value={effectiveService}
               onChange={(e) => {
-                setManualService(e.target.value as ReferralService);
+                set({ manualService: e.target.value as ReferralService });
                 setError('');
               }}
             >
@@ -204,7 +222,7 @@ export const ReferralFormModal: React.FC<ReferralFormModalProps> = ({
               value={receivingInstance}
               maxLength={200}
               placeholder="Ej. Psicólogo Juan Pérez - Consultorio 3"
-              onChange={(e) => setReceivingInstance(e.target.value)}
+              onChange={(e) => set({ receivingInstance: e.target.value })}
             />
           </div>
 

@@ -1,4 +1,4 @@
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { InterviewFormModal } from './InterviewFormModal';
@@ -6,7 +6,7 @@ import type { Student } from '@features/tutorados/services/studentService';
 
 vi.mock('@features/auth/hooks/useAuth', () => ({
   useAuth: () => ({
-    user: { firstName: 'Elena', lastName: 'Ramírez', role: 'Docente Tutor' },
+    user: { id: 'u1', firstName: 'Elena', lastName: 'Ramírez', role: 'Docente Tutor' },
   }),
 }));
 
@@ -30,6 +30,25 @@ async function goToStep(user: ReturnType<typeof userEvent.setup>, times: number)
 }
 
 describe('InterviewFormModal', () => {
+  beforeEach(() => sessionStorage.clear());
+
+  it('al recargar recupera lo escrito y el paso en que iba; descartar vuelve a empezar', async () => {
+    const user = userEvent.setup();
+    const modal = <InterviewFormModal student={student} schoolName="Ingeniería de Sistemas" onSubmit={vi.fn()} onCancel={vi.fn()} />;
+    const first = render(modal);
+    await goToStep(user, 2);
+    await user.click(screen.getByLabelText(/^académica$/i));
+    first.unmount();
+
+    render(modal);
+    expect(screen.getByRole('status')).toHaveTextContent(/recuperamos lo que habías escrito/i);
+    expect(screen.getByLabelText(/^académica$/i)).toBeChecked();
+
+    await user.click(screen.getByRole('button', { name: /descartar borrador/i }));
+    expect(screen.queryByRole('status')).not.toBeInTheDocument();
+    expect(screen.queryByLabelText(/^académica$/i)).not.toBeInTheDocument();
+  });
+
   it('exige al menos un motivo antes de avanzar', async () => {
     const user = userEvent.setup();
     render(

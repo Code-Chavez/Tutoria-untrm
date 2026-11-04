@@ -1,4 +1,4 @@
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { CancelSessionModal } from './CancelSessionModal';
@@ -24,6 +24,21 @@ const session: TutoringSession = {
 };
 
 describe('CancelSessionModal', () => {
+  beforeEach(() => sessionStorage.clear());
+
+  it('recupera el motivo escrito al volver a abrirla y se puede descartar', async () => {
+    const user = userEvent.setup();
+    const modal = <CancelSessionModal session={session} draftOwnerId="u1" onConfirm={vi.fn()} onCancel={vi.fn()} />;
+    const first = render(modal);
+    await user.type(screen.getByRole('textbox'), 'Se cruza con examen');
+    first.unmount();
+
+    render(modal);
+    expect(screen.getByRole('textbox')).toHaveValue('Se cruza con examen');
+    await user.click(screen.getByRole('button', { name: /descartar borrador/i }));
+    expect(screen.getByRole('textbox')).toHaveValue('');
+  });
+
   it('exige el motivo antes de confirmar', async () => {
     const onConfirm = vi.fn();
     const user = userEvent.setup();

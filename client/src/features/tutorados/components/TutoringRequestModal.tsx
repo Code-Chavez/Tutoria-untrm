@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useDialogFocus } from '@shared/hooks/useDialog';
+import { useDraftForm } from '@shared/hooks/useDraftForm';
+import { DraftNotice } from '@shared/components/ui';
 import { Button, SelectField } from '@shared/components/ui';
 import { SendIcon, CloseIcon } from '@shared/components/icons';
 import { Student } from '../services/studentService';
@@ -10,6 +12,9 @@ interface TutoringRequestModalProps {
   student: Student;
   loading?: boolean;
   serverError?: string;
+  /** Quien escribe y la clave del borrador: con ellos, lo escrito se guarda en la pestaña y se recupera al recargar. */
+  draftOwnerId?: string;
+  draftKey?: string;
   onSubmit: (data: CreateTutoringRequestData) => void;
   onCancel: () => void;
 }
@@ -26,14 +31,24 @@ export const TutoringRequestModal: React.FC<TutoringRequestModalProps> = ({
   student,
   loading,
   serverError,
+  draftOwnerId,
+  draftKey,
   onSubmit,
   onCancel,
 }) => {
-  const [source, setSource] = useState<'STUDENT' | 'INSTRUCTOR'>('STUDENT');
-  const [instructorName, setInstructorName] = useState('');
-  const [courseName, setCourseName] = useState('');
-  const [caseType, setCaseType] = useState<CreateTutoringRequestData['caseType']>('ACADEMIC');
-  const [reason, setReason] = useState('');
+  const { form, set, restored, discard } = useDraftForm(draftOwnerId, draftKey ?? `solicitud.${student.id}`, {
+    source: 'STUDENT' as 'STUDENT' | 'INSTRUCTOR',
+    instructorName: '',
+    courseName: '',
+    caseType: 'ACADEMIC' as CreateTutoringRequestData['caseType'],
+    reason: '',
+  });
+  const { source, instructorName, courseName, caseType, reason } = form;
+  const setSource = (v: typeof form.source) => set({ source: v });
+  const setInstructorName = (v: typeof form.instructorName) => set({ instructorName: v });
+  const setCourseName = (v: typeof form.courseName) => set({ courseName: v });
+  const setCaseType = (v: typeof form.caseType) => set({ caseType: v });
+  const setReason = (v: typeof form.reason) => set({ reason: v });
   const [error, setError] = useState('');
 
   const dialogRef = useDialogFocus();
@@ -90,6 +105,7 @@ export const TutoringRequestModal: React.FC<TutoringRequestModalProps> = ({
         </div>
 
         <div className={styles.body}>
+          {restored && <DraftNotice onDiscard={discard} />}
           <label className={styles.label}>Origen de la solicitud</label>
           <div className={styles.sourceOptions}>
             <label className={styles.radio}>

@@ -1,6 +1,8 @@
 import { getRoleLabel } from '@shared/utils/roleLabel';
 import React, { useEffect, useState } from 'react';
 import { useDialogFocus } from '@shared/hooks/useDialog';
+import { useDraftForm } from '@shared/hooks/useDraftForm';
+import { DraftNotice } from '@shared/components/ui';
 import { Button, Stepper } from '@shared/components/ui';
 import { ClipboardIcon, CloseIcon, CheckCircleIcon } from '@shared/components/icons';
 import { useAuth } from '@features/auth/hooks/useAuth';
@@ -18,6 +20,8 @@ interface InterviewFormModalProps {
   schoolName: string;
   loading?: boolean;
   serverError?: string;
+  /** Clave del borrador: con ella, lo escrito y el paso en que iba se recuperan al recargar. */
+  draftKey?: string;
   onSubmit: (data: CreateInterviewData, supportContact?: UpsertSupportContactData) => void;
   onCancel: () => void;
 }
@@ -71,12 +75,14 @@ export const InterviewFormModal: React.FC<InterviewFormModalProps> = ({
   schoolName,
   loading,
   serverError,
+  draftKey,
   onSubmit,
   onCancel,
 }) => {
   const { user } = useAuth();
-  const [step, setStep] = useState(0);
-  const [form, setForm] = useState<FormState>(EMPTY_FORM);
+  const { form: draft, set: setDraft, restored, discard } = useDraftForm(user?.id, draftKey ?? `entrevista.${student.id}`, { step: 0, form: EMPTY_FORM });
+  const { step, form } = draft;
+  const setStep = (next: (current: number) => number) => setDraft({ step: next(step) });
   const [error, setError] = useState('');
 
   const dialogRef = useDialogFocus();
@@ -89,7 +95,7 @@ export const InterviewFormModal: React.FC<InterviewFormModalProps> = ({
   }, [onCancel]);
 
   const set = <K extends keyof FormState>(field: K, value: FormState[K]) => {
-    setForm((prev) => ({ ...prev, [field]: value }));
+    setDraft({ form: { ...form, [field]: value } });
     setError('');
   };
 
@@ -187,6 +193,7 @@ export const InterviewFormModal: React.FC<InterviewFormModalProps> = ({
         </div>
 
         <div className={styles.body}>
+          {restored && <DraftNotice onDiscard={discard} />}
           <Stepper steps={STEPS} current={step} label="Progreso de la entrevista" />
 
           {step === 0 && (

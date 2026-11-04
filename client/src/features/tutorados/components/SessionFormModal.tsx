@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useDialogFocus } from '@shared/hooks/useDialog';
+import { useDraftForm } from '@shared/hooks/useDraftForm';
+import { DraftNotice } from '@shared/components/ui';
 import { Button } from '@shared/components/ui';
 import { CalendarIcon, CloseIcon, InfoIcon } from '@shared/components/icons';
 import { Student } from '../services/studentService';
@@ -15,6 +17,9 @@ interface SessionFormModalProps {
   defaultTopic?: string;
   /** Texto que explica de dónde viene esta sesión (la solicitud que atiende). */
   context?: string;
+  /** Quien escribe y la clave del borrador: con ellos, lo escrito se guarda en la pestaña y se recupera al recargar. */
+  draftOwnerId?: string;
+  draftKey?: string;
   onSubmit: (data: ScheduleSessionData) => void;
   onCancel: () => void;
 }
@@ -26,15 +31,26 @@ export const SessionFormModal: React.FC<SessionFormModalProps> = ({
   serverError,
   defaultTopic,
   context,
+  draftOwnerId,
+  draftKey,
   onSubmit,
   onCancel,
 }) => {
-  const [date, setDate] = useState('');
-  const [time, setTime] = useState('');
-  const [topic, setTopic] = useState(defaultTopic ?? '');
-  const [modality, setModality] = useState<SessionModality>('PRESENCIAL');
-  const [location, setLocation] = useState('');
-  const [meetingLink, setMeetingLink] = useState('');
+  const { form, set, restored, discard } = useDraftForm(draftOwnerId, draftKey ?? `sesion.${student.id}`, {
+    date: '',
+    time: '',
+    topic: defaultTopic ?? '',
+    modality: 'PRESENCIAL' as SessionModality,
+    location: '',
+    meetingLink: '',
+  });
+  const { date, time, topic, modality, location, meetingLink } = form;
+  const setDate = (v: typeof form.date) => set({ date: v });
+  const setTime = (v: typeof form.time) => set({ time: v });
+  const setTopic = (v: typeof form.topic) => set({ topic: v });
+  const setModality = (v: typeof form.modality) => set({ modality: v });
+  const setLocation = (v: typeof form.location) => set({ location: v });
+  const setMeetingLink = (v: typeof form.meetingLink) => set({ meetingLink: v });
   const [error, setError] = useState('');
 
   const dialogRef = useDialogFocus();
@@ -105,6 +121,7 @@ export const SessionFormModal: React.FC<SessionFormModalProps> = ({
         </div>
 
         <div className={styles.body}>
+          {restored && <DraftNotice onDiscard={discard} />}
           {context && (
             <div className={styles.hint}>
               <InfoIcon size={16} />
