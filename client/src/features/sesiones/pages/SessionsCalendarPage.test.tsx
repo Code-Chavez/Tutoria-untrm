@@ -7,6 +7,8 @@ import { SessionsCalendarPage } from './SessionsCalendarPage';
 import { sessionService, TutoringSession } from '../services/sessionService';
 import { studentService, Student } from '@features/tutorados/services/studentService';
 
+vi.mock('@features/auth/hooks/useAuth', () => ({ useAuth: () => ({ user: { id: 'me', role: 'Docente Tutor' } }) }));
+
 vi.mock('../services/sessionService', () => ({
   sessionService: {
     getMySessions: vi.fn(),

@@ -19,6 +19,8 @@ import { RescheduleSessionModal } from '../components/RescheduleSessionModal';
 import { CancelSessionModal } from '../components/CancelSessionModal';
 import { getApiErrorMessage } from '@shared/services/apiClient';
 import { useUrlParams } from '@shared/hooks/useUrlParams';
+import { removeDraft } from '@shared/utils/drafts';
+import { useAuth } from '@features/auth/hooks/useAuth';
 import {
   addDays,
   addMonths,
@@ -58,6 +60,7 @@ export const SessionsCalendarPage: React.FC = () => {
   const { sessions, students, loading, error, refresh } = useMySessions();
   // La vista (?vista=semana), la fecha (?fecha=AAAA-MM-DD), la sesión abierta (?sesion=<id>) y su ventana (?accion=reprogramar|cancelar)
   // viven en la URL: recargar o compartir el enlace vuelve al mismo lugar.
+  const { user } = useAuth();
   const url = useUrlParams();
   const view: ViewMode = url.get('vista') === 'semana' ? 'week' : 'month';
   const setView = (next: ViewMode) => url.set({ vista: next === 'week' ? 'semana' : null }, { replace: true });
@@ -140,6 +143,7 @@ export const SessionsCalendarPage: React.FC = () => {
     setChangeError('');
     try {
       const moved = await sessionService.rescheduleSession(selectedSession.id, data);
+      if (user) removeDraft(user.id, `reprogramar.${selectedSession.id}`);
       setFeedback(`Sesión reprogramada.${sessionNoticeText(moved.notice)}`);
       setRescheduleOpen(false);
       setSelectedSession(null);
@@ -157,6 +161,7 @@ export const SessionsCalendarPage: React.FC = () => {
     setChangeError('');
     try {
       const cancelled = await sessionService.cancelSession(selectedSession.id, { reason });
+      if (user) removeDraft(user.id, `cancelar.${selectedSession.id}`);
       setFeedback(`Sesión cancelada.${sessionNoticeText(cancelled.notice)}`);
       setCancelOpen(false);
       setSelectedSession(null);
@@ -426,6 +431,7 @@ export const SessionsCalendarPage: React.FC = () => {
           session={selectedSession}
           loading={changeLoading}
           serverError={changeError}
+          draftOwnerId={user?.id}
           onSubmit={handleReschedule}
           onCancel={() => setRescheduleOpen(false)}
         />
@@ -436,6 +442,7 @@ export const SessionsCalendarPage: React.FC = () => {
           session={selectedSession}
           loading={changeLoading}
           serverError={changeError}
+          draftOwnerId={user?.id}
           onConfirm={handleCancelSession}
           onCancel={() => setCancelOpen(false)}
         />

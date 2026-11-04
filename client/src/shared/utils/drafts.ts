@@ -8,6 +8,10 @@
  */
 const PREFIX = 'sit.draft.';
 
+/** Claves de los borradores de fichas que se abren desde varias pantallas (quien las registra con éxito las quita con `removeDraft`). */
+export const followUpDraftKey = (studentId: string) => `seguimiento.${studentId}`;
+export const referralDraftKey = (studentId: string, scope = 'estudiante') => `derivacion.${scope}.${studentId}`;
+
 const storage = (): Storage | null => {
   try {
     return window.sessionStorage;

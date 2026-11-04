@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useDialogFocus } from '@shared/hooks/useDialog';
+import { useDraftForm } from '@shared/hooks/useDraftForm';
+import { DraftNotice } from '@shared/components/ui';
 import { Button } from '@shared/components/ui';
 import { AlertTriangleIcon, CloseIcon } from '@shared/components/icons';
 import { TutoringSession } from '../services/sessionService';
@@ -9,6 +11,9 @@ interface CancelSessionModalProps {
   session: TutoringSession;
   loading?: boolean;
   serverError?: string;
+  /** Quien escribe y la clave del borrador: con ellos, lo escrito se guarda en la pestaña y se recupera al recargar. */
+  draftOwnerId?: string;
+  draftKey?: string;
   onConfirm: (reason: string) => void;
   onCancel: () => void;
 }
@@ -19,10 +24,14 @@ export const CancelSessionModal: React.FC<CancelSessionModalProps> = ({
   session,
   loading,
   serverError,
+  draftOwnerId,
+  draftKey,
   onConfirm,
   onCancel,
 }) => {
-  const [reason, setReason] = useState('');
+  const { form, set, restored, discard } = useDraftForm(draftOwnerId, draftKey ?? `cancelar.${session.id}`, { reason: '' });
+  const { reason } = form;
+  const setReason = (v: typeof form.reason) => set({ reason: v });
   const [error, setError] = useState('');
 
   const dialogRef = useDialogFocus();
@@ -67,6 +76,7 @@ export const CancelSessionModal: React.FC<CancelSessionModalProps> = ({
         </div>
 
         <div className={styles.body}>
+          {restored && <DraftNotice onDiscard={discard} />}
           <label htmlFor="cancelReason" className={styles.label}>
             Motivo de la cancelación
           </label>

@@ -36,7 +36,19 @@ const renderPage = (url = '/tutorados') =>
 describe('StudentsPage: el estado de la lista vive en la URL', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    sessionStorage.clear();
     mockRole = 'Coordinador';
+  });
+
+  it('recargar con una ficha abierta la reabre con lo que se había escrito', async () => {
+    const user = userEvent.setup();
+    const first = renderPage('/tutorados?dialogo=seguimiento&estudiante=s1');
+    await user.type(await screen.findByLabelText(/motivo de seguimiento/i), 'Faltas reiteradas');
+    first.unmount();
+
+    renderPage('/tutorados?dialogo=seguimiento&estudiante=s1');
+    expect(await screen.findByLabelText(/motivo de seguimiento/i)).toHaveValue('Faltas reiteradas');
+    expect(screen.getByRole('status')).toHaveTextContent(/recuperamos/i);
   });
 
   it('los filtros salen de la URL y escribirlos la actualiza sin perder los demás', async () => {

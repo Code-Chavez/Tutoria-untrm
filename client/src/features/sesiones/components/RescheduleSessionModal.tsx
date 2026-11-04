@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useDialogFocus } from '@shared/hooks/useDialog';
+import { useDraftForm } from '@shared/hooks/useDraftForm';
+import { DraftNotice } from '@shared/components/ui';
 import { Button } from '@shared/components/ui';
 import { CalendarIcon, CloseIcon } from '@shared/components/icons';
 import { TutoringSession, RescheduleSessionData } from '../services/sessionService';
@@ -9,6 +11,9 @@ interface RescheduleSessionModalProps {
   session: TutoringSession;
   loading?: boolean;
   serverError?: string;
+  /** Quien escribe y la clave del borrador: con ellos, lo escrito se guarda en la pestaña y se recupera al recargar. */
+  draftOwnerId?: string;
+  draftKey?: string;
   onSubmit: (data: RescheduleSessionData) => void;
   onCancel: () => void;
 }
@@ -19,12 +24,16 @@ export const RescheduleSessionModal: React.FC<RescheduleSessionModalProps> = ({
   session,
   loading,
   serverError,
+  draftOwnerId,
+  draftKey,
   onSubmit,
   onCancel,
 }) => {
-  const [date, setDate] = useState('');
-  const [time, setTime] = useState('');
-  const [reason, setReason] = useState('');
+  const { form, set, restored, discard } = useDraftForm(draftOwnerId, draftKey ?? `reprogramar.${session.id}`, { date: '', time: '', reason: '' });
+  const { date, time, reason } = form;
+  const setDate = (v: typeof form.date) => set({ date: v });
+  const setTime = (v: typeof form.time) => set({ time: v });
+  const setReason = (v: typeof form.reason) => set({ reason: v });
   const [error, setError] = useState('');
 
   const dialogRef = useDialogFocus();
@@ -78,6 +87,7 @@ export const RescheduleSessionModal: React.FC<RescheduleSessionModalProps> = ({
         </div>
 
         <div className={styles.body}>
+          {restored && <DraftNotice onDiscard={discard} />}
           <div className={styles.grid}>
             <div className={styles.field}>
               <label htmlFor="rescheduleDate">Nueva fecha</label>

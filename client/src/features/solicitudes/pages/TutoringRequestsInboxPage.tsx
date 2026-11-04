@@ -6,6 +6,7 @@ import { useAuth } from '@features/auth/hooks/useAuth';
 import { useStudents } from '@features/tutorados/hooks/useStudents';
 import { SessionFormModal } from '@features/tutorados/components/SessionFormModal';
 import { ReferralFormModal } from '@features/derivaciones/components/ReferralFormModal';
+import { referralDraftKey, removeDraft } from '@shared/utils/drafts';
 import { referralService, type CreateReferralData } from '@features/derivaciones/services/referralService';
 import { sessionService, type ScheduleSessionData } from '@features/sesiones/services/sessionService';
 import { sessionNoticeText } from '@features/sesiones/utils/sessionNotice';
@@ -234,6 +235,7 @@ export function TutoringRequestsInboxPage() {
   const confirmSession = (r: TutoringRequestView, data: ScheduleSessionData) =>
     finishFollowUp(async () => {
       const session = await sessionService.scheduleSession({ ...data, tutoringRequestId: r.id });
+      if (user) removeDraft(user.id, `sesion.solicitud.${r.id}`);
       const when = new Date(session.scheduledAt).toLocaleString('es-PE', { dateStyle: 'medium', timeStyle: 'short' });
       // El aviso de la sesión es el de la solicitud vinculada (no se repite): se le dice a quien programó si no se pudo avisar.
       return `Sesión programada para el ${when} con ${r.studentName}. Quedó vinculada a su solicitud y la verá en Mis sesiones.${sessionNoticeText(session.notice)}`;
@@ -241,6 +243,7 @@ export function TutoringRequestsInboxPage() {
   const confirmReferral = (r: TutoringRequestView, data: CreateReferralData) =>
     finishFollowUp(async () => {
       await referralService.createReferral(r.studentId, { ...data, tutoringRequestId: r.id });
+      if (user) removeDraft(user.id, referralDraftKey(r.studentId, `solicitud.${r.id}`));
       return `Caso de ${r.studentName} derivado. Quedó vinculado a su solicitud; lo sigues en Casos derivados.`;
     });
 
@@ -384,6 +387,8 @@ export function TutoringRequestsInboxPage() {
           context={`Atiende la solicitud de ${followUp.request.studentName}: «${followUp.request.reason}»`}
           loading={followUpBusy}
           serverError={followUpError}
+          draftOwnerId={user?.id}
+          draftKey={`sesion.solicitud.${followUp.request.id}`}
           onSubmit={(data) => confirmSession(followUp.request, data)}
           onCancel={closeFollowUp}
         />
@@ -393,6 +398,8 @@ export function TutoringRequestsInboxPage() {
         <ReferralFormModal
           student={followUpStudent}
           defaultReason={followUp.request.reason.slice(0, 1000)}
+          draftOwnerId={user?.id}
+          draftScope={`solicitud.${followUp.request.id}`}
           context={`Atiende la solicitud de ${followUp.request.studentName}: «${followUp.request.reason}»`}
           loading={followUpBusy}
           serverError={followUpError}

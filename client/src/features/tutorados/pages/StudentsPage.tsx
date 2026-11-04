@@ -21,6 +21,7 @@ import { InterviewFormModal } from '@features/entrevistas/components/InterviewFo
 import { interviewService, CreateInterviewData } from '@features/entrevistas/services/interviewService';
 import { supportContactService, UpsertSupportContactData } from '@features/entrevistas/services/supportContactService';
 import { FollowUpFormModal } from '@features/seguimiento/components/FollowUpFormModal';
+import { followUpDraftKey, referralDraftKey, removeDraft } from '@shared/utils/drafts';
 import { followUpService, CreateFollowUpData } from '@features/seguimiento/services/followUpService';
 import { ReferralFormModal } from '@features/derivaciones/components/ReferralFormModal';
 import { referralService, CreateReferralData } from '@features/derivaciones/services/referralService';
@@ -255,11 +256,18 @@ export const StudentsPage: React.FC = () => {
     refresh();
   };
 
+  // Lo que se escribe en cada ventana se conserva como borrador de la pestaña; al enviar con éxito se descarta.
+  const draftKeyOf = (dialogName: string, studentId: string) => `${dialogName}.${studentId}`;
+  const dropDraft = (dialogName: string, studentId: string) => {
+    if (user) removeDraft(user.id, draftKeyOf(dialogName, studentId));
+  };
+
   const confirmMarkRisk = async (reason: string) => {
     if (!studentToMark) return;
     setRiskLoading(true);
     try {
       await studentService.markRisk(studentToMark.id, true, reason);
+      dropDraft('riesgo', studentToMark.id);
       setStudentToMark(null);
       refresh();
     } catch (err) {
@@ -289,6 +297,7 @@ export const StudentsPage: React.FC = () => {
     setReassignError('');
     try {
       await assignmentService.reassignStudent(studentToReassign.id, newTutorId, reason);
+      dropDraft('reasignar', studentToReassign.id);
       setStudentToReassign(null);
       refresh();
     } catch (err) {
@@ -310,6 +319,7 @@ export const StudentsPage: React.FC = () => {
         await supportContactService.upsertSupportContact(studentForInterview.id, supportContact);
       }
       await interviewService.createInterview(studentForInterview.id, data);
+      dropDraft('entrevista', studentForInterview.id);
       setStudentForInterview(null);
     } catch (err) {
       setInterviewError(getApiErrorMessage(err));
@@ -330,6 +340,7 @@ export const StudentsPage: React.FC = () => {
       setRequestFeedback(
         `Solicitud registrada y enviada a ${request.routedToRole === 'tutor' ? 'el tutor' : 'el coordinador'} de ${studentForRequest.firstName} ${studentForRequest.lastName}.`,
       );
+      dropDraft('solicitud', studentForRequest.id);
       setStudentForRequest(null);
     } catch (err) {
       setRequestError(getApiErrorMessage(err));
@@ -371,6 +382,7 @@ export const StudentsPage: React.FC = () => {
           {sessionNoticeText(session.notice)}
         </>,
       );
+      dropDraft('sesion', studentForSession.id);
       setStudentForSession(null);
     } catch (err) {
       setSessionError(getApiErrorMessage(err));
@@ -409,6 +421,7 @@ export const StudentsPage: React.FC = () => {
     setFollowUpError('');
     try {
       await followUpService.createFollowUp(studentForFollowUp.id, data);
+      if (user) removeDraft(user.id, followUpDraftKey(studentForFollowUp.id));
       setRequestFeedback(
         `Ficha de seguimiento registrada para ${studentForFollowUp.firstName} ${studentForFollowUp.lastName}.`,
       );
@@ -426,6 +439,7 @@ export const StudentsPage: React.FC = () => {
     setReferralError('');
     try {
       const referral = await referralService.createReferral(studentForReferral.id, data);
+      if (user) removeDraft(user.id, referralDraftKey(studentForReferral.id));
       setRequestFeedback(
         <>
           Ficha de derivación registrada para {studentForReferral.firstName}{' '}
@@ -653,6 +667,8 @@ export const StudentsPage: React.FC = () => {
         <RiskModal
           student={studentToMark}
           loading={riskLoading}
+          draftOwnerId={user?.id}
+          draftKey={draftKeyOf('riesgo', studentToMark.id)}
           onConfirm={confirmMarkRisk}
           onCancel={() => setStudentToMark(null)}
         />
@@ -665,6 +681,8 @@ export const StudentsPage: React.FC = () => {
           currentTutorName={tutorName(studentToReassign.tutorId)}
           loading={reassignLoading}
           serverError={reassignError}
+          draftOwnerId={user?.id}
+          draftKey={draftKeyOf('reasignar', studentToReassign.id)}
           onConfirm={confirmReassign}
           onCancel={() => setStudentToReassign(null)}
         />
@@ -677,6 +695,7 @@ export const StudentsPage: React.FC = () => {
           schoolName={schoolName(studentForInterview.schoolId)}
           loading={interviewLoading}
           serverError={interviewError}
+          draftKey={draftKeyOf('entrevista', studentForInterview.id)}
           onSubmit={confirmInterview}
           onCancel={() => setStudentForInterview(null)}
         />
@@ -687,6 +706,8 @@ export const StudentsPage: React.FC = () => {
           student={studentForRequest}
           loading={requestLoading}
           serverError={requestError}
+          draftOwnerId={user?.id}
+          draftKey={draftKeyOf('solicitud', studentForRequest.id)}
           onSubmit={confirmTutoringRequest}
           onCancel={() => setStudentForRequest(null)}
         />
@@ -698,6 +719,8 @@ export const StudentsPage: React.FC = () => {
           durationMinutes={DEFAULT_SESSION_DURATION}
           loading={sessionLoading}
           serverError={sessionError}
+          draftOwnerId={user?.id}
+          draftKey={draftKeyOf('sesion', studentForSession.id)}
           onSubmit={confirmSchedule}
           onCancel={() => setStudentForSession(null)}
         />
@@ -721,6 +744,7 @@ export const StudentsPage: React.FC = () => {
           student={studentForFollowUp}
           loading={followUpLoading}
           serverError={followUpError}
+          draftOwnerId={user?.id}
           onSubmit={confirmFollowUp}
           onCancel={() => setStudentForFollowUp(null)}
         />
@@ -731,6 +755,7 @@ export const StudentsPage: React.FC = () => {
           student={studentForReferral}
           loading={referralLoading}
           serverError={referralError}
+          draftOwnerId={user?.id}
           onSubmit={confirmReferral}
           onCancel={() => setStudentForReferral(null)}
         />
