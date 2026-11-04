@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useUrlParams } from '@shared/hooks/useUrlParams';
 import { getApiErrorMessage } from '@shared/services/apiClient';
 import { PageHeader, Card, Button, ConfirmDialog, SelectField, EmptyState, TableSkeleton } from '@shared/components/ui';
 import { CalendarRangeIcon, PlusIcon, TrashIcon } from '@shared/components/icons';
@@ -183,7 +184,11 @@ function toContent(f: FormState): WorkPlanContent {
 }
 
 function WorkPlanEditor({ schoolId, plan }: { schoolId: string; plan: WorkPlan | null }) {
-  const [tab, setTab] = useState<TabId>('general');
+  // La pestaña abierta (?pestana=) vive en la URL: recargar o compartir el enlace vuelve a la misma sección.
+  const url = useUrlParams();
+  const tabParam = url.get('pestana');
+  const tab: TabId = TABS.find((t) => t.id === tabParam)?.id ?? 'general';
+  const setTab = (next: TabId) => url.set({ pestana: next === 'general' ? null : next }, { replace: true });
   const [form, setForm] = useState<FormState>(() => (plan ? fromPlan(plan) : emptyForm()));
   const [message, setMessage] = useState<{ type: 'ok' | 'error'; text: string } | null>(null);
 

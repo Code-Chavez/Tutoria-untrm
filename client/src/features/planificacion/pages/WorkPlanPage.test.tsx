@@ -1,6 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { MemoryRouter } from 'react-router-dom';
 import { QueryClientTestWrapper } from '@shared/test-utils/QueryClientTestWrapper';
 import { WorkPlanPage } from './WorkPlanPage';
 import { workPlanService } from '../services/workPlanService';
@@ -19,9 +20,9 @@ const mocked = vi.mocked(workPlanService);
 
 function renderPage() {
   return render(
-    <QueryClientTestWrapper>
+    <MemoryRouter><QueryClientTestWrapper>
       <WorkPlanPage />
-    </QueryClientTestWrapper>,
+    </QueryClientTestWrapper></MemoryRouter>,
   );
 }
 

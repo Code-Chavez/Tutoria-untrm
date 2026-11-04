@@ -2,7 +2,8 @@ import { Fragment, useState } from 'react';
 import { getApiErrorMessage } from '@shared/services/apiClient';
 import { PageHeader, Button, EmptyState, TableSkeleton, Card } from '@shared/components/ui';
 import { ReportFilters } from '@shared/reportFilters/ReportFilters';
-import { EMPTY_REPORT_FILTERS, toFilterParams } from '@shared/reportFilters/reportFilterService';
+import { toFilterParams } from '@shared/reportFilters/reportFilterService';
+import { useReportFiltersUrl } from '@shared/reportFilters/useReportFiltersUrl';
 import { ReportIcon, DownloadIcon } from '@shared/components/icons';
 import { useConsolidatedReport } from '../hooks/useConsolidatedReport';
 import { consolidatedReportService, ConsolidatedMetrics } from '../services/consolidatedReportService';
@@ -25,7 +26,8 @@ const COLUMNS: { label: string; value: (m: ConsolidatedMetrics) => string }[] = 
 ];
 
 export function ConsolidatedReportPage() {
-  const [values, setValues] = useState(EMPTY_REPORT_FILTERS);
+  // Los filtros del reporte viven en la URL: recargar o compartir el enlace conserva el mismo reporte.
+  const [values, setValues] = useReportFiltersUrl();
   const [exporting, setExporting] = useState<'excel' | 'pdf' | null>(null);
   const [exportError, setExportError] = useState('');
 

@@ -1,7 +1,7 @@
-import { useState } from 'react';
 import { PageHeader, Card, Button, StatCard, EmptyState, TableSkeleton } from '@shared/components/ui';
 import { ReportFilters } from '@shared/reportFilters/ReportFilters';
-import { EMPTY_REPORT_FILTERS, toFilterParams } from '@shared/reportFilters/reportFilterService';
+import { toFilterParams } from '@shared/reportFilters/reportFilterService';
+import { useReportFiltersUrl } from '@shared/reportFilters/useReportFiltersUrl';
 import { PieChartIcon, UsersIcon, ActivityIcon, SendIcon, StarIcon } from '@shared/components/icons';
 import { ExportButtons } from '@shared/components/ExportButtons';
 import { downloadFile } from '@shared/services/downloadFile';
@@ -75,7 +75,8 @@ function BarChart({ title, rows, legend }: { title: string; rows: BarRow[]; lege
 }
 
 export function IndicatorsPage() {
-  const [values, setValues] = useState(EMPTY_REPORT_FILTERS);
+  // Los filtros del reporte viven en la URL: recargar o compartir el enlace conserva el mismo reporte.
+  const [values, setValues] = useReportFiltersUrl();
 
   const filters = toFilterParams(values);
   const { report, loading, error, refresh } = useIndicators(filters);

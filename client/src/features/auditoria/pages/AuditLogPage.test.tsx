@@ -1,6 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { MemoryRouter } from 'react-router-dom';
 import { QueryClientTestWrapper } from '@shared/test-utils/QueryClientTestWrapper';
 import { AuditLogPage } from './AuditLogPage';
 import { auditService, type AuditEntry } from '../services/auditService';
@@ -24,11 +25,11 @@ const entry = (over: Partial<AuditEntry> = {}): AuditEntry => ({
   ...over,
 });
 
-const renderPage = () =>
+const renderPage = (url = '/auditoria') =>
   render(
-    <QueryClientTestWrapper>
+    <MemoryRouter initialEntries={[url]}><QueryClientTestWrapper>
       <AuditLogPage />
-    </QueryClientTestWrapper>,
+    </QueryClientTestWrapper></MemoryRouter>,
   );
 
 describe('AuditLogPage (UI-09)', () => {
@@ -36,6 +37,13 @@ describe('AuditLogPage (UI-09)', () => {
     vi.clearAllMocks();
     mocked.options.mockResolvedValue({ entities: ['User', 'School'], actions: ['LOGIN', 'UPDATE'] });
     mocked.list.mockResolvedValue({ items: [entry()], total: 1, page: 1, pageSize: 25 });
+  });
+
+  it('los filtros y la página salen de la URL: recargar o compartir el enlace repite la consulta', async () => {
+    renderPage('/auditoria?accion=LOGIN&autor=admin&desde=2026-10-01&pagina=2');
+    await waitFor(() =>
+      expect(mocked.list).toHaveBeenLastCalledWith(expect.objectContaining({ action: 'LOGIN', actor: 'admin', from: '2026-10-01', page: 2 })),
+    );
   });
 
   it('muestra autor, fecha, acción, entidad, campos modificados e IP', async () => {
