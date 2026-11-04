@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { MemoryRouter } from 'react-router-dom';
+import { MemoryRouter, useLocation } from 'react-router-dom';
 import { QueryClientTestWrapper } from '@shared/test-utils/QueryClientTestWrapper';
 import { TutoringRequestsInboxPage } from './TutoringRequestsInboxPage';
 import { AuthContext, type AuthContextValue } from '@features/auth/context/AuthContext';
@@ -63,12 +63,18 @@ const authAs = (role: string): AuthContextValue => ({
   markPasswordChanged: vi.fn(),
 });
 
+function Where() {
+  const { search } = useLocation();
+  return <span aria-label="url">{search}</span>;
+}
+
 const renderPage = (url = '/solicitudes', role = 'Docente Tutor') =>
   render(
     <AuthContext.Provider value={authAs(role)}>
       <MemoryRouter initialEntries={[url]}>
         <QueryClientTestWrapper>
           <TutoringRequestsInboxPage />
+          <Where />
         </QueryClientTestWrapper>
       </MemoryRouter>
     </AuthContext.Provider>,
@@ -143,6 +149,34 @@ describe('TutoringRequestsInboxPage (R01)', () => {
     mocked.getInbox.mockResolvedValue([]);
     renderPage();
     expect(await screen.findByText('Aún no hay solicitudes')).toBeInTheDocument();
+  });
+
+  it('abrir una solicitud la pone en la URL (?solicitud=) y cerrarla la quita; un enlace la abre al cargar', async () => {
+    const user = userEvent.setup();
+    const first = renderPage('/solicitudes?estado=todas');
+    await user.click(await screen.findByRole('button', { name: 'Atender' }));
+    expect(screen.getByLabelText('url')).toHaveTextContent('solicitud=r1');
+    await user.click(screen.getByRole('button', { name: 'Cerrar' }));
+    await waitFor(() => expect(screen.getByLabelText('url')).not.toHaveTextContent('solicitud='));
+    expect(screen.getByLabelText('url')).toHaveTextContent('estado=todas');
+    first.unmount();
+
+    renderPage('/solicitudes?solicitud=r1');
+    expect(await screen.findByRole('button', { name: 'Programar sesión' })).toBeInTheDocument();
+  });
+
+  it('programar una sesión desde la solicitud pone ?programar= en la URL y un enlace abre el formulario', async () => {
+    const user = userEvent.setup();
+    mocked.getInbox.mockResolvedValue([request()]);
+    vi.mocked(studentService.getStudents).mockResolvedValue([ana as never]);
+    const first = renderPage('/solicitudes?solicitud=r1');
+    await user.click(await screen.findByRole('button', { name: 'Programar sesión' }));
+    expect(screen.getByLabelText('url')).toHaveTextContent('programar=r1');
+    expect(screen.getByLabelText('url')).not.toHaveTextContent('solicitud=');
+    first.unmount();
+
+    renderPage('/solicitudes?programar=r1');
+    expect(await screen.findByRole('dialog')).toBeInTheDocument();
   });
 
   it('con ?solicitud=<id> (desde un aviso) abre esa solicitud', async () => {

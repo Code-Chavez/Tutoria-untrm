@@ -1,6 +1,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { MemoryRouter, useLocation } from 'react-router-dom';
 import { QueryClientTestWrapper } from '@shared/test-utils/QueryClientTestWrapper';
 import { SessionsCalendarPage } from './SessionsCalendarPage';
 import { sessionService, TutoringSession } from '../services/sessionService';
@@ -104,7 +105,9 @@ describe('SessionsCalendarPage', () => {
   it('muestra ambas sesiones del mes en la vista mensual', async () => {
     render(
       <QueryClientTestWrapper>
-        <SessionsCalendarPage />
+        <MemoryRouter>
+          <SessionsCalendarPage />
+        </MemoryRouter>
       </QueryClientTestWrapper>,
     );
 
@@ -116,7 +119,9 @@ describe('SessionsCalendarPage', () => {
     const user = userEvent.setup();
     render(
       <QueryClientTestWrapper>
-        <SessionsCalendarPage />
+        <MemoryRouter>
+          <SessionsCalendarPage />
+        </MemoryRouter>
       </QueryClientTestWrapper>,
     );
 
@@ -132,7 +137,9 @@ describe('SessionsCalendarPage', () => {
     const user = userEvent.setup();
     render(
       <QueryClientTestWrapper>
-        <SessionsCalendarPage />
+        <MemoryRouter>
+          <SessionsCalendarPage />
+        </MemoryRouter>
       </QueryClientTestWrapper>,
     );
 
@@ -163,7 +170,9 @@ describe('SessionsCalendarPage', () => {
     const user = userEvent.setup();
     render(
       <QueryClientTestWrapper>
-        <SessionsCalendarPage />
+        <MemoryRouter>
+          <SessionsCalendarPage />
+        </MemoryRouter>
       </QueryClientTestWrapper>,
     );
 
@@ -173,5 +182,53 @@ describe('SessionsCalendarPage', () => {
 
     await waitFor(() => expect(sessionService.recordAttendance).toHaveBeenCalledWith('sess-past', ['s1']));
     expect(await screen.findByText(/asistieron 1 de 2 estudiantes/i)).toBeInTheDocument();
+  });
+
+  describe('el estado del calendario vive en la URL', () => {
+    function Where() {
+      const { search } = useLocation();
+      return <span aria-label="url">{search}</span>;
+    }
+    const renderAt = (url: string) =>
+      render(
+        <QueryClientTestWrapper>
+          <MemoryRouter initialEntries={[url]}>
+            <SessionsCalendarPage />
+            <Where />
+          </MemoryRouter>
+        </QueryClientTestWrapper>,
+      );
+
+    it('cambiar a la vista semanal y abrir una sesión los pone en la URL; cerrar la sesión la quita', async () => {
+      const user = userEvent.setup();
+      renderAt('/sesiones');
+      await screen.findByText(/reforzamiento de cálculo/i);
+      await user.click(screen.getByText(/taller de hábitos de estudio/i));
+      expect(screen.getByLabelText('url')).toHaveTextContent(/sesion=/);
+      expect(await screen.findByText(/sesión grupal/i)).toBeInTheDocument();
+      await user.keyboard('{Escape}');
+      await waitFor(() => expect(screen.getByLabelText('url')).not.toHaveTextContent(/sesion=/));
+
+      await user.click(screen.getByRole('button', { name: /semanal/i }));
+      expect(screen.getByLabelText('url')).toHaveTextContent('vista=semana');
+    });
+
+    it('un enlace con vista, fecha y sesión vuelve al mismo lugar', async () => {
+      const first = renderAt('/sesiones');
+      const link = '/sesiones?vista=semana&fecha=2026-10-15';
+      await screen.findByText(/reforzamiento de cálculo/i);
+      first.unmount();
+
+      renderAt(link);
+      expect(await screen.findByText(/reforzamiento de cálculo/i)).toBeInTheDocument();
+      expect(screen.getByLabelText('url')).toHaveTextContent('vista=semana');
+    });
+
+    it('un enlace a una sesión que no existe no deja una ventana abierta y limpia la URL', async () => {
+      renderAt('/sesiones?sesion=nada&accion=cancelar&vista=semana');
+      await screen.findByText(/reforzamiento de cálculo/i);
+      await waitFor(() => expect(screen.getByLabelText('url')).toHaveTextContent(/^\?vista=semana$/));
+      expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+    });
   });
 });
