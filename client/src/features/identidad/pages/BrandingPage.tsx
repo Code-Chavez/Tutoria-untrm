@@ -1,6 +1,8 @@
-import { useRef, useState, type CSSProperties } from 'react';
+import { useCallback, useRef, useState, type CSSProperties } from 'react';
+import { useDraft } from '@shared/hooks/useDraft';
+import { useAuth } from '@features/auth/hooks/useAuth';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { PageHeader, Card, Button, ConfirmDialog } from '@shared/components/ui';
+import { PageHeader, Card, Button, ConfirmDialog, DraftNotice } from '@shared/components/ui';
 import { SettingsIcon, UploadIcon } from '@shared/components/icons';
 import { getApiErrorMessage } from '@shared/services/apiClient';
 import { BRANDING_QUERY_KEY, useBranding } from '@shared/theme/BrandingProvider';
@@ -28,12 +30,23 @@ function BrandingEditor({
 }) {
   const queryClient = useQueryClient();
   const fileInput = useRef<HTMLInputElement>(null);
-  const [form, setForm] = useState({
+  const { user } = useAuth();
+  const saved = {
     institutionName: current.institutionName,
     shortName: current.shortName,
     primaryColor: current.primaryColor,
     accentColor: current.accentColor,
-  });
+  };
+  // Lo escrito sin guardar se conserva como borrador de la pestaña; sin cambios respecto de la identidad vigente no hay nada que guardar.
+  const sameAsSaved = useCallback(
+    (v: typeof saved) =>
+      v.institutionName === current.institutionName &&
+      v.shortName === current.shortName &&
+      v.primaryColor.toUpperCase() === current.primaryColor.toUpperCase() &&
+      v.accentColor.toUpperCase() === current.accentColor.toUpperCase(),
+    [current],
+  );
+  const { value: form, setValue: setForm, restored, discard } = useDraft(user?.id, 'identidad', saved, sameAsSaved);
   const [confirmReset, setConfirmReset] = useState(false);
 
   // Cada operación devuelve la identidad ya guardada: se publica en la caché global.
@@ -95,6 +108,7 @@ function BrandingEditor({
   return (
     <div className={styles.layout}>
       <Card padded>
+        {restored && <DraftNotice onDiscard={discard} />}
         <h2 className={styles.heading}>Textos</h2>
         <div className={styles.field}>
           <label htmlFor="br-institution">Nombre de la institución</label>

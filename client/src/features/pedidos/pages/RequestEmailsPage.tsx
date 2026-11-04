@@ -1,4 +1,6 @@
 import { useState } from 'react';
+import { useUrlParams } from '@shared/hooks/useUrlParams';
+import { useDraft } from '@shared/hooks/useDraft';
 import { useSearchParams } from 'react-router-dom';
 import { PageHeader, Card, CardBody, Button, Badge, EmptyState, NextSteps, TableSkeleton } from '@shared/components/ui';
 import { SettingsIcon } from '@shared/components/icons';
@@ -15,16 +17,19 @@ export function RequestEmailsPage() {
   const setEmail = useSetRequestEmail();
   const [searchParams] = useSearchParams();
   const focused = searchParams.get('escuela');
-  const [drafts, setDrafts] = useState<Record<string, string>>({});
-  // Escuelas cuyo correo se está editando; si se llega con ?escuela=… esa escuela se abre para editar.
-  const [editing, setEditing] = useState<Set<string>>(() => new Set(focused ? [focused] : []));
-  const setEditingOf = (id: string, on: boolean) =>
-    setEditing((current) => {
-      const next = new Set(current);
-      if (on) next.add(id);
-      else next.delete(id);
-      return next;
-    });
+  // El correo que se está escribiendo por escuela se conserva como borrador de la pestaña (no va a la URL).
+  const { value: drafts, setValue: setDrafts } = useDraft<Record<string, string>>(user?.id, 'correos-escuelas', {}, (v) => Object.values(v).every((x) => !x));
+  // Escuelas cuyo correo se está editando (?editar=<id>,<id>); si se llega con ?escuela=… esa escuela se abre para editar.
+  const url = useUrlParams();
+  const editingParam = url.get('editar');
+  const editing = new Set([...(editingParam ? editingParam.split(',') : []), ...(focused ? [focused] : [])]);
+  const setEditingOf = (id: string, on: boolean) => {
+    const next = new Set(editingParam ? editingParam.split(',') : []);
+    if (on) next.add(id);
+    else next.delete(id);
+    // Cancelar la edición de la escuela con la que se llegó (?escuela=) también quita ese parámetro.
+    url.set({ editar: [...next].join(','), ...(!on && id === focused ? { escuela: null } : {}) }, { replace: true });
+  };
   const [feedback, setFeedback] = useState<{ ok: boolean; text: string } | null>(null);
 
   const schools = (schoolsQuery.data ?? []).filter((s) => user?.role === 'Administrador DBU' || s.coordinatorId === user?.id);

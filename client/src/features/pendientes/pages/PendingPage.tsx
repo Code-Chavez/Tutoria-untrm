@@ -1,4 +1,5 @@
 import { useRef, useState } from 'react';
+import { useUrlParams } from '@shared/hooks/useUrlParams';
 import { Link } from 'react-router-dom';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Badge, Button, ConfirmDialog, EmptyState, PageHeader, SelectField, TableSkeleton } from '@shared/components/ui';
@@ -67,9 +68,14 @@ export function PendingPage() {
   const sending = useRef(false);
   // Identidad de cada operación de reenvío: se conserva al perder la respuesta y se renueva ante una respuesta definitiva o un cambio.
   const operations = useRef(new Map<string, { id: string; fingerprint: string }>());
-  const [kind, setKind] = useState<'ALL' | PendingKind>('ALL');
-  const [search, setSearch] = useState('');
-  const [school, setSchool] = useState('ALL');
+  // Los filtros (?tipo=, ?q=, ?escuela=) viven en la URL: recargar o compartir el enlace conserva la lista filtrada.
+  const url = useUrlParams();
+  const kind = (url.get('tipo') || 'ALL') as 'ALL' | PendingKind;
+  const setKind = (value: 'ALL' | PendingKind) => url.set({ tipo: value === 'ALL' ? null : value }, { replace: true });
+  const search = url.get('q');
+  const setSearch = (value: string) => url.set({ q: value }, { replace: true });
+  const school = url.get('escuela') || 'ALL';
+  const setSchool = (value: string) => url.set({ escuela: value === 'ALL' ? null : value }, { replace: true });
   const normalize = (text: string) => text.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLocaleLowerCase('es');
   const schools = [...new Map((query.data ?? []).map((item) => [item.schoolId, item.schoolName])).entries()].sort((a, b) => a[1].localeCompare(b[1], 'es'));
   const items: PendingItem[] = (query.data ?? []).filter((item) =>
@@ -164,7 +170,7 @@ export function PendingPage() {
           <div className={styles.searchBar}>
             <div className={styles.searchField}><label htmlFor="pending-search">Buscar pendiente</label><input id="pending-search" type="search" value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Nombre, escuela, ciclo o detalle…" /></div>
             <div className={styles.schoolField}><label htmlFor="pending-school">Escuela profesional</label><SelectField id="pending-school" value={school} onChange={(e) => setSchool(e.target.value)}><option value="ALL">Todas las escuelas</option>{schools.map(([id, name]) => <option key={id} value={id}>{name}</option>)}</SelectField></div>
-            <button type="button" className={styles.clear} disabled={!search && school === 'ALL' && kind === 'ALL'} onClick={() => { setSearch(''); setSchool('ALL'); setKind('ALL'); }}>Limpiar filtros</button>
+            <button type="button" className={styles.clear} disabled={!search && school === 'ALL' && kind === 'ALL'} onClick={() => url.set({ q: null, escuela: null, tipo: null }, { replace: true })}>Limpiar filtros</button>
           </div>
           <p role="status" className={styles.results}>{items.length} de {(query.data ?? []).length} pendientes · Más antiguos primero</p>
           {items.length === 0 ? <EmptyState icon={<InboxIcon size={26} />} title="No hay coincidencias" description="Prueba otra búsqueda o limpia los filtros." /> : <div className={styles.scrollArea} role="region" aria-label="Resultados de pendientes" tabIndex={0}><ul className={styles.list} aria-label="Pendientes">

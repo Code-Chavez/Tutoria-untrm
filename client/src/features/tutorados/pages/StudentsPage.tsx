@@ -660,6 +660,7 @@ export const StudentsPage: React.FC = () => {
           onSubmit={handleSubmit}
           studentToEdit={studentToEdit}
           schools={schools}
+          draftOwnerId={user?.id}
         />
       )}
 
