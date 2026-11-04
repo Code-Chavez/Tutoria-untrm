@@ -1,6 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { MemoryRouter } from 'react-router-dom';
 import { QueryClientTestWrapper } from '@shared/test-utils/QueryClientTestWrapper';
 import { ScheduleAttendanceReportPage } from './ScheduleAttendanceReportPage';
 import { reportService, type ScheduleAttendanceReport } from '../services/reportService';
@@ -78,9 +79,9 @@ describe('ScheduleAttendanceReportPage', () => {
   it('carga automáticamente el consolidado propio cuando el rol es Docente Tutor', async () => {
     mockedReports.getScheduleAttendanceReport.mockResolvedValue(sampleReport);
     render(
-      <QueryClientTestWrapper>
+      <MemoryRouter><QueryClientTestWrapper>
         <ScheduleAttendanceReportPage />
-      </QueryClientTestWrapper>,
+      </QueryClientTestWrapper></MemoryRouter>,
     );
 
     expect(await screen.findByText(/sesiones de elena ramírez/i)).toBeInTheDocument();
@@ -100,9 +101,9 @@ describe('ScheduleAttendanceReportPage', () => {
       { tutorId: 'tutor-1', fullName: 'Elena Ramírez', email: 'e@x.com', assignedCount: 5 },
     ]);
     render(
-      <QueryClientTestWrapper>
+      <MemoryRouter><QueryClientTestWrapper>
         <ScheduleAttendanceReportPage />
-      </QueryClientTestWrapper>,
+      </QueryClientTestWrapper></MemoryRouter>,
     );
 
     expect(await screen.findByRole('heading', { name: /selecciona un tutor/i })).toBeInTheDocument();
@@ -118,9 +119,9 @@ describe('ScheduleAttendanceReportPage', () => {
     mockedReports.getScheduleAttendanceReport.mockResolvedValue(sampleReport);
     const user = userEvent.setup();
     render(
-      <QueryClientTestWrapper>
+      <MemoryRouter><QueryClientTestWrapper>
         <ScheduleAttendanceReportPage />
-      </QueryClientTestWrapper>,
+      </QueryClientTestWrapper></MemoryRouter>,
     );
 
     await screen.findByRole('option', { name: 'Elena Ramírez' });
@@ -137,9 +138,9 @@ describe('ScheduleAttendanceReportPage', () => {
     mockedReports.getScheduleAttendanceReport.mockResolvedValue(sampleReport);
     const user = userEvent.setup();
     render(
-      <QueryClientTestWrapper>
+      <MemoryRouter><QueryClientTestWrapper>
         <ScheduleAttendanceReportPage />
-      </QueryClientTestWrapper>,
+      </QueryClientTestWrapper></MemoryRouter>,
     );
 
     await screen.findByText(/sesiones de elena ramírez/i);
@@ -154,9 +155,9 @@ describe('ScheduleAttendanceReportPage', () => {
     mockRole = 'Vicerrectorado';
     mockedAssignments.getTutorWorkload.mockResolvedValue([]);
     render(
-      <QueryClientTestWrapper>
+      <MemoryRouter><QueryClientTestWrapper>
         <ScheduleAttendanceReportPage />
-      </QueryClientTestWrapper>,
+      </QueryClientTestWrapper></MemoryRouter>,
     );
 
     await screen.findByRole('heading', { name: /selecciona un tutor/i });

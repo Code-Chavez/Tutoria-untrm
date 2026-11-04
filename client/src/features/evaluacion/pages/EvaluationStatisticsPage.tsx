@@ -1,7 +1,8 @@
 import { useState } from 'react';
 import { PageHeader, Card, Button, EmptyState, TableSkeleton } from '@shared/components/ui';
 import { ReportFilters } from '@shared/reportFilters/ReportFilters';
-import { EMPTY_REPORT_FILTERS, toFilterParams } from '@shared/reportFilters/reportFilterService';
+import { toFilterParams } from '@shared/reportFilters/reportFilterService';
+import { useReportFiltersUrl } from '@shared/reportFilters/useReportFiltersUrl';
 import { PieChartIcon } from '@shared/components/icons';
 import { ExportButtons } from '@shared/components/ExportButtons';
 import { downloadFile } from '@shared/services/downloadFile';
@@ -11,7 +12,8 @@ import styles from './EvaluationStatisticsPage.module.css';
 // Resultados estadísticos de la evaluación de tutoría (HU-39): promedios por
 // tutor e ítem del periodo activo, filtrables por escuela/facultad.
 export function EvaluationStatisticsPage() {
-  const [values, setValues] = useState(EMPTY_REPORT_FILTERS);
+  // Los filtros del reporte viven en la URL: recargar o compartir el enlace conserva el mismo reporte.
+  const [values, setValues] = useReportFiltersUrl();
   const [expandedTutorId, setExpandedTutorId] = useState<string | null>(null);
 
   const filters = toFilterParams(values);

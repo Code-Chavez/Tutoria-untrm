@@ -1,6 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { MemoryRouter } from 'react-router-dom';
 import { QueryClientTestWrapper } from '@shared/test-utils/QueryClientTestWrapper';
 import { CycleTutorsPage } from './CycleTutorsPage';
 import { cycleTutorService, type CycleRow } from '../services/cycleTutorService';
@@ -18,9 +19,9 @@ const cycles = Array.from({ length: 10 }, (_, i) => ({ cycle: i + 1, assignment:
 
 const renderPage = () =>
   render(
-    <QueryClientTestWrapper>
+    <MemoryRouter><QueryClientTestWrapper>
       <CycleTutorsPage />
-    </QueryClientTestWrapper>,
+    </QueryClientTestWrapper></MemoryRouter>,
   );
 
 describe('CycleTutorsPage', () => {

@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useUrlParams } from '@shared/hooks/useUrlParams';
 import { isAxiosError } from 'axios';
 import { PageHeader, Card, CardBody, Button, Badge, SelectField, EmptyState, NextSteps, TableSkeleton } from '@shared/components/ui';
 import { UserPlusIcon } from '@shared/components/icons';
@@ -55,7 +56,10 @@ export function CycleTutorsPage() {
   const { user } = useAuth();
   const schoolsQuery = useRequestSchools();
   const tutorsQuery = useTutorOptions();
-  const [chosen, setChosen] = useState('');
+  // La escuela elegida (?escuela=<id>) y el grupo de ciclos que se muestra (?ver=) viven en la URL: recargar o compartir el enlace vuelve a la misma vista.
+  const url = useUrlParams();
+  const chosen = url.get('escuela');
+  const setChosen = (value: string) => url.set({ escuela: value, ver: null }, { replace: true });
   const schools = (schoolsQuery.data ?? []).filter((s) => user?.role === 'Administrador DBU' || s.coordinatorId === user?.id);
   const school = schools.find((s) => s.id === chosen) ?? schools[0];
   const view = useCycleTutors(school?.id);
@@ -69,7 +73,8 @@ export function CycleTutorsPage() {
   const exceptionNote = exceptionReason === 'OTHER' ? note.trim() : exceptionReason;
   const [feedback, setFeedback] = useState<{ ok: boolean; text: string } | null>(null);
   const [selection, setSelection] = useState<Record<number, string>>({});
-  const [filter, setFilter] = useState<'students' | 'review' | 'accepted' | 'all'>('students');
+  const filter = (['students', 'review', 'accepted', 'all'] as const).find((f) => f === url.get('ver')) ?? 'students';
+  const setFilter = (value: 'students' | 'review' | 'accepted' | 'all') => url.set({ ver: value === 'students' ? null : value }, { replace: true });
   const [removing, setRemoving] = useState<number | null>(null);
   const busy = setTutor.isPending || removeTutor.isPending || resend.isPending;
   const rows = view.data?.cycles ?? [];

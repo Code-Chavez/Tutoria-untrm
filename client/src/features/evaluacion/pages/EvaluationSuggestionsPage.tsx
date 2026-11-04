@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useUrlParams } from '@shared/hooks/useUrlParams';
 import { useQuery } from '@tanstack/react-query';
 import { PageHeader, Card, Button, SelectField, EmptyState, TableSkeleton } from '@shared/components/ui';
 import { StarIcon } from '@shared/components/icons';
@@ -10,8 +10,12 @@ import styles from './EvaluationSuggestionsPage.module.css';
 // Sugerencias abiertas consolidadas del cuestionario de evaluación (HU-40):
 // "Me gustaría" / "No me gusta" del periodo activo, de forma anónima.
 export function EvaluationSuggestionsPage() {
-  const [schoolId, setSchoolId] = useState('');
-  const [facultyId, setFacultyId] = useState('');
+  // Los filtros (?escuela=, ?facultad=) viven en la URL: recargar o compartir el enlace conserva la vista.
+  const url = useUrlParams();
+  const schoolId = url.get('escuela');
+  const facultyId = url.get('facultad');
+  const setSchoolId = (value: string) => url.set({ escuela: value }, { replace: true });
+  const setFacultyId = (value: string) => url.set({ facultad: value }, { replace: true });
 
   const { data: schools = [] } = useQuery({
     queryKey: ['schools'],

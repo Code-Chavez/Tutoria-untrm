@@ -1,6 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { MemoryRouter } from 'react-router-dom';
 import { QueryClientTestWrapper } from '@shared/test-utils/QueryClientTestWrapper';
 import { ConsolidatedReportPage } from './ConsolidatedReportPage';
 import { consolidatedReportService } from '../services/consolidatedReportService';
@@ -75,11 +76,11 @@ const report: ConsolidatedReport = {
   appliedFilters: [],
 };
 
-function renderPage() {
+function renderPage(url = '/informes/consolidado') {
   return render(
-    <QueryClientTestWrapper>
+    <MemoryRouter initialEntries={[url]}><QueryClientTestWrapper>
       <ConsolidatedReportPage />
-    </QueryClientTestWrapper>,
+    </QueryClientTestWrapper></MemoryRouter>,
   );
 }
 
@@ -97,6 +98,13 @@ describe('ConsolidatedReportPage', () => {
     expect(screen.getByText('Total general')).toBeInTheDocument();
     expect(screen.getByText('99')).toBeInTheDocument();
     expect(screen.getAllByText('80%').length).toBeGreaterThan(0);
+  });
+
+  it('los filtros salen de la URL: recargar o compartir el enlace repite el mismo reporte', async () => {
+    renderPage('/informes/consolidado?periodo=p0&ciclo=3');
+    await waitFor(() =>
+      expect(mocked.getReport).toHaveBeenLastCalledWith({ periodId: 'p0', facultyId: undefined, schoolId: undefined, cycle: '3', tutorId: undefined }),
+    );
   });
 
   it('al combinar semestre, facultad y ciclo consulta con todos los filtros, sin recargar', async () => {

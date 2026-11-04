@@ -1,4 +1,5 @@
 import { useRef, useState } from 'react';
+import { useUrlParams } from '@shared/hooks/useUrlParams';
 import { getApiErrorMessage } from '@shared/services/apiClient';
 import { PageHeader, Card, Button, EmptyState, TableSkeleton } from '@shared/components/ui';
 import { SettingsIcon, CheckCircleIcon, BanIcon } from '@shared/components/icons';
@@ -47,8 +48,12 @@ export function EvaluationWindowsPage() {
   const saving = useRef(false);
   const [actionError, setActionError] = useState('');
   const [feedback, setFeedback] = useState('');
-  const [search, setSearch] = useState('');
-  const [filter, setFilter] = useState('all');
+  // La búsqueda (?q=) y el estado (?estado=open|closed) viven en la URL: recargar o compartir el enlace conserva la vista.
+  const url = useUrlParams();
+  const search = url.get('q');
+  const setSearch = (value: string) => url.set({ q: value }, { replace: true });
+  const filter = url.get('estado') || 'all';
+  const setFilter = (value: string) => url.set({ estado: value === 'all' ? null : value }, { replace: true });
   const schools = overview?.schools ?? [];
   const visibleSchools = schools.filter((school) => school.schoolName.toLocaleLowerCase('es').includes(search.trim().toLocaleLowerCase('es')) && (filter === 'all' || (filter === 'open' ? school.isOpen : !school.isOpen)));
 

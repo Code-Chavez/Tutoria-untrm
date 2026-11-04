@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { MemoryRouter } from 'react-router-dom';
 import { QueryClientTestWrapper } from '@shared/test-utils/QueryClientTestWrapper';
 import { EvaluationWindowsPage } from './EvaluationWindowsPage';
 import { evaluationService, type EvaluationWindowSchoolState } from '../services/evaluationService';
@@ -9,7 +10,7 @@ vi.mock('../services/evaluationService', () => ({ evaluationService: { getWindow
 const api = vi.mocked(evaluationService);
 const openSchool = { schoolId: 's1', schoolName: 'Ingeniería de Sistemas', isOpen: true };
 const closedSchool = { schoolId: 's2', schoolName: 'Enfermería', isOpen: false };
-const renderPage = () => render(<QueryClientTestWrapper><EvaluationWindowsPage /></QueryClientTestWrapper>);
+const renderPage = () => render(<MemoryRouter><QueryClientTestWrapper><EvaluationWindowsPage /></QueryClientTestWrapper></MemoryRouter>);
 
 describe('EvaluationWindowsPage', () => {
   beforeEach(() => {

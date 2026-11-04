@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useUrlParams } from '@shared/hooks/useUrlParams';
 import { Link } from 'react-router-dom';
 import { PageHeader, Card, CardHeader, CardBody, Button, Badge, ConfirmDialog, SelectField, EmptyState, TableSkeleton } from '@shared/components/ui';
 import { ClockIcon } from '@shared/components/icons';
@@ -38,7 +39,10 @@ function SummaryList({ summary }: { summary: PeriodSummary }) {
 // Los registros no se borran: quedan como historial del periodo.
 export function PeriodClosurePage() {
   const periods = usePeriodList();
-  const [chosen, setChosen] = useState('');
+  // El periodo elegido (?periodo=<id>) vive en la URL: recargar o compartir el enlace vuelve al mismo periodo.
+  const url = useUrlParams();
+  const chosen = url.get('periodo');
+  const setChosen = (value: string) => url.set({ periodo: value }, { replace: true });
   // Del más reciente al más antiguo: sin periodo vigente, el primero es el que se cerró último (el que se querría reabrir).
   const list = [...(periods.data ?? [])].sort((a, b) => (b.startDate ?? '').localeCompare(a.startDate ?? ''));
   // Por defecto, el periodo vigente (o el más reciente si no hay).
