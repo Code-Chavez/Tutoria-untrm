@@ -1,6 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { MemoryRouter } from 'react-router-dom';
 import { QueryClientTestWrapper } from '@shared/test-utils/QueryClientTestWrapper';
 import { AdmonitionsPage } from './AdmonitionsPage';
 import { admonitionService } from '../services/admonitionService';
@@ -12,16 +13,19 @@ const mocked = vi.mocked(admonitionService);
 
 const row = { id: 'a1', tutorId: 't1', tutorName: 'Elena Ramírez', schoolName: 'Ingeniería de Sistemas', issuedOn: '2026-11-09', reason: 'No registró sesiones en el periodo', issuedByName: 'Héctor Vargas', hasFile: true, fileName: 'resolucion.pdf' };
 
-const renderPage = () =>
+const renderPage = (url = '/amonestaciones') =>
   render(
-    <QueryClientTestWrapper>
-      <AdmonitionsPage />
-    </QueryClientTestWrapper>,
+    <MemoryRouter initialEntries={[url]}>
+      <QueryClientTestWrapper>
+        <AdmonitionsPage />
+      </QueryClientTestWrapper>
+    </MemoryRouter>,
   );
 
 describe('AdmonitionsPage', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    sessionStorage.clear();
     role = 'Decano';
     mocked.list.mockResolvedValue([row]);
     mocked.tutors.mockResolvedValue([{ tutorId: 't1', fullName: 'Elena Ramírez', schoolId: 's1', schoolName: 'Ingeniería de Sistemas' }]);
@@ -33,6 +37,16 @@ describe('AdmonitionsPage', () => {
     expect(await screen.findByText('No registró sesiones en el periodo')).toBeInTheDocument();
     await userEvent.click(screen.getByRole('button', { name: 'Descargar documento de Elena Ramírez' }));
     expect(mocked.downloadFile).toHaveBeenCalledWith('a1', 'resolucion.pdf');
+  });
+
+  it('recargar con la ventana abierta (?nuevo=1) la reabre con el motivo que se había escrito', async () => {
+    const first = renderPage('/amonestaciones?nuevo=1');
+    await userEvent.type(await screen.findByLabelText('Motivo'), 'No registró ninguna sesión');
+    first.unmount();
+
+    renderPage('/amonestaciones?nuevo=1');
+    expect(await screen.findByLabelText('Motivo')).toHaveValue('No registró ninguna sesión');
+    expect(screen.getByRole('status')).toHaveTextContent(/recuperamos/i);
   });
 
   it('el Decano registra una amonestación con docente, fecha, motivo y documento', async () => {

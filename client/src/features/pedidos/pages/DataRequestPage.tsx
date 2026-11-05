@@ -1,6 +1,8 @@
 import { useRef, useState, type FormEvent } from 'react';
-import { Link, useSearchParams } from 'react-router-dom';
-import { PageHeader, Card, CardHeader, CardBody, Button, Badge, SelectField, EmptyState, NextSteps, ConfirmDialog } from '@shared/components/ui';
+import { Link } from 'react-router-dom';
+import { useUrlParams } from '@shared/hooks/useUrlParams';
+import { useDraft } from '@shared/hooks/useDraft';
+import { PageHeader, Card, CardHeader, CardBody, Button, Badge, SelectField, EmptyState, NextSteps, ConfirmDialog, DraftNotice } from '@shared/components/ui';
 import { SendIcon } from '@shared/components/icons';
 import { getApiErrorMessage } from '@shared/services/apiClient';
 import { isLostResponse, parseSendConflict, type DataRequestKind, type DataRequestStatus, type PreviousRequest } from '../services/dataRequestService';
@@ -72,7 +74,10 @@ export function DataRequestPage() {
 
   // La coordinación solo ve sus escuelas; la DBU, todas.
   const schools = (schoolsQuery.data ?? []).filter((s) => user?.role === 'Administrador DBU' || s.coordinatorId === user?.id);
-  const [chosen, setChosen] = useState('');
+  // La escuela (?escuela=<id>) y la lista que se pide (?lista=docentes) viven en la URL: recargar o compartir el enlace vuelve a la misma vista.
+  const url = useUrlParams();
+  const chosen = url.get('escuela');
+  const setChosen = (value: string) => url.set({ escuela: value }, { replace: true });
   const school = schools.find((s) => s.id === chosen) ?? schools[0];
   const availableCycles = Array.from({ length: school?.cycleCount ?? 0 }, (_, index) => index + 1);
   const [cycleSelection, setCycleSelection] = useState<{ schoolId: string; total: number; values: number[] } | null>(null);
@@ -81,9 +86,10 @@ export function DataRequestPage() {
   // La DBU también pide la lista de docentes tutores (la coordinación solo la de estudiantes).
   const isDbu = user?.role === 'Administrador DBU';
   // Las pantallas de carga llevan aquí con la lista ya elegida (?lista=docentes); la de docentes solo la pide la DBU.
-  const [searchParams] = useSearchParams();
-  const [kind, setKind] = useState<DataRequestKind>(isDbu && searchParams.get('lista') === 'docentes' ? 'DOCENTES' : 'ESTUDIANTES');
-  const [note, setNote] = useState('');
+  const kind: DataRequestKind = isDbu && url.get('lista') === 'docentes' ? 'DOCENTES' : 'ESTUDIANTES';
+  const setKind = (value: DataRequestKind) => url.set({ lista: value === 'DOCENTES' ? 'docentes' : null }, { replace: true });
+  // La nota que se está escribiendo se conserva como borrador de la pestaña (no va a la URL).
+  const { value: note, setValue: setNote, restored: noteRestored, discard: discardNote } = useDraft<string>(user?.id, 'pedido-listas.nota', '', (v) => v === '');
   const [feedback, setFeedback] = useState<Feedback | null>(null);
   // Equivalente reciente que el servidor mostró y que la persona debe confirmar expresamente para reenviar.
   const [duplicate, setDuplicate] = useState<PreviousRequest | null>(null);
@@ -107,7 +113,7 @@ export function DataRequestPage() {
       const { request, replayed } = await send.mutateAsync({ schoolId: school.id, cycles: sentCycles, note: note.trim() || undefined, kind, operationId: operation.current.id, confirmDuplicateOf });
       operation.current = null;
       setDuplicate(null);
-      setNote('');
+      discardNote();
       if (request.status === 'ENVIADO') {
         setFeedback({ type: 'ok', text: replayed ? `Este pedido ya estaba registrado y enviado a ${request.toEmail}; no se envió otro correo.` : `Pedido enviado a ${request.toEmail}. Recibirás una copia y las respuestas llegarán a tu correo.` });
       } else if (request.status === 'FALLIDO') {
@@ -232,6 +238,7 @@ export function DataRequestPage() {
 
               <div className={`${styles.field} ${styles.fullWidth}`}>
                 <label htmlFor="req-note">Observaciones (opcional)</label>
+                {noteRestored && <DraftNotice onDiscard={discardNote} />}
                 <textarea id="req-note" className={styles.input} rows={3} maxLength={500} value={note} onChange={(e) => setNote(e.target.value)} />
               </div>
 

@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { EMAIL_INVALID, isValidEmailFormat, normalizeEmail } from '@shared/utils/email';
 import { useDialog } from '@shared/hooks/useDialog';
+import { useDraftForm } from '@shared/hooks/useDraftForm';
+import { DraftNotice } from '@shared/components/ui';
 import styles from './StudentFormModal.module.css';
 import { Student, CreateStudentData, UpdateStudentData } from '../services/studentService';
 import { School } from '../services/schoolService';
@@ -11,6 +13,8 @@ interface StudentFormModalProps {
   onSubmit: (data: CreateStudentData | UpdateStudentData) => Promise<void>;
   studentToEdit: Student | null;
   schools: School[];
+  /** Quien escribe: con su id, lo escrito se guarda como borrador de la pestaña y se recupera al recargar. */
+  draftOwnerId?: string;
 }
 
 interface FormState {
@@ -30,10 +34,13 @@ export const StudentFormModal: React.FC<StudentFormModalProps> = ({
   onSubmit,
   studentToEdit,
   schools,
+  draftOwnerId,
 }) => {
   // El componente se remonta (vía `key`) al cambiar el estudiante a editar,
   // así que el estado inicial se deriva del prop sin un efecto.
-  const [form, setForm] = useState<FormState>(() =>
+  const { form, set, restored, discard } = useDraftForm<FormState>(
+    draftOwnerId,
+    `estudiante.${studentToEdit?.id ?? 'nuevo'}`,
     studentToEdit
       ? {
           studentCode: studentToEdit.studentCode,
@@ -61,7 +68,7 @@ export const StudentFormModal: React.FC<StudentFormModalProps> = ({
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>,
   ) => {
     const { name, value } = e.target;
-    setForm((prev) => ({ ...prev, [name]: value }));
+    set({ [name]: value });
   };
 
   const validate = (): boolean => {
@@ -110,6 +117,7 @@ export const StudentFormModal: React.FC<StudentFormModalProps> = ({
     try {
       setLoading(true);
       await onSubmit(payload);
+      discard();
       onClose();
     } catch (error) {
       console.error('Error submitting student form', error);
@@ -139,6 +147,7 @@ export const StudentFormModal: React.FC<StudentFormModalProps> = ({
         <p className={styles.modalHint}>Datos de filiación del estudiante (Anexo 3).</p>
 
         <form onSubmit={handleSubmit} noValidate>
+          {restored && <DraftNotice onDiscard={discard} />}
           <div className={styles.grid2}>
             <div className={styles.formGroup}>
               <label htmlFor="studentCode">Código universitario</label>

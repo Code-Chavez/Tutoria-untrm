@@ -1,5 +1,7 @@
 import { useState, type FormEvent } from 'react';
-import { PageHeader, Card, CardBody, Button, SelectField, EmptyState, TableSkeleton } from '@shared/components/ui';
+import { useUrlParams } from '@shared/hooks/useUrlParams';
+import { useDraftForm } from '@shared/hooks/useDraftForm';
+import { PageHeader, Card, CardBody, Button, SelectField, EmptyState, TableSkeleton, DraftNotice } from '@shared/components/ui';
 import { AlertTriangleIcon, PlusIcon } from '@shared/components/icons';
 import { getApiErrorMessage } from '@shared/services/apiClient';
 import { useAuth } from '@features/auth/hooks/useAuth';
@@ -19,21 +21,29 @@ export function AdmonitionsPage() {
   const tutors = useAdmonishableTutors(canIssue);
   const issue = useIssueAdmonition();
 
-  const [open, setOpen] = useState(false);
-  const [tutorId, setTutorId] = useState('');
-  const [issuedOn, setIssuedOn] = useState(todayIso());
-  const [reason, setReason] = useState('');
+  // La ventana abierta (?nuevo=1) vive en la URL; docente, fecha y motivo se conservan como borrador de la pestaña
+  // (el documento adjunto no se puede conservar: hay que volver a elegirlo).
+  const url = useUrlParams();
+  const open = url.get('nuevo') === '1';
+  const setOpen = (value: boolean) => url.set({ nuevo: value ? '1' : null }, { replace: !value });
+  const { form, set, restored, discard } = useDraftForm(user?.id, 'amonestacion.nueva', { tutorId: '', issuedOn: todayIso(), reason: '' });
+  const { tutorId, issuedOn, reason } = form;
+  const setTutorId = (v: string) => set({ tutorId: v });
+  const setIssuedOn = (v: string) => set({ issuedOn: v });
+  const setReason = (v: string) => set({ reason: v });
   const [file, setFile] = useState<File | null>(null);
   const [error, setError] = useState('');
   const [feedback, setFeedback] = useState('');
 
-  const reset = () => {
+  // Cerrar sin enviar conserva el borrador; enviar con éxito lo descarta.
+  const close = () => {
     setOpen(false);
-    setTutorId('');
-    setReason('');
-    setFile(null);
-    setIssuedOn(todayIso());
     setError('');
+  };
+  const reset = () => {
+    close();
+    discard();
+    setFile(null);
   };
 
   const submit = async (event: FormEvent) => {
@@ -101,9 +111,10 @@ export function AdmonitionsPage() {
       )}
 
       {open && (
-        <div className={styles.overlay} onClick={reset}>
+        <div className={styles.overlay} onClick={close}>
           <form role="dialog" aria-modal="true" aria-labelledby="admonition-title" className={styles.dialog} onClick={(e) => e.stopPropagation()} onSubmit={submit}>
             <h2 id="admonition-title">Nueva amonestación</h2>
+            {restored && <DraftNotice onDiscard={discard} />}
 
             <label htmlFor="adm-tutor">Docente tutor</label>
             <SelectField id="adm-tutor" value={tutorId} onChange={(e) => setTutorId(e.target.value)} required>
@@ -130,7 +141,7 @@ export function AdmonitionsPage() {
               </p>
             )}
             <div className={styles.actions}>
-              <Button type="button" variant="secondary" onClick={reset}>
+              <Button type="button" variant="secondary" onClick={close}>
                 Cancelar
               </Button>
               <Button type="submit" loading={issue.isPending} disabled={!tutorId || reason.trim().length < 10}>
