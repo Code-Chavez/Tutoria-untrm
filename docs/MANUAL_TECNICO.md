@@ -2,7 +2,7 @@
 
 **Sistema de Información para la Sistematización de los Procesos de Acompañamiento de Tutoría Universitaria**
 Universidad Nacional Toribio Rodríguez de Mendoza de Amazonas · Dirección de Bienestar Universitario
-Versión del documento: 1.0 (octubre de 2026) · Versión del software: 0.4.1 (candidata a 1.0.0)
+Versión del documento: 1.0 (octubre de 2026) · Versión del software: 1.0.0-beta.2 (candidata a 1.0.0)
 
 > Este manual está dirigido a quien instala, opera y mantiene el sistema. Para el uso diario por cada rol, vea `docs/MANUAL_USUARIO.md`.
 > Los detalles de despliegue, respaldo y reversión viven en `deploy/README.md` y `backup/README.md`; aquí se resumen y se enlazan.
