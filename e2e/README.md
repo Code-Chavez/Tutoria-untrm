@@ -17,6 +17,7 @@ Recorridos de extremo a extremo con [Playwright](https://playwright.dev) sobre l
 | E2E-10 Cierre de periodo | `tests/e2e-10-cierre-de-periodo.spec.ts` | escrito |
 | E2E-11 Pedido de listas por correo | `tests/e2e-11-pedido-de-listas.spec.ts` | escrito |
 | E2E-12 Tutor por ciclo, aceptación del docente y amonestación del Decano | `tests/e2e-12-tutor-por-ciclo-y-decano.spec.ts` | escrito |
+| E2E-21 Roles, permisos y alcance: rol nuevo, alcance de una escuela, permiso retirado en sesión, cambio de rol y cuenta sin autorización | `tests/e2e-21-roles-permisos-alcance.spec.ts` | escrito |
 | E2E-19 Accesibilidad de las pantallas de gestión (axe) | `tests/e2e-19-accesibilidad-gestion.spec.ts` | escrito |
 | E2E-20 Estados del docente: rechazo, sin respuesta, correo no enviado | `tests/e2e-20-estados-del-docente.spec.ts` | escrito |
 
