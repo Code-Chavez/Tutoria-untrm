@@ -2,7 +2,8 @@ import { Fragment, useState } from 'react';
 import { getApiErrorMessage } from '@shared/services/apiClient';
 import { PageHeader, Button, EmptyState, TableSkeleton, Card } from '@shared/components/ui';
 import { ReportFilters } from '@shared/reportFilters/ReportFilters';
-import { EMPTY_REPORT_FILTERS, toFilterParams } from '@shared/reportFilters/reportFilterService';
+import { toFilterParams } from '@shared/reportFilters/reportFilterService';
+import { useReportFiltersUrl } from '@shared/reportFilters/useReportFiltersUrl';
 import { ReportIcon, DownloadIcon } from '@shared/components/icons';
 import { useConsolidatedReport } from '../hooks/useConsolidatedReport';
 import { consolidatedReportService, ConsolidatedMetrics } from '../services/consolidatedReportService';
@@ -11,7 +12,7 @@ import styles from './ConsolidatedReportPage.module.css';
 // Informe consolidado por escuela y facultad (HU-44) para la DBU y las
 // autoridades académicas: totales y promedios del periodo activo, exportable.
 const COLUMNS: { label: string; value: (m: ConsolidatedMetrics) => string }[] = [
-  { label: 'Tutorados', value: (m) => String(m.activeStudents) },
+  { label: 'Estudiantes', value: (m) => String(m.activeStudents) },
   { label: 'Con tutor', value: (m) => String(m.studentsWithTutor) },
   { label: 'Cobertura', value: (m) => `${m.coveragePct}%` },
   { label: 'Tutores', value: (m) => String(m.tutors) },
@@ -20,12 +21,13 @@ const COLUMNS: { label: string; value: (m: ConsolidatedMetrics) => string }[] = 
   { label: 'Participantes', value: (m) => String(m.participants) },
   { label: 'Participación', value: (m) => `${m.participationPct}%` },
   { label: 'Informes', value: (m) => `${m.reportsSubmitted}/${m.tutors}` },
-  { label: 'Tutorados/tutor', value: (m) => String(m.avgStudentsPerTutor) },
+  { label: 'Estudiantes por tutor', value: (m) => String(m.avgStudentsPerTutor) },
   { label: 'Sesiones/tutor', value: (m) => String(m.avgSessionsPerTutor) },
 ];
 
 export function ConsolidatedReportPage() {
-  const [values, setValues] = useState(EMPTY_REPORT_FILTERS);
+  // Los filtros del reporte viven en la URL: recargar o compartir el enlace conserva el mismo reporte.
+  const [values, setValues] = useReportFiltersUrl();
   const [exporting, setExporting] = useState<'excel' | 'pdf' | null>(null);
   const [exportError, setExportError] = useState('');
 
@@ -103,7 +105,8 @@ export function ConsolidatedReportPage() {
         />
       ) : (
         <Card>
-          <div className={styles.tableWrap}>
+          {/* Región con desplazamiento: se enfoca con el teclado para poder recorrerla (WCAG 2.1.1) */}
+          <div className={styles.tableWrap} tabIndex={0} role="region" aria-label="Informe consolidado: tabla desplazable">
             <table className={styles.table}>
               <thead>
                 <tr>

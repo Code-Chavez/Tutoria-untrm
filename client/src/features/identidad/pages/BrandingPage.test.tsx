@@ -2,11 +2,14 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, waitFor, fireEvent } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { AxiosError } from 'axios';
+import { MemoryRouter } from 'react-router-dom';
 import { QueryClientTestWrapper } from '@shared/test-utils/QueryClientTestWrapper';
 import { BrandingProvider } from '@shared/theme/BrandingProvider';
 import { BrandingPage } from './BrandingPage';
 import { brandingService, DEFAULT_BRANDING } from '@shared/theme/brandingService';
 import type { Branding } from '@shared/theme/brandingService';
+
+vi.mock('@features/auth/hooks/useAuth', () => ({ useAuth: () => ({ user: { id: 'u1', role: 'Administrador DBU' } }) }));
 
 vi.mock('@shared/theme/brandingService', async () => {
   const actual = await vi.importActual<typeof import('@shared/theme/brandingService')>('@shared/theme/brandingService');
@@ -19,11 +22,13 @@ const saved: Branding = { ...DEFAULT_BRANDING, primaryColor: '#1B5E20', updatedA
 
 function renderPage() {
   return render(
-    <QueryClientTestWrapper>
-      <BrandingProvider>
-        <BrandingPage />
-      </BrandingProvider>
-    </QueryClientTestWrapper>,
+    <MemoryRouter>
+      <QueryClientTestWrapper>
+        <BrandingProvider>
+          <BrandingPage />
+        </BrandingProvider>
+      </QueryClientTestWrapper>
+    </MemoryRouter>,
   );
 }
 
@@ -31,6 +36,7 @@ describe('BrandingPage (HU-50)', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     localStorage.clear();
+    sessionStorage.clear();
     document.documentElement.removeAttribute('style');
     mocked.get.mockResolvedValue(DEFAULT_BRANDING);
   });

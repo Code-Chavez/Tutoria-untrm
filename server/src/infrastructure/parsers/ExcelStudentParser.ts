@@ -1,5 +1,6 @@
 import ExcelJS from 'exceljs';
 import { ImportStudentRow } from '@application/dtos/studentImport.dto';
+import { StudentTemplateProvider } from '@application/ports/StudentTemplateProvider';
 
 type Field = 'studentCode' | 'firstName' | 'lastName' | 'email' | 'phone' | 'cycle' | 'school';
 
@@ -31,7 +32,7 @@ const TEMPLATE_COLUMNS: { header: string; field: Field; example: string }[] = [
   { header: 'escuela', field: 'school', example: 'Ingeniería de Sistemas' },
 ];
 
-function normalizeHeader(value: string): string {
+export function normalizeHeader(value: string): string {
   return value
     .trim()
     .toLowerCase()
@@ -40,7 +41,7 @@ function normalizeHeader(value: string): string {
 }
 
 // exceljs devuelve valores heterogéneos (texto, número, hipervínculo, fórmula).
-function cellText(value: ExcelJS.CellValue): string {
+export function cellText(value: ExcelJS.CellValue): string {
   if (value === null || value === undefined) return '';
   if (typeof value === 'string') return value.trim();
   if (typeof value === 'number' || typeof value === 'boolean') return String(value);
@@ -54,7 +55,7 @@ function cellText(value: ExcelJS.CellValue): string {
   return '';
 }
 
-export class ExcelStudentParser {
+export class ExcelStudentParser implements StudentTemplateProvider {
   async parse(buffer: Buffer): Promise<ImportStudentRow[]> {
     const workbook = new ExcelJS.Workbook();
     // @types/node 22 tipa Buffer como genérico; exceljs espera el Buffer clásico.
@@ -98,6 +99,10 @@ export class ExcelStudentParser {
     }
 
     return rows;
+  }
+
+  build(): Promise<Buffer> {
+    return this.buildTemplate();
   }
 
   // Genera un .xlsx de plantilla con encabezados y una fila de ejemplo.

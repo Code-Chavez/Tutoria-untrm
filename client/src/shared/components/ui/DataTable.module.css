@@ -1,6 +1,9 @@
 /* Skin de tabla compartido: se importa en varias páginas para una apariencia coherente. */
+/* El contenedor decide cuándo la tabla pasa a tarjetas según SU ancho (no el de la ventana): con el menú lateral abierto, una
+   ventana de 1024 px deja la tabla con ~770 px y ya no cabe. */
 .scroll {
   overflow-x: auto;
+  container-type: inline-size;
 }
 
 .table {
@@ -102,4 +105,79 @@
   font-weight: 700;
   font-size: 12.5px;
   flex-shrink: 0;
+}
+
+/* Las tablas de bandeja llevan 6-7 columnas: con menos relleno lateral caben en un portátil con el menú abierto y la acción
+   de la fila no queda fuera de la vista. */
+.stacked thead th,
+.stacked tbody td {
+  padding-left: var(--s3);
+  padding-right: var(--s3);
+}
+
+/* Tabla adaptable (U05): con table.stacked, cuando el ancho disponible no alcanza cada fila pasa a ser una tarjeta con «Etiqueta: valor»
+   (la etiqueta sale del data-label de la celda) y la acción queda siempre a la vista, sin desplazarse a los lados. */
+@container (max-width: 920px) {
+  .stacked,
+  .stacked tbody,
+  .stacked tr,
+  .stacked td {
+    display: block;
+    width: 100%;
+  }
+
+  /* El encabezado se oculta a la vista pero se conserva para lectores de pantalla */
+  .stacked thead {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+  }
+
+  .stacked tbody tr {
+    margin: 0 0 var(--s3);
+    padding: var(--s3) var(--s4);
+    border: 1px solid var(--g200);
+    border-radius: var(--r);
+    background: var(--blanco);
+    width: auto;
+  }
+
+  .stacked tbody td {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: var(--s3);
+    padding: 6px 0;
+    border-bottom: none;
+    text-align: right;
+  }
+
+  .stacked tbody td[data-label]::before {
+    content: attr(data-label);
+    flex: 0 0 34%;
+    font-size: var(--fs-xs);
+    font-weight: 700;
+    letter-spacing: 0.3px;
+    text-transform: uppercase;
+    text-align: left;
+    color: var(--g500);
+  }
+
+  .stacked tbody td > * {
+    min-width: 0;
+    text-align: right;
+  }
+
+  .stacked tbody tr:hover td {
+    background: transparent;
+  }
+
+  .stacked .cardAction {
+    justify-content: flex-end;
+    padding-top: var(--s3);
+    margin-top: var(--s2);
+    border-top: 1px solid var(--g100);
+  }
 }

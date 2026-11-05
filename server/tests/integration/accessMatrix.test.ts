@@ -40,6 +40,7 @@ const MATRIX: { method: string; path: string; allowed: Role[] }[] = [
   { method: 'GET', path: '/api/tutoring-requests/mine', allowed: ['admin', 'tutorado'] },
   { method: 'PATCH', path: '/api/tutoring-requests/00000000-0000-0000-0000-000000000000/status', allowed: ['admin', 'coordinador', 'tutor'] },
   { method: 'GET', path: '/api/audit/options', allowed: ['admin'] },
+  { method: 'GET', path: '/api/institutional-pending', allowed: ['admin', 'coordinador'] },
   { method: 'GET', path: '/api/consolidated-reports', allowed: ['admin', 'vicerrectorado'] },
   { method: 'GET', path: '/api/indicators', allowed: ['admin', 'coordinador', 'vicerrectorado'] },
   { method: 'GET', path: '/api/work-plans', allowed: ['admin', 'coordinador'] },

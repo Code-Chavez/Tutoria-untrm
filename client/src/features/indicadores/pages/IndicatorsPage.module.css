@@ -36,7 +36,7 @@
   gap: var(--s4);
 }
 
-.chart h3 {
+.chart h2 {
   margin: 0 0 var(--s3);
   font-size: var(--fs-sm);
   color: var(--g900);

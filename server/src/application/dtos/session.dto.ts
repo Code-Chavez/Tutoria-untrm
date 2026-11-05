@@ -10,6 +10,8 @@ export interface ScheduleSessionInput {
   modality: SessionModality;
   location?: string;
   meetingLink?: string;
+  /** Solicitud de tutoría que esta sesión atiende: queda vinculada, sin duplicar la atención. */
+  tutoringRequestId?: string;
 }
 
 // Reprogramación de sesión (HU-23): solo cambia el horario; duración,

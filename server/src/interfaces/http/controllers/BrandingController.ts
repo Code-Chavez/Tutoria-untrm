@@ -32,7 +32,7 @@ export class BrandingController {
 
   private handleError(error: unknown, res: Response) {
     if (error instanceof z.ZodError) {
-      res.status(400).json({ error: 'Datos de entrada inválidos', details: error.errors });
+      res.status(400).json({ error: 'Datos de entrada inválidos', details: error.issues });
     } else if (error instanceof BrandingValidationError) {
       res.status(400).json({ error: error.message });
     } else if (error instanceof BrandingLogoNotFoundError) {

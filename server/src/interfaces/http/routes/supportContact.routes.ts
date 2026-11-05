@@ -1,4 +1,5 @@
 import { Router, type IRouter } from 'express';
+import { requireOpenPeriod } from '../middleware/requireOpenPeriod';
 import { auditAccess, byParam } from '../middleware/auditAccess';
 import { container } from '../../../infrastructure/container';
 import { SupportContactController } from '../controllers/SupportContactController';
@@ -18,7 +19,7 @@ const requireAuth = authenticate(container.services.tokenService);
 router.put(
   '/students/:id/support-contact',
   requireAuth,
-  authorize(['support-contacts:write']),
+  authorize(['support-contacts:write']), requireOpenPeriod,
   supportContactController.upsert,
 );
 

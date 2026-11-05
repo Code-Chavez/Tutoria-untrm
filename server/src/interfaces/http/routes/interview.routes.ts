@@ -1,4 +1,5 @@
 import { Router, type IRouter } from 'express';
+import { requireOpenPeriod } from '../middleware/requireOpenPeriod';
 import { auditAccess, byParam } from '../middleware/auditAccess';
 import { container } from '../../../infrastructure/container';
 import { InterviewController } from '../controllers/InterviewController';
@@ -17,7 +18,7 @@ const requireAuth = authenticate(container.services.tokenService);
 router.post(
   '/students/:id/interviews',
   requireAuth,
-  authorize(['interviews:write']),
+  authorize(['interviews:write']), requireOpenPeriod,
   interviewController.create,
 );
 

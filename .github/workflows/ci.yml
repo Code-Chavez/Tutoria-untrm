@@ -5,6 +5,12 @@ on:
     branches: [develop, main]
   pull_request:
     branches: [develop, main]
+    # «edited» también se dispara al cambiar la rama destino: un PR apilado (abierto sobre otra rama de trabajo) queda
+    # reapuntado a develop al fusionarse la de abajo y, sin este tipo, nunca recibiría el CI. Cada edición (también de
+    # título o descripción) ejecuta la CI completa: omitir los jobs en ese caso creaba, para cada check obligatorio, un
+    # resultado «omitido» más reciente que el real, y un PR con un check en rojo pasaba a estar fusionable (verificado con
+    # un PR desechable, docs/resultados-2026-10-26/checks-omitidos-por-edicion.txt).
+    types: [opened, synchronize, reopened, edited]
 
 concurrency:
   group: ci-${{ github.ref }}

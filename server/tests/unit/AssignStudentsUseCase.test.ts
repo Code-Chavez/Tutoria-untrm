@@ -3,6 +3,7 @@ import {
   TutorNotFoundError,
   NoStudentsSelectedError,
   StudentsAlreadyAssignedError,
+  TutorSchoolMismatchError,
 } from '@application/use-cases/assignments/AssignmentErrors';
 import { StudentRepository } from '@domain/repositories/StudentRepository';
 import { UserRepository } from '@domain/repositories/UserRepository';
@@ -58,6 +59,24 @@ describe('AssignStudentsUseCase', () => {
     expect(result.assigned).toBe(2);
     // Deduplica ids antes de asignar.
     expect(students.assignTutor).toHaveBeenCalledWith(['s1', 's2'], 'tutor-1', expect.any(Date));
+  });
+
+  describe('escuela del tutor (fase 3)', () => {
+    it('un tutor de otra escuela no recibe estudiantes y no se asigna a nadie', async () => {
+      users.findById.mockResolvedValue({ ...tutor, schoolId: 'school-mecanica' } as User);
+
+      await expect(useCase.execute({ tutorId: 'tutor-1', studentIds: ['s1'] }, 'admin-1')).rejects.toBeInstanceOf(TutorSchoolMismatchError);
+
+      expect(students.assignTutor).not.toHaveBeenCalled();
+    });
+
+    it('un tutor de la misma escuela sí; uno sin escuela registrada (cuenta anterior) no se bloquea', async () => {
+      users.findById.mockResolvedValue({ ...tutor, schoolId: 'school-1' } as User);
+      await expect(useCase.execute({ tutorId: 'tutor-1', studentIds: ['s1', 's2'] }, 'admin-1')).resolves.toEqual({ assigned: 2 });
+
+      users.findById.mockResolvedValue({ ...tutor, schoolId: null } as User);
+      await expect(useCase.execute({ tutorId: 'tutor-1', studentIds: ['s1', 's2'] }, 'admin-1')).resolves.toEqual({ assigned: 2 });
+    });
   });
 
   it('rechaza cuando no hay estudiantes seleccionados', async () => {

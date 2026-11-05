@@ -1,6 +1,8 @@
-import { useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { Button } from '@shared/components/ui';
 import { useDialog } from '@shared/hooks/useDialog';
+import { useDraft } from '@shared/hooks/useDraft';
+import { removeDraft } from '@shared/utils/drafts';
 import { CloseIcon } from '@shared/components/icons';
 import { getApiErrorMessage } from '@shared/services/apiClient';
 import { useCatalog } from '../hooks/useCatalog';
@@ -11,6 +13,9 @@ interface CatalogEntryModalProps {
   definition: CatalogDefinition;
   /** Elemento a editar; sin él, el formulario crea uno nuevo. */
   entry: CatalogEntry | null;
+  /** Quien edita y el catálogo: con ellos, lo escrito se guarda como borrador de la pestaña y se recupera al recargar. */
+  draftOwnerId?: string;
+  draftScope?: string;
   onClose: () => void;
   onSubmit: (input: CatalogInput) => Promise<void>;
 }
@@ -19,17 +24,25 @@ const toDateInput = (iso: string | null) => (iso ? iso.slice(0, 10) : '');
 
 // Alta y edición de un elemento de catálogo (HU-48). Se remonta con `key`
 // al cambiar de elemento, así el estado inicial sale de las props.
-export function CatalogEntryModal({ definition, entry, onClose, onSubmit }: CatalogEntryModalProps) {
+export function CatalogEntryModal({ definition, entry, draftOwnerId, draftScope, onClose, onSubmit }: CatalogEntryModalProps) {
   const editing = entry !== null;
   const { entries: faculties } = useCatalog('faculties');
-  const [form, setForm] = useState({
-    name: entry?.name ?? '',
-    code: entry?.code ?? '',
-    facultyId: entry?.facultyId ?? '',
-    startDate: toDateInput(entry?.startDate ?? null),
-    endDate: toDateInput(entry?.endDate ?? null),
-    isActive: entry?.isActive ?? false,
-  });
+  const initial = useMemo(
+    () => ({
+      name: entry?.name ?? '',
+      code: entry?.code ?? '',
+      facultyId: entry?.facultyId ?? '',
+      cycleCount: String(entry?.cycleCount ?? ''),
+      startDate: toDateInput(entry?.startDate ?? null),
+      endDate: toDateInput(entry?.endDate ?? null),
+      isActive: entry?.isActive ?? false,
+    }),
+    [entry],
+  );
+  // Sin cambios respecto de lo guardado en el servidor no hay borrador que conservar.
+  const unchanged = useCallback((value: typeof initial) => JSON.stringify(value) === JSON.stringify(initial), [initial]);
+  const draftKey = `catalog-form.${draftScope ?? definition.kind}.${entry?.id ?? 'nuevo'}`;
+  const { value: form, setValue: setForm, restored, discard } = useDraft(draftOwnerId, draftKey, initial, unchanged);
   const [error, setError] = useState('');
   const [saving, setSaving] = useState(false);
 
@@ -40,7 +53,10 @@ export function CatalogEntryModal({ definition, entry, onClose, onSubmit }: Cata
     setError('');
     const input: CatalogInput = { name: form.name.trim() };
     if (definition.hasCode && !editing) input.code = form.code.trim();
-    if (definition.kind === 'schools') input.facultyId = form.facultyId;
+    if (definition.kind === 'schools') {
+      input.facultyId = form.facultyId;
+      input.cycleCount = Number(form.cycleCount);
+    }
     if (definition.kind === 'periods') {
       input.startDate = form.startDate;
       input.endDate = form.endDate;
@@ -49,6 +65,7 @@ export function CatalogEntryModal({ definition, entry, onClose, onSubmit }: Cata
     setSaving(true);
     try {
       await onSubmit(input);
+      if (draftOwnerId) removeDraft(draftOwnerId, draftKey);
       onClose();
     } catch (err) {
       setError(getApiErrorMessage(err));
@@ -80,6 +97,14 @@ export function CatalogEntryModal({ definition, entry, onClose, onSubmit }: Cata
         </div>
 
         <form onSubmit={handleSubmit}>
+          {restored && (
+            <p role="status" className={styles.restored}>
+              Recuperamos lo que estabas escribiendo.{' '}
+              <button type="button" className={styles.link} onClick={discard}>
+                Descartar
+              </button>
+            </p>
+          )}
           {definition.hasCode && (
             <div className={styles.field}>
               <label htmlFor="cat-code">{definition.codeLabel}</label>
@@ -104,6 +129,7 @@ export function CatalogEntryModal({ definition, entry, onClose, onSubmit }: Cata
           </div>
 
           {definition.kind === 'schools' && (
+            <>
             <div className={styles.field}>
               <label htmlFor="cat-faculty">Facultad</label>
               <select id="cat-faculty" value={form.facultyId} onChange={(e) => set({ facultyId: e.target.value })} required>
@@ -115,6 +141,12 @@ export function CatalogEntryModal({ definition, entry, onClose, onSubmit }: Cata
                 ))}
               </select>
             </div>
+            <div className={styles.field}>
+              <label htmlFor="cat-cycle-count">Cantidad de ciclos de la escuela</label>
+              <input id="cat-cycle-count" type="number" min={1} max={14} step={1} required value={form.cycleCount} onChange={(event) => set({ cycleCount: event.target.value })} />
+              <small>Según el plan de estudios: por ejemplo, 10 o 12. El sistema admite de 1 a 14 ciclos. Se usa al pedir listas y asignar tutores.</small>
+            </div>
+            </>
           )}
 
           {definition.kind === 'periods' && (

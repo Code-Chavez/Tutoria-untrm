@@ -117,6 +117,7 @@ describe('LoginUseCase', () => {
       firstName: 'Juan',
       lastName: 'Pérez',
       role: 'Docente Tutor',
+      permissions: [],
       mustChangePassword: false,
     });
     expect(refreshTokens.create).toHaveBeenCalledWith(

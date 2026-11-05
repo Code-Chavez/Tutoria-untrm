@@ -69,3 +69,16 @@
   white-space: nowrap;
   text-align: right;
 }
+
+.tabs { padding: 6px; gap: 6px; border: 1px solid var(--borde); border-radius: 10px; background: var(--g50); }
+.tab, .tabActive { padding: 10px 14px; min-height: 44px; border: 0; border-radius: 8px; font-weight: 600; }
+.tabActive { background: var(--blanco); color: var(--azul); box-shadow: var(--sombra-xs); }
+.tableWrap { border: 1px solid var(--borde); border-radius: 12px; background: var(--blanco); }
+.table th, .table td { padding: 16px; }
+.table th { background: var(--g50); }
+.table tbody tr:last-child td { border-bottom: 0; }
+.table tbody tr:hover { background: var(--g50); }
+@media (max-width: 480px) { .tab, .tabActive { flex: 1 1 120px; } .table th, .table td { padding: 12px; } }
+.tabs { padding: 4px; gap: 4px; margin-bottom: 12px; }
+.tab, .tabActive { padding: 7px 10px; min-height: 36px; }
+.table th, .table td { padding: 10px 12px; }

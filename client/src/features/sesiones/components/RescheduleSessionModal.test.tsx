@@ -57,13 +57,13 @@ describe('RescheduleSessionModal', () => {
     await user.type(screen.getByLabelText(/nueva hora/i), '10:00');
     await user.type(
       screen.getByLabelText(/motivo de la reprogramación/i),
-      'El tutorado solicitó cambio de horario',
+      'El estudiante solicitó cambio de horario',
     );
     await user.click(screen.getByRole('button', { name: /reprogramar/i }));
 
     expect(onSubmit).toHaveBeenCalledWith({
       scheduledAt: new Date('2026-10-15T10:00').toISOString(),
-      reason: 'El tutorado solicitó cambio de horario',
+      reason: 'El estudiante solicitó cambio de horario',
     });
   });
 });

@@ -1,6 +1,6 @@
 import { PrismaClient } from '@prisma/client';
 import { Role } from '@domain/entities/Role';
-import { RoleRepository } from '@domain/repositories/RoleRepository';
+import { RoleCreationAudit, RoleRepository } from '@domain/repositories/RoleRepository';
 
 const withPermissions = {
   permissions: { include: { permission: true } },
@@ -11,6 +11,9 @@ type PrismaRoleWithPermissions = {
   name: string;
   description: string;
   createdAt: Date;
+  isBase?: boolean;
+  isActive?: boolean;
+  _count?: { users: number };
   permissions: { permission: { id: string; code: string; description: string } }[];
 };
 
@@ -20,6 +23,9 @@ function toDomain(role: PrismaRoleWithPermissions): Role {
     name: role.name,
     description: role.description,
     createdAt: role.createdAt,
+    isBase: role.isBase,
+    isActive: role.isActive,
+    ...(role._count ? { userCount: role._count.users } : {}),
     permissions: role.permissions.map((rp) => rp.permission),
   };
 }
@@ -44,14 +50,28 @@ export class PrismaRoleRepository implements RoleRepository {
   }
 
   async findAll(): Promise<Role[]> {
-    const roles = await this.prisma.role.findMany({ include: withPermissions });
+    const roles = await this.prisma.role.findMany({ include: { ...withPermissions, _count: { select: { users: true } } }, orderBy: { name: 'asc' } });
     return roles.map(toDomain);
   }
 
-  async create(data: { name: string; description: string }): Promise<Role> {
-    const role = await this.prisma.role.create({
-      data,
-      include: withPermissions,
+  async create(data: { name: string; description: string }, audit?: RoleCreationAudit): Promise<Role> {
+    if (!audit) {
+      const role = await this.prisma.role.create({ data, include: withPermissions });
+      return toDomain(role);
+    }
+    const role = await this.prisma.$transaction(async (tx) => {
+      const created = await tx.role.create({ data, include: withPermissions });
+      await tx.auditLog.create({
+        data: {
+          userId: audit.userId,
+          action: 'ROLE_CREATED',
+          entity: 'Role',
+          entityId: created.id,
+          details: `Rol «${created.name}»`,
+          ipAddress: audit.ipAddress,
+        },
+      });
+      return created;
     });
     return toDomain(role);
   }

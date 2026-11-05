@@ -56,7 +56,7 @@ function buildMocks() {
     create: jest.fn(),
     findAll: jest.fn(),
   };
-  const useCase = new AssignRoleUseCase(users, roles, auditLogs);
+  const useCase = new AssignRoleUseCase(users, roles, auditLogs, { findById: jest.fn().mockResolvedValue({ id: 'school-1', isActive: true }), findAll: jest.fn() });
   return { useCase, users, roles, auditLogs };
 }
 

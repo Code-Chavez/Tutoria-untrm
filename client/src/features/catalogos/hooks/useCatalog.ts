@@ -19,6 +19,7 @@ export function useCatalogMutations(kind: CatalogKind) {
       queryClient.invalidateQueries({ queryKey: ['reportFilterOptions'] }),
       queryClient.invalidateQueries({ queryKey: ['schools'] }),
       queryClient.invalidateQueries({ queryKey: ['faculties'] }),
+      queryClient.invalidateQueries({ queryKey: ['cycleTutors'] }),
     ]);
 
   return {

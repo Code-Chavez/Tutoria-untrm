@@ -25,7 +25,7 @@ async function openCaseFromBell(page: Page): Promise<void> {
 test('la tutora deriva el caso de Ana a Psicología', async ({ page }) => {
   await loginUi(page, accounts.tutor);
   await goToMenu(page, 'Derivar caso');
-  await page.getByLabel('Buscar tutorado').fill('20191234');
+  await page.getByLabel('Buscar estudiante').fill('20191234');
   await page.getByRole('button', { name: /Derivar caso: Ana Torres/ }).click();
 
   const form = page.getByRole('dialog', { name: 'Ficha de derivación' });
@@ -46,23 +46,29 @@ test('Psicología recibe el aviso, abre el caso y lo lleva hasta cerrarlo', asyn
   const detail = page.getByRole('dialog', { name: 'Detalle de derivación' });
   await expect(detail).toContainText(reason);
 
-  const status = detail.getByLabel('Nuevo Estado');
+  const status = detail.getByLabel('Nuevo estado');
   await expect(status).toHaveValue('RECIBIDO');
-  await detail.getByRole('button', { name: 'Guardar Cambios' }).click();
+  await detail.getByRole('button', { name: 'Recibir caso' }).click();
   await expect(status).toHaveValue('EN_ATENCION');
-  await detail.getByRole('button', { name: 'Guardar Cambios' }).click();
+  await detail.getByRole('button', { name: 'Iniciar atención' }).click();
   await expect(status).toHaveValue('ATENDIDO');
-  await expect(detail.getByRole('button', { name: 'Registrar Atención' })).toBeDisabled();
+  await expect(detail.getByRole('button', { name: 'Registrar atención' })).toBeDisabled();
   await detail.getByLabel(/Observaciones/).fill(internalNote);
-  await detail.getByRole('button', { name: 'Registrar Atención' }).click();
+  await detail.getByRole('button', { name: 'Registrar atención' }).click();
   if (!(await detail.isVisible())) await reopen(page);
 
   await detail.getByLabel(/Observaciones/).fill('Cierre del caso E2E');
-  await detail.getByRole('button', { name: 'Cerrar Caso Derivado' }).click();
+  await detail.getByRole('button', { name: 'Cerrar caso', exact: true }).click();
+  // Un caso cerrado sale de «Pendientes» (la vista inicial): se cierra el detalle y se consulta en «Cerrados»
+  await page.keyboard.press('Escape');
+  await expect(detail).toBeHidden();
+  await page.getByRole('button', { name: /^Cerrados/ }).click();
   await expect(page.getByRole('row', { name: new RegExp(instance) })).toContainText('Cerrado');
 });
 
 async function reopen(page: Page): Promise<void> {
+  // Atendido ya no es «pendiente»: el caso sale de la vista inicial y se busca en «Todos»
+  await page.getByRole('button', { name: /^Todos/ }).click();
   await page.getByRole('row', { name: new RegExp(instance) }).getByTitle('Ver Detalles').click();
   await expect(page.getByRole('dialog', { name: 'Detalle de derivación' })).toBeVisible();
 }
@@ -77,6 +83,7 @@ test('otro servicio no ve el caso', async ({ page }) => {
 test('la tutora descarga la constancia y no ve las notas internas', async ({ page }) => {
   await loginUi(page, accounts.tutor);
   await goToMenu(page, 'Casos derivados');
+  await page.getByRole('button', { name: /^Cerrados/ }).click(); // el caso ya está cerrado: no está en «Pendientes»
   const row = page.getByRole('row', { name: new RegExp(instance) });
 
   const [download] = await Promise.all([page.waitForEvent('download'), row.getByTitle('Descargar Constancia').click()]);

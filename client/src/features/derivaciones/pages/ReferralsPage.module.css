@@ -3,6 +3,7 @@
 }
 
 .tableCard {
+  container-type: inline-size; /* la tabla pasa a tarjetas según el ancho disponible, no el de la ventana */
   background-color: var(--blanco);
   border: 1px solid var(--g200);
   border-radius: var(--r-lg);
@@ -177,4 +178,63 @@
   color: var(--azul-med);
   text-decoration: underline;
   cursor: pointer;
+}
+
+/* Ancho disponible estrecho (U05): cada fila es una tarjeta con «Etiqueta: valor» y las acciones siempre a la vista, sin desplazarse. */
+.table small {
+  display: block;
+  color: var(--g500);
+  font-size: var(--fs-xs);
+}
+
+@container (max-width: 920px) {
+  .table,
+  .table tbody,
+  .table tr,
+  .table td {
+    display: block;
+    width: 100%;
+  }
+
+  .table thead {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+  }
+
+  .table tbody tr {
+    margin: var(--s3);
+    padding: var(--s3) var(--s4);
+    border: 1px solid var(--g200);
+    border-radius: var(--r);
+    width: auto;
+  }
+
+  .table tbody td {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: var(--s3);
+    padding: 6px 0;
+    border-bottom: none;
+    text-align: right;
+  }
+
+  .table tbody td[data-label]::before {
+    content: attr(data-label);
+    flex: 0 0 34%;
+    font-size: var(--fs-xs);
+    font-weight: 700;
+    text-transform: uppercase;
+    text-align: left;
+    color: var(--g500);
+  }
+
+  .cardAction {
+    justify-content: flex-end;
+    margin-top: var(--s2);
+    border-top: 1px solid var(--g100);
+  }
 }

@@ -52,7 +52,7 @@ Marcar cada punto con fecha y responsable. Propuesta: **9 al 12 de noviembre** (
 - [ ] Cuentas de **portal** vinculadas para los estudiantes que van a participar (*Tutorados → Más → Vincular cuenta*).
 - [ ] *Evaluación de tutoría*: habilitada para la escuela del piloto.
 - [ ] Plan semestral de la escuela guardado, para que el coordinador pueda adjuntar la resolución.
-- [ ] Contraseñas iniciales entregadas por un medio seguro y cambio de contraseña en el primer ingreso.
+- [ ] Cuentas activadas con la invitación de un solo uso (ninguna clave inicial circula); las pendientes o vencidas se reemitieron.
 
 ### 2.3 Material
 

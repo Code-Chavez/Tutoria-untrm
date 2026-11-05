@@ -35,12 +35,16 @@ git clone <url-del-repositorio>
 cd Tutoria-untrm
 
 # 2. Levantar los servicios
-docker compose up --build
+docker compose up --build -d
+
+# 3. SOLO en un entorno nuevo (base vacía): cargar los datos de demostración, una vez
+docker compose exec server pnpm run seed
 ```
 
-Eso es todo: el contenedor del server aplica las migraciones y ejecuta el seed
-automáticamente en cada arranque, así que el entorno queda listo incluso con una
-base de datos vacía. El seed es idempotente (todo son `upsert`).
+El contenedor del server aplica las migraciones en cada arranque (igual que producción) pero **no ejecuta el seed**: reiniciar el servidor no
+cambia ningún dato. El seed es una orden explícita que **solo crea lo que falta** y nunca modifica lo que ya existe (coordinaciones, sedes,
+escuelas de los docentes, vínculos y matrículas); si falla, termina con error y muestra la causa. Con la base vacía y sin ese paso, no hay
+cuentas con las que iniciar sesión.
 
 Los servicios estarán disponibles en:
 - **Client**: http://localhost:5173

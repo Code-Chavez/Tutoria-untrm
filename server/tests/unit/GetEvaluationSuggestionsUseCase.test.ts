@@ -40,7 +40,7 @@ describe('GetEvaluationSuggestionsUseCase', () => {
       findAll: jest.fn(),
       create: jest.fn(),
     };
-    periods = { findActive: jest.fn().mockResolvedValue(activePeriod), findAll: jest.fn(), findById: jest.fn(), findByDate: jest.fn() };
+    periods = { findActive: jest.fn().mockResolvedValue(activePeriod), findAll: jest.fn(), findById: jest.fn(), findByDate: jest.fn(), close: jest.fn(), reopen: jest.fn() };
     evaluations = {
       create: jest.fn(),
       findByStudentAndPeriod: jest.fn(),

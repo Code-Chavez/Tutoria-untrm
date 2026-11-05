@@ -75,11 +75,9 @@
 .group {
   display: block;
   font-family: var(--ft);
-  font-size: 10.5px;
-  font-weight: 700;
-  letter-spacing: 1px;
-  text-transform: uppercase;
-  color: rgba(255, 255, 255, 0.45);
+  font-size: 12px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.55);
   padding: 0 var(--s3);
   margin-bottom: var(--s2);
 }
@@ -220,4 +218,20 @@
     opacity: 1;
     pointer-events: auto;
   }
+}
+
+/* Título de un grupo desplegable: se ve como el de los demás, pero es un botón con su flecha. */
+.groupToggle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  border: 0;
+  background: none;
+  cursor: pointer;
+  margin-bottom: 0;
+}
+
+.groupToggle:hover {
+  color: rgba(255, 255, 255, 0.8);
 }

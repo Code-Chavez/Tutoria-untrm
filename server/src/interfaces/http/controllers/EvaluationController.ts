@@ -42,7 +42,7 @@ export class EvaluationController {
       res.status(201).json({ message: 'Evaluación registrada exitosamente', evaluation });
     } catch (error) {
       if (error instanceof z.ZodError) {
-        res.status(400).json({ error: 'Datos de entrada inválidos', details: error.errors });
+        res.status(400).json({ error: 'Datos de entrada inválidos', details: error.issues });
       } else if (error instanceof StudentProfileNotLinkedError || error instanceof TutorNotAssignedError) {
         res.status(400).json({ error: error.message });
       } else if (
@@ -117,7 +117,7 @@ export class EvaluationController {
       res.status(200).json(state);
     } catch (error) {
       if (error instanceof z.ZodError) {
-        res.status(400).json({ error: 'Datos de entrada inválidos', details: error.errors });
+        res.status(400).json({ error: 'Datos de entrada inválidos', details: error.issues });
       } else if (error instanceof EvaluationWindowForbiddenError) {
         res.status(403).json({ error: error.message });
       } else if (error instanceof SchoolNotFoundError) {

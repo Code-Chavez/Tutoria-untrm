@@ -113,3 +113,15 @@
   color: var(--peligro);
   border-color: var(--peligro-bg);
 }
+
+/* La carga ocupa el espacio necesario, sin un lienzo vacío alrededor del icono. */
+.dropzone { padding: 24px 16px; background: var(--blanco); border-radius: 10px; }
+.label { gap: 12px; }
+.arrow { width: 44px; height: 44px; }
+.arrow svg { width: 24px; height: 24px; }
+.big { font-size: var(--fs-body); line-height: 1.6; }
+.meta { font-size: var(--fs-xs); line-height: 1.5; color: var(--g600); }
+.selected { padding: 16px; gap: 12px; background: var(--blanco); border-radius: 10px; }
+.fileIcon { width: 40px; height: 40px; }
+.fileInfo b { font-size: var(--fs-sm); }
+@media (max-width: 480px) { .dropzone { padding: 20px 12px; } .selected { padding: 12px; gap: 8px; } }

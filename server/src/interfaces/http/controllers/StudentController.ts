@@ -1,4 +1,5 @@
 import { Request, Response } from 'express';
+import { NoOpenPeriodForLoadError } from '@application/use-cases/students/StudentErrors';
 import { z } from 'zod';
 import { CreateStudentUseCase } from '@application/use-cases/students/CreateStudentUseCase';
 import { UpdateStudentUseCase } from '@application/use-cases/students/UpdateStudentUseCase';
@@ -9,6 +10,7 @@ import { LinkStudentPortalAccountUseCase } from '@application/use-cases/students
 import { StudentFilters } from '@domain/repositories/StudentRepository';
 import {
   DuplicateStudentCodeError,
+  DuplicateStudentEmailError,
   StudentNotFoundError,
   StudentAccessDeniedError,
   SchoolNotFoundError,
@@ -61,7 +63,7 @@ export class StudentController {
       });
     } catch (error) {
       if (error instanceof z.ZodError) {
-        res.status(400).json({ error: 'Datos de entrada inválidos', details: error.errors });
+        res.status(400).json({ error: 'Datos de entrada inválidos', details: error.issues });
       } else if (
         error instanceof PortalUserNotFoundError ||
         error instanceof StudentNotFoundError
@@ -92,7 +94,7 @@ export class StudentController {
       });
     } catch (error) {
       if (error instanceof z.ZodError) {
-        res.status(400).json({ error: 'Datos de entrada inválidos', details: error.errors });
+        res.status(400).json({ error: 'Datos de entrada inválidos', details: error.issues });
       } else if (error instanceof RiskReasonRequiredError) {
         res.status(400).json({ error: error.message });
       } else if (error instanceof StudentNotFoundError) {
@@ -119,7 +121,7 @@ export class StudentController {
       res.status(200).send(buffer);
     } catch (error) {
       if (error instanceof z.ZodError) {
-        res.status(400).json({ error: 'Reporte inválido', details: error.errors });
+        res.status(400).json({ error: 'Reporte inválido', details: error.issues });
         return;
       }
       console.error('Error generando el reporte de carga', error);
@@ -147,6 +149,10 @@ export class StudentController {
       const report = await this.importStudentsUseCase.execute(rows, req.auth?.sub as string);
       res.status(200).json({ message: 'Carga masiva procesada', report });
     } catch (error) {
+      if (error instanceof NoOpenPeriodForLoadError) {
+        res.status(409).json({ error: error.message, code: 'NO_OPEN_PERIOD' });
+        return;
+      }
       console.error('Error en carga masiva de estudiantes', error);
       res.status(500).json({ error: 'No se pudo procesar el archivo. Verifique que sea un .xlsx válido.' });
     }
@@ -229,8 +235,8 @@ export class StudentController {
 
   private handleError(error: unknown, res: Response) {
     if (error instanceof z.ZodError) {
-      res.status(400).json({ error: 'Datos de entrada inválidos', details: error.errors });
-    } else if (error instanceof DuplicateStudentCodeError) {
+      res.status(400).json({ error: 'Datos de entrada inválidos', details: error.issues });
+    } else if (error instanceof DuplicateStudentCodeError || error instanceof DuplicateStudentEmailError) {
       res.status(409).json({ error: error.message });
     } else if (error instanceof SchoolNotFoundError || error instanceof StudentNotFoundError) {
       res.status(404).json({ error: error.message });

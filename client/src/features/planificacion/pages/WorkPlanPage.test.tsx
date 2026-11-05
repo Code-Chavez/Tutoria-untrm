@@ -1,6 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen, waitFor } from '@testing-library/react';
+import { render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { MemoryRouter } from 'react-router-dom';
 import { QueryClientTestWrapper } from '@shared/test-utils/QueryClientTestWrapper';
 import { WorkPlanPage } from './WorkPlanPage';
 import { workPlanService } from '../services/workPlanService';
@@ -19,9 +20,9 @@ const mocked = vi.mocked(workPlanService);
 
 function renderPage() {
   return render(
-    <QueryClientTestWrapper>
+    <MemoryRouter><QueryClientTestWrapper>
       <WorkPlanPage />
-    </QueryClientTestWrapper>,
+    </QueryClientTestWrapper></MemoryRouter>,
   );
 }
 
@@ -97,5 +98,56 @@ describe('WorkPlanPage', () => {
     expect(mocked.save).not.toHaveBeenCalled();
     await user.click(await screen.findByRole('button', { name: 'Guardar revisión' }));
     await waitFor(() => expect(mocked.save).toHaveBeenCalled());
+  });
+
+  it('F3: al confirmar la revisión el diálogo sigue abierto y ocupado mientras se guarda, no se cancela ni se repite, y al terminar el foco vuelve al botón', async () => {
+    mocked.getOverview.mockResolvedValue({
+      periodName: '2026-II',
+      schools: [{ schoolId: 's1', schoolName: 'Sistemas', hasPlan: true, inForce: true, status: 'APROBADO' }],
+    });
+    mocked.getBySchool.mockResolvedValue({
+      periodName: '2026-II',
+      schoolName: 'Sistemas',
+      plan: {
+        id: 'wp1',
+        status: 'APROBADO',
+        revision: 1,
+        inForce: true,
+        resolution: { fileName: 'RD.pdf', fileSize: 1, uploadedAt: '2026-10-03T10:00:00Z' },
+        denomination: 'Taller aprobado',
+        specificObjectives: [],
+        planning: [],
+        programming: [],
+        physicalResources: [],
+        humanResources: [],
+        budget: [],
+        operationalActivities: [],
+      } as never,
+    });
+    let finish: (value: never) => void = () => undefined;
+    mocked.save.mockReturnValue(new Promise((resolve) => (finish = resolve as (value: never) => void)));
+    const user = userEvent.setup();
+    renderPage();
+    const opener = await screen.findByRole('button', { name: 'Guardar como nueva revisión' });
+
+    await user.click(opener);
+    const dialog = await screen.findByRole('alertdialog', { name: 'Crear una nueva revisión' });
+    await user.click(within(dialog).getByRole('button', { name: 'Guardar revisión' }));
+
+    await waitFor(() => expect(mocked.save).toHaveBeenCalledTimes(1));
+    // Con el guardado pendiente el diálogo NO se cierra: sigue ocupado y con el foco dentro.
+    await waitFor(() => expect(dialog).toHaveAttribute('aria-busy', 'true'));
+    expect(screen.getByRole('alertdialog')).toBeInTheDocument();
+    expect(dialog.contains(document.activeElement)).toBe(true);
+    await user.keyboard('{Escape}');
+    await user.keyboard('{Enter}');
+    await user.click(dialog.parentElement as HTMLElement);
+    expect(screen.getByRole('alertdialog')).toBeInTheDocument();
+    expect(mocked.save).toHaveBeenCalledTimes(1);
+
+    finish({} as never);
+    await waitFor(() => expect(screen.queryByRole('alertdialog')).not.toBeInTheDocument());
+    expect(await screen.findByRole('status')).toHaveTextContent('Cambios guardados como nueva revisión');
+    await waitFor(() => expect(screen.getByRole('button', { name: 'Guardar como nueva revisión' })).toHaveFocus());
   });
 });

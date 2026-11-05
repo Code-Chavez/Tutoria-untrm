@@ -28,3 +28,9 @@ export function useUsers() {
     refresh,
   };
 }
+
+/** Dominios de correo permitidos para las cuentas (RF-01). Casi nunca cambian: se piden una vez. */
+export function useEmailPolicy() {
+  const query = useQuery({ queryKey: ['users', 'email-policy'], queryFn: () => userService.getEmailPolicy(), staleTime: Infinity });
+  return query.data;
+}

@@ -1,7 +1,7 @@
-import { useState } from 'react';
 import { PageHeader, Card, Button, StatCard, EmptyState, TableSkeleton } from '@shared/components/ui';
 import { ReportFilters } from '@shared/reportFilters/ReportFilters';
-import { EMPTY_REPORT_FILTERS, toFilterParams } from '@shared/reportFilters/reportFilterService';
+import { toFilterParams } from '@shared/reportFilters/reportFilterService';
+import { useReportFiltersUrl } from '@shared/reportFilters/useReportFiltersUrl';
 import { PieChartIcon, UsersIcon, ActivityIcon, SendIcon, StarIcon } from '@shared/components/icons';
 import { ExportButtons } from '@shared/components/ExportButtons';
 import { downloadFile } from '@shared/services/downloadFile';
@@ -42,7 +42,7 @@ function BarChart({ title, rows, legend }: { title: string; rows: BarRow[]; lege
   const max = Math.max(1, ...rows.map((r) => r.value + (r.extra ?? 0)));
   return (
     <Card padded className={styles.chart}>
-      <h3>{title}</h3>
+      <h2>{title}</h2>
       {legend && (
         <p className={styles.legend}>
           <span className={styles.swatchA} /> {legend[0]} <span className={styles.swatchB} /> {legend[1]}
@@ -75,7 +75,8 @@ function BarChart({ title, rows, legend }: { title: string; rows: BarRow[]; lege
 }
 
 export function IndicatorsPage() {
-  const [values, setValues] = useState(EMPTY_REPORT_FILTERS);
+  // Los filtros del reporte viven en la URL: recargar o compartir el enlace conserva el mismo reporte.
+  const [values, setValues] = useReportFiltersUrl();
 
   const filters = toFilterParams(values);
   const { report, loading, error, refresh } = useIndicators(filters);
@@ -114,20 +115,20 @@ export function IndicatorsPage() {
             <StatCard
               icon={<UsersIcon size={18} />}
               value={report.students.active}
-              label="Tutorados activos"
+              label="Estudiantes activos"
               hint={`${report.students.assignedPct}% con tutor asignado`}
             />
             <StatCard
               icon={<ActivityIcon size={18} />}
               value={`${report.sessions.coveragePct}%`}
               label="Cobertura de sesiones"
-              hint={`${report.sessions.studentsServed} tutorados atendidos · ${report.sessions.total} sesiones`}
+              hint={`${report.sessions.studentsServed} estudiantes atendidos · ${report.sessions.total} sesiones`}
               tone="success"
             />
             <StatCard
               icon={<UsersIcon size={18} />}
               value={`${report.risk.atRiskPct}%`}
-              label="Tutorados en riesgo"
+              label="Estudiantes en riesgo"
               hint={`${report.risk.atRisk} de ${report.students.active}`}
               tone="danger"
             />
@@ -170,7 +171,7 @@ export function IndicatorsPage() {
               }))}
             />
             <BarChart
-              title="Tutorados en riesgo por escuela"
+              title="Estudiantes en riesgo por escuela"
               rows={report.risk.bySchool.map((s) => ({
                 label: s.schoolName,
                 value: s.atRisk,

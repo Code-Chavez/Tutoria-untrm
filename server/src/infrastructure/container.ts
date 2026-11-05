@@ -1,6 +1,10 @@
 import { prisma } from './database/prisma';
 import { PrismaUserRepository } from './repositories/PrismaUserRepository';
 import { CachedRoleRepository } from '@infrastructure/repositories/CachedRoleRepository';
+import { PrismaRoleAdminRepository } from '@infrastructure/repositories/PrismaRoleAdminRepository';
+import { UpdateRoleUseCase } from '@application/use-cases/roles/UpdateRoleUseCase';
+import { SetRoleActiveUseCase } from '@application/use-cases/roles/SetRoleActiveUseCase';
+import { clearRolePermissionCache } from '@infrastructure/security/rolePermissions';
 import { PrismaRoleRepository } from './repositories/PrismaRoleRepository';
 import { PrismaSignedDocumentRepository } from './repositories/PrismaSignedDocumentRepository';
 import {
@@ -30,6 +34,20 @@ import { PrismaStudentReferralRepository } from './repositories/PrismaStudentRef
 import { PrismaSystemParameterRepository } from './repositories/PrismaSystemParameterRepository';
 import { PrismaSupportContactRepository } from './repositories/PrismaSupportContactRepository';
 import { PrismaSchoolRepository } from './repositories/PrismaSchoolRepository';
+import { PrismaUserAccessPolicyRepository } from './repositories/PrismaUserAccessPolicyRepository';
+import { ImportTutorsUseCase } from '@application/use-cases/users/ImportTutorsUseCase';
+import { GetTutorAcceptanceUseCase, RequestTutorAcceptanceUseCase, RespondTutorAcceptanceUseCase } from '@application/use-cases/cycle-tutors/TutorAcceptanceUseCases';
+import { ExcelTutorParser } from './parsers/ExcelTutorParser';
+import { PrismaAdmonitionRepository } from './repositories/PrismaAdmonitionRepository';
+import { AdmonitionScopeResolver, GetAdmonitionFileUseCase, IssueAdmonitionUseCase, ListAdmonishableTutorsUseCase, ListAdmonitionsUseCase } from '@application/use-cases/admonitions/AdmonitionUseCases';
+import { PrismaCycleTutorRepository } from './repositories/PrismaCycleTutorRepository';
+import { PrismaDeclineNoticeRepository } from './repositories/PrismaDeclineNoticeRepository';
+import { DeclineNoticeProcessor } from '@application/use-cases/cycle-tutors/DeclineNoticeProcessor';
+import { ResendDeclineNoticeUseCase } from '@application/use-cases/cycle-tutors/ResendDeclineNoticeUseCase';
+import { CycleTutorApplier, ListCycleTutorsUseCase, RemoveCycleTutorUseCase, SetCycleTutorUseCase } from '@application/use-cases/cycle-tutors/CycleTutorUseCases';
+import { GetInstitutionalPendingUseCase } from '@application/use-cases/pending/GetInstitutionalPendingUseCase';
+import { PrismaCampusRepository } from './repositories/PrismaCampusRepository';
+import { CreateCampusUseCase, ListCampusesUseCase, SetSchoolCampusUseCase, UpdateCampusUseCase } from '@application/use-cases/campuses/CampusUseCases';
 import { PrismaFacultyRepository } from './repositories/PrismaFacultyRepository';
 import { PrismaWorkPlanRepository } from './repositories/PrismaWorkPlanRepository';
 import { StudentAccessGuard } from '@application/access/StudentAccessGuard';
@@ -90,7 +108,8 @@ const tokenService = new JwtTokenService();
 const evidenceStorage = new LocalEvidenceStorage();
 
 // Política única de alcance sobre los tutorados (Art. 9.a y 14.c): la usan todos los casos de uso que tocan datos de un estudiante.
-const studentAccessGuard = new StudentAccessGuard(userRepository, roleRepository, schoolRepository, studentRepository);
+const userAccessPolicyRepository = new PrismaUserAccessPolicyRepository(prisma);
+const studentAccessGuard = new StudentAccessGuard(userRepository, roleRepository, schoolRepository, studentRepository, userAccessPolicyRepository);
 
 const loginUseCase = new LoginUseCase(
   userRepository,
@@ -192,13 +211,22 @@ const requestPasswordResetUseCase = new RequestPasswordResetUseCase(
 
 const resetPasswordUseCase = new ResetPasswordUseCase(passwordResetTokenRepository, passwordHasher, auditLogRepository);
 
+import { ListDataRequestsUseCase, MarkDataRequestReceivedUseCase, SendDataRequestUseCase, SetSchoolRequestEmailUseCase } from '@application/use-cases/data-requests/DataRequestUseCases';
+import { PrismaDataRequestRepository } from './repositories/PrismaDataRequestRepository';
+import { PrismaSchoolContactRepository } from './repositories/PrismaSchoolContactRepository';
+import { ExcelStudentParser } from './parsers/ExcelStudentParser';
+import { PrismaPeriodEnrollmentRepository } from './repositories/PrismaPeriodEnrollmentRepository';
+import { ClosePeriodUseCase, GetCurrentPeriodUseCase, GetPeriodClosureUseCase, ReopenPeriodUseCase } from '@application/use-cases/periods/PeriodLifecycleUseCases';
+import { PrismaPeriodSummaryRepository } from './repositories/PrismaPeriodSummaryRepository';
 import { CreateUserUseCase } from '@application/use-cases/users/CreateUserUseCase';
+import { IssueInvitationUseCase } from '@application/use-cases/users/IssueInvitationUseCase';
 import { UpdateUserUseCase } from '@application/use-cases/users/UpdateUserUseCase';
 import { ToggleUserStatusUseCase } from '@application/use-cases/users/ToggleUserStatusUseCase';
 import { ListUsersUseCase } from '@application/use-cases/users/ListUsersUseCase';
 import { ListRolesUseCase } from '@application/use-cases/roles/ListRolesUseCase';
 import { CreateRoleUseCase } from '@application/use-cases/roles/CreateRoleUseCase';
 import { AssignRoleUseCase } from '@application/use-cases/roles/AssignRoleUseCase';
+import { GetUserAccessUseCase, SetUserAccessUseCase } from '@application/use-cases/users/UserAccessScopeUseCases';
 import { GetProfileUseCase } from '@application/use-cases/profile/GetProfileUseCase';
 import { UpdateProfileUseCase } from '@application/use-cases/profile/UpdateProfileUseCase';
 import { ChangePasswordUseCase } from '@application/use-cases/profile/ChangePasswordUseCase';
@@ -225,6 +253,11 @@ import {
   ListOwnTutoringRequestsUseCase,
 } from '@application/use-cases/tutoring-requests/ListTutoringRequestsUseCase';
 import { UpdateTutoringRequestStatusUseCase } from '@application/use-cases/tutoring-requests/UpdateTutoringRequestStatusUseCase';
+import { createEmailPolicy } from '@application/validation/email';
+import { SessionNotifier } from '@application/services/SessionNotifier';
+import { TutoringRequestRouter } from '@application/use-cases/tutoring-requests/TutoringRequestRouter';
+import { GetOwnRequestRecipientUseCase } from '@application/use-cases/tutoring-requests/GetOwnRequestRecipientUseCase';
+import { TutoringRequestLinker } from '@application/use-cases/tutoring-requests/TutoringRequestLinker';
 import { ScheduleSessionUseCase } from '@application/use-cases/sessions/ScheduleSessionUseCase';
 import { ListSessionsUseCase } from '@application/use-cases/sessions/ListSessionsUseCase';
 import { RegisterAttendanceUseCase } from '@application/use-cases/sessions/RegisterAttendanceUseCase';
@@ -290,13 +323,49 @@ import { GetNotificationsUseCase } from '@application/use-cases/notifications/Ge
 import { MarkAllNotificationsReadUseCase } from '@application/use-cases/notifications/MarkAllNotificationsReadUseCase';
 import { MarkNotificationReadUseCase } from '@application/use-cases/notifications/MarkNotificationReadUseCase';
 
-const createUserUseCase = new CreateUserUseCase(userRepository, passwordHasher, roleRepository);
-const updateUserUseCase = new UpdateUserUseCase(userRepository, roleRepository);
+const periodSummaryRepository = new PrismaPeriodSummaryRepository(prisma);
+const periodEnrollmentRepository = new PrismaPeriodEnrollmentRepository(prisma);
+const dataRequestRepository = new PrismaDataRequestRepository(prisma);
+const schoolContactRepository = new PrismaSchoolContactRepository(prisma);
+const sendDataRequestUseCase = new SendDataRequestUseCase(studentAccessGuard, academicPeriodRepository, schoolRepository, facultyRepository, userRepository, mailer, new ExcelStudentParser(), dataRequestRepository, auditLogRepository, { build: () => new ExcelTutorParser().buildTemplate() });
+const listDataRequestsUseCase = new ListDataRequestsUseCase(studentAccessGuard, schoolRepository, academicPeriodRepository, dataRequestRepository);
+const markDataRequestReceivedUseCase = new MarkDataRequestReceivedUseCase(studentAccessGuard, dataRequestRepository);
+const setSchoolRequestEmailUseCase = new SetSchoolRequestEmailUseCase(studentAccessGuard, schoolRepository, schoolContactRepository, auditLogRepository);
+const getCurrentPeriodUseCase = new GetCurrentPeriodUseCase(academicPeriodRepository, studentRepository, periodEnrollmentRepository);
+const getPeriodClosureUseCase = new GetPeriodClosureUseCase(academicPeriodRepository, periodSummaryRepository);
+const closePeriodUseCase = new ClosePeriodUseCase(academicPeriodRepository, periodSummaryRepository, auditLogRepository);
+const reopenPeriodUseCase = new ReopenPeriodUseCase(academicPeriodRepository, auditLogRepository);
+// Política de dominio de las cuentas de usuario (RF-01), del despliegue; la usan el alta, la edición y la carga de docentes.
+const emailPolicy = createEmailPolicy(env.EMAIL_ALLOWED_DOMAINS);
+const createUserUseCase = new CreateUserUseCase(userRepository, passwordHasher, roleRepository, schoolRepository, facultyRepository, emailPolicy);
+const issueInvitationUseCase = new IssueInvitationUseCase(userRepository, passwordResetTokenRepository, mailer, auditLogRepository, {
+  publicUrl: env.PUBLIC_APP_URL,
+  ttlHours: env.INVITATION_TTL_HOURS,
+});
+const admonitionRepository = new PrismaAdmonitionRepository(prisma);
+const admonitionScope = new AdmonitionScopeResolver(userRepository, roleRepository, studentAccessGuard);
+const listAdmonitionsUseCase = new ListAdmonitionsUseCase(admonitionScope, userRepository, schoolRepository, admonitionRepository);
+const listAdmonishableTutorsUseCase = new ListAdmonishableTutorsUseCase(admonitionScope, userRepository, roleRepository, schoolRepository);
+const issueAdmonitionUseCase = new IssueAdmonitionUseCase(admonitionScope, userRepository, roleRepository, schoolRepository, admonitionRepository, evidenceStorage, auditLogRepository);
+const getAdmonitionFileUseCase = new GetAdmonitionFileUseCase(admonitionScope, admonitionRepository, evidenceStorage);
+const importTutorsUseCase = new ImportTutorsUseCase(userRepository, roleRepository, schoolRepository, createUserUseCase, issueInvitationUseCase, emailPolicy);
+const updateUserUseCase = new UpdateUserUseCase(userRepository, roleRepository, schoolRepository, facultyRepository, emailPolicy);
 const toggleUserStatusUseCase = new ToggleUserStatusUseCase(userRepository);
 const listUsersUseCase = new ListUsersUseCase(userRepository);
 const listRolesUseCase = new ListRolesUseCase(roleRepository);
-const createRoleUseCase = new CreateRoleUseCase(roleRepository);
-const assignRoleUseCase = new AssignRoleUseCase(userRepository, roleRepository, auditLogRepository);
+// Un cambio de rol rige desde la siguiente petición: se vacían la caché de roles y la de permisos.
+const onRoleChanged = () => {
+  roleRepository.clear();
+  clearRolePermissionCache();
+};
+const roleAdminRepository = new PrismaRoleAdminRepository(prisma);
+const createRoleUseCase = new CreateRoleUseCase(roleRepository, roleAdminRepository, onRoleChanged);
+const updateRoleUseCase = new UpdateRoleUseCase(roleRepository, roleAdminRepository, onRoleChanged);
+const setRoleActiveUseCase = new SetRoleActiveUseCase(roleRepository, roleAdminRepository, onRoleChanged);
+const assignRoleUseCase = new AssignRoleUseCase(userRepository, roleRepository, auditLogRepository, schoolRepository, facultyRepository);
+
+const getUserAccessUseCase = new GetUserAccessUseCase(userRepository, roleRepository, userAccessPolicyRepository);
+const setUserAccessUseCase = new SetUserAccessUseCase(userRepository, roleRepository, schoolRepository, facultyRepository, userAccessPolicyRepository);
 
 const getProfileUseCase = new GetProfileUseCase(userRepository, roleRepository);
 const updateProfileUseCase = new UpdateProfileUseCase(userRepository, roleRepository);
@@ -307,10 +376,41 @@ const changePasswordUseCase = new ChangePasswordUseCase(
   passwordHasher,
 );
 
-const createStudentUseCase = new CreateStudentUseCase(studentRepository, schoolRepository, studentAccessGuard);
+const cycleTutorRepository = new PrismaCycleTutorRepository(prisma);
+const cycleTutorApplier = new CycleTutorApplier(cycleTutorRepository, studentRepository, tutorAssignmentHistoryRepository);
+const listCycleTutorsUseCase = new ListCycleTutorsUseCase(studentAccessGuard, academicPeriodRepository, cycleTutorRepository, schoolRepository);
+// Aviso a la coordinación del rechazo de un docente (LEV-R05): guardado en cola de forma atómica con el rechazo y entregado por el
+// intento inmediato o por el proceso de fondo, que comparten la misma reserva. Sin SMTP el aviso queda en cola y se explica por qué.
+const declineNoticeRepository = new PrismaDeclineNoticeRepository(prisma);
+const declineNoticeDeliveryEnabled = Boolean(env.SMTP_HOST);
+const declineNoticeProcessor = new DeclineNoticeProcessor(declineNoticeRepository, cycleTutorRepository, userRepository, schoolRepository, academicPeriodRepository, mailer, auditLogRepository, declineNoticeDeliveryEnabled);
+const declineNoticeWorker = declineNoticeDeliveryEnabled ? new EmailOutboxWorker(declineNoticeProcessor, 30_000, console, 'avisos de rechazo') : undefined;
+const getInstitutionalPendingUseCase = new GetInstitutionalPendingUseCase(
+  studentAccessGuard,
+  academicPeriodRepository,
+  schoolRepository,
+  cycleTutorRepository,
+  userRepository,
+  auditLogRepository,
+  tutoringRequestRepository,
+  sessionRepository,
+  studentRepository,
+  declineNoticeRepository,
+  declineNoticeDeliveryEnabled,
+);
+const setCycleTutorUseCase = new SetCycleTutorUseCase(studentAccessGuard, academicPeriodRepository, schoolRepository, userRepository, roleRepository, cycleTutorRepository, cycleTutorApplier, auditLogRepository);
+const removeCycleTutorUseCase = new RemoveCycleTutorUseCase(studentAccessGuard, academicPeriodRepository, cycleTutorRepository, auditLogRepository);
+const acceptanceConfig = { publicUrl: env.PUBLIC_APP_URL, ttlHours: env.INVITATION_TTL_HOURS };
+const requestTutorAcceptanceUseCase = new RequestTutorAcceptanceUseCase(studentAccessGuard, academicPeriodRepository, schoolRepository, userRepository, cycleTutorRepository, mailer, auditLogRepository, acceptanceConfig);
+const getTutorAcceptanceUseCase = new GetTutorAcceptanceUseCase(cycleTutorRepository, userRepository, schoolRepository, academicPeriodRepository, systemParameterRepository);
+const respondTutorAcceptanceUseCase = new RespondTutorAcceptanceUseCase(cycleTutorRepository, userRepository, systemParameterRepository, declineNoticeRepository, auditLogRepository, issueInvitationUseCase, (attemptId) => {
+  void declineNoticeProcessor.attemptNow(attemptId);
+});
+const resendDeclineNoticeUseCase = new ResendDeclineNoticeUseCase(studentAccessGuard, academicPeriodRepository, schoolRepository, userRepository, cycleTutorRepository, declineNoticeRepository, declineNoticeProcessor, auditLogRepository);
+const createStudentUseCase = new CreateStudentUseCase(studentRepository, schoolRepository, studentAccessGuard, academicPeriodRepository, periodEnrollmentRepository, cycleTutorApplier);
 const updateStudentUseCase = new UpdateStudentUseCase(studentRepository, schoolRepository, studentAccessGuard);
 const listStudentsUseCase = new ListStudentsUseCase(studentRepository, studentAccessGuard);
-const importStudentsUseCase = new ImportStudentsUseCase(studentRepository, schoolRepository, studentAccessGuard);
+const importStudentsUseCase = new ImportStudentsUseCase(studentRepository, schoolRepository, studentAccessGuard, academicPeriodRepository, periodEnrollmentRepository, cycleTutorApplier);
 const markStudentRiskUseCase = new MarkStudentRiskUseCase(studentRepository, studentAccessGuard);
 const linkStudentPortalAccountUseCase = new LinkStudentPortalAccountUseCase(
   studentRepository,
@@ -379,11 +479,14 @@ const listTutoringRequestsUseCase = new ListTutoringRequestsUseCase(
   studentAccessGuard,
   studentRepository,
   userRepository,
+  sessionRepository,
 );
 const listOwnTutoringRequestsUseCase = new ListOwnTutoringRequestsUseCase(
   tutoringRequestRepository,
   studentRepository,
   userRepository,
+  sessionRepository,
+  auditLogRepository,
 );
 const updateTutoringRequestStatusUseCase = new UpdateTutoringRequestStatusUseCase(
   tutoringRequestRepository,
@@ -394,14 +497,29 @@ const updateTutoringRequestStatusUseCase = new UpdateTutoringRequestStatusUseCas
   notificationRepository,
   auditLogRepository,
 );
+// Una sola regla de a quién llega una solicitud: la usa el registro y la consulta previa del estudiante.
+const tutoringRequestRouter = new TutoringRequestRouter(schoolRepository, userRepository, roleRepository);
+const getOwnRequestRecipientUseCase = new GetOwnRequestRecipientUseCase(studentRepository, userRepository, tutoringRequestRouter);
 const createOwnTutoringRequestUseCase = new CreateOwnTutoringRequestUseCase(
   studentRepository,
   createTutoringRequestUseCase,
 );
+const tutoringRequestLinker = new TutoringRequestLinker(
+  tutoringRequestRepository,
+  studentAccessGuard,
+  studentRepository,
+  notificationRepository,
+  auditLogRepository,
+  sessionRepository,
+);
+// Avisa a los tutorados cuando se programa, reprograma o cancela una sesión (aviso en el sistema y, si está activo, su correo).
+const sessionNotifier = new SessionNotifier(studentRepository, notificationRepository);
 const scheduleSessionUseCase = new ScheduleSessionUseCase(
   sessionRepository,
   studentAccessGuard,
   systemParameterRepository,
+  tutoringRequestLinker,
+  sessionNotifier,
 );
 const listSessionsUseCase = new ListSessionsUseCase(
   sessionRepository,
@@ -415,8 +533,8 @@ const registerAttendanceUseCase = new RegisterAttendanceUseCase(
   systemParameterRepository,
   academicPeriodRepository,
 );
-const rescheduleSessionUseCase = new RescheduleSessionUseCase(sessionRepository);
-const cancelSessionUseCase = new CancelSessionUseCase(sessionRepository);
+const rescheduleSessionUseCase = new RescheduleSessionUseCase(sessionRepository, sessionNotifier);
+const cancelSessionUseCase = new CancelSessionUseCase(sessionRepository, sessionNotifier);
 const uploadSessionEvidenceUseCase = new UploadSessionEvidenceUseCase(
   sessionRepository,
   evidenceStorage,
@@ -428,6 +546,11 @@ const getSessionEvidenceFileUseCase = new GetSessionEvidenceFileUseCase(
   studentAccessGuard,
 );
 const listSchoolsUseCase = new ListSchoolsUseCase(schoolRepository);
+const campusRepository = new PrismaCampusRepository(prisma);
+const listCampusesUseCase = new ListCampusesUseCase(campusRepository, schoolRepository);
+const createCampusUseCase = new CreateCampusUseCase(campusRepository, auditLogRepository);
+const updateCampusUseCase = new UpdateCampusUseCase(campusRepository, auditLogRepository);
+const setSchoolCampusUseCase = new SetSchoolCampusUseCase(schoolRepository, campusRepository, auditLogRepository);
 const listFacultiesUseCase = new ListFacultiesUseCase(facultyRepository);
 const listWorkPlansUseCase = new ListWorkPlansUseCase(
   userRepository,
@@ -568,6 +691,7 @@ const createReferralUseCase = new CreateReferralUseCase(
   userRepository,
   roleRepository,
   notificationRepository,
+  tutoringRequestLinker,
 );
 const getReferralConstanciaUseCase = new GetReferralConstanciaUseCase(
   studentReferralRepository,
@@ -663,6 +787,9 @@ const getHomePanelUseCase = new GetHomePanelUseCase(
   getIndicatorsUseCase,
   getRiskAlertsUseCase,
   getEvaluationStatusUseCase,
+  listTutoringRequestsUseCase,
+  listOwnTutoringRequestsUseCase,
+  getOwnRequestRecipientUseCase,
 );
 
 const getBrandingUseCase = new GetBrandingUseCase(brandingRepository);
@@ -698,10 +825,12 @@ export const container = {
     evaluationWindowRepository,
   },
   services: {
+    emailPolicy,
     passwordHasher,
     tokenService,
     evidenceStorage,
     emailOutboxWorker,
+    declineNoticeWorker,
   },
   useCases: {
     loginUseCase,
@@ -718,12 +847,25 @@ export const container = {
     requestPasswordResetUseCase,
     resetPasswordUseCase,
     createUserUseCase,
+    getCurrentPeriodUseCase,
+    sendDataRequestUseCase,
+    listDataRequestsUseCase,
+    markDataRequestReceivedUseCase,
+    setSchoolRequestEmailUseCase,
+    getPeriodClosureUseCase,
+    closePeriodUseCase,
+    reopenPeriodUseCase,
+    issueInvitationUseCase,
     updateUserUseCase,
     toggleUserStatusUseCase,
     listUsersUseCase,
     listRolesUseCase,
     createRoleUseCase,
+    updateRoleUseCase,
+    setRoleActiveUseCase,
     assignRoleUseCase,
+    getUserAccessUseCase,
+    setUserAccessUseCase,
     getProfileUseCase,
     updateProfileUseCase,
     changePasswordUseCase,
@@ -747,6 +889,7 @@ export const container = {
     createOwnTutoringRequestUseCase,
     listTutoringRequestsUseCase,
     listOwnTutoringRequestsUseCase,
+    getOwnRequestRecipientUseCase,
     updateTutoringRequestStatusUseCase,
     scheduleSessionUseCase,
     listSessionsUseCase,
@@ -757,6 +900,23 @@ export const container = {
     listSessionEvidenceUseCase,
     getSessionEvidenceFileUseCase,
     listSchoolsUseCase,
+    listCampusesUseCase,
+    importTutorsUseCase,
+    listAdmonitionsUseCase,
+    listAdmonishableTutorsUseCase,
+    issueAdmonitionUseCase,
+    getAdmonitionFileUseCase,
+    listCycleTutorsUseCase,
+    getInstitutionalPendingUseCase,
+    requestTutorAcceptanceUseCase,
+    getTutorAcceptanceUseCase,
+    respondTutorAcceptanceUseCase,
+    resendDeclineNoticeUseCase,
+    setCycleTutorUseCase,
+    removeCycleTutorUseCase,
+    createCampusUseCase,
+    updateCampusUseCase,
+    setSchoolCampusUseCase,
     listFacultiesUseCase,
     listWorkPlansUseCase,
     getWorkPlanUseCase,

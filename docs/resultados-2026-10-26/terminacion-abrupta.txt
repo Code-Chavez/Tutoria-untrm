@@ -1,0 +1,24 @@
+# Terminación abrupta (SIGKILL) de una corrida de integración, y recuperación manual (26/10/2026)
+# Base: sit_db_test exclusiva (contenedor sit-postgres-test), con la seed y 7 asignaciones de ciclo preexistentes; foto previa de las 205 filas.
+# Prueba descartable (archivo temporal, no versionado): cambia login_max_attempts de 5 a 9, crea una sede y ejecuta process.kill(process.pid, 'SIGKILL')
+# sin afterAll ni globalTeardown. Comando: node scripts/test-integration.js tests/integration/zzKill   (salida del proceso: 1)
+
+ANTES:                  login_max_attempts=5  filas_en_el_registro=0    fotos_de_corrida=0
+DESPUÉS DE MATAR:       login_max_attempts=9  filas_en_el_registro=1    fotos_de_corrida=205 (corrida dd84d67a)
+candado entre archivos: LIBERADO (pg_try_advisory_lock devolvió t: la conexión murió con el proceso)
+fila huérfana:          campuses | sit-jest:dd84d67a:32356:zzKill
+
+# Conclusión medida: el candado se libera solo, PERO el parámetro queda cambiado y la fila creada queda sin borrar.
+# globalTeardown no corre cuando el proceso de jest muere, así que nada se restaura ni se verifica.
+
+# Una corrida SIGUIENTE (node scripts/test-integration.js tests/integration/schoolCycles) pasó sin avisar de nada:
+tras la corrida siguiente: login_max_attempts=9  fotos_de_corridas=1  filas_de_registro_huérfanas=1
+# Es decir: la corrida siguiente toma el valor 9 como «preexistente» y no lo detecta; la foto y la fila de la corrida muerta siguen ahí.
+
+# Recuperación manual con la foto de la corrida interrumpida (comandos del documento docs/PRUEBAS_DE_INTEGRACION.md §3.5):
+test_diff_rows('dd84d67a'): system_parameters/d539447c-b5c4-4f6a-a699-0bfbfa4b25cd MODIFICADA
+UPDATE 7                       (se reescribieron los 7 parámetros con el valor de la foto; solo uno difería)
+filas que no se pudieron borrar: 0
+DELETE 205                     (foto descartada)
+fotos restantes: 0 ; filas de registro restantes: 0 ; login_max_attempts=5
+comparación fila por fila (205 filas, 41 tablas) contra la foto inicial: SIN DIFERENCIAS

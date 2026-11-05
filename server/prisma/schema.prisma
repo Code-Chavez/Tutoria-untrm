@@ -27,9 +27,21 @@ model User {
 
   roleId String @map("role_id")
   role   Role   @relation(fields: [roleId], references: [id])
+  accessPolicy UserAccessPolicy?
 
   // Para el Profesional de Servicio (HU-30), indica a qué servicio pertenece
   service String?
+
+  // Para el Docente Tutor: escuela profesional a la que pertenece (de ahí salen su facultad y su sede). Solo tutorea estudiantes de su escuela.
+  schoolId String? @map("school_id")
+  school   School? @relation("TutorSchool", fields: [schoolId], references: [id])
+  cycleAssignments CycleTutorAssignment[]
+
+  // Para el Decano: facultad a la que pertenece (solo amonesta a los docentes de su facultad).
+  facultyId String?  @map("faculty_id")
+  faculty   Faculty? @relation("FacultyDean", fields: [facultyId], references: [id])
+  admonitionsReceived Admonition[] @relation("AdmonitionTutor")
+  admonitionsIssued   Admonition[] @relation("AdmonitionIssuer")
 
 
   auditLogs     AuditLog[]
@@ -44,6 +56,7 @@ model User {
   interviewsConducted  TutorInterview[]
   followUpsConducted   TutorFollowUp[]
   coordinatedSchools   School[]                 @relation("SchoolCoordinator")
+  dataRequestsMade     DataRequest[]           @relation("DataRequestRequester")
   requestsCreated      TutoringRequest[]        @relation("RequestsCreated")
   requestsRouted       TutoringRequest[]        @relation("RequestsRouted")
   sessionsAsTutor      Session[]                @relation("SessionsAsTutor")
@@ -57,6 +70,8 @@ model User {
   workPlansAuthored      WorkPlan[]        @relation("WorkPlansAuthored")
   semesterReports        TutorSemesterReport[]
 
+  @@index([schoolId])
+  @@index([facultyId])
   @@map("users")
 }
 
@@ -65,11 +80,32 @@ model Role {
   name        String   @unique
   description String
   createdAt   DateTime @default(now()) @map("created_at")
+  /// Roles base (los sembrados): protegidos; solo se pueden ver y copiar como plantilla.
+  isBase      Boolean  @default(false) @map("is_base")
+  /// Un rol desactivado no concede permisos ni se puede asignar.
+  isActive    Boolean  @default(true) @map("is_active")
 
   users       User[]
+  accessPolicies UserAccessPolicy[]
   permissions RolePermission[]
 
   @@map("roles")
+}
+
+// No se crean políticas para las cuentas históricas: conservan su alcance vigente hasta una asignación explícita.
+model UserAccessPolicy {
+  id         String @id @default(uuid())
+  userId     String @unique @map("user_id")
+  roleId     String @map("role_id")
+  kind       String
+  schoolIds  String[] @default([]) @map("school_ids")
+  facultyIds String[] @default([]) @map("faculty_ids")
+  service    String?
+  revision   Int @default(0)
+  user       User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  role       Role @relation(fields: [roleId], references: [id], onDelete: Restrict)
+
+  @@map("user_access_policies")
 }
 
 model Permission {
@@ -151,14 +187,27 @@ model Faculty {
   createdAt DateTime @default(now()) @map("created_at")
 
   schools School[]
+  deans   User[]   @relation("FacultyDean")
 
   @@map("faculties")
+}
+
+model Campus {
+  id        String   @id @default(uuid())
+  name      String   @unique
+  isActive  Boolean  @default(true) @map("is_active")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  schools School[]
+
+  @@map("campuses")
 }
 
 model School {
   id        String   @id @default(uuid())
   name      String
   facultyId String   @map("faculty_id")
+  cycleCount Int     @default(10) @map("cycle_count")
   isActive  Boolean  @default(true) @map("is_active")
   createdAt DateTime @default(now()) @map("created_at")
 
@@ -170,10 +219,21 @@ model School {
   coordinatorId String? @map("coordinator_id")
   coordinator   User?   @relation("SchoolCoordinator", fields: [coordinatorId], references: [id])
 
+  // Sede donde se dicta la escuela (una sola); la configura Vicerrectorado o la DBU.
+  campusId String? @map("campus_id")
+  campus   Campus? @relation(fields: [campusId], references: [id])
+  tutors   User[]  @relation("TutorSchool")
+  cycleTutors CycleTutorAssignment[]
+
+  // Correo al que se piden las listas de estudiantes de la escuela cada periodo; lo configura quien administra o coordina.
+  requestEmail String?        @map("request_email")
+  dataRequests DataRequest[]
+
   evaluationWindows EvaluationWindow[]
   workPlans         WorkPlan[]
 
   @@unique([name, facultyId])
+  @@index([campusId])
   @@map("schools")
 }
 
@@ -184,6 +244,15 @@ model AcademicPeriod {
   endDate   DateTime @map("end_date")
   isActive  Boolean  @default(true) @map("is_active")
   createdAt DateTime @default(now()) @map("created_at")
+
+  // Cierre del periodo (fase 1 de la tutoría por ciclo): quién y cuándo lo cerró, y el resumen de lo ocurrido en él.
+  closedAt       DateTime? @map("closed_at")
+  closedById     String?   @map("closed_by_id")
+  closureSummary Json?     @map("closure_summary")
+
+  enrollments PeriodEnrollment[]
+  cycleTutors CycleTutorAssignment[]
+  dataRequests DataRequest[]
 
   evaluations       TutorEvaluation[]
   evaluationWindows EvaluationWindow[]
@@ -227,6 +296,7 @@ model Student {
   assignmentHistory TutorAssignmentHistory[]
   signedDocuments   SignedDocument[]
   periodSnapshots   StudentPeriodSnapshot[]
+  enrollments       PeriodEnrollment[]
   interviews        TutorInterview[]
   followUps         TutorFollowUp[]
   supportContact    SupportContact?
@@ -394,6 +464,8 @@ model TutoringRequest {
   handledAt    DateTime? @map("handled_at")
   // Sesión en la que se atendió (opcional).
   sessionId    String?   @map("session_id")
+  // Derivación a un servicio con la que se atendió (opcional). Una solicitud lleva a una sesión o a una derivación, no a ambas.
+  referralId   String?   @map("referral_id")
 
   @@index([studentId])
   @@index([routedToId])
@@ -408,6 +480,8 @@ model TutoringRequest {
 model Session {
   id        String   @id @default(uuid())
   createdAt DateTime @default(now()) @map("created_at")
+
+  notifications Notification[]
 
   tutorId String @map("tutor_id")
   tutor   User   @relation("SessionsAsTutor", fields: [tutorId], references: [id])
@@ -592,6 +666,7 @@ model Notification {
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   // 'REFERRAL_CREATED' | 'REFERRAL_STATUS_CHANGED' | 'TUTORING_REQUEST_CREATED' | 'TUTORING_REQUEST_UPDATED' | 'TUTORING_REQUEST_RECEIVED'
+  // | 'SESSION_SCHEDULED' | 'SESSION_RESCHEDULED' | 'SESSION_CANCELLED'
   type    String
   message String
 
@@ -602,6 +677,9 @@ model Notification {
   // Solicitud de tutoría a la que se refiere el aviso (R01).
   tutoringRequestId String?          @map("tutoring_request_id")
   tutoringRequest   TutoringRequest? @relation(fields: [tutoringRequestId], references: [id], onDelete: Cascade)
+  // Sesión a la que se refiere el aviso (programada, reprogramada o cancelada).
+  sessionId String?  @map("session_id")
+  session   Session? @relation(fields: [sessionId], references: [id], onDelete: Cascade)
 
   read Boolean @default(false)
 
@@ -609,6 +687,7 @@ model Notification {
   emailOutbox EmailOutbox?
 
   @@index([userId, read])
+  @@index([sessionId])
   @@map("notifications")
 }
 
@@ -870,4 +949,173 @@ model EmailOutbox {
 
   @@index([status, nextAttemptAt])
   @@map("email_outbox")
+}
+
+// Matrícula por periodo: quiénes están en la tutoría de ese periodo (se carga al inicio de cada ciclo). Un estudiante que
+// no figura en la carga del periodo vigente queda en solo lectura: no puede solicitar ni responder.
+model PeriodEnrollment {
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now()) @map("created_at")
+
+  periodId  String         @map("period_id")
+  period    AcademicPeriod @relation(fields: [periodId], references: [id], onDelete: Cascade)
+  studentId String         @map("student_id")
+  student   Student        @relation(fields: [studentId], references: [id], onDelete: Cascade)
+
+  schoolId String @map("school_id")
+  cycle    Int
+
+  @@unique([periodId, studentId])
+  @@index([periodId])
+  @@map("period_enrollments")
+}
+
+// Pedido por correo de las listas (estudiantes) a la persona que las entrega; queda registrado para saber qué se pidió y si llegó.
+model DataRequest {
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now()) @map("created_at")
+
+  periodId String         @map("period_id")
+  period   AcademicPeriod @relation(fields: [periodId], references: [id], onDelete: Cascade)
+  schoolId String         @map("school_id")
+  school   School         @relation(fields: [schoolId], references: [id])
+
+  // Qué lista se pide: la de estudiantes o la de docentes tutores (solo la DBU pide esta).
+  kind    String @default("ESTUDIANTES")
+  toEmail String @map("to_email")
+  cycles  Int[]
+  note    String?
+
+  requestedById String @map("requested_by_id")
+  requestedBy   User   @relation("DataRequestRequester", fields: [requestedById], references: [id])
+
+  // Estado del ENVÍO (no de la recepción ni de la carga de la lista):
+  //   PENDIENTE = guardado, con un intento de envío en curso; ENVIADO = aceptado por el servidor de correo;
+  //   FALLIDO = se demostró que no fue aceptado (se puede reenviar); INCIERTO = no se puede saber si el correo salió.
+  status String  @default("ENVIADO")
+  error  String?
+
+  receivedAt   DateTime? @map("received_at")
+  receivedById String?   @map("received_by_id")
+
+  // Idempotencia: la misma persona repitiendo el mismo operationId recibe el resultado ya guardado, no otro envío. contentHash
+  // resume lo que se envía (destinatario, nota, ciclos…) para rechazar un identificador reutilizado con otro contenido.
+  // Nulos en los pedidos anteriores a esta función: no se les atribuye nada que no se pueda acreditar.
+  operationId String? @map("operation_id")
+  contentHash String? @map("content_hash")
+  // Equivalencia para advertir duplicados: tipo, escuela, periodo y alcance (los ciclos normalizados).
+  equivalenceKey String? @map("equivalence_key")
+  // Pedido anterior que la persona confirmó expresamente al reenviar.
+  resendOfId String?       @map("resend_of_id")
+  resendOf   DataRequest?  @relation("DataRequestResend", fields: [resendOfId], references: [id], onDelete: SetNull)
+  resends    DataRequest[] @relation("DataRequestResend")
+  // Inicio del intento de envío en curso (vigencia y protección ante resultados tardíos).
+  attemptStartedAt DateTime? @map("attempt_started_at")
+
+  @@unique([requestedById, operationId])
+  @@index([periodId, schoolId])
+  @@index([equivalenceKey, createdAt])
+  @@map("data_requests")
+}
+
+// Tutor de un ciclo de una escuela en un periodo: un solo tutor por (periodo, escuela, ciclo) y, salvo excepción registrada, un tutor atiende un solo ciclo.
+model CycleTutorAssignment {
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now()) @map("created_at")
+
+  periodId String         @map("period_id")
+  period   AcademicPeriod @relation(fields: [periodId], references: [id], onDelete: Cascade)
+  schoolId String         @map("school_id")
+  school   School         @relation(fields: [schoolId], references: [id])
+  cycle    Int
+  tutorId  String         @map("tutor_id")
+  tutor    User           @relation(fields: [tutorId], references: [id])
+
+  // Excepción: el tutor atiende un segundo ciclo (la facultad no tiene docentes para todos); queda el motivo.
+  isException Boolean @default(false) @map("is_exception")
+  note        String?
+  assignedById String @map("assigned_by_id")
+
+  // Aceptación del docente (fase 4): SIN_SOLICITAR → PENDIENTE (correo con enlace de un solo uso) → ACEPTADA / RECHAZADA.
+  acceptanceStatus    String    @default("SIN_SOLICITAR") @map("acceptance_status")
+  acceptanceTokenHash String?   @unique @map("acceptance_token_hash")
+  acceptanceExpiresAt DateTime? @map("acceptance_expires_at")
+  requestedAt         DateTime? @map("requested_at")
+  respondedAt         DateTime? @map("responded_at")
+  declineReason       String?   @map("decline_reason")
+  // Días, horas y lugar de atención que fija el docente: [{ day: 1-6, start: "HH:MM", end: "HH:MM", place?: string }]
+  availability        Json?
+  // Resumen del aviso a la coordinación cuando el docente rechazó (EN_COLA, ENVIANDO, ENVIADO, FALLIDO, INCIERTO, SIN_DESTINATARIO,
+  // DATOS_INCOMPLETOS, OBSOLETO) y el último intento. Nulos en los rechazos anteriores a esta función: «sin registro», no «sin enviar».
+  declineNoticeStatus    String?                @map("decline_notice_status")
+  declineNoticeAttemptId String?                @map("decline_notice_attempt_id")
+  declineNoticeAttempts  DeclineNoticeAttempt[]
+
+  @@unique([periodId, schoolId, cycle])
+  @@index([periodId, tutorId])
+  @@map("cycle_tutor_assignments")
+}
+
+// Un INTENTO de avisar a la coordinación del rechazo de un docente: el original (lo encola el propio rechazo, de forma atómica) o un
+// reenvío pedido por una persona (con identidad de operación). El resumen vive en la designación; aquí queda cada intento, con el
+// destinatario al que se intentó y su resultado. Sin tokens ni mensajes de error: solo un código corto.
+model DeclineNoticeAttempt {
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now()) @map("created_at")
+
+  assignmentId String                @map("assignment_id")
+  assignment   CycleTutorAssignment @relation(fields: [assignmentId], references: [id], onDelete: Cascade)
+  kind         String // ORIGINAL | REENVIO
+  // EN_COLA (nunca se intentó) → ENVIANDO (intento en curso) → ENVIADO | FALLIDO (demostrado) | INCIERTO | SIN_DESTINATARIO | DATOS_INCOMPLETOS | OBSOLETO
+  status       String                @default("EN_COLA")
+
+  // A qué rechazo corresponde: si la designación cambió, el intento es obsoleto.
+  tutorId    String   @map("tutor_id")
+  declinedAt DateTime @map("declined_at")
+
+  operationId       String? @map("operation_id")
+  requestedById     String? @map("requested_by_id")
+  reason            String?
+  previousAttemptId String? @map("previous_attempt_id")
+  previousAttempt   DeclineNoticeAttempt?  @relation("DeclineNoticeChain", fields: [previousAttemptId], references: [id], onDelete: SetNull)
+  nextAttempts      DeclineNoticeAttempt[] @relation("DeclineNoticeChain")
+
+  recipientUserId String?   @map("recipient_user_id")
+  recipientEmail  String?   @map("recipient_email")
+  startedAt       DateTime? @map("started_at")
+  finishedAt      DateTime? @map("finished_at")
+  errorCode       String?   @map("error_code")
+
+  @@unique([requestedById, operationId])
+  @@index([status, createdAt])
+  @@index([assignmentId, createdAt])
+  @@map("decline_notice_attempts")
+}
+
+// Amonestación a un docente tutor por incumplir su labor de tutoría (Art. del protocolo): la emite el Decano de su facultad y
+// queda registrada con fecha, motivo y, si se tiene, el documento (resolución / memorándum). El sistema no aplica ninguna sanción.
+model Admonition {
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now()) @map("created_at")
+
+  tutorId String @map("tutor_id")
+  tutor   User   @relation("AdmonitionTutor", fields: [tutorId], references: [id])
+  issuedById String @map("issued_by_id")
+  issuedBy   User   @relation("AdmonitionIssuer", fields: [issuedById], references: [id])
+  // Escuela y facultad del docente al momento de amonestar (el docente puede cambiar después).
+  schoolId  String @map("school_id")
+  facultyId String @map("faculty_id")
+
+  issuedOn DateTime @map("issued_on") @db.Date
+  reason   String
+
+  fileName   String? @map("file_name")
+  mimeType   String? @map("mime_type")
+  fileSize   Int?    @map("file_size")
+  storageKey String? @map("storage_key")
+  sha256     String?
+
+  @@index([facultyId, issuedOn])
+  @@index([tutorId])
+  @@map("admonitions")
 }

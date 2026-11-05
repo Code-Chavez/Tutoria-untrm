@@ -1,0 +1,11 @@
+2026-10-27T20:20:32Z
+
+ RUN  v4.1.10 C:/Proyects/Proyects/Tutoria-untrm/client
+
+Not implemented: navigation to another Document
+
+ Test Files  87 passed (87)
+      Tests  553 passed (553)
+   Start at  15:20:44
+   Duration  265.76s (transform 36.21s, setup 255.82s, import 226.67s, tests 383.09s, environment 793.77s)
+

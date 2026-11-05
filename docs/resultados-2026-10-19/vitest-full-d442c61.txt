@@ -1,0 +1,42 @@
+
+ RUN  v4.1.10 C:/Proyects/Proyects/Tutoria-untrm/client
+
+Not implemented: navigation to another Document
+⎯⎯⎯⎯⎯⎯ Unhandled Errors ⎯⎯⎯⎯⎯⎯
+
+Vitest caught 2 unhandled errors during the test run.
+This might cause false positive tests. Resolve unhandled errors to make sure your tests are not affected.
+
+⎯⎯⎯⎯⎯⎯ Unhandled Error ⎯⎯⎯⎯⎯⎯⎯
+Error: [vitest-pool]: Failed to start forks worker for test files C:/Proyects/Proyects/Tutoria-untrm/client/src/features/evaluacion/pages/EvaluationPage.test.tsx.
+ ❯ node_modules/.pnpm/vitest@4.1.10_@vitest+coverage-v8@4.1.10_jsdom@29.1.1_vite@6.4.3/node_modules/vitest/dist/chunks/cli-api.BK8pd4xc.js:3465:94
+ ❯ runNextTicks node:internal/process/task_queues:65:5
+ ❯ listOnTimeout node:internal/timers:549:9
+ ❯ processTimers node:internal/timers:523:7
+ ❯ Pool.schedule node_modules/.pnpm/vitest@4.1.10_@vitest+coverage-v8@4.1.10_jsdom@29.1.1_vite@6.4.3/node_modules/vitest/dist/chunks/cli-api.BK8pd4xc.js:3465:5
+
+Caused by: Error: [vitest-pool-runner]: Timeout waiting for worker to respond
+ ❯ Timeout.<anonymous> node_modules/.pnpm/vitest@4.1.10_@vitest+coverage-v8@4.1.10_jsdom@29.1.1_vite@6.4.3/node_modules/vitest/dist/chunks/cli-api.BK8pd4xc.js:3041:58
+ ❯ listOnTimeout node:internal/timers:588:17
+ ❯ processTimers node:internal/timers:523:7
+
+
+⎯⎯⎯⎯⎯⎯ Unhandled Error ⎯⎯⎯⎯⎯⎯⎯
+Error: [vitest-pool]: Failed to start forks worker for test files C:/Proyects/Proyects/Tutoria-untrm/client/src/features/solicitudes/pages/TutoringRequestsInboxPage.test.tsx.
+ ❯ node_modules/.pnpm/vitest@4.1.10_@vitest+coverage-v8@4.1.10_jsdom@29.1.1_vite@6.4.3/node_modules/vitest/dist/chunks/cli-api.BK8pd4xc.js:3465:94
+ ❯ Pool.schedule node_modules/.pnpm/vitest@4.1.10_@vitest+coverage-v8@4.1.10_jsdom@29.1.1_vite@6.4.3/node_modules/vitest/dist/chunks/cli-api.BK8pd4xc.js:3465:5
+
+Caused by: Error: [vitest-pool-runner]: Timeout waiting for worker to respond
+ ❯ Timeout.<anonymous> node_modules/.pnpm/vitest@4.1.10_@vitest+coverage-v8@4.1.10_jsdom@29.1.1_vite@6.4.3/node_modules/vitest/dist/chunks/cli-api.BK8pd4xc.js:3041:58
+ ❯ listOnTimeout node:internal/timers:588:17
+ ❯ processTimers node:internal/timers:523:7
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯
+
+
+ Test Files  83 passed (83)
+      Tests  490 passed (490)
+     Errors  2 errors
+   Start at  18:14:50
+   Duration  917.87s (transform 22.09s, setup 285.12s, import 241.98s, tests 232.29s, environment 815.52s)
+

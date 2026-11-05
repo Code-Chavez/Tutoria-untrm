@@ -1,0 +1,937 @@
+
+ RUN  v4.1.10 C:/Proyects/Proyects/Tutoria-untrm/client
+
+ ❯ src/features/dashboard/components/DashboardPage.test.tsx (12 tests | 1 failed) 5225ms
+     × los indicadores con detalle enlazan a su vista y los demás no 1179ms
+Not implemented: navigation to another Document
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/features/dashboard/components/DashboardPage.test.tsx > DashboardPage (paneles por rol) > los indicadores con detalle enlazan a su vista y los demás no
+TestingLibraryElementError: Unable to find role="link" and name "Mis estudiantes: 12"
+
+Ignored nodes: comments, script, style
+[36m<body>[39m
+  [36m<div>[39m
+    [36m<div>[39m
+      [36m<div[39m
+        [33mclass[39m=[32m"_hero_c7806a"[39m
+      [36m>[39m
+        [36m<div>[39m
+          [36m<h1[39m
+            [33mclass[39m=[32m"_welcome_c7806a"[39m
+          [36m>[39m
+            [0mBienvenido[0m
+            [0m, Elena[0m
+          [36m</h1>[39m
+          [36m<p[39m
+            [33mclass[39m=[32m"_sub_c7806a"[39m
+          [36m>[39m
+            [0mResumen de tu trabajo en el sistema[0m
+          [36m</p>[39m
+        [36m</div>[39m
+        [36m<span[39m
+          [33mclass[39m=[32m"_roleTag_c7806a"[39m
+        [36m>[39m
+          [0mDocente[0m
+        [36m</span>[39m
+      [36m</div>[39m
+      [36m<div[39m
+        [33mclass[39m=[32m"_kpis_c7806a"[39m
+      [36m>[39m
+        [36m<article[39m
+          [33mclass[39m=[32m"_card_ea905e _info_ea905e"[39m
+        [36m>[39m
+          [36m<div[39m
+            [33mclass[39m=[32m"_top_ea905e"[39m
+          [36m>[39m
+            [36m<span[39m
+              [33mclass[39m=[32m"_icon_ea905e"[39m
+            [36m>[39m
+              [36m<svg[39m
+                [33maria-hidden[39m=[32m"true"[39m
+                [33mfill[39m=[32m"none"[39m
+                [33mheight[39m=[32m"22"[39m
+                [33mstroke[39m=[32m"currentColor"[39m
+                [33mstroke-linecap[39m=[32m"round"[39m
+                [33mstroke-linejoin[39m=[32m"round"[39m
+                [33mstroke-width[39m=[32m"2"[39m
+                [33mviewBox[39m=[32m"0 0 24 24"[39m
+                [33mwidth[39m=[32m"22"[39m
+              [36m>[39m
+                [36m<path[39m
+                  [33md[39m=[32m"M22 12h-4l-3 9L9 3l-3 9H2"[39m
+                [36m/>[39m
+              [36m</svg>[39m
+            [36m</span>[39m
+          [36m</div>[39m
+          [36m<div[39m
+            [33mclass[39m=[32m"_value_ea905e"[39m
+          [36m>[39m
+            [36m<span[39m
+              [33mclass[39m=[32m"_skeleton_ea905e"[39m
+            [36m/>[39m
+          [36m</div>[39m
+          [36m<div[39m
+            [33mclass[39m=[32m"_label_ea905e"[39m
+          [36m/>[39m
+        [36m</article>[39m
+        [36m<article[39m
+          [33mclass[39m=[32m"_card_ea905e _info_ea905e"[39m
+        [36m>[39m
+          [36m<div[39m
+            [33mclass[39m=[32m"_top_ea905e"[39m
+          [36m>[39m
+            [36m<span[39m
+              [33mclass[39m=[32m"_icon_ea905e"[39m
+            [36m>[39m
+              [36m<svg[39m
+                [33maria-hidden[39m=[32m"true"[39m
+                [33mfill[39m=[32m"none"[39m
+                [33mheight[39m=[32m"22"[39m
+                [33mstroke[39m=[32m"currentColor"[39m
+                [33mstroke-linecap[39m=[32m"round"[39m
+                [33mstroke-linejoin[39m=[32m"round"[39m
+                [33mstroke-width[39m=[32m"2"[39m
+                [33mviewBox[39m=[32m"0 0 24 24"[39m
+                [33mwidth[39m=[32m"22"[39m
+              [36m>[39m
+                [36m<path[39m
+                  [33md[39m=[32m"M22 12h-4l-3 9L9 3l-3 9H2"[39m
+                [36m/>[39m
+              [36m</svg>[39m
+            [36m</span>[39m
+          [36m</div>[39m
+          [36m<div[39m
+            [33mclass[39m=[32m"_value_ea905e"[39m
+          [36m>[39m
+            [36m<span[39m
+              [33mclass[39m=[32m"_skeleton_ea905e"[39m
+            [36m/>[39m
+          [36m</div>[39m
+          [36m<div[39m
+            [33mclass[39m=[32m"_label_ea905e"[39m
+          [36m/>[39m
+        [36m</article>[39m
+        [36m<article[39m
+          [33mclass[39m=[32m"_card_ea905e _info_ea905e"[39m
+        [36m>[39m
+          [36m<div[39m
+            [33mclass[39m=[32m"_top_ea905e"[39m
+          [36m>[39m
+            [36m<span[39m
+              [33mclass[39m=[32m"_icon_ea905e"[39m
+            [36m>[39m
+              [36m<svg[39m
+                [33maria-hidden[39m=[32m"true"[39m
+                [33mfill[39m=[32m"none"[39m
+                [33mheight[39m=[32m"22"[39m
+                [33mstroke[39m=[32m"currentColor"[39m
+                [33mstroke-linecap[39m=[32m"round"[39m
+                [33mstroke-linejoin[39m=[32m"round"[39m
+                [33mstroke-width[39m=[32m"2"[39m
+                [33mviewBox[39m=[32m"0 0 24 24"[39m
+                [33mwidth[39m=[32m"22"[39m
+              [36m>[39m
+                [36m<path[39m
+                  [33md[39m=[32m"M22 12h-4l-3 9L9 3l-3 9H2"[39m
+                [36m/>[39m
+              [36m</svg>[39m
+            [36m</span>[39m
+          [36m</div>[39m
+          [36m<div[39m
+            [33mclass[39m=[32m"_value_ea905e"[39m
+          [36m>[39m
+            [36m<span[39m
+              [33mclass[39m=[32m"_skeleton_ea905e"[39m
+            [36m/>[39m
+          [36m</div>[39m
+          [36m<div[39m
+            [33mclass[39m=[32m"_label_ea905e"[39m
+          [36m/>[39m
+        [36m</article>[39m
+      [36m</div>[39m
+      [36m<div[39m
+        [33mclass[39m=[32m"_columns_c7806a"[39m
+      [36m>[39m
+        [36m<div[39m
+          [33mclass[39m=[32m"_card_7523f3  "[39m
+        [36m>[39m
+          [36m<div[39m
+            [33mclass[39m=[32m"_header_7523f3"[39m
+          [36m>[39m
+            [36m<div[39m
+              [33mclass[39m=[32m"_headingWrap_7523f3"[39m
+            [36m>[39m
+              [36m<div>[39m
+                [36m<h2[39m
+                  [33mclass[39m=[32m"_title_7523f3"[39m
+                [36m>[39m
+                  [0mAcciones rápidas[0m
+                [36m</h2>[39m
+                [36m<p[39m
+                  [33mclass[39m=[32m"_desc_7523f3"[39m
+                [36m>[39m
+                  [0mAccesos directos a las tareas frecuentes[0m
+                [36m</p>[39m
+              [36m</div>[39m
+            [36m</div>[39m
+          [36m</div>[39m
+          [36m<div[39m
+            [33mclass[39m=[32m"_body_7523f3 "[39m
+          [36m>[39m
+            [36m<div[39m
+              [33mclass[39m=[32m"_groups_120917"[39m
+            [36m>[39m
+              [36m<section[39m
+                [33maria-labelledby[39m=[32m"qa-Atención a estudiantes"[39m
+              [36m>[39m
+                [36m<h2[39m
+                  [33mclass[39m=[32m"_groupTitle_120917"[39m
+                  [33mid[39m=[32m"qa-Atención a estudiantes"[39m
+                [36m>[39m
+                  [0mAtención a estudiantes[0m
+                [36m</h2>[39m
+                [36m<div[39m
+                  [33mclass[39m=[32m"_grid_120917"[39m
+                [36m>[39m
+                  [36m<a[39m
+                    [33mclass[39m=[32m"_action_120917"[39m
+                    [33mdata-discover[39m=[32m"true"[39m
+                    [33mhref[39m=[32m"/tutorados"[39m
+                  [36m>[39m
+                    [36m<span[39m
+                      [33mclass[39m=[32m"_icon_120917"[39m
+                    [36m>[39m
+                      [36m<svg[39m
+                        [33maria-hidden[39m=[32m"true"[39m
+                        [33mfill[39m=[32m"none"[39m
+                        [33mheight[39m=[32m"20"[39m
+                        [33mstroke[39m=[32m"currentColor"[39m
+                        [33mstroke-linecap[39m=[32m"round"[39m
+                        [33mstroke-linejoin[39m=[32m"round"[39m
+                        [33mstroke-width[39m=[32m"2"[39m
+                        [33mviewBox[39m=[32m"0 0 24 24"[39m
+                        [33mwidth[39m=[32m"20"[39m
+                      [36m>[39m
+                        [36m<path[39m
+                          [33md[39m=[32m"M22 10 12 5 2 10l10 5 10-5Z"[39m
+                        [36m/>[39m
+                        [36m<path[39m
+                          [33md[39m=[32m"M6 12v5c3 2.5 9 2.5 12 0v-5"[39m
+                        [36m/>[39m
+                        [36m<path[39m
+                          [33md[39m=[32m"M22 10v6"[39m
+                        [36m/>[39m
+                      [36m</svg>[39m
+                    [36m</span>[39m
+                    [36m<span[39m
+                      [33mclass[39m=[32m"_text_120917"[39m
+                    [36m>[39m
+                      [36m<b>[39m
+                        [0mVer estudiantes[0m
+                      [36m</b>[39m
+                      [36m<small>[39m
+                        [0mConsultar y filtrar estudiantes[0m
+                      [36m</small>[39m
+                    [36m</span>[39m
+                    [36m<span[39m
+                      [33mclass[39m=[32m"_arrow_120917"[39m
+                    [36m>[39m
+                      [36m<svg[39m
+                        [33maria-hidden[39m=[32m"true"[39m
+                        [33mfill[39m=[32m"none"[39m
+                        [33mheight[39m=[32m"16"[39m
+                        [33mstroke[39m=[32m"currentColor"[39m
+                        [33mstroke-linecap[39m=[32m"round"[39m
+                        [33mstroke-linejoin[39m=[32m"round"[39m
+                        [33mstroke-width[39m=[32m"2"[39m
+                        [33mviewBox[39m=[32m"0 0 24 24"[39m
+                        [33mwidth[39m=[32m"16"[39m
+                      [36m>[39m
+                        [36m<path[39m
+                          [33md[39m=[32m"m9 18 6-6-6-6"[39m
+                        [36m/>[39m
+                      [36m</svg>[39m
+                    [36m</span>[39m
+                  [36m</a>[39m
+                  [36m<a[39m
+                    [33mclass[39m=[32m"_action_120917"[39m
+                    [33mdata-discover[39m=[32m"true"[39m
+                    [33mhref[39m=[32m"/sesiones"[39m
+                  [36m>[39m
+                    [36m<span[39m
+                      [33mclass[39m=[32m"_icon_120917"[39m
+                    [36m>[39m
+                      [36m<svg[39m
+                        [33maria-hidden[39m=[32m"true"[39m
+                        [33mfill[39m=[32m"none"[39m
+                        [33mheight[39m=[32m"20"[39m
+                        [33mstroke[39m=[32m"currentColor"[39m
+                        [33mstroke-linecap[39m=[32m"round"[39m
+                        [33mstroke-linejoin[39m=[32m"round"[39m
+                        [33mstroke-width[39m=[32m"2"[39m
+                        [33mviewBox[39m=[32m"0 0 24 24"[39m
+                        [33mwidth[39m=[32m"20"[39m
+                      [36m>[39m
+                        [36m<rect[39m
+                          [33mheight[39m=[32m"18"[39m
+                          [33mrx[39m=[32m"2"[39m
+                          [33mwidth[39m=[32m"18"[39m
+                          [33mx[39m=[32m"3"[39m
+                          [33my[39m=[32m"4"[39m
+                        [36m/>[39m
+                        [36m<path[39m
+                          [33md[39m=[32m"M16 2v4M8 2v4M3 10h18"[39m
+                        [36m/>[39m
+                      [36m</svg>[39m
+                    [36m</span>[39m
+                    [36m<span[39m
+                      [33mclass[39m=[32m"_text_120917"[39m
+                    [36m>[39m
+                      [36m<b>[39m
+                        [0mMi calendario[0m
+                      [36m</b>[39m
+                      [36m<small>[39m
+                        [0mSesiones programadas y asistencia[0m
+                      [36m</small>[39m
+                    [36m</span>[39m
+                    [36m<span[39m
+                      [33mclass[39m=[32m"_arrow_120917"[39m
+                    [36m>[39m
+                      [36m<svg[39m
+                        [33maria-hidden[39m=[32m"true"[39m
+                        [33mfill[39m=[32m"none"[39m
+                        [33mheight[39m=[32m"16"[39m
+                        [33mstroke[39m=[32m"currentColor"[39m
+                        [33mstroke-linecap[39m=[32m"round"[39m
+                        [33mstroke-linejoin[39m=[32m"round"[39m
+                        [33mstroke-width[39m=[32m"2"[39m
+                        [33mviewBox[39m=[32m"0 0 24 24"[39m
+                        [33mwidth[39m=[32m"16"[39m
+                      [36m>[39m
+                        [36m<path[39m
+                          [33md[39m=[32m"m9 18 6-6-6-6"[39m
+                        [36m/>[39m
+                      [36m</svg>[39m
+                    [36m</span>[39m
+                  [36m</a>[39m
+                  [36m<a[39m
+                    [33mclass[39m=[32m"_action_120917"[39m
+                    [33mdata-discover[39m=[32m"true"[39m
+                    [33mhref[39m=[32m"/solicitudes"[39m
+                  [36m>[39m
+                    [36m<span[39m
+                      [33mclass[39m=[32m"_icon_120917"[39m
+                    [36m>[39m
+                      [36m<svg[39m
+                        [33maria-hidden[39m=[32m"true"[39m
+                        [33mfill[39m=[32m"none"[39m
+                        [33mheight[39m=[32m"20"[39m
+                        [33mstroke[39m=[32m"currentColor"[39m
+                        [33mstroke-linecap[39m=[32m"round"[39m
+                        [33mstroke-linejoin[39m=[32m"round"[39m
+                        [33mstroke-width[39m=[32m"2"[39m
+                        [33mviewBox[39m=[32m"0 0 24 24"[39m
+                        [33mwidth[39m=[32m"20"[39m
+                      [36m>[39m
+                        [36m<path[39m
+                          [33md[39m=[32m"M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2Z"[39m
+                        [36m/>[39m
+                      [36m</svg>[39m
+                    [36m</span>[39m
+                    [36m<span[39m
+                      [33mclass[39m=[32m"_text_120917"[39m
+                    [36m>[39m
+                      [36m<b>[39m
+                        [0mSolicitudes de tutoría[0m
+                      [36m</b>[39m
+                      [36m<small>[39m
+                        [0mRecibidas y por atender[0m
+                      [36m</small>[39m
+                    [36m</span>[39m
+                    [36m<span[39m
+                      [33mclass[39m=[32m"_arrow_120917"[39m
+                    [36m>[39m
+                      [36m<svg[39m
+                        [33maria-hidden[39m=[32m"true"[39m
+                        [33mfill[39m=[32m"none"[39m
+                        [33mheight[39m=[32m"16"[39m
+                        [33mstroke[39m=[32m"currentColor"[39m
+                        [33mstroke-linecap[39m=[32m"round"[39m
+                        [33mstroke-linejoin[39m=[32m"round"[39m
+                        [33mstroke-width[39m=[32m"2"[39m
+                        [33mviewBox[39m=[32m"0 0 24 24"[39m
+                        [33mwidth[39m=[32m"16"[39m
+                      [36m>[39m
+                        [36m<path[39m
+                          [33md[39m=[32m"m9 18 6-6-6-6"[39m
+                        [36m/>[39m
+                      [36m</svg>[39m
+                    [36m</span>[39m
+                  [36m</a>[39m
+                  [36m<a[39m
+                    [33mclass[39m=[32m"_action_120917"[39m
+                    [33mdata-discover[39m=[32m"true"[39m
+                    [33mhref[39m=[32m"/derivaciones"[39m
+                  [36m>[39m
+                    [36m<span[39m
+                      [33mclass[39m=[32m"_icon_120917"[39m
+                    [36m>[39m
+                      [36m<svg[39m
+                        [33maria-hidden[39m=[32m"true"[39m
+                        [33mfill[39m=[32m"none"[39m
+                        [33mheight[39m=[32m"20"[39m
+                        [33mstroke[39m=[32m"currentColor"[39m
+                        [33mstroke-linecap[39m=[32m"round"[39m
+                        [33mstroke-linejoin[39m=[32m"round"[39m
+                        [33mstroke-width[39m=[32m"2"[39m
+                        [33mviewBox[39m=[32m"0 0 24 24"[39m
+                        [33mwidth[39m=[32m"20"[39m
+                      [36m>[39m
+                        [36m<path[39m
+                          [33md[39m=[32m"M22 12h-6l-2 3h-4l-2-3H2"[39m
+                        [36m/>[39m
+                        [36m<path[39m
+                          [33md[39m=[32m"M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11Z"[39m
+                        [36m/>[39m
+                      [36m</svg>[39m
+                    [36m</span>[39m
+                    [36m<span[39m
+                      [33mclass[39m=[32m"_text_120917"[39m
+                    [36m>[39m
+                      [36m<b>[39m
+                        [0mCasos derivados[0m
+                      [36m</b>[39m
+                      [36m<small>[39m
+                        [0mTus derivaciones y su estado[0m
+                      [36m</small>[39m
+                    [36m</span>[39m
+                    [36m<span[39m
+                      [33mclass[39m=[32m"_arrow_120917"[39m
+                    [36m>[39m
+                      [36m<svg[39m
+                        [33maria-hidden[39m=[32m"true"[39m
+                        [33mfill[39m=[32m"none"[39m
+                        [33mheight[39m=[32m"16"[39m
+                        [33mstroke[39m=[32m"currentColor"[39m
+                        [33mstroke-linecap[39m=[32m"round"[39m
+                        [33mstroke-linejoin[39m=[32m"round"[39m
+                        [33mstroke-width[39m=[32m"2"[39m
+                        [33mviewBox[39m=[32m"0 0 24 24"[39m
+                        [33mwidth[39m=[32m"16"[39m
+                      [36m>[39m
+                        [36m<path[39m
+                          [33md[39m=[32m"m9 18 6-6-6-6"[39m
+                        [36m/>[39m
+                      [36m</svg>[39m
+                    [36m</span>[39m
+                  [36m</a>[39m
+                [36m</div>[39m
+              [36m</section>[39m
+            [36m</div>[39m
+          [36m</div>[39m
+        [36m</div>[39m
+      [36m</div>[39m
+      [36m<div[39m
+        [33mclass[39m=[32m"_card_7523f3  "[39m
+      [36m>[39m
+        [36m<div[39m
+          [33mclass[39m=[32m"_header_7523f3"[39m
+        [36m>[39m
+          [36m<div[39m
+            [33mclass[39m=[32m"_headingWrap_7523f3"[39m
+          [36m>[39m
+            [36m<div>[39m
+              [36m<h2[39m
+                [33mclass[39m=[32m"_title_7523f3"[39m
+              [36m>[39m
+                [0mAlertas de inasistencia y riesgo[0m
+              [36m</h2>[39m
+              [36m<p[39m
+                [33mclass[39m=[32m"_desc_7523f3"[39m
+              [36m>[39m
+                [0mEstudiantes en riesgo sin sesiones o con inasistencias por encima del umbral[0m
+              [36m</p>[39m
+            [36m</div>[39m
+          [36m</div>[39m
+        [36m</div>[39m
+        [36m<div>[39m
+          [0mbloque de alertas[0m
+        [36m</div>[39m
+      [36m</div>[39m
+    [36m</div>[39m
+  [36m</div>[39m
+[36m</body>[39m
+
+Ignored nodes: comments, script, style
+[36m<body>[39m
+  [36m<div>[39m
+    [36m<div>[39m
+      [36m<div[39m
+        [33mclass[39m=[32m"_hero_c7806a"[39m
+      [36m>[39m
+        [36m<div>[39m
+          [36m<h1[39m
+            [33mclass[39m=[32m"_welcome_c7806a"[39m
+          [36m>[39m
+            [0mBienvenido[0m
+            [0m, Elena[0m
+          [36m</h1>[39m
+          [36m<p[39m
+            [33mclass[39m=[32m"_sub_c7806a"[39m
+          [36m>[39m
+            [0mResumen de tu trabajo en el sistema[0m
+          [36m</p>[39m
+        [36m</div>[39m
+        [36m<span[39m
+          [33mclass[39m=[32m"_roleTag_c7806a"[39m
+        [36m>[39m
+          [0mDocente[0m
+        [36m</span>[39m
+      [36m</div>[39m
+      [36m<div[39m
+        [33mclass[39m=[32m"_kpis_c7806a"[39m
+      [36m>[39m
+        [36m<article[39m
+          [33mclass[39m=[32m"_card_ea905e _info_ea905e"[39m
+        [36m>[39m
+          [36m<div[39m
+            [33mclass[39m=[32m"_top_ea905e"[39m
+          [36m>[39m
+            [36m<span[39m
+              [33mclass[39m=[32m"_icon_ea905e"[39m
+            [36m>[39m
+              [36m<svg[39m
+                [33maria-hidden[39m=[32m"true"[39m
+                [33mfill[39m=[32m"none"[39m
+                [33mheight[39m=[32m"22"[39m
+                [33mstroke[39m=[32m"currentColor"[39m
+                [33mstroke-linecap[39m=[32m"round"[39m
+                [33mstroke-linejoin[39m=[32m"round"[39m
+                [33mstroke-width[39m=[32m"2"[39m
+                [33mviewBox[39m=[32m"0 0 24 24"[39m
+                [33mwidth[39m=[32m"22"[39m
+              [36m>[39m
+                [36m<path[39m
+                  [33md[39m=[32m"M22 12h-4l-3 9L9 3l-3 9H2"[39m
+                [36m/>[39m
+              [36m</svg>[39m
+            [36m</span>[39m
+          [36m</div>[39m
+          [36m<div[39m
+            [33mclass[39m=[32m"_value_ea905e"[39m
+          [36m>[39m
+            [36m<span[39m
+              [33mclass[39m=[32m"_skeleton_ea905e"[39m
+            [36m/>[39m
+          [36m</div>[39m
+          [36m<div[39m
+            [33mclass[39m=[32m"_label_ea905e"[39m
+          [36m/>[39m
+        [36m</article>[39m
+        [36m<article[39m
+          [33mclass[39m=[32m"_card_ea905e _info_ea905e"[39m
+        [36m>[39m
+          [36m<div[39m
+            [33mclass[39m=[32m"_top_ea905e"[39m
+          [36m>[39m
+            [36m<span[39m
+              [33mclass[39m=[32m"_icon_ea905e"[39m
+            [36m>[39m
+              [36m<svg[39m
+                [33maria-hidden[39m=[32m"true"[39m
+                [33mfill[39m=[32m"none"[39m
+                [33mheight[39m=[32m"22"[39m
+                [33mstroke[39m=[32m"currentColor"[39m
+                [33mstroke-linecap[39m=[32m"round"[39m
+                [33mstroke-linejoin[39m=[32m"round"[39m
+                [33mstroke-width[39m=[32m"2"[39m
+                [33mviewBox[39m=[32m"0 0 24 24"[39m
+                [33mwidth[39m=[32m"22"[39m
+              [36m>[39m
+                [36m<path[39m
+                  [33md[39m=[32m"M22 12h-4l-3 9L9 3l-3 9H2"[39m
+                [36m/>[39m
+              [36m</svg>[39m
+            [36m</span>[39m
+          [36m</div>[39m
+          [36m<div[39m
+            [33mclass[39m=[32m"_value_ea905e"[39m
+          [36m>[39m
+            [36m<span[39m
+              [33mclass[39m=[32m"_skeleton_ea905e"[39m
+            [36m/>[39m
+          [36m</div>[39m
+          [36m<div[39m
+            [33mclass[39m=[32m"_label_ea905e"[39m
+          [36m/>[39m
+        [36m</article>[39m
+        [36m<article[39m
+          [33mclass[39m=[32m"_card_ea905e _info_ea905e"[39m
+        [36m>[39m
+          [36m<div[39m
+            [33mclass[39m=[32m"_top_ea905e"[39m
+          [36m>[39m
+            [36m<span[39m
+              [33mclass[39m=[32m"_icon_ea905e"[39m
+            [36m>[39m
+              [36m<svg[39m
+                [33maria-hidden[39m=[32m"true"[39m
+                [33mfill[39m=[32m"none"[39m
+                [33mheight[39m=[32m"22"[39m
+                [33mstroke[39m=[32m"currentColor"[39m
+                [33mstroke-linecap[39m=[32m"round"[39m
+                [33mstroke-linejoin[39m=[32m"round"[39m
+                [33mstroke-width[39m=[32m"2"[39m
+                [33mviewBox[39m=[32m"0 0 24 24"[39m
+                [33mwidth[39m=[32m"22"[39m
+              [36m>[39m
+                [36m<path[39m
+                  [33md[39m=[32m"M22 12h-4l-3 9L9 3l-3 9H2"[39m
+                [36m/>[39m
+              [36m</svg>[39m
+            [36m</span>[39m
+          [36m</div>[39m
+          [36m<div[39m
+            [33mclass[39m=[32m"_value_ea905e"[39m
+          [36m>[39m
+            [36m<span[39m
+              [33mclass[39m=[32m"_skeleton_ea905e"[39m
+            [36m/>[39m
+          [36m</div>[39m
+          [36m<div[39m
+            [33mclass[39m=[32m"_label_ea905e"[39m
+          [36m/>[39m
+        [36m</article>[39m
+      [36m</div>[39m
+      [36m<div[39m
+        [33mclass[39m=[32m"_columns_c7806a"[39m
+      [36m>[39m
+        [36m<div[39m
+          [33mclass[39m=[32m"_card_7523f3  "[39m
+        [36m>[39m
+          [36m<div[39m
+            [33mclass[39m=[32m"_header_7523f3"[39m
+          [36m>[39m
+            [36m<div[39m
+              [33mclass[39m=[32m"_headingWrap_7523f3"[39m
+            [36m>[39m
+              [36m<div>[39m
+                [36m<h2[39m
+                  [33mclass[39m=[32m"_title_7523f3"[39m
+                [36m>[39m
+                  [0mAcciones rápidas[0m
+                [36m</h2>[39m
+                [36m<p[39m
+                  [33mclass[39m=[32m"_desc_7523f3"[39m
+                [36m>[39m
+                  [0mAccesos directos a las tareas frecuentes[0m
+                [36m</p>[39m
+              [36m</div>[39m
+            [36m</div>[39m
+          [36m</div>[39m
+          [36m<div[39m
+            [33mclass[39m=[32m"_body_7523f3 "[39m
+          [36m>[39m
+            [36m<div[39m
+              [33mclass[39m=[32m"_groups_120917"[39m
+            [36m>[39m
+              [36m<section[39m
+                [33maria-labelledby[39m=[32m"qa-Atención a estudiantes"[39m
+              [36m>[39m
+                [36m<h2[39m
+                  [33mclass[39m=[32m"_groupTitle_120917"[39m
+                  [33mid[39m=[32m"qa-Atención a estudiantes"[39m
+                [36m>[39m
+                  [0mAtención a estudiantes[0m
+                [36m</h2>[39m
+                [36m<div[39m
+                  [33mclass[39m=[32m"_grid_120917"[39m
+                [36m>[39m
+                  [36m<a[39m
+                    [33mclass[39m=[32m"_action_120917"[39m
+                    [33mdata-discover[39m=[32m"true"[39m
+                    [33mhref[39m=[32m"/tutorados"[39m
+                  [36m>[39m
+                    [36m<span[39m
+                      [33mclass[39m=[32m"_icon_120917"[39m
+                    [36m>[39m
+                      [36m<svg[39m
+                        [33maria-hidden[39m=[32m"true"[39m
+                        [33mfill[39m=[32m"none"[39m
+                        [33mheight[39m=[32m"20"[39m
+                        [33mstroke[39m=[32m"currentColor"[39m
+                        [33mstroke-linecap[39m=[32m"round"[39m
+                        [33mstroke-linejoin[39m=[32m"round"[39m
+                        [33mstroke-width[39m=[32m"2"[39m
+                        [33mviewBox[39m=[32m"0 0 24 24"[39m
+                        [33mwidth[39m=[32m"20"[39m
+                      [36m>[39m
+                        [36m<path[39m
+                          [33md[39m=[32m"M22 10 12 5 2 10l10 5 10-5Z"[39m
+                        [36m/>[39m
+                        [36m<path[39m
+                          [33md[39m=[32m"M6 12v5c3 2.5 9 2.5 12 0v-5"[39m
+                        [36m/>[39m
+                        [36m<path[39m
+                          [33md[39m=[32m"M22 10v6"[39m
+                        [36m/>[39m
+                      [36m</svg>[39m
+                    [36m</span>[39m
+                    [36m<span[39m
+                      [33mclass[39m=[32m"_text_120917"[39m
+                    [36m>[39m
+                      [36m<b>[39m
+                        [0mVer estudiantes[0m
+                      [36m</b>[39m
+                      [36m<small>[39m
+                        [0mConsultar y filtrar estudiantes[0m
+                      [36m</small>[39m
+                    [36m</span>[39m
+                    [36m<span[39m
+                      [33mclass[39m=[32m"_arrow_120917"[39m
+                    [36m>[39m
+                      [36m<svg[39m
+                        [33maria-hidden[39m=[32m"true"[39m
+                        [33mfill[39m=[32m"none"[39m
+                        [33mheight[39m=[32m"16"[39m
+                        [33mstroke[39m=[32m"currentColor"[39m
+                        [33mstroke-linecap[39m=[32m"round"[39m
+                        [33mstroke-linejoin[39m=[32m"round"[39m
+                        [33mstroke-width[39m=[32m"2"[39m
+                        [33mviewBox[39m=[32m"0 0 24 24"[39m
+                        [33mwidth[39m=[32m"16"[39m
+                      [36m>[39m
+                        [36m<path[39m
+                          [33md[39m=[32m"m9 18 6-6-6-6"[39m
+                        [36m/>[39m
+                      [36m</svg>[39m
+                    [36m</span>[39m
+                  [36m</a>[39m
+                  [36m<a[39m
+                    [33mclass[39m=[32m"_action_120917"[39m
+                    [33mdata-discover[39m=[32m"true"[39m
+                    [33mhref[39m=[32m"/sesiones"[39m
+                  [36m>[39m
+                    [36m<span[39m
+                      [33mclass[39m=[32m"_icon_120917"[39m
+                    [36m>[39m
+                      [36m<svg[39m
+                        [33maria-hidden[39m=[32m"true"[39m
+                        [33mfill[39m=[32m"none"[39m
+                        [33mheight[39m=[32m"20"[39m
+                        [33mstroke[39m=[32m"currentColor"[39m
+                        [33mstroke-linecap[39m=[32m"round"[39m
+                        [33mstroke-linejoin[39m=[32m"round"[39m
+                        [33mstroke-width[39m=[32m"2"[39m
+                        [33mviewBox[39m=[32m"0 0 24 24"[39m
+                        [33mwidth[39m=[32m"20"[39m
+                      [36m>[39m
+                        [36m<rect[39m
+                          [33mheight[39m=[32m"18"[39m
+                          [33mrx[39m=[32m"2"[39m
+                          [33mwidth[39m=[32m"18"[39m
+                          [33mx[39m=[32m"3"[39m
+                          [33my[39m=[32m"4"[39m
+                        [36m/>[39m
+                        [36m<path[39m
+                          [33md[39m=[32m"M16 2v4M8 2v4M3 10h18"[39m
+                        [36m/>[39m
+                      [36m</svg>[39m
+                    [36m</span>[39m
+                    [36m<span[39m
+                      [33mclass[39m=[32m"_text_120917"[39m
+                    [36m>[39m
+                      [36m<b>[39m
+                        [0mMi calendario[0m
+                      [36m</b>[39m
+                      [36m<small>[39m
+                        [0mSesiones programadas y asistencia[0m
+                      [36m</small>[39m
+                    [36m</span>[39m
+                    [36m<span[39m
+                      [33mclass[39m=[32m"_arrow_120917"[39m
+                    [36m>[39m
+                      [36m<svg[39m
+                        [33maria-hidden[39m=[32m"true"[39m
+                        [33mfill[39m=[32m"none"[39m
+                        [33mheight[39m=[32m"16"[39m
+                        [33mstroke[39m=[32m"currentColor"[39m
+                        [33mstroke-linecap[39m=[32m"round"[39m
+                        [33mstroke-linejoin[39m=[32m"round"[39m
+                        [33mstroke-width[39m=[32m"2"[39m
+                        [33mviewBox[39m=[32m"0 0 24 24"[39m
+                        [33mwidth[39m=[32m"16"[39m
+                      [36m>[39m
+                        [36m<path[39m
+                          [33md[39m=[32m"m9 18 6-6-6-6"[39m
+                        [36m/>[39m
+                      [36m</svg>[39m
+                    [36m</span>[39m
+                  [36m</a>[39m
+                  [36m<a[39m
+                    [33mclass[39m=[32m"_action_120917"[39m
+                    [33mdata-discover[39m=[32m"true"[39m
+                    [33mhref[39m=[32m"/solicitudes"[39m
+                  [36m>[39m
+                    [36m<span[39m
+                      [33mclass[39m=[32m"_icon_120917"[39m
+                    [36m>[39m
+                      [36m<svg[39m
+                        [33maria-hidden[39m=[32m"true"[39m
+                        [33mfill[39m=[32m"none"[39m
+                        [33mheight[39m=[32m"20"[39m
+                        [33mstroke[39m=[32m"currentColor"[39m
+                        [33mstroke-linecap[39m=[32m"round"[39m
+                        [33mstroke-linejoin[39m=[32m"round"[39m
+                        [33mstroke-width[39m=[32m"2"[39m
+                        [33mviewBox[39m=[32m"0 0 24 24"[39m
+                        [33mwidth[39m=[32m"20"[39m
+                      [36m>[39m
+                        [36m<path[39m
+                          [33md[39m=[32m"M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2Z"[39m
+                        [36m/>[39m
+                      [36m</svg>[39m
+                    [36m</span>[39m
+                    [36m<span[39m
+                      [33mclass[39m=[32m"_text_120917"[39m
+                    [36m>[39m
+                      [36m<b>[39m
+                        [0mSolicitudes de tutoría[0m
+                      [36m</b>[39m
+                      [36m<small>[39m
+                        [0mRecibidas y por atender[0m
+                      [36m</small>[39m
+                    [36m</span>[39m
+                    [36m<span[39m
+                      [33mclass[39m=[32m"_arrow_120917"[39m
+                    [36m>[39m
+                      [36m<svg[39m
+                        [33maria-hidden[39m=[32m"true"[39m
+                        [33mfill[39m=[32m"none"[39m
+                        [33mheight[39m=[32m"16"[39m
+                        [33mstroke[39m=[32m"currentColor"[39m
+                        [33mstroke-linecap[39m=[32m"round"[39m
+                        [33mstroke-linejoin[39m=[32m"round"[39m
+                        [33mstroke-width[39m=[32m"2"[39m
+                        [33mviewBox[39m=[32m"0 0 24 24"[39m
+                        [33mwidth[39m=[32m"16"[39m
+                      [36m>[39m
+                        [36m<path[39m
+                          [33md[39m=[32m"m9 18 6-6-6-6"[39m
+                        [36m/>[39m
+                      [36m</svg>[39m
+                    [36m</span>[39m
+                  [36m</a>[39m
+                  [36m<a[39m
+                    [33mclass[39m=[32m"_action_120917"[39m
+                    [33mdata-discover[39m=[32m"true"[39m
+                    [33mhref[39m=[32m"/derivaciones"[39m
+                  [36m>[39m
+                    [36m<span[39m
+                      [33mclass[39m=[32m"_icon_120917"[39m
+                    [36m>[39m
+                      [36m<svg[39m
+                        [33maria-hidden[39m=[32m"true"[39m
+                        [33mfill[39m=[32m"none"[39m
+                        [33mheight[39m=[32m"20"[39m
+                        [33mstroke[39m=[32m"currentColor"[39m
+                        [33mstroke-linecap[39m=[32m"round"[39m
+                        [33mstroke-linejoin[39m=[32m"round"[39m
+                        [33mstroke-width[39m=[32m"2"[39m
+                        [33mviewBox[39m=[32m"0 0 24 24"[39m
+                        [33mwidth[39m=[32m"20"[39m
+                      [36m>[39m
+                        [36m<path[39m
+                          [33md[39m=[32m"M22 12h-6l-2 3h-4l-2-3H2"[39m
+                        [36m/>[39m
+                        [36m<path[39m
+                          [33md[39m=[32m"M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11Z"[39m
+                        [36m/>[39m
+                      [36m</svg>[39m
+                    [36m</span>[39m
+                    [36m<span[39m
+                      [33mclass[39m=[32m"_text_120917"[39m
+                    [36m>[39m
+                      [36m<b>[39m
+                        [0mCasos derivados[0m
+                      [36m</b>[39m
+                      [36m<small>[39m
+                        [0mTus derivaciones y su estado[0m
+                      [36m</small>[39m
+                    [36m</span>[39m
+                    [36m<span[39m
+                      [33mclass[39m=[32m"_arrow_120917"[39m
+                    [36m>[39m
+                      [36m<svg[39m
+                        [33maria-hidden[39m=[32m"true"[39m
+                        [33mfill[39m=[32m"none"[39m
+                        [33mheight[39m=[32m"16"[39m
+                        [33mstroke[39m=[32m"currentColor"[39m
+                        [33mstroke-linecap[39m=[32m"round"[39m
+                        [33mstroke-linejoin[39m=[32m"round"[39m
+                        [33mstroke-width[39m=[32m"2"[39m
+                        [33mviewBox[39m=[32m"0 0 24 24"[39m
+                        [33mwidth[39m=[32m"16"[39m
+                      [36m>[39m
+                        [36m<path[39m
+                          [33md[39m=[32m"m9 18 6-6-6-6"[39m
+                        [36m/>[39m
+                      [36m</svg>[39m
+                    [36m</span>[39m
+                  [36m</a>[39m
+                [36m</div>[39m
+              [36m</section>[39m
+            [36m</div>[39m
+          [36m</div>[39m
+        [36m</div>[39m
+      [36m</div>[39m
+      [36m<div[39m
+        [33mclass[39m=[32m"_card_7523f3  "[39m
+      [36m>[39m
+        [36m<div[39m
+          [33mclass[39m=[32m"_header_7523f3"[39m
+        [36m>[39m
+          [36m<div[39m
+            [33mclass[39m=[32m"_headingWrap_7523f3"[39m
+          [36m>[39m
+            [36m<div>[39m
+              [36m<h2[39m
+                [33mclass[39m=[32m"_title_7523f3"[39m
+              [36m>[39m
+                [0mAlertas de inasistencia y riesgo[0m
+              [36m</h2>[39m
+              [36m<p[39m
+                [33mclass[39m=[32m"_desc_7523f3"[39m
+              [36m>[39m
+                [0mEstudiantes en riesgo sin sesiones o con inasistencias por encima del umbral[0m
+              [36m</p>[39m
+            [36m</div>[39m
+          [36m</div>[39m
+        [36m</div>[39m
+        [36m<div>[39m
+          [0mbloque de alertas[0m
+        [36m</div>[39m
+      [36m</div>[39m
+    [36m</div>[39m
+  [36m</div>[39m
+[36m</body>[39m
+ ❯ waitForWrapper node_modules/.pnpm/@testing-library+dom@10.4.1/node_modules/@testing-library/dom/dist/wait-for.js:163:27
+ ❯ node_modules/.pnpm/@testing-library+dom@10.4.1/node_modules/@testing-library/dom/dist/query-helpers.js:86:33
+ ❯ src/features/dashboard/components/DashboardPage.test.tsx:62:31
+     60|     renderPage();
+     61|
+     62|     const link = await screen.findByRole('link', { name: 'Mis estudian…
+       |                               ^
+     63|     expect(link).toHaveAttribute('href', '/tutorados');
+     64|     expect(screen.queryByRole('link', { name: /Alertas pendientes/ }))…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed | 84 passed (85)
+      Tests  1 failed | 520 passed (521)
+   Start at  13:57:55
+   Duration  1038.66s (transform 31.27s, setup 320.44s, import 261.58s, tests 360.24s, environment 949.43s)
+

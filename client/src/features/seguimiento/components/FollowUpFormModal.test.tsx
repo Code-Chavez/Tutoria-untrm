@@ -1,4 +1,4 @@
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { FollowUpFormModal } from './FollowUpFormModal';
@@ -18,6 +18,24 @@ const student: Student = {
 };
 
 describe('FollowUpFormModal', () => {
+  beforeEach(() => sessionStorage.clear());
+
+  it('recupera lo escrito al volver a abrirla y no mezcla borradores de otra persona', async () => {
+    const user = userEvent.setup();
+    const first = render(<FollowUpFormModal student={student} draftOwnerId="u1" onSubmit={vi.fn()} onCancel={vi.fn()} />);
+    await user.type(screen.getByLabelText(/motivo de seguimiento/i), 'Bajo rendimiento');
+    first.unmount();
+
+    const other = render(<FollowUpFormModal student={student} draftOwnerId="u2" onSubmit={vi.fn()} onCancel={vi.fn()} />);
+    expect(screen.queryByRole('status')).not.toBeInTheDocument();
+    expect(screen.getByLabelText(/motivo de seguimiento/i)).toHaveValue('');
+    other.unmount();
+
+    render(<FollowUpFormModal student={student} draftOwnerId="u1" onSubmit={vi.fn()} onCancel={vi.fn()} />);
+    expect(screen.getByRole('status')).toBeInTheDocument();
+    expect(screen.getByLabelText(/motivo de seguimiento/i)).toHaveValue('Bajo rendimiento');
+  });
+
   it('exige motivo antes de confirmar', async () => {
     const onSubmit = vi.fn();
     const user = userEvent.setup();

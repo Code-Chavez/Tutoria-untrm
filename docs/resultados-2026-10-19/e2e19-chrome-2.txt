@@ -1,0 +1,134 @@
+
+Running 31 tests using 1 worker
+
+  ok  1 tests\e2e-19-accesibilidad-gestion.spec.ts:19:11 › gestión · coordinator › «Estudiantes» no tiene infracciones serias ni de estructura (1.4m)
+  ok  2 tests\e2e-19-accesibilidad-gestion.spec.ts:19:11 › gestión · coordinator › «Solicitudes de tutoría» no tiene infracciones serias ni de estructura (28.4s)
+  ok  3 tests\e2e-19-accesibilidad-gestion.spec.ts:19:11 › gestión · coordinator › «Pendientes» no tiene infracciones serias ni de estructura (34.2s)
+  ok  4 tests\e2e-19-accesibilidad-gestion.spec.ts:19:11 › gestión · coordinator › «Pedir listas» no tiene infracciones serias ni de estructura (20.0s)
+  ok  5 tests\e2e-19-accesibilidad-gestion.spec.ts:19:11 › gestión · coordinator › «Carga de estudiantes» no tiene infracciones serias ni de estructura (19.5s)
+  ok  6 tests\e2e-19-accesibilidad-gestion.spec.ts:19:11 › gestión · coordinator › «Asignación por ciclo» no tiene infracciones serias ni de estructura (32.0s)
+  ok  7 tests\e2e-19-accesibilidad-gestion.spec.ts:19:11 › gestión · coordinator › «Plan semestral» no tiene infracciones serias ni de estructura (24.4s)
+  ok  8 tests\e2e-19-accesibilidad-gestion.spec.ts:19:11 › gestión · coordinator › «Horarios y asistencia» no tiene infracciones serias ni de estructura (15.3s)
+  ok  9 tests\e2e-19-accesibilidad-gestion.spec.ts:19:11 › gestión · coordinator › «Indicadores» no tiene infracciones serias ni de estructura (17.2s)
+  ok 10 tests\e2e-19-accesibilidad-gestion.spec.ts:19:11 › gestión · coordinator › «Resultados de evaluación» no tiene infracciones serias ni de estructura (26.5s)
+  ok 11 tests\e2e-19-accesibilidad-gestion.spec.ts:19:11 › gestión · coordinator › «Sugerencias de estudiantes» no tiene infracciones serias ni de estructura (25.6s)
+  ok 12 tests\e2e-19-accesibilidad-gestion.spec.ts:19:11 › gestión · coordinator › «Correos de las escuelas» no tiene infracciones serias ni de estructura (24.2s)
+  ok 13 tests\e2e-19-accesibilidad-gestion.spec.ts:19:11 › gestión · coordinator › «Amonestaciones» no tiene infracciones serias ni de estructura (25.0s)
+  ok 14 tests\e2e-19-accesibilidad-gestion.spec.ts:19:11 › gestión · admin › «Carga de docentes» no tiene infracciones serias ni de estructura (16.9s)
+  ok 15 tests\e2e-19-accesibilidad-gestion.spec.ts:19:11 › gestión · admin › «Cierre de periodo» no tiene infracciones serias ni de estructura (25.8s)
+  ok 16 tests\e2e-19-accesibilidad-gestion.spec.ts:19:11 › gestión · admin › «Casos derivados» no tiene infracciones serias ni de estructura (29.2s)
+  ok 17 tests\e2e-19-accesibilidad-gestion.spec.ts:19:11 › gestión · admin › «Seguimiento DBU» no tiene infracciones serias ni de estructura (23.7s)
+  x  18 tests\e2e-19-accesibilidad-gestion.spec.ts:19:11 › gestión · admin › «Informe consolidado» no tiene infracciones serias ni de estructura (31.3s)
+  ok 19 tests\e2e-19-accesibilidad-gestion.spec.ts:19:11 › gestión · admin › «Sedes» no tiene infracciones serias ni de estructura (31.3s)
+  ok 20 tests\e2e-19-accesibilidad-gestion.spec.ts:19:11 › gestión · admin › «Evaluación de tutoría» no tiene infracciones serias ni de estructura (27.0s)
+  ok 21 tests\e2e-19-accesibilidad-gestion.spec.ts:19:11 › gestión · admin › «Catálogos» no tiene infracciones serias ni de estructura (25.3s)
+  ok 22 tests\e2e-19-accesibilidad-gestion.spec.ts:19:11 › gestión · admin › «Usuarios y roles» no tiene infracciones serias ni de estructura (1.3m)
+  ok 23 tests\e2e-19-accesibilidad-gestion.spec.ts:19:11 › gestión · admin › «Parámetros» no tiene infracciones serias ni de estructura (28.4s)
+  ok 24 tests\e2e-19-accesibilidad-gestion.spec.ts:19:11 › gestión · admin › «Identidad visual» no tiene infracciones serias ni de estructura (18.1s)
+  ok 25 tests\e2e-19-accesibilidad-gestion.spec.ts:19:11 › gestión · admin › «Bitácora de auditoría» no tiene infracciones serias ni de estructura (33.1s)
+  ok 26 tests\e2e-19-accesibilidad-gestion.spec.ts:19:11 › gestión · tutor › «Estudiantes» no tiene infracciones serias ni de estructura (18.7s)
+  ok 27 tests\e2e-19-accesibilidad-gestion.spec.ts:19:11 › gestión · tutor › «Sesiones» no tiene infracciones serias ni de estructura (29.7s)
+  ok 28 tests\e2e-19-accesibilidad-gestion.spec.ts:19:11 › gestión · tutor › «Casos derivados» no tiene infracciones serias ni de estructura (22.6s)
+  x  29 tests\e2e-19-accesibilidad-gestion.spec.ts:19:11 › gestión · tutor › «Informe semestral» no tiene infracciones serias ni de estructura (25.2s)
+  ok 30 tests\e2e-19-accesibilidad-gestion.spec.ts:19:11 › gestión · psychology › «Casos derivados» no tiene infracciones serias ni de estructura (28.4s)
+  ok 31 tests\e2e-19-accesibilidad-gestion.spec.ts:30:5 › el detalle de un caso derivado (diálogo) tampoco tiene infracciones y se cierra con Escape devolviendo el foco (25.8s)
+
+
+  1) tests\e2e-19-accesibilidad-gestion.spec.ts:19:11 › gestión · admin › «Informe consolidado» no tiene infracciones serias ni de estructura 
+
+    Error: Infracciones serias o críticas en «admin · Informe consolidado»:
+    - scrollable-region-focusable [serious] Scrollable region must have keyboard access (1 elementos, p. ej. ._tableWrap_oo5d4_67)
+
+    [2mexpect([22m[31mreceived[39m[2m).[22mtoEqual[2m([22m[32mexpected[39m[2m) // deep equality[22m
+
+    [32m- Expected  - 1[39m
+    [31m+ Received  + 9[39m
+
+    [32m- Array [][39m
+    [31m+ Array [[39m
+    [31m+   Object {[39m
+    [31m+     "help": "Scrollable region must have keyboard access",[39m
+    [31m+     "id": "scrollable-region-focusable",[39m
+    [31m+     "impact": "serious",[39m
+    [31m+     "nodes": 1,[39m
+    [31m+     "target": "._tableWrap_oo5d4_67",[39m
+    [31m+   },[39m
+    [31m+ ][39m
+
+       at ..\support\a11y.ts:36
+
+      34 |   const minor = findings.filter((f) => !blocking.includes(f));
+      35 |   if (minor.length > 0) testInfo.annotations.push({ type: `axe-leves: ${label}`, description: minor.map((f) => `${f.id} (${f.impact}, ${f.nodes}): ${f.help}`).join(' | ') });
+    > 36 |   expect(blocking, `Infracciones serias o críticas en «${label}»:\n${blocking.map((f) => `- ${f.id} [${f.impact}] ${f.help} (${f.nodes} elementos, p. ej. ${f.target})`).join('\n')}`).toEqual([]);
+         |                                                                                                                                                                                        ^
+      37 |   return findings;
+      38 | }
+      39 |
+        at expectNoSeriousViolations (C:\Proyects\Proyects\Tutoria-untrm\e2e\support\a11y.ts:36:184)
+        at C:\Proyects\Proyects\Tutoria-untrm\e2e\tests\e2e-19-accesibilidad-gestion.spec.ts:24:9
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results\e2e-19-accesibilidad-gesti-b0b36-nes-serias-ni-de-estructura\test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results\e2e-19-accesibilidad-gesti-b0b36-nes-serias-ni-de-estructura\error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results\e2e-19-accesibilidad-gesti-b0b36-nes-serias-ni-de-estructura\trace.zip
+    Usage:
+
+        npx playwright show-trace test-results\e2e-19-accesibilidad-gesti-b0b36-nes-serias-ni-de-estructura\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  2) tests\e2e-19-accesibilidad-gestion.spec.ts:19:11 › gestión · tutor › «Informe semestral» no tiene infracciones serias ni de estructura 
+
+    Error: Infracciones serias o críticas en «tutor · Informe semestral»:
+    - heading-order [moderate] Heading levels should only increase by one (1 elementos, p. ej. section:nth-child(5) > h4)
+
+    [2mexpect([22m[31mreceived[39m[2m).[22mtoEqual[2m([22m[32mexpected[39m[2m) // deep equality[22m
+
+    [32m- Expected  - 1[39m
+    [31m+ Received  + 9[39m
+
+    [32m- Array [][39m
+    [31m+ Array [[39m
+    [31m+   Object {[39m
+    [31m+     "help": "Heading levels should only increase by one",[39m
+    [31m+     "id": "heading-order",[39m
+    [31m+     "impact": "moderate",[39m
+    [31m+     "nodes": 1,[39m
+    [31m+     "target": "section:nth-child(5) > h4",[39m
+    [31m+   },[39m
+    [31m+ ][39m
+
+       at ..\support\a11y.ts:36
+
+      34 |   const minor = findings.filter((f) => !blocking.includes(f));
+      35 |   if (minor.length > 0) testInfo.annotations.push({ type: `axe-leves: ${label}`, description: minor.map((f) => `${f.id} (${f.impact}, ${f.nodes}): ${f.help}`).join(' | ') });
+    > 36 |   expect(blocking, `Infracciones serias o críticas en «${label}»:\n${blocking.map((f) => `- ${f.id} [${f.impact}] ${f.help} (${f.nodes} elementos, p. ej. ${f.target})`).join('\n')}`).toEqual([]);
+         |                                                                                                                                                                                        ^
+      37 |   return findings;
+      38 | }
+      39 |
+        at expectNoSeriousViolations (C:\Proyects\Proyects\Tutoria-untrm\e2e\support\a11y.ts:36:184)
+        at C:\Proyects\Proyects\Tutoria-untrm\e2e\tests\e2e-19-accesibilidad-gestion.spec.ts:24:9
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results\e2e-19-accesibilidad-gesti-b1525-nes-serias-ni-de-estructura\test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results\e2e-19-accesibilidad-gesti-b1525-nes-serias-ni-de-estructura\error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results\e2e-19-accesibilidad-gesti-b1525-nes-serias-ni-de-estructura\trace.zip
+    Usage:
+
+        npx playwright show-trace test-results\e2e-19-accesibilidad-gesti-b1525-nes-serias-ni-de-estructura\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  2 failed
+    tests\e2e-19-accesibilidad-gestion.spec.ts:19:11 › gestión · admin › «Informe consolidado» no tiene infracciones serias ni de estructura 
+    tests\e2e-19-accesibilidad-gestion.spec.ts:19:11 › gestión · tutor › «Informe semestral» no tiene infracciones serias ni de estructura 
+  29 passed (15.4m)

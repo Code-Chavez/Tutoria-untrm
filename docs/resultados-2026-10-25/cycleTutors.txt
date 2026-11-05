@@ -1,0 +1,6 @@
+# cycleTutors: 3 corridas seguidas con asignaciones preexistentes (base exclusiva)
+corrida 1: Tests:       8 passed, 8 total | residuo en todas las tablas: sin residuos | huella de las 7 asignaciones preexistentes: sin cambios
+corrida 2: Tests:       8 passed, 8 total | residuo en todas las tablas: sin residuos | huella de las 7 asignaciones preexistentes: sin cambios
+corrida 3: Tests:       8 passed, 8 total | residuo en todas las tablas: sin residuos | huella de las 7 asignaciones preexistentes: sin cambios
+
+Con una prueba que falla a propósito (solo en una copia temporal, no se versiona): Tests:       1 failed, 8 passed, 9 total | residuo: sin residuos (la limpieza corre aunque falle una prueba)

@@ -1,5 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { sessionNoticeText } from '@features/sesiones/utils/sessionNotice';
+import { useNavigate } from 'react-router-dom';
+import { useUrlParams } from '@shared/hooks/useUrlParams';
 import styles from './StudentsPage.module.css';
 import {
   Student,
@@ -19,6 +21,7 @@ import { InterviewFormModal } from '@features/entrevistas/components/InterviewFo
 import { interviewService, CreateInterviewData } from '@features/entrevistas/services/interviewService';
 import { supportContactService, UpsertSupportContactData } from '@features/entrevistas/services/supportContactService';
 import { FollowUpFormModal } from '@features/seguimiento/components/FollowUpFormModal';
+import { followUpDraftKey, referralDraftKey, removeDraft } from '@shared/utils/drafts';
 import { followUpService, CreateFollowUpData } from '@features/seguimiento/services/followUpService';
 import { ReferralFormModal } from '@features/derivaciones/components/ReferralFormModal';
 import { referralService, CreateReferralData } from '@features/derivaciones/services/referralService';
@@ -43,6 +46,7 @@ import {
   StatCard,
   Button,
   EmptyState,
+  NextSteps,
   TableSkeleton,
   Pagination,
   ConfirmDialog,
@@ -74,75 +78,102 @@ const EMPTY_FILTERS: StudentFilterValues = { search: '', schoolId: '', cycle: ''
 // «elegir tutorado» para que cada acceso conduzca a su formulario real (A15).
 type PickAction = 'entrevista' | 'seguimiento' | 'derivar';
 const PICK_TEXT: Record<PickAction, { button: string; help: string }> = {
-  entrevista: { button: 'Registrar entrevista', help: 'Elige al tutorado a quien le harás la entrevista inicial.' },
-  seguimiento: { button: 'Registrar seguimiento', help: 'Elige al tutorado para registrar su ficha de seguimiento.' },
-  derivar: { button: 'Derivar caso', help: 'Elige al tutorado cuyo caso vas a derivar a un servicio.' },
+  entrevista: { button: 'Registrar entrevista', help: 'Elige al estudiante a quien le harás la entrevista inicial.' },
+  seguimiento: { button: 'Registrar seguimiento', help: 'Elige al estudiante para registrar su ficha de seguimiento.' },
+  derivar: { button: 'Derivar caso', help: 'Elige al estudiante cuyo caso vas a derivar a un servicio.' },
 };
 
 export const StudentsPage: React.FC = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
-  const [searchParams, setSearchParams] = useSearchParams();
+  const url = useUrlParams();
   const canWrite = user ? WRITE_ROLES.includes(user.role) : false;
   const canConductInterview = user ? INTERVIEW_ROLES.includes(user.role) : false;
 
   const { students, schools, tutors, loading, error, refresh } = useStudents();
 
-  const requestedAction = searchParams.get('accion');
+  const requestedAction = url.get('accion');
   const pickAction: PickAction | null =
     canConductInterview && (requestedAction === 'entrevista' || requestedAction === 'seguimiento' || requestedAction === 'derivar')
       ? requestedAction
       : null;
-  const clearPickAction = () => setSearchParams({});
+  const clearPickAction = () => url.set({ accion: null }, { replace: true });
 
-  // «Registrar tutorado» del panel de inicio llega con ?accion=nuevo y abre directamente el alta.
+  // «Registrar estudiante» del panel de inicio llega con ?accion=nuevo y abre directamente el alta.
   const wantsNewStudent = canWrite && requestedAction === 'nuevo';
 
-  const [filters, setFilters] = useState<StudentFilterValues>(EMPTY_FILTERS);
-  const [page, setPage] = useState(1);
+  // Lo que conviene conservar al recargar o compartir el enlace vive en la URL: los filtros (q, escuela, ciclo, estado), la página
+  // (pagina) y la ventana abierta con el estudiante sobre el que se abrió (?dialogo=<ventana>&estudiante=<id>).
+  const [q, schoolParam, cycleParam, statusParam] = [url.get('q'), url.get('escuela'), url.get('ciclo'), url.get('estado')];
+  const filters = useMemo<StudentFilterValues>(() => ({ search: q, schoolId: schoolParam, cycle: cycleParam, status: statusParam }), [q, schoolParam, cycleParam, statusParam]);
+  const page = Math.max(1, Number.parseInt(url.get('pagina'), 10) || 1);
+  const setPage = (next: number) => url.set({ pagina: next > 1 ? String(next) : null }, { replace: true });
 
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [studentToEdit, setStudentToEdit] = useState<Student | null>(null);
+  const dialog = url.get('dialogo');
+  const dialogStudentId = url.get('estudiante');
+  const studentFor = (name: string): Student | null => (dialog === name ? (students.find((s) => s.id === dialogStudentId) ?? null) : null);
+  const dialogSetter = (name: string) => (student: Student | null) =>
+    url.set(student ? { dialogo: name, estudiante: student.id } : { dialogo: null, estudiante: null }, { replace: student === null });
+
+  const studentToEdit = studentFor('editar');
+  const isModalOpen = dialog === 'nuevo' || studentToEdit !== null;
+  const groupSessionOpen = dialog === 'sesion-grupal';
+  const setGroupSessionOpen = (open: boolean) => url.set({ dialogo: open ? 'sesion-grupal' : null, estudiante: null }, { replace: !open });
+
+  // Un enlace a un estudiante que ya no existe (o que la persona no ve) no deja una ventana fantasma: se limpia el parámetro.
+  useEffect(() => {
+    if (loading || error) return;
+    if (dialogStudentId && !students.some((s) => s.id === dialogStudentId)) url.set({ dialogo: null, estudiante: null }, { replace: true });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [loading, error, students, dialogStudentId]);
 
   // Marcado de riesgo (HU-11).
-  const [studentToMark, setStudentToMark] = useState<Student | null>(null);
-  const [studentToUnmark, setStudentToUnmark] = useState<Student | null>(null);
+  const studentToMark = studentFor('riesgo');
+  const setStudentToMark = dialogSetter('riesgo');
+  const studentToUnmark = studentFor('sin-riesgo');
+  const setStudentToUnmark = dialogSetter('sin-riesgo');
   const [riskLoading, setRiskLoading] = useState(false);
 
   // Reasignación individual (HU-13).
-  const [studentToReassign, setStudentToReassign] = useState<Student | null>(null);
+  const studentToReassign = studentFor('reasignar');
+  const setStudentToReassign = dialogSetter('reasignar');
   const [reassignLoading, setReassignLoading] = useState(false);
   const [reassignError, setReassignError] = useState('');
 
   // Entrevista inicial tutorial (HU-14).
-  const [studentForInterview, setStudentForInterview] = useState<Student | null>(null);
+  const studentForInterview = studentFor('entrevista');
+  const setStudentForInterview = dialogSetter('entrevista');
   const [interviewLoading, setInterviewLoading] = useState(false);
   const [interviewError, setInterviewError] = useState('');
 
   // Solicitud de tutoría (HU-17).
-  const [studentForRequest, setStudentForRequest] = useState<Student | null>(null);
+  const studentForRequest = studentFor('solicitud');
+  const setStudentForRequest = dialogSetter('solicitud');
   const [requestLoading, setRequestLoading] = useState(false);
   const [requestError, setRequestError] = useState('');
   const [requestFeedback, setRequestFeedback] = useState<React.ReactNode>('');
 
   // Programación de sesión individual (HU-18) o grupal (HU-19).
-  const [studentForSession, setStudentForSession] = useState<Student | null>(null);
-  const [groupSessionOpen, setGroupSessionOpen] = useState(false);
+  const studentForSession = studentFor('sesion');
+  const setStudentForSession = dialogSetter('sesion');
   const [sessionLoading, setSessionLoading] = useState(false);
   const [sessionError, setSessionError] = useState('');
 
   // Ficha de seguimiento (HU-24).
-  const [studentForFollowUp, setStudentForFollowUp] = useState<Student | null>(null);
+  const studentForFollowUp = studentFor('seguimiento');
+  const setStudentForFollowUp = dialogSetter('seguimiento');
   const [followUpLoading, setFollowUpLoading] = useState(false);
   const [followUpError, setFollowUpError] = useState('');
 
   // Ficha de derivación (HU-28, Anexo N°6).
-  const [studentForReferral, setStudentForReferral] = useState<Student | null>(null);
+  const studentForReferral = studentFor('derivar');
+  const setStudentForReferral = dialogSetter('derivar');
   const [referralLoading, setReferralLoading] = useState(false);
   const [referralError, setReferralError] = useState('');
 
   // Vinculación de cuenta de portal (autoservicio de solicitud de tutoría).
-  const [studentToLink, setStudentToLink] = useState<Student | null>(null);
+  const studentToLink = studentFor('vincular');
+  const setStudentToLink = dialogSetter('vincular');
   const [linkLoading, setLinkLoading] = useState(false);
   const [linkError, setLinkError] = useState('');
   const [tutoradoAccounts, setTutoradoAccounts] = useState<PortalAccountOption[]>([]);
@@ -209,20 +240,12 @@ export const StudentsPage: React.FC = () => {
 
   // Reinicia la página cuando cambian los filtros.
   const handleFilters = (next: StudentFilterValues) => {
-    setFilters(next);
-    setPage(1);
+    url.set({ q: next.search, escuela: next.schoolId, ciclo: next.cycle, estado: next.status, pagina: null }, { replace: true });
   };
 
-  const handleOpenModal = (student?: Student) => {
-    setStudentToEdit(student || null);
-    setIsModalOpen(true);
-  };
+  const handleOpenModal = (student?: Student) => url.set(student ? { dialogo: 'editar', estudiante: student.id } : { dialogo: 'nuevo', estudiante: null });
 
-  const handleCloseModal = () => {
-    setIsModalOpen(false);
-    setStudentToEdit(null);
-    if (wantsNewStudent) setSearchParams({}, { replace: true });
-  };
+  const handleCloseModal = () => url.set({ dialogo: null, estudiante: null, ...(wantsNewStudent && { accion: null }) }, { replace: true });
 
   const handleSubmit = async (data: CreateStudentData | UpdateStudentData) => {
     if (studentToEdit) {
@@ -233,11 +256,18 @@ export const StudentsPage: React.FC = () => {
     refresh();
   };
 
+  // Lo que se escribe en cada ventana se conserva como borrador de la pestaña; al enviar con éxito se descarta.
+  const draftKeyOf = (dialogName: string, studentId: string) => `${dialogName}.${studentId}`;
+  const dropDraft = (dialogName: string, studentId: string) => {
+    if (user) removeDraft(user.id, draftKeyOf(dialogName, studentId));
+  };
+
   const confirmMarkRisk = async (reason: string) => {
     if (!studentToMark) return;
     setRiskLoading(true);
     try {
       await studentService.markRisk(studentToMark.id, true, reason);
+      dropDraft('riesgo', studentToMark.id);
       setStudentToMark(null);
       refresh();
     } catch (err) {
@@ -267,6 +297,7 @@ export const StudentsPage: React.FC = () => {
     setReassignError('');
     try {
       await assignmentService.reassignStudent(studentToReassign.id, newTutorId, reason);
+      dropDraft('reasignar', studentToReassign.id);
       setStudentToReassign(null);
       refresh();
     } catch (err) {
@@ -288,6 +319,7 @@ export const StudentsPage: React.FC = () => {
         await supportContactService.upsertSupportContact(studentForInterview.id, supportContact);
       }
       await interviewService.createInterview(studentForInterview.id, data);
+      dropDraft('entrevista', studentForInterview.id);
       setStudentForInterview(null);
     } catch (err) {
       setInterviewError(getApiErrorMessage(err));
@@ -306,8 +338,9 @@ export const StudentsPage: React.FC = () => {
         data,
       );
       setRequestFeedback(
-        `Solicitud registrada y enrutada a ${request.routedToRole === 'tutor' ? 'el tutor' : 'el coordinador'} de ${studentForRequest.firstName} ${studentForRequest.lastName}.`,
+        `Solicitud registrada y enviada a ${request.routedToRole === 'tutor' ? 'el tutor' : 'el coordinador'} de ${studentForRequest.firstName} ${studentForRequest.lastName}.`,
       );
+      dropDraft('solicitud', studentForRequest.id);
       setStudentForRequest(null);
     } catch (err) {
       setRequestError(getApiErrorMessage(err));
@@ -346,8 +379,10 @@ export const StudentsPage: React.FC = () => {
         <>
           Sesión programada para el {when} con {studentForSession.firstName}{' '}
           {studentForSession.lastName}.{sessionModalityNote(session)}
+          {sessionNoticeText(session.notice)}
         </>,
       );
+      dropDraft('sesion', studentForSession.id);
       setStudentForSession(null);
     } catch (err) {
       setSessionError(getApiErrorMessage(err));
@@ -367,8 +402,9 @@ export const StudentsPage: React.FC = () => {
       });
       setRequestFeedback(
         <>
-          Sesión grupal programada para el {when} con {session.studentIds.length} tutorados.
+          Sesión grupal programada para el {when} con {session.studentIds.length} estudiantes.
           {sessionModalityNote(session)}
+          {sessionNoticeText(session.notice)}
         </>,
       );
       setGroupSessionOpen(false);
@@ -385,6 +421,7 @@ export const StudentsPage: React.FC = () => {
     setFollowUpError('');
     try {
       await followUpService.createFollowUp(studentForFollowUp.id, data);
+      if (user) removeDraft(user.id, followUpDraftKey(studentForFollowUp.id));
       setRequestFeedback(
         `Ficha de seguimiento registrada para ${studentForFollowUp.firstName} ${studentForFollowUp.lastName}.`,
       );
@@ -402,6 +439,7 @@ export const StudentsPage: React.FC = () => {
     setReferralError('');
     try {
       const referral = await referralService.createReferral(studentForReferral.id, data);
+      if (user) removeDraft(user.id, referralDraftKey(studentForReferral.id));
       setRequestFeedback(
         <>
           Ficha de derivación registrada para {studentForReferral.firstName}{' '}
@@ -446,7 +484,7 @@ export const StudentsPage: React.FC = () => {
   return (
     <div>
       <PageHeader
-        title="Tutorados"
+        title="Estudiantes"
         subtitle="Gestión de estudiantes en el programa de tutoría"
         icon={<GraduationCapIcon size={24} />}
         actions={
@@ -465,7 +503,7 @@ export const StudentsPage: React.FC = () => {
             )}
             {canWrite && (
               <Button icon={<PlusIcon size={17} />} onClick={() => handleOpenModal()}>
-                Nuevo tutorado
+                Nuevo estudiante
               </Button>
             )}
           </>
@@ -480,8 +518,8 @@ export const StudentsPage: React.FC = () => {
       )}
 
       <div className={styles.kpis}>
-        <StatCard icon={<GraduationCapIcon size={22} />} value={String(total)} label="Total de tutorados" hint="Registrados en el sistema" tone="info" loading={loading} />
-        <StatCard icon={<CheckCircleIcon size={22} />} value={String(active)} label="Tutorados activos" hint="Con matrícula vigente" tone="success" loading={loading} />
+        <StatCard icon={<GraduationCapIcon size={22} />} value={String(total)} label="Total de estudiantes" hint="Registrados en el sistema" tone="info" loading={loading} />
+        <StatCard icon={<CheckCircleIcon size={22} />} value={String(active)} label="Estudiantes activos" hint="Con matrícula vigente" tone="success" loading={loading} />
         <StatCard icon={<AlertTriangleIcon size={22} />} value={String(atRisk)} label="En riesgo académico" hint="Requieren seguimiento" tone="warning" loading={loading} />
         <StatCard icon={<BanIcon size={22} />} value={String(inactive)} label="Inactivos" hint="Sin matrícula vigente" tone="neutral" loading={loading} />
       </div>
@@ -510,24 +548,35 @@ export const StudentsPage: React.FC = () => {
           <EmptyState
             variant="error"
             icon={<XCircleIcon size={26} />}
-            title="No se pudieron cargar los tutorados"
+            title="No se pudieron cargar los estudiantes"
             description="Ocurrió un error al consultar la información. Vuelve a intentarlo."
             action={<Button variant="secondary" onClick={refresh}>Reintentar</Button>}
           />
         ) : filtered.length === 0 ? (
           <EmptyState
             icon={<SearchIcon size={26} />}
-            title={total === 0 ? 'Aún no hay tutorados registrados' : 'Sin resultados'}
+            title={total === 0 ? 'Aún no hay estudiantes registrados' : 'Sin resultados'}
             description={
               total === 0
-                ? 'Registra un tutorado o utiliza la carga masiva para importarlos desde Excel.'
-                : 'No se encontraron tutorados con los filtros aplicados. Prueba ajustarlos.'
+                ? canWrite
+                  ? 'Registra un estudiante o utiliza la carga masiva para importarlos desde Excel.'
+                  : 'Aún no tienes estudiantes asignados. La coordinación de tu escuela los asigna por ciclo en «Asignación por ciclo»; cuando lo haga, aparecerán aquí.'
+                : 'No se encontraron estudiantes con los filtros aplicados. Prueba ajustarlos.'
             }
             action={
               total === 0 && canWrite ? (
-                <Button icon={<PlusIcon size={16} />} onClick={() => handleOpenModal()}>
-                  Nuevo tutorado
-                </Button>
+                <>
+                  <Button icon={<PlusIcon size={16} />} onClick={() => handleOpenModal()}>
+                    Nuevo estudiante
+                  </Button>
+                  <NextSteps
+                    title="O consíguelos así"
+                    steps={[
+                      { to: '/pedir-listas', label: 'Pedir la lista a la escuela', description: 'Sale por correo con la plantilla de Excel' },
+                      { to: '/carga-masiva', label: 'Cargar el Excel', description: 'Cuando ya tengas la lista' },
+                    ]}
+                  />
+                </>
               ) : undefined
             }
           />
@@ -611,6 +660,7 @@ export const StudentsPage: React.FC = () => {
           onSubmit={handleSubmit}
           studentToEdit={studentToEdit}
           schools={schools}
+          draftOwnerId={user?.id}
         />
       )}
 
@@ -618,6 +668,8 @@ export const StudentsPage: React.FC = () => {
         <RiskModal
           student={studentToMark}
           loading={riskLoading}
+          draftOwnerId={user?.id}
+          draftKey={draftKeyOf('riesgo', studentToMark.id)}
           onConfirm={confirmMarkRisk}
           onCancel={() => setStudentToMark(null)}
         />
@@ -630,6 +682,8 @@ export const StudentsPage: React.FC = () => {
           currentTutorName={tutorName(studentToReassign.tutorId)}
           loading={reassignLoading}
           serverError={reassignError}
+          draftOwnerId={user?.id}
+          draftKey={draftKeyOf('reasignar', studentToReassign.id)}
           onConfirm={confirmReassign}
           onCancel={() => setStudentToReassign(null)}
         />
@@ -642,6 +696,7 @@ export const StudentsPage: React.FC = () => {
           schoolName={schoolName(studentForInterview.schoolId)}
           loading={interviewLoading}
           serverError={interviewError}
+          draftKey={draftKeyOf('entrevista', studentForInterview.id)}
           onSubmit={confirmInterview}
           onCancel={() => setStudentForInterview(null)}
         />
@@ -652,6 +707,8 @@ export const StudentsPage: React.FC = () => {
           student={studentForRequest}
           loading={requestLoading}
           serverError={requestError}
+          draftOwnerId={user?.id}
+          draftKey={draftKeyOf('solicitud', studentForRequest.id)}
           onSubmit={confirmTutoringRequest}
           onCancel={() => setStudentForRequest(null)}
         />
@@ -663,6 +720,8 @@ export const StudentsPage: React.FC = () => {
           durationMinutes={DEFAULT_SESSION_DURATION}
           loading={sessionLoading}
           serverError={sessionError}
+          draftOwnerId={user?.id}
+          draftKey={draftKeyOf('sesion', studentForSession.id)}
           onSubmit={confirmSchedule}
           onCancel={() => setStudentForSession(null)}
         />
@@ -686,6 +745,7 @@ export const StudentsPage: React.FC = () => {
           student={studentForFollowUp}
           loading={followUpLoading}
           serverError={followUpError}
+          draftOwnerId={user?.id}
           onSubmit={confirmFollowUp}
           onCancel={() => setStudentForFollowUp(null)}
         />
@@ -696,6 +756,7 @@ export const StudentsPage: React.FC = () => {
           student={studentForReferral}
           loading={referralLoading}
           serverError={referralError}
+          draftOwnerId={user?.id}
           onSubmit={confirmReferral}
           onCancel={() => setStudentForReferral(null)}
         />

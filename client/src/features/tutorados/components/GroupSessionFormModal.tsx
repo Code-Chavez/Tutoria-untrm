@@ -49,6 +49,8 @@ export const GroupSessionFormModal: React.FC<GroupSessionFormModalProps> = ({
   const [meetingLink, setMeetingLink] = useState('');
   const [filters, setFilters] = useState<AssignFilterValues>(EMPTY_FILTERS);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  // A quién el sistema no puede avisar: los seleccionados sin cuenta del portal.
+  const withoutAccount = students.filter((s) => selectedIds.has(s.id) && !s.userId).length;
   const [error, setError] = useState('');
 
   const dialogRef = useDialogFocus();
@@ -112,7 +114,7 @@ export const GroupSessionFormModal: React.FC<GroupSessionFormModalProps> = ({
       return;
     }
     if (selectedIds.size < 2) {
-      setError('Selecciona al menos dos tutorados para una sesión grupal (Art. 7.b).');
+      setError('Selecciona al menos dos estudiantes para una sesión grupal.');
       return;
     }
     if (modality === 'PRESENCIAL' && !location.trim()) {
@@ -150,7 +152,7 @@ export const GroupSessionFormModal: React.FC<GroupSessionFormModalProps> = ({
           </span>
           <div className={styles.headText}>
             <h2>Programar sesión grupal</h2>
-            <p>Dos o más tutorados, para abordar temas comunes (Art. 7.b)</p>
+            <p>Dos o más estudiantes, para abordar temas comunes</p>
           </div>
           <button className={styles.close} onClick={onCancel} aria-label="Cerrar">
             <CloseIcon size={18} />
@@ -202,7 +204,7 @@ export const GroupSessionFormModal: React.FC<GroupSessionFormModalProps> = ({
             />
           </div>
 
-          <label className={styles.label}>Modalidad (Art. 8)</label>
+          <label className={styles.label}>Modalidad</label>
           <div className={styles.sourceOptions}>
             <label className={styles.radio}>
               <input
@@ -264,7 +266,7 @@ export const GroupSessionFormModal: React.FC<GroupSessionFormModalProps> = ({
 
           <div className={styles.listSection}>
             <div className={styles.listHead}>
-              <label>Tutorados (agrupa por ciclo o escuela con los filtros)</label>
+              <label>Estudiantes (agrupa por ciclo o escuela con los filtros)</label>
               <span className={styles.count}>{selectedIds.size} seleccionado(s)</span>
             </div>
             <div className={styles.listBox}>
@@ -284,8 +286,10 @@ export const GroupSessionFormModal: React.FC<GroupSessionFormModalProps> = ({
 
           <div className={styles.hint}>
             <InfoIcon size={16} />
-            La sesión tendrá una duración de {durationMinutes} minutos (Art. 15.c del Protocolo). Se
-            notificará a todos los participantes cuando el módulo de notificaciones esté disponible.
+            La sesión tendrá una duración de {durationMinutes} minutos. Cada participante con cuenta del portal
+            recibe un aviso en el sistema con la fecha y el lugar o enlace.
+            {withoutAccount > 0 &&
+              ` ${withoutAccount} de los seleccionados no ${withoutAccount === 1 ? 'tiene' : 'tienen'} cuenta del portal: avísa${withoutAccount === 1 ? 'le' : 'les'} por otro medio.`}
           </div>
 
           {(error || serverError) && <span className={styles.error}>{error || serverError}</span>}

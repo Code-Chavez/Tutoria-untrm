@@ -1,15 +1,22 @@
+import type { CycleTutorApplier } from '@application/use-cases/cycle-tutors/CycleTutorUseCases';
 import { Student } from '@domain/entities/Student';
 import { StudentRepository } from '@domain/repositories/StudentRepository';
 import { SchoolRepository } from '@domain/repositories/SchoolRepository';
 import { StudentAccessGuard } from '@application/access/StudentAccessGuard';
+import { AcademicPeriodRepository } from '@domain/repositories/AcademicPeriodRepository';
+import { PeriodEnrollmentRepository } from '@domain/repositories/PeriodEnrollmentRepository';
 import { CreateStudentInput } from '@application/dtos/student.dto';
-import { DuplicateStudentCodeError, SchoolNotFoundError } from './StudentErrors';
+import { normalizeEmail } from '@application/validation/email';
+import { DuplicateStudentCodeError, DuplicateStudentEmailError, SchoolNotFoundError } from './StudentErrors';
 
 export class CreateStudentUseCase {
   constructor(
     private readonly students: StudentRepository,
     private readonly schools: SchoolRepository,
     private readonly guard: StudentAccessGuard,
+    private readonly periods: AcademicPeriodRepository,
+    private readonly enrollments: PeriodEnrollmentRepository,
+    private readonly cycleTutors?: CycleTutorApplier,
   ) {}
 
   async execute(data: CreateStudentInput, requesterId: string): Promise<Student> {
@@ -26,16 +33,29 @@ export class CreateStudentUseCase {
       throw new DuplicateStudentCodeError(code);
     }
 
-    return this.students.create({
+    // Correo de contacto opcional, guardado en su forma única; vacío es «sin correo» (no una cadena vacía). Dos estudiantes no
+    // comparten correo: el aviso o el vínculo con la cuenta de portal llegaría a la persona equivocada.
+    const email = data.email ? normalizeEmail(data.email) : null;
+    if (email && (await this.students.findAll({ email })).length > 0) throw new DuplicateStudentEmailError(email);
+
+    const student = await this.students.create({
       studentCode: code,
       firstName: data.firstName.trim(),
       lastName: data.lastName.trim(),
-      email: data.email ?? null,
+      email,
       phone: data.phone ?? null,
       cycle: data.cycle,
       schoolId: data.schoolId,
       isAtRisk: false,
       isActive: true,
     });
+
+    // Un estudiante dado de alta durante un periodo vigente queda matriculado en él.
+    const period = await this.periods.findActive();
+    if (period) {
+      await this.enrollments.enroll({ periodId: period.id, studentId: student.id, schoolId: student.schoolId, cycle: student.cycle });
+      await this.cycleTutors?.applyToStudent(period.id, { id: student.id, schoolId: student.schoolId, cycle: student.cycle }, requesterId);
+    }
+    return student;
   }
 }

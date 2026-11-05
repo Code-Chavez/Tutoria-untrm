@@ -1,0 +1,25 @@
+.notice {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--s2) var(--s3);
+  margin: 0 0 var(--s3);
+  padding: var(--s2) var(--s3);
+  border-left: 3px solid var(--dorado, var(--azul));
+  border-radius: var(--r-sm);
+  background: var(--g50);
+  font-size: var(--fs-sm);
+  color: var(--g700);
+}
+
+.discard {
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: var(--azul);
+  font: inherit;
+  font-weight: 600;
+  text-decoration: underline;
+  cursor: pointer;
+}

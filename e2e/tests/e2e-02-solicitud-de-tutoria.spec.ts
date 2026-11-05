@@ -27,11 +27,18 @@ test.beforeAll(async () => {
 test('el estudiante registra la solicitud y queda Pendiente', async ({ page }) => {
   await loginUi(page, accounts.student);
   await goToMenu(page, 'Solicitar tutoría');
-  await page.getByLabel('Motivo (Art. 20)').selectOption({ label: 'Académico' });
+  // Antes de enviar ya sabe quien la recibira (se espera a verlo: asi lo veria una persona antes de pulsar el boton)
+  const announcement = page.getByText(/Tu solicitud la recibirá tu tutor Elena/);
+  await expect(announcement).toBeVisible();
+  const announcedName = /tu tutor (.+?)\. Te avisaremos/.exec((await announcement.textContent()) ?? '')?.[1];
+  expect(announcedName, 'nombre del destinatario anunciado').toBeTruthy();
+  await page.getByLabel('Motivo', { exact: true }).selectOption({ label: 'Académico' });
   await page.getByLabel('Descripción del motivo').fill(reason);
   await page.getByRole('button', { name: 'Registrar solicitud' }).click();
 
-  await expect(page.getByText('Solicitud registrada y enrutada a tu tutor.')).toBeVisible();
+  // Despues de enviar, la pantalla dice a quien llego
+  // y es la MISMA persona que se anunció (y la tutora de abajo recibe el aviso: es quien tiene la solicitud)
+  await expect(page.getByText(`Solicitud registrada: la recibió tu tutor ${announcedName}. Te avisaremos en el sistema cuando responda.`)).toBeVisible();
   const row = page.getByText(reason).first();
   await expect(row).toBeVisible();
   await expect(page.getByText('Pendiente').first()).toBeVisible();
@@ -56,6 +63,9 @@ test('la tutora recibe el aviso y exige una respuesta antes de marcarla atendida
 
   await dialog.getByLabel('Respuesta para el estudiante').fill(answer);
   await dialog.getByRole('button', { name: 'Marcar atendida' }).click();
+  // Lo atendido sale de «Por atender» (la vista inicial) y se consulta en «Atendidas»
+  await expect(page.getByRole('row', { name: new RegExp(reason) })).toHaveCount(0);
+  await page.getByRole('button', { name: /^Atendidas/ }).click();
   await expect(page.getByRole('row', { name: new RegExp(reason) }).getByText('Atendida')).toBeVisible();
 });
 
@@ -70,6 +80,7 @@ test('el estudiante ve el estado Atendida y la respuesta', async ({ page }) => {
 test('la coordinadora de la escuela ve la solicitud', async ({ page }) => {
   await loginUi(page, accounts.coordinator);
   await goToMenu(page, 'Solicitudes de tutoría');
+  await page.getByRole('button', { name: /^Atendidas/ }).click(); // la solicitud ya se atendió: no está en «Por atender»
   await expect(page.getByText(reason)).toBeVisible();
 });
 

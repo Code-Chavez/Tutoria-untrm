@@ -62,7 +62,7 @@ export function WorkPlanResolutionCard({ schoolId, plan }: { schoolId: string; p
   return (
     <Card padded className={styles.card}>
       <div className={styles.head}>
-        <h3>Resolución de aprobación</h3>
+        <h2>Resolución de aprobación</h2>
         <Badge tone={plan.status === 'APROBADO' ? 'success' : 'warning'}>
           {plan.status === 'APROBADO'
             ? 'Plan vigente'
@@ -114,7 +114,7 @@ export function WorkPlanResolutionCard({ schoolId, plan }: { schoolId: string; p
 
       {versions.length > 0 && (
         <div className={styles.versions}>
-          <h4>Versiones aprobadas anteriores</h4>
+          <h3>Versiones aprobadas anteriores</h3>
           <ul>
             {versions.map((v) => (
               <li key={v.revision}>

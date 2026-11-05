@@ -33,3 +33,11 @@ export class StudentsAlreadyAssignedError extends Error {
     this.name = 'StudentsAlreadyAssignedError';
   }
 }
+
+// Un docente tutor solo tutorea estudiantes de su escuela (y, por tanto, de su facultad y de su sede).
+export class TutorSchoolMismatchError extends Error {
+  constructor() {
+    super('El tutor pertenece a otra escuela: solo puede tutorear estudiantes de su propia escuela');
+    this.name = 'TutorSchoolMismatchError';
+  }
+}

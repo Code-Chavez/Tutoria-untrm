@@ -52,7 +52,7 @@ test.beforeAll(async () => {
 test('la coordinadora deja vigente el plan con la resolución', async ({ page }) => {
   await loginUi(page, accounts.coordinator);
   await goToMenu(page, 'Plan semestral');
-  await expect(page.getByRole('heading', { level: 3, name: 'Resolución de aprobación' })).toBeVisible();
+  await expect(page.getByRole('heading', { level: 2, name: 'Resolución de aprobación' })).toBeVisible();
 
   if (!(await page.getByText('Plan vigente').isVisible())) await attachResolution(page);
   await expect(page.getByText('Plan vigente')).toBeVisible();
@@ -71,7 +71,7 @@ test('al editar el plan aprobado se crea una revisión y se conserva la versión
   await page.getByRole('button', { name: 'Guardar revisión' }).click();
 
   await expect(page.getByText('Revisión pendiente de resolución')).toBeVisible();
-  await expect(page.getByRole('heading', { level: 4, name: 'Versiones aprobadas anteriores' })).toBeVisible();
+  await expect(page.getByRole('heading', { level: 3, name: 'Versiones aprobadas anteriores' })).toBeVisible();
 
   await attachResolution(page);
 });

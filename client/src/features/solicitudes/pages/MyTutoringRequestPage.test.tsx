@@ -1,10 +1,12 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { MemoryRouter } from 'react-router-dom';
 import { QueryClientTestWrapper } from '@shared/test-utils/QueryClientTestWrapper';
 import { AuthContext, type AuthContextValue } from '@features/auth/context/AuthContext';
 import { MyTutoringRequestPage } from './MyTutoringRequestPage';
 import { tutoringRequestService } from '../services/tutoringRequestService';
+import { periodService } from '@features/periodo/services/periodService';
 import type { TutoringRequest, TutoringRequestView } from '../services/tutoringRequestService';
 
 vi.mock('../services/tutoringRequestService', async (importOriginal) => {
@@ -14,11 +16,18 @@ vi.mock('../services/tutoringRequestService', async (importOriginal) => {
     tutoringRequestService: {
       createOwnTutoringRequest: vi.fn(),
       getOwn: vi.fn(),
+      getRecipient: vi.fn(),
     },
   };
 });
 
+vi.mock('@features/periodo/services/periodService', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@features/periodo/services/periodService')>();
+  return { ...actual, periodService: { current: vi.fn() } };
+});
+
 const mocked = vi.mocked(tutoringRequestService);
+const mockedPeriod = vi.mocked(periodService);
 
 const view = (over: Partial<TutoringRequestView> = {}): TutoringRequestView => ({
   id: 'r1',
@@ -32,6 +41,8 @@ const view = (over: Partial<TutoringRequestView> = {}): TutoringRequestView => (
   responseNote: null,
   handledById: null,
   handledAt: null,
+  sessionId: null,
+  referralId: null,
   createdAt: '2026-10-01T10:00:00.000Z',
   studentName: 'Ana Torres',
   studentCode: '20191234',
@@ -52,7 +63,9 @@ const renderPage = () =>
   render(
     <AuthContext.Provider value={auth}>
       <QueryClientTestWrapper>
-        <MyTutoringRequestPage />
+        <MemoryRouter>
+          <MyTutoringRequestPage />
+        </MemoryRouter>
       </QueryClientTestWrapper>
     </AuthContext.Provider>,
   );
@@ -60,7 +73,9 @@ const renderPage = () =>
 describe('MyTutoringRequestPage', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    window.sessionStorage.clear(); // los borradores viven en la pestaña: que no pasen de una prueba a otra
     mocked.getOwn.mockResolvedValue([]);
+    mockedPeriod.current.mockResolvedValue({ open: true, period: { id: 'p1', name: '2026-II', startDate: '2026-08-24', endDate: '2026-12-18' }, enrolled: true });
   });
 
   it('exige describir el motivo antes de enviar', async () => {
@@ -96,9 +111,96 @@ describe('MyTutoringRequestPage', () => {
         reason: 'Dificultad en Cálculo',
       });
     });
-    expect(await screen.findByText(/enrutada a tu tutor/i)).toBeInTheDocument();
+    expect(await screen.findByText(/enviada a tu tutor/i)).toBeInTheDocument();
     // Tras registrar, el historial se vuelve a pedir para que aparezca la nueva solicitud.
     await waitFor(() => expect(mocked.getOwn.mock.calls.length).toBeGreaterThan(1));
+  });
+
+  describe('borrador: no se pierde lo escrito (U07)', () => {
+    it('al volver a la pantalla recupera lo que había escrito y lo avisa; descartar lo borra', async () => {
+      const user = userEvent.setup();
+      const first = renderPage();
+      await user.type(screen.getByLabelText(/descripción del motivo/i), 'Tengo dificultades con Cálculo');
+      first.unmount(); // fue a «Mis sesiones» sin enviar
+
+      renderPage();
+      expect(screen.getByLabelText(/descripción del motivo/i)).toHaveValue('Tengo dificultades con Cálculo');
+      expect(screen.getByText(/Recuperamos lo que habías escrito/)).toBeInTheDocument();
+      expect(screen.getByText(/Recuperamos lo que habías escrito/)).toBeInTheDocument();
+
+      await user.click(screen.getByRole('button', { name: 'Descartar borrador' }));
+      expect(screen.getByLabelText(/descripción del motivo/i)).toHaveValue('');
+      expect(screen.queryByText(/Recuperamos lo que habías escrito/)).not.toBeInTheDocument();
+    });
+
+    it('el borrador es de esa persona: otra cuenta en la misma pestaña no lo ve', async () => {
+      const user = userEvent.setup();
+      const first = renderPage();
+      await user.type(screen.getByLabelText(/descripción del motivo/i), 'Algo privado');
+      first.unmount();
+
+      render(
+        <AuthContext.Provider value={{ ...auth, user: { ...auth.user!, id: 'otra-persona' } }}>
+          <QueryClientTestWrapper>
+            <MyTutoringRequestPage />
+          </QueryClientTestWrapper>
+        </AuthContext.Provider>,
+      );
+      expect(screen.getByLabelText(/descripción del motivo/i)).toHaveValue('');
+    });
+
+    it('al enviar con éxito no queda borrador', async () => {
+      mocked.createOwnTutoringRequest.mockResolvedValue({ id: 'r', studentId: 's', source: 'STUDENT', caseType: 'ACADEMIC', reason: 'x', routedToId: 't', routedToRole: 'tutor', createdAt: new Date().toISOString() } as TutoringRequest);
+      const user = userEvent.setup();
+      renderPage();
+      await user.type(screen.getByLabelText(/descripción del motivo/i), 'Dificultad en Cálculo');
+      await user.click(screen.getByRole('button', { name: /registrar solicitud/i }));
+      await screen.findByText(/Solicitud registrada/);
+      expect(Object.keys(window.sessionStorage).filter((k) => k.startsWith('sit.draft.'))).toEqual([]);
+      expect(screen.getByLabelText(/descripción del motivo/i)).toHaveValue('');
+    });
+  });
+
+  describe('a quién llega mi solicitud (U02)', () => {
+    const created = { id: 'req-1', studentId: 's1', source: 'STUDENT', caseType: 'ACADEMIC', reason: 'x', routedToId: 't', routedToRole: 'tutor', createdAt: new Date().toISOString() } as TutoringRequest;
+
+    it('antes de enviar dice quién la recibirá, con su nombre', async () => {
+      mocked.getRecipient.mockResolvedValue({ kind: 'tutor', name: 'Elena Ramírez' });
+      renderPage();
+      expect(await screen.findByText('Tu solicitud la recibirá tu tutor Elena Ramírez. Te avisaremos en el sistema cuando responda.')).toBeInTheDocument();
+    });
+
+    it('sin tutor explica quién la recibe y no deja al estudiante sin saber qué hacer', async () => {
+      mocked.getRecipient.mockResolvedValue({ kind: 'coordinator', name: 'Rosa Mendoza' });
+      renderPage();
+      expect(await screen.findByText(/Aún no tienes tutor asignado: tu solicitud la recibirá la coordinación de tu escuela \(Rosa Mendoza\)/)).toBeInTheDocument();
+    });
+
+    it('sin nadie que pueda recibirla lo dice, no promete atención, no deja enviar y conserva lo escrito', async () => {
+      mocked.getRecipient.mockResolvedValue({ kind: 'none', name: '' });
+      const user = userEvent.setup();
+      renderPage();
+      expect(await screen.findByText(/no hay una persona disponible para recibir tu solicitud/)).toBeInTheDocument();
+      expect(screen.queryByText(/te avisaremos/i)).not.toBeInTheDocument();
+
+      await user.type(screen.getByLabelText(/descripción del motivo/i), 'Dificultad en Cálculo');
+      expect(screen.getByRole('button', { name: /registrar solicitud/i })).toBeDisabled();
+      expect(screen.getByLabelText(/descripción del motivo/i)).toHaveValue('Dificultad en Cálculo');
+      expect(mocked.createOwnTutoringRequest).not.toHaveBeenCalled();
+    });
+
+    it('después de enviar nombra a quien la recibió', async () => {
+      mocked.getRecipient.mockResolvedValue({ kind: 'tutor', name: 'Elena Ramírez' });
+      mocked.createOwnTutoringRequest.mockResolvedValue(created);
+      const user = userEvent.setup();
+      renderPage();
+      await screen.findByText(/Tu solicitud la recibirá tu tutor Elena Ramírez/);
+
+      await user.type(screen.getByLabelText(/descripción del motivo/i), 'Dificultad en Cálculo');
+      await user.click(screen.getByRole('button', { name: /registrar solicitud/i }));
+
+      expect(await screen.findByText('Solicitud registrada: la recibió tu tutor Elena Ramírez. Te avisaremos en el sistema cuando responda.')).toBeInTheDocument();
+    });
   });
 
   it('muestra el historial con el estado y la respuesta recibida (R01)', async () => {
@@ -113,6 +215,41 @@ describe('MyTutoringRequestPage', () => {
     expect(screen.getByText('Atendida')).toBeInTheDocument();
     expect(screen.getByText(/Te espero el jueves a las 10:00/)).toBeInTheDocument();
     expect(screen.getByText(/Respuesta de Elena Ramírez/)).toBeInTheDocument();
+  });
+
+  describe('la cita de mi solicitud (vigente, cancelada, nueva)', () => {
+    const appointment = (over: Record<string, unknown>) => ({ state: 'VIGENTE', scheduledAt: '2026-11-05T15:00:00.000Z', modality: 'PRESENCIAL', place: 'Aula 302', replacedSessionIds: [], ...over });
+
+    it('cita vigente: fecha y lugar, y enlace a «Mis sesiones»', async () => {
+      mocked.getOwn.mockResolvedValue([view({ status: 'EN_ATENCION', sessionId: 'x2', appointment: appointment({}) as never })]);
+      renderPage();
+      expect(await screen.findByText('Cita programada')).toBeInTheDocument();
+      expect(screen.getByText(/Aula 302/)).toBeInTheDocument();
+      expect(screen.getByRole('link', { name: 'Ir a Mis sesiones' })).toHaveAttribute('href', '/mis-sesiones');
+    });
+
+    it('cita cancelada: lo dice, que la solicitud sigue abierta y qué esperar (sin plazos ni pedirla de nuevo)', async () => {
+      mocked.getOwn.mockResolvedValue([view({ status: 'EN_ATENCION', sessionId: 'x1', appointment: appointment({ state: 'CANCELADA' }) as never })]);
+      renderPage();
+      expect(await screen.findByText('Cita cancelada')).toBeInTheDocument();
+      expect(screen.getByText(/tu solicitud sigue abierta/)).toBeInTheDocument();
+      expect(screen.getByText(/No hace falta pedirla de nuevo/)).toBeInTheDocument();
+      expect(screen.queryByRole('link', { name: 'Ir a Mis sesiones' })).not.toBeInTheDocument();
+    });
+
+    it('nueva cita que reemplaza a una cancelada: lo dice con la fecha nueva', async () => {
+      mocked.getOwn.mockResolvedValue([view({ status: 'EN_ATENCION', sessionId: 'x2', appointment: appointment({ replacedSessionIds: ['x1'] }) as never })]);
+      renderPage();
+      expect(await screen.findByText('Nueva cita')).toBeInTheDocument();
+      expect(screen.getByText(/Tu cita anterior se canceló y se programó otra/)).toBeInTheDocument();
+    });
+
+    it('no muestra notas ni datos reservados de la sesión', async () => {
+      mocked.getOwn.mockResolvedValue([view({ status: 'EN_ATENCION', sessionId: 'x2', appointment: { ...appointment({}), topic: 'Reservado', notes: 'Nota clínica' } as never })]);
+      renderPage();
+      await screen.findByText('Cita programada');
+      expect(screen.queryByText(/Reservado|Nota clínica/)).not.toBeInTheDocument();
+    });
   });
 
   it('sin solicitudes lo dice', async () => {
@@ -170,6 +307,39 @@ describe('MyTutoringRequestPage', () => {
 
       expect(await screen.findByText('Describe el motivo de la solicitud.')).toBeInTheDocument();
       expect(mocked.createOwnTutoringRequest).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('periodo cerrado: solo lectura', () => {
+    it('explica que no se puede solicitar y deshabilita el formulario, pero deja ver el historial', async () => {
+      mockedPeriod.current.mockResolvedValue({ open: false, period: null, enrolled: null });
+      mocked.getOwn.mockResolvedValue([view()]);
+      renderPage();
+
+      expect(await screen.findByText(/No hay un periodo académico abierto/)).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: /registrar solicitud/i })).toBeDisabled();
+      expect(screen.getByLabelText('Descripción del motivo')).toBeDisabled();
+      expect(screen.getByLabelText(/Motivo/)).toBeDisabled();
+      expect(await screen.findByText('Dificultad en Cálculo')).toBeInTheDocument(); // historial visible
+    });
+
+    it('sin figurar en la carga del periodo vigente: explica, deshabilita y deja ver el historial', async () => {
+      mockedPeriod.current.mockResolvedValue({ open: true, period: { id: 'p1', name: '2026-II', startDate: '2026-08-24', endDate: '2026-12-18' }, enrolled: false });
+      mocked.getOwn.mockResolvedValue([view()]);
+      renderPage();
+
+      expect(await screen.findByText(/No figuras en la carga del periodo 2026-II/)).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: /registrar solicitud/i })).toBeDisabled();
+      expect(screen.getByLabelText('Descripción del motivo')).toBeDisabled();
+      expect(await screen.findByText('Dificultad en Cálculo')).toBeInTheDocument();
+    });
+
+    it('con el periodo abierto el formulario funciona normalmente', async () => {
+      renderPage();
+
+      await waitFor(() => expect(mockedPeriod.current).toHaveBeenCalled());
+      expect(screen.queryByText(/No hay un periodo académico abierto/)).not.toBeInTheDocument();
+      expect(screen.getByRole('button', { name: /registrar solicitud/i })).toBeEnabled();
     });
   });
 });

@@ -1,19 +1,17 @@
-.bar {
-  display: flex;
-  gap: var(--s3);
-  padding: var(--s4) var(--s5);
-  border-bottom: 1px solid var(--borde);
-}
-
-.filter {
-  min-width: 200px;
-}
-
 .reasonCell {
-  max-width: 320px;
+  max-width: 260px;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+/* En tarjeta (ancho disponible estrecho) el motivo se lee completo en varias líneas */
+@container (max-width: 920px) {
+  .reasonCell {
+    max-width: none;
+    white-space: normal;
+    overflow: visible;
+  }
 }
 
 .overlay {
@@ -129,4 +127,32 @@
   color: var(--azul-med);
   text-decoration: underline;
   cursor: pointer;
+}
+
+.linked {
+  margin: 0 0 var(--s3);
+  padding: var(--s3);
+  background: var(--g50, #f6f8fb);
+  border-left: 3px solid var(--azul);
+  border-radius: var(--r-sm);
+  font-size: var(--fs-sm);
+  color: var(--g700, #334155);
+}
+
+.followUp {
+  margin-bottom: var(--s3);
+}
+
+.followUpButtons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s2);
+  margin-top: var(--s2);
+}
+
+.followUpTag {
+  display: block;
+  margin-top: var(--s1);
+  font-size: var(--fs-xs, 12px);
+  color: var(--g600);
 }

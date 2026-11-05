@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
+import { sessionNoticeText } from '../utils/sessionNotice';
 import { Card, Button, IconButton, EmptyState, TableSkeleton, PageHeader } from '@shared/components/ui';
 import {
   CalendarIcon,
@@ -17,6 +18,9 @@ import { SessionDetailModal } from '../components/SessionDetailModal';
 import { RescheduleSessionModal } from '../components/RescheduleSessionModal';
 import { CancelSessionModal } from '../components/CancelSessionModal';
 import { getApiErrorMessage } from '@shared/services/apiClient';
+import { useUrlParams } from '@shared/hooks/useUrlParams';
+import { removeDraft } from '@shared/utils/drafts';
+import { useAuth } from '@features/auth/hooks/useAuth';
 import {
   addDays,
   addMonths,
@@ -29,6 +33,16 @@ import {
 import styles from './SessionsCalendarPage.module.css';
 
 type ViewMode = 'month' | 'week';
+
+// La fecha que se mira viaja en la URL como AAAA-MM-DD (hora local, sin zona).
+const pad = (n: number) => String(n).padStart(2, '0');
+const toParam = (d: Date) => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+const fromParam = (value: string): Date | null => {
+  const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(value);
+  if (!m) return null;
+  const d = new Date(Number(m[1]), Number(m[2]) - 1, Number(m[3]));
+  return Number.isNaN(d.getTime()) ? null : d;
+};
 
 const WEEKDAY_LABELS = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'];
 const WEEKDAY_LONG = new Intl.DateTimeFormat('es-PE', { weekday: 'short' });
@@ -44,15 +58,39 @@ function sessionsOnDay(sessions: TutoringSession[], day: Date): TutoringSession[
 // diferenciando individuales de grupales por color, con detalle al abrir.
 export const SessionsCalendarPage: React.FC = () => {
   const { sessions, students, loading, error, refresh } = useMySessions();
-  const [view, setView] = useState<ViewMode>('month');
-  const [cursor, setCursor] = useState(new Date());
-  const [selectedSession, setSelectedSession] = useState<TutoringSession | null>(null);
+  // La vista (?vista=semana), la fecha (?fecha=AAAA-MM-DD), la sesión abierta (?sesion=<id>) y su ventana (?accion=reprogramar|cancelar)
+  // viven en la URL: recargar o compartir el enlace vuelve al mismo lugar.
+  const { user } = useAuth();
+  const url = useUrlParams();
+  const view: ViewMode = url.get('vista') === 'semana' ? 'week' : 'month';
+  const setView = (next: ViewMode) => url.set({ vista: next === 'week' ? 'semana' : null }, { replace: true });
+  const dateParam = url.get('fecha');
+  const cursor = useMemo(() => fromParam(dateParam) ?? new Date(), [dateParam]);
+  const moveCursor = (next: Date) => url.set({ fecha: toParam(next) }, { replace: true });
+  const sessionId = url.get('sesion');
+  // La sesión abierta se busca por id en la lista; la que devolvió la última acción (asistencia) manda hasta que la lista se vuelva a cargar.
+  const [latest, setLatest] = useState<TutoringSession | null>(null);
+  const selectedSession = (latest?.id === sessionId ? latest : null) ?? sessions.find((s) => s.id === sessionId) ?? null;
+  const setSelectedSession = (s: TutoringSession | null) => {
+    setLatest(s);
+    url.set({ sesion: s?.id ?? null, accion: null }, { replace: s === null || s.id === sessionId });
+  };
+  const action = url.get('accion');
+  const rescheduleOpen = action === 'reprogramar';
+  const cancelOpen = action === 'cancelar';
+  const setRescheduleOpen = (open: boolean) => url.set({ accion: open ? 'reprogramar' : null }, { replace: !open });
+  const setCancelOpen = (open: boolean) => url.set({ accion: open ? 'cancelar' : null }, { replace: !open });
+  // Un enlace a una sesión que ya no existe (o que la persona no ve) no deja una ventana fantasma: se limpia el parámetro.
+  useEffect(() => {
+    if (loading || error) return;
+    if (sessionId && !sessions.some((s) => s.id === sessionId)) url.set({ sesion: null, accion: null }, { replace: true });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [loading, error, sessions, sessionId]);
   const [registeringAttendance, setRegisteringAttendance] = useState(false);
   const [attendanceError, setAttendanceError] = useState('');
   const [recordingRoll, setRecordingRoll] = useState(false);
   const [rollError, setRollError] = useState('');
-  const [rescheduleOpen, setRescheduleOpen] = useState(false);
-  const [cancelOpen, setCancelOpen] = useState(false);
+  const [feedback, setFeedback] = useState('');
   const [changeLoading, setChangeLoading] = useState(false);
   const [changeError, setChangeError] = useState('');
   const [evidences, setEvidences] = useState<SessionEvidence[]>([]);
@@ -64,9 +102,9 @@ export const SessionsCalendarPage: React.FC = () => {
   const weekDays = useMemo(() => getWeekDays(cursor), [cursor]);
   const today = new Date();
 
-  const goPrev = () => setCursor((c) => (view === 'month' ? addMonths(c, -1) : addDays(c, -7)));
-  const goNext = () => setCursor((c) => (view === 'month' ? addMonths(c, 1) : addDays(c, 7)));
-  const goToday = () => setCursor(new Date());
+  const goPrev = () => moveCursor(view === 'month' ? addMonths(cursor, -1) : addDays(cursor, -7));
+  const goNext = () => moveCursor(view === 'month' ? addMonths(cursor, 1) : addDays(cursor, 7));
+  const goToday = () => url.set({ fecha: null }, { replace: true });
 
   const handleRegisterAttendance = async () => {
     if (!selectedSession) return;
@@ -104,7 +142,9 @@ export const SessionsCalendarPage: React.FC = () => {
     setChangeLoading(true);
     setChangeError('');
     try {
-      await sessionService.rescheduleSession(selectedSession.id, data);
+      const moved = await sessionService.rescheduleSession(selectedSession.id, data);
+      if (user) removeDraft(user.id, `reprogramar.${selectedSession.id}`);
+      setFeedback(`Sesión reprogramada.${sessionNoticeText(moved.notice)}`);
       setRescheduleOpen(false);
       setSelectedSession(null);
       refresh();
@@ -120,7 +160,9 @@ export const SessionsCalendarPage: React.FC = () => {
     setChangeLoading(true);
     setChangeError('');
     try {
-      await sessionService.cancelSession(selectedSession.id, { reason });
+      const cancelled = await sessionService.cancelSession(selectedSession.id, { reason });
+      if (user) removeDraft(user.id, `cancelar.${selectedSession.id}`);
+      setFeedback(`Sesión cancelada.${sessionNoticeText(cancelled.notice)}`);
       setCancelOpen(false);
       setSelectedSession(null);
       refresh();
@@ -192,6 +234,15 @@ export const SessionsCalendarPage: React.FC = () => {
         subtitle="Calendario de tu agenda de tutoría (individuales y grupales)"
         icon={<CalendarIcon size={24} />}
       />
+
+      {feedback && (
+        <div className={styles.notice} role="status">
+          <span>{feedback}</span>
+          <button type="button" className={styles.noticeClose} onClick={() => setFeedback('')}>
+            Cerrar
+          </button>
+        </div>
+      )}
 
       <Card>
         <div className={styles.toolbar}>
@@ -380,6 +431,7 @@ export const SessionsCalendarPage: React.FC = () => {
           session={selectedSession}
           loading={changeLoading}
           serverError={changeError}
+          draftOwnerId={user?.id}
           onSubmit={handleReschedule}
           onCancel={() => setRescheduleOpen(false)}
         />
@@ -390,6 +442,7 @@ export const SessionsCalendarPage: React.FC = () => {
           session={selectedSession}
           loading={changeLoading}
           serverError={changeError}
+          draftOwnerId={user?.id}
           onConfirm={handleCancelSession}
           onCancel={() => setCancelOpen(false)}
         />

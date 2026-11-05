@@ -18,6 +18,7 @@
 
 > Marca **todas** las casillas antes de solicitar la revisión.
 > Este checklist es obligatorio para toda HU, TT y RSK sin excepción.
+> Aclaración aprobada el 30/10/2026: se verifica el alcance real del cambio. Si no se modifica código, lógica de negocio, endpoints o interfaz, se conserva el criterio y se justifica su aplicabilidad mediante el diff; no se inventan pruebas ni cobertura. Todo lo no verificado queda sin marcar. El visto bueno del PO y el cierre en el seguimiento siguen siendo obligatorios.
 
 ### C-01 · Criterios de Aceptación
 
@@ -35,7 +36,7 @@
 - [ ] El código nuevo cuenta con pruebas que validan su comportamiento.
 - [ ] La suite existente no presenta regresiones.
 - [ ] Cobertura mínima del 70 % en la lógica de negocio del módulo.
-- [ ] Todas las pruebas pasan localmente antes de abrir el PR.
+- [ ] Todas las pruebas aplicables pasan localmente antes de solicitar la revisión final del PR; los borradores pueden abrirse antes. Se registran comando, configuración y resultados completos.
 
 ### C-04 · Seguridad
 
@@ -69,9 +70,9 @@
 
 ### C-09 · Git Flow y Gestión del Tablero
 
-- [ ] Rama proviene de `develop` con la convención de nombres (`feature/HU-XX-descripcion`).
+- [ ] Rama proviene de `develop` con la convención aprobada: `feature/HU-XX-...`, `feature/TT-XX-...`, `bugfix/...`, `fix/...`, `docs/...`, `test/...` o `codex/...`; el PR relaciona el ítem existente.
 - [ ] Commits siguen Conventional Commits (`feat:`, `fix:`, etc.).
-- [ ] Tarjeta del tablero Scrum movida a TERMINADO.
+- [ ] Ítem marcado TERMINADO en el tablero o registro oficial de seguimiento del repositorio, con enlace al PR, evidencia y validación real.
 
 ---
 

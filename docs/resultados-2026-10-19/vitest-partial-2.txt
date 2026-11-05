@@ -1,0 +1,9 @@
+
+ RUN  v4.1.10 C:/Proyects/Proyects/Tutoria-untrm/client
+
+
+ Test Files  2 passed (2)
+      Tests  14 passed (14)
+   Start at  12:18:18
+   Duration  57.78s (transform 2.56s, setup 3.63s, import 6.37s, tests 34.82s, environment 10.82s)
+

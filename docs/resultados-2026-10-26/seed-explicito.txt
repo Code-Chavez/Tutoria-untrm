@@ -1,0 +1,59 @@
+# Seed explícito y no destructivo; el arranque de desarrollo no siembra (26/10/2026)
+# Todo en una pila TEMPORAL y aparte (contenedores sit-seedtest-*, base en tmpfs) o en la base de pruebas sit_db_test. No se tocó sit-postgres, sit-server ni sit_db.
+
+## A. Reinicio del servidor con el Dockerfile nuevo (imagen construida de este árbol; el script de la verificación es temporal y no se versiona)
+# Nota: una primera pasada y dos reintentos fueron INVÁLIDOS por errores de mi script (conversión de rutas de Git Bash, y dos ejecuciones superpuestas que compartían nombres);
+# aquí figura la ejecución limpia y única posterior.
+## 1. Construir la imagen de desarrollo con el Dockerfile nuevo
+sha256:f9c7b24981e4b0a5bc49e3a7c124a98c6c9bf5e54405befe6296560ed266489c
+CMD de la imagen: ["sh","-c","pnpm prisma generate && pnpm prisma migrate deploy && pnpm run dev"]
+## 2. Base temporal vacía y servidor con el arranque normal (sin seed)
+/var/run/postgresql:5432 - accepting connections
+servidor escuchando en 3000: sí
+migraciones aplicadas: 48
+usuarios=0 permisos=0 estudiantes=0  (esperado: 0 usuarios, 0 estudiantes: el arranque no siembra)
+líneas «Seeding» en el registro del servidor: 0
+## 3. Orden explícita para el entorno nuevo
+salida de 'pnpm run seed': 0
+Seed completed successfully: 12 cuentas, 12 estudiantes y 11 matrículas creados; lo que ya existía no se modificó.
+usuarios=13 estudiantes=12 matrículas=11
+## 4. Se modifican a mano coordinaciones, sedes, docentes, vínculos y matrículas, y se agrega un estudiante propio
+modificaciones aplicadas (salida 0)
+198 filas en 40 tablas
+## 5. Reiniciar el servidor (docker restart): no debe cambiar ningún dato
+servidor escuchando tras reiniciar: sí
+líneas «Seeding» en el registro tras reiniciar: 0
+198 filas en 40 tablas
+comparación fila por fila (205 filas, 41 tablas) contra la foto inicial: SIN DIFERENCIAS
+## 6. Ejecutar la orden explícita OTRA VEZ sobre ese entorno modificado
+salida de 'pnpm run seed': 0
+Seed completed successfully: 0 cuentas, 0 estudiantes y 0 matrículas creados; lo que ya existía no se modificó.
+198 filas en 40 tablas
+comparación fila por fila (205 filas, 41 tablas) contra la foto inicial: SIN DIFERENCIAS
+estudiante propio matriculado: 0 (esperado 0)
+FIN
+
+## B. Un fallo de siembra ya no se oculta (pruebas unitarias seedCommands.test.ts, procesos reales contra una base que no responde)
+seed ANTERIOR (develop) ante un fallo: código de salida 0 (el error se registraba y se ignoraba): medido con DATABASE_URL a un puerto cerrado.
+seed NUEVO ante el mismo fallo: termina con error («El seed falló: …») y la causa; test:db:prepare tampoco dice «Base de pruebas lista».
+
+## C. Prueba en base temporal propia (tests/integration/seedIdempotence.test.ts): sembrar dos veces conserva lo modificado, sin crear ni borrar filas
+resultado: 2 pruebas aprobadas. Verificación de que la prueba detecta el defecto: al reintroducir temporalmente el viejo 'update' de la escuela de Sistemas, la prueba FALLÓ (se restauró después).
+
+## D. Corrida completa como la CI (desde server/: REQUIRE_DB_TESTS=1 DATABASE_URL=$TEST_DATABASE_URL JWT_SECRET=ci-test-secret NODE_ENV=test npx jest --ci --coverage), base nueva preparada con el seed nuevo
+--- corrida 1
+EXIT 1
+Lines        : 90.41% ( 6871/7599 )
+Statements   : 89.64% ( 7461/8323 )
+Test Suites: 1 failed, 139 passed, 140 total
+Tests:       1 failed, 1207 passed, 1208 total
+prueba fallida: tutoringRequestFollowUp › programar una sesión desde la solicitud… (esperaba 2 sesiones de la tutora Elena y encontró 3: otra suite creó una sesión para ella entre las dos lecturas). Carrera previa e independiente de la seed: la prueba cuenta TODAS las sesiones de una tutora de demostración compartida.
+comparación fila por fila (205 filas, 41 tablas) contra la foto inicial: SIN DIFERENCIAS
+--- corrida 2
+EXIT 0
+Lines        : 90.44% ( 6873/7599 )
+Statements   : 89.66% ( 7463/8323 )
+Test Suites: 140 passed, 140 total
+Tests:       1208 passed, 1208 total
+suites de integración que pasaron: 26
+comparación fila por fila (205 filas, 41 tablas) contra la foto inicial: SIN DIFERENCIAS

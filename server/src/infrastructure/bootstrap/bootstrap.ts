@@ -1,4 +1,5 @@
 import { PrismaClient } from '@prisma/client';
+import { accountEmailProblem, createEmailPolicy, normalizeEmail } from '../../application/validation/email';
 import bcrypt from 'bcryptjs';
 import { seedBase } from './seedBase';
 
@@ -38,9 +39,13 @@ export async function bootstrap(prisma: PrismaClient, options: BootstrapOptions)
   if (existingAdmins > 0) return { createdAdmin: false };
 
   assertAcceptableAdminPassword(options.adminPassword);
+  // Mismas reglas que cualquier cuenta: forma única, formato y dominio permitido (EMAIL_ALLOWED_DOMAINS).
+  const adminEmail = normalizeEmail(options.adminEmail);
+  const emailProblem = accountEmailProblem(adminEmail, createEmailPolicy(process.env.EMAIL_ALLOWED_DOMAINS));
+  if (emailProblem) throw new Error(`ADMIN_EMAIL no es válido: ${emailProblem}. Si el correo es de otro dominio, agréguelo en EMAIL_ALLOWED_DOMAINS.`);
   await prisma.user.create({
     data: {
-      email: options.adminEmail.toLowerCase().trim(),
+      email: adminEmail,
       passwordHash: await bcrypt.hash(options.adminPassword, options.bcryptRounds ?? 12),
       firstName: options.adminFirstName ?? 'Administrador',
       lastName: options.adminLastName ?? 'DBU',

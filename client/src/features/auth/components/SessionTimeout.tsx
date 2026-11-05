@@ -16,15 +16,19 @@ export function SessionTimeout() {
   const idleMs = user?.idleTimeoutMinutes ? user.idleTimeoutMinutes * 60_000 : IDLE_TIMEOUT_MS;
   const navigate = useNavigate();
 
-  const expire = useCallback(() => {
-    logout();
-    navigate('/login', { replace: true, state: { reason: 'timeout' } });
-  }, [logout, navigate]);
+  // Por inactividad se conserva lo que la persona escribía (se recupera al volver a entrar); al «Cerrar sesión» por decisión propia, no.
+  const expire = useCallback(
+    (byInactivity = false) => {
+      logout({ keepDrafts: byInactivity });
+      navigate('/login', { replace: true, state: { reason: 'timeout' } });
+    },
+    [logout, navigate],
+  );
 
   const { isWarning, remainingMs, stayActive } = useIdleTimer({
     idleMs,
     warningMs: IDLE_WARNING_MS,
-    onExpire: expire,
+    onExpire: () => expire(true),
   });
 
   if (!isWarning) return null;
@@ -45,7 +49,7 @@ export function SessionTimeout() {
           <strong className={styles.count}>{seconds}s</strong>.
         </p>
         <div className={styles.actions}>
-          <button type="button" className={styles.secondary} onClick={expire}>
+          <button type="button" className={styles.secondary} onClick={() => expire(false)}>
             Cerrar sesión
           </button>
           <button type="button" className={styles.primary} onClick={stayActive}>

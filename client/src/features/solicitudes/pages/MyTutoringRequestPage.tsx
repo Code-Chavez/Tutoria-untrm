@@ -1,7 +1,9 @@
 import { useState, type FormEvent } from 'react';
+import { Link } from 'react-router-dom';
 import { useAuth } from '@features/auth/hooks/useAuth';
 import { getApiErrorMessage } from '@shared/services/apiClient';
-import { PageHeader, Button, SelectField } from '@shared/components/ui';
+import { PageHeader, Button, DraftNotice, SelectField } from '@shared/components/ui';
+import { useDraft } from '@shared/hooks/useDraft';
 import { SendIcon } from '@shared/components/icons';
 import {
   tutoringRequestService,
@@ -9,9 +11,15 @@ import {
 } from '../services/tutoringRequestService';
 import { Badge } from '@shared/components/ui';
 import { useQueryClient } from '@tanstack/react-query';
-import { OWN_REQUESTS_KEY, useOwnTutoringRequests } from '../hooks/useTutoringRequests';
-import { CASE_TYPE_LABEL, REQUEST_STATUS_LABEL, type TutoringRequestStatus } from '../services/tutoringRequestService';
+import { OWN_REQUESTS_KEY, useOwnRequestRecipient, useOwnTutoringRequests } from '../hooks/useTutoringRequests';
+import { recipientAfter, recipientBefore } from '../utils/requestRecipient';
+import { appointmentSummary } from '../utils/requestAppointment';
+import { usePeriodStatus } from '@features/periodo/hooks/usePeriods';
+import { CASE_TYPE_LABEL, REQUEST_STATUS_LABEL, type TutoringRequestStatus, type TutoringRequestView } from '../services/tutoringRequestService';
 import styles from './MyTutoringRequestPage.module.css';
+
+const EMPTY_FORM: { caseType: CreateOwnTutoringRequestData['caseType']; reason: string } = { caseType: 'ACADEMIC', reason: '' };
+const isEmptyForm = (value: typeof EMPTY_FORM) => value.reason.trim() === '';
 
 interface Feedback {
   type: 'ok' | 'error';
@@ -55,12 +63,40 @@ const STATUS_TONE: Record<TutoringRequestStatus, 'warning' | 'info' | 'success'>
   ATENDIDA: 'success',
 };
 
+function AppointmentNote({ appointment }: { appointment: NonNullable<TutoringRequestView['appointment']> }) {
+  const summary = appointmentSummary(appointment);
+  return (
+    <p className={styles.historyResponse}>
+      <Badge tone={summary.tone}>{summary.label}</Badge> {summary.text} {summary.next}{' '}
+      {appointment.state === 'VIGENTE' && <Link to="/mis-sesiones">Ir a Mis sesiones</Link>}
+    </p>
+  );
+}
+
 export function MyTutoringRequestPage() {
   const queryClient = useQueryClient();
   const { user } = useAuth();
+  // Sin periodo abierto la tutoría está en solo lectura: se ve el historial, no se puede solicitar.
+  const { data: periodStatus } = usePeriodStatus();
+  const closed = periodStatus ? !periodStatus.open : false;
+  const notEnrolled = periodStatus?.open === true && periodStatus.enrolled === false;
+  const readOnly = closed || notEnrolled;
   const history = useOwnTutoringRequests();
-  const [caseType, setCaseType] = useState<CreateOwnTutoringRequestData['caseType']>('ACADEMIC');
-  const [reason, setReason] = useState('');
+  // A quién llegará la solicitud: se dice antes de enviarla y después (con la misma regla con la que se enruta).
+  const recipient = useOwnRequestRecipient();
+  // Lo escrito se conserva si cambia de pantalla, recarga o lo interrumpen (borrador solo de esta pestaña; ver shared/utils/drafts).
+  const {
+    value: form,
+    setValue: setForm,
+    restored: draftRestored,
+    discard: discardDraft,
+  } = useDraft(user?.id, 'solicitud', EMPTY_FORM, isEmptyForm);
+  const { caseType, reason } = form;
+  const setCaseType = (value: CreateOwnTutoringRequestData['caseType']) => setForm((current) => ({ ...current, caseType: value }));
+  const setReason = (value: string | ((current: string) => string)) =>
+    setForm((current) => ({ ...current, reason: typeof value === 'function' ? value(current.reason) : value }));
+  // Sin nadie que pueda recibirla hoy, no se deja enviar (el servidor tampoco la registraría): no se promete atención.
+  const noRecipient = recipient?.kind === 'none';
   const [submitting, setSubmitting] = useState(false);
   const [feedback, setFeedback] = useState<Feedback | null>(null);
 
@@ -70,6 +106,8 @@ export function MyTutoringRequestPage() {
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setFeedback(null);
+
+    if (readOnly || noRecipient) return;
 
     if (reason.trim().length < 3) {
       setFeedback({ type: 'error', text: 'Describe el motivo de la solicitud.' });
@@ -84,9 +122,9 @@ export function MyTutoringRequestPage() {
       });
       setFeedback({
         type: 'ok',
-        text: `Solicitud registrada y enrutada a ${request.routedToRole === 'tutor' ? 'tu tutor' : 'el coordinador de tu escuela'}.`,
+        text: recipientAfter(recipient, request.routedToRole),
       });
-      setReason('');
+      discardDraft(); // ya se envió: no queda borrador
       await queryClient.invalidateQueries({ queryKey: OWN_REQUESTS_KEY });
     } catch (error) {
       setFeedback({ type: 'error', text: getApiErrorMessage(error) });
@@ -99,21 +137,35 @@ export function MyTutoringRequestPage() {
     <div className={styles.page}>
       <PageHeader
         title="Solicitar tutoría"
-        subtitle="Cuéntanos qué necesitas y lo enrutaremos a tu tutor o coordinador."
+        subtitle="Cuéntanos qué necesitas y se la haremos llegar a tu tutor o a la coordinación de tu escuela."
         icon={<SendIcon size={22} />}
       />
 
       <div className={styles.panel}>
         <div className={styles.panelHead}>
-          <h3>Nueva solicitud</h3>
+          <h2>Nueva solicitud</h2>
         </div>
         <div className={styles.panelBody}>
+          {closed && (
+            <p role="status" className={styles.closedNote}>
+              No hay un periodo académico abierto, así que por ahora no puedes registrar solicitudes. Tu historial sigue disponible abajo. Podrás
+              solicitar tutoría cuando se abra el siguiente periodo y estés cargado en él.
+            </p>
+          )}
+          {notEnrolled && (
+            <p role="status" className={styles.closedNote}>
+              No figuras en la carga del periodo {periodStatus?.period?.name}, así que por ahora no puedes registrar solicitudes. Tu historial sigue
+              disponible abajo. Consulta con tu escuela para que te incluya en la carga.
+            </p>
+          )}
           <form onSubmit={handleSubmit}>
             {user && (
               <p className={styles.requester}>
                 Solicitas como <b>{user.firstName} {user.lastName}</b> ({user.email}). Tu solicitud la verá solo quien debe atenderla.
               </p>
             )}
+            {recipient && <p className={styles.recipient} role={noRecipient ? 'status' : undefined}>{recipientBefore(recipient)}</p>}
+            {draftRestored && <DraftNotice onDiscard={discardDraft} />}
             {feedback && (
               <div className={feedback.type === 'ok' ? styles.ok : styles.error} role="alert">
                 {feedback.text}
@@ -121,14 +173,14 @@ export function MyTutoringRequestPage() {
             )}
 
             <div className={styles.field}>
-              <label htmlFor="caseType">Motivo (Art. 20)</label>
+              <label htmlFor="caseType">Motivo</label>
               <SelectField
                 id="caseType"
                 value={caseType}
                 onChange={(e) =>
                   setCaseType(e.target.value as CreateOwnTutoringRequestData['caseType'])
                 }
-                disabled={submitting}
+                disabled={submitting || readOnly}
               >
                 {CASE_TYPES.map((c) => (
                   <option key={c.value} value={c.value}>
@@ -142,7 +194,7 @@ export function MyTutoringRequestPage() {
               <span className={styles.examplesLabel} id="examples-label">¿No sabes cómo empezar? Toca una frase y complétala:</span>
               <div className={styles.examples} role="group" aria-labelledby="examples-label">
                 {EXAMPLES[caseType].map((example) => (
-                  <button key={example} type="button" className={styles.example} onClick={() => insertExample(example)} disabled={submitting}>
+                  <button key={example} type="button" className={styles.example} onClick={() => insertExample(example)} disabled={submitting || readOnly}>
                     {example.trim()}
                   </button>
                 ))}
@@ -159,11 +211,11 @@ export function MyTutoringRequestPage() {
                 maxLength={1000}
                 placeholder="Cuéntanos con tus palabras qué necesitas y desde cuándo. Escribe solo lo que quieras compartir."
                 onChange={(e) => setReason(e.target.value)}
-                disabled={submitting}
+                disabled={submitting || readOnly}
               />
             </div>
 
-            <Button type="submit" variant="primary" loading={submitting}>
+            <Button type="submit" variant="primary" loading={submitting} disabled={readOnly || noRecipient}>
               Registrar solicitud
             </Button>
           </form>
@@ -172,11 +224,13 @@ export function MyTutoringRequestPage() {
 
       <div className={styles.panel} style={{ marginTop: 18 }}>
         <div className={styles.panelHead}>
-          <h3>Mis solicitudes</h3>
+          <h2>Mis solicitudes</h2>
         </div>
         <div className={styles.panelBody}>
           {history.loading ? (
-            <p className={styles.historyEmpty}>Cargando…</p>
+            <p className={styles.historyEmpty} role="status">
+              Cargando tus solicitudes…
+            </p>
           ) : history.error ? (
             <p className={styles.error} role="alert">
               No se pudo cargar tu historial. Recarga la página.
@@ -200,6 +254,7 @@ export function MyTutoringRequestPage() {
                       <b>Respuesta{r.handledByName ? ` de ${r.handledByName}` : ''}:</b> {r.responseNote}
                     </p>
                   )}
+                  {r.appointment && <AppointmentNote appointment={r.appointment} />}
                 </li>
               ))}
             </ul>

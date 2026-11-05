@@ -8,6 +8,10 @@ export interface User {
   photoUrl?: string | null;
   roleId: string;
   service?: string | null;
+  /** Escuela profesional del Docente Tutor (de ella salen su facultad y su sede). */
+  schoolId?: string | null;
+  /** Facultad del Decano (solo amonesta a los docentes de su facultad). */
+  facultyId?: string | null;
   isActive: boolean;
   failedLoginAttempts: number;
   lockedUntil?: Date | null;

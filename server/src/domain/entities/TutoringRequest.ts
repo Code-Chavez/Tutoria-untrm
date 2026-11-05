@@ -25,6 +25,8 @@ export interface TutoringRequest {
   handledAt: Date | null;
   /** Sesión en la que se atendió, si se vinculó. */
   sessionId: string | null;
+  /** Derivación a un servicio con la que se atendió, si se vinculó. */
+  referralId: string | null;
   createdAt: Date;
 }
 
@@ -34,4 +36,17 @@ export interface TutoringRequestView extends TutoringRequest {
   studentCode: string;
   routedToName: string;
   handledByName: string | null;
+  /** La sesión vinculada se canceló: la solicitud sigue sin atención y se puede reemplazar por otra sesión o una derivación. */
+  sessionCancelled?: boolean;
+  /**
+   * Solo en el historial propio del estudiante: la cita de la solicitud, sin notas ni datos reservados (solo lo que ya ve en «Mis
+   * sesiones»). `replacedSessionIds`: citas canceladas que luego se reemplazaron por esta.
+   */
+  appointment?: {
+    state: 'VIGENTE' | 'CANCELADA';
+    scheduledAt: string;
+    modality: string;
+    place: string | null;
+    replacedSessionIds: string[];
+  };
 }

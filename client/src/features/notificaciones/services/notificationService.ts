@@ -6,7 +6,10 @@ export type NotificationType =
   | 'REFERRAL_STATUS_CHANGED'
   | 'TUTORING_REQUEST_CREATED'
   | 'TUTORING_REQUEST_UPDATED'
-  | 'TUTORING_REQUEST_RECEIVED';
+  | 'TUTORING_REQUEST_RECEIVED'
+  | 'SESSION_SCHEDULED'
+  | 'SESSION_RESCHEDULED'
+  | 'SESSION_CANCELLED';
 
 export interface AppNotification {
   id: string;
@@ -15,6 +18,8 @@ export interface AppNotification {
   message: string;
   referralId?: string | null;
   tutoringRequestId?: string | null;
+  /** Sesión a la que se refiere el aviso (programada, reprogramada o cancelada). */
+  sessionId?: string | null;
   read: boolean;
   createdAt: string;
 }

@@ -1,0 +1,166 @@
+
+Running 104 tests using 1 worker
+
+  ok   1 tests\e2e-01-acceso-y-menu.spec.ts:17:7 › Administrador DBU: menú y panel de inicio (58.7s)
+  ok   2 tests\e2e-01-acceso-y-menu.spec.ts:17:7 › Coordinador: menú y panel de inicio (34.7s)
+  ok   3 tests\e2e-01-acceso-y-menu.spec.ts:17:7 › Docente Tutor: menú y panel de inicio (31.9s)
+  ok   4 tests\e2e-01-acceso-y-menu.spec.ts:17:7 › Profesional de Servicio: menú y panel de inicio (28.9s)
+  ok   5 tests\e2e-01-acceso-y-menu.spec.ts:17:7 › Vicerrectorado: menú y panel de inicio (32.5s)
+  ok   6 tests\e2e-01-acceso-y-menu.spec.ts:17:7 › Decano: menú y panel de inicio (20.6s)
+  ok   7 tests\e2e-01-acceso-y-menu.spec.ts:17:7 › Tutorado: menú y panel de inicio (55.6s)
+  ok   8 tests\e2e-01-acceso-y-menu.spec.ts:29:5 › credenciales inválidas muestran un error y no entran (42.5s)
+  ok   9 tests\e2e-01-acceso-y-menu.spec.ts:38:5 › una ruta protegida sin sesión redirige al ingreso (13.0s)
+  ok  10 tests\e2e-01-acceso-y-menu.spec.ts:43:5 › un rol no entra a una página que no es suya (32.9s)
+  ok  11 tests\e2e-01-acceso-y-menu.spec.ts:49:5 › el menú es corto: Periodo académico, Informes y Configuración son una pantalla con pestañas, y los grupos se pliegan (31.2s)
+  ok  12 tests\e2e-01-acceso-y-menu.spec.ts:80:5 › el expediente se abre desde Tutorados (ya no hay una entrada de menú) y vuelve a Tutorados (56.0s)
+  ok  13 tests\e2e-02-solicitud-de-tutoria.spec.ts:27:5 › el estudiante registra la solicitud y queda Pendiente (52.7s)
+  ok  14 tests\e2e-02-solicitud-de-tutoria.spec.ts:47:5 › la tutora recibe el aviso y exige una respuesta antes de marcarla atendida (1.1m)
+  ok  15 tests\e2e-02-solicitud-de-tutoria.spec.ts:72:5 › el estudiante ve el estado Atendida y la respuesta (37.2s)
+  ok  16 tests\e2e-02-solicitud-de-tutoria.spec.ts:80:5 › la coordinadora de la escuela ve la solicitud (56.2s)
+  ok  17 tests\e2e-02-solicitud-de-tutoria.spec.ts:87:5 › un tutor que no es el de Ana no la ve (30.7s)
+  ok  18 tests\e2e-03-sesiones-y-asistencia.spec.ts:33:5 › la tutora programa una sesión individual presencial para Ana (1.2m)
+  ok  19 tests\e2e-03-sesiones-y-asistencia.spec.ts:54:5 › la tutorada ve la sesión con su lugar (38.7s)
+  ok  20 tests\e2e-03-sesiones-y-asistencia.spec.ts:66:5 › la tutora cancela la sesión con un motivo y la tutorada ve Cancelada (1.6m)
+  ok  21 tests\e2e-03-sesiones-y-asistencia.spec.ts:87:5 › la tutora registra la asistencia de una sesión que ya empezó (44.0s)
+  ok  22 tests\e2e-04-derivacion-a-servicio.spec.ts:25:5 › la tutora deriva el caso de Ana a Psicología (1.0m)
+  ok  23 tests\e2e-04-derivacion-a-servicio.spec.ts:43:5 › Psicología recibe el aviso, abre el caso y lo lleva hasta cerrarlo (1.1m)
+  ok  24 tests\e2e-04-derivacion-a-servicio.spec.ts:76:5 › otro servicio no ve el caso (36.6s)
+  ok  25 tests\e2e-04-derivacion-a-servicio.spec.ts:83:5 › la tutora descarga la constancia y no ve las notas internas (56.6s)
+  ok  26 tests\e2e-04-derivacion-a-servicio.spec.ts:98:5 › la DBU ve el caso en el seguimiento (1.2m)
+  ok  27 tests\e2e-05-informes-y-exportaciones.spec.ts:16:5 › la tutora ve su consolidado de horarios y exporta PDF y Excel (1.1m)
+  ok  28 tests\e2e-05-informes-y-exportaciones.spec.ts:24:5 › la tutora guarda su informe semestral y exporta el PDF (1.6m)
+  ok  29 tests\e2e-05-informes-y-exportaciones.spec.ts:42:5 › Vicerrectorado ve el consolidado e indicadores y exporta (1.3m)
+  ok  30 tests\e2e-05-informes-y-exportaciones.spec.ts:57:5 › el consolidado y los indicadores muestran las mismas cifras (2.0s)
+  ok  31 tests\e2e-06-plan-semestral.spec.ts:52:5 › la coordinadora deja vigente el plan con la resolución (46.7s)
+  ok  32 tests\e2e-06-plan-semestral.spec.ts:62:5 › al editar el plan aprobado se crea una revisión y se conserva la versión aprobada (1.4m)
+  ok  33 tests\e2e-07-evaluacion-de-tutoria.spec.ts:28:5 › el tutorado responde los 20 ítems y no puede enviar antes de terminar (1.2m)
+  ok  34 tests\e2e-07-evaluacion-de-tutoria.spec.ts:57:5 › la coordinadora ve resultados y sugerencias sin el nombre del estudiante (53.6s)
+  ok  35 tests\e2e-07-evaluacion-de-tutoria.spec.ts:68:5 › la DBU cierra la evaluación y otro tutorado ya no puede responder (1.4m)
+  ok  36 tests\e2e-09-carga-masiva-y-asignacion.spec.ts:32:5 › la coordinadora importa el Excel: 3 estudiantes se registran y la fila con error se informa (49.4s)
+  ok  37 tests\e2e-09-carga-masiva-y-asignacion.spec.ts:50:5 › la coordinadora asigna el ciclo 3 a Elena y los 3 estudiantes nuevos pasan a ella (1.8m)
+  ok  38 tests\e2e-09-carga-masiva-y-asignacion.spec.ts:66:5 › la coordinadora reasigna a uno de ellos a Jorge con un motivo (1.3m)
+  ok  39 tests\e2e-09-carga-masiva-y-asignacion.spec.ts:84:5 › cada tutor ve solo los suyos: Elena dos, Jorge uno (1.5m)
+  ok  40 tests\e2e-13-carga-de-docentes.spec.ts:52:5 › en la carga de estudiantes, el bloque «pide la lista» lleva a Pedir listas (23.2s)
+  ok  41 tests\e2e-13-carga-de-docentes.spec.ts:62:5 › en la carga de docentes, la DBU llega a Pedir listas con la lista de docentes elegida y la pide (1.3m)
+  ok  42 tests\e2e-13-carga-de-docentes.spec.ts:83:5 › la DBU carga el Excel de docentes: 2 se crean y 2 filas con error se informan (59.3s)
+  ok  43 tests\e2e-13-carga-de-docentes.spec.ts:103:5 › a cada docente le llega su invitación con un enlace de un solo uso, sin contraseñas (254ms)
+  ok  44 tests\e2e-13-carga-de-docentes.spec.ts:118:5 › la coordinación no tiene la carga de docentes (54.5s)
+  ok  45 tests\e2e-14-solicitud-a-sesion-o-derivacion.spec.ts:36:5 › la tutora programa la sesión desde la solicitud: estudiante y motivo ya vienen y la solicitud queda vinculada (1.3m)
+  ok  46 tests\e2e-14-solicitud-a-sesion-o-derivacion.spec.ts:64:5 › la estudiante ve la sesión en su agenda y su solicitud ya está en atención (56.7s)
+  ok  47 tests\e2e-14-solicitud-a-sesion-o-derivacion.spec.ts:74:5 › la tutora deriva desde otra solicitud: el motivo ya viene y queda vinculada sin duplicarse (1.9m)
+  ok  48 tests\e2e-14-solicitud-a-sesion-o-derivacion.spec.ts:92:5 › la coordinadora ve el vínculo pero no programa ni deriva (46.1s)
+  ok  49 tests\e2e-16-borrador-del-estudiante.spec.ts:8:5 › lo escrito en la solicitud se recupera al volver de otra pantalla y se puede descartar (45.8s)
+  ok  50 tests\e2e-16-borrador-del-estudiante.spec.ts:27:5 › al cerrar sesión no queda lo escrito: otra persona en el mismo equipo no lo ve (51.1s)
+  ok  51 tests\e2e-17-pendientes-institucionales.spec.ts:49:5 › la coordinación de la escuela ve la cita cancelada de la solicitud, con el motivo (1.6m)
+  ok  52 tests\e2e-17-pendientes-institucionales.spec.ts:61:5 › la DBU también lo ve, y se puede filtrar por tipo (56.8s)
+  ok  53 tests\e2e-17-pendientes-institucionales.spec.ts:68:5 › la tutora reemplaza la cita cancelada desde la solicitud y el pendiente desaparece (1.2m)
+  ok  54 tests\e2e-17-pendientes-institucionales.spec.ts:89:5 › la estudiante ve su solicitud con la nueva cita y, en su agenda, la cancelada como «Reemplazada» con el siguiente paso (40.8s)
+  ok  55 tests\e2e-17-pendientes-institucionales.spec.ts:106:5 › el docente tutor no tiene la pestaña ni accede a los datos (22.9s)
+  ok  56 tests\e2e-18-accesibilidad.spec.ts:34:7 › ingreso › la pantalla de ingreso no tiene infracciones serias y se maneja solo con teclado (32.9s)
+  ok  57 tests\e2e-18-accesibilidad.spec.ts:55:7 › ingreso › un error de ingreso se anuncia (role alert) y no depende solo del color (28.9s)
+  ok  58 tests\e2e-18-accesibilidad.spec.ts:67:7 › estudiante › solicitar tutoría, mis sesiones y evaluación no tienen infracciones serias (54.3s)
+  ok  59 tests\e2e-18-accesibilidad.spec.ts:79:7 › estudiante › la evaluación (20 ítems con leyenda) no tiene infracciones serias y su grupo de opciones tiene nombre (1.4m)
+  ok  60 tests\e2e-18-accesibilidad.spec.ts:90:7 › estudiante › con teclado se contesta una opción (flechas) y se llega al botón de enviar (40.6s)
+  ok  61 tests\e2e-18-accesibilidad.spec.ts:102:7 › estudiante › «Saltar al contenido»: con Tab aparece, y con Enter el foco pasa al contenido principal (hay un solo <main>) (35.1s)
+  ok  62 tests\e2e-18-accesibilidad.spec.ts:122:7 › estudiante › mientras carga y si falla, la agenda lo anuncia (progressbar / alert) y ofrece reintentar (37.5s)
+  ok  63 tests\e2e-18-accesibilidad.spec.ts:157:7 › tutora: bandeja y diálogos de atención › la bandeja y el diálogo «Atender» no tienen infracciones serias (53.7s)
+  ok  64 tests\e2e-18-accesibilidad.spec.ts:168:7 › tutora: bandeja y diálogos de atención › al abrir con teclado el foco entra en el diálogo; Escape lo cierra y el foco vuelve al botón que lo abrió (32.6s)
+  ok  65 tests\e2e-18-accesibilidad.spec.ts:180:7 › tutora: bandeja y diálogos de atención › con el diálogo abierto, Tab no saca el foco hacia la página de atrás (39.7s)
+  ok  66 tests\e2e-18-accesibilidad.spec.ts:190:7 › tutora: bandeja y diálogos de atención › el diálogo «Programar sesión» tampoco tiene infracciones serias y sus campos tienen etiqueta (40.3s)
+  ok  67 tests\e2e-18-accesibilidad.spec.ts:205:7 › móvil (375×812) › ingreso, solicitud, sesiones y evaluación: sin desplazamiento horizontal ni infracciones serias (1.6m)
+  ok  68 tests\e2e-18-accesibilidad.spec.ts:225:7 › móvil (375×812) › la evaluación en móvil no se desborda y se puede responder (1.0m)
+  ok  69 tests\e2e-19-accesibilidad-gestion.spec.ts:19:11 › gestión · coordinator › «Estudiantes» no tiene infracciones serias ni de estructura (1.1m)
+  ok  70 tests\e2e-19-accesibilidad-gestion.spec.ts:19:11 › gestión · coordinator › «Solicitudes de tutoría» no tiene infracciones serias ni de estructura (48.1s)
+  ok  71 tests\e2e-19-accesibilidad-gestion.spec.ts:19:11 › gestión · coordinator › «Pendientes» no tiene infracciones serias ni de estructura (45.4s)
+  ok  72 tests\e2e-19-accesibilidad-gestion.spec.ts:19:11 › gestión · coordinator › «Pedir listas» no tiene infracciones serias ni de estructura (29.6s)
+  ok  73 tests\e2e-19-accesibilidad-gestion.spec.ts:19:11 › gestión · coordinator › «Carga de estudiantes» no tiene infracciones serias ni de estructura (34.6s)
+  ok  74 tests\e2e-19-accesibilidad-gestion.spec.ts:19:11 › gestión · coordinator › «Asignación por ciclo» no tiene infracciones serias ni de estructura (41.3s)
+  ok  75 tests\e2e-19-accesibilidad-gestion.spec.ts:19:11 › gestión · coordinator › «Plan semestral» no tiene infracciones serias ni de estructura (41.5s)
+  ok  76 tests\e2e-19-accesibilidad-gestion.spec.ts:19:11 › gestión · coordinator › «Horarios y asistencia» no tiene infracciones serias ni de estructura (36.7s)
+  ok  77 tests\e2e-19-accesibilidad-gestion.spec.ts:19:11 › gestión · coordinator › «Indicadores» no tiene infracciones serias ni de estructura (1.2m)
+  ok  78 tests\e2e-19-accesibilidad-gestion.spec.ts:19:11 › gestión · coordinator › «Resultados de evaluación» no tiene infracciones serias ni de estructura (56.5s)
+  ok  79 tests\e2e-19-accesibilidad-gestion.spec.ts:19:11 › gestión · coordinator › «Sugerencias de estudiantes» no tiene infracciones serias ni de estructura (1.4m)
+  ok  80 tests\e2e-19-accesibilidad-gestion.spec.ts:19:11 › gestión · coordinator › «Correos de las escuelas» no tiene infracciones serias ni de estructura (37.8s)
+  ok  81 tests\e2e-19-accesibilidad-gestion.spec.ts:19:11 › gestión · coordinator › «Amonestaciones» no tiene infracciones serias ni de estructura (35.4s)
+  ok  82 tests\e2e-19-accesibilidad-gestion.spec.ts:19:11 › gestión · admin › «Carga de docentes» no tiene infracciones serias ni de estructura (26.9s)
+  ok  83 tests\e2e-19-accesibilidad-gestion.spec.ts:19:11 › gestión · admin › «Cierre de periodo» no tiene infracciones serias ni de estructura (51.5s)
+  ok  84 tests\e2e-19-accesibilidad-gestion.spec.ts:19:11 › gestión · admin › «Casos derivados» no tiene infracciones serias ni de estructura (37.2s)
+  ok  85 tests\e2e-19-accesibilidad-gestion.spec.ts:19:11 › gestión · admin › «Seguimiento DBU» no tiene infracciones serias ni de estructura (40.7s)
+  ok  86 tests\e2e-19-accesibilidad-gestion.spec.ts:19:11 › gestión · admin › «Informe consolidado» no tiene infracciones serias ni de estructura (44.2s)
+  ok  87 tests\e2e-19-accesibilidad-gestion.spec.ts:19:11 › gestión · admin › «Sedes» no tiene infracciones serias ni de estructura (41.7s)
+  ok  88 tests\e2e-19-accesibilidad-gestion.spec.ts:19:11 › gestión · admin › «Evaluación de tutoría» no tiene infracciones serias ni de estructura (39.6s)
+  ok  89 tests\e2e-19-accesibilidad-gestion.spec.ts:19:11 › gestión · admin › «Catálogos» no tiene infracciones serias ni de estructura (38.2s)
+  ok  90 tests\e2e-19-accesibilidad-gestion.spec.ts:19:11 › gestión · admin › «Usuarios y roles» no tiene infracciones serias ni de estructura (1.7m)
+  ok  91 tests\e2e-19-accesibilidad-gestion.spec.ts:19:11 › gestión · admin › «Parámetros» no tiene infracciones serias ni de estructura (39.2s)
+  ok  92 tests\e2e-19-accesibilidad-gestion.spec.ts:19:11 › gestión · admin › «Identidad visual» no tiene infracciones serias ni de estructura (24.1s)
+  ok  93 tests\e2e-19-accesibilidad-gestion.spec.ts:19:11 › gestión · admin › «Bitácora de auditoría» no tiene infracciones serias ni de estructura (42.5s)
+  ok  94 tests\e2e-19-accesibilidad-gestion.spec.ts:19:11 › gestión · tutor › «Estudiantes» no tiene infracciones serias ni de estructura (41.3s)
+  ok  95 tests\e2e-19-accesibilidad-gestion.spec.ts:19:11 › gestión · tutor › «Sesiones» no tiene infracciones serias ni de estructura (36.5s)
+  ok  96 tests\e2e-19-accesibilidad-gestion.spec.ts:19:11 › gestión · tutor › «Casos derivados» no tiene infracciones serias ni de estructura (40.7s)
+  x   97 tests\e2e-19-accesibilidad-gestion.spec.ts:19:11 › gestión · tutor › «Informe semestral» no tiene infracciones serias ni de estructura (3.5m)
+  ok  98 tests\e2e-19-accesibilidad-gestion.spec.ts:19:11 › gestión · psychology › «Casos derivados» no tiene infracciones serias ni de estructura (46.8s)
+  -   99 tests\e2e-19-accesibilidad-gestion.spec.ts:30:5 › el detalle de un caso derivado (diálogo) tampoco tiene infracciones y se cierra con Escape devolviendo el foco
+  ok 100 tests\e2e-20-estados-del-docente.spec.ts:80:5 › RECHAZO: el docente dice que no puede; la coordinación lo ve con el motivo y el ciclo queda sin tutor efectivo (47.1s)
+  ok 101 tests\e2e-20-estados-del-docente.spec.ts:102:5 › RECHAZO (comportamiento actual, pendiente de decisión de la DBU): la estudiante conserva a la docente que rechazó y su solicitud sigue yendo a ella (1.8s)
+  ok 102 tests\e2e-20-estados-del-docente.spec.ts:113:5 › SIN RESPUESTA: el enlace vence sin que el docente responda; aparece como pendiente y el enlace ya no sirve (40.0s)
+  ok 103 tests\e2e-20-estados-del-docente.spec.ts:140:5 › CORREO NO ENVIADO: si el servidor de correo no responde, se avisa a quien designó y queda como pendiente; al reenviar desaparece (43.7s)
+  ok 104 tests\e2e-20-estados-del-docente.spec.ts:168:5 › la lista de pendientes del ciclo queda limpia al liberar la designación (4.7s)
+
+
+  1) tests\e2e-19-accesibilidad-gestion.spec.ts:19:11 › gestión · tutor › «Informe semestral» no tiene infracciones serias ni de estructura 
+
+    [31mTest timeout of 150000ms exceeded.[39m
+
+    Error: [2mexpect([22m[31mlocator[39m[2m).[22mtoHaveCount[2m([22m[32mexpected[39m[2m)[22m failed
+
+    Locator:  getByRole('progressbar')
+    Expected: [32m0[39m
+    Received: [31m1[39m
+    Timeout:  60000ms
+
+    Call log:
+    [2m  - Expect "toHaveCount" with timeout 60000ms[22m
+    [2m  - waiting for getByRole('progressbar')[22m
+    [2m    34 × locator resolved to 1 element[22m
+    [2m       - unexpected value "1"[22m
+
+
+      21 |         await goToMenu(page, screen);
+      22 |         await expect(page.getByRole('heading', { level: 1 }).first()).toBeVisible();
+    > 23 |         await expect(page.getByRole('progressbar')).toHaveCount(0, { timeout: 60_000 }); // ya cargó: se revisa la pantalla final
+         |                                                     ^
+      24 |         await expectNoSeriousViolations(page, testInfo, `${who} · ${screen}`);
+      25 |       });
+      26 |     }
+        at C:\Proyects\Proyects\Tutoria-untrm\e2e\tests\e2e-19-accesibilidad-gestion.spec.ts:23:53
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results\e2e-19-accesibilidad-gesti-b1525-nes-serias-ni-de-estructura\test-failed-3.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results\e2e-19-accesibilidad-gesti-b1525-nes-serias-ni-de-estructura\test-failed-4.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #3: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results\e2e-19-accesibilidad-gesti-b1525-nes-serias-ni-de-estructura\test-failed-2.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results\e2e-19-accesibilidad-gesti-b1525-nes-serias-ni-de-estructura\error-context.md
+
+    attachment #5: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results\e2e-19-accesibilidad-gesti-b1525-nes-serias-ni-de-estructura\trace.zip
+    Usage:
+
+        npx playwright show-trace test-results\e2e-19-accesibilidad-gesti-b1525-nes-serias-ni-de-estructura\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  Slow test file: tests\e2e-18-accesibilidad.spec.ts (10.6m)
+  Slow test file: tests\e2e-01-acceso-y-menu.spec.ts (7.3m)
+  Slow test file: tests\e2e-09-carga-masiva-y-asignacion.spec.ts (5.4m)
+  Consider running tests from slow files in parallel. See: https://playwright.dev/docs/test-parallel
+  1 failed
+    tests\e2e-19-accesibilidad-gestion.spec.ts:19:11 › gestión · tutor › «Informe semestral» no tiene infracciones serias ni de estructura 
+  1 skipped
+  102 passed (1.5h)

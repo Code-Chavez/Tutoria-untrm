@@ -68,7 +68,7 @@ export class ProfileController {
 
   private mapError(err: unknown): Error {
     if (err instanceof ZodError) {
-      return new AppError(400, err.errors[0]?.message ?? 'Datos inválidos');
+      return new AppError(400, err.issues[0]?.message ?? 'Datos inválidos');
     }
     if (err instanceof ProfileUserNotFoundError) {
       return new AppError(404, err.message);

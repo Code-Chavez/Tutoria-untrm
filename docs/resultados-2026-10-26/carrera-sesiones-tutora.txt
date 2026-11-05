@@ -1,0 +1,28 @@
+# Carrera de tutoringRequestFollowUp: la prueba contaba TODAS las sesiones de la tutora de demostración compartida (26/10/2026)
+# Reproducción controlada en la base de pruebas sit_db_test: mientras corre SOLO esa suite (node scripts/test-integration.js tests/integration/tutoringRequestFollowUp),
+# un proceso aparte (un bloque DO de PostgreSQL, script temporal NO versionado) inserta una sesión de Elena cada ~30 ms (tema CARRERA-SIMULADA, a 400 días), como hacen otras suites en paralelo.
+# Al terminar se borran las sesiones simuladas (comprobado: 0 restantes).
+
+## Antes de la corrección (develop)
+(un primer intento con un inyector de solo 500 inserciones NO reprodujo el fallo: terminó antes de que la prueba llegara a la comprobación; se alargó a 2000)
+    × programar una sesión desde la solicitud la vincula, la pasa a «en atención» y avisa al estudiante (584 ms)
+    Expected: 1533
+    Received: 1535
+Tests:       1 failed, 8 passed, 9 total
+salida=1
+sesiones simuladas insertadas: 2000
+sesiones simuladas tras limpiar: 0
+
+## Después de la corrección (el recuento se limita a las sesiones de la tutora con el tema propio de la corrida; la aserción toBe(before) no cambia)
+--- ejecución 1
+Tests:       9 passed, 9 total
+salida=0
+sesiones simuladas insertadas: 2000
+sesiones simuladas tras limpiar: 0
+--- ejecución 2
+Tests:       9 passed, 9 total
+salida=0
+sesiones simuladas insertadas: 2000
+sesiones simuladas tras limpiar: 0
+
+# Alcance: es una reproducción de la carrera, no una prueba de que no pueda haber otras carreras en otras suites. La CI corre además la suite completa en paralelo.

@@ -82,15 +82,52 @@
   margin: 0;
 }
 
+.howTo {
+  margin-bottom: var(--s4);
+  padding: var(--s3) var(--s4);
+  border-left: 3px solid var(--azul);
+  border-radius: var(--r-sm);
+  background: var(--g50);
+  font-size: var(--fs-sm);
+  line-height: 1.5;
+  color: var(--g700);
+}
+
+/* La leyenda va antes de la primera pregunta: quien responde sabe qué significa cada opción antes de empezar */
 .scaleLegend {
   display: flex;
   flex-wrap: wrap;
-  gap: var(--s4);
-  margin-top: var(--s5);
-  padding-top: var(--s4);
-  border-top: 1px solid var(--g100);
-  font-size: var(--fs-xs);
+  gap: var(--s2) var(--s4);
+  margin: var(--s2) 0;
+  padding: 0;
+  list-style: none;
+  font-size: var(--fs-sm);
+  color: var(--g900);
+}
+
+.scaleName {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: flex-start;
+  line-height: 1.15;
+}
+
+.scaleName small {
+  font-size: 11px;
+  font-weight: 500;
   color: var(--g600);
+}
+
+.jump {
+  margin-left: var(--s3);
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: var(--azul);
+  font: inherit;
+  font-weight: 600;
+  text-decoration: underline;
+  cursor: pointer;
 }
 
 .field {

@@ -1,0 +1,30 @@
+# Pruebas de integración completas, base exclusiva sit_db_test (25/10/2026)
+Con 7 asignaciones de ciclo PREEXISTENTES sembradas a propósito (incluido el ciclo 10 de Sistemas ocupado y un docente con dos ciclos).
+
+PASS tests/integration/accessMatrix.test.ts
+PASS tests/integration/accountInvitation.test.ts
+PASS tests/integration/admonitions.test.ts
+PASS tests/integration/attendanceNumbering.test.ts
+PASS tests/integration/bootstrap.test.ts
+PASS tests/integration/campusesAndTutorSchool.test.ts
+PASS tests/integration/cycleTutors.test.ts
+PASS tests/integration/emailOutbox.test.ts
+PASS tests/integration/emailValidation.test.ts
+PASS tests/integration/evaluationScope.test.ts
+PASS tests/integration/notificationLifecycle.test.ts
+PASS tests/integration/objectAccess.test.ts
+PASS tests/integration/passwordReset.test.ts
+PASS tests/integration/periodClosure.test.ts
+PASS tests/integration/periodEnrollment.test.ts
+PASS tests/integration/schoolCycles.test.ts
+PASS tests/integration/securityParameters.test.ts
+PASS tests/integration/sensitiveAccessAudit.test.ts
+PASS tests/integration/sessionNotices.test.ts
+PASS tests/integration/signedDocuments.test.ts
+PASS tests/integration/tutorAcceptance.test.ts
+PASS tests/integration/tutorImport.test.ts
+PASS tests/integration/tutoringRequestCircuit.test.ts
+PASS tests/integration/tutoringRequestFollowUp.test.ts
+Test Suites: 24 passed, 24 total
+Tests:       166 passed, 166 total
+Diferencias de conteo en la base tras la suite completa (otras suites, ver docs/PRUEBAS_DE_INTEGRACION.md): audit_logs +192; password_reset_tokens +9; refresh_tokens +74; users +6

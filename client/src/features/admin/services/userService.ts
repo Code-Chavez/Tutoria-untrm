@@ -10,7 +10,21 @@ export interface User {
   photoUrl?: string;
   /** Servicio al que pertenece un Profesional de Servicio; nulo en los demás roles. */
   service?: string | null;
+  /** Escuela profesional del docente tutor; nulo en los demás roles y en tutores anteriores a esta regla. */
+  schoolId?: string | null;
+  /** Facultad del Decano; nulo en los demás roles. */
+  facultyId?: string | null;
   isActive: boolean;
+  /** Pendiente de activación: aún no creó su contraseña con la invitación. */
+  mustChangePassword?: boolean;
+}
+
+/** Invitación de acceso único para activar una cuenta. */
+export interface Invitation {
+  link: string;
+  expiresAt: string;
+  /** El correo salió hacia el servidor SMTP; si es false hay que entregar el enlace por otro medio. */
+  emailSent: boolean;
 }
 
 export interface CreateUserData {
@@ -20,6 +34,8 @@ export interface CreateUserData {
   roleId: string;
   phone?: string;
   service?: string | null;
+  schoolId?: string | null;
+  facultyId?: string | null;
 }
 
 export interface UpdateUserData {
@@ -29,9 +45,40 @@ export interface UpdateUserData {
   roleId?: string;
   phone?: string;
   service?: string | null;
+  schoolId?: string | null;
+  facultyId?: string | null;
+}
+
+export type AccessKind = 'NONE' | 'OWN' | 'SCHOOLS' | 'FACULTIES' | 'INSTITUTION' | 'SERVICE';
+
+/** Alcance de datos de una persona con su rol (LEV-R12). */
+export interface UserAccess {
+  userId: string;
+  role: { id: string; name: string };
+  policy: { kind: AccessKind; schoolIds: string[]; facultyIds: string[]; service: string | null; revision: number } | null;
+  /** STORED: configurado; DEFAULT: sin configurar (rige el comportamiento del rol); OUTDATED: quedó de un rol anterior. */
+  source: 'STORED' | 'DEFAULT' | 'OUTDATED';
+  configurable: boolean;
+}
+
+export interface AccessInput {
+  kind: AccessKind;
+  schoolIds?: string[];
+  facultyIds?: string[];
+  service?: string | null;
 }
 
 export const userService = {
+  getAccess: async (id: string): Promise<UserAccess> => (await apiClient.get<{ access: UserAccess }>(`/users/${id}/access`)).data.access,
+
+  setAccess: async (id: string, input: AccessInput): Promise<UserAccess> => (await apiClient.put<{ access: UserAccess }>(`/users/${id}/access`, input)).data.access,
+
+  /** Dominios de correo permitidos para las cuentas (RF-01): la misma política que aplica el servidor. */
+  getEmailPolicy: async (): Promise<string[]> => {
+    const response = await apiClient.get<{ allowedDomains: string[] }>('/users/email-policy');
+    return response.data.allowedDomains;
+  },
+
   getUsers: async (filters?: { isActive?: boolean; roleId?: string }): Promise<User[]> => {
     const params = new URLSearchParams();
     if (filters?.isActive !== undefined) params.append('isActive', String(filters.isActive));
@@ -41,10 +88,16 @@ export const userService = {
     return response.data.users;
   },
 
-  /** Devuelve la cuenta y su clave temporal, que el servidor entrega una sola vez. */
-  createUser: async (data: CreateUserData): Promise<{ user: User; temporaryPassword?: string }> => {
-    const response = await apiClient.post<{ message: string; user: User; temporaryPassword?: string }>('/users', data);
-    return { user: response.data.user, temporaryPassword: response.data.temporaryPassword };
+  /** Crea la cuenta (sin clave) y devuelve su invitación de acceso único. */
+  createUser: async (data: CreateUserData): Promise<{ user: User; invitation: Invitation }> => {
+    const response = await apiClient.post<{ message: string; user: User; invitation: Invitation }>('/users', data);
+    return { user: response.data.user, invitation: response.data.invitation };
+  },
+
+  /** Emite una invitación nueva (la anterior deja de servir). */
+  reissueInvitation: async (id: string): Promise<Invitation> => {
+    const response = await apiClient.post<{ message: string; invitation: Invitation }>(`/users/${id}/invitation`);
+    return response.data.invitation;
   },
 
   updateUser: async (id: string, data: UpdateUserData): Promise<User> => {

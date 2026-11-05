@@ -1,7 +1,7 @@
 import { UserRepository } from '@domain/repositories/UserRepository';
 import { RoleRepository } from '@domain/repositories/RoleRepository';
 import { User } from '@domain/entities/User';
-import { TutorNotFoundError } from './AssignmentErrors';
+import { TutorNotFoundError, TutorSchoolMismatchError } from './AssignmentErrors';
 
 export const TUTOR_ROLE_NAME = 'Docente Tutor';
 
@@ -17,4 +17,15 @@ export async function assertActiveTutor(
     throw new TutorNotFoundError();
   }
   return tutor;
+}
+
+/**
+ * El tutor solo atiende estudiantes de su escuela. Un tutor sin escuela registrada (cuenta anterior a esta regla)
+ * no se bloquea, pero la pantalla de usuarios lo marca para que se le indique la suya.
+ */
+export function assertTutorServesSchools(tutor: User, schoolIds: Iterable<string>): void {
+  if (!tutor.schoolId) return;
+  for (const schoolId of schoolIds) {
+    if (schoolId !== tutor.schoolId) throw new TutorSchoolMismatchError();
+  }
 }

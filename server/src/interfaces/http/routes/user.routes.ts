@@ -10,17 +10,27 @@ const userController = new UserController(
   container.useCases.updateUserUseCase,
   container.useCases.toggleUserStatusUseCase,
   container.useCases.listUsersUseCase,
-  container.useCases.assignRoleUseCase
+  container.useCases.assignRoleUseCase,
+  container.useCases.issueInvitationUseCase,
+  container.services.emailPolicy,
+  container.useCases.getUserAccessUseCase,
+  container.useCases.setUserAccessUseCase,
 );
 
 // Todas las rutas de usuarios requieren autenticación
 router.use('/users', authenticate(container.services.tokenService));
+
+// Dominios de correo permitidos para las cuentas (RF-01): lo necesitan los formularios de alta y edición
+router.get('/users/email-policy', authorize(['users:write']), userController.getEmailPolicy);
 
 // Listar usuarios (requiere permiso de leer usuarios)
 router.get('/users', authorize(['users:read']), userController.list);
 
 // Crear usuario (requiere permiso de crear/editar usuarios)
 router.post('/users', authorize(['users:write']), userController.create);
+
+// Emitir o reemitir la invitación de activación (enlace de un solo uso); la persona crea su propia contraseña
+router.post('/users/:id/invitation', authorize(['users:write']), userController.reissueInvitation);
 
 // Actualizar usuario (requiere permiso de crear/editar usuarios)
 router.patch('/users/:id', authorize(['users:write']), userController.update);
@@ -30,5 +40,9 @@ router.patch('/users/:id/status', authorize(['users:delete']), userController.to
 
 // Asignar rol a un usuario (administración del sistema, solo DBU)
 router.put('/users/:id/role', authorize(['admin:system']), userController.assignRole);
+
+// Alcance de datos de una persona con su rol (propios, escuelas, facultades, servicio, institución): administración del sistema
+router.get('/users/:id/access', authorize(['admin:system']), userController.getAccess);
+router.put('/users/:id/access', authorize(['admin:system']), userController.setAccess);
 
 export default router;

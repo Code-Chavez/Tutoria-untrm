@@ -1,5 +1,8 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { useDialogFocus } from '@shared/hooks/useDialog';
+import { useDraft } from '@shared/hooks/useDraft';
+import { DraftNotice } from '@shared/components/ui';
+import { followUpDraftKey } from '@shared/utils/drafts';
 import { Button } from '@shared/components/ui';
 import { ActivityIcon, CloseIcon, InfoIcon } from '@shared/components/icons';
 import { Student } from '@features/tutorados/services/studentService';
@@ -10,9 +13,15 @@ interface FollowUpFormModalProps {
   student: Student;
   loading?: boolean;
   serverError?: string;
+  /** Quien registra: con su id, lo escrito se guarda como borrador de la pestaña y se recupera al recargar. */
+  draftOwnerId?: string;
   onSubmit: (data: CreateFollowUpData) => void;
   onCancel: () => void;
 }
+
+const EMPTY_FORM = { reason: '', agreements: '', withInstructor: false, instructorName: '', courseName: '', courseCycle: '' };
+const isEmptyForm = (v: typeof EMPTY_FORM) => JSON.stringify(v) === JSON.stringify(EMPTY_FORM);
+
 
 // Ficha de seguimiento (HU-24, Anexo N° 5): motivo y acuerdos, con los datos
 // del docente de asignatura cuando el acuerdo se tomó con él en vez de con
@@ -21,15 +30,13 @@ export const FollowUpFormModal: React.FC<FollowUpFormModalProps> = ({
   student,
   loading,
   serverError,
+  draftOwnerId,
   onSubmit,
   onCancel,
 }) => {
-  const [reason, setReason] = useState('');
-  const [agreements, setAgreements] = useState('');
-  const [withInstructor, setWithInstructor] = useState(false);
-  const [instructorName, setInstructorName] = useState('');
-  const [courseName, setCourseName] = useState('');
-  const [courseCycle, setCourseCycle] = useState('');
+  const { value: form, setValue: setForm, restored, discard } = useDraft(draftOwnerId, followUpDraftKey(student.id), EMPTY_FORM, isEmptyForm);
+  const { reason, agreements, withInstructor, instructorName, courseName, courseCycle } = form;
+  const set = useCallback((patch: Partial<typeof EMPTY_FORM>) => setForm((f) => ({ ...f, ...patch })), [setForm]);
   const [error, setError] = useState('');
 
   const dialogRef = useDialogFocus();
@@ -91,6 +98,7 @@ export const FollowUpFormModal: React.FC<FollowUpFormModalProps> = ({
         </div>
 
         <div className={styles.body}>
+          {restored && <DraftNotice onDiscard={discard} />}
           <div className={styles.field}>
             <label htmlFor="followUpReason">Motivo de seguimiento</label>
             <textarea
@@ -101,7 +109,7 @@ export const FollowUpFormModal: React.FC<FollowUpFormModalProps> = ({
               maxLength={1000}
               placeholder="Ej. Seguimiento al acuerdo de reforzamiento en Cálculo…"
               onChange={(e) => {
-                setReason(e.target.value);
+                set({ reason: e.target.value });
                 setError('');
               }}
             />
@@ -112,7 +120,7 @@ export const FollowUpFormModal: React.FC<FollowUpFormModalProps> = ({
               type="checkbox"
               checked={withInstructor}
               onChange={(e) => {
-                setWithInstructor(e.target.checked);
+                set({ withInstructor: e.target.checked });
                 setError('');
               }}
             />
@@ -130,7 +138,7 @@ export const FollowUpFormModal: React.FC<FollowUpFormModalProps> = ({
                     className={styles.input}
                     value={instructorName}
                     onChange={(e) => {
-                      setInstructorName(e.target.value);
+                      set({ instructorName: e.target.value });
                       setError('');
                     }}
                   />
@@ -143,7 +151,7 @@ export const FollowUpFormModal: React.FC<FollowUpFormModalProps> = ({
                     className={styles.input}
                     value={courseName}
                     onChange={(e) => {
-                      setCourseName(e.target.value);
+                      set({ courseName: e.target.value });
                       setError('');
                     }}
                   />
@@ -158,7 +166,7 @@ export const FollowUpFormModal: React.FC<FollowUpFormModalProps> = ({
                     className={styles.input}
                     value={courseCycle}
                     onChange={(e) => {
-                      setCourseCycle(e.target.value);
+                      set({ courseCycle: e.target.value });
                       setError('');
                     }}
                   />
@@ -177,7 +185,7 @@ export const FollowUpFormModal: React.FC<FollowUpFormModalProps> = ({
               maxLength={1000}
               placeholder="Ej. El estudiante se compromete a asistir a asesorías los martes…"
               onChange={(e) => {
-                setAgreements(e.target.value);
+                set({ agreements: e.target.value });
                 setError('');
               }}
             />
@@ -185,7 +193,7 @@ export const FollowUpFormModal: React.FC<FollowUpFormModalProps> = ({
 
           <div className={styles.hint}>
             <InfoIcon size={16} />
-            La ficha se agrega al expediente del tutorado (Anexo N° 5) para dar continuidad al
+            La ficha se agrega al expediente del estudiante (Anexo N° 5) para dar continuidad al
             acompañamiento.
           </div>
 

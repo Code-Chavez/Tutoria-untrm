@@ -1,4 +1,5 @@
 import { Router, type IRouter } from 'express';
+import { requireOpenPeriod } from '../middleware/requireOpenPeriod';
 import { auditAccess, byParam } from '../middleware/auditAccess';
 import { container } from '../../../infrastructure/container';
 import { ReferralController } from '../controllers/ReferralController';
@@ -25,7 +26,7 @@ const requireAuth = authenticate(container.services.tokenService);
 router.post(
   '/students/:id/referrals',
   requireAuth,
-  authorize(['referrals:write']),
+  authorize(['referrals:write']), requireOpenPeriod,
   referralController.create,
 );
 router.get(
@@ -64,7 +65,7 @@ router.get(
 router.patch(
   '/referrals/:id/status',
   requireAuth,
-  authorize(['referrals:write']),
+  authorize(['referrals:write']), requireOpenPeriod,
   referralController.updateStatus,
 );
 

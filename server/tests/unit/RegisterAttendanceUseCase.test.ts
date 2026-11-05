@@ -76,6 +76,8 @@ describe('RegisterAttendanceUseCase', () => {
       findAll: jest.fn(),
       findById: jest.fn(),
       findByDate: jest.fn().mockResolvedValue({ id: 'period-A', name: '2026-I' }),
+      close: jest.fn(),
+      reopen: jest.fn(),
     } as unknown as jest.Mocked<AcademicPeriodRepository>;
     useCase = new RegisterAttendanceUseCase(sessions, systemParameters, periods);
   });

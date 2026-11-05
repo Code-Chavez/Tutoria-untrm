@@ -69,13 +69,13 @@ export const LinkPortalAccountModal: React.FC<LinkPortalAccountModalProps> = ({
 
         <div className={styles.body}>
           <p className={styles.hint}>
-            Vincula la cuenta con la que este tutorado inicia sesión, para que pueda solicitar
-            tutoría por sí mismo. Solo se listan cuentas con rol Tutorado que aún no están
+            Vincula la cuenta con la que este estudiante inicia sesión, para que pueda solicitar
+            tutoría por sí mismo. Solo se listan cuentas con rol Estudiante que aún no están
             vinculadas a otro estudiante.
           </p>
 
           <div className={styles.field}>
-            <label htmlFor="portalAccount">Cuenta de portal (Tutorado)</label>
+            <label htmlFor="portalAccount">Cuenta de portal (Estudiante)</label>
             <SelectField
               id="portalAccount"
               value={userId}
@@ -92,7 +92,7 @@ export const LinkPortalAccountModal: React.FC<LinkPortalAccountModalProps> = ({
 
           {options.length === 0 && (
             <p className={styles.empty} role="status">
-              No hay cuentas disponibles para vincular. Primero crea el usuario con rol Tutorado en
+              No hay cuentas disponibles para vincular. Primero crea el usuario con rol Estudiante en
               «Usuarios y roles» (con el correo con el que iniciará sesión); si ya existe, puede
               estar vinculado a otro estudiante.
             </p>

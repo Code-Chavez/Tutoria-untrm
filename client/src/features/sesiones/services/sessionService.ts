@@ -45,6 +45,13 @@ export interface TutoringSession {
   cancelledAt: string | null;
   cancelReason: string | null;
   createdAt: string;
+  /** Solo en la respuesta de programar, reprogramar o cancelar: a cuántos tutorados avisó el sistema y a cuántos no pudo. */
+  notice?: SessionNotice;
+}
+
+export interface SessionNotice {
+  notified: number;
+  notReached: number;
 }
 
 export interface RescheduleSessionData {
@@ -64,6 +71,8 @@ export interface ScheduleSessionData {
   modality: SessionModality;
   location?: string;
   meetingLink?: string;
+  /** Solicitud de tutoría que esta sesión atiende (queda vinculada). */
+  tutoringRequestId?: string;
 }
 
 // Evidencia (PDF o imagen) adjunta a una sesión (HU-25, repositorio seguro

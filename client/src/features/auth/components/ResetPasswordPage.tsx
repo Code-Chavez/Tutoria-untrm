@@ -3,8 +3,32 @@ import { useParams, useNavigate, Link } from 'react-router-dom';
 import { getApiErrorMessage } from '@shared/services/apiClient';
 import { authService } from '../services/authService';
 import styles from './LoginPage.module.css';
+import local from './ResetPasswordPage.module.css';
 
-export function ResetPasswordPage() {
+interface ResetPasswordPageProps {
+  /** `activate`: primera contraseña de una cuenta nueva (invitación de un solo uso); `reset`: recuperación. */
+  mode?: 'reset' | 'activate';
+}
+
+const COPY = {
+  reset: {
+    title: 'Nueva contraseña',
+    subtitle: 'Ingresa y confirma tu nueva contraseña institucional.',
+    submit: 'Restablecer contraseña',
+    success: 'Tu contraseña ha sido restablecida con éxito. Ya puedes iniciar sesión con tu nueva contraseña.',
+    invalidToken: 'Token de recuperación no válido.',
+  },
+  activate: {
+    title: 'Activa tu cuenta',
+    subtitle: 'Crea tu contraseña personal para comenzar a usar el sistema de tutoría.',
+    submit: 'Activar mi cuenta',
+    success: 'Tu cuenta está activa. Ya puedes iniciar sesión con la contraseña que acabas de crear.',
+    invalidToken: 'El enlace de activación no es válido.',
+  },
+} as const;
+
+export function ResetPasswordPage({ mode = 'reset' }: ResetPasswordPageProps) {
+  const copy = COPY[mode];
   const { token } = useParams<{ token: string }>();
   const navigate = useNavigate();
 
@@ -30,7 +54,7 @@ export function ResetPasswordPage() {
     }
 
     if (!token) {
-      setError('Token de recuperación no válido.');
+      setError(copy.invalidToken);
       return;
     }
 
@@ -38,7 +62,7 @@ export function ResetPasswordPage() {
 
     try {
       await authService.resetPassword(token, password);
-      setSuccess('Tu contraseña ha sido restablecida con éxito. Ya puedes iniciar sesión con tu nueva contraseña.');
+      setSuccess(copy.success);
       setTimeout(() => {
         navigate('/login', { replace: true });
       }, 3000);
@@ -50,20 +74,19 @@ export function ResetPasswordPage() {
   };
 
   return (
-    <div className={styles.page}>
-      <main className={styles.card}>
-        <div className={styles.brandRow}>
-          <div className={styles.emblem}>SIT</div>
+    <div className={`${styles.page} ${local.page}`}>
+      <main className={`${styles.card} ${local.card}`}>
+        <div className={local.brand}>
+          <div className={local.emblem}>SIT</div>
           <div>
             <b>UNTRM</b>
             <small>Bienestar Universitario</small>
           </div>
         </div>
 
-        <h1 className={styles.title}>Nueva contraseña</h1>
-        <p className={styles.subtitle}>
-          Ingresa y confirma tu nueva contraseña institucional.
-        </p>
+        <h1 className={styles.title}>{copy.title}</h1>
+        <p className={styles.subtitle}>{copy.subtitle}</p>
+        {mode === 'activate' && <p className={local.notice}>Primer acceso · Este enlace es personal y sirve una sola vez.</p>}
 
         {success ? (
           <div className={styles.success} style={{ padding: '12px', background: '#e6f4ea', color: '#137333', borderRadius: '4px', marginBottom: '16px', fontSize: '14px' }}>
@@ -96,6 +119,8 @@ export function ResetPasswordPage() {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   disabled={isSubmitting}
+                  autoComplete="new-password"
+                  aria-describedby="password-help"
                 />
                 <button
                   type="button"
@@ -107,6 +132,7 @@ export function ResetPasswordPage() {
                   {showPassword ? <EyeOffIcon /> : <EyeIcon />}
                 </button>
               </div>
+              <p id="password-help" className={local.help}>Usa al menos 8 caracteres.</p>
             </div>
 
             <div className={styles.field}>
@@ -125,6 +151,7 @@ export function ResetPasswordPage() {
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
                   disabled={isSubmitting}
+                  autoComplete="new-password"
                 />
               </div>
             </div>
@@ -136,7 +163,7 @@ export function ResetPasswordPage() {
                   Guardando…
                 </>
               ) : (
-                'Restablecer contraseña'
+                copy.submit
               )}
             </button>
           </form>
@@ -190,3 +217,4 @@ function AlertIcon() {
     </svg>
   );
 }
+

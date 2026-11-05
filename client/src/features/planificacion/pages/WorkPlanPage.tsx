@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useUrlParams } from '@shared/hooks/useUrlParams';
 import { getApiErrorMessage } from '@shared/services/apiClient';
 import { PageHeader, Card, Button, ConfirmDialog, SelectField, EmptyState, TableSkeleton } from '@shared/components/ui';
 import { CalendarRangeIcon, PlusIcon, TrashIcon } from '@shared/components/icons';
@@ -183,7 +184,11 @@ function toContent(f: FormState): WorkPlanContent {
 }
 
 function WorkPlanEditor({ schoolId, plan }: { schoolId: string; plan: WorkPlan | null }) {
-  const [tab, setTab] = useState<TabId>('general');
+  // La pestaña abierta (?pestana=) vive en la URL: recargar o compartir el enlace vuelve a la misma sección.
+  const url = useUrlParams();
+  const tabParam = url.get('pestana');
+  const tab: TabId = TABS.find((t) => t.id === tabParam)?.id ?? 'general';
+  const setTab = (next: TabId) => url.set({ pestana: next === 'general' ? null : next }, { replace: true });
   const [form, setForm] = useState<FormState>(() => (plan ? fromPlan(plan) : emptyForm()));
   const [message, setMessage] = useState<{ type: 'ok' | 'error'; text: string } | null>(null);
 
@@ -209,7 +214,6 @@ function WorkPlanEditor({ schoolId, plan }: { schoolId: string; plan: WorkPlan |
     setForm((f) => ({ ...f, [table]: f[table].filter((_, idx) => idx !== i) }));
 
   const handleSave = async () => {
-    setConfirmRevision(false);
     setMessage(null);
     try {
       await save.mutateAsync(toContent(form));
@@ -221,6 +225,9 @@ function WorkPlanEditor({ schoolId, plan }: { schoolId: string; plan: WorkPlan |
       });
     } catch (err) {
       setMessage({ type: 'error', text: getApiErrorMessage(err) });
+    } finally {
+      // El diálogo de confirmación se cierra al terminar (no al confirmar): mientras se guarda queda ocupado y conserva el foco.
+      setConfirmRevision(false);
     }
   };
 
@@ -245,7 +252,7 @@ function WorkPlanEditor({ schoolId, plan }: { schoolId: string; plan: WorkPlan |
     const total = (r: Row) => (Number(r.quantity) || 0) * (Number(r.unitCost) || 0);
     return (
       <section className={styles.tableBlock} key={table}>
-        <h3>{title}</h3>
+        <h2>{title}</h2>
         <div className={styles.tableWrap}>
           <table className={styles.table}>
             <thead>
@@ -254,7 +261,9 @@ function WorkPlanEditor({ schoolId, plan }: { schoolId: string; plan: WorkPlan |
                   <th key={c.key}>{c.label}</th>
                 ))}
                 {table === 'budget' && <th>Costo total (S/)</th>}
-                <th aria-label="Acciones" />
+                <th>
+                  <span className="sr-only">Acciones</span>
+                </th>
               </tr>
             </thead>
             <tbody>
@@ -407,7 +416,7 @@ function WorkPlanEditor({ schoolId, plan }: { schoolId: string; plan: WorkPlan |
 
                 {tab === 'operational' && (
                   <section className={styles.tableBlock}>
-                    <h3>X. Actividades operativas</h3>
+                    <h2>X. Actividades operativas</h2>
                     <div className={styles.tableWrap}>
                       <table className={styles.table}>
                         <thead>

@@ -1,4 +1,5 @@
 import { Router, type IRouter } from 'express';
+import { requireOpenPeriod } from '../middleware/requireOpenPeriod';
 import { auditAccess, byParam } from '../middleware/auditAccess';
 import multer from 'multer';
 import { container } from '../../../infrastructure/container';
@@ -33,12 +34,12 @@ const requireAuth = authenticate(container.services.tokenService);
 
 // Constancia de derivación firmada (Anexo N°6): mismas reglas de visibilidad que la derivación.
 router.get('/referrals/:id/signed-documents', requireAuth, authorize(['referrals:read']), controller.listForReferral);
-router.post('/referrals/:id/signed-documents', requireAuth, authorize(['referrals:write']), upload.single('file'), requireFileSignature(['pdf', 'png', 'jpeg']), controller.attachToReferral);
+router.post('/referrals/:id/signed-documents', requireAuth, authorize(['referrals:write']), requireOpenPeriod, upload.single('file'), requireFileSignature(['pdf', 'png', 'jpeg']), controller.attachToReferral);
 
 // Hoja de asistencia a la tutoría individual (Anexo N°4): PDF imprimible y documentos firmados.
 router.get('/students/:id/attendance-sheet/pdf', requireAuth, auditAccess('AttendanceSheet', 'DOWNLOAD', byParam('id')), authorize(['sessions:read']), controller.attendanceSheetPdf);
 router.get('/students/:id/attendance-sheet/signed-documents', requireAuth, authorize(['sessions:read']), controller.listForAttendanceSheet);
-router.post('/students/:id/attendance-sheet/signed-documents', requireAuth, authorize(['sessions:write']), upload.single('file'), requireFileSignature(['pdf', 'png', 'jpeg']), controller.attachToAttendanceSheet);
+router.post('/students/:id/attendance-sheet/signed-documents', requireAuth, authorize(['sessions:write']), requireOpenPeriod, upload.single('file'), requireFileSignature(['pdf', 'png', 'jpeg']), controller.attachToAttendanceSheet);
 
 // Descarga de cualquier documento firmado: la regla de acceso depende del caso al que pertenece.
 router.get('/signed-documents/:docId/file', requireAuth, auditAccess('SignedDocument', 'DOWNLOAD', byParam('docId')), controller.download);

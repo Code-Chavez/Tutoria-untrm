@@ -92,7 +92,7 @@ export class SessionEvidenceNotFoundError extends Error {
 // Asistencia por participante (A07): solo pueden marcarse quienes están en la sesión.
 export class InvalidAttendeesError extends Error {
   constructor() {
-    super('Solo puedes registrar la asistencia de los tutorados de esta sesión');
+    super('Solo puedes registrar la asistencia de los estudiantes de esta sesión');
     this.name = 'InvalidAttendeesError';
   }
 }

@@ -34,7 +34,7 @@ export class CatalogController {
 
   private handleError(error: unknown, res: Response) {
     if (error instanceof z.ZodError) {
-      res.status(400).json({ error: 'Datos de entrada inválidos', details: error.errors });
+      res.status(400).json({ error: 'Datos de entrada inválidos', details: error.issues });
     } else if (error instanceof CatalogValidationError) {
       res.status(400).json({ error: error.message });
     } else if (error instanceof CatalogEntryNotFoundError) {
@@ -61,7 +61,7 @@ export class CatalogController {
     const kind = this.kind(req, res);
     if (!kind) return;
     try {
-      const input = catalogCreateSchema(kind).parse(req.body) as CatalogInput;
+      const input = catalogCreateSchema(kind).parse(req.body) as unknown as CatalogInput;
       const entry = await this.createCatalogEntryUseCase.execute(kind, input);
       res.status(201).json({ message: 'Elemento creado', entry });
     } catch (error) {

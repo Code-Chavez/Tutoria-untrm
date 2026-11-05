@@ -11,6 +11,7 @@ function toNotification(row: unknown): Notification {
     message: r.message,
     referralId: r.referralId,
     tutoringRequestId: r.tutoringRequestId ?? null,
+    sessionId: r.sessionId ?? null,
     read: r.read,
     createdAt: r.createdAt,
   };
@@ -25,6 +26,7 @@ export class PrismaNotificationRepository implements NotificationRepository {
     message: string;
     referralId?: string | null;
     tutoringRequestId?: string | null;
+    sessionId?: string | null;
   }): Promise<Notification> {
     const row = await this.prisma.notification.create({ data });
     return toNotification(row);

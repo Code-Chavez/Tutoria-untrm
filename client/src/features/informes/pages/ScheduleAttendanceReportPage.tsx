@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useUrlParams } from '@shared/hooks/useUrlParams';
 import { useQuery } from '@tanstack/react-query';
 import {
   PageHeader,
@@ -60,16 +61,22 @@ export function ScheduleAttendanceReportPage() {
   const isTutor = user?.role === TUTOR_ROLE;
   const canExport = user ? EXPORT_ROLES.includes(user.role) : false;
 
-  const [tutorId, setTutorId] = useState('');
-  const [from, setFrom] = useState('');
-  const [to, setTo] = useState('');
+  // El tutor (?tutor=), el rango (?desde=&hasta=) y si el consolidado ya se generó (?generado=1) viven en la URL:
+  // recargar o compartir el enlace vuelve a mostrar el mismo consolidado.
+  const url = useUrlParams();
+  const tutorId = url.get('tutor');
+  const from = url.get('desde');
+  const to = url.get('hasta');
+  const setTutorId = (value: string) => url.set({ tutor: value }, { replace: true });
+  const setFrom = (value: string) => url.set({ desde: value }, { replace: true });
+  const setTo = (value: string) => url.set({ hasta: value }, { replace: true });
   const [exporting, setExporting] = useState<'pdf' | 'excel' | null>(null);
   const [exportError, setExportError] = useState('');
 
   // El consolidado propio del docente tutor se carga solo, sin esperar un
   // clic; para el resto de roles, solo tras "Generar consolidado".
-  const [submittedParams, setSubmittedParams] = useState<ScheduleAttendanceParams | null>(
-    isTutor ? { mine: true } : null,
+  const [submittedParams, setSubmittedParams] = useState<ScheduleAttendanceParams | null>(() =>
+    isTutor ? { mine: true } : url.get('generado') && url.get('tutor') ? { tutorId: url.get('tutor'), from: url.get('desde') || undefined, to: url.get('hasta') || undefined } : null,
   );
 
   const tutorsQuery = useQuery({
@@ -98,6 +105,7 @@ export function ScheduleAttendanceReportPage() {
   const handleGenerate = () => {
     if (!isTutor && !tutorId) return;
     setSubmittedParams(currentParams());
+    url.set({ generado: '1' }, { replace: true });
   };
 
   const handleExport = async (format: 'pdf' | 'excel') => {
@@ -117,7 +125,7 @@ export function ScheduleAttendanceReportPage() {
     <div>
       <PageHeader
         title="Consolidado de horarios y asistencia"
-        subtitle="Resumen de sesiones y asistencias del periodo, por tutor (Art. 15.d)"
+        subtitle="Resumen de sesiones y asistencias del periodo, por tutor"
         icon={<ReportIcon size={24} />}
       />
 
@@ -125,8 +133,8 @@ export function ScheduleAttendanceReportPage() {
         <div className={styles.filters}>
           {!isTutor && (
             <div className={styles.field}>
-              <label>Tutor</label>
-              <SelectField value={tutorId} onChange={(e) => setTutorId(e.target.value)}>
+              <label htmlFor="report-tutor">Tutor</label>
+              <SelectField id="report-tutor" value={tutorId} onChange={(e) => setTutorId(e.target.value)}>
                 <option value="">Selecciona un tutor…</option>
                 {tutors.map((t) => (
                   <option key={t.tutorId} value={t.tutorId}>
@@ -137,8 +145,9 @@ export function ScheduleAttendanceReportPage() {
             </div>
           )}
           <div className={styles.field}>
-            <label>Desde</label>
+            <label htmlFor="report-from">Desde</label>
             <input
+              id="report-from"
               type="date"
               className={styles.dateInput}
               value={from}
@@ -146,8 +155,9 @@ export function ScheduleAttendanceReportPage() {
             />
           </div>
           <div className={styles.field}>
-            <label>Hasta</label>
+            <label htmlFor="report-to">Hasta</label>
             <input
+              id="report-to"
               type="date"
               className={styles.dateInput}
               value={to}
@@ -248,7 +258,7 @@ export function ScheduleAttendanceReportPage() {
                     <th>Fecha</th>
                     <th>Tema</th>
                     <th>Modalidad</th>
-                    <th>Tutorados</th>
+                    <th>Estudiantes</th>
                     <th>Estado</th>
                     <th>Asistencia</th>
                   </tr>

@@ -37,7 +37,7 @@
   color: var(--alerta);
 }
 
-.headText h3 {
+.headText h2 {
   font-size: var(--fs-h3);
   color: var(--g900);
   margin: 0;

@@ -1,4 +1,5 @@
 import { Request, Response } from 'express';
+import { GetOwnRequestRecipientUseCase } from '@application/use-cases/tutoring-requests/GetOwnRequestRecipientUseCase';
 import { z } from 'zod';
 import { CreateTutoringRequestUseCase } from '@application/use-cases/tutoring-requests/CreateTutoringRequestUseCase';
 import { CreateOwnTutoringRequestUseCase } from '@application/use-cases/tutoring-requests/CreateOwnTutoringRequestUseCase';
@@ -29,6 +30,7 @@ export class TutoringRequestController {
     private readonly createOwnTutoringRequestUseCase: CreateOwnTutoringRequestUseCase,
     private readonly listOwnTutoringRequestsUseCase: ListOwnTutoringRequestsUseCase,
     private readonly updateTutoringRequestStatusUseCase: UpdateTutoringRequestStatusUseCase,
+    private readonly getOwnRequestRecipientUseCase: GetOwnRequestRecipientUseCase,
   ) {}
 
   // Autoservicio (HU-17 ext.): el propio tutorado solicita tutoría para sí mismo.
@@ -40,7 +42,7 @@ export class TutoringRequestController {
       res.status(201).json({ message: 'Solicitud de tutoría registrada exitosamente', request });
     } catch (error) {
       if (error instanceof z.ZodError) {
-        res.status(400).json({ error: 'Datos de entrada inválidos', details: error.errors });
+        res.status(400).json({ error: 'Datos de entrada inválidos', details: error.issues });
       } else if (error instanceof StudentProfileNotLinkedError || error instanceof StudentNotFoundError) {
         res.status(404).json({ error: error.message });
       } else if (error instanceof NoRoutingTargetError) {
@@ -64,7 +66,7 @@ export class TutoringRequestController {
       res.status(201).json({ message: 'Solicitud de tutoría registrada exitosamente', request });
     } catch (error) {
       if (error instanceof z.ZodError) {
-        res.status(400).json({ error: 'Datos de entrada inválidos', details: error.errors });
+        res.status(400).json({ error: 'Datos de entrada inválidos', details: error.issues });
       } else if (error instanceof InstructorDetailsRequiredError) {
         res.status(400).json({ error: error.message });
       } else if (error instanceof StudentNotFoundError) {
@@ -89,10 +91,19 @@ export class TutoringRequestController {
       res.status(200).json({ requests });
     } catch (error) {
       if (error instanceof z.ZodError) {
-        res.status(400).json({ error: 'Datos de entrada inválidos', details: error.errors });
+        res.status(400).json({ error: 'Datos de entrada inválidos', details: error.issues });
       } else {
         res.status(500).json({ error: 'Error interno del servidor' });
       }
+    }
+  };
+
+  // A quién llegará la solicitud del propio estudiante, antes de enviarla (misma regla con la que se enruta).
+  recipient = async (req: Request, res: Response) => {
+    try {
+      res.status(200).json({ recipient: await this.getOwnRequestRecipientUseCase.execute(req.auth?.sub as string) });
+    } catch {
+      res.status(500).json({ error: 'Error interno del servidor' });
     }
   };
 
@@ -118,7 +129,7 @@ export class TutoringRequestController {
       res.status(200).json({ message: 'Solicitud actualizada', request });
     } catch (error) {
       if (error instanceof z.ZodError) {
-        res.status(400).json({ error: 'Datos de entrada inválidos', details: error.errors });
+        res.status(400).json({ error: 'Datos de entrada inválidos', details: error.issues });
       } else if (error instanceof TutoringRequestNotFoundError) {
         res.status(404).json({ error: error.message });
       } else if (error instanceof InvalidTutoringRequestStatusError) {

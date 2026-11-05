@@ -1,3 +1,22 @@
+.groups {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s5);
+}
+
+.groupTitle {
+  margin: 0 0 var(--s3);
+  font-family: var(--ft);
+  font-size: var(--fs-sm);
+  font-weight: 700;
+  color: var(--g600);
+}
+
+.step {
+  font-weight: 700;
+  color: var(--azul-med);
+}
+
 .grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));

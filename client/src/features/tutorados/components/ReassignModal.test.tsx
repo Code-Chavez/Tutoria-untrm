@@ -41,6 +41,19 @@ describe('ReassignModal', () => {
     expect(select).toBeInTheDocument();
   });
 
+  it('solo ofrece tutores de la escuela del tutorado (y los aún sin escuela registrada)', () => {
+    const bySchool: TutorWorkload[] = [
+      ...tutors,
+      { tutorId: 'tutor-same', fullName: 'Mismo Colegio', email: 'a@untrm.edu.pe', assignedCount: 1, schoolId: 'school-1' },
+      { tutorId: 'tutor-other', fullName: 'Otra Escuela', email: 'b@untrm.edu.pe', assignedCount: 1, schoolId: 'school-2' },
+    ];
+    render(<ReassignModal student={student} tutors={bySchool} currentTutorName="Jorge Salazar" onConfirm={vi.fn()} onCancel={vi.fn()} />);
+
+    expect(screen.getByRole('option', { name: /mismo colegio/i })).toBeInTheDocument();
+    expect(screen.getByRole('option', { name: /elena ramírez/i })).toBeInTheDocument();
+    expect(screen.queryByRole('option', { name: /otra escuela/i })).not.toBeInTheDocument();
+  });
+
   it('exige motivo antes de confirmar', async () => {
     const onConfirm = vi.fn();
     const user = userEvent.setup();

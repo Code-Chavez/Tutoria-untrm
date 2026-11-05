@@ -123,7 +123,7 @@ export const StudentSelectList: React.FC<StudentSelectListProps> = ({
                       onChange={() => onToggle(student.id)}
                       onClick={(e) => e.stopPropagation()}
                       disabled={Boolean(student.tutorId)}
-                      title={student.tutorId ? 'Ya tiene tutor: para cambiarlo usa «Reasignar» en Tutorados' : undefined}
+                      title={student.tutorId ? 'Ya tiene tutor: para cambiarlo usa «Reasignar» en Estudiantes' : undefined}
                       aria-label={`Seleccionar ${student.firstName} ${student.lastName}`}
                     />
                   </td>

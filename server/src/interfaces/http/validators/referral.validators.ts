@@ -32,6 +32,7 @@ export const createReferralSchema = z.object({
   // Instancia o profesional específico que recibe (HU-29); libre porque no
   // todo servicio tiene un directorio de personal modelado en el sistema.
   receivingInstance: z.string().trim().max(200).optional(),
+  tutoringRequestId: z.string().uuid('La solicitud debe ser un UUID válido').optional(),
 });
 
 export type CreateReferralBody = z.infer<typeof createReferralSchema>;

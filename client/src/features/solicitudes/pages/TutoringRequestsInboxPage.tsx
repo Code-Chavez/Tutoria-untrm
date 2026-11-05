@@ -1,8 +1,19 @@
-import { useState } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { useCallback, useState } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
+import { useUrlParams } from '@shared/hooks/useUrlParams';
 import { getApiErrorMessage } from '@shared/services/apiClient';
-import { Badge, Button, Card, EmptyState, PageHeader, SelectField, TableSkeleton } from '@shared/components/ui';
+import { useAuth } from '@features/auth/hooks/useAuth';
+import { useStudents } from '@features/tutorados/hooks/useStudents';
+import { SessionFormModal } from '@features/tutorados/components/SessionFormModal';
+import { ReferralFormModal } from '@features/derivaciones/components/ReferralFormModal';
+import { referralDraftKey, removeDraft } from '@shared/utils/drafts';
+import { referralService, type CreateReferralData } from '@features/derivaciones/services/referralService';
+import { sessionService, type ScheduleSessionData } from '@features/sesiones/services/sessionService';
+import { sessionNoticeText } from '@features/sesiones/utils/sessionNotice';
+import { Badge, Button, Card, DraftNotice, EmptyState, InboxToolbar, PageHeader, TableSkeleton } from '@shared/components/ui';
+import { useDraft } from '@shared/hooks/useDraft';
 import { InboxIcon, XCircleIcon } from '@shared/components/icons';
+import { parseFilterParam, waitingText } from '@shared/utils/inbox';
 import table from '@shared/components/ui/DataTable.module.css';
 import { useDialog } from '@shared/hooks/useDialog';
 import { useTutoringRequestsInbox, useUpdateTutoringRequestStatus } from '../hooks/useTutoringRequests';
@@ -12,7 +23,25 @@ import {
   type TutoringRequestStatus,
   type TutoringRequestView,
 } from '../services/tutoringRequestService';
+import {
+  countRequests,
+  DEFAULT_REQUEST_FILTER,
+  isOpenRequest,
+  REQUEST_FILTER_LABEL,
+  REQUEST_FILTERS,
+  viewRequests,
+  type RequestFilter,
+} from '../utils/requestInbox';
 import styles from './TutoringRequestsInboxPage.module.css';
+
+// Duración habitual (Art. 15.c); el valor real lo fija el servidor. Solo es el texto de ayuda del formulario.
+const SESSION_MINUTES = 45;
+
+// Qué se hizo con la solicitud: se dice en la tabla y en el detalle, para no abrirla a ver si ya se atendió.
+// Una cita cancelada ya no atiende la solicitud: se dice, y se puede programar otra o derivar.
+const needsNewFollowUp = (r: TutoringRequestView) => !!r.sessionId && !r.referralId && r.sessionCancelled === true;
+const followUpLabel = (r: TutoringRequestView) =>
+  needsNewFollowUp(r) ? 'Cita cancelada' : r.sessionId ? 'Con sesión programada' : r.referralId ? 'Derivada a un servicio' : null;
 
 const STATUS_TONE: Record<TutoringRequestStatus, 'warning' | 'info' | 'success'> = {
   PENDIENTE: 'warning',
@@ -20,10 +49,22 @@ const STATUS_TONE: Record<TutoringRequestStatus, 'warning' | 'info' | 'success'>
   ATENDIDA: 'success',
 };
 
-function AttendModal({ request, onClose }: { request: TutoringRequestView; onClose: () => void }) {
+interface AttendModalProps {
+  request: TutoringRequestView;
+  onClose: () => void;
+  /** Solo quien puede programar y derivar (el docente tutor) ve estas acciones. */
+  onSchedule?: () => void;
+  onRefer?: () => void;
+}
+
+function AttendModal({ request, onClose, onSchedule, onRefer }: AttendModalProps) {
   const dialogRef = useDialog(onClose);
   const update = useUpdateTutoringRequestStatus();
-  const [note, setNote] = useState(request.responseNote ?? '');
+  const { user } = useAuth();
+  // La respuesta a medio escribir se conserva si cierra la ventana sin querer o la interrumpen (solo en esta pestaña).
+  const saved = request.responseNote ?? '';
+  const isUnchanged = useCallback((value: string) => value.trim() === saved.trim(), [saved]);
+  const { value: note, setValue: setNote, restored, discard } = useDraft(user?.id, `respuesta-${request.id}`, saved, isUnchanged);
   const [error, setError] = useState('');
 
   const apply = async (status: 'EN_ATENCION' | 'ATENDIDA') => {
@@ -34,6 +75,7 @@ function AttendModal({ request, onClose }: { request: TutoringRequestView; onClo
     }
     try {
       await update.mutateAsync({ id: request.id, data: { status, note: note.trim() || undefined } });
+      discard();
       onClose();
     } catch (err) {
       setError(getApiErrorMessage(err));
@@ -61,6 +103,31 @@ function AttendModal({ request, onClose }: { request: TutoringRequestView; onClo
           </p>
         )}
         <p className={styles.reason}>{request.reason}</p>
+        {needsNewFollowUp(request) ? (
+          <p className={styles.linked} role="status">
+            La cita de esta solicitud se canceló y sigue sin atención: programa otra sesión o deriva el caso.
+          </p>
+        ) : (
+          followUpLabel(request) && (
+            <p className={styles.linked} role="status">
+              {followUpLabel(request)}: no hace falta crear otra atención para esta solicitud.
+            </p>
+          )
+        )}
+        {onSchedule && onRefer && ((!request.sessionId && !request.referralId) || needsNewFollowUp(request)) && (
+          <div className={styles.followUp}>
+            <span className={styles.label}>¿Qué hacer con esta solicitud?</span>
+            <div className={styles.followUpButtons}>
+              <Button variant="secondary" onClick={onSchedule}>
+                Programar sesión
+              </Button>
+              <Button variant="secondary" onClick={onRefer}>
+                Derivar a un servicio
+              </Button>
+            </div>
+            <p className={styles.sub}>Ambas parten de esta solicitud: el estudiante y el motivo ya vienen cargados y la solicitud queda vinculada.</p>
+          </div>
+        )}
 
         {request.status === 'ATENDIDA' ? (
           <p className={styles.done}>
@@ -71,6 +138,7 @@ function AttendModal({ request, onClose }: { request: TutoringRequestView; onClo
             <label htmlFor="response-note" className={styles.label}>
               Respuesta para el estudiante
             </label>
+            {restored && <DraftNotice onDiscard={discard} />}
             <textarea
               id="response-note"
               className={styles.textarea}
@@ -111,43 +179,111 @@ function AttendModal({ request, onClose }: { request: TutoringRequestView; onClo
 
 // Bandeja de solicitudes de tutoría (R01): tutor, coordinación y DBU reciben, revisan y atienden.
 export function TutoringRequestsInboxPage() {
-  const [status, setStatus] = useState<TutoringRequestStatus | ''>('');
-  const { requests, loading, error, refresh } = useTutoringRequestsInbox(status || undefined);
-  const [selected, setSelected] = useState<TutoringRequestView | null>(null);
-  // Un aviso llega con ?solicitud=<id>: se abre esa solicitud, o se explica que ya no está disponible (R03).
-  const [searchParams, setSearchParams] = useSearchParams();
-  const requestedId = searchParams.get('solicitud');
-  const requested = requestedId ? requests.find((r) => r.id === requestedId) ?? null : null;
+  // Se trae todo y se filtra aquí: la vista inicial es «Por atender» (lo que espera respuesta) y cada contador del inicio
+  // abre la bandeja ya filtrada con ?estado=… (U04, U09).
+  const { requests: all, loading, error, refresh } = useTutoringRequestsInbox();
+  // La vista (?estado=), la búsqueda (?q=), la solicitud abierta (?solicitud=<id>) y las ventanas de seguimiento (?programar=<id>,
+  // ?derivar=<id>) viven en la URL: recargar o compartir el enlace vuelve al mismo lugar.
+  const url = useUrlParams();
+  const search = url.get('q');
+  const setSearch = (value: string) => url.set({ q: value }, { replace: true });
+  const filter = parseFilterParam(url.get('estado'), REQUEST_FILTERS, DEFAULT_REQUEST_FILTER);
+  const changeFilter = (next: RequestFilter) => url.set({ estado: next }, { replace: true });
+  const counts = countRequests(all);
+  const requests = viewRequests(all, filter, search);
+  // Un aviso llega con ?solicitud=<id>: se abre esa solicitud (esté en la vista que esté), o se explica que ya no está disponible (R03).
+  const requestedId = url.get('solicitud');
+  const requested = requestedId ? all.find((r) => r.id === requestedId) ?? null : null;
   const unavailable = !!requestedId && !loading && !error && !requested;
-  const clearRequested = () => setSearchParams({}, { replace: true });
-  const open = selected ?? requested;
+  const clearRequested = () => url.set({ solicitud: null }, { replace: true });
+  const open = requested;
+
+  // Programar una sesión o derivar el caso parte de la solicitud: el estudiante y el motivo ya vienen cargados.
+  const { user } = useAuth();
+  const canFollowUp = user?.role === 'Docente Tutor';
+  const { students } = useStudents();
+  const queryClient = useQueryClient();
+  const scheduleId = url.get('programar');
+  const referId = url.get('derivar');
+  const followUpRequest = all.find((r) => r.id === (scheduleId || referId)) ?? null;
+  const followUp: { kind: 'session' | 'referral'; request: TutoringRequestView } | null = followUpRequest ? { kind: scheduleId ? 'session' : 'referral', request: followUpRequest } : null;
+  const [followUpBusy, setFollowUpBusy] = useState(false);
+  const [followUpError, setFollowUpError] = useState('');
+  const [feedback, setFeedback] = useState('');
+  const followUpStudent = followUp ? students.find((s) => s.id === followUp.request.studentId) : undefined;
+  const closeFollowUp = () => {
+    url.set({ programar: null, derivar: null }, { replace: true });
+    setFollowUpError('');
+  };
+  const startFollowUp = (kind: 'session' | 'referral', r: TutoringRequestView) => {
+    setFollowUpError('');
+    url.set({ solicitud: null, programar: kind === 'session' ? r.id : null, derivar: kind === 'referral' ? r.id : null });
+  };
+  const finishFollowUp = async (done: () => Promise<string>) => {
+    setFollowUpBusy(true);
+    setFollowUpError('');
+    try {
+      setFeedback(await done());
+      url.set({ programar: null, derivar: null }, { replace: true });
+      await queryClient.invalidateQueries({ queryKey: ['tutoringRequests'] });
+    } catch (err) {
+      setFollowUpError(getApiErrorMessage(err));
+    } finally {
+      setFollowUpBusy(false);
+    }
+  };
+  const confirmSession = (r: TutoringRequestView, data: ScheduleSessionData) =>
+    finishFollowUp(async () => {
+      const session = await sessionService.scheduleSession({ ...data, tutoringRequestId: r.id });
+      if (user) removeDraft(user.id, `sesion.solicitud.${r.id}`);
+      const when = new Date(session.scheduledAt).toLocaleString('es-PE', { dateStyle: 'medium', timeStyle: 'short' });
+      // El aviso de la sesión es el de la solicitud vinculada (no se repite): se le dice a quien programó si no se pudo avisar.
+      return `Sesión programada para el ${when} con ${r.studentName}. Quedó vinculada a su solicitud y la verá en Mis sesiones.${sessionNoticeText(session.notice)}`;
+    });
+  const confirmReferral = (r: TutoringRequestView, data: CreateReferralData) =>
+    finishFollowUp(async () => {
+      await referralService.createReferral(r.studentId, { ...data, tutoringRequestId: r.id });
+      if (user) removeDraft(user.id, referralDraftKey(r.studentId, `solicitud.${r.id}`));
+      return `Caso de ${r.studentName} derivado. Quedó vinculado a su solicitud; lo sigues en Casos derivados.`;
+    });
 
   return (
     <div>
       <PageHeader
         title="Solicitudes de tutoría"
-        subtitle="Las solicitudes de tus tutorados (o de tu escuela) y las que se te enrutaron, con su estado de atención"
+        subtitle="Las solicitudes de tus estudiantes (o de tu escuela) y las que se te enviaron, con su estado de atención"
         icon={<InboxIcon size={24} />}
       />
 
       {unavailable && (
         <div className={styles.notice} role="status">
-          <span>Esa solicitud ya no está disponible para tu cuenta: fue eliminada, se atendió en otro filtro o dejó de estar a tu cargo.</span>
+          <span>Esa solicitud ya no está disponible para tu cuenta: fue eliminada o dejó de estar a tu cargo.</span>
           <button type="button" className={styles.noticeClose} onClick={clearRequested}>
             Cerrar
           </button>
         </div>
       )}
 
-      <Card>
-        <div className={styles.bar}>
-          <SelectField value={status} onChange={(e) => setStatus(e.target.value as TutoringRequestStatus | '')} aria-label="Filtrar por estado" wrapClassName={styles.filter}>
-            <option value="">Todos los estados</option>
-            <option value="PENDIENTE">Pendientes</option>
-            <option value="EN_ATENCION">En atención</option>
-            <option value="ATENDIDA">Atendidas</option>
-          </SelectField>
+      {feedback && (
+        <div className={styles.notice} role="status">
+          <span>{feedback}</span>
+          <button type="button" className={styles.noticeClose} onClick={() => setFeedback('')}>
+            Cerrar
+          </button>
         </div>
+      )}
+
+      <Card>
+        <InboxToolbar
+          label="Filtrar por estado"
+          options={REQUEST_FILTERS.map((key) => ({ key, label: REQUEST_FILTER_LABEL[key], count: counts[key] }))}
+          active={filter}
+          onChange={changeFilter}
+          search={search}
+          onSearch={setSearch}
+          searchLabel="Buscar solicitud"
+          searchPlaceholder="Buscar estudiante o motivo"
+        />
 
         {loading ? (
           <TableSkeleton rows={5} columns={6} />
@@ -163,44 +299,65 @@ export function TutoringRequestsInboxPage() {
               </Button>
             }
           />
+        ) : all.length === 0 ? (
+          <EmptyState
+            icon={<InboxIcon size={26} />}
+            title="Aún no hay solicitudes"
+            description="Cuando un estudiante de tu alcance solicite tutoría, la verás aquí y recibirás un aviso."
+          />
         ) : requests.length === 0 ? (
           <EmptyState
             icon={<InboxIcon size={26} />}
-            title={status ? 'Sin solicitudes con ese estado' : 'Aún no hay solicitudes'}
-            description="Cuando un tutorado de tu alcance solicite tutoría, la verás aquí y recibirás un aviso."
+            title={search ? 'Ninguna solicitud coincide con la búsqueda' : filter === 'por-atender' ? 'No hay solicitudes por atender' : 'No hay solicitudes en esta vista'}
+            description={filter === 'por-atender' && !search ? 'Todo lo recibido ya se atendió. Puedes revisar lo atendido o ver todas.' : 'Prueba con otra búsqueda o cambia de vista.'}
+            action={
+              filter !== 'todas' ? (
+                <Button variant="secondary" onClick={() => changeFilter('todas')}>
+                  Ver todas
+                </Button>
+              ) : undefined
+            }
           />
         ) : (
           <div className={table.scroll}>
-            <table className={table.table}>
+            <table className={`${table.table} ${table.stacked}`}>
               <thead>
                 <tr>
-                  <th>Tutorado</th>
+                  <th>Estudiante</th>
                   <th>Tipo</th>
                   <th>Motivo</th>
                   <th>Fecha</th>
-                  <th>Enrutada a</th>
+                  <th>Responsable</th>
                   <th>Estado</th>
-                  <th className={table.right}></th>
+                  <th className={table.right}>
+                    <span className="sr-only">Acciones</span>
+                  </th>
                 </tr>
               </thead>
               <tbody>
                 {requests.map((r) => (
                   <tr key={r.id}>
-                    <td>
+                    <td data-label="Estudiante">
                       <div className={table.stack}>
                         <span className={table.name}>{r.studentName}</span>
                         <span className={table.sub}>{r.studentCode}</span>
                       </div>
                     </td>
-                    <td>{CASE_TYPE_LABEL[r.caseType]}</td>
-                    <td className={styles.reasonCell}>{r.reason}</td>
-                    <td>{new Date(r.createdAt).toLocaleDateString('es-PE')}</td>
-                    <td>{r.routedToName}</td>
-                    <td>
-                      <Badge tone={STATUS_TONE[r.status]}>{REQUEST_STATUS_LABEL[r.status]}</Badge>
+                    <td data-label="Tipo">{CASE_TYPE_LABEL[r.caseType]}</td>
+                    <td data-label="Motivo" className={styles.reasonCell}>{r.reason}</td>
+                    <td data-label="Fecha">
+                      <div className={table.stack}>
+                        <span>{new Date(r.createdAt).toLocaleDateString('es-PE')}</span>
+                        {isOpenRequest(r) && <span className={table.sub}>Espera desde {waitingText(r.createdAt)}</span>}
+                      </div>
                     </td>
-                    <td className={table.right}>
-                      <Button size="sm" variant={r.status === 'ATENDIDA' ? 'ghost' : 'secondary'} onClick={() => setSelected(r)}>
+                    <td data-label="Responsable">{r.routedToName}</td>
+                    <td data-label="Estado">
+                      <Badge tone={STATUS_TONE[r.status]}>{REQUEST_STATUS_LABEL[r.status]}</Badge>
+                      {followUpLabel(r) && <span className={styles.followUpTag}>{followUpLabel(r)}</span>}
+                    </td>
+                    <td className={`${table.right} ${table.cardAction}`}>
+                      <Button size="sm" variant={r.status === 'ATENDIDA' ? 'ghost' : 'secondary'} onClick={() => url.set({ solicitud: r.id })}>
                         {r.status === 'ATENDIDA' ? 'Ver' : 'Atender'}
                       </Button>
                     </td>
@@ -216,10 +373,38 @@ export function TutoringRequestsInboxPage() {
         <AttendModal
           key={open.id}
           request={open}
-          onClose={() => {
-            setSelected(null);
-            if (requestedId) clearRequested();
-          }}
+          onSchedule={canFollowUp ? () => startFollowUp('session', open) : undefined}
+          onRefer={canFollowUp ? () => startFollowUp('referral', open) : undefined}
+          onClose={clearRequested}
+        />
+      )}
+
+      {followUp?.kind === 'session' && followUpStudent && (
+        <SessionFormModal
+          student={followUpStudent}
+          durationMinutes={SESSION_MINUTES}
+          defaultTopic={followUp.request.reason.slice(0, 200)}
+          context={`Atiende la solicitud de ${followUp.request.studentName}: «${followUp.request.reason}»`}
+          loading={followUpBusy}
+          serverError={followUpError}
+          draftOwnerId={user?.id}
+          draftKey={`sesion.solicitud.${followUp.request.id}`}
+          onSubmit={(data) => confirmSession(followUp.request, data)}
+          onCancel={closeFollowUp}
+        />
+      )}
+
+      {followUp?.kind === 'referral' && followUpStudent && (
+        <ReferralFormModal
+          student={followUpStudent}
+          defaultReason={followUp.request.reason.slice(0, 1000)}
+          draftOwnerId={user?.id}
+          draftScope={`solicitud.${followUp.request.id}`}
+          context={`Atiende la solicitud de ${followUp.request.studentName}: «${followUp.request.reason}»`}
+          loading={followUpBusy}
+          serverError={followUpError}
+          onSubmit={(data) => confirmReferral(followUp.request, data)}
+          onCancel={closeFollowUp}
         />
       )}
     </div>

@@ -77,3 +77,11 @@
     margin: 0 var(--s2);
   }
 }
+
+.stepper { margin-bottom: 24px; padding-bottom: 20px; border-bottom: 1px solid var(--borde); }
+@media (max-width: 700px) {
+  .stepper { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; }
+  .step { flex-direction: column; justify-content: flex-start; gap: 8px; text-align: center; min-width: 0; }
+  .label { display: block; font-size: 11px; white-space: normal; line-height: 1.4; }
+  .line { display: none; }
+}

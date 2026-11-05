@@ -1,4 +1,2 @@
-/** Forma única del correo: sin espacios exteriores y en minúsculas, para que alta, edición, ingreso y recuperación coincidan. */
-export function normalizeEmail(email: string): string {
-  return email.trim().toLowerCase();
-}
+// La forma única del correo vive en validation/email.ts; este archivo conserva la ruta que ya importan los casos de uso.
+export { normalizeEmail } from '@application/validation/email';

@@ -1,4 +1,6 @@
 import { Router, type IRouter } from 'express';
+import { requireOpenPeriod } from '../middleware/requireOpenPeriod';
+import { requireEnrollment } from '../middleware/requireEnrollment';
 import { container } from '../../../infrastructure/container';
 import { TutoringRequestController } from '../controllers/TutoringRequestController';
 import { authenticate } from '../middleware/authenticate';
@@ -11,6 +13,7 @@ const tutoringRequestController = new TutoringRequestController(
   container.useCases.createOwnTutoringRequestUseCase,
   container.useCases.listOwnTutoringRequestsUseCase,
   container.useCases.updateTutoringRequestStatusUseCase,
+  container.useCases.getOwnRequestRecipientUseCase,
 );
 
 const requireAuth = authenticate(container.services.tokenService);
@@ -19,7 +22,7 @@ const requireAuth = authenticate(container.services.tokenService);
 router.post(
   '/students/:id/tutoring-requests',
   requireAuth,
-  authorize(['tutoring-requests:write']),
+  authorize(['tutoring-requests:write']), requireOpenPeriod,
   tutoringRequestController.create,
 );
 
@@ -27,8 +30,16 @@ router.post(
 router.post(
   '/tutoring-requests/me',
   requireAuth,
-  authorize(['tutoring-requests:self']),
+  authorize(['tutoring-requests:self']), requireOpenPeriod, requireEnrollment,
   tutoringRequestController.createOwn,
+);
+
+// A quién llegará mi solicitud (antes de enviarla). Antes de /:id para que «recipient» no se tome por un identificador.
+router.get(
+  '/tutoring-requests/recipient',
+  requireAuth,
+  authorize(['tutoring-requests:self']),
+  tutoringRequestController.recipient,
 );
 
 // Historial propio del tutorado (estado y respuesta). Antes de /:id para que «mine» no se tome por un identificador.
@@ -43,7 +54,7 @@ router.get(
 router.patch(
   '/tutoring-requests/:id/status',
   requireAuth,
-  authorize(['tutoring-requests:write']),
+  authorize(['tutoring-requests:write']), requireOpenPeriod,
   tutoringRequestController.updateStatus,
 );
 

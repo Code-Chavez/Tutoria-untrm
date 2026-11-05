@@ -1,0 +1,39 @@
+@startuml
+left to right direction
+skinparam shadowing false
+skinparam defaultFontName Arial
+title Acompañamiento del docente tutor
+actor "Docente tutor" as doc
+actor "Coordinador de tutoría" as coord
+actor "Administrador (DBU)" as admin
+rectangle "SIT UNTRM" {
+  usecase "AT01\nConsultar estudiantes y expediente" as AT01
+  usecase "AT02\nRegistrar entrevista inicial" as AT02
+  usecase "AT03\nRegistrar persona de red de apoyo" as AT03
+  usecase "AT04\nAtender solicitud de tutoría" as AT04
+  usecase "AT05\nProgramar sesión individual o grupal" as AT05
+  usecase "AT06\nReprogramar o cancelar sesión" as AT06
+  usecase "AT07\nRegistrar asistencia y evidencias" as AT07
+  usecase "AT08\nRegistrar seguimiento tutorial" as AT08
+  usecase "AT09\nConsultar alertas de riesgo" as AT09
+}
+doc -- AT01
+coord -- AT01
+admin -- AT01
+doc -- AT02
+doc -- AT03
+doc -- AT04
+coord -- AT04
+admin -- AT04
+doc -- AT05
+doc -- AT06
+doc -- AT07
+doc -- AT08
+doc -- AT09
+coord -- AT09
+admin -- AT09
+note bottom
+Alcance restringido por rol, escuela, servicio y periodo.
+Autenticación previa, salvo ingreso y recuperación.
+end note
+@enduml

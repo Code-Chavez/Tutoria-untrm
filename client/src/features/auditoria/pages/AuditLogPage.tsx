@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { useMemo } from 'react';
+import { useUrlParams } from '@shared/hooks/useUrlParams';
 import { Badge, Button, Card, EmptyState, PageHeader, Pagination, SearchField, SelectField, TableSkeleton } from '@shared/components/ui';
 import { RefreshIcon, ShieldCheckIcon, XCircleIcon } from '@shared/components/icons';
 import table from '@shared/components/ui/DataTable.module.css';
@@ -27,14 +28,18 @@ const TONE: Record<string, 'success' | 'info' | 'danger' | 'warning' | 'neutral'
 
 // Bitácora de auditoría (UI-09): quién hizo qué y cuándo, con filtros por fecha, autor, entidad y acción.
 export function AuditLogPage() {
-  const [filters, setFilters] = useState(EMPTY);
-  const [page, setPage] = useState(1);
+  // Los filtros (?desde=&hasta=&autor=&entidad=&accion=) y la página (?pagina=) viven en la URL: recargar o compartir el enlace conserva la consulta.
+  const url = useUrlParams();
+  const [from, to, actor, entity, action] = [url.get('desde'), url.get('hasta'), url.get('autor'), url.get('entidad'), url.get('accion')];
+  const filters = useMemo(() => ({ from, to, actor, entity, action }), [from, to, actor, entity, action]);
+  const page = Math.max(1, Number.parseInt(url.get('pagina'), 10) || 1);
+  const setPage = (next: number) => url.set({ pagina: next > 1 ? String(next) : null }, { replace: true });
   const options = useAuditOptions();
   const { data, loading, error, refresh } = useAuditLog({ ...filters, page, pageSize: PAGE_SIZE });
 
   const set = (patch: Partial<typeof EMPTY>) => {
-    setFilters((current) => ({ ...current, ...patch }));
-    setPage(1);
+    const next = { ...filters, ...patch };
+    url.set({ desde: next.from, hasta: next.to, autor: next.actor, entidad: next.entity, accion: next.action, pagina: null }, { replace: true });
   };
   const hasFilters = Object.values(filters).some((v) => v !== '');
 
@@ -98,8 +103,7 @@ export function AuditLogPage() {
             <Button
               variant="ghost"
               onClick={() => {
-                setFilters(EMPTY);
-                setPage(1);
+                set(EMPTY);
               }}
             >
               Limpiar

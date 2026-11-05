@@ -1,0 +1,66 @@
+# Detección de restos de una corrida anterior (26/10/2026). Base: sit_db_test exclusiva (contenedor sit-postgres-test), con la seed y 7 asignaciones preexistentes.
+# Cada escenario ejecuta una suite pequeña (schoolCycles) con node scripts/test-integration.js; las pruebas descartables (zzKill, zzResiduo, zzParam) son archivos temporales NO versionados.
+# Nota de honestidad: en una primera pasada, la recreación de la base de los últimos pasos de E4 y E5 falló en silencio (base sin seed) y esa parte NO es válida;
+# se repitió E4 y E5 con un script que comprueba que la base quedó sembrada («base lista: usuarios=13 asignaciones_preexistentes=7»). Aquí solo figuran las partes válidas.
+
+## E1 (base nueva: aún no existen las tablas del registro) y E2 (SIGKILL) y E3 (recuperación): primera pasada válida
+## E1: base nueva (aún sin las tablas del registro): la primera corrida debe pasar
+tablas del registro antes: 
+Tests:       1 passed, 1 total
+salida=0
+login_max_attempts=5 fotos=0 filas_registro=0 sede_bagua_activa=t
+## E2: terminación abrupta (SIGKILL) y corrida siguiente
+salida=1
+login_max_attempts=9 fotos=205 filas_registro=1 sede_bagua_activa=t
+Error: Jest: Got error running globalSetup - C:\Proyects\Proyects\Tutoria-untrm\server\tests\support\testDatabaseGlobalSetup.ts, reason: La base de pruebas tiene restos de una corrida anterior que se interrumpió o terminó con residuos o cambios inesperados
+(corridas: f15d07d0 (205 filas en la foto); filas de pruebas sin borrar: 1). No se ejecutó ninguna prueba: aceptar esta base daría por buenos
+salida=1
+login_max_attempts=9 fotos=205 filas_registro=1 sede_bagua_activa=t
+SIN DIFERENCIAS
+## E3: recuperación recreando la base de pruebas y nueva corrida
+Tests:       1 passed, 1 total
+salida=0
+login_max_attempts=5 fotos=0 filas_registro=0 sede_bagua_activa=t
+
+## E4 y E5: repetición con base sembrada verificada
+base lista: usuarios=13 asignaciones_preexistentes=7
+## E4: residuo deliberado (parámetro + sede preexistente), corrida siguiente
+Tests:       1 passed, 1 total
+[jest] El parámetro «login_max_attempts» quedó cambiado por una prueba; se restauró a «5».
+campuses/407cc9e6-abb5-48ed-bca9-d3e60cd59e04: MODIFICADA (is_active)
+- La base de pruebas quedó marcada como no confiable: la próxima corrida se detendrá hasta que se recupere (docs/PRUEBAS_DE_INTEGRACION.md, sección 3.5).
+salida=1
+login_max_attempts=5 fotos=205 filas_registro=0 sede_bagua_activa=f
+Error: Jest: Got error running globalSetup - C:\Proyects\Proyects\Tutoria-untrm\server\tests\support\testDatabaseGlobalSetup.ts, reason: La base de pruebas tiene restos de una corrida anterior que se 
+salida=1
+base lista: usuarios=13 asignaciones_preexistentes=7
+Tests:       1 passed, 1 total
+salida=0
+login_max_attempts=5 fotos=0 filas_registro=0 sede_bagua_activa=t
+## E5: solo un parámetro sin restaurar: esa corrida falla, la verificación lo restaura y la siguiente pasa
+Tests:       1 passed, 1 total
+[jest] El parámetro «login_max_attempts» quedó cambiado por una prueba; se restauró a «5».
+- Una prueba dejó cambiados parámetros del sistema (se restauraron): login_max_attempts.
+salida=1
+login_max_attempts=5 fotos=0 filas_registro=0 sede_bagua_activa=t
+Tests:       1 passed, 1 total
+salida=0
+login_max_attempts=5 fotos=0 filas_registro=0 sede_bagua_activa=t
+
+## Corrida completa (como la CI) con la detección activa, base nueva y sembrada (comando desde server/: REQUIRE_DB_TESTS=1 DATABASE_URL=$TEST_DATABASE_URL JWT_SECRET=ci-test-secret NODE_ENV=test npx jest --ci --coverage)
+base lista: usuarios=13 asignaciones_preexistentes=7
+205 filas en 40 tablas
+205 filas en 41 tablas
+SIN DIFERENCIAS
+tablas del registro: foto=0 filas=0
+EXIT 0
+Lines        : 90.4% ( 6815/7538 )
+Statements   : 89.61% ( 7396/8253 )
+Test Suites: 139 passed, 139 total
+Tests:       1211 passed, 1211 total
+suites de integración que pasaron: 25 de 25
+
+## Contra la base de desarrollo (sit_db): el globalSetup aborta ANTES de consultar tablas de restos
+Error: Jest: Got error running globalSetup - C:\Proyects\Proyects\Tutoria-untrm\server\tests\support\testDatabaseGlobalSetup.ts, reason: La conexión configurada llega a la base «sit_db», que no es una base de pruebas (su nombre debe terminar en «
+    at globalSetup (C:\Proyects\Proyects\Tutoria-untrm\server\tests\support\testDatabaseGlobalSetup.ts:26:15)
+huella de los conteos de todas las tablas de sit_db antes y después: idéntica (cb28d8e7…); tablas del registro en sit_db: 0. (Son conteos: no detectan un valor cambiado.)

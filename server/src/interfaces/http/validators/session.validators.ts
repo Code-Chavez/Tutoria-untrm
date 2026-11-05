@@ -24,6 +24,7 @@ export const scheduleSessionSchema = z.object({
     .max(500)
     .refine((v) => v === '' || /^https?:\/\/\S+$/i.test(v), 'El enlace debe empezar con http:// o https://')
     .optional(),
+  tutoringRequestId: z.string().uuid('La solicitud debe ser un UUID válido').optional(),
 });
 
 export type ScheduleSessionBody = z.infer<typeof scheduleSessionSchema>;

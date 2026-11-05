@@ -33,6 +33,9 @@ export interface TutoringRequest {
   responseNote: string | null;
   handledById: string | null;
   handledAt: string | null;
+  /** Sesión programada o derivación hecha desde esta solicitud (una u otra, no ambas). */
+  sessionId: string | null;
+  referralId: string | null;
   createdAt: string;
 }
 
@@ -40,8 +43,24 @@ export interface TutoringRequest {
 export interface TutoringRequestView extends TutoringRequest {
   studentName: string;
   studentCode: string;
+  /** La sesión vinculada se canceló: la solicitud sigue sin atención y se puede reemplazar por otra sesión o una derivación. */
+  sessionCancelled?: boolean;
+  /** Solo en el historial propio: la cita de la solicitud (sin notas) y las citas canceladas que esta reemplazó. */
+  appointment?: {
+    state: 'VIGENTE' | 'CANCELADA';
+    scheduledAt: string;
+    modality: string;
+    place: string | null;
+    replacedSessionIds: string[];
+  };
   routedToName: string;
   handledByName: string | null;
+}
+
+/** Quién recibirá la solicitud del propio estudiante: su tutor, la coordinación de su escuela o, de respaldo, la DBU; `none` si hoy no hay nadie. */
+export interface OwnRequestRecipient {
+  kind: 'tutor' | 'coordinator' | 'dbu' | 'none';
+  name: string;
 }
 
 export interface UpdateRequestStatusData {
@@ -80,6 +99,12 @@ export const tutoringRequestService = {
       params: status ? { status } : undefined,
     });
     return response.data.requests;
+  },
+
+  // A quién llegará mi solicitud (con la misma regla con la que se enruta), para decirlo antes de enviarla.
+  getRecipient: async (): Promise<OwnRequestRecipient | null> => {
+    const response = await apiClient.get<{ recipient: OwnRequestRecipient | null }>('/tutoring-requests/recipient');
+    return response.data.recipient;
   },
 
   // Historial propio del tutorado, con el estado y la respuesta recibida.

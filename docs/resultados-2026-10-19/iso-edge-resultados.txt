@@ -1,0 +1,8 @@
+
+Running 3 tests using 1 worker
+
+  ok 1 tests\e2e-19-accesibilidad-gestion.spec.ts:19:11 › gestión · coordinator › «Resultados de evaluación» no tiene infracciones serias ni de estructura (34.0s)
+  ok 2 tests\e2e-19-accesibilidad-gestion.spec.ts:19:11 › gestión · coordinator › «Resultados de evaluación» no tiene infracciones serias ni de estructura (32.5s)
+  ok 3 tests\e2e-19-accesibilidad-gestion.spec.ts:19:11 › gestión · coordinator › «Resultados de evaluación» no tiene infracciones serias ni de estructura (38.8s)
+
+  3 passed (2.2m)

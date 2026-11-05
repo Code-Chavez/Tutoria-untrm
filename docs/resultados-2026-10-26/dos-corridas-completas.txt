@@ -1,0 +1,24 @@
+# Dos corridas completas consecutivas desde el repositorio (commit ec14f9d), base nueva sit_db_test con 7 asignaciones preexistentes
+# Comando (desde server/): REQUIRE_DB_TESTS=1 DATABASE_URL=$TEST_DATABASE_URL JWT_SECRET=ci-test-secret NODE_ENV=test npx jest --ci --coverage --coverageReporters=text-summary
+--- corrida 1
+EXIT 0
+Lines        : 90.39% ( 6806/7529 )
+Statements   : 89.6% ( 7386/8243 )
+Test Suites: 138 passed, 138 total
+Tests:       1203 passed, 1203 total
+suites de integración que pasaron: 25 de 25
+comparación fila por fila (valores completos de las 205 filas preexistentes en 41 tablas) contra la foto inicial: SIN DIFERENCIAS
+--- corrida 2
+EXIT 0
+Lines        : 90.39% ( 6806/7529 )
+Statements   : 89.6% ( 7386/8243 )
+Test Suites: 138 passed, 138 total
+Tests:       1203 passed, 1203 total
+suites de integración que pasaron: 25 de 25
+comparación fila por fila (valores completos de las 205 filas preexistentes en 41 tablas) contra la foto inicial: SIN DIFERENCIAS
+--- solo integración, en banda (node scripts/test-integration.js)
+Test Suites: 25 passed, 25 total
+Tests:       170 passed, 170 total
+EXIT 0
+comparación fila por fila contra la foto inicial: SIN DIFERENCIAS
+Omitidas: 0 (el resumen de jest no informa ninguna)

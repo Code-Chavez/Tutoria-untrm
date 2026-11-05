@@ -1,0 +1,42 @@
+@startuml
+left to right direction
+skinparam shadowing false
+skinparam defaultFontName Arial
+title Informes y evaluación del servicio
+actor "Docente tutor" as doc
+actor "Coordinador de tutoría" as coord
+actor "Administrador (DBU)" as admin
+actor "Vicerrectorado" as vice
+rectangle "SIT UNTRM" {
+  usecase "IN01\nConsultar horarios y asistencia" as IN01
+  usecase "IN02\nElaborar informe semestral propio" as IN02
+  usecase "IN03\nConsultar informe consolidado" as IN03
+  usecase "IN04\nConsultar indicadores" as IN04
+  usecase "IN05\nConsultar resultados de evaluación" as IN05
+  usecase "IN06\nConsultar sugerencias de estudiantes" as IN06
+  usecase "IN07\nHabilitar o cerrar evaluación" as IN07
+  usecase "IN08\nExportar informes autorizados" as IN08
+}
+doc -- IN01
+coord -- IN01
+admin -- IN01
+doc -- IN02
+admin -- IN03
+vice -- IN03
+coord -- IN04
+admin -- IN04
+vice -- IN04
+coord -- IN05
+admin -- IN05
+coord -- IN06
+admin -- IN06
+admin -- IN07
+doc -- IN08
+coord -- IN08
+admin -- IN08
+vice -- IN08
+note bottom
+Alcance restringido por rol, escuela, servicio y periodo.
+Autenticación previa, salvo ingreso y recuperación.
+end note
+@enduml

@@ -1,4 +1,4 @@
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { StudentFormModal } from './StudentFormModal';
@@ -23,6 +23,21 @@ function setup() {
 }
 
 describe('StudentFormModal', () => {
+  beforeEach(() => sessionStorage.clear());
+
+  it('recupera lo escrito al volver a abrir el formulario y se puede descartar', async () => {
+    const user = userEvent.setup();
+    const modal = <StudentFormModal onClose={vi.fn()} onSubmit={vi.fn()} studentToEdit={null} schools={schools} draftOwnerId="u1" />;
+    const first = render(modal);
+    await user.type(screen.getByLabelText(/código universitario/i), '20240001');
+    first.unmount();
+
+    render(modal);
+    expect(screen.getByLabelText(/código universitario/i)).toHaveValue('20240001');
+    await user.click(screen.getByRole('button', { name: /descartar borrador/i }));
+    expect(screen.getByLabelText(/código universitario/i)).toHaveValue('');
+  });
+
   it('rechaza un código universitario con formato inválido', async () => {
     const user = userEvent.setup();
     const { onSubmit } = setup();

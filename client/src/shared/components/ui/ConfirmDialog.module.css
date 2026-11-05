@@ -70,3 +70,7 @@
     opacity: 0;
   }
 }
+
+.dialog:focus {
+  outline: none;
+}

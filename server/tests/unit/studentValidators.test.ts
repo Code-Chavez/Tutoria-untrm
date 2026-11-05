@@ -5,7 +5,7 @@ const base = {
   firstName: 'Ana',
   lastName: 'Torres',
   cycle: 5,
-  schoolId: '6f9619ff-8b86-d011-b42d-00c04fc964ff',
+  schoolId: '6f9619ff-8b86-4011-b42d-00c04fc964ff',
 };
 
 describe('createStudentSchema (mismas reglas que la carga masiva, A03)', () => {

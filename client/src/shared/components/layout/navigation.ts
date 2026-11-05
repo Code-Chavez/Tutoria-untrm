@@ -2,10 +2,7 @@ import { type ComponentType } from 'react';
 import {
   DashboardIcon,
   GraduationCapIcon,
-  SwitchIcon,
-  UploadIcon,
   ClipboardIcon,
-  FolderIcon,
   CalendarIcon,
   ActivityIcon,
   SendIcon,
@@ -13,21 +10,17 @@ import {
   StarIcon,
   CalendarRangeIcon,
   ReportIcon,
-  PieChartIcon,
-  UsersIcon,
-  LayersIcon,
-  SlidersIcon,
-  PaletteIcon,
-  ListChecksIcon,
-  BarChartIcon,
+  RefreshIcon,
   ClockIcon,
-  FileSpreadsheetIcon,
-  ShieldCheckIcon,
   MessageSquareIcon,
-  FileTextIcon,
+  SettingsIcon,
+  AlertTriangleIcon,
 } from '@shared/components/icons';
 
-export type RoleCode = 'tutor' | 'coord' | 'dbu' | 'serv' | 'est' | 'vice';
+import { SECTIONS, sectionPermissions } from './sections';
+import { ROUTE_PERMISSIONS } from '../../routePermissions';
+
+export type RoleCode = 'tutor' | 'coord' | 'dbu' | 'serv' | 'est' | 'vice' | 'dec';
 
 // El JWT trae el nombre del rol; lo traducimos al código con que se filtra el menú.
 export const ROLE_CODES: Record<string, RoleCode> = {
@@ -37,6 +30,7 @@ export const ROLE_CODES: Record<string, RoleCode> = {
   Tutorado: 'est',
   'Profesional de Servicio': 'serv',
   Vicerrectorado: 'vice',
+  Decano: 'dec',
 };
 
 export interface NavItem {
@@ -45,35 +39,57 @@ export interface NavItem {
   title?: string;
   Icon: ComponentType<{ size?: number }>;
   path: string;
-  /** Acción que abre la lista de tutorados en modo «elegir estudiante» (?accion=…). */
+  /** Acción que abre la lista de estudiantes en modo «elegir estudiante» (?accion=…). */
   action?: string;
   roles?: RoleCode[]; // sin roles = visible para todos
+  /** Con un rol personalizado (sin código), la entrada se ve si tiene alguno de estos permisos. Sin permisos, solo los roles base la ven. */
+  permissions?: readonly string[];
+  /** Otras direcciones que también dejan esta entrada activa (las pestañas de una sección). */
+  alsoPaths?: string[];
 }
 
 export interface NavGroup {
+  /** Vacío = grupo sin título (una entrada suelta, como «Configuración»). */
   title: string;
   items: NavItem[];
+  /** Grupo sin título desplegable (p. ej. «Inicio», que es una sola entrada). Por omisión, todos los grupos se despliegan y pliegan. */
+  fixed?: boolean;
+  /** Arranca plegado (se muestra abierto si la página actual está dentro). Por omisión arranca abierto. */
+  startsCollapsed?: boolean;
 }
 
+const sectionPaths = (key: keyof typeof SECTIONS) => SECTIONS[key].tabs.map((tab) => tab.path);
+
 // Única fuente de verdad: el menú, el título de la barra superior y la entrada activa salen de aquí.
-// Cada función tiene su propio icono; los grupos siguen el trabajo de cada rol.
+// El menú es corto a propósito: «Periodo académico» y «Configuración» juntan varias pantallas en una sola, con pestañas
+// (ver sections.ts). Los grupos siguen el trabajo de cada persona y se pliegan; un grupo sin entradas para el rol no se muestra.
 export const NAV: NavGroup[] = [
   {
-    title: 'Principal',
+    title: 'Inicio',
+    fixed: true,
+    items: [{ label: 'Panel de inicio', Icon: DashboardIcon, path: '/' }],
+  },
+  {
+    // El estudiante: pedir, ver y evaluar su tutoría.
+    title: 'Mi tutoría',
     items: [
-      { label: 'Panel de inicio', Icon: DashboardIcon, path: '/' },
-      { label: 'Tutorados', Icon: GraduationCapIcon, path: '/tutorados', action: '', roles: ['tutor', 'coord', 'dbu'] },
-      { label: 'Asignación', Icon: SwitchIcon, path: '/asignacion', roles: ['coord', 'dbu'] },
-      { label: 'Carga masiva', Icon: UploadIcon, path: '/carga-masiva', roles: ['coord', 'dbu'] },
-      { label: 'Entrevista inicial', Icon: ClipboardIcon, path: '/tutorados', action: 'entrevista', roles: ['tutor'] },
-      { label: 'Expediente', Icon: FolderIcon, path: '/expediente', roles: ['tutor', 'coord', 'dbu'] },
-      { label: 'Sesiones', Icon: CalendarIcon, path: '/sesiones', roles: ['tutor'] },
-      { label: 'Mis sesiones', Icon: CalendarIcon, path: '/mis-sesiones', roles: ['est'] },
-      { label: 'Seguimiento', Icon: ActivityIcon, path: '/tutorados', action: 'seguimiento', roles: ['tutor'] },
-      { label: 'Derivar caso', Icon: SendIcon, path: '/tutorados', action: 'derivar', roles: ['tutor'] },
       { label: 'Solicitar tutoría', Icon: SendIcon, path: '/solicitar-tutoria', roles: ['est'] },
-      { label: 'Solicitudes de tutoría', Icon: MessageSquareIcon, path: '/solicitudes', roles: ['tutor', 'coord', 'dbu'] },
-      { label: 'Casos derivados', Icon: InboxIcon, path: '/derivaciones', roles: ['tutor', 'serv', 'dbu'] },
+      { label: 'Mis sesiones', Icon: CalendarIcon, path: '/mis-sesiones', roles: ['est'] },
+      { label: 'Evaluar tutoría', Icon: StarIcon, path: '/evaluar-tutoria', roles: ['est'] },
+    ],
+  },
+  {
+    // Quien atiende a los tutorados: el docente tutor y quien lo supervisa (coordinación, DBU) o recibe sus derivaciones (servicios).
+    title: 'Atención a estudiantes',
+    items: [
+      // El expediente se abre desde la lista de estudiantes («Ver expediente»); mientras se ve uno, esta entrada queda activa.
+      { label: 'Estudiantes', Icon: GraduationCapIcon, path: '/tutorados', alsoPaths: ['/expediente'], action: '', roles: ['tutor', 'coord', 'dbu'], permissions: ROUTE_PERMISSIONS['/tutorados'] },
+      { label: 'Entrevista inicial', Icon: ClipboardIcon, path: '/tutorados', action: 'entrevista', roles: ['tutor'], permissions: ['interviews:write'] },
+      { label: 'Sesiones', Icon: CalendarIcon, path: '/sesiones', roles: ['tutor'], permissions: ROUTE_PERMISSIONS['/sesiones'] },
+      { label: 'Seguimiento', Icon: ActivityIcon, path: '/tutorados', action: 'seguimiento', roles: ['tutor'], permissions: ['followups:write'] },
+      { label: 'Derivar caso', Icon: SendIcon, path: '/tutorados', action: 'derivar', roles: ['tutor'], permissions: ['referrals:write'] },
+      { label: 'Solicitudes de tutoría', Icon: MessageSquareIcon, path: '/solicitudes', roles: ['tutor', 'coord', 'dbu'], permissions: ROUTE_PERMISSIONS['/solicitudes'] },
+      { label: 'Casos derivados', Icon: InboxIcon, path: '/derivaciones', roles: ['tutor', 'serv', 'dbu'], permissions: ROUTE_PERMISSIONS['/derivaciones'] },
       {
         label: 'Seguimiento DBU',
         title: 'Seguimiento de derivaciones',
@@ -81,39 +97,35 @@ export const NAV: NavGroup[] = [
         path: '/derivaciones/seguimiento',
         roles: ['dbu'],
       },
-      { label: 'Evaluar tutoría', Icon: StarIcon, path: '/evaluar-tutoria', roles: ['est'] },
     ],
   },
   {
+    // Lo que hacen la coordinación y la DBU en cada periodo (una sola pantalla con pestañas, en el orden en que se hace), la
+    // planificación, los informes (otra pantalla con pestañas) y las amonestaciones.
     title: 'Gestión',
     items: [
-      { label: 'Plan semestral', Icon: CalendarRangeIcon, path: '/plan-semestral', roles: ['coord', 'dbu'] },
-      {
-        label: 'Horarios y asistencia',
-        title: 'Consolidado de horarios y asistencia',
-        Icon: ReportIcon,
-        path: '/informes',
-        roles: ['tutor', 'coord', 'dbu'],
-      },
-      { label: 'Informe semestral', Icon: FileTextIcon, path: '/informes/semestral', roles: ['tutor'] },
-      { label: 'Informe consolidado', Icon: FileSpreadsheetIcon, path: '/informes/consolidado', roles: ['dbu', 'vice'] },
-      { label: 'Indicadores', Icon: PieChartIcon, path: '/indicadores', roles: ['dbu', 'coord', 'vice'] },
-      { label: 'Usuarios y roles', Icon: UsersIcon, path: '/users', roles: ['dbu'] },
-      { label: 'Catálogos', Icon: LayersIcon, path: '/catalogos', roles: ['dbu'] },
-      { label: 'Parámetros', Icon: SlidersIcon, path: '/parametros', roles: ['dbu'] },
-      { label: 'Identidad visual', Icon: PaletteIcon, path: '/identidad', roles: ['dbu'] },
-      { label: 'Bitácora de auditoría', Icon: ShieldCheckIcon, path: '/auditoria', roles: ['dbu'] },
-      { label: 'Evaluación de tutoría', Icon: ListChecksIcon, path: '/evaluacion/configuracion', roles: ['dbu'] },
-      { label: 'Resultados de evaluación', Icon: BarChartIcon, path: '/evaluacion/resultados', roles: ['dbu', 'coord'] },
-      { label: 'Sugerencias de estudiantes', Icon: StarIcon, path: '/evaluacion/sugerencias', roles: ['dbu', 'coord'] },
+      { label: SECTIONS.periodo.title, Icon: RefreshIcon, path: SECTIONS.periodo.path, alsoPaths: sectionPaths('periodo'), roles: ['coord', 'dbu'], permissions: sectionPermissions('periodo') },
+      { label: 'Plan semestral', Icon: CalendarRangeIcon, path: '/plan-semestral', roles: ['coord', 'dbu'], permissions: ROUTE_PERMISSIONS['/plan-semestral'] },
+      { label: SECTIONS.informes.title, Icon: ReportIcon, path: SECTIONS.informes.path, alsoPaths: sectionPaths('informes'), roles: ['tutor', 'coord', 'dbu', 'vice'], permissions: sectionPermissions('informes') },
+      { label: 'Amonestaciones', Icon: AlertTriangleIcon, path: '/amonestaciones', roles: ['dec', 'dbu', 'coord'], permissions: ROUTE_PERMISSIONS['/amonestaciones'] },
     ],
+  },
+  {
+    // Todo lo que se configura, en una sola pantalla con pestañas (correos, sedes, catálogos, usuarios, parámetros…).
+    title: '',
+    fixed: true,
+    items: [{ label: SECTIONS.configuracion.title, Icon: SettingsIcon, path: SECTIONS.configuracion.path, alsoPaths: sectionPaths('configuracion'), roles: ['coord', 'dbu', 'vice'], permissions: sectionPermissions('configuracion') }],
   },
 ];
 
-const matchesPath = (item: NavItem, pathname: string) =>
-  item.path === '/' ? pathname === '/' : pathname === item.path || pathname.startsWith(`${item.path}/`);
+const pathMatches = (path: string, pathname: string) => (path === '/' ? pathname === '/' : pathname === path || pathname.startsWith(`${path}/`));
+
+const matchesPath = (item: NavItem, pathname: string) => [item.path, ...(item.alsoPaths ?? [])].some((path) => pathMatches(path, pathname));
 
 const matchesAction = (item: NavItem, action: string) => item.action === undefined || item.action === action;
+
+const matchedLength = (item: NavItem, pathname: string) =>
+  Math.max(0, ...[item.path, ...(item.alsoPaths ?? [])].filter((path) => pathMatches(path, pathname)).map((path) => path.length));
 
 /**
  * La entrada que corresponde a la URL: la más específica entre las que coinciden, de modo
@@ -122,7 +134,7 @@ const matchesAction = (item: NavItem, action: string) => item.action === undefin
 export function findActiveItem(items: NavItem[], pathname: string, action: string): NavItem | undefined {
   return items
     .filter((item) => matchesPath(item, pathname) && matchesAction(item, action))
-    .sort((a, b) => b.path.length - a.path.length)[0];
+    .sort((a, b) => matchedLength(b, pathname) - matchedLength(a, pathname))[0];
 }
 
 export const ALL_NAV_ITEMS: NavItem[] = NAV.flatMap((group) => group.items);
@@ -131,14 +143,16 @@ export const ALL_NAV_ITEMS: NavItem[] = NAV.flatMap((group) => group.items);
 const EXTRA_META: Record<string, { title: string; group: string }> = {
   '/profile': { title: 'Mi perfil', group: 'Cuenta' },
   '/unauthorized': { title: 'Acceso denegado', group: '' },
+  '/expediente': { title: 'Expediente', group: 'Atención a estudiantes' },
 };
 
 // La entrada de menú más específica da el título; las rutas con parámetro (p. ej. /expediente/:id)
 // heredan el de su base.
 export function resolveMeta(pathname: string) {
   if (EXTRA_META[pathname]) return EXTRA_META[pathname];
+  if (pathname.startsWith('/expediente/')) return EXTRA_META['/expediente'];
   const item = findActiveItem(ALL_NAV_ITEMS, pathname, '');
-  if (!item) return { title: 'Panel de inicio', group: 'Principal' };
+  if (!item) return { title: 'Panel de inicio', group: 'Inicio' };
   const group = NAV.find((g) => g.items.includes(item));
-  return { title: item.title ?? item.label, group: group?.title ?? 'Principal' };
+  return { title: item.title ?? item.label, group: group?.title ?? 'Inicio' };
 }

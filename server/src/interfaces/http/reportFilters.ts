@@ -12,7 +12,7 @@ export function parseReportFilters(query: unknown): ReportFilters {
 /** Responde 400/404 para los errores propios de los filtros; devuelve true si ya respondió. */
 export function handleReportFilterError(error: unknown, res: Response): boolean {
   if (error instanceof z.ZodError) {
-    res.status(400).json({ error: 'Filtros inválidos', details: error.errors });
+    res.status(400).json({ error: 'Filtros inválidos', details: error.issues });
     return true;
   }
   if (error instanceof ReportPeriodNotFoundError) {

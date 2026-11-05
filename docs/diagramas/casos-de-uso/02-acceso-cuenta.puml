@@ -1,0 +1,25 @@
+@startuml
+left to right direction
+skinparam shadowing false
+skinparam defaultFontName Arial
+title Acceso y cuenta personal
+actor "Usuario del sistema" as user
+rectangle "SIT UNTRM" {
+  usecase "AC01\nIniciar sesión" as AC01
+  usecase "AC02\nRecuperar contraseña" as AC02
+  usecase "AC03\nActualizar perfil personal" as AC03
+  usecase "AC04\nCambiar contraseña" as AC04
+  usecase "AC05\nConsultar notificaciones" as AC05
+  usecase "AC06\nCerrar sesión" as AC06
+}
+user -- AC01
+user -- AC02
+user -- AC03
+user -- AC04
+user -- AC05
+user -- AC06
+note bottom
+Alcance restringido por rol, escuela, servicio y periodo.
+Autenticación previa, salvo ingreso y recuperación.
+end note
+@enduml

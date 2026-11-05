@@ -38,7 +38,7 @@ test('tutorado', async ({ page }) => {
 test('docente tutor', async ({ page }) => {
   await loginUi(page, accounts.tutor);
   await shot(page, '07-inicio-tutor');
-  await goToMenu(page, 'Tutorados');
+  await goToMenu(page, 'Estudiantes');
   await page.getByRole('row', { name: /20191234/ }).waitFor();
   await shot(page, '08-tutorados');
 
@@ -55,7 +55,7 @@ test('docente tutor', async ({ page }) => {
   await shot(page, '11-detalle-sesion');
   await page.keyboard.press('Escape');
 
-  await goToMenu(page, 'Tutorados');
+  await goToMenu(page, 'Estudiantes');
   await page.getByRole('row', { name: /20191234/ }).getByRole('button', { name: 'Ver expediente' }).click();
   await page.getByText('Línea de tiempo del acompañamiento').waitFor();
   await shot(page, '12-expediente');
@@ -87,21 +87,21 @@ test('docente tutor (2)', async ({ page }) => {
   await shot(page, '17-horarios-asistencia');
 
   await goToMenu(page, 'Informe semestral');
-  await page.getByRole('heading', { level: 3, name: /I\. Datos generales/ }).waitFor();
+  await page.getByRole('heading', { level: 2, name: /I\. Datos generales/ }).waitFor();
   await shot(page, '18-informe-semestral');
 });
 
 test('coordinador', async ({ page }) => {
   await loginUi(page, accounts.coordinator);
   await shot(page, '19-inicio-coordinador');
-  await goToMenu(page, 'Asignación');
-  await page.getByText('1 · Selecciona los estudiantes').waitFor();
+  await goToMenu(page, 'Asignación por ciclo');
+  await page.getByLabel('Tutor del ciclo 1').waitFor();
   await shot(page, '20-asignacion');
   await goToMenu(page, 'Plan semestral');
-  await page.getByRole('heading', { level: 3, name: 'Resolución de aprobación' }).waitFor();
+  await page.getByRole('heading', { level: 2, name: 'Resolución de aprobación' }).waitFor();
   await shot(page, '21-plan-semestral');
   await goToMenu(page, 'Indicadores');
-  await page.getByText('Tutorados activos').first().waitFor();
+  await page.getByText('Estudiantes activos').first().waitFor();
   await shot(page, '22-indicadores');
 });
 

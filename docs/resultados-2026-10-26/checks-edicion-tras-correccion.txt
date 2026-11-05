@@ -1,0 +1,52 @@
+# Verificación de la corrección de ci.yml con un PR desechable (#183, 27/10/2026)
+# El PR (cerrado sin fusionar, rama borrada) llevaba la corrección de ci.yml más una prueba unitaria que falla a propósito.
+# Se esperó a que la CI terminara (Server — Test en fallo, estado BLOCKED), se editó UNA vez la descripción y se leyó de nuevo el estado.
+# Resultado: el evento edited ejecutó la CI completa (check-runs del 2.º grupo, 15:36:34Z), Server — Test volvió a fallar y el PR siguió BLOCKED.
+# Comparar con checks-omitidos-por-edicion.txt (antes de la corrección: los 9 checks se omitían y el PR pasaba a CLEAN).
+# No verificado: una fusión real; el caso del PR apilado reapuntado a develop (el único otro uso de «edited»).
+# Línea 1 = hora UTC previa a la edición; 2.ª línea = hora de la edición.
+2026-10-27T15:36:23Z
+edited at 2026-10-27T15:36:26Z
+BLOCKED	MERGEABLE
+Backup — Restore drill	completed	success	2026-10-27T15:33:31Z
+Backup — Restore drill	completed	success	2026-10-27T15:36:34Z
+Client — Audit	completed	success	2026-10-27T15:33:30Z
+Client — Audit	completed	success	2026-10-27T15:36:35Z
+Client — Lint	completed	success	2026-10-27T15:33:31Z
+Client — Lint	completed	success	2026-10-27T15:36:34Z
+Client — Test	completed	success	2026-10-27T15:33:31Z
+Client — Test	completed	success	2026-10-27T15:36:34Z
+Client — Type Check & Build	completed	success	2026-10-27T15:33:31Z
+Client — Type Check & Build	completed	success	2026-10-27T15:36:34Z
+Docker — Build Images	completed	skipped	2026-10-27T15:35:59Z
+Docker — Build Images	completed	skipped	2026-10-27T15:38:31Z
+Server — Audit	completed	success	2026-10-27T15:33:31Z
+Server — Audit	completed	success	2026-10-27T15:36:34Z
+Server — Build	completed	success	2026-10-27T15:33:31Z
+Server — Build	completed	success	2026-10-27T15:36:33Z
+Server — Lint	completed	success	2026-10-27T15:33:31Z
+Server — Lint	completed	success	2026-10-27T15:36:34Z
+Server — Test	completed	failure	2026-10-27T15:33:31Z
+Server — Test	completed	failure	2026-10-27T15:36:34Z
+📋 Validate PR Description	completed	success	2026-10-27T15:33:30Z
+📋 Validate PR Description	completed	success	2026-10-27T15:36:34Z
+📝 Validate PR Title	completed	success	2026-10-27T15:33:31Z
+📝 Validate PR Title	completed	success	2026-10-27T15:36:34Z
+🔀 Validate Feature → develop	completed	success	2026-10-27T15:33:31Z
+🔀 Validate Feature → develop	completed	success	2026-10-27T15:36:34Z
+🛡️ Gate — Main Branch Protection	completed	skipped	2026-10-27T15:33:28Z
+🛡️ Gate — Main Branch Protection	completed	skipped	2026-10-27T15:36:31Z
+Server — Test	fail	1m56s	https://github.com/Code-Chavez/Tutoria-untrm/actions/runs/40532655715/job/122289369043	
+Backup — Restore drill	pass	32s	https://github.com/Code-Chavez/Tutoria-untrm/actions/runs/40532655715/job/122289369023	
+Client — Audit	pass	19s	https://github.com/Code-Chavez/Tutoria-untrm/actions/runs/40532655715/job/122289369831	
+Client — Lint	pass	29s	https://github.com/Code-Chavez/Tutoria-untrm/actions/runs/40532655715/job/122289368948	
+Server — Lint	pass	21s	https://github.com/Code-Chavez/Tutoria-untrm/actions/runs/40532655715/job/122289368886	
+📋 Validate PR Description	pass	4s	https://github.com/Code-Chavez/Tutoria-untrm/actions/runs/40532656030/job/122289370826	
+Docker — Build Images	skipping	0	https://github.com/Code-Chavez/Tutoria-untrm/actions/runs/40532655715/job/122290553631	
+Client — Test	pass	1m53s	https://github.com/Code-Chavez/Tutoria-untrm/actions/runs/40532655715/job/122289369300	
+Client — Type Check & Build	pass	35s	https://github.com/Code-Chavez/Tutoria-untrm/actions/runs/40532655715/job/122289369328	
+Server — Audit	pass	20s	https://github.com/Code-Chavez/Tutoria-untrm/actions/runs/40532655715/job/122289368721	
+Server — Build	pass	23s	https://github.com/Code-Chavez/Tutoria-untrm/actions/runs/40532655715/job/122289368632	
+📝 Validate PR Title	pass	5s	https://github.com/Code-Chavez/Tutoria-untrm/actions/runs/40532656030/job/122289370899	
+🔀 Validate Feature → develop	pass	5s	https://github.com/Code-Chavez/Tutoria-untrm/actions/runs/40532656030/job/122289369904	
+🛡️ Gate — Main Branch Protection	skipping	0	https://github.com/Code-Chavez/Tutoria-untrm/actions/runs/40532656030/job/122289373656	

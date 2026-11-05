@@ -1,3 +1,5 @@
+import { SchoolRepository } from '@domain/repositories/SchoolRepository';
+import { TutorSchoolRequiredError } from '@application/use-cases/users/tutorSchool';
 import { UpdateUserUseCase, UserNotFoundError, DuplicateEmailError } from '@application/use-cases/users/UpdateUserUseCase';
 import { DuplicateEmailError as CreateDuplicateEmailError } from '@application/use-cases/users/CreateUserUseCase';
 import { ServiceRequiredError } from '@application/use-cases/users/serviceAssignment';
@@ -23,6 +25,7 @@ const user = (overrides: Partial<User> = {}) =>
 describe('UpdateUserUseCase', () => {
   let users: jest.Mocked<UserRepository>;
   let roles: jest.Mocked<RoleRepository>;
+  let schools: jest.Mocked<SchoolRepository>;
   let useCase: UpdateUserUseCase;
 
   beforeEach(() => {
@@ -39,7 +42,8 @@ describe('UpdateUserUseCase', () => {
       findAll: jest.fn(),
       create: jest.fn(),
     };
-    useCase = new UpdateUserUseCase(users, roles);
+    schools = { findById: jest.fn().mockImplementation(async (id: string) => ({ id, name: 'Sistemas', facultyId: 'f1', isActive: true, createdAt: new Date() })), findAll: jest.fn() };
+    useCase = new UpdateUserUseCase(users, roles, schools);
   });
 
   it('lanza error si el usuario no existe', async () => {
@@ -51,6 +55,29 @@ describe('UpdateUserUseCase', () => {
     await useCase.execute('u1', { phone: '999' });
     expect(roles.findById).not.toHaveBeenCalled();
     expect(users.update).toHaveBeenCalledWith('u1', { phone: '999' });
+  });
+
+  describe('escuela del docente tutor (fase 3)', () => {
+    it('cambiar de escuela a un tutor la actualiza; un cambio sin relación no la toca', async () => {
+      await useCase.execute('u1', { schoolId: 'school-2' });
+      expect(users.update).toHaveBeenCalledWith('u1', { schoolId: 'school-2' });
+
+      users.update.mockClear();
+      await useCase.execute('u1', { phone: '1' });
+      expect(users.update).toHaveBeenCalledWith('u1', { phone: '1' });
+    });
+
+    it('quitarle la escuela a un tutor se rechaza', async () => {
+      await expect(useCase.execute('u1', { schoolId: null })).rejects.toBeInstanceOf(TutorSchoolRequiredError);
+      expect(users.update).not.toHaveBeenCalled();
+    });
+
+    it('pasar a otro rol descarta la escuela', async () => {
+      users.findById.mockResolvedValue(user({ schoolId: 'school-1' }));
+      roles.findById.mockResolvedValue(role('coord', 'Coordinador'));
+      await useCase.execute('u1', { roleId: 'coord' });
+      expect(users.update).toHaveBeenCalledWith('u1', { roleId: 'coord', service: null, schoolId: null });
+    });
   });
 
   it('pasar a Profesional de Servicio sin servicio se rechaza', async () => {
@@ -71,8 +98,8 @@ describe('UpdateUserUseCase', () => {
 
   it('dejar el rol de servicio descarta el servicio', async () => {
     users.findById.mockResolvedValue(user({ roleId: 'servicio', service: 'SALUD' }));
-    await useCase.execute('u1', { roleId: 'tutor' });
-    expect(users.update).toHaveBeenCalledWith('u1', { roleId: 'tutor', service: null });
+    await useCase.execute('u1', { roleId: 'tutor', schoolId: 'school-1' });
+    expect(users.update).toHaveBeenCalledWith('u1', { roleId: 'tutor', service: null, schoolId: 'school-1' });
   });
 
   describe('correo', () => {

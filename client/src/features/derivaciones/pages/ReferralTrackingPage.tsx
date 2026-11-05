@@ -34,7 +34,7 @@ export function ReferralTrackingPage() {
     <div>
       <PageHeader
         title="Seguimiento de Derivaciones"
-        subtitle="Casos derivados a los servicios de la DBU, por servicio y estado (Art. 22.b)"
+        subtitle="Casos derivados a los servicios de la DBU, por servicio y estado"
         icon={<ReportIcon size={24} />}
       />
 
@@ -113,11 +113,13 @@ export function ReferralTrackingPage() {
               <table className={styles.table}>
                 <thead>
                   <tr>
-                    <th>ID Tutorado</th>
+                    <th>ID de estudiante</th>
                     <th>Servicio</th>
                     <th>Estado</th>
                     <th>Última actualización</th>
-                    <th></th>
+                    <th>
+                  <span className="sr-only">Acciones</span>
+                </th>
                   </tr>
                 </thead>
                 <tbody>

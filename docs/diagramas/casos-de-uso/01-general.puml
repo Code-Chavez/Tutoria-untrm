@@ -1,0 +1,50 @@
+@startuml
+left to right direction
+skinparam shadowing false
+skinparam defaultFontName Arial
+title Vista general del SIT
+actor "Estudiante" as est
+actor "Docente tutor" as doc
+actor "Coordinador de tutoría" as coord
+actor "Profesional de servicio" as serv
+actor "Administrador (DBU)" as admin
+actor "Vicerrectorado" as vice
+actor "Decano" as dec
+rectangle "SIT UNTRM" {
+  usecase "G01\nSolicitar y consultar tutoría" as G01
+  usecase "G02\nRegistrar acompañamiento tutorial" as G02
+  usecase "G03\nGestionar el periodo y asignaciones" as G03
+  usecase "G04\nGestionar derivaciones" as G04
+  usecase "G05\nEvaluar y consultar resultados" as G05
+  usecase "G06\nConsultar informes e indicadores" as G06
+  usecase "G07\nGestionar amonestaciones" as G07
+  usecase "G08\nAdministrar configuración institucional" as G08
+}
+est -- G01
+doc -- G01
+coord -- G01
+admin -- G01
+doc -- G02
+coord -- G03
+admin -- G03
+doc -- G04
+serv -- G04
+admin -- G04
+est -- G05
+coord -- G05
+admin -- G05
+doc -- G06
+coord -- G06
+admin -- G06
+vice -- G06
+dec -- G07
+coord -- G07
+admin -- G07
+admin -- G08
+coord -- G08
+vice -- G08
+note bottom
+Alcance restringido por rol, escuela, servicio y periodo.
+Autenticación previa, salvo ingreso y recuperación.
+end note
+@enduml

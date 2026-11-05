@@ -11,6 +11,9 @@ const SUBJECT: Record<NotificationType, string> = {
   TUTORING_REQUEST_CREATED: 'Nueva solicitud de tutoría',
   TUTORING_REQUEST_UPDATED: 'Actualización de su solicitud de tutoría',
   TUTORING_REQUEST_RECEIVED: 'Solicitud de tutoría registrada',
+  SESSION_SCHEDULED: 'Sesión de tutoría programada',
+  SESSION_RESCHEDULED: 'Cambio en su sesión de tutoría',
+  SESSION_CANCELLED: 'Su sesión de tutoría fue cancelada',
 };
 
 /** Texto formal de cada aviso. No lleva datos del caso ni de la persona atendida (ver `buildNotificationEmail`). */
@@ -25,6 +28,12 @@ const BODY: Record<NotificationType, string> = {
     'Le comunicamos que su solicitud de tutoría ha sido actualizada. Puede consultar la respuesta ingresando al sistema.',
   TUTORING_REQUEST_RECEIVED:
     'Le confirmamos que su solicitud de tutoría ha sido registrada en el sistema y remitida a la persona responsable de su atención. Recibirá un aviso cuando tenga respuesta.',
+  SESSION_SCHEDULED:
+    'Le comunicamos que se ha programado una sesión de tutoría para usted. Puede consultar la fecha y el lugar o enlace ingresando al sistema.',
+  SESSION_RESCHEDULED:
+    'Le comunicamos que se ha cambiado el horario de una de sus sesiones de tutoría. Puede consultar la nueva fecha y el motivo ingresando al sistema.',
+  SESSION_CANCELLED:
+    'Le comunicamos que se ha cancelado una de sus sesiones de tutoría. Puede consultar el motivo ingresando al sistema.',
 };
 
 const CONFIDENTIALITY =
@@ -38,6 +47,7 @@ function deepLink(notification: Notification, appUrl: string): string {
     return `${base}/solicitudes?solicitud=${notification.tutoringRequestId}`;
   }
   if (notification.type === 'TUTORING_REQUEST_UPDATED' || notification.type === 'TUTORING_REQUEST_RECEIVED') return `${base}/solicitar-tutoria`;
+  if (notification.sessionId) return `${base}/mis-sesiones`;
   return base;
 }
 

@@ -87,3 +87,7 @@
     font-size: 24px;
   }
 }
+.hero { position: relative; align-items: center; padding: 18px; border: 1px solid var(--borde); border-radius: 12px; background: white; }
+.contextImage { width: 170px; height: 96px; object-fit: cover; border-radius: 9px; flex-shrink: 0; }
+.hero > div { flex: 1 1 230px; }
+@media (max-width: 650px) { .contextImage { width: 80px; height: 80px; } .hero { padding: 12px; gap: 12px; } }

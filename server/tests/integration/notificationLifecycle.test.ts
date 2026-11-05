@@ -95,11 +95,15 @@ describe('ciclo de vida de los avisos (R03)', () => {
       ],
     });
 
+    // Los avisos sin leer que tenía al pedirlo: otras suites crean avisos para esta misma cuenta mientras corre ésta, y uno
+    // que llegue después de la petición no debe contar como «sin leer» de ella.
+    const unreadBefore = (await prisma.notification.findMany({ where: { userId: tutorId, read: false }, select: { id: true } })).map((n) => n.id);
+
     const res = await call('PATCH', '/api/notifications/read-all', tutorToken);
     expect(res.status).toBe(200);
     expect(((await res.json()) as { updated: number }).updated).toBeGreaterThanOrEqual(2);
 
-    expect(await prisma.notification.count({ where: { userId: tutorId, read: false } })).toBe(0);
+    expect(await prisma.notification.count({ where: { id: { in: unreadBefore }, read: false } })).toBe(0);
     expect(await prisma.notification.count({ where: { userId: otherId, message: 'Prueba R03 ajena', read: false } })).toBe(1);
   });
 

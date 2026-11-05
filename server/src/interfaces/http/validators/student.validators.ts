@@ -44,6 +44,7 @@ export const markStudentRiskSchema = z.object({
 export const importReportSchema = z.object({
   totalRows: z.number().int().min(0),
   created: z.number().int().min(0),
+  continued: z.number().int().min(0).default(0),
   skipped: z.number().int().min(0),
   createdRows: z
     .array(
@@ -54,6 +55,16 @@ export const importReportSchema = z.object({
       }),
     )
     .max(20000),
+  continuedRows: z
+    .array(
+      z.object({
+        row: z.number().int(),
+        studentCode: z.string(),
+        fullName: z.string(),
+      }),
+    )
+    .max(20000)
+    .default([]),
   errors: z
     .array(
       z.object({

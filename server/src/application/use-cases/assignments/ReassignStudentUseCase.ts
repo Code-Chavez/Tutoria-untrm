@@ -6,7 +6,7 @@ import { StudentAccessGuard } from '@application/access/StudentAccessGuard';
 import { TutorAssignmentHistoryRepository } from '@domain/repositories/TutorAssignmentHistoryRepository';
 import { ReassignStudentInput } from '@application/dtos/assignment.dto';
 import { ReassignReasonRequiredError, SameTutorAssignmentError } from './AssignmentErrors';
-import { assertActiveTutor } from './TutorValidation';
+import { assertActiveTutor, assertTutorServesSchools } from './TutorValidation';
 
 /**
  * Reasignación individual de un tutorado (HU-13). Exige un motivo y conserva
@@ -38,6 +38,7 @@ export class ReassignStudentUseCase {
     }
 
     const newTutor = await assertActiveTutor(this.users, this.roles, input.newTutorId);
+    assertTutorServesSchools(newTutor, [student.schoolId]);
 
     if (student.tutorId === newTutor.id) {
       throw new SameTutorAssignmentError();

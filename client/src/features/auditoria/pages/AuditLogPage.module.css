@@ -51,3 +51,12 @@
     flex: 1 1 100%;
   }
 }
+
+.bar { padding: 20px; gap: 16px; background: var(--g50); }
+.date { font-size: var(--fs-sm); gap: 8px; }
+.date input { min-height: 44px; box-sizing: border-box; max-width: 100%; }
+.details { line-height: 1.6; }
+@media (max-width: 480px) { .date { width: 100%; } .select { min-width: 0; } }
+.bar { padding: 12px; gap: 10px; }
+.date { gap: 5px; font-size: var(--fs-xs); }
+.details { max-width: 380px; line-height: 1.45; }

@@ -11,6 +11,7 @@ export interface CatalogEntry {
   /** Ciclos, servicios y motivos: el valor que referencian los demás datos. */
   code: string | null;
   facultyId: string | null;
+  cycleCount?: number;
   startDate: string | null;
   endDate: string | null;
   /** Registros que lo usan hoy; con uso mayor que 0 no se puede eliminar. */
@@ -22,6 +23,7 @@ export interface CatalogInput {
   isActive?: boolean;
   code?: string;
   facultyId?: string;
+  cycleCount?: number;
   startDate?: string;
   endDate?: string;
 }

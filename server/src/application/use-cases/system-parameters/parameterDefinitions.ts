@@ -84,6 +84,16 @@ export const PARAMETER_DEFINITIONS: readonly ParameterDefinition[] = [
     defaultValue: 15,
     group: 'Seguridad de acceso',
   },
+  {
+    key: 'tutor_max_weekly_hours',
+    label: 'Máximo de horas de atención por semana',
+    description: 'Tope de horas semanales de atención que un docente tutor puede ofrecer al aceptar su ciclo (la sesión dura 45 minutos; cada docente decide cuándo, cuánto y dónde).',
+    unit: 'horas',
+    min: 1,
+    max: 40,
+    defaultValue: 10,
+    group: 'Sesiones',
+  },
 ];
 
 export const findParameterDefinition = (key: string): ParameterDefinition | undefined =>

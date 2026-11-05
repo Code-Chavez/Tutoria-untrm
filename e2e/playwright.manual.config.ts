@@ -2,7 +2,7 @@ import { defineConfig } from '@playwright/test';
 
 // Capturas de pantalla del manual de usuario (docs/MANUAL_USUARIO.md). No forma parte de la suite de pruebas:
 //   cd e2e && E2E_CHANNEL=chrome npx playwright test -c playwright.manual.config.ts
-// Pensado para un entorno recién sembrado (docker compose down -v && docker compose up -d --build) para que las
+// Pensado para un entorno recién sembrado (docker compose down -v && docker compose up -d --build && docker compose exec server pnpm run seed) para que las
 // pantallas muestren solo los datos de demostración.
 export default defineConfig({
   testDir: './manual',

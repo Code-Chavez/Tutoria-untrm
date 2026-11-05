@@ -1,0 +1,25 @@
+@startuml
+left to right direction
+skinparam shadowing false
+skinparam defaultFontName Arial
+title Portal del estudiante
+actor "Estudiante" as est
+rectangle "SIT UNTRM" {
+  usecase "ES01\nSolicitar tutoría" as ES01
+  usecase "ES02\nConsultar estado y respuesta" as ES02
+  usecase "ES03\nConsultar sesiones propias" as ES03
+  usecase "ES04\nConsultar lugar o enlace de sesión" as ES04
+  usecase "ES05\nResponder evaluación de tutoría" as ES05
+  usecase "ES06\nRegistrar sugerencias en evaluación" as ES06
+}
+est -- ES01
+est -- ES02
+est -- ES03
+est -- ES04
+est -- ES05
+est -- ES06
+note bottom
+Alcance restringido por rol, escuela, servicio y periodo.
+Autenticación previa, salvo ingreso y recuperación.
+end note
+@enduml

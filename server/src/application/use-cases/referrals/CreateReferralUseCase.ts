@@ -4,6 +4,8 @@ import { StudentAccessGuard } from '@application/access/StudentAccessGuard';
 import { UserRepository } from '@domain/repositories/UserRepository';
 import { RoleRepository } from '@domain/repositories/RoleRepository';
 import { NotificationRepository } from '@domain/repositories/NotificationRepository';
+import { TutoringRequestLinker } from '@application/use-cases/tutoring-requests/TutoringRequestLinker';
+import { InvalidTutoringRequestStatusError } from '@application/use-cases/tutoring-requests/TutoringRequestErrors';
 import { CreateReferralInput } from '@application/dtos/referral.dto';
 
 const SERVICE_LABEL: Record<string, string> = {
@@ -32,14 +34,18 @@ export class CreateReferralUseCase {
     private readonly users: UserRepository,
     private readonly roles: RoleRepository,
     private readonly notifications: NotificationRepository,
+    private readonly requestLinker?: TutoringRequestLinker,
   ) {}
 
   async execute(
     studentId: string,
     referredById: string,
     input: CreateReferralInput,
+    ipAddress?: string,
   ): Promise<StudentReferral> {
     await this.guard.assertAccess(referredById, studentId);
+    // Si la derivación atiende una solicitud, se valida antes de crear nada (es suya, es de ese estudiante, sin atención previa).
+    const request = input.tutoringRequestId && this.requestLinker ? await this.requestLinker.prepare(referredById, input.tutoringRequestId, [studentId]) : null;
 
     const referral = await this.referrals.create({
       studentId,
@@ -49,6 +55,12 @@ export class CreateReferralUseCase {
       service: input.service,
       receivingInstance: input.receivingInstance?.trim() || null,
     });
+
+    if (request && this.requestLinker && !(await this.requestLinker.attach(referredById, request, { kind: 'referral', id: referral.id }, ipAddress))) {
+      // Otra persona vinculó la solicitud en el mismo instante: la derivación recién creada no puede quedar suelta, se anula.
+      await this.referrals.updateStatus(referral.id, 'CERRADO', referredById, 'La solicitud ya fue atendida por otra sesión o derivación', 'ENVIADO');
+      throw new InvalidTutoringRequestStatusError('Esta solicitud acaba de recibir otra atención: no se crea una segunda derivación.');
+    }
 
     const serviceRole = await this.roles.findByName('Profesional de Servicio');
     if (serviceRole) {

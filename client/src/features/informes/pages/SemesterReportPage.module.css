@@ -65,7 +65,7 @@
   margin-bottom: var(--s5);
 }
 
-.block h4 {
+.block h3 {
   margin: 0 0 var(--s2);
   font-size: var(--fs-sm);
   color: var(--g900);

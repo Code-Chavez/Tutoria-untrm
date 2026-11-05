@@ -8,6 +8,7 @@ import { TokenService } from '@application/ports/TokenService';
 import { hashRefreshToken } from './refreshTokenHash';
 import { LoginInput, LoginOutput } from '@application/dtos/auth.dto';
 import { SystemParameterRepository } from '@domain/repositories/SystemParameterRepository';
+import { grantedPermissionCodes } from './grantedPermissions';
 import { loadSecurityPolicy } from '@application/use-cases/system-parameters/securityPolicy';
 
 export class InvalidCredentialsError extends Error {
@@ -131,6 +132,7 @@ export class LoginUseCase {
         lastName: user.lastName,
         role: roleName,
         service: user.service,
+        permissions: grantedPermissionCodes(role),
         mustChangePassword: user.mustChangePassword,
       },
     };

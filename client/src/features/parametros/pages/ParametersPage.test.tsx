@@ -9,6 +9,7 @@ import type { SystemParameter } from '../services/parameterService';
 
 vi.mock('../services/parameterService', () => ({ parameterService: { list: vi.fn(), update: vi.fn() } }));
 
+vi.mock('@features/auth/hooks/useAuth', () => ({ useAuth: () => ({ user: { id: 'me' } }) }));
 const mocked = vi.mocked(parameterService);
 
 const param = (over: Partial<SystemParameter>): SystemParameter => ({
@@ -42,6 +43,7 @@ function renderPage() {
 describe('ParametersPage', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    sessionStorage.clear();
     mocked.list.mockResolvedValue(parameters);
   });
 
@@ -54,6 +56,18 @@ describe('ParametersPage', () => {
     expect(screen.getByRole('spinbutton', { name: /Número de sesiones por semestre/ })).toHaveValue(10);
     // Solo los que no tienen valor guardado llevan la etiqueta.
     expect(screen.getAllByText('Predeterminado')).toHaveLength(2);
+  });
+
+  it('un valor escrito y sin guardar se recupera al recargar la pantalla', async () => {
+    const user = userEvent.setup();
+    const first = renderPage();
+    const input = await screen.findByRole('spinbutton', { name: /Duración de la sesión/ });
+    await user.clear(input);
+    await user.type(input, '90');
+    first.unmount();
+
+    renderPage();
+    expect(await screen.findByRole('spinbutton', { name: /Duración de la sesión/ })).toHaveValue(90);
   });
 
   it('guarda un valor válido', async () => {

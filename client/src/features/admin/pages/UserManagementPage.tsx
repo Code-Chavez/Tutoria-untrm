@@ -1,12 +1,20 @@
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
+import { useNavigate } from 'react-router-dom';
+import { catalogService } from '@features/catalogos/services/catalogService';
+import { schoolService } from '@features/tutorados/services/schoolService';
 import styles from './UserManagementPage.module.css';
-import { User, userService, CreateUserData, UpdateUserData } from '../services/userService';
-import { TemporaryPasswordDialog } from '../components/TemporaryPasswordDialog';
+import { User, userService, CreateUserData, UpdateUserData, Invitation } from '../services/userService';
+import { InvitationDialog } from '../components/InvitationDialog';
 import { UserFormModal } from '../components/UserFormModal';
 import { UserFilters, UserFilterValues } from '../components/UserFilters';
 import { UserTable } from '../components/UserTable';
+import { UserAccessDialog } from '../components/UserAccessDialog';
 import { roleDisplayName } from '@shared/utils/roleLabel';
+import { getApiErrorMessage } from '@shared/services/apiClient';
 import { useUsers } from '../hooks/useUsers';
+import { useUrlParams } from '@shared/hooks/useUrlParams';
+import { useAuth } from '@features/auth/hooks/useAuth';
 import {
   PageHeader,
   Button,
@@ -14,20 +22,48 @@ import {
   TableSkeleton,
   ConfirmDialog,
 } from '@shared/components/ui';
-import { PlusIcon, UsersIcon, XCircleIcon, SearchIcon } from '@shared/components/icons';
+import { PlusIcon, UploadIcon, UsersIcon, XCircleIcon, SearchIcon } from '@shared/components/icons';
 
 const EMPTY_FILTERS: UserFilterValues = { search: '', roleId: '', status: '' };
 
 export const UserManagementPage: React.FC = () => {
+  const navigate = useNavigate();
   const { users, roles, loading, error, refresh } = useUsers();
-  // La clave temporal de una cuenta recién creada: se muestra una sola vez, a quien la entrega.
-  const [issuedAccount, setIssuedAccount] = useState<{ email: string; temporaryPassword: string } | null>(null);
+  const faculties = useQuery({ queryKey: ['catalog', 'faculties'], queryFn: () => catalogService.list('faculties'), staleTime: 60_000 }).data ?? [];
+  const schools = useQuery({ queryKey: ['schools'], queryFn: () => schoolService.getSchools(), staleTime: 60_000 }).data ?? [];
+  // La invitación de una cuenta recién creada (o reemitida): el enlace se muestra una sola vez, a quien administra.
+  const [issued, setIssued] = useState<{ email: string; invitation: Invitation } | null>(null);
+  const [actionError, setActionError] = useState('');
 
-  const [filters, setFilters] = useState<UserFilterValues>(EMPTY_FILTERS);
+  // Lo que conviene conservar al recargar o compartir el enlace vive en la URL: los filtros (q, rol, estado) y qué ventana está
+  // abierta y sobre quién (nuevo, editar, acceso, confirmar). Lo que se escribe en el formulario se recupera como borrador.
+  const url = useUrlParams();
+  const { user: me } = useAuth();
+  const [search, roleId, status] = [url.get('q'), url.get('rol'), url.get('estado')];
+  const filters = useMemo<UserFilterValues>(() => ({ search, roleId, status }), [search, roleId, status]);
+  const setFilters = (next: UserFilterValues) => url.set({ q: next.search, rol: next.roleId, estado: next.status }, { replace: true });
 
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [userToEdit, setUserToEdit] = useState<User | null>(null);
-  const [userToToggle, setUserToToggle] = useState<User | null>(null);
+  const byId = (id: string) => users.find((u) => u.id === id) ?? null;
+  const creating = url.get('nuevo') === '1';
+  const userToEdit = byId(url.get('editar'));
+  const userForAccess = byId(url.get('acceso'));
+  const userToToggle = byId(url.get('confirmar'));
+  const isModalOpen = creating || userToEdit !== null;
+  const setUserForAccess = (user: User | null) => url.set({ acceso: user?.id ?? null }, { replace: user === null });
+  const setUserToToggle = (user: User | null) => url.set({ confirmar: user?.id ?? null }, { replace: user === null });
+
+  // Un enlace a un registro que ya no existe (o que la persona no ve) no deja una ventana fantasma: se limpia el parámetro.
+  const dialogIds = [url.get('editar'), url.get('acceso'), url.get('confirmar')].join('|');
+  useEffect(() => {
+    if (loading || error) return;
+    const gone: Record<string, null> = {};
+    for (const key of ['editar', 'acceso', 'confirmar']) {
+      const id = url.get(key);
+      if (id && !users.some((u) => u.id === id)) gone[key] = null;
+    }
+    if (Object.keys(gone).length > 0) url.set(gone, { replace: true });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [loading, error, users, dialogIds]);
   const [toggling, setToggling] = useState(false);
 
   const roleName = (roleId: string) => {
@@ -49,35 +85,42 @@ export const UserManagementPage: React.FC = () => {
     });
   }, [users, filters]);
 
-  const handleOpenModal = (user?: User) => {
-    setUserToEdit(user || null);
-    setIsModalOpen(true);
-  };
+  const handleOpenModal = (user?: User) => url.set(user ? { editar: user.id, nuevo: null } : { nuevo: '1', editar: null });
 
-  const handleCloseModal = () => {
-    setIsModalOpen(false);
-    setUserToEdit(null);
-  };
+  const handleCloseModal = () => url.set({ editar: null, nuevo: null }, { replace: true });
 
   const handleSubmit = async (data: CreateUserData | UpdateUserData) => {
     if (userToEdit) {
       await userService.updateUser(userToEdit.id, data as UpdateUserData);
     } else {
-      const { user, temporaryPassword } = await userService.createUser(data as CreateUserData);
-      if (temporaryPassword) setIssuedAccount({ email: user.email, temporaryPassword });
+      const { user, invitation } = await userService.createUser(data as CreateUserData);
+      setIssued({ email: user.email, invitation });
     }
     refresh();
+  };
+
+  const reissue = async (user: User) => {
+    setActionError('');
+    try {
+      setIssued({ email: user.email, invitation: await userService.reissueInvitation(user.id) });
+      refresh();
+    } catch (err) {
+      setActionError(getApiErrorMessage(err));
+    }
   };
 
   const confirmToggle = async () => {
     if (!userToToggle) return;
     setToggling(true);
+    setActionError('');
     try {
       await userService.toggleUserStatus(userToToggle.id);
       refresh();
       setUserToToggle(null);
     } catch (err) {
-      console.error('Error toggling status', err);
+      // Por ejemplo, desactivar a la última cuenta de administración activa: el servidor explica el motivo y no cambia nada.
+      setActionError(getApiErrorMessage(err));
+      setUserToToggle(null);
     } finally {
       setToggling(false);
     }
@@ -90,11 +133,22 @@ export const UserManagementPage: React.FC = () => {
         subtitle="Cuentas del sistema y el rol de cada persona. Los catálogos y parámetros tienen su propia sección en el menú."
         icon={<UsersIcon size={24} />}
         actions={
-          <Button icon={<PlusIcon size={17} />} onClick={() => handleOpenModal()}>
-            Nuevo usuario
-          </Button>
+          <>
+            <Button variant="secondary" icon={<UploadIcon size={17} />} onClick={() => navigate('/carga-docentes')}>
+              Importar docentes
+            </Button>
+            <Button icon={<PlusIcon size={17} />} onClick={() => handleOpenModal()}>
+              Nuevo usuario
+            </Button>
+          </>
         }
       />
+
+      {actionError && (
+        <p role="alert" className={styles.inviteError}>
+          {actionError}
+        </p>
+      )}
 
       <div className={styles.tableCard}>
         <UserFilters
@@ -130,6 +184,8 @@ export const UserManagementPage: React.FC = () => {
             roleName={roleName}
             onEdit={handleOpenModal}
             onToggleStatus={setUserToToggle}
+            onAccess={setUserForAccess}
+            onReissueInvitation={reissue}
           />
         )}
       </div>
@@ -137,14 +193,28 @@ export const UserManagementPage: React.FC = () => {
       {isModalOpen && (
         <UserFormModal
           key={userToEdit?.id ?? 'new'}
+          draftOwnerId={me?.id}
           onClose={handleCloseModal}
           onSubmit={handleSubmit}
           userToEdit={userToEdit}
           roles={roles}
+          schools={schools}
+          faculties={faculties}
         />
       )}
 
-      {issuedAccount && <TemporaryPasswordDialog {...issuedAccount} onClose={() => setIssuedAccount(null)} />}
+      {userForAccess && (
+        <UserAccessDialog
+          key={userForAccess.id}
+          user={userForAccess}
+          role={roles.find((r) => r.id === userForAccess.roleId)}
+          schools={schools}
+          faculties={faculties}
+          onClose={() => setUserForAccess(null)}
+        />
+      )}
+
+      {issued && <InvitationDialog {...issued} onClose={() => setIssued(null)} />}
 
       <ConfirmDialog
         open={userToToggle !== null}

@@ -36,6 +36,27 @@ describe('Alcance sobre los tutorados con la política real (A03, Art. 9.a y 14.
   });
 
   describe('scopeFor / scopeCovers', () => {
+    it('un rol nuevo con permisos no hereda acceso individual por tener el mismo permiso de lectura', async () => {
+      w.roles.findById.mockResolvedValue({
+        id: 'custom-role', name: 'Revisor de escuela', description: 'Rol de prueba', createdAt: new Date(),
+        permissions: [{ id: 'read', code: 'students:read', description: 'Consultar estudiantes' }],
+      });
+      expect(await w.guard.scopeFor('tutorA1')).toEqual({ kind: 'NONE' });
+      await expect(w.guard.assertAccess('tutorA1', 'a1')).rejects.toBeInstanceOf(StudentNotFoundError);
+    });
+
+    it('un rol inexistente no deja usar el alcance anterior de la cuenta', async () => {
+      w.roles.findById.mockResolvedValue(null);
+      expect(await w.guard.scopeFor('dbu')).toEqual({ kind: 'NONE' });
+    });
+
+    it('el decano no obtiene acceso individual por su cargo', async () => {
+      w.roles.findById.mockResolvedValue({
+        id: 'dean-role', name: 'Decano', description: 'Rol de prueba', permissions: [], createdAt: new Date(),
+      });
+      expect(await w.guard.scopeFor('dbu')).toEqual({ kind: 'NONE' });
+    });
+
     it.each([
       ['dbu', 'ALL'],
       ['coordA', 'SCHOOLS'],
@@ -124,7 +145,7 @@ describe('Alcance sobre los tutorados con la política real (A03, Art. 9.a y 14.
 
   describe('alta, edición, riesgo e importación', () => {
     const create = (who: string, schoolId: string) =>
-      new CreateStudentUseCase(w.students, w.schools, w.guard).execute(
+      new CreateStudentUseCase(w.students, w.schools, w.guard, { findActive: jest.fn().mockResolvedValue(null) } as never, { enroll: jest.fn() } as never).execute(
         { studentCode: '12345678', firstName: 'N', lastName: 'A', cycle: 1, schoolId } as never,
         who,
       );
@@ -165,14 +186,14 @@ describe('Alcance sobre los tutorados con la política real (A03, Art. 9.a y 14.
         { rowNumber: 2, studentCode: '20200001', firstName: 'Ana', lastName: 'Alvarez', cycle: '2', school: 'Escuela A' },
         { rowNumber: 3, studentCode: '20200002', firstName: 'Beto', lastName: 'Benites', cycle: '2', school: 'Escuela B' },
       ];
-      const report = await new ImportStudentsUseCase(w.students, w.schools, w.guard).execute(rows as never, 'coordA');
+      const report = await new ImportStudentsUseCase(w.students, w.schools, w.guard, { findActive: jest.fn().mockResolvedValue({ id: 'p1' }) } as never, { enroll: jest.fn() } as never).execute(rows as never, 'coordA');
 
       expect(report.created).toBe(1);
       expect(report.errors).toHaveLength(1);
       expect(report.errors[0].message).toMatch(/No tienes acceso a la escuela/);
       expect(w.students.create).toHaveBeenCalledTimes(1);
 
-      const all = await new ImportStudentsUseCase(w.students, w.schools, w.guard).execute(rows as never, 'dbu');
+      const all = await new ImportStudentsUseCase(w.students, w.schools, w.guard, { findActive: jest.fn().mockResolvedValue({ id: 'p1' }) } as never, { enroll: jest.fn() } as never).execute(rows as never, 'dbu');
       expect(all.created).toBe(2);
     });
   });

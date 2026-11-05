@@ -5,7 +5,8 @@ import { getApiErrorMessage } from '@shared/services/apiClient';
 import { ImportStepper } from '../components/ImportStepper';
 import { UploadDropzone } from '../components/UploadDropzone';
 import { ImportResult } from '../components/ImportResult';
-import { PageHeader, Button, Card } from '@shared/components/ui';
+import { PageHeader, Button, Card, NextSteps } from '@shared/components/ui';
+import { RequestListBanner } from '@features/pedidos/components/RequestListBanner';
 import { UploadIcon, DownloadIcon, InfoIcon } from '@shared/components/icons';
 
 const XLSX_EXT = '.xlsx';
@@ -71,22 +72,26 @@ export const BulkImportPage: React.FC = () => {
     <div className={styles.page}>
       <PageHeader
         title="Carga masiva de estudiantes"
-        subtitle="Importa tutorados desde un archivo Excel de forma guiada"
+        subtitle="Importa estudiantes desde un archivo Excel de forma guiada"
         icon={<UploadIcon size={24} />}
-        actions={
-          <Button variant="secondary" icon={<DownloadIcon size={16} />} onClick={handleTemplate}>
-            Descargar plantilla
-          </Button>
-        }
       />
 
-      <Card padded>
+      <Card padded className={styles.importCard}>
         <ImportStepper current={currentStep} />
 
+        <div className={styles.workspace}>
+          <section className={styles.preparation} aria-label="Plantilla y requisitos">
+            <h2 className={styles.panelTitle}>Plantilla y requisitos</h2>
+            <p className={styles.panelHint}>Completa una fila por estudiante con su escuela y ciclo.</p>
+            <div className={styles.templateAction}><Button variant="secondary" icon={<DownloadIcon size={16} />} onClick={handleTemplate}>
+            Descargar plantilla
+          </Button></div>
         <div className={styles.intro}>
           <span className={styles.introIcon}>
             <InfoIcon size={18} />
           </span>
+          <details className={styles.rules}>
+            <summary>Ver columnas y validaciones</summary>
           <p>
             Descarga la plantilla, completa los datos y súbela. El archivo debe incluir las columnas{' '}
             <code>codigo</code>, <code>nombres</code>, <code>apellidos</code>, <code>correo</code>,{' '}
@@ -95,8 +100,14 @@ export const BulkImportPage: React.FC = () => {
             <strong>escuela</strong> debe coincidir con una escuela registrada. Las filas con errores
             se omiten y se listan al final para su corrección.
           </p>
+          </details>
         </div>
 
+            <RequestListBanner kind="ESTUDIANTES" />
+          </section>
+          <section className={styles.uploadPanel} aria-label="Archivo a importar">
+            <h2 className={styles.panelTitle}>Archivo a importar</h2>
+            <p className={styles.panelHint}>Selecciona el Excel completado y luego pulsa Importar. El resultado mostrará las filas con errores.</p>
         <UploadDropzone file={file} maxSizeMB={MAX_SIZE_MB} onFile={pickFile} />
 
         {error && (
@@ -117,7 +128,17 @@ export const BulkImportPage: React.FC = () => {
           </Button>
         </div>
 
+          </section>
+        </div>
         {report && <ImportResult report={report} onDownload={handleDownloadReport} />}
+        {report && report.created + report.continued > 0 && (
+          <NextSteps
+            steps={[
+              { to: '/asignacion', label: 'Asignar el tutor de cada ciclo', description: 'Los estudiantes cargados pasan al tutor de su ciclo' },
+              { to: '/tutorados', label: 'Ver los estudiantes', description: 'Comprobar que quedaron registrados' },
+            ]}
+          />
+        )}
       </Card>
     </div>
   );

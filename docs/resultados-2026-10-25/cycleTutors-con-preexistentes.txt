@@ -1,0 +1,13 @@
+# Solo integración (node scripts/test-integration.js, en banda) y cycleTutors x3 con 7 asignaciones preexistentes
+Test Suites: 24 passed, 24 total
+Tests:       166 passed, 166 total
+--- cycleTutors x3:
+Test Suites: 1 passed, 1 total
+Tests:       8 passed, 8 total
+Test Suites: 1 passed, 1 total
+Tests:       8 passed, 8 total
+Test Suites: 1 passed, 1 total
+Tests:       8 passed, 8 total
+corrida 1: conteos de las tablas y huella de las asignaciones preexistentes idénticos a los de antes
+corrida 2: conteos de las tablas y huella de las asignaciones preexistentes idénticos a los de antes
+corrida 3: conteos de las tablas y huella de las asignaciones preexistentes idénticos a los de antes

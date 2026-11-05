@@ -5,6 +5,13 @@ export class DuplicateStudentCodeError extends Error {
   }
 }
 
+export class DuplicateStudentEmailError extends Error {
+  constructor(email: string) {
+    super(`Ya hay un estudiante con el correo ${email}`);
+    this.name = 'DuplicateStudentEmailError';
+  }
+}
+
 export class StudentNotFoundError extends Error {
   constructor(id: string) {
     super(`No se encontró el estudiante con ID ${id}`);
@@ -35,7 +42,7 @@ export class PortalUserNotFoundError extends Error {
 
 export class PortalUserRoleMismatchError extends Error {
   constructor() {
-    super('Solo se puede vincular una cuenta con rol Tutorado');
+    super('Solo se puede vincular una cuenta con rol Estudiante');
     this.name = 'PortalUserRoleMismatchError';
   }
 }
@@ -50,7 +57,14 @@ export class PortalUserAlreadyLinkedError extends Error {
 // El solicitante no tiene alcance sobre la escuela o el tutorado indicados (Art. 9.a y 14.c).
 export class StudentAccessDeniedError extends Error {
   constructor() {
-    super('No tienes acceso a los tutorados de esa escuela');
+    super('No tienes acceso a los estudiantes de esa escuela');
     this.name = 'StudentAccessDeniedError';
+  }
+}
+
+export class NoOpenPeriodForLoadError extends Error {
+  constructor() {
+    super('No hay un periodo académico vigente: cree y abra el periodo (Catálogos) antes de cargar a los estudiantes');
+    this.name = 'NoOpenPeriodForLoadError';
   }
 }

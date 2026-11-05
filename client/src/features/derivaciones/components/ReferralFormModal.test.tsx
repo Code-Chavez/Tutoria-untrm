@@ -1,4 +1,4 @@
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { ReferralFormModal } from './ReferralFormModal';
@@ -18,6 +18,22 @@ const student: Student = {
 };
 
 describe('ReferralFormModal', () => {
+  beforeEach(() => sessionStorage.clear());
+
+  it('recupera los aspectos marcados y el motivo al volver a abrirla', async () => {
+    const user = userEvent.setup();
+    const modal = <ReferralFormModal student={student} draftOwnerId="u1" onSubmit={vi.fn()} onCancel={vi.fn()} />;
+    const first = render(modal);
+    await user.click(screen.getByLabelText(/está en riesgo de repetir algún curso/i));
+    await user.type(screen.getByLabelText(/motivo de la derivación/i), 'Faltas reiteradas');
+    first.unmount();
+
+    render(modal);
+    expect(screen.getByRole('status')).toBeInTheDocument();
+    expect(screen.getByLabelText(/está en riesgo de repetir algún curso/i)).toBeChecked();
+    expect(screen.getByLabelText(/motivo de la derivación/i)).toHaveValue('Faltas reiteradas');
+  });
+
   it('exige marcar al menos un aspecto antes de confirmar', async () => {
     const onSubmit = vi.fn();
     const user = userEvent.setup();

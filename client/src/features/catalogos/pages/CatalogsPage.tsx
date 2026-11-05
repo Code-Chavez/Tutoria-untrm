@@ -1,7 +1,9 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { PageHeader, Card, Button, Badge, ConfirmDialog, EmptyState, TableSkeleton } from '@shared/components/ui';
 import { SettingsIcon, PlusIcon } from '@shared/components/icons';
 import { getApiErrorMessage } from '@shared/services/apiClient';
+import { useUrlParams } from '@shared/hooks/useUrlParams';
+import { useAuth } from '@features/auth/hooks/useAuth';
 import { CatalogEntryModal } from '../components/CatalogEntryModal';
 import { useCatalog, useCatalogMutations } from '../hooks/useCatalog';
 import { CATALOGS, CatalogEntry, CatalogKind } from '../services/catalogService';
@@ -13,19 +15,39 @@ const date = (iso: string | null) => (iso ? new Date(iso).toLocaleDateString('es
 // ciclos, servicios y motivos. Lo que está en uso solo se desactiva; la baja
 // definitiva se permite únicamente si nada lo referencia.
 export function CatalogsPage() {
-  const [kind, setKind] = useState<CatalogKind>('faculties');
-  const [editing, setEditing] = useState<CatalogEntry | null>(null);
-  const [creating, setCreating] = useState(false);
-  const [toDelete, setToDelete] = useState<CatalogEntry | null>(null);
+  // La pestaña y la ventana abierta viven en la URL (?tipo=, ?nuevo=1, ?editar=<id>, ?eliminar=<id>): recargar o compartir el enlace
+  // vuelve al mismo lugar. Lo que se escribe en el formulario se conserva como borrador de la pestaña.
+  const url = useUrlParams();
+  const { user: me } = useAuth();
+  const kind: CatalogKind = CATALOGS.find((c) => c.kind === url.get('tipo'))?.kind ?? 'faculties';
   const [actionError, setActionError] = useState('');
 
   const definition = CATALOGS.find((c) => c.kind === kind)!;
   const { entries, loading, error, refresh } = useCatalog(kind);
+  const creating = url.get('nuevo') === '1';
+  const editing = entries.find((e) => e.id === url.get('editar')) ?? null;
+  const toDelete = entries.find((e) => e.id === url.get('eliminar')) ?? null;
+  const setCreating = (open: boolean) => url.set({ nuevo: open ? '1' : null, editar: null, eliminar: null }, { replace: !open });
+  const setEditing = (entry: CatalogEntry | null) => url.set({ editar: entry?.id ?? null, nuevo: null, eliminar: null }, { replace: entry === null });
+  const setToDelete = (entry: CatalogEntry | null) => url.set({ eliminar: entry?.id ?? null }, { replace: entry === null });
+
+  // Un enlace a un elemento que ya no existe no deja una ventana fantasma: se limpia el parámetro.
+  const staleIds = [url.get('editar'), url.get('eliminar')].join('|');
+  useEffect(() => {
+    if (loading || error) return;
+    const gone: Record<string, null> = {};
+    for (const key of ['editar', 'eliminar']) {
+      const id = url.get(key);
+      if (id && !entries.some((e) => e.id === id)) gone[key] = null;
+    }
+    if (Object.keys(gone).length > 0) url.set(gone, { replace: true });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [loading, error, entries, staleIds]);
   const { create, update, remove } = useCatalogMutations(kind);
   const { entries: faculties } = useCatalog('faculties');
 
   const detail = (entry: CatalogEntry) => {
-    if (entry.kind === 'schools') return faculties.find((f) => f.id === entry.facultyId)?.name ?? '—';
+    if (entry.kind === 'schools') return `${faculties.find((f) => f.id === entry.facultyId)?.name ?? '—'} · ${entry.cycleCount ?? 'Sin configurar'} ciclos`;
     if (entry.kind === 'periods') return `${date(entry.startDate)} – ${date(entry.endDate)}`;
     return entry.code ?? '—';
   };
@@ -53,7 +75,7 @@ export function CatalogsPage() {
   };
 
   const switchTab = (next: CatalogKind) => {
-    setKind(next);
+    url.set({ tipo: next === 'faculties' ? null : next, nuevo: null, editar: null, eliminar: null }, { replace: true });
     setActionError('');
   };
 
@@ -117,7 +139,9 @@ export function CatalogsPage() {
                   {detailHeader && <th>{detailHeader}</th>}
                   <th>Estado</th>
                   <th className={styles.num}>En uso</th>
-                  <th aria-label="Acciones" />
+                  <th>
+                  <span className="sr-only">Acciones</span>
+                </th>
                 </tr>
               </thead>
               <tbody>
@@ -160,10 +184,9 @@ export function CatalogsPage() {
           key={editing?.id ?? 'new'}
           definition={definition}
           entry={editing}
-          onClose={() => {
-            setCreating(false);
-            setEditing(null);
-          }}
+          draftOwnerId={me?.id}
+          draftScope={kind}
+          onClose={() => url.set({ nuevo: null, editar: null }, { replace: true })}
           onSubmit={async (input) => {
             if (editing) await update.mutateAsync({ id: editing.id, input });
             else await create.mutateAsync(input);

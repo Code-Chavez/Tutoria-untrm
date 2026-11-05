@@ -18,6 +18,17 @@ const student: Student = {
 };
 
 describe('SessionFormModal', () => {
+  it('dice lo que de verdad pasa con el aviso: lo recibe quien tiene cuenta del portal, y a quien no se le avisa por otro medio (U06)', () => {
+    const { unmount } = render(<SessionFormModal student={{ ...student, userId: 'user-1' }} durationMinutes={45} onSubmit={vi.fn()} onCancel={vi.fn()} />);
+    expect(screen.getByText(/Ana recibirá un aviso en el sistema con la fecha y el lugar o enlace/)).toBeInTheDocument();
+    expect(screen.queryByText(/módulo de notificaciones/)).not.toBeInTheDocument();
+    unmount();
+
+    render(<SessionFormModal student={{ ...student, userId: null }} durationMinutes={45} onSubmit={vi.fn()} onCancel={vi.fn()} />);
+    expect(screen.getByText(/Ana no tiene cuenta del portal: el sistema no puede avisarle/)).toBeInTheDocument();
+    expect(screen.getByText(/Comunícale la sesión por otro medio/)).toBeInTheDocument();
+  });
+
   it('exige fecha y hora antes de confirmar', async () => {
     const onSubmit = vi.fn();
     const user = userEvent.setup();

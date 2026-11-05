@@ -35,7 +35,7 @@ export function RiskAlerts() {
       <EmptyState
         icon={<AlertTriangleIcon size={26} />}
         title="Sin alertas activas"
-        description="Ningún tutorado en riesgo requiere intervención en este momento."
+        description="Ningún estudiante en riesgo requiere intervención en este momento."
       />
     );
   }

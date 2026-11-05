@@ -1,10 +1,15 @@
 import { UserRepository } from '@domain/repositories/UserRepository';
 import { User } from '@domain/entities/User';
 import { RoleRepository } from '@domain/repositories/RoleRepository';
-import { RoleNotFoundError } from '@application/use-cases/roles/RoleErrors';
+import { RoleNotFoundError, assertRoleActive } from '@application/use-cases/roles/RoleErrors';
+import { SchoolRepository } from '@domain/repositories/SchoolRepository';
 import { resolveService } from './serviceAssignment';
+import { FacultyRepository } from '@domain/repositories/FacultyRepository';
+import { resolveTutorSchool, TutorSchoolRequiredError } from './tutorSchool';
+import { DeanFacultyRequiredError, resolveDeanFaculty } from './deanFaculty';
 import { DuplicateEmailError } from './UserErrors';
-import { normalizeEmail } from './normalizeEmail';
+import { accountEmailProblem, createEmailPolicy, EmailPolicy, normalizeEmail } from '@application/validation/email';
+import { InvalidAccountEmailError } from './UserErrors';
 
 export class UserNotFoundError extends Error {
   constructor(id: string) {
@@ -13,12 +18,16 @@ export class UserNotFoundError extends Error {
   }
 }
 
-export { DuplicateEmailError };
+export { DuplicateEmailError, TutorSchoolRequiredError, DeanFacultyRequiredError };
 
 export class UpdateUserUseCase {
   constructor(
     private readonly userRepository: UserRepository,
     private readonly roles: RoleRepository,
+    private readonly schools: SchoolRepository,
+    private readonly faculties?: FacultyRepository,
+    // Sin indicarla rige RF-01: solo el dominio institucional. El despliegue pasa la suya (EMAIL_ALLOWED_DOMAINS).
+    private readonly emailPolicy: EmailPolicy = createEmailPolicy(undefined),
   ) {}
 
   async execute(id: string, data: Partial<Omit<User, 'id' | 'createdAt' | 'updatedAt' | 'passwordHash'>>): Promise<Omit<User, 'passwordHash'>> {
@@ -32,6 +41,11 @@ export class UpdateUserUseCase {
     const changes = { ...data };
     if (data.email) {
       const email = normalizeEmail(data.email);
+      // El dominio se exige al cambiar el correo: una cuenta anterior a la regla puede seguir editándose sin tocar el suyo.
+      if (email !== existingUser.email) {
+        const emailProblem = accountEmailProblem(email, this.emailPolicy);
+        if (emailProblem) throw new InvalidAccountEmailError(emailProblem);
+      }
       const emailUser = await this.userRepository.findByEmail(email);
       if (emailUser && emailUser.id !== id) {
         throw new DuplicateEmailError(email);
@@ -44,7 +58,28 @@ export class UpdateUserUseCase {
       const roleId = data.roleId ?? existingUser.roleId;
       const role = await this.roles.findById(roleId);
       if (!role) throw new RoleNotFoundError(roleId);
+      if (data.roleId !== undefined && data.roleId !== existingUser.roleId) assertRoleActive(role);
       changes.service = resolveService(role.name, data.service !== undefined ? data.service : existingUser.service);
+    }
+
+    // 3b. Un docente tutor pertenece a una escuela: se exige al volverlo tutor o al tocar su escuela; el resto la conserva o la pierde según el rol.
+    if (data.roleId !== undefined || data.schoolId !== undefined) {
+      const roleId = data.roleId ?? existingUser.roleId;
+      const role = await this.roles.findById(roleId);
+      if (!role) throw new RoleNotFoundError(roleId);
+      const schoolId = await resolveTutorSchool(this.schools, role.name, data.schoolId !== undefined ? data.schoolId : existingUser.schoolId);
+      if (schoolId !== (existingUser.schoolId ?? null)) changes.schoolId = schoolId;
+      else delete changes.schoolId;
+    }
+
+    // 3c. El Decano pertenece a una facultad (igual criterio que la escuela del tutor).
+    if (data.roleId !== undefined || data.facultyId !== undefined) {
+      const roleId = data.roleId ?? existingUser.roleId;
+      const role = await this.roles.findById(roleId);
+      if (!role) throw new RoleNotFoundError(roleId);
+      const facultyId = await resolveDeanFaculty(this.faculties, role.name, data.facultyId !== undefined ? data.facultyId : existingUser.facultyId);
+      if (facultyId !== (existingUser.facultyId ?? null)) changes.facultyId = facultyId;
+      else delete changes.facultyId;
     }
 
     // 4. Actualizar el usuario

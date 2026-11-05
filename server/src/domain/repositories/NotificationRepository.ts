@@ -7,6 +7,7 @@ export interface NotificationRepository {
     message: string;
     referralId?: string | null;
     tutoringRequestId?: string | null;
+    sessionId?: string | null;
   }): Promise<Notification>;
   /** Los avisos más recientes del usuario (el resto queda archivado, no se descarta). */
   findByUser(userId: string, limit?: number): Promise<Notification[]>;

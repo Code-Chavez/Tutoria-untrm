@@ -1,0 +1,15 @@
+# Caso que falla a propósito (archivo temporal, no versionado): inicia sesión con una cuenta compartida, crea una sede y falla
+Tests:       1 failed, 1 total
+EXIT 1
+comparación fila por fila contra la foto inicial (filas nuevas = residuo, filas cambiadas o borradas): SIN DIFERENCIAS
+
+# Residuo deliberado (archivo temporal, no versionado): cambia login_max_attempts y la sede preexistente «Sede Bagua» y no los restaura
+    √ cambia un parámetro global y una sede preexistente y no los restaura (91 ms)
+Tests:       1 passed, 1 total
+[jest] El parámetro «login_max_attempts» quedó cambiado por una prueba; se restauró a «5».
+Error: Jest: Got error running globalTeardown - C:\Proyects\Proyects\Tutoria-untrm\server\tests\support\testDatabaseGlobalTeardown.ts, reason: Las pruebas de integración dejaron residuos o cambios inesperados:
+- Una prueba dejó cambiados parámetros del sistema (se restauraron): login_max_attempts.
+campuses/f1adf7a6-4d64-4ff9-a5a6-ddc160138434: MODIFICADA (is_active)
+EXIT 1
+valor del parámetro después de la corrida: login_max_attempts=5 (la verificación final lo restauró)
+la sede se restauró a mano después (la verificación final solo restaura parámetros del sistema): comparación posterior: SIN DIFERENCIAS

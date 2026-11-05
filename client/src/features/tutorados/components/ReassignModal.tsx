@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useDialogFocus } from '@shared/hooks/useDialog';
+import { useDraftForm } from '@shared/hooks/useDraftForm';
+import { DraftNotice } from '@shared/components/ui';
 import { Button, SelectField } from '@shared/components/ui';
 import { SwitchIcon, CloseIcon } from '@shared/components/icons';
 import { Student } from '../services/studentService';
@@ -13,6 +15,9 @@ interface ReassignModalProps {
   loading?: boolean;
   /** Error del servidor (p. ej. de red o de validación) a mostrar en el modal. */
   serverError?: string;
+  /** Quien escribe y la clave del borrador: con ellos, lo escrito se guarda en la pestaña y se recupera al recargar. */
+  draftOwnerId?: string;
+  draftKey?: string;
   onConfirm: (newTutorId: string, reason: string) => void;
   onCancel: () => void;
 }
@@ -23,14 +28,18 @@ export const ReassignModal: React.FC<ReassignModalProps> = ({
   currentTutorName,
   loading,
   serverError,
+  draftOwnerId,
+  draftKey,
   onConfirm,
   onCancel,
 }) => {
-  // Solo tiene sentido elegir entre tutores distintos al actual.
-  const options = tutors.filter((t) => t.tutorId !== student.tutorId);
+  // Solo tiene sentido elegir entre tutores distintos al actual y de la misma escuela del tutorado.
+  const options = tutors.filter((t) => t.tutorId !== student.tutorId && (!t.schoolId || t.schoolId === student.schoolId));
 
-  const [newTutorId, setNewTutorId] = useState(options[0]?.tutorId ?? '');
-  const [reason, setReason] = useState('');
+  const { form, set, restored, discard } = useDraftForm(draftOwnerId, draftKey ?? `reasignar.${student.id}`, { newTutorId: options[0]?.tutorId ?? '', reason: '' });
+  const { newTutorId, reason } = form;
+  const setNewTutorId = (v: typeof form.newTutorId) => set({ newTutorId: v });
+  const setReason = (v: typeof form.reason) => set({ reason: v });
   const [error, setError] = useState('');
 
   const dialogRef = useDialogFocus();
@@ -62,7 +71,7 @@ export const ReassignModal: React.FC<ReassignModalProps> = ({
         ref={dialogRef}
         tabIndex={-1}
         aria-modal="true"
-        aria-label="Reasignar tutorado"
+        aria-label="Reasignar estudiante"
         onClick={(e) => e.stopPropagation()}
       >
         <div className={styles.header}>
@@ -70,7 +79,7 @@ export const ReassignModal: React.FC<ReassignModalProps> = ({
             <SwitchIcon size={20} />
           </span>
           <div className={styles.headText}>
-            <h2>Reasignar tutorado</h2>
+            <h2>Reasignar estudiante</h2>
             <p>
               {student.firstName} {student.lastName} · {student.studentCode}
             </p>
@@ -81,6 +90,7 @@ export const ReassignModal: React.FC<ReassignModalProps> = ({
         </div>
 
         <div className={styles.body}>
+          {restored && <DraftNotice onDiscard={discard} />}
           <div className={styles.currentTutor}>
             <span>Tutor actual</span>
             <b>{currentTutorName ?? 'Sin asignar'}</b>
@@ -103,7 +113,7 @@ export const ReassignModal: React.FC<ReassignModalProps> = ({
               <option value="">Seleccione un tutor…</option>
               {options.map((t) => (
                 <option key={t.tutorId} value={t.tutorId}>
-                  {t.fullName} · {t.assignedCount} tutorado{t.assignedCount === 1 ? '' : 's'}
+                  {t.fullName} · {t.assignedCount} estudiante{t.assignedCount === 1 ? '' : 's'}
                 </option>
               ))}
             </SelectField>

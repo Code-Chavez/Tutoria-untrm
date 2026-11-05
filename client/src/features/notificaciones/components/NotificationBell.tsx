@@ -50,6 +50,9 @@ export function NotificationBell() {
     } else if (notification.tutoringRequestId) {
       // El estudiante revisa su historial; el personal abre la solicitud en la bandeja.
       navigate(user?.role === 'Tutorado' ? '/solicitar-tutoria' : `/solicitudes?solicitud=${notification.tutoringRequestId}`);
+    } else if (notification.sessionId) {
+      // El aviso de una sesión lleva a la agenda: la del estudiante o, para el personal, el calendario.
+      navigate(user?.role === 'Tutorado' ? '/mis-sesiones' : '/sesiones');
     }
   };
 
@@ -58,7 +61,7 @@ export function NotificationBell() {
       <button
         className={styles.bell}
         type="button"
-        aria-label="Notificaciones"
+        aria-label={unreadCount > 0 ? `Notificaciones: ${unreadCount > 9 ? '9+' : unreadCount} sin leer` : 'Notificaciones'}
         onClick={() => setOpen((prev) => !prev)}
       >
         <BellIcon size={19} />

@@ -65,7 +65,7 @@ jobs:
         with:
           script: |
             const head = context.payload.pull_request.head.ref;
-            const allowed = /^(feature\/|bugfix\/|hotfix\/|release\/|dependabot\/)/;
+            const allowed = /^(feature\/|bugfix\/|fix\/|docs\/|test\/|codex\/|hotfix\/|release\/|dependabot\/)/;
 
             if (!allowed.test(head)) {
               core.warning(

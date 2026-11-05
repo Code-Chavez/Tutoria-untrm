@@ -1,0 +1,95 @@
+# Verificación con un PR desechable (#178, 27/10/2026): ¿los checks «omitidos» por editar un PR dejan fusionar con un check obligatorio en rojo?
+# El PR contenía una prueba unitaria que falla a propósito. Se esperó a que la CI terminara, se editó UNA vez la descripción y se leyó el estado de fusión.
+# NO se fusionó. El PR se cerró sin fusionar y su rama se borró. El script de la verificación es temporal y no está en el repositorio.
+PR=178 SHA=de3d86f32864a6bda6889f1d1fef148ef1ab01c5
+
+=== 1. Tras la primera ejecución de la CI (antes de editar) (04:07:34Z)
+GraphQL mergeStateStatus=BLOCKED mergeable=MERGEABLE
+REST mergeable=true mergeable_state=blocked
+-- gh pr checks:
+   Server — Test | fail
+   Backup — Restore drill | pass
+   Client — Audit | pass
+   Client — Lint | pass
+   Client — Test | pass
+   Client — Type Check & Build | pass
+   Server — Audit | pass
+   Docker — Build Images | skipping
+   Server — Build | pass
+   Server — Lint | pass
+   📋 Validate PR Description | pass
+   📝 Validate PR Title | pass
+   🔀 Validate Feature → develop | pass
+   🛡️ Gate — Main Branch Protection | skipping
+-- check-runs del commit (nombre | estado | conclusión | inicio | fin | evento):
+   Backup — Restore drill	completed	success	2026-10-27T04:05:12Z	2026-10-27T04:05:40Z
+   Client — Audit	completed	success	2026-10-27T04:05:12Z	2026-10-27T04:05:27Z
+   Client — Lint	completed	success	2026-10-27T04:05:12Z	2026-10-27T04:05:37Z
+   Client — Test	completed	success	2026-10-27T04:05:12Z	2026-10-27T04:07:07Z
+   Client — Type Check & Build	completed	success	2026-10-27T04:05:12Z	2026-10-27T04:05:38Z
+   Docker — Build Images	completed	skipped	2026-10-27T04:07:08Z	2026-10-27T04:07:08Z
+   Server — Audit	completed	success	2026-10-27T04:05:12Z	2026-10-27T04:05:31Z
+   Server — Build	completed	success	2026-10-27T04:05:12Z	2026-10-27T04:05:38Z
+   Server — Lint	completed	success	2026-10-27T04:05:12Z	2026-10-27T04:05:36Z
+   Server — Test	completed	failure	2026-10-27T04:05:12Z	2026-10-27T04:06:56Z
+   📋 Validate PR Description	completed	success	2026-10-27T04:05:12Z	2026-10-27T04:05:16Z
+   📝 Validate PR Title	completed	success	2026-10-27T04:05:12Z	2026-10-27T04:05:16Z
+   🔀 Validate Feature → develop	completed	success	2026-10-27T04:05:12Z	2026-10-27T04:05:15Z
+   🛡️ Gate — Main Branch Protection	completed	skipped	2026-10-27T04:05:09Z	2026-10-27T04:05:09Z
+descripción editada a las 04:07:57Z
+=== 2. Tras editar la descripción (ejecución disparada por el evento edited) (04:08:26Z)
+GraphQL mergeStateStatus=CLEAN mergeable=MERGEABLE
+REST mergeable=true mergeable_state=clean
+-- gh pr checks:
+   📋 Validate PR Description | pass
+   Client — Audit | skipping
+   Backup — Restore drill | skipping
+   📝 Validate PR Title | pass
+   🔀 Validate Feature → develop | pass
+   Client — Lint | skipping
+   Client — Test | skipping
+   Client — Type Check & Build | skipping
+   Docker — Build Images | skipping
+   Server — Audit | skipping
+   Server — Build | skipping
+   Server — Lint | skipping
+   Server — Test | skipping
+   🛡️ Gate — Main Branch Protection | skipping
+-- check-runs del commit (nombre | estado | conclusión | inicio | fin | evento):
+   Backup — Restore drill	completed	skipped	2026-10-27T04:08:01Z	2026-10-27T04:08:01Z
+   Backup — Restore drill	completed	success	2026-10-27T04:05:12Z	2026-10-27T04:05:40Z
+   Client — Audit	completed	skipped	2026-10-27T04:08:01Z	2026-10-27T04:08:01Z
+   Client — Audit	completed	success	2026-10-27T04:05:12Z	2026-10-27T04:05:27Z
+   Client — Lint	completed	skipped	2026-10-27T04:08:02Z	2026-10-27T04:08:01Z
+   Client — Lint	completed	success	2026-10-27T04:05:12Z	2026-10-27T04:05:37Z
+   Client — Test	completed	skipped	2026-10-27T04:08:07Z	2026-10-27T04:08:01Z
+   Client — Test	completed	success	2026-10-27T04:05:12Z	2026-10-27T04:07:07Z
+   Client — Type Check & Build	completed	skipped	2026-10-27T04:08:11Z	2026-10-27T04:08:01Z
+   Client — Type Check & Build	completed	success	2026-10-27T04:05:12Z	2026-10-27T04:05:38Z
+   Docker — Build Images	completed	skipped	2026-10-27T04:07:08Z	2026-10-27T04:07:08Z
+   Docker — Build Images	completed	skipped	2026-10-27T04:08:02Z	2026-10-27T04:08:01Z
+   Server — Audit	completed	skipped	2026-10-27T04:08:07Z	2026-10-27T04:08:01Z
+   Server — Audit	completed	success	2026-10-27T04:05:12Z	2026-10-27T04:05:31Z
+   Server — Build	completed	skipped	2026-10-27T04:08:02Z	2026-10-27T04:08:01Z
+   Server — Build	completed	success	2026-10-27T04:05:12Z	2026-10-27T04:05:38Z
+   Server — Lint	completed	skipped	2026-10-27T04:08:09Z	2026-10-27T04:08:01Z
+   Server — Lint	completed	success	2026-10-27T04:05:12Z	2026-10-27T04:05:36Z
+   Server — Test	completed	failure	2026-10-27T04:05:12Z	2026-10-27T04:06:56Z
+   Server — Test	completed	skipped	2026-10-27T04:08:02Z	2026-10-27T04:08:01Z
+   📋 Validate PR Description	completed	success	2026-10-27T04:05:12Z	2026-10-27T04:05:16Z
+   📋 Validate PR Description	completed	success	2026-10-27T04:08:04Z	2026-10-27T04:08:07Z
+   📝 Validate PR Title	completed	success	2026-10-27T04:05:12Z	2026-10-27T04:05:16Z
+   📝 Validate PR Title	completed	success	2026-10-27T04:08:04Z	2026-10-27T04:08:09Z
+   🔀 Validate Feature → develop	completed	success	2026-10-27T04:05:12Z	2026-10-27T04:05:15Z
+   🔀 Validate Feature → develop	completed	success	2026-10-27T04:08:04Z	2026-10-27T04:08:08Z
+   🛡️ Gate — Main Branch Protection	completed	skipped	2026-10-27T04:05:09Z	2026-10-27T04:05:09Z
+   🛡️ Gate — Main Branch Protection	completed	skipped	2026-10-27T04:08:01Z	2026-10-27T04:08:01Z
+
+# Ejecuciones de workflow de la rama (fecha, workflow, evento, estado, conclusión):
+2026-10-27T04:08:01Z CI Pipeline pull_request completed skipped
+2026-10-27T04:08:01Z PR Checks pull_request completed success
+2026-10-27T04:05:09Z PR Checks pull_request completed success
+2026-10-27T04:05:09Z CI Pipeline pull_request completed failure
+
+# Conclusión medida: con Server — Test en fallo el PR estaba BLOCKED; tras editar la descripción, el check omitido (04:08:02Z) es el más reciente y el estado pasó a CLEAN.
+# No verificado: una fusión real; la alternativa de corrección; otros eventos.

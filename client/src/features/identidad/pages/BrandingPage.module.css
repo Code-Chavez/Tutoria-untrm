@@ -196,3 +196,15 @@
   border-radius: 3px;
   background: var(--dorado);
 }
+
+.heading { font-size: 18px; padding-bottom: 10px; border-bottom: 1px solid var(--borde); }
+.field label { font-size: var(--fs-sm); line-height: 1.5; }
+.field small, .logoActions small, .hint { font-size: var(--fs-sm); line-height: 1.6; }
+.field { min-width: 0; }
+.field input:not([type='color']) { min-height: 44px; }
+.colorRow { flex-wrap: wrap; }
+.colorRow input { min-width: 0; max-width: 100%; }
+.preview { box-shadow: var(--sombra-xs); }
+@media (max-width: 480px) { .colors { flex-direction: column; } .actions { flex-direction: column; align-items: stretch; } }
+.heading { font-size: 16px; padding-bottom: 8px; }
+.field small, .logoActions small, .hint { font-size: var(--fs-xs); line-height: 1.5; }

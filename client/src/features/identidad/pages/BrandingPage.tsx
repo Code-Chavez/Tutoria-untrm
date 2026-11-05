@@ -1,6 +1,8 @@
-import { useRef, useState, type CSSProperties } from 'react';
+import { useCallback, useRef, useState, type CSSProperties } from 'react';
+import { useDraft } from '@shared/hooks/useDraft';
+import { useAuth } from '@features/auth/hooks/useAuth';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { PageHeader, Card, Button, ConfirmDialog } from '@shared/components/ui';
+import { PageHeader, Card, Button, ConfirmDialog, DraftNotice } from '@shared/components/ui';
 import { SettingsIcon, UploadIcon } from '@shared/components/icons';
 import { getApiErrorMessage } from '@shared/services/apiClient';
 import { BRANDING_QUERY_KEY, useBranding } from '@shared/theme/BrandingProvider';
@@ -28,12 +30,23 @@ function BrandingEditor({
 }) {
   const queryClient = useQueryClient();
   const fileInput = useRef<HTMLInputElement>(null);
-  const [form, setForm] = useState({
+  const { user } = useAuth();
+  const saved = {
     institutionName: current.institutionName,
     shortName: current.shortName,
     primaryColor: current.primaryColor,
     accentColor: current.accentColor,
-  });
+  };
+  // Lo escrito sin guardar se conserva como borrador de la pestaña; sin cambios respecto de la identidad vigente no hay nada que guardar.
+  const sameAsSaved = useCallback(
+    (v: typeof saved) =>
+      v.institutionName === current.institutionName &&
+      v.shortName === current.shortName &&
+      v.primaryColor.toUpperCase() === current.primaryColor.toUpperCase() &&
+      v.accentColor.toUpperCase() === current.accentColor.toUpperCase(),
+    [current],
+  );
+  const { value: form, setValue: setForm, restored, discard } = useDraft(user?.id, 'identidad', saved, sameAsSaved);
   const [confirmReset, setConfirmReset] = useState(false);
 
   // Cada operación devuelve la identidad ya guardada: se publica en la caché global.
@@ -95,7 +108,8 @@ function BrandingEditor({
   return (
     <div className={styles.layout}>
       <Card padded>
-        <h3 className={styles.heading}>Textos</h3>
+        {restored && <DraftNotice onDiscard={discard} />}
+        <h2 className={styles.heading}>Textos</h2>
         <div className={styles.field}>
           <label htmlFor="br-institution">Nombre de la institución</label>
           <input id="br-institution" value={form.institutionName} maxLength={150} onChange={(e) => setForm({ ...form, institutionName: e.target.value })} />
@@ -106,7 +120,7 @@ function BrandingEditor({
           <small>Aparece junto al logotipo en la barra lateral y como título del navegador.</small>
         </div>
 
-        <h3 className={styles.heading}>Colores</h3>
+        <h2 className={styles.heading}>Colores</h2>
         <div className={styles.colors}>
           {([
             ['primaryColor', 'Color principal', 'br-primary'],
@@ -137,7 +151,7 @@ function BrandingEditor({
           </p>
         )}
 
-        <h3 className={styles.heading}>Logotipo</h3>
+        <h2 className={styles.heading}>Logotipo</h2>
         <div className={styles.logoRow}>
           <img src={logoSrc} alt="Logotipo actual" className={styles.logoThumb} />
           <div className={styles.logoActions}>
@@ -170,7 +184,7 @@ function BrandingEditor({
       </Card>
 
       <Card padded>
-        <h3 className={styles.heading}>Vista previa</h3>
+        <h2 className={styles.heading}>Vista previa</h2>
         <div className={styles.preview} style={previewVars} data-testid="preview">
           <div className={styles.previewBar}>
             <img src={logoSrc} alt="" className={styles.previewLogo} />

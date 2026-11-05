@@ -1,0 +1,20 @@
+# Fallo aislado de BcryptPasswordHasher (26/10/2026). CAUSA NO DETERMINADA.
+#
+# Observado UNA vez, en una corrida de diagnóstico local (jest con coverage, workers por defecto, todas las suites; base sit_db_test), sobre el
+# estado de la rama test/own-data-remaining-suites anterior al commit ec14f9d:
+#
+#   FAIL tests/unit/BcryptPasswordHasher.test.ts (18.524 s)
+#     ● BcryptPasswordHasher › rechaza una contraseña incorrecta
+#       thrown: "Exceeded timeout of 5000 ms for a test."
+#   Test Suites: 1 failed, 137 passed, 138 total      Tests: 1 failed, 1199 passed, 1200 total
+#
+# La prueba hace hash() de «Secreto123» y compare() con una clave incorrecta, dentro del plazo predeterminado de 5 s de jest (la suite del
+# archivo tardó 18,5 s en total en esa corrida).
+#
+# No se reprodujo en: 4 corridas completas locales posteriores (2 sobre el commit probado ec14f9d), la CI del PR #170 (3874f9e), la CI del PR #171
+# (c18ef2d) ni la CI de develop tras las fusiones (0299db1).
+#
+# NO se demostró la causa. Hipótesis sin probar: el tiempo de bcrypt (hash + compare) quedó cerca del plazo de 5 s en esa corrida; la máquina
+# ejecutaba otras suites a la vez, pero no se midió que eso la provocara. No se investigó más ni se cambió la prueba ni su plazo. Si reaparece, hay
+# que medir el tiempo de la prueba aislada y con carga antes de decidir (p. ej. subir el plazo o reducir el costo de bcrypt en pruebas).
+# El texto original de la salida de esa corrida no se versiona (está en el directorio temporal local del autor).

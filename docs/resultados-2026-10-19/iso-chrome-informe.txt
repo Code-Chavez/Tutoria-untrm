@@ -1,0 +1,8 @@
+
+Running 3 tests using 1 worker
+
+  ok 1 tests\e2e-19-accesibilidad-gestion.spec.ts:19:11 › gestión · tutor › «Informe semestral» no tiene infracciones serias ni de estructura (42.7s)
+  ok 2 tests\e2e-19-accesibilidad-gestion.spec.ts:19:11 › gestión · tutor › «Informe semestral» no tiene infracciones serias ni de estructura (59.0s)
+  ok 3 tests\e2e-19-accesibilidad-gestion.spec.ts:19:11 › gestión · tutor › «Informe semestral» no tiene infracciones serias ni de estructura (37.8s)
+
+  3 passed (2.8m)

@@ -34,7 +34,7 @@ describe('LinkPortalAccountModal', () => {
       />,
     );
 
-    expect(screen.getByLabelText(/cuenta de portal \(tutorado\)/i)).toHaveValue('');
+    expect(screen.getByLabelText(/cuenta de portal \((estudiante)\)/i)).toHaveValue('');
   });
 
   it('envía el userId elegido al guardar', async () => {
@@ -49,7 +49,7 @@ describe('LinkPortalAccountModal', () => {
       />,
     );
 
-    await user.selectOptions(screen.getByLabelText(/cuenta de portal \(tutorado\)/i), 'u1');
+    await user.selectOptions(screen.getByLabelText(/cuenta de portal \((estudiante)\)/i), 'u1');
     await user.click(screen.getByRole('button', { name: /guardar/i }));
 
     expect(onSubmit).toHaveBeenCalledWith('u1');
@@ -67,7 +67,7 @@ describe('LinkPortalAccountModal', () => {
       />,
     );
 
-    await user.selectOptions(screen.getByLabelText(/cuenta de portal \(tutorado\)/i), '');
+    await user.selectOptions(screen.getByLabelText(/cuenta de portal \((estudiante)\)/i), '');
     await user.click(screen.getByRole('button', { name: /guardar/i }));
 
     expect(onSubmit).toHaveBeenCalledWith(null);
@@ -76,7 +76,7 @@ describe('LinkPortalAccountModal', () => {
   it('explica qué hacer cuando no hay cuentas disponibles', () => {
     render(<LinkPortalAccountModal student={student} options={[]} onSubmit={vi.fn()} onCancel={vi.fn()} />);
 
-    expect(screen.getByRole('status')).toHaveTextContent(/crea el usuario con rol Tutorado/i);
+    expect(screen.getByRole('status')).toHaveTextContent(/crea el usuario con rol Estudiante/i);
   });
 
   it('no muestra ese aviso cuando hay cuentas para elegir', () => {

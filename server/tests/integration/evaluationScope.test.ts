@@ -1,6 +1,7 @@
 import http from 'http';
 import app from '../../src/app';
 import { prisma } from '../../src/infrastructure/database/prisma';
+import { currentPeriodId } from '../helpers/currentPeriod';
 
 /**
  * Alcance del coordinador sobre las evaluaciones (A05) sobre HTTP real y base de datos real: una respuesta de un
@@ -62,14 +63,14 @@ describe('alcance del coordinador sobre las evaluaciones (A05)', () => {
     const sistemas = await prisma.school.findFirstOrThrow({ where: { name: 'Ingeniería de Sistemas' } });
     mecanicaSchoolId = (await prisma.school.findFirstOrThrow({ where: { name: 'Ingeniería Mecánica Eléctrica' } })).id;
     tutorId = (await prisma.user.findFirstOrThrow({ where: { email: 'elena.ramirez@untrm.edu.pe' } })).id;
-    const period = await prisma.academicPeriod.findFirstOrThrow({ where: { isActive: true } });
+    const periodId = await currentPeriodId(prisma);
 
     const student = await prisma.student.create({
       data: { studentCode: `9905${String(Date.now()).slice(-6)}`, firstName: 'Prueba', lastName: 'Alcance', cycle: 3, schoolId: sistemas.id, tutorId },
     });
     studentId = student.id;
     const evaluation = await prisma.tutorEvaluation.create({
-      data: { studentId, tutorId, periodId: period.id, scores: Array(20).fill('S'), likes: MARKER },
+      data: { studentId, tutorId, periodId, scores: Array(20).fill('S'), likes: MARKER },
     });
     evaluationId = evaluation.id;
   });

@@ -1,0 +1,36 @@
+CORRIDA 2026-10-28T02:19:55.114Z
+render: 170 ms
+findByRole + click «Todos los ciclos»: 1295 ms
+findByLabelText + selectOptions tutor: 357 ms
+getByRole + click guardar: 752 ms
+findByRole dialog: 85 ms
+selectOptions motivo: 278 ms
+type 3 espacios: 415 ms
+clear: 178 ms
+type 17 caracteres: 1487 ms
+click registrar: 553 ms
+waitFor set: 13 ms
+CORRIDA 2026-10-28T02:20:38.861Z
+render: 212 ms
+findByRole + click «Todos los ciclos»: 1972 ms
+findByLabelText + selectOptions tutor: 453 ms
+getByRole + click guardar: 695 ms
+findByRole dialog: 99 ms
+selectOptions motivo: 305 ms
+type 3 espacios: 416 ms
+clear: 151 ms
+type 17 caracteres: 1281 ms
+click registrar: 582 ms
+waitFor set: 8 ms
+CORRIDA 2026-10-28T02:21:16.528Z
+render: 160 ms
+findByRole + click «Todos los ciclos»: 1429 ms
+findByLabelText + selectOptions tutor: 423 ms
+getByRole + click guardar: 668 ms
+findByRole dialog: 72 ms
+selectOptions motivo: 276 ms
+type 3 espacios: 385 ms
+clear: 131 ms
+type 17 caracteres: 1257 ms
+click registrar: 612 ms
+waitFor set: 9 ms

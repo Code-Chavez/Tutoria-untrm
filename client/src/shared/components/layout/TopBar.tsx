@@ -59,7 +59,7 @@ export function TopBar({ title, group, onMenu }: TopBarProps) {
         )}
         <button type="button" className={styles.logout} onClick={handleLogout} aria-label="Cerrar sesión">
           <LogOutIcon size={17} />
-          <span className={styles.logoutText}>Salir</span>
+          <span className={styles.logoutText}>Cerrar sesión</span>
         </button>
       </div>
     </header>

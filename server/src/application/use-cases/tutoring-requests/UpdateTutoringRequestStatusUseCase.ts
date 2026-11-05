@@ -102,6 +102,6 @@ export class UpdateTutoringRequestStatusUseCase {
       });
     }
 
-    return (await toTutoringRequestViews([updated], this.students, this.users))[0];
+    return (await toTutoringRequestViews([updated], this.students, this.users, this.sessions))[0];
   }
 }

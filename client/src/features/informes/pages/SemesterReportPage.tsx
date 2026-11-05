@@ -121,7 +121,7 @@ function SemesterReportEditor({ view }: { view: MySemesterReportView }) {
         </Button>
       </div>
 
-      <h3 className={styles.sectionTitle}>I. Datos generales</h3>
+      <h2 className={styles.sectionTitle}>I. Datos generales</h2>
       <div className={styles.general}>
         <div className={styles.field}>
           <label htmlFor="sr-tutor">Nombre del tutor/a</label>
@@ -139,10 +139,10 @@ function SemesterReportEditor({ view }: { view: MySemesterReportView }) {
         ))}
       </div>
 
-      <h3 className={styles.sectionTitle}>II. Desarrollo del proceso tutorial</h3>
+      <h2 className={styles.sectionTitle}>II. Desarrollo del proceso tutorial</h2>
       {SECTIONS.map(({ key: section, title }) => (
         <section className={styles.block} key={section}>
-          <h4>{title}</h4>
+          <h3>{title}</h3>
           <div className={styles.tableWrap}>
             <table className={styles.table}>
               <thead>
@@ -151,7 +151,9 @@ function SemesterReportEditor({ view }: { view: MySemesterReportView }) {
                     <th key={c.key}>{c.label}</th>
                   ))}
                   <th>N° de participantes</th>
-                  <th aria-label="Acciones" />
+                  <th>
+                  <span className="sr-only">Acciones</span>
+                </th>
                 </tr>
               </thead>
               <tbody>

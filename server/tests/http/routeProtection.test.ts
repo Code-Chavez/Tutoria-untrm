@@ -13,6 +13,9 @@ const PUBLIC_ROUTES = new Set([
   'POST /api/auth/reset-password',
   'GET /api/branding',
   'GET /api/branding/logo',
+  // Aceptación del tutor: la autorización es el enlace personal de un solo uso del correo (fase 4).
+  'GET /api/tutor-acceptance/:token',
+  'POST /api/tutor-acceptance/:token',
 ]);
 
 interface Layer {

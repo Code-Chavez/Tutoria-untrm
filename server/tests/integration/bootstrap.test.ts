@@ -79,8 +79,8 @@ describe('instalación nueva: bootstrap de producción (A11)', () => {
     expect(await fresh.academicPeriod.count()).toBe(0);
     expect(await fresh.session.count()).toBe(0);
 
-    // Datos base presentes: los seis roles con sus permisos y los parámetros del sistema.
-    expect(await fresh.role.count()).toBe(6);
+    // Datos base presentes: los siete roles con sus permisos y los parámetros del sistema.
+    expect(await fresh.role.count()).toBe(7);
     expect(await fresh.permission.count()).toBeGreaterThan(20);
     expect(await fresh.rolePermission.count()).toBeGreaterThan(40);
     expect(await fresh.systemParameter.count()).toBeGreaterThanOrEqual(6);

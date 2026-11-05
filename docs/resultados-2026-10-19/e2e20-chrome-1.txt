@@ -1,0 +1,10 @@
+
+Running 5 tests using 1 worker
+
+  ok 1 tests\e2e-20-estados-del-docente.spec.ts:80:5 › RECHAZO: el docente dice que no puede; la coordinación lo ve con el motivo y el ciclo queda sin tutor efectivo (45.6s)
+  ok 2 tests\e2e-20-estados-del-docente.spec.ts:102:5 › RECHAZO (comportamiento actual, pendiente de decisión de la DBU): la estudiante conserva a la docente que rechazó y su solicitud sigue yendo a ella (1.9s)
+  ok 3 tests\e2e-20-estados-del-docente.spec.ts:113:5 › SIN RESPUESTA: el enlace vence sin que el docente responda; aparece como pendiente y el enlace ya no sirve (39.5s)
+  ok 4 tests\e2e-20-estados-del-docente.spec.ts:140:5 › CORREO NO ENVIADO: si el servidor de correo no responde, se avisa a quien designó y queda como pendiente; al reenviar desaparece (55.1s)
+  ok 5 tests\e2e-20-estados-del-docente.spec.ts:168:5 › la lista de pendientes del ciclo queda limpia al liberar la designación (6.2s)
+
+  5 passed (2.8m)
