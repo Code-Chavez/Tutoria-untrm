@@ -7,7 +7,7 @@ import { SessionTimeout } from './SessionTimeout';
 const baseUser = { id: 'u1', email: 'a@untrm.edu.pe', firstName: 'Ana', lastName: 'Ruiz', role: 'Docente Tutor' };
 
 function renderWith(user: AuthContextValue['user']) {
-  const value: AuthContextValue = { user, isAuthenticated: true, login: vi.fn(), logout: vi.fn(), markPasswordChanged: vi.fn() };
+  const value: AuthContextValue = { user, isAuthenticated: true, isSessionFresh: true, login: vi.fn(), logout: vi.fn(), markPasswordChanged: vi.fn() };
   render(
     <AuthContext.Provider value={value}>
       <MemoryRouter>
