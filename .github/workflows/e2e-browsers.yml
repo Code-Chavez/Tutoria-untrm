@@ -1,0 +1,129 @@
+name: E2E browsers (certificate screen)
+
+# Corre los recorridos de la pantalla de certificados (E2E-26 y E2E-27) en Firefox y WebKit, sobre Linux. El job principal del pipeline usa
+# Chrome; esta comprobación aparte cubre los otros motores solo para esa pantalla y solo cuando cambia (o a mano). Qué navegadores corren
+# en el pipeline para el resto de recorridos se decide en el issue #231.
+on:
+  pull_request:
+    branches: [develop]
+    types: [opened, synchronize, reopened]
+    paths:
+      - 'client/src/features/certificados/**'
+      - 'client/src/shared/components/layout/Section*'
+      - 'client/src/shared/hooks/useDialog*'
+      - 'server/src/application/use-cases/certification/**'
+      - 'server/src/interfaces/http/routes/certificate.routes.ts'
+      - 'e2e/tests/e2e-26-*'
+      - 'e2e/tests/e2e-27-*'
+      - 'e2e/support/**'
+      - 'e2e/playwright.config.ts'
+      - '.github/workflows/e2e-browsers.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: e2e-browsers-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  browsers:
+    name: E2E — ${{ matrix.browser }} (certificate screen)
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    strategy:
+      fail-fast: false
+      matrix:
+        browser: [firefox, webkit]
+
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: sit_user
+          POSTGRES_PASSWORD: sit_pass
+          POSTGRES_DB: sit_db_e2e
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U sit_user -d sit_db_e2e"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+      # Bandeja de correo de pruebas: el enlace de aceptación del docente solo llega por correo.
+      mailpit:
+        image: axllent/mailpit:v1.21
+        ports:
+          - 1025:1025
+          - 8025:8025
+
+    env:
+      DATABASE_URL: postgresql://sit_user:sit_pass@localhost:5432/sit_db_e2e
+      JWT_SECRET: ci-e2e-secret
+      E2E_BASE_URL: http://localhost:5174
+      E2E_API_URL: http://localhost:3100/api
+      E2E_MAILPIT_URL: http://localhost:8025
+      E2E_BROWSER: ${{ matrix.browser }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9.15.9
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20.19.5
+
+      - name: Install server dependencies
+        working-directory: server
+        run: pnpm install --frozen-lockfile
+
+      - name: Install client dependencies
+        working-directory: client
+        run: pnpm install --frozen-lockfile
+
+      - name: Install E2E dependencies
+        working-directory: e2e
+        run: pnpm install --frozen-lockfile
+
+      - name: Install ${{ matrix.browser }} in the disposable runner
+        working-directory: e2e
+        run: pnpm exec playwright install --with-deps ${{ matrix.browser }}
+
+      - name: Prepare the database (client, migrations, seed)
+        working-directory: server
+        run: |
+          pnpm prisma generate
+          pnpm prisma migrate deploy
+          pnpm run seed
+
+      - name: Start the server and the client
+        run: |
+          (cd server && PORT=3100 CORS_ORIGIN=http://localhost:5174 PUBLIC_APP_URL=http://localhost:5174 SMTP_HOST=localhost SMTP_PORT=1025 MAIL_FROM="SIT UNTRM <no-reply@untrm.edu.pe>" nohup pnpm exec ts-node -r tsconfig-paths/register --transpile-only src/index.ts > "$RUNNER_TEMP/server.log" 2>&1 &)
+          (cd client && VITE_PROXY_TARGET=http://localhost:3100 nohup pnpm exec vite --port 5174 --strictPort > "$RUNNER_TEMP/client.log" 2>&1 &)
+          for i in $(seq 1 60); do
+            if curl -fsS http://localhost:3100/api/health > /dev/null 2>&1 && curl -fsS http://localhost:5174 > /dev/null 2>&1; then echo "stack ready"; exit 0; fi
+            sleep 3
+          done
+          echo "The stack did not start"; tail -n 40 "$RUNNER_TEMP/server.log" "$RUNNER_TEMP/client.log"; exit 1
+
+      - name: Run the certificate screen journeys on ${{ matrix.browser }}
+        working-directory: e2e
+        run: pnpm exec playwright test e2e-26 e2e-27
+
+      - name: Upload Playwright report and traces
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: e2e-${{ matrix.browser }}-report
+          path: |
+            e2e/playwright-report
+            e2e/test-results
+          retention-days: 14
+
+      - name: Show server log on failure
+        if: failure()
+        run: tail -n 80 "$RUNNER_TEMP/server.log" || true

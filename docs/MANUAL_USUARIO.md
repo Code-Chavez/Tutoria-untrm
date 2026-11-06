@@ -578,6 +578,8 @@ En **Certificados** (*Gestión → Periodo académico → Certificados*; la DBU 
 7. **Generar y descargar el PDF.** Con el trámite aprobado, *Generar PDF de demostración* le asigna su número y crea el archivo. *Descargar PDF* lo baja; cada descarga queda en la bitácora.
 8. **Anular.** *Anular* pide un motivo; un certificado anulado conserva su número y no se reabre.
 
+La pantalla se comprobó con axe, con el teclado (el foco entra al diálogo, `Tab` no sale de él, `Escape` cierra el de arriba y el foco vuelve al botón que lo abrió) y en pantallas de 320 y 375 píxeles de ancho; en el teléfono, *Periodo académico* muestra un selector «Tarea del periodo» en lugar de las pestañas. Axe no sustituye la prueba con un lector de pantalla ni con un teléfono real.
+
 Lo que escriba en los motivos y comentarios se guarda como **borrador solo en esa pestaña** (nunca en la dirección de la página): si recarga o cierra la ventana sin enviar, vuelve a aparecer con el aviso *«Recuperamos lo que habías escrito»* y puede descartarlo; al enviar con éxito se borra.
 
 ## 8. Preguntas frecuentes

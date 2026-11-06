@@ -105,7 +105,7 @@ test('2. «Certificados» es una pestaña de Periodo académico; el filtro de es
 test('3. se inicia el trámite del docente sin trámite y el detalle muestra lo que el sistema sabe, solo como información', async ({ page }) => {
   await loginUi(page, accounts.admin);
   await page.goto(`/certificados?escuela=${s.school.id}`);
-  await page.getByRole('button', { name: `Iniciar el trámite de ${TEACHER_FULL}` }).click();
+  await page.getByRole('button', { name: `Iniciar trámite de ${TEACHER_FULL}` }).click();
   const d = detail(page);
   await expect(d).toBeVisible();
   await expect(page).toHaveURL(/certificado=[0-9a-f-]{36}/);
@@ -118,13 +118,13 @@ test('3. se inicia el trámite del docente sin trámite y el detalle muestra lo 
   await expect(d.getByText(/cumplió/i)).toHaveCount(0);
   // El docente ya no figura entre los que no tienen trámite.
   await d.getByRole('button', { name: 'Cerrar', exact: true }).last().click();
-  await expect(page.getByRole('button', { name: `Iniciar el trámite de ${TEACHER_FULL}` })).toHaveCount(0);
+  await expect(page.getByRole('button', { name: `Iniciar trámite de ${TEACHER_FULL}` })).toHaveCount(0);
 });
 
 test('4. Atrás cierra el trámite y Adelante lo vuelve a abrir; el enlace funciona en otra pestaña', async ({ page, context }) => {
   await loginUi(page, accounts.admin);
   await page.goto(`/certificados?escuela=${s.school.id}`);
-  await page.getByRole('button', { name: `Ver el trámite de ${TEACHER_FULL}` }).click();
+  await page.getByRole('button', { name: `Ver trámite de ${TEACHER_FULL}` }).click();
   await expect(detail(page)).toBeVisible();
 
   await page.goBack();
@@ -265,7 +265,7 @@ test('10. una cuenta que solo consulta ve la pantalla sin acciones; una cuenta s
   await expect(page.getByRole('heading', { level: 1, name: 'Certificados' }).last()).toBeVisible();
   await expect(page.getByText('Docentes sin trámite')).toHaveCount(0);
   await expect(page.getByRole('button', { name: 'Resolución de decanato' })).toHaveCount(0);
-  await page.getByRole('button', { name: `Ver el trámite de ${TEACHER_FULL}` }).click();
+  await page.getByRole('button', { name: `Ver trámite de ${TEACHER_FULL}` }).click();
   const d = detail(page);
   await expect(d).toBeVisible();
   for (const name of ['Aprobar', 'Rechazar', 'Anular', 'Enviar a revisión', 'Generar PDF de demostración', 'Descargar PDF']) await expect(d.getByRole('button', { name })).toHaveCount(0);

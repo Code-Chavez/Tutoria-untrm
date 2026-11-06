@@ -25,6 +25,8 @@
 
 .scroll {
   overflow-x: auto;
+  /* Contiene el encabezado oculto para lectores de pantalla (position:absolute): sin esto escapa del scroll y estira la página en móvil. */
+  position: relative;
 }
 
 .table {

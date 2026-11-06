@@ -125,6 +125,19 @@ describe('CertificatesPage', () => {
       expect(api.list).toHaveBeenCalledWith({ periodId: 'p1', schoolId: '', status: '' });
     });
 
+    it('el nombre accesible de cada botón de las tablas contiene su texto visible y dice de quién es (accesibilidad: etiqueta en el nombre)', async () => {
+      renderPage();
+      await screen.findByText('Docente Candidato');
+      const buttons = [...document.querySelectorAll('table button')] as HTMLButtonElement[];
+      expect(buttons.length).toBeGreaterThanOrEqual(3);
+      for (const button of buttons) {
+        const visible = button.textContent?.trim() ?? '';
+        const name = button.getAttribute('aria-label') ?? visible;
+        expect(name.toLowerCase(), `«${name}» debe contener «${visible}»`).toContain(visible.toLowerCase());
+        expect(name).toMatch(/Docente|Otra Docente/);
+      }
+    });
+
     it('los filtros se escriben en la URL y se restauran al recargar o abrir el enlace', async () => {
       const user = userEvent.setup();
       const first = renderPage();
@@ -175,7 +188,7 @@ describe('CertificatesPage', () => {
     it('abrir un trámite lo escribe en la URL y «atrás» lo cierra; el enlace lo vuelve a abrir', async () => {
       const user = userEvent.setup();
       const first = renderPage();
-      await user.click(await screen.findByRole('button', { name: 'Ver el trámite de Docente Ficticio' }));
+      await user.click(await screen.findByRole('button', { name: 'Ver trámite de Docente Ficticio' }));
       expect(await screen.findByRole('dialog', { name: /Certificado de Docente Ficticio/ })).toBeInTheDocument();
       expect(search()).toBe('?certificado=c1');
 
@@ -202,7 +215,7 @@ describe('CertificatesPage', () => {
       api.get.mockResolvedValue(detail({ id: 'nuevo', status: 'INICIADO', allowedActions: ['SUBMIT', 'VOID'] }));
       const user = userEvent.setup();
       renderPage();
-      await user.click(await screen.findByRole('button', { name: 'Iniciar el trámite de Docente Candidato' }));
+      await user.click(await screen.findByRole('button', { name: 'Iniciar trámite de Docente Candidato' }));
       expect(api.start).toHaveBeenCalledWith({ tutorId: 't9', periodId: 'p1', schoolId: 's1' });
       expect(await screen.findByRole('dialog', { name: /Certificado de Docente Ficticio/ })).toBeInTheDocument();
       expect(search()).toBe('?certificado=nuevo');
@@ -212,7 +225,7 @@ describe('CertificatesPage', () => {
       api.start.mockRejectedValue(httpError(409, 'Ya existe un trámite vigente de certificado para ese docente'));
       const user = userEvent.setup();
       renderPage();
-      await user.click(await screen.findByRole('button', { name: 'Iniciar el trámite de Docente Candidato' }));
+      await user.click(await screen.findByRole('button', { name: 'Iniciar trámite de Docente Candidato' }));
       expect(await screen.findByText('Ya existe un trámite vigente de certificado para ese docente')).toBeInTheDocument();
     });
   });
