@@ -89,7 +89,7 @@ test('2. «Certificados» es una pestaña de Periodo académico; el filtro de es
   await expect(page.getByRole('note')).toContainText('Demostración sin valor');
   // La pantalla está dentro de «Periodo académico»: su barra de pestañas se ve y «Certificados» es la actual.
   const tabs = page.getByRole('navigation', { name: 'Secciones de Periodo académico' });
-  await expect(tabs.getByRole('link', { name: 'Certificados', exact: true })).toHaveAttribute('aria-current', 'page');
+  await expect(tabs.getByRole('link', { name: /^Certificados/ })).toHaveAttribute('aria-current', 'page');
 
   await page.getByLabel('Escuela profesional').selectOption(s.school.id);
   await expect(page).toHaveURL(new RegExp(`escuela=${s.school.id}`));
