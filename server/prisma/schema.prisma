@@ -42,6 +42,12 @@ model User {
   faculty   Faculty? @relation("FacultyDean", fields: [facultyId], references: [id])
   admonitionsReceived Admonition[] @relation("AdmonitionTutor")
   admonitionsIssued   Admonition[] @relation("AdmonitionIssuer")
+  certificatesAsTutor  Certificate[] @relation("CertificateTutor")
+  certificatesCreated  Certificate[] @relation("CertificateCreator")
+  certificatesApproved Certificate[] @relation("CertificateApprover")
+  certificatesVoided   Certificate[] @relation("CertificateVoider")
+  certificateEvidences CertificateEvidence[] @relation("CertificateEvidenceReviewer")
+  committeeResolutions CommitteeResolution[] @relation("CommitteeResolutionCreator")
 
 
   auditLogs     AuditLog[]
@@ -224,6 +230,8 @@ model School {
   campus   Campus? @relation(fields: [campusId], references: [id])
   tutors   User[]  @relation("TutorSchool")
   cycleTutors CycleTutorAssignment[]
+  certificates Certificate[]
+  committeeResolutions CommitteeResolution[]
 
   // Correo al que se piden las listas de estudiantes de la escuela cada periodo; lo configura quien administra o coordina.
   requestEmail String?        @map("request_email")
@@ -252,6 +260,8 @@ model AcademicPeriod {
 
   enrollments PeriodEnrollment[]
   cycleTutors CycleTutorAssignment[]
+  certificates Certificate[]
+  committeeResolutions CommitteeResolution[]
   dataRequests DataRequest[]
 
   evaluations       TutorEvaluation[]
@@ -1050,6 +1060,7 @@ model CycleTutorAssignment {
   declineNoticeStatus    String?                @map("decline_notice_status")
   declineNoticeAttemptId String?                @map("decline_notice_attempt_id")
   declineNoticeAttempts  DeclineNoticeAttempt[]
+  certificates           Certificate[]
 
   @@unique([periodId, schoolId, cycle])
   @@index([periodId, tutorId])
@@ -1118,4 +1129,121 @@ model Admonition {
   @@index([facultyId, issuedOn])
   @@index([tutorId])
   @@map("admonitions")
+}
+
+// ─── Certificación del docente tutor (diseño: docs/levantamiento/17_DISENO_CERTIFICACION_DEMOSTRACION.md) ──────────
+// Corte 1: solo el modelo. Mientras no exista plantilla oficial todo certificado es de demostración (is_demo): lleva numeración
+// DEMO- y la base impide que llegue a firmado o entregado. Los estados válidos y esas reglas son CHECK en la migración.
+
+model Certificate {
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  periodId     String                @map("period_id")
+  period       AcademicPeriod        @relation(fields: [periodId], references: [id])
+  schoolId     String                @map("school_id")
+  school       School                @relation(fields: [schoolId], references: [id])
+  tutorId      String                @map("tutor_id")
+  tutor        User                  @relation("CertificateTutor", fields: [tutorId], references: [id])
+  // Designación aceptada que respalda el trámite (puede faltar si la asignación se eliminó después).
+  assignmentId String?               @map("assignment_id")
+  assignment   CycleTutorAssignment? @relation(fields: [assignmentId], references: [id], onDelete: SetNull)
+
+  createdById String @map("created_by_id")
+  createdBy   User   @relation("CertificateCreator", fields: [createdById], references: [id])
+
+  // INICIADO, EN_REVISION, OBSERVADO, RECHAZADO, APROBADO, GENERADO_SIN_FIRMA, PENDIENTE_DE_FIRMA, FIRMADO_INCORPORADO, ENTREGADO, ANULADO.
+  status String  @default("INICIADO")
+  isDemo Boolean @default(true) @map("is_demo")
+  // Se asigna al generar el PDF y no se reutiliza, ni siquiera al anular.
+  number String? @unique
+
+  templateId         String?              @map("template_id")
+  template           CertificateTemplate? @relation(fields: [templateId], references: [id])
+  // Datos tal como salieron en el PDF (nombre, grado, resolución, firmante…): un cambio posterior no altera lo ya generado.
+  snapshot           Json?
+  unsignedSha256     String?              @map("unsigned_sha256")
+  unsignedStorageKey String?              @map("unsigned_storage_key")
+
+  approvedById String?   @map("approved_by_id")
+  approvedBy   User?     @relation("CertificateApprover", fields: [approvedById], references: [id])
+  approvedAt   DateTime? @map("approved_at")
+  voidedById   String?   @map("voided_by_id")
+  voidedBy     User?     @relation("CertificateVoider", fields: [voidedById], references: [id])
+  voidedAt     DateTime? @map("voided_at")
+  voidReason   String?   @map("void_reason")
+
+  evidences CertificateEvidence[]
+
+  @@index([periodId, schoolId, status])
+  @@index([tutorId])
+  @@map("certificates")
+}
+
+model CertificateEvidence {
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now()) @map("created_at")
+
+  certificateId String      @map("certificate_id")
+  certificate   Certificate @relation(fields: [certificateId], references: [id], onDelete: Cascade)
+  // ACEPTACION, SESIONES, INFORME_SEMESTRAL, EVALUACION, RESOLUCION… (referencia al registro que el revisor consulta).
+  kind          String
+  ref           String?
+  // PENDIENTE, CONFORME u OBSERVADA: la decide una persona, nunca el sistema.
+  result        String      @default("PENDIENTE")
+  comment       String?
+  reviewedById  String?     @map("reviewed_by_id")
+  reviewedBy    User?       @relation("CertificateEvidenceReviewer", fields: [reviewedById], references: [id])
+  reviewedAt    DateTime?   @map("reviewed_at")
+
+  @@index([certificateId])
+  @@map("certificate_evidences")
+}
+
+// Un contador por ámbito y año (p. ej. "DEMO"/2026); se incrementa dentro de la transacción que genera el certificado.
+model CertificateSequence {
+  scope String
+  year  Int
+  last  Int    @default(0)
+
+  @@id([scope, year])
+  @@map("certificate_sequences")
+}
+
+model CertificateTemplate {
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now()) @map("created_at")
+
+  name     String
+  version  Int     @default(1)
+  isDemo   Boolean @default(true) @map("is_demo")
+  isActive Boolean @default(true) @map("is_active")
+  title    String
+  // Texto con variables {escuela}, {facultad}, {departamento}, {resolucion}, {periodo}.
+  bodyText String  @map("body_text")
+  config   Json    @default("{}")
+
+  certificates Certificate[]
+
+  @@unique([name, version])
+  @@map("certificate_templates")
+}
+
+// «Resolución de Decanato N.° …» que aprueba la comisión de tutoría de una escuela en un periodo.
+model CommitteeResolution {
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now()) @map("created_at")
+
+  periodId    String         @map("period_id")
+  period      AcademicPeriod @relation(fields: [periodId], references: [id])
+  schoolId    String         @map("school_id")
+  school      School         @relation(fields: [schoolId], references: [id])
+  number      String
+  issuedOn    DateTime       @map("issued_on") @db.Date
+  createdById String         @map("created_by_id")
+  createdBy   User           @relation("CommitteeResolutionCreator", fields: [createdById], references: [id])
+
+  @@unique([periodId, schoolId])
+  @@map("committee_resolutions")
 }
