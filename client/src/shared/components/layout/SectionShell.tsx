@@ -104,7 +104,7 @@ export function SectionShell({ section }: { section: SectionKey }) {
             const meta = section === 'periodo' ? PERIOD_NAV[tab.path as keyof typeof PERIOD_NAV] : SETTINGS_NAV[tab.path as keyof typeof SETTINGS_NAV];
             const Icon = meta.icon;
             const descriptionId = `section-help-${tab.path.slice(1).replaceAll('/', '-')}`;
-            return <NavLink key={tab.path} to={tab.path} end aria-label={tab.label} aria-describedby={descriptionId} data-hint-hidden={dismissedHint === tab.path || undefined} onMouseEnter={() => setDismissedHint(null)} onFocus={() => setDismissedHint(null)} onKeyDown={(event) => { if (event.key === 'Escape') setDismissedHint(tab.path); }} className={({ isActive }) => `${styles.periodNavItem} ${isActive ? styles.periodNavActive : ''}`}>
+            return <NavLink key={tab.path} to={tab.path} end aria-describedby={descriptionId} data-hint-hidden={dismissedHint === tab.path || undefined} onMouseEnter={() => setDismissedHint(null)} onFocus={() => setDismissedHint(null)} onKeyDown={(event) => { if (event.key === 'Escape') setDismissedHint(tab.path); }} className={({ isActive }) => `${styles.periodNavItem} ${isActive ? styles.periodNavActive : ''}`}>
               <span className={styles.periodNavIcon}><Icon size={19} /></span>
               <span className={styles.periodNavTitle}>{tab.label}</span>
               <span id={descriptionId} role="tooltip" className={styles.periodNavDescription}>{meta.description}</span>
