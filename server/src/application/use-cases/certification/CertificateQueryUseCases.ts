@@ -61,6 +61,7 @@ export interface CertificateView {
   approvedAt: Date | null;
   voidedAt: Date | null;
   voidReason: string | null;
+  reviewNote: string | null;
 }
 
 export interface CertificateDetailView extends CertificateView {
@@ -114,6 +115,7 @@ class CertificateViewBuilder {
       approvedAt: row.approvedAt,
       voidedAt: row.voidedAt,
       voidReason: row.voidReason,
+      reviewNote: row.reviewNote,
     };
   }
 }

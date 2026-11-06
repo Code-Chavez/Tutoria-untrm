@@ -78,6 +78,14 @@ export const ACTION_LABEL: Record<string, string> = {
   TUTORING_REQUEST_SESSION: 'Solicitud atendida con una sesión',
   TUTORING_REQUEST_REFERRAL: 'Solicitud atendida con una derivación',
   ADMONITION_ISSUED: 'Amonestación registrada',
+  CERTIFICATE_STARTED: 'Trámite de certificado iniciado',
+  CERTIFICATE_SUBMITTED: 'Trámite de certificado enviado a revisión',
+  CERTIFICATE_RESUBMITTED: 'Trámite de certificado reenviado a revisión',
+  CERTIFICATE_EVIDENCE_REVIEWED: 'Evidencia de un certificado revisada',
+  CERTIFICATE_OBSERVED: 'Trámite de certificado observado',
+  CERTIFICATE_REJECTED: 'Trámite de certificado rechazado',
+  CERTIFICATE_APPROVED: 'Trámite de certificado aprobado',
+  CERTIFICATE_VOIDED: 'Trámite de certificado anulado',
 };
 
 export const ENTITY_LABEL: Record<string, string> = {
@@ -98,6 +106,7 @@ export const ENTITY_LABEL: Record<string, string> = {
   SessionEvidence: 'Evidencia de sesión',
   AttendanceSheet: 'Hoja de asistencia',
   Admonition: 'Amonestación',
+  Certificate: 'Certificado de tutoría',
   BrandingSetting: 'Identidad visual',
   Campus: 'Sede',
   CycleTutorAssignment: 'Tutor por ciclo',
