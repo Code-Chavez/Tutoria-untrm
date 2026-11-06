@@ -22,6 +22,7 @@ const VALID: [CertificateStatus, CertificateAction, CertificateStatus][] = [
   ['EN_REVISION', 'OBSERVE', 'OBSERVADO'],
   ['EN_REVISION', 'REJECT', 'RECHAZADO'],
   ['EN_REVISION', 'APPROVE', 'APROBADO'],
+  ['APROBADO', 'GENERATE', 'GENERADO_SIN_FIRMA'],
   ...(['INICIADO', 'EN_REVISION', 'OBSERVADO', 'APROBADO', 'GENERADO_SIN_FIRMA', 'PENDIENTE_DE_FIRMA', 'FIRMADO_INCORPORADO', 'ENTREGADO'] as CertificateStatus[]).map(
     (from): [CertificateStatus, CertificateAction, CertificateStatus] => [from, 'VOID', 'ANULADO'],
   ),
@@ -42,7 +43,7 @@ describe('máquina de estados del certificado (corte 3)', () => {
         expect(() => applyTransition(from, action, { isDemo: true })).toThrow(InvalidTransitionError);
       }
     }
-    // 10 estados x 6 acciones menos las válidas: ninguna se escapa del recorrido.
+    // 10 estados x 7 acciones menos las válidas: ninguna se escapa del recorrido.
     expect(invalid).toBe(CERTIFICATE_STATUSES.length * ACTIONS.length - VALID.length);
   });
 
@@ -84,7 +85,9 @@ describe('máquina de estados del certificado (corte 3)', () => {
     expect(availableActions('INICIADO', { isDemo: true })).toEqual(['SUBMIT', 'VOID']);
     expect(availableActions('EN_REVISION', { isDemo: true }).sort()).toEqual(['APPROVE', 'OBSERVE', 'REJECT', 'VOID']);
     expect(availableActions('OBSERVADO', { isDemo: true }).sort()).toEqual(['RESUBMIT', 'VOID']);
-    expect(availableActions('APROBADO', { isDemo: true })).toEqual(['VOID']);
+    expect(availableActions('APROBADO', { isDemo: true })).toEqual(['GENERATE', 'VOID']);
+    // Tras generar el PDF solo queda anular: la firma y la entrega siguen bloqueadas en demostración.
+    expect(availableActions('GENERADO_SIN_FIRMA', { isDemo: true })).toEqual(['VOID']);
   });
 
   it('las evidencias solo se revisan mientras el trámite está en revisión', () => {

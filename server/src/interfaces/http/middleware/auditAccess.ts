@@ -19,9 +19,11 @@ export function accessDetails(kind: AccessKind, statusCode: number): string {
  */
 export function auditAccess(entity: string, kind: AccessKind, idOf: (req: Request) => string | undefined) {
   return (req: Request, res: Response, next: NextFunction): void => {
+    // El identificador se lee AHORA, con la ruta ya resuelta: cuando la respuesta termina por un rechazo (p. ej. 403 de `authorize`), Express
+    // ya pasó al manejador de errores y `req.params` quedó vacío, con lo que el intento rechazado se perdía de la bitácora.
+    const entityId = idOf(req);
     res.on('finish', () => {
       const userId = req.auth?.sub;
-      const entityId = idOf(req);
       if (!userId || !entityId) return;
       prisma.auditLog
         .create({ data: { userId, action: kind, entity, entityId, details: accessDetails(kind, res.statusCode), ipAddress: req.ip ?? null } })

@@ -21,4 +21,22 @@ export function formatDemoCertificateNumber(sequence: number, year: number, facu
   return `${DEMO_PREFIX}${String(sequence).padStart(3, '0')}-${year}/UNTRM/${faculty}-${school}`;
 }
 
+const STOPWORDS = new Set(['de', 'del', 'la', 'las', 'el', 'los', 'y', 'e', 'en', 'para', 'a']);
+
+/**
+ * Siglas de DEMOSTRACIÓN para el número: iniciales de las palabras significativas del nombre («Facultad de Ingeniería de Sistemas y
+ * Mecánica Eléctrica» → FISME). Las siglas oficiales no están guardadas todavía (Q25); cuando se decidan se persistirán y esta
+ * derivación solo servirá para los certificados de demostración.
+ */
+export function deriveAcronym(name: string): string {
+  const words = name
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .split(/[^A-Za-z0-9]+/)
+    .filter((w) => w.length > 0 && !STOPWORDS.has(w.toLowerCase()));
+  let acronym = words.map((w) => w[0]!.toUpperCase()).join('');
+  if (acronym.length < 2) acronym = (words.join('') + 'XX').slice(0, 3).toUpperCase();
+  return acronym.slice(0, 12);
+}
+
 export const isDemoCertificateNumber = (number: string): boolean => number.startsWith(DEMO_PREFIX);

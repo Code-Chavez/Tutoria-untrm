@@ -1,4 +1,5 @@
 import { Prisma, PrismaClient } from '@prisma/client';
+import { PrismaCertificateSequenceRepository } from './PrismaCertificateSequenceRepository';
 import { CertificateEvidenceRecord, CertificateRecord } from '@domain/repositories/CertificateRepository';
 import {
   CertificateAlreadyExistsError,
@@ -6,6 +7,7 @@ import {
   CertificateWorkflowRepository,
   EvidencePatch,
   NewCertificate,
+  TransitionTools,
 } from '@domain/repositories/CertificateWorkflowRepository';
 
 const CERTIFICATE_SELECT = {
@@ -22,6 +24,7 @@ const CERTIFICATE_SELECT = {
   number: true,
   templateId: true,
   unsignedStorageKey: true,
+  unsignedSha256: true,
   approvedById: true,
   approvedAt: true,
   voidedById: true,
@@ -32,8 +35,8 @@ const CERTIFICATE_SELECT = {
 
 const EVIDENCE_SELECT = { id: true, kind: true, ref: true, result: true, comment: true, reviewedById: true, reviewedAt: true } as const;
 
-type Row = Omit<CertificateRecord, 'hasUnsignedPdf'> & { unsignedStorageKey: string | null };
-const toRecord = ({ unsignedStorageKey, ...rest }: Row): CertificateRecord => ({ ...rest, hasUnsignedPdf: unsignedStorageKey !== null });
+type Row = Omit<CertificateRecord, 'hasUnsignedPdf' | 'pdfSha256'> & { unsignedStorageKey: string | null; unsignedSha256: string | null };
+const toRecord = ({ unsignedStorageKey, unsignedSha256, ...rest }: Row): CertificateRecord => ({ ...rest, hasUnsignedPdf: unsignedStorageKey !== null, pdfSha256: unsignedSha256 });
 
 const isUniqueViolation = (error: unknown): boolean => error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2002';
 
@@ -68,14 +71,16 @@ export class PrismaCertificateWorkflowRepository implements CertificateWorkflowR
 
   transition(
     id: string,
-    decide: (current: CertificateRecord, evidences: CertificateEvidenceRecord[]) => CertificatePatch,
+    decide: (current: CertificateRecord, evidences: CertificateEvidenceRecord[], tools: TransitionTools) => CertificatePatch | Promise<CertificatePatch>,
   ): Promise<CertificateRecord | null> {
     return this.prisma.$transaction(async (tx) => {
       if (!(await this.lock(tx, id))) return null;
       const current = toRecord(await tx.certificate.findUniqueOrThrow({ where: { id }, select: CERTIFICATE_SELECT }));
       const evidences = await tx.certificateEvidence.findMany({ where: { certificateId: id }, select: EVIDENCE_SELECT, orderBy: [{ createdAt: 'asc' }, { id: 'asc' }] });
-      const patch = decide(current, evidences);
-      return toRecord(await tx.certificate.update({ where: { id }, data: patch, select: CERTIFICATE_SELECT }));
+      const tools: TransitionTools = { nextSequence: (scope, year) => new PrismaCertificateSequenceRepository(tx).next(scope, year) };
+      const { snapshot, ...rest } = await decide(current, evidences, tools);
+      const data = { ...rest, ...(snapshot !== undefined && { snapshot: snapshot as Prisma.InputJsonValue }) };
+      return toRecord(await tx.certificate.update({ where: { id }, data, select: CERTIFICATE_SELECT }));
     });
   }
 

@@ -19,6 +19,12 @@ export interface CertificatePatch {
   voidedAt?: Date | null;
   voidReason?: string | null;
   reviewNote?: string | null;
+  // Generación del PDF sin firma (corte 4).
+  number?: string;
+  templateId?: string;
+  snapshot?: unknown;
+  unsignedSha256?: string;
+  unsignedStorageKey?: string;
 }
 
 export interface EvidencePatch {
@@ -26,6 +32,12 @@ export interface EvidencePatch {
   comment: string | null;
   reviewedById: string;
   reviewedAt: Date;
+}
+
+/** Lo que `decide` puede usar dentro de la transacción que bloquea el trámite. */
+export interface TransitionTools {
+  /** Siguiente número del contador del ámbito y año, tomado en esta misma transacción: si se revierte, no se consume. */
+  nextSequence(scope: string, year: number): Promise<number>;
 }
 
 /** Ya hay un trámite vigente para ese docente, escuela y periodo (lo impone la base de datos). */
@@ -44,7 +56,10 @@ export class CertificateAlreadyExistsError extends Error {
 export interface CertificateWorkflowRepository {
   create(input: NewCertificate): Promise<CertificateRecord>;
   /** Devuelve null si el trámite no existe. `decide` puede lanzar un error de dominio: entonces no se escribe nada. */
-  transition(id: string, decide: (current: CertificateRecord, evidences: CertificateEvidenceRecord[]) => CertificatePatch): Promise<CertificateRecord | null>;
+  transition(
+    id: string,
+    decide: (current: CertificateRecord, evidences: CertificateEvidenceRecord[], tools: TransitionTools) => CertificatePatch | Promise<CertificatePatch>,
+  ): Promise<CertificateRecord | null>;
   /** Devuelve null si el trámite o la evidencia (de ese trámite) no existen. */
   reviewEvidence(
     certificateId: string,

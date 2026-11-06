@@ -9,3 +9,12 @@ export interface EvidenceStorage {
   /** Elimina el archivo (p. ej. al reemplazar el logotipo); no falla si ya no existe. */
   delete(storageKey: string): Promise<void>;
 }
+
+/**
+ * Lectura del contenido guardado. Va aparte para quien necesita los bytes (p. ej. verificar la huella de un PDF antes de entregarlo,
+ * sobre los mismos bytes que se envían) sin obligar a los demás a implementarla.
+ */
+export interface StoredFileReader {
+  /** El contenido; lanza un error con código ENOENT si ya no existe. */
+  read(storageKey: string): Promise<Buffer>;
+}

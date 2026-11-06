@@ -86,6 +86,8 @@ export const ACTION_LABEL: Record<string, string> = {
   CERTIFICATE_REJECTED: 'Trámite de certificado rechazado',
   CERTIFICATE_APPROVED: 'Trámite de certificado aprobado',
   CERTIFICATE_VOIDED: 'Trámite de certificado anulado',
+  CERTIFICATE_GENERATED: 'Certificado de demostración generado (PDF sin firma)',
+  COMMITTEE_RESOLUTION_SAVED: 'Resolución de decanato registrada',
 };
 
 export const ENTITY_LABEL: Record<string, string> = {
@@ -107,6 +109,7 @@ export const ENTITY_LABEL: Record<string, string> = {
   AttendanceSheet: 'Hoja de asistencia',
   Admonition: 'Amonestación',
   Certificate: 'Certificado de tutoría',
+  CommitteeResolution: 'Resolución de decanato',
   BrandingSetting: 'Identidad visual',
   Campus: 'Sede',
   CycleTutorAssignment: 'Tutor por ciclo',

@@ -2,7 +2,7 @@ import { DEFAULT_EVIDENCE_KINDS, DemoRestrictedError, InvalidTransitionError, RE
 import { AcademicPeriodRepository } from '@domain/repositories/AcademicPeriodRepository';
 import { AuditLogRepository } from '@domain/repositories/AuditLogRepository';
 import { CertificateEvidenceRecord, CertificateRecord, CertificateRepository } from '@domain/repositories/CertificateRepository';
-import { CertificatePatch, CertificateWorkflowRepository } from '@domain/repositories/CertificateWorkflowRepository';
+import { CertificatePatch, CertificateWorkflowRepository, TransitionTools } from '@domain/repositories/CertificateWorkflowRepository';
 import { CycleTutorRepository } from '@domain/repositories/CycleTutorRepository';
 import { SchoolRepository } from '@domain/repositories/SchoolRepository';
 import { UserRepository } from '@domain/repositories/UserRepository';
@@ -53,7 +53,7 @@ function requireReason(value: unknown, label: string): string {
 }
 
 /** Lo que comparten todas las acciones sobre un trámite existente: alcance, bloqueo, errores de dominio y bitácora. */
-abstract class CertificateStep {
+export abstract class CertificateStep {
   constructor(
     protected readonly scopes: CertificateScopeResolver,
     protected readonly certificates: CertificateRepository,
@@ -71,7 +71,10 @@ abstract class CertificateStep {
   }
 
   /** Las reglas de dominio que rechazan la acción se informan como conflicto de estado, no como error interno. */
-  protected async move(id: string, decide: (current: CertificateRecord, evidences: CertificateEvidenceRecord[]) => CertificatePatch): Promise<CertificateRecord> {
+  protected async move(
+    id: string,
+    decide: (current: CertificateRecord, evidences: CertificateEvidenceRecord[], tools: TransitionTools) => CertificatePatch | Promise<CertificatePatch>,
+  ): Promise<CertificateRecord> {
     try {
       const updated = await this.workflow.transition(id, decide);
       if (!updated) throw new CertificateNotFoundError();
