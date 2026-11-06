@@ -188,7 +188,7 @@ export function CertificatesPage() {
                           </td>
                           <td>{c.number ?? '—'}</td>
                           <td>
-                            <Button size="sm" variant="secondary" aria-label={`Ver el trámite de ${c.tutorName}`} onClick={() => openCertificate(c.id)}>
+                            <Button size="sm" variant="secondary" aria-label={`Ver trámite de ${c.tutorName}`} onClick={() => openCertificate(c.id)}>
                               Ver trámite
                             </Button>
                           </td>
@@ -236,7 +236,7 @@ export function CertificatesPage() {
                             <td>{c.schoolName}</td>
                             <td>{c.cycles.join(', ')}</td>
                             <td>
-                              <Button size="sm" loading={start.isPending} aria-label={`Iniciar el trámite de ${c.tutorName}`} onClick={() => void startFor(c.tutorId, c.schoolId)}>
+                              <Button size="sm" loading={start.isPending} aria-label={`Iniciar trámite de ${c.tutorName}`} onClick={() => void startFor(c.tutorId, c.schoolId)}>
                                 Iniciar trámite
                               </Button>
                             </td>
