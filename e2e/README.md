@@ -20,6 +20,7 @@ Recorridos de extremo a extremo con [Playwright](https://playwright.dev) sobre l
 | E2E-21 Roles, permisos y alcance: rol nuevo, alcance de una escuela, permiso retirado en sesión, cambio de rol y cuenta sin autorización | `tests/e2e-21-roles-permisos-alcance.spec.ts` | escrito |
 | E2E-22 Estado en la URL y borradores: filtros al recargar/otra pestaña, ventanas con Atrás/Adelante, borrador por formulario, limpieza al guardar o descartar y aislamiento entre cuentas | `tests/e2e-22-url-y-borradores.spec.ts` | escrito |
 | E2E-23 Certificación (corte 2): permisos nuevos en la pantalla de roles, consulta por escuela, permiso retirado en sesión y cuenta sin autorización; la pantalla de certificación queda pendiente (corte 5) | `tests/e2e-23-certificados-consulta.spec.ts` | escrito |
+| E2E-24 Certificación (corte 3): docente que acepta su designación por el enlace del correo, trámite iniciado, revisado, observado, rechazado, aprobado y anulado, con permisos por acción, alcance por escuela y aprobaciones simultáneas (necesita Mailpit: `E2E_MAILPIT_URL`) | `tests/e2e-24-certificados-tramite.spec.ts` | escrito |
 | E2E-19 Accesibilidad de las pantallas de gestión (axe) | `tests/e2e-19-accesibilidad-gestion.spec.ts` | escrito |
 | E2E-20 Estados del docente: rechazo, sin respuesta, correo no enviado | `tests/e2e-20-estados-del-docente.spec.ts` | escrito |
 
@@ -43,9 +44,9 @@ Variables opcionales: `E2E_BASE_URL` (por defecto `http://localhost:5173`) y `E2
 
 ## En el CI
 
-El job **E2E — Playwright (Chrome)** de `.github/workflows/ci.yml` levanta una base PostgreSQL propia, aplica las migraciones y la seed, arranca el servidor (puerto 3100) y el cliente (5174) y corre `pnpm run test:ci` con Chromium. Solo ejecuta las suites que se mantienen al día (hoy **E2E-21**, **E2E-22** y **E2E-23**); la lista está en el script `test:ci` de `package.json`.
+El job **E2E — Playwright (Chrome)** de `.github/workflows/ci.yml` levanta una base PostgreSQL propia, aplica las migraciones y la seed, arranca el servidor (puerto 3100) y el cliente (5174) y corre `pnpm run test:ci` con Chromium. Solo ejecuta las suites que se mantienen al día (hoy **E2E-21**, **E2E-22**, **E2E-23** y **E2E-24**); la lista está en el script `test:ci` de `package.json`.
 
-Las demás suites no están en el CI porque algunas se desactualizaron mientras no corrían en ningún flujo (por ejemplo, el caso «el menú es corto» de E2E-01 espera pestañas sin descripción y en otro orden). Para incorporar una: ponerla al día, comprobar que pasa dos veces seguidas sobre una base nueva y agregar su prefijo a `test:ci`. Si el job falla, el informe y las trazas (`e2e/playwright-report`, `e2e/test-results`) quedan como artefacto 14 días.
+Las demás suites no están en el CI porque algunas se desactualizaron mientras no corrían en ningún flujo (por ejemplo, el caso «el menú es corto» de E2E-01 espera pestañas sin descripción y en otro orden). Para incorporar una: ponerla al día, comprobar que pasa dos veces seguidas sobre una base nueva y agregar su prefijo a `test:ci`. El job también levanta Mailpit como servicio y la aplicación envía a él por SMTP: así un recorrido puede leer el enlace que solo llega por correo (E2E-24 lo usa para la aceptación del docente). Límite que conviene conocer: el servidor limita `POST /auth/reset-password` a 10 por IP cada 15 minutos, en memoria. Una corrida completa de `test:ci` usa 6 (cada cuenta nueva que activa un recorrido); dos corridas seguidas contra el mismo servidor responden 429. En local, reinicie el servidor entre corridas; en el CI cada ejecución parte de un servidor nuevo. Antes de añadir recorridos que activen más cuentas, revise ese presupuesto. Si el job falla, el informe y las trazas (`e2e/playwright-report`, `e2e/test-results`) quedan como artefacto 14 días.
 
 ## Convenciones
 

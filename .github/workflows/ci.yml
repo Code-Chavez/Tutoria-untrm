@@ -324,12 +324,20 @@ jobs:
           --health-interval 10s
           --health-timeout 5s
           --health-retries 5
+      # Bandeja de correo de pruebas: algunos recorridos necesitan un enlace que solo llega por correo (p. ej. la aceptación
+      # del docente). La aplicación envía por SMTP a este servicio; nada sale de la máquina del runner.
+      mailpit:
+        image: axllent/mailpit:v1.21
+        ports:
+          - 1025:1025
+          - 8025:8025
 
     env:
       DATABASE_URL: postgresql://sit_user:sit_pass@localhost:5432/sit_db_e2e
       JWT_SECRET: ci-e2e-secret
       E2E_BASE_URL: http://localhost:5174
       E2E_API_URL: http://localhost:3100/api
+      E2E_MAILPIT_URL: http://localhost:8025
 
     steps:
       - uses: actions/checkout@v4
@@ -367,7 +375,7 @@ jobs:
 
       - name: Start the server and the client
         run: |
-          (cd server && PORT=3100 CORS_ORIGIN=http://localhost:5174 PUBLIC_APP_URL=http://localhost:5174 EMAIL_NOTIFICATIONS=false             nohup pnpm exec ts-node -r tsconfig-paths/register --transpile-only src/index.ts > "$RUNNER_TEMP/server.log" 2>&1 &)
+          (cd server && PORT=3100 CORS_ORIGIN=http://localhost:5174 PUBLIC_APP_URL=http://localhost:5174 SMTP_HOST=localhost SMTP_PORT=1025 MAIL_FROM="SIT UNTRM <no-reply@untrm.edu.pe>"             nohup pnpm exec ts-node -r tsconfig-paths/register --transpile-only src/index.ts > "$RUNNER_TEMP/server.log" 2>&1 &)
           (cd client && VITE_PROXY_TARGET=http://localhost:3100 nohup pnpm exec vite --port 5174 --strictPort > "$RUNNER_TEMP/client.log" 2>&1 &)
           for i in $(seq 1 60); do
             if curl -fsS http://localhost:3100/api/health > /dev/null 2>&1 && curl -fsS http://localhost:5174 > /dev/null 2>&1; then echo "stack ready"; exit 0; fi

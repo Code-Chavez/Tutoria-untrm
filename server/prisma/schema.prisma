@@ -1173,6 +1173,8 @@ model Certificate {
   voidedBy     User?     @relation("CertificateVoider", fields: [voidedById], references: [id])
   voidedAt     DateTime? @map("voided_at")
   voidReason   String?   @map("void_reason")
+  // Por qué se observó o se rechazó el trámite (obligatorio al rechazar: restricción en la migración `certificate_review_note`).
+  reviewNote   String?   @map("review_note")
 
   evidences CertificateEvidence[]
 
