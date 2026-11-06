@@ -72,7 +72,12 @@ test('la coordinadora reasigna a uno de ellos a Jorge con un motivo', async ({ p
   const row = page.getByRole('row', { name: new RegExp(students[0].code) });
   await expect(row).toContainText('Elena');
 
-  await row.getByRole('button', { name: /Más/ }).click();
+  // El menú «Más» se cierra con cualquier evento de scroll. Playwright desplaza la tabla para dejar el botón a la vista y ese evento
+  // llega después del clic (en el siguiente cuadro): se espera a que se vacíe antes de hacer clic.
+  const more = row.getByRole('button', { name: /Más/ });
+  await more.scrollIntoViewIfNeeded();
+  await page.evaluate(() => new Promise<void>((resolve) => requestAnimationFrame(() => requestAnimationFrame(() => resolve()))));
+  await more.click();
   await page.getByText('Reasignar tutor', { exact: true }).click();
   const dialog = page.getByRole('dialog', { name: 'Reasignar estudiante' });
   const jorgeValue = await dialog.locator('select option', { hasText: 'Jorge' }).first().getAttribute('value');

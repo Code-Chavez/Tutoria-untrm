@@ -5,7 +5,7 @@ Recorridos de extremo a extremo con [Playwright](https://playwright.dev) sobre l
 
 | Recorrido | Archivo | Estado |
 |---|---|---|
-| E2E-01 Acceso, menú y panel por rol | `tests/e2e-01-acceso-y-menu.spec.ts` | escrito |
+| E2E-01 Acceso, menú y panel por rol | `tests/e2e-01-acceso-y-menu.spec.ts` | en el CI |
 | E2E-02 Solicitud de tutoría | `tests/e2e-02-solicitud-de-tutoria.spec.ts` | escrito |
 | E2E-03 Sesiones y asistencia | `tests/e2e-03-sesiones-y-asistencia.spec.ts` | escrito |
 | E2E-04 Derivación a un servicio | `tests/e2e-04-derivacion-a-servicio.spec.ts` | escrito |
@@ -13,10 +13,10 @@ Recorridos de extremo a extremo con [Playwright](https://playwright.dev) sobre l
 | E2E-06 Plan semestral | `tests/e2e-06-plan-semestral.spec.ts` | escrito |
 | E2E-07 Evaluación de tutoría | `tests/e2e-07-evaluacion-de-tutoria.spec.ts` | escrito |
 | E2E-08 Administración | `tests/e2e-08-administracion.spec.ts` | escrito |
-| E2E-09 Carga masiva y asignación | `tests/e2e-09-carga-masiva-y-asignacion.spec.ts` | escrito |
+| E2E-09 Carga masiva y asignación | `tests/e2e-09-carga-masiva-y-asignacion.spec.ts` | en el CI |
 | E2E-10 Cierre de periodo | `tests/e2e-10-cierre-de-periodo.spec.ts` | escrito |
 | E2E-11 Pedido de listas por correo | `tests/e2e-11-pedido-de-listas.spec.ts` | escrito |
-| E2E-12 Tutor por ciclo, aceptación del docente y amonestación del Decano | `tests/e2e-12-tutor-por-ciclo-y-decano.spec.ts` | escrito |
+| E2E-12 Tutor por ciclo, aceptación del docente y amonestación del Decano | `tests/e2e-12-tutor-por-ciclo-y-decano.spec.ts` | en el CI |
 | E2E-21 Roles, permisos y alcance: rol nuevo, alcance de una escuela, permiso retirado en sesión, cambio de rol y cuenta sin autorización | `tests/e2e-21-roles-permisos-alcance.spec.ts` | escrito |
 | E2E-22 Estado en la URL y borradores: filtros al recargar/otra pestaña, ventanas con Atrás/Adelante, borrador por formulario, limpieza al guardar o descartar y aislamiento entre cuentas | `tests/e2e-22-url-y-borradores.spec.ts` | escrito |
 | E2E-23 Certificación (corte 2): permisos nuevos en la pantalla de roles, consulta por escuela, permiso retirado en sesión y cuenta sin autorización; la pantalla de certificación queda pendiente (corte 5) | `tests/e2e-23-certificados-consulta.spec.ts` | escrito |
@@ -47,9 +47,9 @@ Variables opcionales: `E2E_BASE_URL` (por defecto `http://localhost:5173`) y `E2
 
 ## En el CI
 
-El job **E2E — Playwright (Chrome)** de `.github/workflows/ci.yml` levanta una base PostgreSQL propia, aplica las migraciones y la seed, arranca el servidor (puerto 3100) y el cliente (5174) y corre `pnpm run test:ci` con Chromium. Solo ejecuta las suites que se mantienen al día (hoy **E2E-19** y **E2E-21** a **E2E-27**); la lista está en el script `test:ci` de `package.json`.
+El job **E2E — Playwright (Chrome)** de `.github/workflows/ci.yml` levanta una base PostgreSQL propia, aplica las migraciones y la seed, arranca el servidor (puerto 3100) y el cliente (5174) y corre `pnpm run test:ci` con Chromium. Solo ejecuta las suites que se mantienen al día (hoy **E2E-01**, **E2E-09**, **E2E-12**, **E2E-19** y **E2E-21** a **E2E-27**); la lista está en el script `test:ci` de `package.json`.
 
-Las demás suites no están en el CI porque algunas se desactualizaron mientras no corrían en ningún flujo (por ejemplo, el caso «el menú es corto» de E2E-01 espera pestañas sin descripción y en otro orden). Para incorporar una: ponerla al día, comprobar que pasa dos veces seguidas sobre una base nueva y agregar su prefijo a `test:ci`. El job también levanta Mailpit como servicio y la aplicación envía a él por SMTP: así un recorrido puede leer el enlace que solo llega por correo (E2E-24 lo usa para la aceptación del docente). **Otros navegadores.** E2E-26 y E2E-27 se ejecutan además en Firefox (Linux) y E2E-27 en WebKit (Linux), con el flujo `.github/workflows/e2e-browsers.yml`, que corre en los PR que tocan la pantalla de certificados o sus pruebas y a mano (`workflow_dispatch`); en local, `E2E_BROWSER=webkit`, `E2E_BROWSER=firefox` o `E2E_CHANNEL=msedge`. En el equipo de desarrollo de Windows Firefox no llegó a arrancar (`spawn UNKNOWN`), por eso se comprueba en Linux. E2E-26 no corre en WebKit de Linux porque ese motor se cae («Page crashed») al recargar o navegar, en casos distintos según la ejecución; en WebKit de Windows pasa completo. Qué navegadores corren en el pipeline para el resto de recorridos se decide en el issue #231.
+Las demás suites no están en el CI: E2E-02 a E2E-08, E2E-10, E2E-11 y E2E-13 a E2E-18 pasan sobre una base nueva (corrida completa del 2026-11-06, issue #230) pero se dejaron fuera para no alargar el job; E2E-20 necesita los contenedores de desarrollo (`docker exec … psql -d sit_db` y `docker stop/start sit-mailpit`) y no puede correr en una pila aislada. Para incorporar una: ponerla al día, comprobar que pasa dos veces seguidas sobre una base nueva y agregar su prefijo a `test:ci`. El job también levanta Mailpit como servicio y la aplicación envía a él por SMTP: así un recorrido puede leer el enlace que solo llega por correo (E2E-24 lo usa para la aceptación del docente). **Otros navegadores.** E2E-26 y E2E-27 se ejecutan además en Firefox (Linux) y E2E-27 en WebKit (Linux), con el flujo `.github/workflows/e2e-browsers.yml`, que corre en los PR que tocan la pantalla de certificados o sus pruebas y a mano (`workflow_dispatch`); en local, `E2E_BROWSER=webkit`, `E2E_BROWSER=firefox` o `E2E_CHANNEL=msedge`. En el equipo de desarrollo de Windows Firefox no llegó a arrancar (`spawn UNKNOWN`), por eso se comprueba en Linux. E2E-26 no corre en WebKit de Linux porque ese motor se cae («Page crashed») al recargar o navegar, en casos distintos según la ejecución; en WebKit de Windows pasa completo. Qué navegadores corren en el pipeline para el resto de recorridos se decide en el issue #231.
 
 Límite que conviene conocer: el servidor limita `POST /auth/reset-password` a 10 por IP cada 15 minutos, en memoria. Una corrida completa de `test:ci` usa 9 (cada cuenta nueva que activa un recorrido); dos corridas seguidas contra el mismo servidor responden 429. En local, arranque el servidor con `RESET_PASSWORD_RATE_LIMIT_MAX=100` (se ignora en producción) o reinícielo entre corridas; en el CI cada ejecución parte de un servidor nuevo. Antes de añadir recorridos que activen más cuentas, revise ese presupuesto. Si el job falla, el informe y las trazas (`e2e/playwright-report`, `e2e/test-results`) quedan como artefacto 14 días.
 
