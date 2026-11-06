@@ -52,7 +52,7 @@ Códigos nuevos en `server/src/domain/permissionCatalog.ts` (la prueba que contr
 
 (`certificados:firmar` / incorporar el firmado queda **reservado** y no se crea hasta salir de la demostración.)
 
-**No existe un rol «Director de Escuela».** Con los roles configurables (#208 a #213) se crea como rol a medida con estos permisos y alcance «escuelas»; no hace falta código de rol nuevo. El rol base «Administrador DBU» recibe solo `consultar` y `administrar`: **no** se le da `aprobar`, para no mezclar la revisión con la administración (regla institucional pendiente, Q22). El docente ve y descarga solo lo propio en la etapa de entrega, que queda fuera de esta entrega.
+**No existe un rol «Director de Escuela».** Con los roles configurables (#208 a #213) se crea como rol a medida con estos permisos y alcance «escuelas»; no hace falta código de rol nuevo. El rol base «Administrador DBU» recibe **todo** el catálogo de certificación, como con el resto de permisos: la política de roles configurables exige que quien concede un permiso lo tenga (`rolePermissionPolicy`), y sin `aprobar` el administrador no podría crear el rol «Director de Escuela» que lo lleva. Que quien administra no pueda además aprobar es una **separación de funciones** que la institución debe decidir (Q22); si se adopta, es una regla propia, no una omisión del catálogo. Los demás roles base (Coordinador, Docente Tutor, Tutorado, Profesional de Servicio, Vicerrectorado y Decano) no reciben ninguno. El docente ve y descarga solo lo propio en la etapa de entrega, que queda fuera de esta entrega.
 
 ## 5. Modelo de datos propuesto (migración aditiva, sin tocar filas existentes)
 
@@ -128,6 +128,8 @@ Se genera con `pdfkit` (ya usado en `BrandedPdf`), A4 horizontal, con la misma d
 8. ¿Existe ya un dato de grado académico y departamento de cada docente, o se carga en la importación de docentes?
 
 ## 10. Plan de entrega (cortes pequeños, cada uno con su PR y pruebas)
+
+**Estado:** corte 1 (modelo y numeración) fusionado en #225. Corte 2 (permisos y rutas de consulta `GET /api/certificates` y `GET /api/certificates/:id`, con alcance por escuela reutilizando `StudentAccessGuard`) en curso. Cortes 3 a 6 pendientes.
 
 1. Migración y modelo (`Certificate`, evidencias, secuencia, plantilla, resolución) con prueba de la secuencia transaccional.
 2. Permisos en el catálogo y rutas de consulta; prueba de alcance.

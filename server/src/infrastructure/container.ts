@@ -39,6 +39,8 @@ import { ImportTutorsUseCase } from '@application/use-cases/users/ImportTutorsUs
 import { GetTutorAcceptanceUseCase, RequestTutorAcceptanceUseCase, RespondTutorAcceptanceUseCase } from '@application/use-cases/cycle-tutors/TutorAcceptanceUseCases';
 import { ExcelTutorParser } from './parsers/ExcelTutorParser';
 import { PrismaAdmonitionRepository } from './repositories/PrismaAdmonitionRepository';
+import { PrismaCertificateRepository } from './repositories/PrismaCertificateRepository';
+import { CertificateScopeResolver, GetCertificateUseCase, ListCertificatesUseCase } from '@application/use-cases/certification/CertificateQueryUseCases';
 import { AdmonitionScopeResolver, GetAdmonitionFileUseCase, IssueAdmonitionUseCase, ListAdmonishableTutorsUseCase, ListAdmonitionsUseCase } from '@application/use-cases/admonitions/AdmonitionUseCases';
 import { PrismaCycleTutorRepository } from './repositories/PrismaCycleTutorRepository';
 import { PrismaDeclineNoticeRepository } from './repositories/PrismaDeclineNoticeRepository';
@@ -348,6 +350,10 @@ const listAdmonitionsUseCase = new ListAdmonitionsUseCase(admonitionScope, userR
 const listAdmonishableTutorsUseCase = new ListAdmonishableTutorsUseCase(admonitionScope, userRepository, roleRepository, schoolRepository);
 const issueAdmonitionUseCase = new IssueAdmonitionUseCase(admonitionScope, userRepository, roleRepository, schoolRepository, admonitionRepository, evidenceStorage, auditLogRepository);
 const getAdmonitionFileUseCase = new GetAdmonitionFileUseCase(admonitionScope, admonitionRepository, evidenceStorage);
+const certificateRepository = new PrismaCertificateRepository(prisma);
+const certificateScope = new CertificateScopeResolver(studentAccessGuard);
+const listCertificatesUseCase = new ListCertificatesUseCase(certificateScope, certificateRepository, userRepository, schoolRepository, academicPeriodRepository);
+const getCertificateUseCase = new GetCertificateUseCase(certificateScope, certificateRepository, userRepository, schoolRepository, academicPeriodRepository);
 const importTutorsUseCase = new ImportTutorsUseCase(userRepository, roleRepository, schoolRepository, createUserUseCase, issueInvitationUseCase, emailPolicy);
 const updateUserUseCase = new UpdateUserUseCase(userRepository, roleRepository, schoolRepository, facultyRepository, emailPolicy);
 const toggleUserStatusUseCase = new ToggleUserStatusUseCase(userRepository);
@@ -906,6 +912,8 @@ export const container = {
     listAdmonishableTutorsUseCase,
     issueAdmonitionUseCase,
     getAdmonitionFileUseCase,
+    listCertificatesUseCase,
+    getCertificateUseCase,
     listCycleTutorsUseCase,
     getInstitutionalPendingUseCase,
     requestTutorAcceptanceUseCase,
