@@ -17,6 +17,7 @@ export interface CertificateRecord {
   voidedById: string | null;
   voidedAt: Date | null;
   voidReason: string | null;
+  reviewNote: string | null;
 }
 
 export interface CertificateEvidenceRecord {

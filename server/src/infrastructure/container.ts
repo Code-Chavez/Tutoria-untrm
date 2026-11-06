@@ -40,6 +40,8 @@ import { GetTutorAcceptanceUseCase, RequestTutorAcceptanceUseCase, RespondTutorA
 import { ExcelTutorParser } from './parsers/ExcelTutorParser';
 import { PrismaAdmonitionRepository } from './repositories/PrismaAdmonitionRepository';
 import { PrismaCertificateRepository } from './repositories/PrismaCertificateRepository';
+import { PrismaCertificateWorkflowRepository } from './repositories/PrismaCertificateWorkflowRepository';
+import { ApproveCertificateUseCase, ObserveCertificateUseCase, RejectCertificateUseCase, ReviewEvidenceUseCase, StartCertificateUseCase, SubmitCertificateUseCase, VoidCertificateUseCase } from '@application/use-cases/certification/CertificateWorkflowUseCases';
 import { CertificateScopeResolver, GetCertificateUseCase, ListCertificatesUseCase } from '@application/use-cases/certification/CertificateQueryUseCases';
 import { AdmonitionScopeResolver, GetAdmonitionFileUseCase, IssueAdmonitionUseCase, ListAdmonishableTutorsUseCase, ListAdmonitionsUseCase } from '@application/use-cases/admonitions/AdmonitionUseCases';
 import { PrismaCycleTutorRepository } from './repositories/PrismaCycleTutorRepository';
@@ -384,6 +386,14 @@ const changePasswordUseCase = new ChangePasswordUseCase(
 
 const cycleTutorRepository = new PrismaCycleTutorRepository(prisma);
 const cycleTutorApplier = new CycleTutorApplier(cycleTutorRepository, studentRepository, tutorAssignmentHistoryRepository);
+const certificateWorkflowRepository = new PrismaCertificateWorkflowRepository(prisma);
+const startCertificateUseCase = new StartCertificateUseCase(certificateScope, certificateWorkflowRepository, userRepository, academicPeriodRepository, cycleTutorRepository, schoolRepository, auditLogRepository);
+const submitCertificateUseCase = new SubmitCertificateUseCase(certificateScope, certificateRepository, certificateWorkflowRepository, auditLogRepository);
+const reviewEvidenceUseCase = new ReviewEvidenceUseCase(certificateScope, certificateRepository, certificateWorkflowRepository, auditLogRepository);
+const observeCertificateUseCase = new ObserveCertificateUseCase(certificateScope, certificateRepository, certificateWorkflowRepository, auditLogRepository);
+const rejectCertificateUseCase = new RejectCertificateUseCase(certificateScope, certificateRepository, certificateWorkflowRepository, auditLogRepository);
+const approveCertificateUseCase = new ApproveCertificateUseCase(certificateScope, certificateRepository, certificateWorkflowRepository, auditLogRepository);
+const voidCertificateUseCase = new VoidCertificateUseCase(certificateScope, certificateRepository, certificateWorkflowRepository, auditLogRepository);
 const listCycleTutorsUseCase = new ListCycleTutorsUseCase(studentAccessGuard, academicPeriodRepository, cycleTutorRepository, schoolRepository);
 // Aviso a la coordinación del rechazo de un docente (LEV-R05): guardado en cola de forma atómica con el rechazo y entregado por el
 // intento inmediato o por el proceso de fondo, que comparten la misma reserva. Sin SMTP el aviso queda en cola y se explica por qué.
@@ -914,6 +924,13 @@ export const container = {
     getAdmonitionFileUseCase,
     listCertificatesUseCase,
     getCertificateUseCase,
+    startCertificateUseCase,
+    submitCertificateUseCase,
+    reviewEvidenceUseCase,
+    observeCertificateUseCase,
+    rejectCertificateUseCase,
+    approveCertificateUseCase,
+    voidCertificateUseCase,
     listCycleTutorsUseCase,
     getInstitutionalPendingUseCase,
     requestTutorAcceptanceUseCase,

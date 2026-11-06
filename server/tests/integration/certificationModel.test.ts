@@ -132,7 +132,8 @@ describe('certificación del docente tutor: modelo de datos (corte 1)', () => {
       await prisma.certificate.update({ where: { id: first.id }, data: { status: 'ANULADO', voidReason: 'se inicia de nuevo', voidedById: adminId } });
       const second = await create();
       expect(second.id).not.toBe(first.id);
-      await prisma.certificate.update({ where: { id: second.id }, data: { status: 'RECHAZADO' } });
+      // Un rechazo guarda su motivo: la base no admite uno sin él (restricción del corte 3).
+      await prisma.certificate.update({ where: { id: second.id }, data: { status: 'RECHAZADO', reviewNote: 'No procede' } });
       await expect(create()).resolves.toBeDefined();
     }));
 

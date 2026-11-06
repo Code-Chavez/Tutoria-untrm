@@ -21,6 +21,7 @@ const SELECT = {
   voidedById: true,
   voidedAt: true,
   voidReason: true,
+  reviewNote: true,
 } as const;
 
 type Row = Omit<CertificateRecord, 'hasUnsignedPdf'> & { unsignedStorageKey: string | null };
