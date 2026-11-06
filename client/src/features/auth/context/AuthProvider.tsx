@@ -16,6 +16,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   // El rol y sus permisos pueden haber cambiado desde que la persona inició sesión (la DBU edita roles): al abrir la aplicación se
   // actualizan, para que el menú no muestre lo anterior. Si no se puede consultar, se conserva lo guardado (el servidor autoriza igual).
   const sessionUserId = user?.id;
+  // Persona para la cual ya se confirmaron el rol y los permisos con el servidor (o se obtuvieron al iniciar sesión).
+  const [confirmedUserId, setConfirmedUserId] = useState<string | null>(null);
   useEffect(() => {
     if (!sessionUserId) return;
     let cancelled = false;
@@ -32,7 +34,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           return updated;
         });
       })
-      .catch(() => undefined);
+      .catch(() => undefined)
+      .finally(() => {
+        if (!cancelled) setConfirmedUserId(sessionUserId);
+      });
     return () => {
       cancelled = true;
     };
@@ -46,6 +51,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     clearDraftsExcept(result.user.id); // los borradores de otra persona no sobreviven a un cambio de cuenta
     const sessionUser = { ...result.user, idleTimeoutMinutes: result.sessionPolicy?.idleTimeoutMinutes };
     tokenStorage.save(result.accessToken, result.refreshToken, sessionUser);
+    setConfirmedUserId(result.user.id);
     setUser(sessionUser);
   }, []);
 
@@ -70,8 +76,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const value = useMemo<AuthContextValue>(
-    () => ({ user, isAuthenticated: user !== null, login, logout, markPasswordChanged }),
-    [user, login, logout, markPasswordChanged],
+    () => ({ user, isAuthenticated: user !== null, isSessionFresh: user === null || confirmedUserId === user.id, login, logout, markPasswordChanged }),
+    [user, confirmedUserId, login, logout, markPasswordChanged],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

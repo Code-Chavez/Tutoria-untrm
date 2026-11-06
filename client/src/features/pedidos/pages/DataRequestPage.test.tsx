@@ -45,6 +45,7 @@ const record = (over: Partial<DataRequest> = {}): DataRequest => ({
 const auth = (role: string, id = 'coord-1'): AuthContextValue => ({
   user: { id, email: 'rosa@untrm.edu.pe', firstName: 'Rosa', lastName: 'Mendoza', role },
   isAuthenticated: true,
+  isSessionFresh: true,
   login: vi.fn(),
   logout: vi.fn(),
   markPasswordChanged: vi.fn(),

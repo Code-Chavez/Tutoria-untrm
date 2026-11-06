@@ -54,6 +54,7 @@ const view = (over: Partial<TutoringRequestView> = {}): TutoringRequestView => (
 const auth: AuthContextValue = {
   user: { id: 'u1', email: 'ana@untrm.edu.pe', firstName: 'Ana', lastName: 'Torres', role: 'Tutorado' },
   isAuthenticated: true,
+  isSessionFresh: true,
   login: vi.fn(),
   logout: vi.fn(),
   markPasswordChanged: vi.fn(),
