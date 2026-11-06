@@ -1,6 +1,8 @@
 import { StudentAccessGuard } from '@application/access/StudentAccessGuard';
 import { CERTIFICATE_STATUSES, isCertificateStatus } from '@domain/certification/certificateStatus';
 import { AcademicPeriodRepository } from '@domain/repositories/AcademicPeriodRepository';
+import { DEFAULT_EVIDENCE_KINDS, availableActions } from '@domain/certification/certificateWorkflow';
+import { CertificateFacts, CertificateFactsReader } from '@domain/repositories/CertificateFactsReader';
 import { CertificateEvidenceRecord, CertificateRecord, CertificateRepository } from '@domain/repositories/CertificateRepository';
 import { SchoolRepository } from '@domain/repositories/SchoolRepository';
 import { UserRepository } from '@domain/repositories/UserRepository';
@@ -64,9 +66,13 @@ export interface CertificateView {
   reviewNote: string | null;
   /** Huella SHA-256 del PDF generado (nunca su ubicación). */
   pdfSha256: string | null;
+  /** Acciones que proceden desde el estado actual; además hace falta el permiso de cada una (lo decide la ruta). */
+  allowedActions: string[];
 }
 
 export interface CertificateDetailView extends CertificateView {
+  /** Hechos que el sistema conoce, solo informativos para quien revisa (nunca aprueban nada). */
+  facts: CertificateFacts | null;
   evidences: (Omit<CertificateEvidenceRecord, 'reviewedById'> & { reviewedByName: string | null })[];
 }
 
@@ -119,6 +125,7 @@ class CertificateViewBuilder {
       voidReason: row.voidReason,
       reviewNote: row.reviewNote,
       pdfSha256: row.pdfSha256,
+      allowedActions: availableActions(row.status, { isDemo: row.isDemo }),
     };
   }
 }
@@ -158,6 +165,7 @@ export class GetCertificateUseCase {
     users: UserRepository,
     schools: SchoolRepository,
     periods: AcademicPeriodRepository,
+    private readonly facts?: CertificateFactsReader,
   ) {
     this.builder = new CertificateViewBuilder(users, schools, periods);
   }
@@ -166,11 +174,76 @@ export class GetCertificateUseCase {
     const scope = await this.scope.resolve(requesterId);
     const row = await this.certificates.findById(id);
     if (!row || (scope.kind === 'SCHOOLS' && !scope.schoolIds.includes(row.schoolId))) throw new CertificateNotFoundError();
-    const evidences = await this.certificates.evidencesOf(id);
+    // Las evidencias nacen juntas y con la misma marca de tiempo: se ordenan siempre igual (el del proceso), las desconocidas al final.
+    const rank = (kind: string) => {
+      const index = (DEFAULT_EVIDENCE_KINDS as readonly string[]).indexOf(kind);
+      return index === -1 ? DEFAULT_EVIDENCE_KINDS.length : index;
+    };
+    const evidences = [...(await this.certificates.evidencesOf(id))].sort((a, b) => rank(a.kind) - rank(b.kind) || a.id.localeCompare(b.id));
     const names = await this.builder.names([row], evidences.flatMap((e) => (e.reviewedById ? [e.reviewedById] : [])));
     return {
       ...this.builder.view(row, names),
+      facts: this.facts ? await this.facts.factsFor({ assignmentId: row.assignmentId, periodId: row.periodId, tutorId: row.tutorId }) : null,
       evidences: evidences.map(({ reviewedById, ...evidence }) => ({ ...evidence, reviewedByName: reviewedById ? (names.people.get(reviewedById) ?? null) : null })),
+    };
+  }
+}
+
+export interface CertificateCandidateView {
+  tutorId: string;
+  tutorName: string;
+  schoolId: string;
+  schoolName: string;
+  assignmentId: string;
+  cycles: number[];
+}
+
+/** Docentes con designación aceptada sin trámite vigente, dentro del alcance de quien consulta (para iniciar su certificado). */
+export class ListCertificateCandidatesUseCase {
+  constructor(
+    private readonly scope: CertificateScopeResolver,
+    private readonly certificates: CertificateRepository,
+    private readonly users: UserRepository,
+    private readonly schools: SchoolRepository,
+  ) {}
+
+  async execute(requesterId: string, filters: { periodId: string; schoolId?: string }): Promise<CertificateCandidateView[]> {
+    const scope = await this.scope.resolve(requesterId);
+    const rows = await this.certificates.candidatesFor({ ...filters, ...(scope.kind === 'SCHOOLS' && { schoolIds: scope.schoolIds }) });
+    const schools = new Map((await this.schools.findAll()).map((s) => [s.id, s.name]));
+    const result: CertificateCandidateView[] = [];
+    for (const row of rows) {
+      const user = await this.users.findById(row.tutorId);
+      if (!user || user.isActive === false) continue; // un docente dado de baja no se certifica
+      result.push({ tutorId: row.tutorId, tutorName: `${user.firstName} ${user.lastName}`, schoolId: row.schoolId, schoolName: schools.get(row.schoolId) ?? '', assignmentId: row.assignmentId, cycles: row.cycles });
+    }
+    return result.sort((a, b) => a.schoolName.localeCompare(b.schoolName, 'es') || a.tutorName.localeCompare(b.tutorName, 'es'));
+  }
+}
+
+export interface CertificateOptionsView {
+  periods: { id: string; name: string; isActive: boolean }[];
+  currentPeriodId: string | null;
+  schools: { id: string; name: string }[];
+}
+
+/** Lo que la pantalla necesita para sus filtros: los periodos y solo las escuelas del alcance de quien consulta. */
+export class GetCertificateOptionsUseCase {
+  constructor(
+    private readonly scope: CertificateScopeResolver,
+    private readonly periods: AcademicPeriodRepository,
+    private readonly schools: SchoolRepository,
+  ) {}
+
+  async execute(requesterId: string): Promise<CertificateOptionsView> {
+    const scope = await this.scope.resolve(requesterId);
+    const periods = await this.periods.findAll();
+    const active = await this.periods.findActive();
+    const schools = (await this.schools.findAll()).filter((s) => scope.kind === 'ALL' || scope.schoolIds.includes(s.id));
+    return {
+      periods: periods.map((p) => ({ id: p.id, name: p.name, isActive: p.isActive })),
+      currentPeriodId: active?.id ?? null,
+      schools: schools.map((s) => ({ id: s.id, name: s.name })).sort((a, b) => a.name.localeCompare(b.name, 'es')),
     };
   }
 }

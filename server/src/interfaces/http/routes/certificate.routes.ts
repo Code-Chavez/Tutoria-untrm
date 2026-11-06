@@ -76,6 +76,24 @@ router.get('/certificates', requireAuth, authorize(['certificados:consultar']), 
   }
 });
 
+// `candidates` y `options` van ANTES de `/certificates/:id`: si no, «candidates» se leería como un identificador.
+router.get('/certificates/candidates', requireAuth, authorize(['certificados:registrar']), async (req: Request, res: Response) => {
+  try {
+    const filters = z.object({ periodId: z.string().uuid('El periodo debe ser un UUID válido'), schoolId: z.string().uuid('La escuela debe ser un UUID válido').optional() }).parse(req.query);
+    res.status(200).json({ candidates: await container.useCases.listCertificateCandidatesUseCase.execute(req.auth?.sub as string, filters) });
+  } catch (error) {
+    fail(res, error);
+  }
+});
+
+router.get('/certificates/options', requireAuth, authorize(['certificados:consultar']), async (req: Request, res: Response) => {
+  try {
+    res.status(200).json(await container.useCases.getCertificateOptionsUseCase.execute(req.auth?.sub as string));
+  } catch (error) {
+    fail(res, error);
+  }
+});
+
 router.get('/certificates/:id', requireAuth, authorize(['certificados:consultar']), async (req: Request, res: Response) => {
   try {
     // Un identificador que no es UUID no puede existir: misma respuesta que un trámite ajeno, sin llegar a la base.

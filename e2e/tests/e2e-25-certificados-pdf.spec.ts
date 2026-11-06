@@ -6,7 +6,7 @@ import { api, apiLogin, apiPublic } from '../support/api';
 // E2E-25 (certificación del docente tutor, corte 4: PDF de demostración): con un trámite aprobado, la administración registra la
 // resolución de decanato, genera el PDF sin firma (con su número DEMO-) y lo descarga; la huella coincide con los bytes entregados,
 // cada descarga —también la rechazada— queda en la bitácora, y desde otra escuela o sin permiso no se entrega. Es una prueba de la API
-// con el navegador de Playwright (la pantalla llega en el corte 5). Necesita la bandeja de correo de pruebas (Mailpit) para el enlace de
+// con el navegador de Playwright; la pantalla y la descarga desde la interfaz las cubre E2E-26. Necesita la bandeja de correo de pruebas (Mailpit) para el enlace de
 // aceptación del docente. Todo con un docente, una cuenta y una escuela de datos ficticios.
 test.describe.configure({ mode: 'serial' });
 
@@ -201,5 +201,3 @@ test('7. un trámite generado solo admite anular: se anula con motivo y conserva
   expect(cert(voided.body)).toMatchObject({ status: 'ANULADO', number: s.number });
 });
 
-// La descarga desde la interfaz (botón en la pantalla del trámite) llega en el corte 5.
-test.fixme('8. pantalla del trámite: generar y descargar el PDF desde la interfaz (corte 5)', async () => {});

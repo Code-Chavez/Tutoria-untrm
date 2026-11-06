@@ -150,5 +150,3 @@ test('6. la administración sí puede delegar el permiso de emitir a un rol a me
   expect(delegated.body.role.permissions?.map((p) => p.code).sort()).toEqual(['certificados:consultar', 'certificados:emitir']);
 });
 
-// La pantalla de certificación se construye en el corte 5 del plan (docs/levantamiento/17_DISENO_CERTIFICACION_DEMOSTRACION.md).
-test.fixme('7. pantalla de certificación: lista de docentes del periodo, evidencias y acciones (corte 5)', async () => {});

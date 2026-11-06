@@ -1,5 +1,5 @@
 import { PrismaClient } from '@prisma/client';
-import { CertificateEvidenceRecord, CertificateFilters, CertificateRecord, CertificateRepository } from '@domain/repositories/CertificateRepository';
+import { CertificateCandidateRecord, CertificateEvidenceRecord, CertificateFilters, CertificateRecord, CertificateRepository } from '@domain/repositories/CertificateRepository';
 
 // Nunca se leen `snapshot` ni `unsignedStorageKey`: el PDF y los datos congelados se entregan por su propia ruta auditada (corte 4).
 const SELECT = {
@@ -33,7 +33,7 @@ const toRecord = ({ unsignedStorageKey, unsignedSha256, ...rest }: Row): Certifi
  * El alcance de quien consulta y la escuela que pide se combinan (intersección), nunca se sustituyen: pedir una escuela fuera del
  * alcance no la abre, devuelve vacío.
  */
-function schoolCondition(filters: CertificateFilters): { schoolId?: string | { in: string[] } } {
+function schoolCondition(filters: Pick<CertificateFilters, 'schoolIds' | 'schoolId'>): { schoolId?: string | { in: string[] } } {
   if (filters.schoolIds && filters.schoolId) return { schoolId: { in: filters.schoolIds.filter((id) => id === filters.schoolId) } };
   if (filters.schoolIds) return { schoolId: { in: filters.schoolIds } };
   if (filters.schoolId) return { schoolId: filters.schoolId };
@@ -64,6 +64,28 @@ export class PrismaCertificateRepository implements CertificateRepository {
   async pdfLocationOf(certificateId: string): Promise<{ storageKey: string; sha256: string } | null> {
     const row = await this.prisma.certificate.findUnique({ where: { id: certificateId }, select: { unsignedStorageKey: true, unsignedSha256: true } });
     return row?.unsignedStorageKey && row.unsignedSha256 ? { storageKey: row.unsignedStorageKey, sha256: row.unsignedSha256 } : null;
+  }
+
+  async candidatesFor(filters: { periodId: string; schoolIds?: string[]; schoolId?: string }): Promise<CertificateCandidateRecord[]> {
+    const where = schoolCondition({ schoolIds: filters.schoolIds, schoolId: filters.schoolId });
+    const [assignments, live] = await Promise.all([
+      this.prisma.cycleTutorAssignment.findMany({
+        where: { periodId: filters.periodId, acceptanceStatus: 'ACEPTADA', ...where },
+        select: { id: true, tutorId: true, schoolId: true, cycle: true },
+        orderBy: [{ schoolId: 'asc' }, { cycle: 'asc' }],
+      }),
+      this.prisma.certificate.findMany({ where: { periodId: filters.periodId, status: { notIn: ['ANULADO', 'RECHAZADO'] }, ...where }, select: { tutorId: true, schoolId: true } }),
+    ]);
+    const busy = new Set(live.map((c) => `${c.tutorId}|${c.schoolId}`));
+    const byTutor = new Map<string, CertificateCandidateRecord>();
+    for (const a of assignments) {
+      const key = `${a.tutorId}|${a.schoolId}`;
+      if (busy.has(key)) continue;
+      const found = byTutor.get(key);
+      if (found) found.cycles.push(a.cycle);
+      else byTutor.set(key, { tutorId: a.tutorId, schoolId: a.schoolId, assignmentId: a.id, cycles: [a.cycle] });
+    }
+    return [...byTutor.values()];
   }
 
   evidencesOf(certificateId: string): Promise<CertificateEvidenceRecord[]> {

@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Navigate, NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom';
-import { ChevronLeftIcon, ChevronRightIcon, ChevronDownIcon, SendIcon, UploadIcon, UsersPlusIcon, UserPlusIcon, CalendarIcon, InboxIcon, FolderIcon, ClipboardIcon, UsersIcon, SlidersIcon, PaletteIcon, ActivityIcon } from '../icons';
+import { ChevronLeftIcon, ChevronRightIcon, ChevronDownIcon, SendIcon, UploadIcon, UsersPlusIcon, UserPlusIcon, CalendarIcon, InboxIcon, FolderIcon, ClipboardIcon, FileTextIcon, UsersIcon, SlidersIcon, PaletteIcon, ActivityIcon } from '../icons';
 import { useAuth } from '@features/auth/hooks/useAuth';
 import { ROLE_CODES } from './navigation';
 import { SECTIONS, tabsFor, type SectionKey } from './sections';
@@ -12,6 +12,7 @@ const PERIOD_HELP: Record<string, { purpose: string; check: string }> = {
   '/carga-docentes': { purpose: 'Registra las cuentas de docentes tutores desde una plantilla de Excel.', check: 'Comprueba la escuela y el correo de cada docente. La carga envía un enlace para crear su contraseña.' },
   '/asignacion': { purpose: 'Elige al docente que atenderá cada ciclo de una escuela.', check: 'Revisa su carga, guarda la asignación y comprueba su respuesta. Asignar y aceptar son pasos distintos.' },
   '/cierre-periodo': { purpose: 'Revisa el resumen del periodo y los informes antes de ejecutar su cierre.', check: 'Lee las consecuencias y comprueba los pendientes antes de confirmar. Este paso cambia el estado del periodo.' },
+  '/certificados': { purpose: 'Inicia, revisa y aprueba el certificado de cada docente tutor y genera su PDF de demostración.', check: 'Revisa cada evidencia antes de marcarla conforme: lo que el sistema muestra es solo información. Todo certificado es de demostración y no tiene valor.' },
   '/pendientes': { purpose: 'Encuentra los casos que todavía requieren atención y abre la pantalla donde se resuelven.', check: 'Esta bandeja se consulta durante todo el periodo; no es un paso que debas dejar para el final.' },
 };
 
@@ -21,6 +22,7 @@ const PERIOD_NAV = {
   '/carga-docentes': { icon: UsersPlusIcon, description: 'Registrar docentes tutores' },
   '/asignacion': { icon: UserPlusIcon, description: 'Elegir un tutor para cada ciclo' },
   '/pendientes': { icon: InboxIcon, description: 'Revisar lo que falta resolver' },
+  '/certificados': { icon: FileTextIcon, description: 'Certificados de los docentes tutores' },
   '/cierre-periodo': { icon: CalendarIcon, description: 'Revisar y finalizar el periodo' },
 };
 
@@ -80,8 +82,8 @@ export function SectionShell({ section }: { section: SectionKey }) {
   const scrollTabs = (direction: -1 | 1) => navRef.current?.scrollBy?.({ left: direction * 160, behavior: 'smooth' });
 
   if (section === 'periodo' || (section === 'configuracion' && tabs.length > 1)) {
-    const organization = tabs.filter((tab) => tab.path !== '/pendientes' && tab.path !== '/cierre-periodo');
-    const followUp = ['/pendientes', '/cierre-periodo'].flatMap((path) => tabs.filter((tab) => tab.path === path));
+    const organization = tabs.filter((tab) => !['/pendientes', '/certificados', '/cierre-periodo'].includes(tab.path));
+    const followUp = ['/pendientes', '/certificados', '/cierre-periodo'].flatMap((path) => tabs.filter((tab) => tab.path === path));
     const groups = section === 'periodo'
       ? [{ label: 'Organización', items: organization }, { label: 'Seguimiento y cierre', items: followUp }]
       : [{ label: 'Organización', items: tabs.filter((tab) => ['/correos-escuelas', '/sedes', '/catalogos', '/evaluacion/configuracion'].includes(tab.path)) },

@@ -566,6 +566,20 @@ En **Asignación por ciclo** (*Gestión → Periodo académico*; DBU y coordinac
 4. **Quitar** deja el ciclo sin tutor; los estudiantes conservan el que ya tienen (para cambiarlo, use la reasignación).
 5. **Aceptación del docente.** Al asignar un docente nuevo a un ciclo, recibe un correo con un enlace personal de un solo uso (vence en 72 horas). Allí **acepta** indicando los días, las horas y el lugar en que atenderá (cada sesión dura 45 minutos; el máximo semanal lo fija la DBU en *Parámetros*) o **rechaza** con un motivo. En la pantalla, cada ciclo muestra *Sin solicitar / Pendiente / Aceptó / Rechazó*, con su disponibilidad o el motivo. Si rechaza, la coordinación recibe un correo y asigna a otro docente. Si no llegó el correo, use **Reenviar** (genera un enlace nuevo e invalida el anterior). Si se cambia el docente del ciclo, la aceptación empieza de nuevo con el nuevo; si se vuelve a elegir al mismo, conserva su respuesta. En una excepción, el correo le pregunta al docente si puede asumir también ese ciclo.
 
+### 7.10 Certificados de los docentes tutores (demostración)
+En **Certificados** (*Gestión → Periodo académico → Certificados*; la DBU y las cuentas con el permiso de consultar certificados) se prepara la constancia de cada docente que integra la comisión de tutoría. **Es una demostración sin valor**: mientras la universidad no entregue el formato oficial, el PDF lleva una marca de agua «DEMOSTRACIÓN — SIN VALOR», un número que empieza con `DEMO-` y marcadores donde irán los logotipos y la firma de la autoridad; no se puede firmar ni entregar.
+
+1. **Elija el periodo y la escuela.** Lo que elija queda en la dirección de la página: al recargar o abrir el enlace en otra pestaña vuelve a verse lo mismo, y el botón *Atrás* cierra la ventana que abrió.
+2. **Docentes sin trámite.** Aparecen los docentes con designación aceptada en el periodo que todavía no tienen un trámite vigente. *Iniciar trámite* crea el trámite con tres evidencias: aceptación de la designación, sesiones realizadas e informe semestral.
+3. **Enviar a revisión.** Quien inicia el trámite lo envía a revisión.
+4. **Revisar cada evidencia.** Debajo de cada una verá lo que el sistema sabe (por ejemplo, cuántas sesiones constan), **solo como información**: que existan no aprueba nada. Quien revisa marca la evidencia como *Conforme*, *Observada* (con un comentario que diga qué se observa) o *Pendiente*.
+5. **Aprobar, devolver o rechazar.** *Aprobar* solo se habilita con las tres evidencias conformes, y la pantalla explica qué falta. *Devolver con observaciones* exige al menos una evidencia observada; quien inició el trámite lo corrige y lo reenvía. *Rechazar* cierra el trámite y pide un motivo de al menos 10 caracteres.
+6. **Resolución de decanato.** La administración registra, con *Resolución de decanato*, el número y la fecha de la resolución que aprueba la comisión de la escuela en el periodo (una por escuela y periodo; guardar otra la reemplaza). Sin ella no se genera el PDF.
+7. **Generar y descargar el PDF.** Con el trámite aprobado, *Generar PDF de demostración* le asigna su número y crea el archivo. *Descargar PDF* lo baja; cada descarga queda en la bitácora.
+8. **Anular.** *Anular* pide un motivo; un certificado anulado conserva su número y no se reabre.
+
+Lo que escriba en los motivos y comentarios se guarda como **borrador solo en esa pestaña** (nunca en la dirección de la página): si recarga o cierra la ventana sin enviar, vuelve a aparecer con el aviso *«Recuperamos lo que habías escrito»* y puede descartarlo; al enviar con éxito se borra.
+
 ## 8. Preguntas frecuentes
 
 **No me aparece una opción del menú.** Depende de su rol. Si cree que le falta acceso, pida a la DBU revisar su rol.
