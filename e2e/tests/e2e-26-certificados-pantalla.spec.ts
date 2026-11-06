@@ -83,7 +83,7 @@ test('1. preparación: un docente con designación aceptada y una cuenta que sol
   expect((await admin('PUT', `/users/${account.body.user.id}/access`, { kind: 'SCHOOLS', schoolIds: [s.school.id] })).status).toBe(200);
 });
 
-test('2. «Certificados» es una pestaña de Periodo académico; el filtro de escuela queda en la URL y se restaura al recargar', async ({ page }) => {
+test('2. «Certificados» es una pestaña de Periodo académico; el filtro de escuela queda en la URL y se restaura al recargar', async ({ page, context }) => {
   await loginUi(page, accounts.admin);
   await openCertificates(page);
   await expect(page.getByRole('note')).toContainText('Demostración sin valor');
@@ -97,9 +97,12 @@ test('2. «Certificados» es una pestaña de Periodo académico; el filtro de es
   await expect(page.getByLabel('Escuela profesional')).toHaveValue(s.school.id);
 
   // Un valor inexistente en la URL no rompe la pantalla.
-  await page.goto('/certificados?periodo=nope&escuela=ajena&estado=INVENTADO&certificado=');
-  await expect(page.getByRole('heading', { level: 1, name: 'Certificados' }).last()).toBeVisible();
-  await expect(page.getByLabel('Estado')).toHaveValue('');
+  // Se abre en una pestaña nueva: WebKit en Linux se cae («Page crashed») al navegar con page.goto justo después de recargar la misma pestaña.
+  const other = await context.newPage();
+  await other.goto('/certificados?periodo=nope&escuela=ajena&estado=INVENTADO&certificado=');
+  await expect(other.getByRole('heading', { level: 1, name: 'Certificados' }).last()).toBeVisible();
+  await expect(other.getByLabel('Estado')).toHaveValue('');
+  await other.close();
 });
 
 test('3. se inicia el trámite del docente sin trámite y el detalle muestra lo que el sistema sabe, solo como información', async ({ page }) => {
