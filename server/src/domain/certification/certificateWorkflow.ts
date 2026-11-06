@@ -8,7 +8,7 @@ import { CertificateStatus, EvidenceResult } from './certificateStatus';
  * Los estados PENDIENTE_DE_FIRMA, FIRMADO_INCORPORADO y ENTREGADO siguen definidos (los usará la entrega con plantilla oficial),
  * pero ninguna acción de esta entrega llega a ellos, y la base de datos impide además que un certificado de demostración los tome.
  */
-export type CertificateAction = 'SUBMIT' | 'RESUBMIT' | 'OBSERVE' | 'REJECT' | 'APPROVE' | 'VOID';
+export type CertificateAction = 'SUBMIT' | 'RESUBMIT' | 'OBSERVE' | 'REJECT' | 'APPROVE' | 'GENERATE' | 'VOID';
 
 interface Transition {
   from: readonly CertificateStatus[];
@@ -24,6 +24,8 @@ export const TRANSITIONS: Readonly<Record<CertificateAction, Transition>> = {
   OBSERVE: { from: ['EN_REVISION'], to: 'OBSERVADO' },
   REJECT: { from: ['EN_REVISION'], to: 'RECHAZADO' },
   APPROVE: { from: ['EN_REVISION'], to: 'APROBADO' },
+  // Corte 4: se genera el PDF sin firma (con su número); la firma y la entrega siguen bloqueadas mientras el certificado es de demostración.
+  GENERATE: { from: ['APROBADO'], to: 'GENERADO_SIN_FIRMA' },
   VOID: { from: VOIDABLE_STATUSES, to: 'ANULADO' },
 };
 

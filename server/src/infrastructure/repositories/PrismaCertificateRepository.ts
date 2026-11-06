@@ -22,11 +22,12 @@ const SELECT = {
   voidedAt: true,
   voidReason: true,
   reviewNote: true,
+  unsignedSha256: true,
 } as const;
 
-type Row = Omit<CertificateRecord, 'hasUnsignedPdf'> & { unsignedStorageKey: string | null };
+type Row = Omit<CertificateRecord, 'hasUnsignedPdf' | 'pdfSha256'> & { unsignedStorageKey: string | null; unsignedSha256: string | null };
 
-const toRecord = ({ unsignedStorageKey, ...rest }: Row): CertificateRecord => ({ ...rest, hasUnsignedPdf: unsignedStorageKey !== null });
+const toRecord = ({ unsignedStorageKey, unsignedSha256, ...rest }: Row): CertificateRecord => ({ ...rest, hasUnsignedPdf: unsignedStorageKey !== null, pdfSha256: unsignedSha256 });
 
 /**
  * El alcance de quien consulta y la escuela que pide se combinan (intersección), nunca se sustituyen: pedir una escuela fuera del
@@ -58,6 +59,11 @@ export class PrismaCertificateRepository implements CertificateRepository {
   async findById(id: string): Promise<CertificateRecord | null> {
     const row = await this.prisma.certificate.findUnique({ where: { id }, select: SELECT });
     return row ? toRecord(row) : null;
+  }
+
+  async pdfLocationOf(certificateId: string): Promise<{ storageKey: string; sha256: string } | null> {
+    const row = await this.prisma.certificate.findUnique({ where: { id: certificateId }, select: { unsignedStorageKey: true, unsignedSha256: true } });
+    return row?.unsignedStorageKey && row.unsignedSha256 ? { storageKey: row.unsignedStorageKey, sha256: row.unsignedSha256 } : null;
   }
 
   evidencesOf(certificateId: string): Promise<CertificateEvidenceRecord[]> {

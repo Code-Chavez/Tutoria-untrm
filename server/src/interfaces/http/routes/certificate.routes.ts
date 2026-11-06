@@ -3,6 +3,7 @@ import { z } from 'zod';
 import { container } from '../../../infrastructure/container';
 import { authenticate } from '../middleware/authenticate';
 import { authorize } from '../middleware/authorize';
+import { auditAccess, byParam } from '../middleware/auditAccess';
 import {
   CertificateForbiddenError,
   CertificateNotFoundError,
@@ -14,6 +15,7 @@ import {
   CertificateStateError,
   InvalidCertificateInputError,
 } from '@application/use-cases/certification/CertificateWorkflowUseCases';
+import { CertificateFileIntegrityError, CertificateNotReadyError, DemoModeDisabledError } from '@application/use-cases/certification/CertificateIssuanceUseCases';
 import { CertificateAlreadyExistsError } from '@domain/repositories/CertificateWorkflowRepository';
 
 const router: IRouter = Router();
@@ -33,13 +35,30 @@ const startSchema = z.object({
 const evidenceSchema = z.object({ result: z.string().min(1).max(20), comment: z.string().max(2000).nullish() });
 const noteSchema = z.object({ note: z.string().max(2000).nullish() });
 const reasonSchema = z.object({ reason: z.string().max(2000).optional() });
+const resolutionSchema = z.object({
+  periodId: z.string().uuid('El periodo debe ser un UUID válido'),
+  schoolId: z.string().uuid('La escuela debe ser un UUID válido'),
+  number: z.string().max(200),
+  issuedOn: z.string().max(20),
+});
 
 function fail(res: Response, error: unknown) {
   if (error instanceof z.ZodError) res.status(400).json({ error: 'Datos de entrada inválidos', details: error.issues });
   else if (error instanceof InvalidCertificateFilterError || error instanceof InvalidCertificateInputError) res.status(400).json({ error: error.message });
   else if (error instanceof CertificateForbiddenError) res.status(403).json({ error: error.message });
   else if (error instanceof CertificateNotFoundError || error instanceof CertificateSchoolNotFoundError) res.status(404).json({ error: error.message });
-  else if (error instanceof CertificateStateError || error instanceof CertificateNotEligibleError || error instanceof CertificateAlreadyExistsError) res.status(409).json({ error: error.message });
+  else if (
+    error instanceof CertificateStateError ||
+    error instanceof CertificateNotEligibleError ||
+    error instanceof CertificateAlreadyExistsError ||
+    error instanceof CertificateNotReadyError ||
+    error instanceof DemoModeDisabledError
+  )
+    res.status(409).json({ error: error.message });
+  else if (error instanceof CertificateFileIntegrityError) {
+    console.error('Certificado: el archivo no coincide con su huella', error);
+    res.status(500).json({ error: error.message });
+  }
   else {
     console.error('Error en certificados', error);
     res.status(500).json({ error: 'Error interno del servidor' });
@@ -142,6 +161,48 @@ router.post('/certificates/:id/void', requireAuth, authorize(['certificados:admi
     const id = idOf(req);
     await container.useCases.voidCertificateUseCase.execute(sub(req), id, reasonSchema.parse(req.body ?? {}), req.ip);
     res.status(200).json(await detail(req, id));
+  } catch (error) {
+    fail(res, error);
+  }
+});
+
+// Corte 4: resolución de decanato, generación del PDF de demostración (sin firma, con número) y su descarga auditada.
+router.put('/committee-resolutions', requireAuth, authorize(['certificados:administrar']), async (req: Request, res: Response) => {
+  try {
+    const saved = await container.useCases.saveCommitteeResolutionUseCase.execute(sub(req), resolutionSchema.parse(req.body), req.ip);
+    res.status(200).json({ resolution: { id: saved.id, periodId: saved.periodId, schoolId: saved.schoolId, number: saved.number, issuedOn: saved.issuedOn } });
+  } catch (error) {
+    fail(res, error);
+  }
+});
+
+router.get('/committee-resolutions', requireAuth, authorize(['certificados:consultar']), async (req: Request, res: Response) => {
+  try {
+    const filters = z.object({ periodId: z.string().uuid().optional(), schoolId: z.string().uuid().optional() }).parse(req.query);
+    res.status(200).json({ resolutions: await container.useCases.listCommitteeResolutionsUseCase.execute(sub(req), filters) });
+  } catch (error) {
+    fail(res, error);
+  }
+});
+
+router.post('/certificates/:id/generate', requireAuth, authorize(['certificados:emitir']), async (req: Request, res: Response) => {
+  try {
+    const id = idOf(req);
+    await container.useCases.generateCertificateUseCase.execute(sub(req), id, req.ip);
+    res.status(200).json(await detail(req, id));
+  } catch (error) {
+    fail(res, error);
+  }
+});
+
+// `auditAccess` va antes de `authorize`: también quedan en la bitácora los intentos de descarga rechazados.
+router.get('/certificates/:id/pdf', requireAuth, auditAccess('Certificate', 'DOWNLOAD', byParam('id')), authorize(['certificados:descargar']), async (req: Request, res: Response) => {
+  try {
+    const { buffer, fileName } = await container.useCases.downloadCertificatePdfUseCase.execute(sub(req), idOf(req));
+    res
+      .status(200)
+      .set({ 'Content-Type': 'application/pdf', 'Content-Disposition': `attachment; filename="${fileName}"`, 'Cache-Control': 'no-store', 'X-Content-Type-Options': 'nosniff' })
+      .send(buffer);
   } catch (error) {
     fail(res, error);
   }

@@ -129,7 +129,7 @@ Se genera con `pdfkit` (ya usado en `BrandedPdf`), A4 horizontal, con la misma d
 
 ## 10. Plan de entrega (cortes pequeños, cada uno con su PR y pruebas)
 
-**Estado:** corte 1 (modelo y numeración) fusionado en #225. Corte 2 (permisos y rutas de consulta, con alcance por escuela reutilizando `StudentAccessGuard`) fusionado en #228. Corte 3 (trámite: iniciar, enviar, revisar evidencias, observar, rechazar, aprobar y anular, con máquina de estados y bloqueo por trámite) en curso. Los hechos que el sistema conoce (sesiones realizadas, informe semestral) se muestran como información al revisor con la pantalla (corte 5). Cortes 4 a 6 pendientes.
+**Estado:** corte 1 (modelo y numeración) fusionado en #225. Corte 2 (permisos y rutas de consulta, con alcance por escuela reutilizando `StudentAccessGuard`) fusionado en #228. Corte 3 (trámite: iniciar, enviar, revisar evidencias, observar, rechazar, aprobar y anular, con máquina de estados y bloqueo por trámite) fusionado en #235. Corte 4 (PDF de demostración con número, resolución de decanato y descarga auditada, #239) en curso. Las siglas del número se derivan del nombre en demostración; persistirlas depende de Q25. Los hechos que el sistema conoce (sesiones realizadas, informe semestral) se muestran como información al revisor con la pantalla (corte 5). Cortes 4 a 6 pendientes.
 
 1. Migración y modelo (`Certificate`, evidencias, secuencia, plantilla, resolución) con prueba de la secuencia transaccional.
 2. Permisos en el catálogo y rutas de consulta; prueba de alcance.

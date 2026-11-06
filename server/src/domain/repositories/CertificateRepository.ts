@@ -18,6 +18,8 @@ export interface CertificateRecord {
   voidedAt: Date | null;
   voidReason: string | null;
   reviewNote: string | null;
+  /** Huella SHA-256 del PDF sin firma que se generó (nunca la clave de almacenamiento: esa solo la usa la descarga). */
+  pdfSha256: string | null;
 }
 
 export interface CertificateEvidenceRecord {
@@ -43,4 +45,6 @@ export interface CertificateRepository {
   list(filters?: CertificateFilters): Promise<CertificateRecord[]>;
   findById(id: string): Promise<CertificateRecord | null>;
   evidencesOf(certificateId: string): Promise<CertificateEvidenceRecord[]>;
+  /** Dónde está el PDF sin firma y con qué huella se guardó; null si todavía no se generó. */
+  pdfLocationOf(certificateId: string): Promise<{ storageKey: string; sha256: string } | null>;
 }

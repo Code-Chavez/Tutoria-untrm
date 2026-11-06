@@ -62,6 +62,8 @@ export interface CertificateView {
   voidedAt: Date | null;
   voidReason: string | null;
   reviewNote: string | null;
+  /** Huella SHA-256 del PDF generado (nunca su ubicación). */
+  pdfSha256: string | null;
 }
 
 export interface CertificateDetailView extends CertificateView {
@@ -116,6 +118,7 @@ class CertificateViewBuilder {
       voidedAt: row.voidedAt,
       voidReason: row.voidReason,
       reviewNote: row.reviewNote,
+      pdfSha256: row.pdfSha256,
     };
   }
 }

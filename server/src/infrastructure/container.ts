@@ -41,6 +41,10 @@ import { ExcelTutorParser } from './parsers/ExcelTutorParser';
 import { PrismaAdmonitionRepository } from './repositories/PrismaAdmonitionRepository';
 import { PrismaCertificateRepository } from './repositories/PrismaCertificateRepository';
 import { PrismaCertificateWorkflowRepository } from './repositories/PrismaCertificateWorkflowRepository';
+import { PrismaCommitteeResolutionRepository } from './repositories/PrismaCommitteeResolutionRepository';
+import { PrismaCertificateTemplateRepository } from './repositories/PrismaCertificateTemplateRepository';
+import { DemoCertificatePdfRenderer } from './export/DemoCertificatePdfRenderer';
+import { DownloadCertificatePdfUseCase, GenerateCertificateUseCase, ListCommitteeResolutionsUseCase, SaveCommitteeResolutionUseCase } from '@application/use-cases/certification/CertificateIssuanceUseCases';
 import { ApproveCertificateUseCase, ObserveCertificateUseCase, RejectCertificateUseCase, ReviewEvidenceUseCase, StartCertificateUseCase, SubmitCertificateUseCase, VoidCertificateUseCase } from '@application/use-cases/certification/CertificateWorkflowUseCases';
 import { CertificateScopeResolver, GetCertificateUseCase, ListCertificatesUseCase } from '@application/use-cases/certification/CertificateQueryUseCases';
 import { AdmonitionScopeResolver, GetAdmonitionFileUseCase, IssueAdmonitionUseCase, ListAdmonishableTutorsUseCase, ListAdmonitionsUseCase } from '@application/use-cases/admonitions/AdmonitionUseCases';
@@ -394,6 +398,21 @@ const observeCertificateUseCase = new ObserveCertificateUseCase(certificateScope
 const rejectCertificateUseCase = new RejectCertificateUseCase(certificateScope, certificateRepository, certificateWorkflowRepository, auditLogRepository);
 const approveCertificateUseCase = new ApproveCertificateUseCase(certificateScope, certificateRepository, certificateWorkflowRepository, auditLogRepository);
 const voidCertificateUseCase = new VoidCertificateUseCase(certificateScope, certificateRepository, certificateWorkflowRepository, auditLogRepository);
+const committeeResolutionRepository = new PrismaCommitteeResolutionRepository(prisma);
+const saveCommitteeResolutionUseCase = new SaveCommitteeResolutionUseCase(certificateScope, schoolRepository, academicPeriodRepository, committeeResolutionRepository, auditLogRepository);
+const listCommitteeResolutionsUseCase = new ListCommitteeResolutionsUseCase(certificateScope, committeeResolutionRepository, schoolRepository, academicPeriodRepository);
+const generateCertificateUseCase = new GenerateCertificateUseCase(certificateScope, certificateRepository, certificateWorkflowRepository, auditLogRepository, {
+  schools: schoolRepository,
+  faculties: facultyRepository,
+  users: userRepository,
+  periods: academicPeriodRepository,
+  resolutions: committeeResolutionRepository,
+  templates: new PrismaCertificateTemplateRepository(prisma),
+  renderer: new DemoCertificatePdfRenderer(),
+  storage: evidenceStorage,
+  demoMode: env.CERTIFICATE_DEMO_MODE,
+});
+const downloadCertificatePdfUseCase = new DownloadCertificatePdfUseCase(certificateScope, certificateRepository, certificateWorkflowRepository, auditLogRepository, evidenceStorage);
 const listCycleTutorsUseCase = new ListCycleTutorsUseCase(studentAccessGuard, academicPeriodRepository, cycleTutorRepository, schoolRepository);
 // Aviso a la coordinación del rechazo de un docente (LEV-R05): guardado en cola de forma atómica con el rechazo y entregado por el
 // intento inmediato o por el proceso de fondo, que comparten la misma reserva. Sin SMTP el aviso queda en cola y se explica por qué.
@@ -931,6 +950,10 @@ export const container = {
     rejectCertificateUseCase,
     approveCertificateUseCase,
     voidCertificateUseCase,
+    saveCommitteeResolutionUseCase,
+    listCommitteeResolutionsUseCase,
+    generateCertificateUseCase,
+    downloadCertificatePdfUseCase,
     listCycleTutorsUseCase,
     getInstitutionalPendingUseCase,
     requestTutorAcceptanceUseCase,
