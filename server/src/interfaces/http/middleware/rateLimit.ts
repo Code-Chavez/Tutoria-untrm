@@ -8,6 +8,15 @@ interface RateLimitOptions {
 }
 
 /**
+ * Tope efectivo de un límite: `override` solo se respeta fuera de producción y si es un entero positivo.
+ * Sirve para que las pruebas E2E repetidas contra un mismo servidor no agoten el límite; en producción siempre rige `defaultMax`.
+ */
+export function effectiveMax(defaultMax: number, override: string | undefined, nodeEnv: string | undefined): number {
+  if ((nodeEnv || 'development') === 'production' || override === undefined || !/^[1-9]\d{0,5}$/.test(override.trim())) return defaultMax;
+  return parseInt(override.trim(), 10);
+}
+
+/**
  * Límite de peticiones por IP en una ventana fija, en memoria (una sola instancia del servidor).
  * Para recuperar contraseña frena el uso del endpoint como disparador de correos y el sondeo de enlaces.
  */
