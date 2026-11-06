@@ -40,6 +40,14 @@ export interface CertificateFilters {
   status?: string;
 }
 
+/** Un docente con designación aceptada que todavía no tiene un trámite vigente en esa escuela y periodo. */
+export interface CertificateCandidateRecord {
+  tutorId: string;
+  schoolId: string;
+  assignmentId: string;
+  cycles: number[];
+}
+
 /** Lectura de los trámites de certificación (el corte 2 solo consulta; las transiciones llegan en el corte 3). */
 export interface CertificateRepository {
   list(filters?: CertificateFilters): Promise<CertificateRecord[]>;
@@ -47,4 +55,6 @@ export interface CertificateRepository {
   evidencesOf(certificateId: string): Promise<CertificateEvidenceRecord[]>;
   /** Dónde está el PDF sin firma y con qué huella se guardó; null si todavía no se generó. */
   pdfLocationOf(certificateId: string): Promise<{ storageKey: string; sha256: string } | null>;
+  /** Docentes con designación ACEPTADA en el periodo, sin trámite vigente (uno anulado o rechazado no cuenta como vigente). */
+  candidatesFor(filters: { periodId: string; schoolIds?: string[]; schoolId?: string }): Promise<CertificateCandidateRecord[]>;
 }

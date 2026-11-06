@@ -30,6 +30,8 @@ export const SECTIONS: Record<'periodo' | 'informes' | 'configuracion', Section>
       { label: 'Carga de docentes', path: '/carga-docentes', roles: ['dbu'], permissions: ROUTE_PERMISSIONS['/carga-docentes'] },
       { label: 'Asignación por ciclo', path: '/asignacion', roles: ['coord', 'dbu'], permissions: ROUTE_PERMISSIONS['/asignacion'] },
       { label: 'Cierre de periodo', path: '/cierre-periodo', roles: ['dbu'], permissions: ROUTE_PERMISSIONS['/cierre-periodo'] },
+      // Certificados de los docentes tutores (demostración): los roles base solo los ve la DBU; una cuenta con rol a medida, si tiene el permiso.
+      { label: 'Certificados', path: '/certificados', roles: ['dbu'], permissions: ROUTE_PERMISSIONS['/certificados'] },
       // Transversal al orden anterior: lo que quedó sin resolver en cualquiera de esos pasos (y las citas canceladas sin continuación).
       { label: 'Pendientes', path: '/pendientes', roles: ['coord', 'dbu'], permissions: ROUTE_PERMISSIONS['/pendientes'] },
     ],

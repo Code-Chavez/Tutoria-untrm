@@ -6,7 +6,7 @@ import { api, apiLogin, apiPublic } from '../support/api';
 // acepta sin iniciar sesión) entra a un trámite que la dirección de la escuela inicia, envía a revisión, observa, devuelve, rechaza,
 // aprueba y la administración anula. Comprueba permisos por acción, alcance por escuela, que el sistema no aprueba con evidencias
 // pendientes y que varias aprobaciones simultáneas dejan una sola. Todo con cuentas, roles y docentes ficticios creados aquí.
-// Es una prueba de la API con el navegador de Playwright (la pantalla del trámite es el corte 5). Necesita la bandeja de correo de
+// Es una prueba de la API con el navegador de Playwright; la pantalla la cubre E2E-26. Necesita la bandeja de correo de
 // pruebas (Mailpit) para el enlace de aceptación.
 test.describe.configure({ mode: 'serial' });
 
@@ -230,5 +230,3 @@ test('8. varias aprobaciones simultáneas dejan una sola: una recibe 200 y las d
   expect((await current(id)).status).toBe('APROBADO');
 });
 
-// La pantalla del trámite (lista de docentes del periodo, evidencias y acciones) llega en el corte 5.
-test.fixme('9. pantalla del trámite: iniciar, revisar evidencias y aprobar desde la interfaz (corte 5)', async () => {});
