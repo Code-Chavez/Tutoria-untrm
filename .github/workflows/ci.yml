@@ -301,6 +301,98 @@ jobs:
           -e PGHOST=127.0.0.1 -e PGUSER=sit_user -e PGPASSWORD=sit_pass -e PGDATABASE=postgres
           --entrypoint /usr/local/bin/test-backup.sh sit-backup
 
+  # ── E2E (Playwright) ─────────────────────────────────────
+  # Recorridos de extremo a extremo en un navegador real contra el servidor y el cliente levantados aquí, con una base propia
+  # y datos ficticios. Solo corren las suites mantenidas (e2e/package.json, script «test:ci»): las demás se incorporan cuando se
+  # actualizan, para que un fallo de este job sea del producto y no de una prueba desactualizada.
+  e2e-playwright:
+    name: E2E — Playwright (Chrome)
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: sit_user
+          POSTGRES_PASSWORD: sit_pass
+          POSTGRES_DB: sit_db_e2e
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U sit_user -d sit_db_e2e"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    env:
+      DATABASE_URL: postgresql://sit_user:sit_pass@localhost:5432/sit_db_e2e
+      JWT_SECRET: ci-e2e-secret
+      E2E_BASE_URL: http://localhost:5174
+      E2E_API_URL: http://localhost:3100/api
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9.15.9
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20.19.5
+
+      - name: Install server dependencies
+        working-directory: server
+        run: pnpm install --frozen-lockfile
+
+      - name: Install client dependencies
+        working-directory: client
+        run: pnpm install --frozen-lockfile
+
+      - name: Install E2E dependencies
+        working-directory: e2e
+        run: pnpm install --frozen-lockfile
+
+      - name: Install Chromium in the disposable runner
+        working-directory: e2e
+        run: pnpm exec playwright install --with-deps chromium
+
+      - name: Prepare the database (client, migrations, seed)
+        working-directory: server
+        run: |
+          pnpm prisma generate
+          pnpm prisma migrate deploy
+          pnpm run seed
+
+      - name: Start the server and the client
+        run: |
+          (cd server && PORT=3100 CORS_ORIGIN=http://localhost:5174 PUBLIC_APP_URL=http://localhost:5174 EMAIL_NOTIFICATIONS=false             nohup pnpm exec ts-node -r tsconfig-paths/register --transpile-only src/index.ts > "$RUNNER_TEMP/server.log" 2>&1 &)
+          (cd client && VITE_PROXY_TARGET=http://localhost:3100 nohup pnpm exec vite --port 5174 --strictPort > "$RUNNER_TEMP/client.log" 2>&1 &)
+          for i in $(seq 1 60); do
+            if curl -fsS http://localhost:3100/api/health > /dev/null 2>&1 && curl -fsS http://localhost:5174 > /dev/null 2>&1; then echo "stack ready"; exit 0; fi
+            sleep 3
+          done
+          echo "The stack did not start"; tail -n 40 "$RUNNER_TEMP/server.log" "$RUNNER_TEMP/client.log"; exit 1
+
+      - name: Run the maintained E2E suites
+        working-directory: e2e
+        run: pnpm run test:ci
+
+      - name: Upload Playwright report and traces
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: e2e-playwright-report
+          path: |
+            e2e/playwright-report
+            e2e/test-results
+          retention-days: 14
+
+      - name: Show server log on failure
+        if: failure()
+        run: tail -n 80 "$RUNNER_TEMP/server.log" || true
+
   # ── Docker ───────────────────────────────────────────────
   docker-build:
     name: Docker — Build Images

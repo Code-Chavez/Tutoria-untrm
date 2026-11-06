@@ -40,6 +40,12 @@ Otros navegadores: `E2E_BROWSER=webkit npx playwright test` (WebKit de Playwrigh
 `E2E-19` (accesibilidad con axe de las pantallas de gestión) y `E2E-18` (ingreso, solicitud, sesiones, evaluación y diálogos) usan `@axe-core/playwright`; axe **no sustituye** la prueba con lector de pantalla ni con un teléfono real. `E2E-20` detiene el contenedor `sit-mailpit` un momento para recorrer «correo no enviado» y lo vuelve a iniciar al terminar.
 Variables opcionales: `E2E_BASE_URL` (por defecto `http://localhost:5173`) y `E2E_API_URL` (por defecto `http://localhost:3000/api`).
 
+## En el CI
+
+El job **E2E — Playwright (Chrome)** de `.github/workflows/ci.yml` levanta una base PostgreSQL propia, aplica las migraciones y la seed, arranca el servidor (puerto 3100) y el cliente (5174) y corre `pnpm run test:ci` con Chromium. Solo ejecuta las suites que se mantienen al día (hoy **E2E-21** y **E2E-22**); la lista está en el script `test:ci` de `package.json`.
+
+Las demás suites no están en el CI porque algunas se desactualizaron mientras no corrían en ningún flujo (por ejemplo, el caso «el menú es corto» de E2E-01 espera pestañas sin descripción y en otro orden). Para incorporar una: ponerla al día, comprobar que pasa dos veces seguidas sobre una base nueva y agregar su prefijo a `test:ci`. Si el job falla, el informe y las trazas (`e2e/playwright-report`, `e2e/test-results`) quedan como artefacto 14 días.
+
 ## Convenciones
 
 - Cada prueba crea sus propios datos con texto único (`unique()`), así que se puede repetir sin reiniciar la base.
