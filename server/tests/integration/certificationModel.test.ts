@@ -45,7 +45,7 @@ describe('certificación del docente tutor: modelo de datos (corte 1)', () => {
       return;
     }
     periodId = (await prisma.academicPeriod.create({ data: { name: `Prueba certificación ${stamp}`, startDate: new Date('2026-01-05'), endDate: new Date('2026-06-30'), isActive: true, createdAt: TEST_PERIOD_CREATED_AT } })).id;
-    schoolId = (await prisma.school.findFirstOrThrow({ where: { name: { contains: 'Sistemas' } } })).id;
+    schoolId = (await prisma.school.findFirstOrThrow({ where: { name: 'Ingeniería de Sistemas' } })).id;
     tutorId = (await prisma.user.findFirstOrThrow({ where: { email: 'elena.ramirez@untrm.edu.pe' } })).id;
     adminId = (await prisma.user.findFirstOrThrow({ where: { email: '7183255722@untrm.edu.pe' } })).id;
   });

@@ -32,6 +32,8 @@ describe('consulta de certificados: permiso y alcance por escuela (corte 2)', ()
   const roleIds: string[] = [];
   const userIds: string[] = [];
   const certificateIds: string[] = [];
+  const schoolIds: string[] = [];
+  const facultyIds: string[] = [];
 
   const call = (path: string, who: Who | null) =>
     fetch(`${baseUrl}/api${path}`, { headers: who ? { Authorization: `Bearer ${tokens[who]}` } : {} });
@@ -66,13 +68,18 @@ describe('consulta de certificados: permiso y alcance por escuela (corte 2)', ()
       console.warn('Sin base de datos: se omite la prueba HTTP de consulta de certificados.');
       return;
     }
-    // Dos escuelas de la MISMA facultad no sirven para probar el alcance por facultad contra otra: se buscan una de cada facultad.
-    const schools = await prisma.school.findMany({ where: { isActive: true }, orderBy: { name: 'asc' } });
-    const first = schools[0]!;
-    const other = schools.find((s) => s.facultyId !== first.facultyId) ?? schools[1]!;
-    schoolA = { id: first.id, facultyId: first.facultyId };
-    schoolB = { id: other.id, facultyId: other.facultyId };
-    expect(schoolA.id).not.toBe(schoolB.id);
+    // Facultades y escuelas PROPIAS, una de cada facultad: las suites corren a la vez sobre la misma base y otra puede borrar su
+    // escuela mientras un trámite nuestro la referencia; además el alcance por facultad se prueba contra una facultad distinta.
+    // Cada escuela lleva la sede de una de referencia: otra suite comprueba que ninguna escuela quede sin sede.
+    const reference = await prisma.school.findFirstOrThrow({ where: { name: 'Ingeniería de Sistemas' } });
+    for (const label of ['A', 'B']) {
+      const faculty = await prisma.faculty.create({ data: { name: `Facultad cert ${label} ${stamp}` } });
+      facultyIds.push(faculty.id);
+      const school = await prisma.school.create({ data: { name: `Escuela cert ${label} ${stamp}`, facultyId: faculty.id, campusId: reference.campusId } });
+      schoolIds.push(school.id);
+    }
+    schoolA = { id: schoolIds[0]!, facultyId: facultyIds[0]! };
+    schoolB = { id: schoolIds[1]!, facultyId: facultyIds[1]! };
 
     periodId = (await prisma.academicPeriod.create({ data: { name: `Prueba consulta certificados ${stamp}`, startDate: new Date('2026-01-05'), endDate: new Date('2026-06-30'), isActive: true, createdAt: TEST_PERIOD_CREATED_AT } })).id;
     adminId = (await prisma.user.findFirstOrThrow({ where: { email: '7183255722@untrm.edu.pe' } })).id;
@@ -135,6 +142,8 @@ describe('consulta de certificados: permiso y alcance por escuela (corte 2)', ()
       await prisma.rolePermission.deleteMany({ where: { roleId: { in: roleIds } } });
       await prisma.role.deleteMany({ where: { id: { in: roleIds } } });
       await prisma.academicPeriod.deleteMany({ where: { id: periodId } });
+      await prisma.school.deleteMany({ where: { id: { in: schoolIds } } });
+      await prisma.faculty.deleteMany({ where: { id: { in: facultyIds } } });
     }
     await prisma.$disconnect();
   });
