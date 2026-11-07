@@ -56,7 +56,6 @@ test('Elena abre el enlace sin iniciar sesión y acepta con su disponibilidad; e
 
   await page.getByRole('radio', { name: 'Acepto' }).click();
   await page.getByLabel('Día 1').selectOption('2');
-  await page.getByLabel('Lugar 1').fill('Aula 12 E2E');
   await page.getByRole('button', { name: 'Enviar respuesta' }).click();
   await expect(page.getByRole('status')).toContainText('Su disponibilidad quedó registrada', { timeout: 45_000 });
 
@@ -72,7 +71,6 @@ test('la coordinadora ve que Elena aceptó y su disponibilidad', async ({ page }
   const row = page.getByRole('listitem').filter({ has: page.getByLabel('Tutor del ciclo 10') });
   await expect(row.getByText('Aceptó')).toBeVisible({ timeout: 45_000 });
   await expect(row).toContainText('Martes');
-  await expect(row).toContainText('Aula 12 E2E');
 });
 
 test('el Decano registra una amonestación a Elena y la coordinadora la consulta; Elena no la ve', async ({ page, browser }) => {

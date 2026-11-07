@@ -26,6 +26,9 @@ for (const [key, account] of Object.entries(accounts) as [AccountKey, (typeof ac
   });
 }
 
+// Cada pestaña lleva su título y, debajo, una línea de descripción: se comprueba el orden por el título con el que empieza el texto.
+const startingWith = (titles: string[]) => titles.map((title) => new RegExp(`^${title}`));
+
 test('credenciales inválidas muestran un error y no entran', async ({ page }) => {
   await page.goto('/login');
   await page.getByPlaceholder('usuario@untrm.edu.pe').fill('no.existe@untrm.edu.pe');
@@ -57,20 +60,20 @@ test('el menú es corto: Periodo académico, Informes y Configuración son una p
   // Periodo académico: pestañas en el orden del trabajo, y la primera abierta
   await nav.getByRole('link', { name: 'Periodo académico', exact: true }).click();
   const tabs = page.getByRole('navigation', { name: 'Secciones de Periodo académico' });
-  await expect(tabs.getByRole('link')).toHaveText(['Pedir listas', 'Carga de estudiantes', 'Carga de docentes', 'Asignación por ciclo', 'Cierre de periodo', 'Pendientes']);
-  await expect(tabs.getByRole('link', { name: 'Pedir listas', exact: true })).toHaveAttribute('aria-current', 'page');
-  await tabs.getByRole('link', { name: 'Asignación por ciclo' }).click();
+  await expect(tabs.getByRole('link')).toHaveText(startingWith(['Pedir listas', 'Carga de estudiantes', 'Carga de docentes', 'Asignación por ciclo', 'Pendientes', 'Certificados', 'Cierre de periodo']));
+  await expect(tabs.getByRole('link', { name: /^Pedir listas/ })).toHaveAttribute('aria-current', 'page');
+  await tabs.getByRole('link', { name: /^Asignación por ciclo/ }).click();
   await expect(nav.getByRole('link', { name: 'Periodo académico', exact: true })).toHaveAttribute('aria-current', 'page');
 
   // Informes: todo lo que se consulta y se exporta
   await nav.getByRole('link', { name: 'Informes', exact: true }).click();
   const reports = page.getByRole('navigation', { name: 'Secciones de Informes' });
-  await expect(reports.getByRole('link')).toHaveText(['Horarios y asistencia', 'Informe consolidado', 'Indicadores', 'Resultados de evaluación', 'Sugerencias de estudiantes']);
+  await expect(reports.getByRole('link')).toHaveText(startingWith(['Horarios y asistencia', 'Informe consolidado', 'Indicadores', 'Resultados de evaluación', 'Sugerencias de estudiantes']));
 
   // Configuración: todo lo configurable en una sola pantalla
   await nav.getByRole('link', { name: 'Configuración', exact: true }).click();
   const config = page.getByRole('navigation', { name: 'Secciones de Configuración' });
-  await expect(config.getByRole('link')).toHaveText(['Correos de las escuelas', 'Sedes', 'Evaluación de tutoría', 'Catálogos', 'Usuarios y roles', 'Parámetros', 'Identidad visual', 'Bitácora de auditoría']);
+  await expect(config.getByRole('link')).toHaveText(startingWith(['Correos de las escuelas', 'Sedes', 'Evaluación de tutoría', 'Catálogos', 'Usuarios y roles', 'Roles y permisos', 'Parámetros', 'Identidad visual', 'Bitácora de auditoría']));
 
   // Los grupos del menú se pliegan
   await nav.getByRole('button', { name: /Gestión/ }).click();
