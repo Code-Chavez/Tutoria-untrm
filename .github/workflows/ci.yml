@@ -338,6 +338,7 @@ jobs:
       E2E_BASE_URL: http://localhost:5174
       E2E_API_URL: http://localhost:3100/api
       E2E_MAILPIT_URL: http://localhost:8025
+      E2E_DATABASE_URL: postgresql://sit_user:sit_pass@localhost:5432/sit_db_e2e
 
     steps:
       - uses: actions/checkout@v4
