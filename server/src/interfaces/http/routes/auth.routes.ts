@@ -18,7 +18,7 @@ const router: IRouter = Router();
 // y el bloqueo deliberado de cuentas ajenas con intentos fallidos. Holgado para uso normal (una oficina tras un mismo NAT).
 const loginLimiter = rateLimit({
   windowMs: 5 * 60_000,
-  max: 100,
+  max: effectiveMax(100, env.LOGIN_RATE_LIMIT_MAX, env.NODE_ENV),
   message: 'Demasiados intentos de inicio de sesión desde esta red. Espera unos minutos e inténtalo de nuevo.',
 });
 router.post('/auth/login', loginLimiter, controller.login);
