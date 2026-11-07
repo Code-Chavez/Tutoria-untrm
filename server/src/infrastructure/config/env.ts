@@ -48,6 +48,8 @@ export const env = {
   EMAIL_NOTIFICATIONS: process.env.EMAIL_NOTIFICATIONS !== 'false',
   // Solo fuera de producción: sube el tope de POST /auth/reset-password (10 por IP cada 15 min) para correr las pruebas E2E varias veces seguidas. En producción se ignora.
   RESET_PASSWORD_RATE_LIMIT_MAX: process.env.RESET_PASSWORD_RATE_LIMIT_MAX,
+  // Igual para POST /auth/login (100 por IP cada 5 min): una corrida E2E completa y rápida inicia más sesiones que eso. Se ignora en producción.
+  LOGIN_RATE_LIMIT_MAX: process.env.LOGIN_RATE_LIMIT_MAX,
   // Certificación del docente tutor: sin plantilla oficial solo existen certificados de DEMOSTRACIÓN. Fuera de producción está activo
   // por defecto; en producción hay que activarlo de forma explícita (CERTIFICATE_DEMO_MODE=true).
   CERTIFICATE_DEMO_MODE: process.env.CERTIFICATE_DEMO_MODE === undefined ? (process.env.NODE_ENV || 'development') !== 'production' : process.env.CERTIFICATE_DEMO_MODE === 'true',

@@ -376,7 +376,7 @@ jobs:
 
       - name: Start the server and the client
         run: |
-          (cd server && PORT=3100 CORS_ORIGIN=http://localhost:5174 PUBLIC_APP_URL=http://localhost:5174 SMTP_HOST=localhost SMTP_PORT=1025 MAIL_FROM="SIT UNTRM <no-reply@untrm.edu.pe>"             nohup pnpm exec ts-node -r tsconfig-paths/register --transpile-only src/index.ts > "$RUNNER_TEMP/server.log" 2>&1 &)
+          (cd server && PORT=3100 CORS_ORIGIN=http://localhost:5174 PUBLIC_APP_URL=http://localhost:5174 SMTP_HOST=localhost SMTP_PORT=1025 MAIL_FROM="SIT UNTRM <no-reply@untrm.edu.pe>" LOGIN_RATE_LIMIT_MAX=2000 nohup pnpm exec ts-node -r tsconfig-paths/register --transpile-only src/index.ts > "$RUNNER_TEMP/server.log" 2>&1 &)
           (cd client && VITE_PROXY_TARGET=http://localhost:3100 nohup pnpm exec vite --port 5174 --strictPort > "$RUNNER_TEMP/client.log" 2>&1 &)
           for i in $(seq 1 60); do
             if curl -fsS http://localhost:3100/api/health > /dev/null 2>&1 && curl -fsS http://localhost:5174 > /dev/null 2>&1; then echo "stack ready"; exit 0; fi
