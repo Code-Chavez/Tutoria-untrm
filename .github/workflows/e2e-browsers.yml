@@ -1,24 +1,27 @@
-name: E2E browsers (certificate screen)
+name: E2E browsers (Firefox, WebKit)
 
-# Corre los recorridos de la pantalla de certificados (E2E-26 y E2E-27) en Firefox y WebKit, sobre Linux. El job principal del pipeline usa
-# Chrome; esta comprobación aparte cubre los otros motores solo para esa pantalla y solo cuando cambia (o a mano). Qué navegadores corren
-# en el pipeline para el resto de recorridos se decide en el issue #231.
+# Segundo job de E2E del pipeline: el principal (ci.yml) usa Chrome; aquí corren Firefox y WebKit sobre Linux. Decisión del issue #231 (2026-11-07):
+# - Chrome: toda PR (ci.yml, 12 suites). Edge es Chromium (mismo motor): se prueba a mano antes de cada release, no en el pipeline.
+# - Firefox: toda PR que toque client, server, e2e o este archivo, con E2E-21, 22, 23, 26 y 27 (~4 min).
+# - WebKit en Linux: solo E2E-27, porque se cae («Page crashed») al recargar en otros recorridos; a mano se le puede pasar otras suites.
+# - Ambos corren además cada noche, para detectar una regresión de motor sin que ninguna PR la toque.
 on:
   pull_request:
     branches: [develop]
     types: [opened, synchronize, reopened]
     paths:
-      - 'client/src/features/certificados/**'
-      - 'client/src/shared/components/layout/Section*'
-      - 'client/src/shared/hooks/useDialog*'
-      - 'server/src/application/use-cases/certification/**'
-      - 'server/src/interfaces/http/routes/certificate.routes.ts'
-      - 'e2e/tests/e2e-26-*'
-      - 'e2e/tests/e2e-27-*'
-      - 'e2e/support/**'
-      - 'e2e/playwright.config.ts'
+      - 'client/**'
+      - 'server/**'
+      - 'e2e/**'
       - '.github/workflows/e2e-browsers.yml'
+  schedule:
+    - cron: '0 7 * * *'
   workflow_dispatch:
+    inputs:
+      specs:
+        description: 'Suites a correr en cada navegador (p. ej. "e2e-21 e2e-22 e2e-23"); vacío = las de la matriz'
+        required: false
+        default: ''
 
 permissions:
   contents: read
@@ -29,7 +32,7 @@ concurrency:
 
 jobs:
   browsers:
-    name: E2E — ${{ matrix.browser }} (certificate screen)
+    name: E2E — ${{ matrix.browser }}
     runs-on: ubuntu-latest
     timeout-minutes: 25
     strategy:
@@ -37,7 +40,7 @@ jobs:
       matrix:
         include:
           - browser: firefox
-            specs: e2e-26 e2e-27
+            specs: e2e-21 e2e-22 e2e-23 e2e-26 e2e-27
           # WebKit en Linux se cae («Page crashed») al recargar o navegar en distintos casos de E2E-26 (cambia de caso entre ejecuciones; en Windows pasa 20/20). Aquí solo se corre E2E-27 (accesibilidad, teclado, móvil), que pasa 10/10.
           - browser: webkit
             specs: e2e-27
@@ -115,9 +118,11 @@ jobs:
           done
           echo "The stack did not start"; tail -n 40 "$RUNNER_TEMP/server.log" "$RUNNER_TEMP/client.log"; exit 1
 
-      - name: Run the certificate screen journeys on ${{ matrix.browser }}
+      - name: Run the journeys on ${{ matrix.browser }}
         working-directory: e2e
-        run: pnpm exec playwright test ${{ matrix.specs }}
+        env:
+          INPUT_SPECS: ${{ inputs.specs }}
+        run: pnpm exec playwright test ${INPUT_SPECS:-${{ matrix.specs }}}
 
       - name: Upload Playwright report and traces
         if: failure()
