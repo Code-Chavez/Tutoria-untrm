@@ -19,6 +19,11 @@ on:
       - 'e2e/playwright.config.ts'
       - '.github/workflows/e2e-browsers.yml'
   workflow_dispatch:
+    inputs:
+      specs:
+        description: 'Suites a correr en cada navegador (p. ej. "e2e-21 e2e-22 e2e-23"); vacío = las de la matriz'
+        required: false
+        default: ''
 
 permissions:
   contents: read
@@ -117,7 +122,9 @@ jobs:
 
       - name: Run the certificate screen journeys on ${{ matrix.browser }}
         working-directory: e2e
-        run: pnpm exec playwright test ${{ matrix.specs }}
+        env:
+          INPUT_SPECS: ${{ inputs.specs }}
+        run: pnpm exec playwright test ${INPUT_SPECS:-${{ matrix.specs }}}
 
       - name: Upload Playwright report and traces
         if: failure()
