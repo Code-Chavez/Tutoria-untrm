@@ -86,7 +86,8 @@ describe('RequestEmailsPage (configuración del correo de pedido de listas)', ()
 
     await waitFor(() => expect(requests.setRequestEmail).toHaveBeenCalledWith('s1', 'correcto@untrm.edu.pe'));
     expect(await screen.findByRole('status')).toHaveTextContent('Correo de Ingeniería de Sistemas guardado');
-    expect(screen.queryByLabelText('Correo de Ingeniería de Sistemas')).not.toBeInTheDocument();
+    // El aviso es estado del componente y la edición vive en la URL: el router la dibuja un poco después (issue #256)
+    await waitFor(() => expect(screen.queryByLabelText('Correo de Ingeniería de Sistemas')).not.toBeInTheDocument());
   });
 
   it('«Cancelar» cierra la edición sin cambiar nada, y llegar con ?escuela=… abre esa escuela para editar', async () => {
@@ -94,7 +95,8 @@ describe('RequestEmailsPage (configuración del correo de pedido de listas)', ()
 
     expect(await screen.findByLabelText('Correo de Ingeniería de Sistemas')).toBeInTheDocument();
     await userEvent.click(screen.getByRole('button', { name: 'Cancelar' }));
-    expect(screen.queryByLabelText('Correo de Ingeniería de Sistemas')).not.toBeInTheDocument();
+    // Cancelar cambia la URL y el router la dibuja un poco después (issue #256)
+    await waitFor(() => expect(screen.queryByLabelText('Correo de Ingeniería de Sistemas')).not.toBeInTheDocument());
     expect(requests.setRequestEmail).not.toHaveBeenCalled();
   });
 });
