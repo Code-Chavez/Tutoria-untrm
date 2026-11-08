@@ -301,7 +301,7 @@ nada a medias**, no borra los respaldos existentes y marca `FAIL` (el contenedor
 |---|---|---|
 | Servidor: unitarias | Jest | `cd server && npx jest tests/unit` |
 | Servidor: integración y rutas (**base real**) | Jest | `cd server && REQUIRE_DB_TESTS=1 npx jest --runInBand` (necesita la base de desarrollo sembrada) |
-| Cliente | Vitest + Testing Library | `cd client && npx vitest run --no-file-parallelism` |
+| Cliente | Vitest + Testing Library | `cd client && npx vitest run --maxWorkers=3` (en un equipo de 4 núcleos; sin ese límite Vitest usa un worker por hilo menos uno y, con la CPU saturada, algunas pruebas pesadas superan los 5 s; ver issue #256) |
 | Extremo a extremo | Playwright | `cd e2e && npx playwright test` (ver `e2e/README.md`; necesita `docker compose up -d`) |
 | Tipos y estilo | TypeScript estricto, ESLint | `npx tsc --noEmit` y `pnpm lint` en `server/` y `client/` |
 | Dependencias | `pnpm audit --prod` | en `server/` y `client/` |
