@@ -1249,3 +1249,10 @@ model CommitteeResolution {
   @@unique([periodId, schoolId])
   @@map("committee_resolutions")
 }
+
+model CertificateVisualAsset {
+  key       String @id
+  content   Bytes
+
+  @@map("certificate_visual_assets")
+}

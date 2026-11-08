@@ -1,3 +1,4 @@
+import { CertificateVisualSettings } from '../components/CertificateVisualSettings';
 import { useState } from 'react';
 import { Badge, Button, Card, CardBody, CardHeader, EmptyState, PageHeader, SelectField, TableSkeleton } from '@shared/components/ui';
 import { FileTextIcon } from '@shared/components/icons';
@@ -113,6 +114,8 @@ export function CertificatesPage() {
       <p className={styles.demo} role="note">
         <strong>Demostración sin valor.</strong> Mientras la universidad no entregue el formato oficial, los certificados llevan una marca de agua y un número de demostración, y no se pueden firmar ni entregar.
       </p>
+
+      {(can('certificados:emitir') || can('branding:manage')) && options.data && <CertificateVisualSettings schools={options.data.schools} preferredSchool={schoolId} />}
 
       {options.isLoading ? (
         <TableSkeleton rows={4} columns={4} />

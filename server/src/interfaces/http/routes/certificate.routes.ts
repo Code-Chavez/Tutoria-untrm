@@ -1,3 +1,7 @@
+import multer from 'multer';
+import { certificateAssetKinds } from '@application/use-cases/certification/CertificateVisualSettings';
+import { isCertificateImage } from '@infrastructure/export/certificateImage';
+import { detectFileKind } from '../middleware/fileSignature';
 import { Router, type IRouter, type Request, type Response } from 'express';
 import { z } from 'zod';
 import { container } from '../../../infrastructure/container';
@@ -89,6 +93,51 @@ router.get('/certificates/candidates', requireAuth, authorize(['certificados:reg
 router.get('/certificates/options', requireAuth, authorize(['certificados:consultar']), async (req: Request, res: Response) => {
   try {
     res.status(200).json(await container.useCases.getCertificateOptionsUseCase.execute(req.auth?.sub as string));
+  } catch (error) {
+    fail(res, error);
+  }
+});
+
+const assetUpload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 1024 * 1024, files: 1, fields: 0 } }).single('file');
+const assetAccess = authorize(['certificados:consultar']);
+const assetPath = '/certificates/visual-settings/:schoolId';
+const assetSchool = z.string().uuid();
+
+router.get(assetPath, requireAuth, assetAccess, async (req, res) => {
+  try {
+    const assets = await container.useCases.certificateVisualSettings.status(req.auth!.sub, assetSchool.parse(req.params.schoolId), req.permissions ?? []);
+    res.set('Cache-Control', 'no-store').json({ assets });
+  } catch (error) {
+    fail(res, error);
+  }
+});
+
+router.put(`${assetPath}/:kind`, requireAuth, assetAccess, (req, res) => {
+  assetUpload(req, res, async (uploadError?: unknown) => {
+    if (uploadError) {
+      const tooLarge = uploadError instanceof multer.MulterError && uploadError.code === 'LIMIT_FILE_SIZE';
+      res.status(tooLarge ? 413 : 400).json({ error: 'Sube un solo archivo PNG o JPG de hasta 1 MB' });
+      return;
+    }
+    try {
+      const image = req.file?.buffer;
+      const kind = image && detectFileKind(image);
+      if (!image || (kind !== 'png' && kind !== 'jpeg') || !isCertificateImage(image, kind)) {
+        res.status(400).json({ error: 'Usa un JPG o un PNG estándar de 8 bits, sin entrelazar, de hasta 2000 × 2000 píxeles' });
+        return;
+      }
+      await container.useCases.certificateVisualSettings.save(req.auth!.sub, assetSchool.parse(req.params.schoolId), req.permissions ?? [], z.enum(certificateAssetKinds).parse(req.params.kind), image, req.ip);
+      res.sendStatus(204);
+    } catch (error) {
+      fail(res, error);
+    }
+  });
+});
+
+router.delete(`${assetPath}/:kind`, requireAuth, assetAccess, async (req, res) => {
+  try {
+    await container.useCases.certificateVisualSettings.save(req.auth!.sub, assetSchool.parse(req.params.schoolId), req.permissions ?? [], z.enum(certificateAssetKinds).parse(req.params.kind), null, req.ip);
+    res.sendStatus(204);
   } catch (error) {
     fail(res, error);
   }

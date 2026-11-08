@@ -126,3 +126,28 @@ export const certificateService = {
     window.URL.revokeObjectURL(url);
   },
 };
+
+export type CertificateAssetKind = 'universityLogo' | 'facultyLogo' | 'watermark' | 'signature';
+export interface CertificateAssetStatus {
+  kind: CertificateAssetKind;
+  configured: boolean;
+  editable: boolean;
+}
+
+const visualSettingsPath = (schoolId: string) => `/certificates/visual-settings/${schoolId}`;
+
+export async function getCertificateVisualSettings(schoolId: string) {
+  const { data } = await apiClient.get<{ assets: CertificateAssetStatus[] }>(visualSettingsPath(schoolId));
+  return data.assets;
+}
+
+export async function saveCertificateAsset(schoolId: string, kind: CertificateAssetKind, file: File | null) {
+  const path = `${visualSettingsPath(schoolId)}/${kind}`;
+  if (!file) {
+    await apiClient.delete(path);
+    return;
+  }
+  const form = new FormData();
+  form.append('file', file);
+  await apiClient.put(path, form, { headers: { 'Content-Type': 'multipart/form-data' } });
+}
