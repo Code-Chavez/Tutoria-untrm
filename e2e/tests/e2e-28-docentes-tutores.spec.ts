@@ -79,6 +79,9 @@ async function viewerAccount(label: string, schoolId: string): Promise<Account> 
   return account;
 }
 
+/** Deja pasar dos cuadros de animación: React ya confirmó el último cambio y ejecutó sus efectos (la URL se actualiza antes que eso). */
+const settle = (page: Page) => page.evaluate(() => new Promise<void>((resolve) => requestAnimationFrame(() => requestAnimationFrame(() => resolve()))));
+
 const row = (page: Page, key: keyof typeof names) => page.getByRole('row').filter({ hasText: full(key) });
 
 async function openList(page: Page): Promise<void> {
@@ -237,4 +240,62 @@ test('8. axe (administración): la lista no tiene infracciones serias ni de estr
   await page.goto(`/docentes-tutores?q=${stamp}`);
   await expect(row(page, 'accepted')).toBeVisible();
   await expectNoSeriousViolations(page, testInfo, 'docentes tutores · lista (administración)');
+});
+
+test('9. historial entre pantallas: con filtros aplicados se abre un trámite en Certificados; Atrás vuelve a la lista con los mismos filtros y resultados y Adelante abre el mismo trámite', async ({ page }) => {
+  await loginUi(page, accounts.admin);
+  await goToMenu(page, 'Docentes tutores');
+  // Filtros aplicados desde la propia pantalla, uno a uno: solo el docente de esta prueba con trámite iniciado. Entre uno y otro se espera a que
+  // React termine de pintar y de ejecutar sus efectos: la URL cambia antes que eso, y useUrlParams puede perder el filtro anterior si el siguiente
+  // llega en ese intervalo (issue #255).
+  await page.getByLabel('Buscar por nombre').fill(stamp);
+  await expect(page).toHaveURL(new RegExp(`q=${stamp}`));
+  await settle(page);
+  await page.getByLabel('Escuela profesional').selectOption(s.school.id);
+  await expect(page).toHaveURL(new RegExp(`escuela=${s.school.id}`));
+  await settle(page);
+  await page.getByLabel('Trámite de certificado').selectOption('INICIADO');
+  await expect(page).toHaveURL(/tramite=INICIADO/);
+  await settle(page);
+  await expect(row(page, 'accepted')).toBeVisible();
+  await expect(row(page, 'none')).toHaveCount(0);
+  const listUrl = page.url();
+  expect(new URL(listUrl).searchParams.get('q')).toBe(stamp);
+  expect(new URL(listUrl).searchParams.get('escuela')).toBe(s.school.id);
+  expect(new URL(listUrl).searchParams.get('tramite')).toBe('INICIADO');
+
+  await row(page, 'accepted').getByRole('button', { name: `Ver trámite de ${full('accepted')}` }).click();
+  await expect(page).toHaveURL(new RegExp(`/certificados\?.*certificado=${s.certificateId}`));
+  const certificateUrl = page.url();
+  const detail = page.getByRole('dialog', { name: new RegExp(`Certificado de ${full('accepted')}`) });
+  await expect(detail).toBeVisible();
+
+  // Atrás: la lista, con la misma dirección, los mismos filtros en los controles y los mismos resultados
+  await page.goBack();
+  await expect(page).toHaveURL(listUrl);
+  await expect(page.getByRole('heading', { level: 1, name: 'Docentes tutores' }).last()).toBeVisible();
+  await expect(page.getByLabel('Buscar por nombre')).toHaveValue(stamp);
+  await expect(page.getByLabel('Escuela profesional')).toHaveValue(s.school.id);
+  await expect(page.getByLabel('Trámite de certificado')).toHaveValue('INICIADO');
+  await expect(row(page, 'accepted')).toBeVisible();
+  await expect(row(page, 'none')).toHaveCount(0);
+  await expect(row(page, 'pending')).toHaveCount(0);
+
+  // Adelante: otra vez el mismo trámite abierto en Certificados
+  await page.goForward();
+  await expect(page).toHaveURL(certificateUrl);
+  await expect(detail).toBeVisible();
+});
+
+test('10. comportamiento actual (documentado, no es una garantía): dentro de la lista los filtros reemplazan la entrada del historial, así que Atrás no recupera la combinación anterior sino que sale de la pantalla', async ({ page }) => {
+  await loginUi(page, accounts.admin);
+  await goToMenu(page, 'Docentes tutores');
+  await page.getByLabel('Designación').selectOption('ACEPTADA');
+  await expect(page).toHaveURL(/estado=ACEPTADA/);
+  await page.getByLabel('Trámite de certificado').selectOption('INICIADO');
+  await expect(page).toHaveURL(/tramite=INICIADO/);
+  await page.goBack();
+  // No volvió a «solo estado=ACEPTADA»: salió de la lista (al panel de inicio, de donde se entró)
+  await expect(page).not.toHaveURL(/\/docentes-tutores/);
+  test.info().annotations.push({ type: 'diferencia', description: 'Recuperar combinaciones anteriores de filtros con Atrás exigiría cambiar replace: true por una entrada de historial por cambio; hoy no se hace.' });
 });
