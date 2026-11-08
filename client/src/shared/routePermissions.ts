@@ -27,6 +27,7 @@ export const ROUTE_PERMISSIONS = {
   '/auditoria': ['audit:read'],
   '/amonestaciones': ['admonitions:read'],
   '/certificados': ['certificados:consultar'],
+  '/docentes-tutores': ['certificados:consultar'],
   '/plan-semestral': ['work-plans:read'],
   '/tutorados': ['students:read'],
   '/sesiones': ['sessions:read'],

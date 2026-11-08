@@ -36,6 +36,7 @@ const SECTION_OF: Record<string, string> = {
   'Carga de estudiantes': 'Periodo académico',
   'Carga de docentes': 'Periodo académico',
   'Asignación por ciclo': 'Periodo académico',
+  'Docentes tutores': 'Periodo académico',
   'Cierre de periodo': 'Periodo académico',
   Certificados: 'Periodo académico',
   Pendientes: 'Periodo académico',

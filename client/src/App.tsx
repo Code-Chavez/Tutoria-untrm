@@ -36,6 +36,7 @@ import { TutorAcceptancePage } from '@features/ciclos/pages/TutorAcceptancePage'
 import { AdmonitionsPage } from '@features/amonestaciones/pages/AdmonitionsPage';
 import { CertificatesPage } from '@features/certificados/pages/CertificatesPage';
 import { TeacherBulkImportPage } from '@features/docentes/pages/TeacherBulkImportPage';
+import { TutorTeachersPage } from '@features/docentes/pages/TutorTeachersPage';
 import { SectionHome, SectionShell } from '@shared/components/layout/SectionShell';
 import { RequestEmailsPage } from '@features/pedidos/pages/RequestEmailsPage';
 import { CycleTutorsPage } from '@features/ciclos/pages/CycleTutorsPage';
@@ -150,6 +151,14 @@ export default function App() {
                 element={
                   <RequireRole roles={['Administrador DBU', 'Coordinador']} permissions={ROUTE_PERMISSIONS['/asignacion']}>
                     <CycleTutorsPage />
+                  </RequireRole>
+                }
+              />
+              <Route
+                path="docentes-tutores"
+                element={
+                  <RequireRole roles={['Administrador DBU']} permissions={ROUTE_PERMISSIONS['/docentes-tutores']}>
+                    <TutorTeachersPage />
                   </RequireRole>
                 }
               />

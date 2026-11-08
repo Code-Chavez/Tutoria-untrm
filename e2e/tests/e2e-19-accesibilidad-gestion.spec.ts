@@ -8,7 +8,7 @@ import { goToMenu, loginUi } from '../support/ui';
 // orden); las leves se anotan. Axe NO sustituye al lector de pantalla ni al teléfono real, que siguen pendientes.
 const SCREENS: { who: AccountKey; screens: string[] }[] = [
   { who: 'coordinator', screens: ['Estudiantes', 'Solicitudes de tutoría', 'Pendientes', 'Pedir listas', 'Carga de estudiantes', 'Asignación por ciclo', 'Plan semestral', 'Horarios y asistencia', 'Indicadores', 'Resultados de evaluación', 'Sugerencias de estudiantes', 'Correos de las escuelas', 'Amonestaciones'] },
-  { who: 'admin', screens: ['Carga de docentes', 'Cierre de periodo', 'Casos derivados', 'Seguimiento DBU', 'Informe consolidado', 'Sedes', 'Evaluación de tutoría', 'Catálogos', 'Usuarios y roles', 'Parámetros', 'Identidad visual', 'Bitácora de auditoría'] },
+  { who: 'admin', screens: ['Carga de docentes', 'Docentes tutores', 'Cierre de periodo', 'Casos derivados', 'Seguimiento DBU', 'Informe consolidado', 'Sedes', 'Evaluación de tutoría', 'Catálogos', 'Usuarios y roles', 'Parámetros', 'Identidad visual', 'Bitácora de auditoría'] },
   { who: 'tutor', screens: ['Estudiantes', 'Sesiones', 'Casos derivados', 'Informe semestral'] },
   { who: 'psychology', screens: ['Casos derivados'] },
 ];

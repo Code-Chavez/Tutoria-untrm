@@ -40,6 +40,8 @@ import { GetTutorAcceptanceUseCase, RequestTutorAcceptanceUseCase, RespondTutorA
 import { ExcelTutorParser } from './parsers/ExcelTutorParser';
 import { PrismaAdmonitionRepository } from './repositories/PrismaAdmonitionRepository';
 import { PrismaCertificateRepository } from './repositories/PrismaCertificateRepository';
+import { PrismaTutorTeacherReader } from './repositories/PrismaTutorTeacherReader';
+import { ListTutorTeachersUseCase } from '@application/use-cases/certification/TutorTeacherListUseCase';
 import { PrismaCertificateWorkflowRepository } from './repositories/PrismaCertificateWorkflowRepository';
 import { PrismaCommitteeResolutionRepository } from './repositories/PrismaCommitteeResolutionRepository';
 import { PrismaCertificateTemplateRepository } from './repositories/PrismaCertificateTemplateRepository';
@@ -363,6 +365,7 @@ const listCertificatesUseCase = new ListCertificatesUseCase(certificateScope, ce
 const getCertificateUseCase = new GetCertificateUseCase(certificateScope, certificateRepository, userRepository, schoolRepository, academicPeriodRepository, new PrismaCertificateFactsReader(prisma));
 const listCertificateCandidatesUseCase = new ListCertificateCandidatesUseCase(certificateScope, certificateRepository, userRepository, schoolRepository);
 const getCertificateOptionsUseCase = new GetCertificateOptionsUseCase(certificateScope, academicPeriodRepository, schoolRepository);
+const listTutorTeachersUseCase = new ListTutorTeachersUseCase(certificateScope, new PrismaTutorTeacherReader(prisma), schoolRepository, academicPeriodRepository);
 const importTutorsUseCase = new ImportTutorsUseCase(userRepository, roleRepository, schoolRepository, createUserUseCase, issueInvitationUseCase, emailPolicy);
 const updateUserUseCase = new UpdateUserUseCase(userRepository, roleRepository, schoolRepository, facultyRepository, emailPolicy);
 const toggleUserStatusUseCase = new ToggleUserStatusUseCase(userRepository);
@@ -947,6 +950,7 @@ export const container = {
     listCertificatesUseCase,
     getCertificateUseCase,
     listCertificateCandidatesUseCase,
+    listTutorTeachersUseCase,
     getCertificateOptionsUseCase,
     startCertificateUseCase,
     submitCertificateUseCase,
