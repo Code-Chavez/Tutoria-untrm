@@ -86,11 +86,11 @@ describe('PeriodClosurePage (fase 1)', () => {
     await user.click(screen.getByRole('button', { name: 'Cerrar periodo' }));
     expect(confirmButton()).toBeDisabled();
 
-    await user.type(screen.getByLabelText('Nombre del periodo'), '2026-I');
+    await user.type(screen.getByLabelText('Nombre del periodo "2026-II"'), '2026-I');
     expect(confirmButton()).toBeDisabled();
 
-    await user.clear(screen.getByLabelText('Nombre del periodo'));
-    await user.type(screen.getByLabelText('Nombre del periodo'), '2026-II');
+    await user.clear(screen.getByLabelText('Nombre del periodo "2026-II"'));
+    await user.type(screen.getByLabelText('Nombre del periodo "2026-II"'), '2026-II');
     expect(confirmButton()).toBeEnabled();
     await user.click(confirmButton());
 
@@ -138,7 +138,7 @@ describe('PeriodClosurePage (fase 1)', () => {
     await screen.findByText('Vigente');
 
     await user.click(screen.getByRole('button', { name: 'Cerrar periodo' }));
-    await user.type(screen.getByLabelText('Nombre del periodo'), '2026-II');
+    await user.type(screen.getByLabelText('Nombre del periodo "2026-II"'), '2026-II');
     await user.click(confirmButton());
 
     expect(await screen.findByRole('alert')).toHaveTextContent('Solo se puede cerrar el periodo vigente');

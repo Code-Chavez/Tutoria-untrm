@@ -173,7 +173,7 @@ export function PeriodClosurePage() {
               La tutoría pasará a <strong>solo lectura</strong> y los estudiantes solo verán su historial hasta que se abra otro periodo y vuelvan a
               estar cargados. Nada se borra. Para confirmar, escriba el nombre del periodo.
             </p>
-            <label htmlFor="confirm-name">Nombre del periodo</label>
+            <label htmlFor="confirm-name">Nombre del periodo "{view.period.name}"</label>
             <input id="confirm-name" className={styles.input} value={typed} onChange={(e) => setTyped(e.target.value)} autoComplete="off" placeholder={view.period.name} />
             <div className={styles.dialogActions}>
               <Button variant="secondary" onClick={() => { setClosing(false); setTyped(''); }}>
