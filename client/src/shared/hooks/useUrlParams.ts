@@ -35,6 +35,19 @@ export function useUrlParams() {
     drawn.current = params;
   }, [params]);
 
+  // Atrás y Adelante: la dirección a la que se navegó manda. Lo que se había pedido y aún no se dibujaba queda sin efecto (la navegación del
+  // historial lo reemplaza), y el siguiente cambio parte de esa dirección, sin esperar a que el router la dibuje.
+  useEffect(() => {
+    const onHistoryNavigation = () => {
+      const current = new URLSearchParams(window.location.search);
+      pending.current = [];
+      drawn.current = current;
+      requested.current = current;
+    };
+    window.addEventListener('popstate', onHistoryNavigation);
+    return () => window.removeEventListener('popstate', onHistoryNavigation);
+  }, []);
+
   const get = useCallback((key: string) => params.get(key) ?? '', [params]);
 
   const set = useCallback(

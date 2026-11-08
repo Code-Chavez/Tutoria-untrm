@@ -107,3 +107,53 @@ describe('useUrlParams', () => {
     expect(lastRequested()).toBe('z=1&b=1');
   });
 });
+
+// Atrás y Adelante con un cambio pendiente: la URL a la que se navegó es la que manda, y el siguiente cambio parte de ella. Se usa el
+// historial real del navegador simulado (jsdom): `history` cambia la dirección y dispara `popstate`, como al pulsar Atrás o Adelante.
+describe('useUrlParams con Atrás y Adelante mientras hay un cambio pendiente', () => {
+  const navigateInHistory = (search: string) => {
+    window.history.replaceState({}, '', `/pantalla${search}`);
+    window.dispatchEvent(new PopStateEvent('popstate'));
+  };
+
+  beforeEach(() => {
+    drawn = new URLSearchParams();
+    setParams.mockClear();
+  });
+
+  it('Atrás con un cambio pendiente: manda la URL a la que se volvió y el siguiente cambio no recupera lo pedido antes', () => {
+    drawn = new URLSearchParams('escuela=e1');
+    const { result, rerender } = renderHook(() => useUrlParams());
+    // Se pide un filtro y el router todavía no lo dibuja...
+    act(() => result.current.set({ q: 'pendiente' }));
+    // ...cuando la persona pulsa Atrás: la URL pasa a otra entrada del historial
+    act(() => navigateInHistory('?estado=x'));
+    drawn = new URLSearchParams('estado=x');
+    rerender();
+    act(() => result.current.set({ tramite: 'INICIADO' }));
+    expect(lastRequested()).toBe('estado=x&tramite=INICIADO');
+  });
+
+  it('Adelante con un cambio pendiente: igual, parte de la URL a la que se avanzó', () => {
+    drawn = new URLSearchParams('a=1');
+    const { result, rerender } = renderHook(() => useUrlParams());
+    act(() => {
+      result.current.set({ q: 'uno' });
+      result.current.set({ escuela: 'e1' });
+    });
+    act(() => navigateInHistory('?a=1&nuevo=1'));
+    drawn = new URLSearchParams('a=1&nuevo=1');
+    rerender();
+    act(() => result.current.set({ q: 'dos' }));
+    expect(lastRequested()).toBe('a=1&nuevo=1&q=dos');
+  });
+
+  it('si el siguiente cambio llega antes de que el router dibuje la URL del historial, ya parte de ella', () => {
+    drawn = new URLSearchParams('a=1');
+    const { result } = renderHook(() => useUrlParams());
+    act(() => result.current.set({ q: 'pendiente' }));
+    act(() => navigateInHistory('?z=9'));
+    act(() => result.current.set({ b: '1' })); // sin rerender: el router aún no dibujó
+    expect(lastRequested()).toBe('z=9&b=1');
+  });
+});
