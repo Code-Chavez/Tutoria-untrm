@@ -1,7 +1,7 @@
 name: E2E browsers (Firefox, WebKit)
 
 # Segundo job de E2E del pipeline: el principal (ci.yml) usa Chrome; aquí corren Firefox y WebKit sobre Linux. Decisión del issue #231 (2026-11-07):
-# - Chrome: toda PR (ci.yml, 12 suites). Edge es Chromium (mismo motor): se prueba a mano antes de cada release, no en el pipeline.
+# - Chrome: toda PR (ci.yml, 13 suites). Edge es Chromium (mismo motor): se prueba a mano antes de cada release, no en el pipeline.
 # - Firefox: toda PR que toque client, server, e2e o este archivo, con E2E-21, 22, 23, 26 y 27 (~4 min).
 # - WebKit en Linux: solo E2E-27, porque se cae («Page crashed») al recargar en otros recorridos; a mano se le puede pasar otras suites.
 # - Ambos corren además cada noche, para detectar una regresión de motor sin que ninguna PR la toque.

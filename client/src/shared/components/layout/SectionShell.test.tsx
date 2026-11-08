@@ -88,7 +88,7 @@ describe('SectionShell (pantallas juntas con pestañas)', () => {
 
     const nav = screen.getByRole('navigation', { name: 'Secciones de Periodo académico' });
     expect(nav).toBeInTheDocument();
-    expect(screen.getAllByRole('link').map((a) => a.children[1].textContent)).toEqual(['Pedir listas', 'Carga de estudiantes', 'Carga de docentes', 'Asignación por ciclo', 'Pendientes', 'Certificados', 'Cierre de periodo']);
+    expect(screen.getAllByRole('link').map((a) => a.children[1].textContent)).toEqual(['Pedir listas', 'Carga de estudiantes', 'Carga de docentes', 'Asignación por ciclo', 'Docentes tutores', 'Pendientes', 'Certificados', 'Cierre de periodo']);
     expect(screen.getByRole('link', { name: 'Asignación por ciclo' })).toHaveAttribute('aria-current', 'page');
     expect(screen.getByText('Pantalla de asignación')).toBeInTheDocument();
   });

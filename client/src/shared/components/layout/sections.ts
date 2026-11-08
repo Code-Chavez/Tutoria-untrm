@@ -29,6 +29,8 @@ export const SECTIONS: Record<'periodo' | 'informes' | 'configuracion', Section>
       { label: 'Carga de estudiantes', path: '/carga-masiva', roles: ['coord', 'dbu'], permissions: ROUTE_PERMISSIONS['/carga-masiva'] },
       { label: 'Carga de docentes', path: '/carga-docentes', roles: ['dbu'], permissions: ROUTE_PERMISSIONS['/carga-docentes'] },
       { label: 'Asignación por ciclo', path: '/asignacion', roles: ['coord', 'dbu'], permissions: ROUTE_PERMISSIONS['/asignacion'] },
+      // Lista de los docentes del periodo con su designación y su certificado; mismo permiso y alcance por escuela que Certificados.
+      { label: 'Docentes tutores', path: '/docentes-tutores', roles: ['dbu'], permissions: ROUTE_PERMISSIONS['/docentes-tutores'] },
       { label: 'Cierre de periodo', path: '/cierre-periodo', roles: ['dbu'], permissions: ROUTE_PERMISSIONS['/cierre-periodo'] },
       // Certificados de los docentes tutores (demostración): los roles base solo los ve la DBU; una cuenta con rol a medida, si tiene el permiso.
       { label: 'Certificados', path: '/certificados', roles: ['dbu'], permissions: ROUTE_PERMISSIONS['/certificados'] },

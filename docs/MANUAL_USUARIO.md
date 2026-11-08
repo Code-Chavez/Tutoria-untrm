@@ -582,6 +582,13 @@ La pantalla se comprobó con axe, con el teclado (el foco entra al diálogo, `Ta
 
 Lo que escriba en los motivos y comentarios se guarda como **borrador solo en esa pestaña** (nunca en la dirección de la página): si recarga o cierra la ventana sin enviar, vuelve a aparecer con el aviso *«Recuperamos lo que habías escrito»* y puede descartarlo; al enviar con éxito se borra.
 
+### 7.11 Docentes tutores del periodo
+En **Docentes tutores** (*Gestión → Periodo académico → Docentes tutores*; la DBU y las cuentas con el permiso de consultar certificados) se ve a los docentes del periodo en una lista: nombre, escuela, ciclos que atienden, estado de su designación y estado de su certificado. La designación distingue al docente **sin asignación** (no atiende ningún ciclo) del que tiene la aceptación **pendiente**, **sin respuesta** (el enlace venció), **aceptada** o **rechazada**; si atiende varios ciclos se ve el estado de cada uno.
+
+Puede buscar por nombre (sin distinguir tildes) y filtrar por periodo, escuela, estado de la designación y estado del trámite de certificado; los filtros quedan en la dirección de la página. Solo se muestran las escuelas de su alcance: no verá docentes ni trámites de otras escuelas.
+
+Cada fila ofrece **Ver trámite**, que abre el certificado en la pantalla de Certificados, e **Iniciar trámite**, que aparece solo si el docente tiene una designación aceptada y ningún trámite vigente y su cuenta puede registrar certificados; al iniciarlo se abre el detalle del trámite. Una cuenta de solo consulta ve los datos sin la acción de iniciar.
+
 ## 8. Preguntas frecuentes
 
 **No me aparece una opción del menú.** Depende de su rol. Si cree que le falta acceso, pida a la DBU revisar su rol.
