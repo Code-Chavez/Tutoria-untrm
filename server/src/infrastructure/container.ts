@@ -418,6 +418,7 @@ const generateCertificateUseCase = new GenerateCertificateUseCase(certificateSco
   resolutions: committeeResolutionRepository,
   templates: new PrismaCertificateTemplateRepository(prisma),
   renderer: new DemoCertificatePdfRenderer(),
+  campuses: new PrismaCampusRepository(prisma),
   visuals: certificateVisualSettings,
   storage: evidenceStorage,
   demoMode: env.CERTIFICATE_DEMO_MODE,

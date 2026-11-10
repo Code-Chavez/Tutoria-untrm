@@ -35,6 +35,15 @@ function cleanName(name: unknown): string {
   return value;
 }
 
+/** Ciudad de la sede: texto corto sin caracteres de control; vacío la quita (se usa la ciudad predeterminada). */
+function cleanCity(city: unknown): string | null {
+  if (city === null || city === undefined) return null;
+  const value = typeof city === 'string' ? city.trim().replace(/\s+/g, ' ') : '';
+  if (value === '') return null;
+  if (value.length > 80 || /\p{Cc}/u.test(value)) throw new InvalidCampusError('La ciudad debe tener hasta 80 caracteres y no puede incluir caracteres de control');
+  return value;
+}
+
 /** Sedes y escuelas con su sede: lo que necesita la pantalla de quien las configura (Vicerrectorado no ve estudiantes). */
 export class ListCampusesUseCase {
   constructor(private readonly campuses: CampusRepository, private readonly schools: SchoolRepository) {}
@@ -55,13 +64,14 @@ export class CreateCampusUseCase {
 
 export class UpdateCampusUseCase {
   constructor(private readonly campuses: CampusRepository, private readonly audit: AuditLogRepository) {}
-  async execute(actingUserId: string, id: string, changes: { name?: string; isActive?: boolean }, ip?: string | null): Promise<Campus> {
+  async execute(actingUserId: string, id: string, changes: { name?: string; isActive?: boolean; city?: string | null }, ip?: string | null): Promise<Campus> {
     if (!(await this.campuses.findById(id))) throw new CampusNotFoundError();
     let updated: Campus | null = null;
     if (changes.name !== undefined) updated = await this.campuses.rename(id, cleanName(changes.name));
     if (changes.isActive !== undefined) updated = await this.campuses.setActive(id, changes.isActive);
+    if (changes.city !== undefined) updated = await this.campuses.setCity(id, cleanCity(changes.city));
     if (!updated) throw new InvalidCampusError('No hay cambios que guardar');
-    await this.audit.create({ userId: actingUserId, action: 'CAMPUS_UPDATED', entity: 'Campus', entityId: id, details: `Sede «${updated.name}» (${updated.isActive ? 'activa' : 'inactiva'})`, ipAddress: ip ?? null });
+    await this.audit.create({ userId: actingUserId, action: 'CAMPUS_UPDATED', entity: 'Campus', entityId: id, details: `Sede «${updated.name}» (${updated.isActive ? 'activa' : 'inactiva'}), ciudad: ${updated.city ?? 'predeterminada'}`, ipAddress: ip ?? null });
     return updated;
   }
 }

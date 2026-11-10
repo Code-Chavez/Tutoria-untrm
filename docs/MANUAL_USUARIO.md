@@ -475,7 +475,7 @@ El **Decano** pertenece a una facultad (la DBU la indica al crear su cuenta en *
 La coordinación de cada escuela y la DBU consultan estas amonestaciones (la coordinación, solo las de sus escuelas) y pueden descargar el documento; los docentes tutores y los demás roles no las ven.
 
 ### 6.1 Sedes
-Vicerrectorado (y la DBU) configuran en **Configuración → Sedes** las sedes de la universidad (*Sede Central, Sede Bagua, Sede Utcubamba*) y **la sede de cada escuela profesional**: una escuela pertenece a una sola sede. Se puede agregar una sede, desactivarla o activarla de nuevo; una sede inactiva no se puede asignar a una escuela. Los cambios quedan en la bitácora. Este perfil no ve datos de estudiantes.
+Vicerrectorado (y la DBU) configuran en **Configuración → Sedes** las sedes de la universidad (*Sede Central, Sede Bagua, Sede Utcubamba*) y **la sede de cada escuela profesional**: una escuela pertenece a una sola sede. Se puede agregar una sede, desactivarla o activarla de nuevo; una sede inactiva no se puede asignar a una escuela. Los cambios quedan en la bitácora. Este perfil no ve datos de estudiantes. Cada sede lleva además su **ciudad** («Ciudad de la sede» → *Guardar ciudad*): es la que se imprime en la fecha del certificado de tutoría («Chachapoyas, 10 noviembre de 2026»). Si la sede no tiene ciudad, se usa Chachapoyas; vaciar el campo vuelve a la ciudad predeterminada. Un certificado ya generado conserva la ciudad con la que se imprimió.
 
 ## 7. Administrador DBU
 

@@ -201,6 +201,8 @@ model Faculty {
 model Campus {
   id        String   @id @default(uuid())
   name      String   @unique
+  /// Ciudad de la sede: se imprime en la fecha del certificado. Sin ella se usa la ciudad predeterminada (Chachapoyas).
+  city      String?
   isActive  Boolean  @default(true) @map("is_active")
   createdAt DateTime @default(now()) @map("created_at")
 

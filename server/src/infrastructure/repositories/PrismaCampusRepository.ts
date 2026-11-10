@@ -34,6 +34,10 @@ export class PrismaCampusRepository implements CampusRepository {
     return this.prisma.campus.update({ where: { id }, data: { isActive } });
   }
 
+  setCity(id: string, city: string | null): Promise<Campus> {
+    return this.prisma.campus.update({ where: { id }, data: { city } });
+  }
+
   async setSchoolCampus(schoolId: string, campusId: string): Promise<void> {
     await this.prisma.school.update({ where: { id: schoolId }, data: { campusId } });
   }

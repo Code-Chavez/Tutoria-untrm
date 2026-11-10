@@ -12,7 +12,7 @@ import {
 } from '@application/use-cases/campuses/CampusUseCases';
 
 const nameSchema = z.object({ name: z.string() });
-const updateSchema = z.object({ name: z.string().optional(), isActive: z.boolean().optional() });
+const updateSchema = z.object({ name: z.string().optional(), isActive: z.boolean().optional(), city: z.string().nullable().optional() });
 const schoolCampusSchema = z.object({ campusId: z.string().uuid('La sede debe ser un UUID válido') });
 
 export class CampusController {

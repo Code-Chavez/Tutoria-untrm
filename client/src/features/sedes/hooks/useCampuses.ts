@@ -20,7 +20,7 @@ export function useCreateCampus() {
 
 export function useUpdateCampus() {
   const refresh = useRefresh();
-  return useMutation({ mutationFn: ({ id, ...changes }: { id: string; name?: string; isActive?: boolean }) => campusService.update(id, changes), onSuccess: refresh });
+  return useMutation({ mutationFn: ({ id, ...changes }: { id: string; name?: string; isActive?: boolean; city?: string | null }) => campusService.update(id, changes), onSuccess: refresh });
 }
 
 export function useSetSchoolCampus() {

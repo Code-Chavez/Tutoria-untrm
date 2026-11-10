@@ -12,6 +12,7 @@ const data = {
   department: 'Ingeniería de Sistemas',
   periodName: '2026-II',
   resolutionNumber: '030-2026-DEMO',
+  city: 'Chachapoyas',
   issuedOn: new Date('2026-11-05T15:30:00.000Z'),
 };
 
@@ -58,10 +59,11 @@ describe('texto del certificado de demostración', () => {
     expect(text.body.filter((s) => s.bold).map((s) => s.text)).toEqual(['Comisión de Tutoría de Estudiantes']);
   });
 
-  it('usa marcadores, no datos oficiales, para los logotipos, la ciudad y la autoridad firmante', () => {
+  it('imprime la ciudad indicada en la fecha, y usa marcadores, no datos oficiales, para los logotipos y la autoridad firmante', () => {
     expect(text.logoPlaceholders.left).toMatch(/marcador/);
     expect(text.logoPlaceholders.right).toMatch(/marcador/);
-    expect(text.dateLine).toBe('[Ciudad], 05 noviembre de 2026.');
+    expect(text.dateLine).toBe('Chachapoyas, 05 noviembre de 2026.');
+    expect(composeCertificateText({ ...data, city: 'Bagua Grande' }).dateLine).toBe('Bagua Grande, 05 noviembre de 2026.');
     expect(text.signatory[0]).toMatch(/^\[.*autoridad firmante\]$/);
     expect(text.signatory).toContain('Director de Escuela de Ingeniería de Sistemas');
   });
