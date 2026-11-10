@@ -211,7 +211,7 @@ Variables del servidor (`server/.env.example`, `.env.production.example`; los va
 | `BACKUP_CRON`, `BACKUP_KEEP`, `BACKUP_OFFSITE_DIR`, `BACKUP_UPLOAD_CMD` | `0 2 * * *`; conserva 7 (desarrollo) o 14 (producción) | Respaldos (ver sección 9). |
 
 Variables del cliente (en tiempo de compilación): `VITE_IDLE_TIMEOUT_MINUTES` (por defecto 15) y `VITE_IDLE_WARNING_SECONDS` (60) controlan el cierre
-de sesión por inactividad.
+de sesión por inactividad. **Volver a la vista (#274):** al cerrarse la sesión por inactividad (`SessionTimeout`) o por un 401 que no se puede renovar (`apiClient`), el cliente guarda en `sessionStorage` (`sit:return-to`, ruta + consulta + ancla, id de la persona y hora) la vista actual (`shared/utils/returnTo.ts`); `LoginPage` la recupera una sola vez tras iniciar sesión solo para la misma persona, hasta 12 horas, y solo si es una ruta interna segura (nunca `//`, `\`, caracteres de control ni las pantallas públicas de acceso). «Salir» (cierre voluntario) no la guarda. La visita directa a una URL protegida (`ProtectedRoute`) conserva además la consulta y el ancla. Tras iniciar sesión el destino se aplica al renderizar (`<Navigate>`), sin carrera con la redirección a «/».
 
 **Parámetros del sistema** (se editan en la aplicación, *Parámetros*, por la DBU): duración de la sesión (45 min), sesiones por semestre (8), umbral de
 alerta por inasistencias (2) y plazo de atención de derivaciones (48 h).

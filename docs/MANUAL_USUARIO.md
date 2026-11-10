@@ -159,6 +159,8 @@ el caso o la solicitud correspondiente. *Marcar todas como leídas* limpia la li
 Si pasan **15 minutos sin actividad**, aparece un aviso con una cuenta regresiva de 60 segundos. Pulse el botón para seguir conectado; si no, la sesión se
 cierra sola. Mientras trabaja, la sesión se renueva sin que usted haga nada. Use siempre *Salir* al terminar, sobre todo en equipos compartidos.
 
+**Al volver a entrar, regresa a donde estaba.** Si la sesión se cerró por inactividad (o porque ya no se pudo renovar), al iniciar sesión de nuevo con **la misma cuenta** el sistema lo lleva a la misma pantalla en que trabajaba, con sus filtros. Si entra otra cuenta, o si usted pulsó *Salir*, se abre el inicio. El sistema recuerda esa pantalla solo en la pestaña de su navegador y hasta 12 horas.
+
 ### 1.7 Confidencialidad
 
 Los datos de los tutorados son **confidenciales** (Ley N.° 29733). No comparta capturas, impresiones o archivos descargados fuera de las personas
