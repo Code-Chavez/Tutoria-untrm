@@ -255,7 +255,7 @@ export function CertificatesPage() {
         </>
       )}
 
-      {openId && <CertificateDialog id={openId} can={can} userId={user?.id} onClose={closeAll} onOpenSub={openSub} />}
+      {openId && <CertificateDialog id={openId} can={can} userId={user?.id} onClose={closeAll} onOpenSub={openSub} campusesOf={(school) => options.data?.schools.find((s) => s.id === school)?.campuses ?? []} />}
 
       {sub === 'observar' && openId && (
         <ReasonDialog

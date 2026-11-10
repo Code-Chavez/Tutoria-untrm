@@ -8,11 +8,13 @@ import {
   ListCampusesUseCase,
   SchoolNotFoundForCampusError,
   SetSchoolCampusUseCase,
+  SetSchoolCampusesUseCase,
   UpdateCampusUseCase,
 } from '@application/use-cases/campuses/CampusUseCases';
 
 const nameSchema = z.object({ name: z.string(), kind: z.enum(['SEDE', 'FILIAL']).optional() });
 const updateSchema = z.object({ name: z.string().optional(), isActive: z.boolean().optional(), city: z.string().nullable().optional(), kind: z.enum(['SEDE', 'FILIAL']).optional() });
+const schoolCampusesSchema = z.object({ campusIds: z.array(z.string().uuid('La sede debe ser un UUID válido')).min(1, 'Elige al menos una sede').max(20) });
 const schoolCampusSchema = z.object({ campusId: z.string().uuid('La sede debe ser un UUID válido') });
 
 export class CampusController {
@@ -21,6 +23,7 @@ export class CampusController {
     private readonly createCampus: CreateCampusUseCase,
     private readonly updateCampus: UpdateCampusUseCase,
     private readonly setSchoolCampus: SetSchoolCampusUseCase,
+    private readonly setSchoolCampuses: SetSchoolCampusesUseCase,
   ) {}
 
   index = async (_req: Request, res: Response) => {
@@ -56,6 +59,16 @@ export class CampusController {
       const { campusId } = schoolCampusSchema.parse(req.body);
       await this.setSchoolCampus.execute(req.auth?.sub as string, req.params.id as string, campusId, req.ip);
       res.status(200).json({ message: 'Sede de la escuela actualizada', campusId });
+    } catch (error) {
+      this.fail(res, error);
+    }
+  };
+
+  setCampusesForSchool = async (req: Request, res: Response) => {
+    try {
+      const { campusIds } = schoolCampusesSchema.parse(req.body);
+      await this.setSchoolCampuses.execute(req.auth?.sub as string, req.params.id as string, campusIds, req.ip);
+      res.status(200).json({ message: 'Sedes de la escuela actualizadas', campusIds });
     } catch (error) {
       this.fail(res, error);
     }

@@ -160,9 +160,9 @@ describe('API de la pantalla de certificados (corte 5)', () => {
       expect(all).toHaveProperty('currentPeriodId');
 
       const scoped = await json(await call('GET', '/certificates/options', 'viewer'));
-      expect(scoped.schools).toEqual([{ id: schoolA.id, name: schoolA.name }]);
+      expect(scoped.schools).toEqual([{ id: schoolA.id, name: schoolA.name, campuses: expect.arrayContaining([]) }]);
       const other = await json(await call('GET', '/certificates/options', 'otherSchool'));
-      expect(other.schools).toEqual([{ id: schoolB.id, name: schoolB.name }]);
+      expect(other.schools).toEqual([{ id: schoolB.id, name: schoolB.name, campuses: expect.arrayContaining([]) }]);
     }));
 
     it('sin sesión responde 401 y sin permiso 403', guard(async () => {

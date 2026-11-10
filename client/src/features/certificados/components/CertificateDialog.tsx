@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Badge, Button, DraftNotice } from '@shared/components/ui';
+import { Badge, Button, DraftNotice, SelectField } from '@shared/components/ui';
 import { CloseIcon } from '@shared/components/icons';
 import { useDialog } from '@shared/hooks/useDialog';
 import { useDraft } from '@shared/hooks/useDraft';
@@ -17,6 +17,8 @@ interface Props {
   userId: string | undefined;
   onClose: () => void;
   onOpenSub: (dialog: SubDialog) => void;
+  /** Sedes donde se dicta la escuela del trámite: con más de una, quien genera elige cuál (su ciudad va en la fecha). */
+  campusesOf?: (schoolId: string) => { id: string; name: string }[];
 }
 
 const fmt = (iso: string | null) =>
@@ -99,12 +101,15 @@ export function CertificateDialog({ id, can, userId, onClose, onOpenSub }: Props
   );
 }
 
-function CertificateBody({ certificate, can, userId, onClose, onOpenSub }: { certificate: CertificateDetail } & Omit<Props, 'id'>) {
+function CertificateBody({ certificate, can, userId, onClose, onOpenSub, campusesOf }: { certificate: CertificateDetail } & Omit<Props, 'id'>) {
   const id = certificate.id;
   const submit = useSubmitCertificate();
   const review = useReviewEvidence();
   const approve = useApproveCertificate();
   const generate = useGenerateCertificate();
+  const campuses = campusesOf?.(certificate.schoolId) ?? [];
+  const [campusId, setCampusId] = useState('');
+  const chosenCampus = campusId || campuses[0]?.id || '';
   const [observing, setObserving] = useState<string | null>(null);
   const [feedback, setFeedback] = useState('');
   const [error, setError] = useState('');
@@ -301,8 +306,20 @@ function CertificateBody({ certificate, can, userId, onClose, onOpenSub }: { cer
             Aprobar
           </Button>
         )}
+        {actions.includes('GENERATE') && campuses.length > 1 && (
+          <>
+            <label htmlFor="cert-campus">Sede donde se emite</label>
+            <SelectField id="cert-campus" value={chosenCampus} onChange={(event) => setCampusId(event.target.value)}>
+              {campuses.map((c) => (
+                <option key={c.id} value={c.id}>
+                  {c.name}
+                </option>
+              ))}
+            </SelectField>
+          </>
+        )}
         {actions.includes('GENERATE') && (
-          <Button loading={generate.isPending} onClick={() => void run(() => generate.mutateAsync(id), 'Se generó el PDF de demostración.')}>
+          <Button loading={generate.isPending} onClick={() => void run(() => generate.mutateAsync({ id, campusId: campuses.length > 1 ? chosenCampus : undefined }), 'Se generó el PDF de demostración.')}>
             Generar PDF de demostración
           </Button>
         )}

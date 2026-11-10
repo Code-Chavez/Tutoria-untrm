@@ -66,6 +66,6 @@ export const useReviewEvidence = () =>
 export const useObserveCertificate = () => useRefreshing((input: { id: string; note: string }) => certificateService.observe(input.id, input.note));
 export const useRejectCertificate = () => useRefreshing((input: { id: string; reason: string }) => certificateService.reject(input.id, input.reason));
 export const useApproveCertificate = () => useRefreshing((id: string) => certificateService.approve(id));
-export const useGenerateCertificate = () => useRefreshing((id: string) => certificateService.generate(id));
+export const useGenerateCertificate = () => useRefreshing((input: { id: string; campusId?: string }) => certificateService.generate(input.id, input.campusId));
 export const useVoidCertificate = () => useRefreshing((input: { id: string; reason: string }) => certificateService.void(input.id, input.reason));
 export const useSaveResolution = () => useRefreshing((input: { periodId: string; schoolId: string; number: string; issuedOn: string }) => certificateService.saveResolution(input));

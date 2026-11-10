@@ -65,7 +65,8 @@ export interface CertificateCandidate {
 export interface CertificateOptions {
   periods: { id: string; name: string; isActive: boolean }[];
   currentPeriodId: string | null;
-  schools: { id: string; name: string }[];
+  /** `campuses`: sedes donde se dicta la escuela (la principal primero). */
+  schools: { id: string; name: string; campuses?: { id: string; name: string }[] }[];
 }
 
 export interface CommitteeResolution {
@@ -104,7 +105,7 @@ export const certificateService = {
   observe: (id: string, note: string) => one(apiClient.post(`/certificates/${id}/observe`, { note })),
   reject: (id: string, reason: string) => one(apiClient.post(`/certificates/${id}/reject`, { reason })),
   approve: (id: string) => one(apiClient.post(`/certificates/${id}/approve`, {})),
-  generate: (id: string) => one(apiClient.post(`/certificates/${id}/generate`, {})),
+  generate: (id: string, campusId?: string) => one(apiClient.post(`/certificates/${id}/generate`, campusId ? { campusId } : {})),
   void: (id: string, reason: string) => one(apiClient.post(`/certificates/${id}/void`, { reason })),
   resolutions: async (periodId: string, schoolId?: string): Promise<CommitteeResolution[]> =>
     (await apiClient.get<{ resolutions: CommitteeResolution[] }>('/committee-resolutions', { params: clean({ periodId, schoolId }) })).data.resolutions,

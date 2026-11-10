@@ -10,6 +10,7 @@ const controller = new CampusController(
   container.useCases.createCampusUseCase,
   container.useCases.updateCampusUseCase,
   container.useCases.setSchoolCampusUseCase,
+  container.useCases.setSchoolCampusesUseCase,
 );
 const requireAuth = authenticate(container.services.tokenService);
 
@@ -17,6 +18,7 @@ const requireAuth = authenticate(container.services.tokenService);
 router.get('/campuses', requireAuth, authorize(['campuses:manage']), controller.index);
 router.post('/campuses', requireAuth, authorize(['campuses:manage']), controller.create);
 router.patch('/campuses/:id', requireAuth, authorize(['campuses:manage']), controller.update);
+router.put('/schools/:id/campuses', requireAuth, authorize(['campuses:manage']), controller.setCampusesForSchool);
 router.put('/schools/:id/campus', requireAuth, authorize(['campuses:manage']), controller.setForSchool);
 
 export default router;

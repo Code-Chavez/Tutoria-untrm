@@ -209,6 +209,7 @@ model Campus {
   createdAt DateTime @default(now()) @map("created_at")
 
   schools School[]
+  schoolLinks SchoolCampus[]
 
   @@map("campuses")
 }
@@ -234,6 +235,7 @@ model School {
   campus   Campus? @relation(fields: [campusId], references: [id])
   tutors   User[]  @relation("TutorSchool")
   certificateSettings CertificateSchoolSettings?
+  campusLinks SchoolCampus[]
   cycleTutors CycleTutorAssignment[]
   certificates Certificate[]
   committeeResolutions CommitteeResolution[]
@@ -1272,4 +1274,15 @@ model CertificateSchoolSettings {
   updatedAt     DateTime @updatedAt @map("updated_at")
 
   @@map("certificate_school_settings")
+}
+
+/// Sedes donde se dicta una escuela (puede ser más de una: sede central y filial). `School.campusId` es la sede principal y siempre está aquí.
+model SchoolCampus {
+  schoolId String @map("school_id")
+  school   School @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+  campusId String @map("campus_id")
+  campus   Campus @relation(fields: [campusId], references: [id], onDelete: Cascade)
+
+  @@id([schoolId, campusId])
+  @@map("school_campuses")
 }
