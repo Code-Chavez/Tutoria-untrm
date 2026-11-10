@@ -30,5 +30,9 @@ const CREATE: Record<CatalogKind, z.ZodObject<z.ZodRawShape>> = {
 
 export const catalogCreateSchema = (kind: CatalogKind) => CREATE[kind];
 
-export const catalogUpdateSchema = (kind: CatalogKind) =>
-  CREATE[kind].omit({ code: true } as never).partial() as z.ZodObject<z.ZodRawShape>;
+export const catalogUpdateSchema = (kind: CatalogKind): z.ZodObject<z.ZodRawShape> => {
+  const schema = CREATE[kind];
+  // `omit` de una clave que no existe lanza un Error (no un ZodError) y la edición respondía 500: solo se quita `code` donde lo hay.
+  const editable = 'code' in schema.shape ? schema.omit({ code: true } as never) : schema;
+  return editable.partial() as z.ZodObject<z.ZodRawShape>;
+};
