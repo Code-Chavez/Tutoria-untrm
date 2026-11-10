@@ -4,7 +4,7 @@ import { MapPinIcon } from '@shared/components/icons';
 import { getApiErrorMessage } from '@shared/services/apiClient';
 import { useDraft } from '@shared/hooks/useDraft';
 import { useAuth } from '@features/auth/hooks/useAuth';
-import { type Campus } from '../services/campusService';
+import { type Campus, type CampusKind } from '../services/campusService';
 import { useCampuses, useCreateCampus, useSetSchoolCampus, useUpdateCampus } from '../hooks/useCampuses';
 import styles from './CampusesPage.module.css';
 
@@ -39,6 +39,7 @@ export function CampusesPage() {
   const nameIsEmpty = useCallback((value: string) => value.trim() === '', []);
   const { value: name, setValue: setName, discard: clearName } = useDraft<string>(user?.id, 'campus-name', '', nameIsEmpty);
   const [error, setError] = useState('');
+  const [newKind, setNewKind] = useState<CampusKind>('SEDE');
 
   const campuses = overview.data?.campuses ?? [];
   const schools = overview.data?.schools ?? [];
@@ -56,8 +57,9 @@ export function CampusesPage() {
   const submit = (event: FormEvent) => {
     event.preventDefault();
     void run(async () => {
-      await create.mutateAsync(name);
+      await create.mutateAsync({ name, kind: newKind });
       clearName();
+      setNewKind('SEDE');
     });
   };
 
@@ -97,13 +99,25 @@ export function CampusesPage() {
                     >
                       {campus.isActive ? 'Desactivar' : 'Activar'}
                     </Button>
+                    <SelectField
+                      aria-label={`Tipo de ${campus.name}`}
+                      value={campus.kind ?? 'SEDE'}
+                      onChange={(e) => run(() => update.mutateAsync({ id: campus.id, kind: e.target.value as CampusKind }))}
+                    >
+                      <option value="SEDE">Sede</option>
+                      <option value="FILIAL">Filial</option>
+                    </SelectField>
                     <CampusCity key={`${campus.id}-${campus.city ?? ''}`} campus={campus} save={(city) => run(() => update.mutateAsync({ id: campus.id, city }))} />
                   </li>
                 ))}
               </ul>
               <form className={styles.add} onSubmit={submit}>
-                <label htmlFor="campus-name">Nueva sede</label>
-                <input id="campus-name" className={styles.input} value={name} onChange={(e) => setName(e.target.value)} placeholder="Sede …" maxLength={80} />
+                <label htmlFor="campus-name">Nueva sede o filial</label>
+                <input id="campus-name" className={styles.input} value={name} onChange={(e) => setName(e.target.value)} placeholder="Sede … o Filial …" maxLength={80} />
+                <SelectField aria-label="Tipo de la nueva sede" value={newKind} onChange={(e) => setNewKind(e.target.value as CampusKind)}>
+                  <option value="SEDE">Sede</option>
+                  <option value="FILIAL">Filial</option>
+                </SelectField>
                 <Button type="submit" size="sm" disabled={name.trim().length < 3} loading={create.isPending}>
                   Agregar
                 </Button>

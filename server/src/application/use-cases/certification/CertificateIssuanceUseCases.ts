@@ -117,6 +117,8 @@ export interface GenerateCertificateDeps {
   templates: CertificateTemplateRepository;
   renderer: CertificatePdfRenderer;
   campuses: Pick<import('@domain/repositories/CampusRepository').CampusRepository, 'findById'>;
+  /** Departamento académico y autoridad que firma, configurados por escuela. */
+  schoolSettings?: Pick<import('@domain/repositories/CertificateSchoolSettingsRepository').CertificateSchoolSettingsRepository, 'find'>;
   visuals?: Pick<import('./CertificateVisualSettings').CertificateVisualSettings, 'forDocument'>;
   storage: EvidenceStorage;
   /** `CERTIFICATE_DEMO_MODE`: sin plantilla oficial solo existen certificados de demostración. */
@@ -163,6 +165,7 @@ export class GenerateCertificateUseCase extends CertificateStep {
     const campus = school.campusId ? await this.deps.campuses.findById(school.campusId) : null;
     const city = campus?.city?.trim() || DEFAULT_CERTIFICATE_CITY;
 
+    const configured = await this.deps.schoolSettings?.find(school.id);
     const visuals = await this.deps.visuals?.forDocument(requesterId, school.id, faculty.id);
     const signer = visuals?.signature ? await this.deps.users.findById(requesterId) : null;
     let savedKey: string | undefined;
@@ -173,10 +176,22 @@ export class GenerateCertificateUseCase extends CertificateStep {
         const year = issuedOn.getUTCFullYear();
         const number = formatDemoCertificateNumber(await tools.nextSequence(DEMO_SEQUENCE_SCOPE, year), year, deriveAcronym(faculty.name), deriveAcronym(school.name));
         const tutorName = `${tutor.firstName} ${tutor.lastName}`;
-        // Hoy no hay dato de departamento académico: se usa el nombre de la escuela y la instantánea lo deja dicho.
-        const printed = { number, tutorName, schoolName: school.name, facultyName: faculty.name, department: school.name, periodName: period.name, resolutionNumber: resolution.number, city, issuedOn };
+        // Sin departamento académico configurado se usa el nombre de la escuela y la instantánea lo deja dicho.
+        const printed = {
+          number,
+          tutorName,
+          schoolName: school.name,
+          facultyName: faculty.name,
+          department: configured?.department || school.name,
+          periodName: period.name,
+          resolutionNumber: resolution.number,
+          city,
+          issuedOn,
+          signatoryName: configured?.signatoryName ?? null,
+          signatoryRole: configured?.signatoryRole ?? null,
+        };
         const text = composeCertificateText({ ...printed, title: template.title, bodyTemplate: template.bodyText });
-        if (signer) {
+        if (signer && !printed.signatoryName) {
           text.signatory = [`${signer.firstName} ${signer.lastName}`, 'Firma visual de demostración', faculty.name];
         }
         const buffer = await this.deps.renderer.render(text, visuals);
@@ -194,7 +209,7 @@ export class GenerateCertificateUseCase extends CertificateStep {
             facultyId: faculty.id,
             periodId: period.id,
             resolutionIssuedOn: resolution.issuedOn,
-            departmentIsPlaceholder: true,
+            departmentIsPlaceholder: !configured?.department,
             template: { id: template.id, name: template.name, version: template.version, title: template.title },
             ...(signer && { visualSignatureOwnerId: signer.id }),
             demo: true,

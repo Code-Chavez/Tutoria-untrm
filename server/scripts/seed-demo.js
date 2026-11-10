@@ -212,6 +212,7 @@ const AVAILABILITY = [
 const SCHOOLS = [
   {
     match: /Sistemas/,
+    authority: ['Mg. Ricardo Alvarado Núñez', 'Director de la Escuela Profesional de Ingeniería de Sistemas'],
     resolution: '012-2026-D-FISME',
     tutors: [
       ['Mario', 'Quispe Llamocca', 1, 'ACEPTADA', 'GENERADO'],
@@ -227,6 +228,7 @@ const SCHOOLS = [
   },
   {
     match: /Mecánica/,
+    authority: ['Dr. Hernán Cabrera Tuesta', 'Director de la Escuela Profesional de Ingeniería Mecánica Eléctrica'],
     resolution: '013-2026-D-FISME',
     tutors: [
       ['Walter', 'Díaz Ocampo', 1, 'ACEPTADA', 'RECHAZADO'],
@@ -238,6 +240,7 @@ const SCHOOLS = [
   },
   {
     match: /Mecatrónica/,
+    authority: ['Mg. Lucía Torrejón Vela', 'Directora de la Escuela Profesional de Ingeniería Mecatrónica'],
     resolution: '014-2026-D-FISME',
     tutors: [
       ['Alberto', 'Mendoza Quiroz', 1, 'ACEPTADA', 'GENERADO'],
@@ -249,6 +252,7 @@ const SCHOOLS = [
   },
   {
     match: /Ciberseguridad/,
+    authority: ['Dr. Iván Collantes Pinedo', 'Director de la Escuela Profesional de Ingeniería en Ciberseguridad'],
     resolution: '015-2026-D-FISME',
     tutors: [
       ['Sandra', 'Gonzales Rojas', 1, 'ACEPTADA', 'APROBADO'],
@@ -259,6 +263,7 @@ const SCHOOLS = [
   },
   {
     match: /^Administración de Empresas$/,
+    authority: ['Mg. Patricia Zumaeta Chávez', 'Directora de la Escuela Profesional de Administración de Empresas'],
     resolution: '007-2026-D-FCEA',
     tutors: [
       ['Gladys', 'Herrera Sánchez', 1, 'ACEPTADA', 'GENERADO'],
@@ -270,6 +275,7 @@ const SCHOOLS = [
   },
   {
     match: /Filial Bagua Grande/,
+    authority: ['Mg. Sofía Herrera Bustamante', 'Directora de la Escuela Profesional de Administración de Empresas (Filial Bagua Grande)'],
     resolution: '008-2026-D-FCEA',
     tutors: [
       ['Rocío', 'Vigo Pizarro', 1, 'ACEPTADA', 'GENERADO'],
@@ -306,6 +312,12 @@ async function main() {
   const palette = [[20, 48, 110], [120, 40, 40], [30, 100, 70]];
   const facultyCode = (name) => (/Económicas|Administrativas/.test(name) ? 'FCEA' : 'FISME');
   const faculties = list((await call('GET', '/faculties')).body, 'faculties');
+  // Las entradas de Sedes cuyo nombre empieza por «Filial» se marcan como filiales (tipo informativo).
+  const campusOverview = (await call('GET', '/campuses')).body;
+  for (const campus of list(campusOverview, 'campuses')) {
+    if (/^Filial/.test(campus.name) && campus.kind !== 'FILIAL') must(await call('PATCH', `/campuses/${campus.id}`, { kind: 'FILIAL' }), [200], `tipo de ${campus.name}`);
+  }
+
   for (const school of SCHOOLS) {
     const found = schools.find((s) => school.match.test(s.name));
     if (!found) throw new Error(`No existe la escuela ${school.match}`);
@@ -321,6 +333,12 @@ async function main() {
     if (!configured.has('watermark')) await upload(found.id, 'watermark', watermark());
     if (!configured.has('signature')) await upload(found.id, 'signature', signature());
     log(`${found.name}: logos, marca de agua y firma listos`);
+    // Autoridad que firma y departamento académico de la escuela (datos ficticios), editables desde Certificados → Diseño del certificado.
+    const text = (await call('GET', `/certificates/text-settings/${found.id}`)).body;
+    if (!text?.school?.signatoryName) {
+      must(await call('PUT', `/certificates/text-settings/${found.id}/school`, { department: found.name.replace(/ \(.*\)$/, ''), signatoryName: school.authority[0], signatoryRole: school.authority[1] }), [204], 'datos de la escuela');
+      log(`${found.name}: autoridad que firma configurada`);
+    }
   }
 
   for (const school of SCHOOLS) {

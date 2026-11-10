@@ -143,6 +143,37 @@ router.delete(`${assetPath}/:kind`, requireAuth, assetAccess, async (req, res) =
   }
 });
 
+const textPath = '/certificates/text-settings/:schoolId';
+const templateBody = z.object({ title: z.unknown(), bodyText: z.unknown() });
+const schoolBody = z.object({ department: z.unknown(), signatoryName: z.unknown(), signatoryRole: z.unknown() });
+
+router.get(textPath, requireAuth, assetAccess, async (req, res) => {
+  try {
+    const view = await container.useCases.certificateTextSettings.view(req.auth!.sub, assetSchool.parse(req.params.schoolId), req.permissions ?? []);
+    res.set('Cache-Control', 'no-store').json(view);
+  } catch (error) {
+    fail(res, error);
+  }
+});
+
+router.put(`${textPath}/template`, requireAuth, assetAccess, async (req, res) => {
+  try {
+    await container.useCases.certificateTextSettings.saveTemplate(req.auth!.sub, assetSchool.parse(req.params.schoolId), req.permissions ?? [], templateBody.parse(req.body), req.ip);
+    res.sendStatus(204);
+  } catch (error) {
+    fail(res, error);
+  }
+});
+
+router.put(`${textPath}/school`, requireAuth, assetAccess, async (req, res) => {
+  try {
+    await container.useCases.certificateTextSettings.saveSchool(req.auth!.sub, assetSchool.parse(req.params.schoolId), req.permissions ?? [], schoolBody.parse(req.body), req.ip);
+    res.sendStatus(204);
+  } catch (error) {
+    fail(res, error);
+  }
+});
+
 router.get('/certificates/:id', requireAuth, authorize(['certificados:consultar']), async (req: Request, res: Response) => {
   try {
     // Un identificador que no es UUID no puede existir: misma respuesta que un trámite ajeno, sin llegar a la base.

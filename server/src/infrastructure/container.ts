@@ -48,6 +48,8 @@ import { PrismaCertificateTemplateRepository } from './repositories/PrismaCertif
 import { DemoCertificatePdfRenderer } from './export/DemoCertificatePdfRenderer';
 import { CertificateVisualSettings } from '@application/use-cases/certification/CertificateVisualSettings';
 import { PrismaCertificateVisualStore } from './repositories/PrismaCertificateVisualStore';
+import { CertificateTextSettings } from '@application/use-cases/certification/CertificateTextSettings';
+import { PrismaCertificateSchoolSettingsRepository } from './repositories/PrismaCertificateSchoolSettingsRepository';
 import { DownloadCertificatePdfUseCase, GenerateCertificateUseCase, ListCommitteeResolutionsUseCase, SaveCommitteeResolutionUseCase } from '@application/use-cases/certification/CertificateIssuanceUseCases';
 import { ApproveCertificateUseCase, ObserveCertificateUseCase, RejectCertificateUseCase, ReviewEvidenceUseCase, StartCertificateUseCase, SubmitCertificateUseCase, VoidCertificateUseCase } from '@application/use-cases/certification/CertificateWorkflowUseCases';
 import { CertificateScopeResolver, GetCertificateOptionsUseCase, GetCertificateUseCase, ListCertificateCandidatesUseCase, ListCertificatesUseCase } from '@application/use-cases/certification/CertificateQueryUseCases';
@@ -410,16 +412,20 @@ const committeeResolutionRepository = new PrismaCommitteeResolutionRepository(pr
 const saveCommitteeResolutionUseCase = new SaveCommitteeResolutionUseCase(certificateScope, schoolRepository, academicPeriodRepository, committeeResolutionRepository, auditLogRepository);
 const listCommitteeResolutionsUseCase = new ListCommitteeResolutionsUseCase(certificateScope, committeeResolutionRepository, schoolRepository, academicPeriodRepository);
 const certificateVisualSettings = new CertificateVisualSettings(certificateScope, schoolRepository, new PrismaCertificateVisualStore(prisma));
+const certificateSchoolSettings = new PrismaCertificateSchoolSettingsRepository(prisma);
+const certificateTemplates = new PrismaCertificateTemplateRepository(prisma);
+const certificateTextSettings = new CertificateTextSettings(certificateScope, schoolRepository, certificateTemplates, certificateSchoolSettings, auditLogRepository);
 const generateCertificateUseCase = new GenerateCertificateUseCase(certificateScope, certificateRepository, certificateWorkflowRepository, auditLogRepository, {
   schools: schoolRepository,
   faculties: facultyRepository,
   users: userRepository,
   periods: academicPeriodRepository,
   resolutions: committeeResolutionRepository,
-  templates: new PrismaCertificateTemplateRepository(prisma),
+  templates: certificateTemplates,
   renderer: new DemoCertificatePdfRenderer(),
   campuses: new PrismaCampusRepository(prisma),
   visuals: certificateVisualSettings,
+  schoolSettings: certificateSchoolSettings,
   storage: evidenceStorage,
   demoMode: env.CERTIFICATE_DEMO_MODE,
 });
@@ -954,6 +960,7 @@ export const container = {
     getAdmonitionFileUseCase,
     listCertificatesUseCase,
     certificateVisualSettings,
+    certificateTextSettings,
     getCertificateUseCase,
     listCertificateCandidatesUseCase,
     listTutorTeachersUseCase,

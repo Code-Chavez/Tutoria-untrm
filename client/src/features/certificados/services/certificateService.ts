@@ -151,3 +151,25 @@ export async function saveCertificateAsset(schoolId: string, kind: CertificateAs
   form.append('file', file);
   await apiClient.put(path, form, { headers: { 'Content-Type': 'multipart/form-data' } });
 }
+
+export interface CertificateTextSettingsView {
+  template: { title: string; bodyText: string; editable: boolean };
+  school: { department: string | null; signatoryName: string | null; signatoryRole: string | null; editable: boolean };
+  defaults: { title: string; bodyText: string; department: string; signatoryName: string; signatoryRole: string };
+  variables: string[];
+}
+
+const textSettingsPath = (schoolId: string) => `/certificates/text-settings/${schoolId}`;
+
+export async function getCertificateTextSettings(schoolId: string) {
+  const { data } = await apiClient.get<CertificateTextSettingsView>(textSettingsPath(schoolId));
+  return data;
+}
+
+export async function saveCertificateTemplateText(schoolId: string, values: { title: string; bodyText: string }) {
+  await apiClient.put(`${textSettingsPath(schoolId)}/template`, values);
+}
+
+export async function saveCertificateSchoolText(schoolId: string, values: { department: string; signatoryName: string; signatoryRole: string }) {
+  await apiClient.put(`${textSettingsPath(schoolId)}/school`, values);
+}

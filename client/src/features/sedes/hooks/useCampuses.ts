@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { campusService } from '../services/campusService';
+import { campusService, type CampusKind } from '../services/campusService';
 
 const KEY = ['campuses'] as const;
 
@@ -15,12 +15,12 @@ function useRefresh() {
 
 export function useCreateCampus() {
   const refresh = useRefresh();
-  return useMutation({ mutationFn: (name: string) => campusService.create(name), onSuccess: refresh });
+  return useMutation({ mutationFn: ({ name, kind }: { name: string; kind: CampusKind }) => campusService.create(name, kind), onSuccess: refresh });
 }
 
 export function useUpdateCampus() {
   const refresh = useRefresh();
-  return useMutation({ mutationFn: ({ id, ...changes }: { id: string; name?: string; isActive?: boolean; city?: string | null }) => campusService.update(id, changes), onSuccess: refresh });
+  return useMutation({ mutationFn: ({ id, ...changes }: { id: string; name?: string; isActive?: boolean; city?: string | null; kind?: CampusKind }) => campusService.update(id, changes), onSuccess: refresh });
 }
 
 export function useSetSchoolCampus() {

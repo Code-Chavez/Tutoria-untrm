@@ -90,6 +90,7 @@ export const ACTION_LABEL: Record<string, string> = {
   COMMITTEE_RESOLUTION_SAVED: 'Resolución de decanato registrada',
   CERTIFICATE_ASSET_SAVED: 'Imagen del certificado guardada',
   CERTIFICATE_ASSET_REMOVED: 'Imagen del certificado retirada',
+  CERTIFICATE_TEXT_SAVED: 'Textos del certificado actualizados',
 };
 
 export const ENTITY_LABEL: Record<string, string> = {
@@ -113,6 +114,8 @@ export const ENTITY_LABEL: Record<string, string> = {
   Certificate: 'Certificado de tutoría',
   CommitteeResolution: 'Resolución de decanato',
   CertificateVisualAsset: 'Imagen del certificado',
+  CertificateTemplate: 'Plantilla del certificado',
+  CertificateSchoolSettings: 'Datos del certificado de la escuela',
   BrandingSetting: 'Identidad visual',
   Campus: 'Sede',
   CycleTutorAssignment: 'Tutor por ciclo',
