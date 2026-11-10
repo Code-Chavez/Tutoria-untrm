@@ -13,6 +13,7 @@
     "test:integration": "node scripts/test-integration.js",
     "test:db:prepare": "node scripts/prepare-test-db.js",
     "seed": "ts-node -r tsconfig-paths/register prisma/seed.ts",
+    "seed:demo": "node scripts/seed-demo.js",
     "bootstrap": "node dist/infrastructure/bootstrap/bootstrap.js",
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate dev",
