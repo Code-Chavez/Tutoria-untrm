@@ -61,12 +61,14 @@ test('3. «Cerrar sesión» por decisión propia no guarda la vista: al volver a
 
 test('4. una sesión que el servidor ya no renueva (401) también regresa a la misma vista al entrar de nuevo', async ({ page }) => {
   await loginUi(page, accounts.admin);
-  await page.route('**/api/auth/refresh', (route) => route.fulfill({ status: 401, contentType: 'application/json', body: '{"error":"Sesión vencida"}' }));
-  await page.route('**/api/campuses', (route) => route.fulfill({ status: 401, contentType: 'application/json', body: '{"error":"Sesión vencida"}' }));
+  // Todo lo autenticado responde 401 (y la renovación también): así ninguna consulta en vuelo puede renovar ni reescribir la sesión.
+  const dead = (route: import('@playwright/test').Route) => route.fulfill({ status: 401, contentType: 'application/json', body: '{"error":"Sesión vencida"}' });
+  const unauthenticated = (url: URL) => url.pathname.startsWith('/api/') && !/\/api\/(auth\/login|branding)/.test(url.pathname);
+  await page.route(unauthenticated, dead);
   await page.goto(VIEW);
   await expect(page).toHaveURL(/\/login$/, { timeout: 30_000 });
-  await page.unroute('**/api/auth/refresh');
-  await page.unroute('**/api/campuses');
+  await expect(page.getByPlaceholder('usuario@untrm.edu.pe')).toBeVisible({ timeout: 30_000 });
+  await page.unroute(unauthenticated, dead);
 
   await signIn(page, accounts.admin);
   await expect(page.getByRole('heading', { level: 1, name: 'Sedes' })).toBeVisible({ timeout: 45_000 });
