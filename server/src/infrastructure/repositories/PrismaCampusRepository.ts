@@ -43,7 +43,32 @@ export class PrismaCampusRepository implements CampusRepository {
   }
 
   async setSchoolCampus(schoolId: string, campusId: string): Promise<void> {
-    await this.prisma.school.update({ where: { id: schoolId }, data: { campusId } });
+    await this.prisma.$transaction(async (tx) => {
+      const current = await tx.school.findUnique({ where: { id: schoolId }, select: { campusId: true } });
+      // Cambiar la sede principal la mueve: la anterior deja de figurar, salvo que se haya agregado como otra sede (no se distingue aquí).
+      if (current?.campusId && current.campusId !== campusId) await tx.schoolCampus.deleteMany({ where: { schoolId, campusId: current.campusId } });
+      await tx.schoolCampus.upsert({ where: { schoolId_campusId: { schoolId, campusId } }, create: { schoolId, campusId }, update: {} });
+      await tx.school.update({ where: { id: schoolId }, data: { campusId } });
+    });
+  }
+
+  async campusIdsBySchool(): Promise<Map<string, string[]>> {
+    const rows = await this.prisma.schoolCampus.findMany({ select: { schoolId: true, campusId: true } });
+    const map = new Map<string, string[]>();
+    for (const { schoolId, campusId } of rows) map.set(schoolId, [...(map.get(schoolId) ?? []), campusId]);
+    return map;
+  }
+
+  async campusIdsOf(schoolId: string): Promise<string[]> {
+    return (await this.prisma.schoolCampus.findMany({ where: { schoolId }, select: { campusId: true } })).map((r) => r.campusId);
+  }
+
+  async setSchoolCampuses(schoolId: string, campusIds: string[], mainCampusId: string): Promise<void> {
+    await this.prisma.$transaction(async (tx) => {
+      await tx.schoolCampus.deleteMany({ where: { schoolId } });
+      await tx.schoolCampus.createMany({ data: campusIds.map((campusId) => ({ schoolId, campusId })) });
+      await tx.school.update({ where: { id: schoolId }, data: { campusId: mainCampusId } });
+    });
   }
 }
 

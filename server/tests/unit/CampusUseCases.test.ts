@@ -5,6 +5,7 @@ import {
   ListCampusesUseCase,
   SchoolNotFoundForCampusError,
   SetSchoolCampusUseCase,
+  SetSchoolCampusesUseCase,
   UpdateCampusUseCase,
 } from '@application/use-cases/campuses/CampusUseCases';
 import { CampusRepository } from '@domain/repositories/CampusRepository';
@@ -29,6 +30,9 @@ describe('sedes (fase 3)', () => {
       setCity: jest.fn().mockImplementation(async (_id: string, city: string | null) => campus({ city })),
       setKind: jest.fn().mockImplementation(async (_id: string, kind: 'SEDE' | 'FILIAL') => campus({ kind })),
       setSchoolCampus: jest.fn().mockResolvedValue(undefined),
+      campusIdsBySchool: jest.fn().mockResolvedValue(new Map([['s1', ['c0', 'c1']]])),
+      campusIdsOf: jest.fn().mockResolvedValue(['c0', 'c1']),
+      setSchoolCampuses: jest.fn().mockResolvedValue(undefined),
     };
     schools = { findAll: jest.fn().mockResolvedValue([school]), findById: jest.fn().mockResolvedValue(school) };
     audit = { create: jest.fn().mockResolvedValue({}) } as unknown as jest.Mocked<AuditLogRepository>;
@@ -38,7 +42,7 @@ describe('sedes (fase 3)', () => {
     const result = await new ListCampusesUseCase(campuses, schools).execute();
 
     expect(result.campuses).toHaveLength(1);
-    expect(result.schools).toEqual([{ id: 's1', name: 'Ingeniería de Sistemas', facultyId: 'f1', campusId: 'c0' }]);
+    expect(result.schools).toEqual([{ id: 's1', name: 'Ingeniería de Sistemas', facultyId: 'f1', campusId: 'c0', campusIds: ['c0', 'c1'] }]);
   });
 
   it('crea una sede normalizando espacios y lo deja en la bitácora', async () => {
@@ -97,6 +101,35 @@ describe('sedes (fase 3)', () => {
 
     await expect(update.execute('vice', 'c1', { kind: 'SUCURSAL' })).rejects.toBeInstanceOf(InvalidCampusError);
     await expect(new CreateCampusUseCase(campuses, audit).execute('vice', 'Otra sede', null, 'x')).rejects.toBeInstanceOf(InvalidCampusError);
+  });
+
+  describe('sedes donde se dicta una escuela (issue #273)', () => {
+    const set = () => new SetSchoolCampusesUseCase(schools, campuses, audit);
+
+    it('fija varias sedes, conserva la principal si sigue en la lista y lo deja en la bitácora', async () => {
+      campuses.findById.mockImplementation(async (id: string) => campus({ id, name: `Sede ${id}` }));
+      await set().execute('vice', 's1', ['c1', 'c0', 'c1'], '10.0.0.1');
+
+      expect(campuses.setSchoolCampuses).toHaveBeenCalledWith('s1', ['c1', 'c0'], 'c0');
+      expect(audit.create).toHaveBeenCalledWith(expect.objectContaining({ action: 'SCHOOL_CAMPUS_SET', entityId: 's1', ipAddress: '10.0.0.1' }));
+    });
+
+    it('si la sede principal sale de la lista, la primera pasa a ser la principal', async () => {
+      campuses.findById.mockImplementation(async (id: string) => campus({ id }));
+      await set().execute('vice', 's1', ['c2'], null);
+      expect(campuses.setSchoolCampuses).toHaveBeenCalledWith('s1', ['c2'], 'c2');
+    });
+
+    it('rechaza una lista vacía, una sede inactiva o inexistente y una escuela inexistente', async () => {
+      await expect(set().execute('vice', 's1', [], null)).rejects.toBeInstanceOf(InvalidCampusError);
+      campuses.findById.mockResolvedValueOnce(campus({ isActive: false }));
+      await expect(set().execute('vice', 's1', ['c1'], null)).rejects.toBeInstanceOf(CampusNotFoundError);
+      campuses.findById.mockResolvedValueOnce(null);
+      await expect(set().execute('vice', 's1', ['zz'], null)).rejects.toBeInstanceOf(CampusNotFoundError);
+      schools.findById.mockResolvedValueOnce(null);
+      await expect(set().execute('vice', 'x', ['c1'], null)).rejects.toBeInstanceOf(SchoolNotFoundForCampusError);
+      expect(campuses.setSchoolCampuses).not.toHaveBeenCalled();
+    });
   });
 
   describe('sede de una escuela', () => {

@@ -52,9 +52,12 @@ function cleanKind(kind: unknown): CampusKind {
 /** Sedes y escuelas con su sede: lo que necesita la pantalla de quien las configura (Vicerrectorado no ve estudiantes). */
 export class ListCampusesUseCase {
   constructor(private readonly campuses: CampusRepository, private readonly schools: SchoolRepository) {}
-  async execute(): Promise<{ campuses: Campus[]; schools: Array<Pick<School, 'id' | 'name' | 'facultyId' | 'campusId'>> }> {
-    const [campuses, schools] = await Promise.all([this.campuses.findAll(), this.schools.findAll()]);
-    return { campuses, schools: schools.map((s) => ({ id: s.id, name: s.name, facultyId: s.facultyId, campusId: s.campusId ?? null })) };
+  async execute(): Promise<{ campuses: Campus[]; schools: Array<Pick<School, 'id' | 'name' | 'facultyId' | 'campusId'> & { campusIds: string[] }> }> {
+    const [campuses, schools, links] = await Promise.all([this.campuses.findAll(), this.schools.findAll(), this.campuses.campusIdsBySchool()]);
+    return {
+      campuses,
+      schools: schools.map((s) => ({ id: s.id, name: s.name, facultyId: s.facultyId, campusId: s.campusId ?? null, campusIds: links.get(s.id) ?? (s.campusId ? [s.campusId] : []) })),
+    };
   }
 }
 
@@ -96,5 +99,25 @@ export class SetSchoolCampusUseCase {
     if (!campus || !campus.isActive) throw new CampusNotFoundError();
     await this.campuses.setSchoolCampus(schoolId, campusId);
     await this.audit.create({ userId: actingUserId, action: 'SCHOOL_CAMPUS_SET', entity: 'School', entityId: schoolId, details: `«${school.name}» → «${campus.name}»`, ipAddress: ip ?? null });
+  }
+}
+
+/** Sedes donde se dicta una escuela (sede central y filial, por ejemplo). La sede principal se conserva si sigue en la lista. */
+export class SetSchoolCampusesUseCase {
+  constructor(
+    private readonly schools: SchoolRepository,
+    private readonly campuses: CampusRepository,
+    private readonly audit: AuditLogRepository,
+  ) {}
+  async execute(actingUserId: string, schoolId: string, campusIds: string[], ip?: string | null): Promise<void> {
+    const school = await this.schools.findById(schoolId);
+    if (!school) throw new SchoolNotFoundForCampusError();
+    const unique = [...new Set(campusIds)];
+    if (unique.length === 0) throw new InvalidCampusError('La escuela debe dictarse en al menos una sede');
+    const found = await Promise.all(unique.map((id) => this.campuses.findById(id)));
+    if (found.some((c) => !c || !c.isActive)) throw new CampusNotFoundError();
+    const main = school.campusId && unique.includes(school.campusId) ? school.campusId : (unique[0] as string);
+    await this.campuses.setSchoolCampuses(schoolId, unique, main);
+    await this.audit.create({ userId: actingUserId, action: 'SCHOOL_CAMPUS_SET', entity: 'School', entityId: schoolId, details: `«${school.name}» se dicta en: ${found.map((c) => `«${c!.name}»`).join(', ')}`, ipAddress: ip ?? null });
   }
 }

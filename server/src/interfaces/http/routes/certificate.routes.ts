@@ -286,7 +286,8 @@ router.get('/committee-resolutions', requireAuth, authorize(['certificados:consu
 router.post('/certificates/:id/generate', requireAuth, authorize(['certificados:emitir']), async (req: Request, res: Response) => {
   try {
     const id = idOf(req);
-    await container.useCases.generateCertificateUseCase.execute(sub(req), id, req.ip);
+    const { campusId } = z.object({ campusId: z.string().uuid('La sede debe ser un UUID válido').optional() }).parse(req.body ?? {});
+    await container.useCases.generateCertificateUseCase.execute(sub(req), id, req.ip, campusId);
     res.status(200).json(await detail(req, id));
   } catch (error) {
     fail(res, error);

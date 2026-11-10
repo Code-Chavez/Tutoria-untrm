@@ -27,3 +27,8 @@ export function useSetSchoolCampus() {
   const refresh = useRefresh();
   return useMutation({ mutationFn: ({ schoolId, campusId }: { schoolId: string; campusId: string }) => campusService.setSchoolCampus(schoolId, campusId), onSuccess: refresh });
 }
+
+export function useSetSchoolCampuses() {
+  const refresh = useRefresh();
+  return useMutation({ mutationFn: ({ schoolId, campusIds }: { schoolId: string; campusIds: string[] }) => campusService.setSchoolCampuses(schoolId, campusIds), onSuccess: refresh });
+}
