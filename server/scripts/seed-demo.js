@@ -237,6 +237,27 @@ const SCHOOLS = [
     ],
   },
   {
+    match: /Mecatrónica/,
+    resolution: '014-2026-D-FISME',
+    tutors: [
+      ['Alberto', 'Mendoza Quiroz', 1, 'ACEPTADA', 'GENERADO'],
+      ['Yolanda', 'Chuquizuta Pérez', 2, 'ACEPTADA', 'EN_REVISION'],
+      ['Percy', 'Vargas Ramos', 3, 'ACEPTADA', null],
+      ['Milagros', 'Tello Barboza', 4, 'PENDIENTE', null],
+      ['Domingo', 'Cabrera Soplín', null, null, null],
+    ],
+  },
+  {
+    match: /Ciberseguridad/,
+    resolution: '015-2026-D-FISME',
+    tutors: [
+      ['Sandra', 'Gonzales Rojas', 1, 'ACEPTADA', 'APROBADO'],
+      ['Julio', 'Fernández Cruz', 2, 'ACEPTADA', 'GENERADO'],
+      ['Karina', 'Huamán Lozano', 3, 'PENDIENTE', null],
+      ['Edwin', 'Tafur Mendoza', null, null, null],
+    ],
+  },
+  {
     match: /Administración/,
     resolution: '007-2026-D-FCEA',
     tutors: [
@@ -300,7 +321,7 @@ async function main() {
     const resolutions = list((await call('GET', `/committee-resolutions?periodId=${period.id}&schoolId=${found.id}`)).body, 'resolutions');
     if (resolutions.length === 0) must(await call('PUT', '/committee-resolutions', { periodId: period.id, schoolId: found.id, number: school.resolution, issuedOn: '2026-08-28' }), [200], 'resolución');
 
-    const designations = list((await call('GET', `/schools/${found.id}/cycle-tutors`)).body, 'assignments');
+    const designations = list((await call('GET', `/schools/${found.id}/cycle-tutors`)).body, 'cycles').filter((c) => c.assignment).map((c) => ({ cycle: c.cycle, acceptanceStatus: c.assignment.acceptanceStatus }));
     const certificates = list((await call('GET', `/certificates?periodId=${period.id}&schoolId=${found.id}`)).body, 'certificates');
 
     let availabilityIndex = 0;

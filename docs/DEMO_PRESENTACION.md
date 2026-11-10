@@ -25,7 +25,10 @@ npm run seed:demo
 | Ingeniería de Sistemas | 9 | Aceptada con PDF generado, aprobado, en revisión, observado y sin trámite (puede iniciar); pendiente de aceptar (2); rechazada (1, con motivo); sin asignación (1) |
 | Ingeniería Mecánica Eléctrica | 5 | Aceptada con trámite rechazado; aceptada sin trámite; pendiente de aceptar (2); sin asignación (1) |
 | Administración de Empresas | 5 | Aceptada con PDF generado; aceptada con trámite iniciado; pendiente de aceptar (2); sin asignación (1) |
+| Ingeniería Mecatrónica (Sede Bagua) | 5 | Aceptada con PDF generado; aceptada con trámite en revisión; aceptada sin trámite; pendiente de aceptar (1); sin asignación (1) |
+| Ingeniería en Ciberseguridad (Sede Bagua) | 4 | Aceptada con trámite aprobado; aceptada con PDF generado; pendiente de aceptar (1); sin asignación (1) |
 
+- Las dos escuelas de Bagua se crean aparte en la base (no hay API para crear escuelas) y se asignan a Sede Bagua; el script solo las llena. Su certificado imprime la ciudad de esa sede.
 - Una resolución de decanato por escuela, y las imágenes del certificado: logo de la universidad, logo y marca de agua por facultad (FISME y FCEA) y la firma visual del Administrador DBU.
 - «Pendiente de aceptar» incluye a los docentes recién designados: designar ya envía la solicitud de aceptación, por eso no hay un estado «sin solicitar» que se pueda crear.
 - Los logotipos son dibujos ficticios, no los institucionales. Se reemplazan desde *Certificados → Diseño del certificado* cuando se entregue el diseño original.
