@@ -1,5 +1,6 @@
 import { useCallback } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
+import { rememberReturnTo } from '@shared/utils/returnTo';
 import { useIdleTimer } from '@shared/hooks/useIdleTimer';
 import { useAuth } from '../hooks/useAuth';
 import { IDLE_TIMEOUT_MS, IDLE_WARNING_MS } from '../sessionConfig';
@@ -15,14 +16,17 @@ export function SessionTimeout() {
   // El plazo lo fija la DBU (parámetro de seguridad) y llega al iniciar sesión; sin él rige el predeterminado del entorno.
   const idleMs = user?.idleTimeoutMinutes ? user.idleTimeoutMinutes * 60_000 : IDLE_TIMEOUT_MS;
   const navigate = useNavigate();
+  const location = useLocation();
 
   // Por inactividad se conserva lo que la persona escribía (se recupera al volver a entrar); al «Cerrar sesión» por decisión propia, no.
   const expire = useCallback(
     (byInactivity = false) => {
+      // Por inactividad, al volver a entrar la misma persona regresa a la vista (y los filtros) en que estaba; al «Cerrar sesión», no.
+      if (byInactivity) rememberReturnTo(`${location.pathname}${location.search}${location.hash}`, user?.id);
       logout({ keepDrafts: byInactivity });
       navigate('/login', { replace: true, state: { reason: 'timeout' } });
     },
-    [logout, navigate],
+    [logout, navigate, location.pathname, location.search, location.hash, user?.id],
   );
 
   const { isWarning, remainingMs, stayActive } = useIdleTimer({

@@ -1,6 +1,7 @@
 import axios, { AxiosError, type InternalAxiosRequestConfig } from 'axios';
 import { tokenStorage } from './tokenStorage';
 import type { ApiError } from '@shared/types/api.types';
+import { rememberReturnTo } from '@shared/utils/returnTo';
 
 const BASE_URL = import.meta.env.VITE_API_URL ?? '/api';
 
@@ -68,6 +69,10 @@ apiClient.interceptors.response.use(
     }
 
     if (error.response?.status === 401 && !error.config?.url?.includes('/auth/login')) {
+      // Una sesión que ya no se puede renovar también regresa a la misma vista tras volver a entrar.
+      // Solo si todavía hay una persona identificada: tras un cierre por inactividad llegan 401 de consultas en vuelo que no deben pisar lo guardado.
+      const sessionUserId = tokenStorage.getUser<{ id: string }>()?.id;
+      if (sessionUserId) rememberReturnTo(`${window.location.pathname}${window.location.search}${window.location.hash}`, sessionUserId);
       tokenStorage.clear();
       window.location.assign('/login');
     }
