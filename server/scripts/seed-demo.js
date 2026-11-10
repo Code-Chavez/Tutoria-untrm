@@ -258,7 +258,7 @@ const SCHOOLS = [
     ],
   },
   {
-    match: /Administración/,
+    match: /^Administración de Empresas$/,
     resolution: '007-2026-D-FCEA',
     tutors: [
       ['Gladys', 'Herrera Sánchez', 1, 'ACEPTADA', 'GENERADO'],
@@ -266,6 +266,16 @@ const SCHOOLS = [
       ['Doris', 'Pérez Vásquez', 3, 'PENDIENTE', null],
       ['Hugo', 'Terrones Bardales', 4, 'PENDIENTE', null],
       ['Nelly', 'Zumaeta Fernández', null, null, null],
+    ],
+  },
+  {
+    match: /Filial Bagua Grande/,
+    resolution: '008-2026-D-FCEA',
+    tutors: [
+      ['Rocío', 'Vigo Pizarro', 1, 'ACEPTADA', 'GENERADO'],
+      ['César', 'Llanos Medina', 2, 'ACEPTADA', 'INICIADO'],
+      ['Teresa', 'Burga Salazar', 3, 'PENDIENTE', null],
+      ['Óscar', 'Mego Díaz', null, null, null],
     ],
   },
 ];
