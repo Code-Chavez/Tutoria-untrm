@@ -49,5 +49,6 @@ Abrir con el Administrador DBU. **Presentar a 1920 × 1080**; en una pantalla de
 ## Lo que se dice claro en la presentación
 
 - Es un certificado **de demostración**: sin valor, sin firma digital. La plantilla y el formato oficiales dependen de decisiones institucionales pendientes (Q20–Q22, Q24 y Q25 del levantamiento).
+- La autoridad que firma y el departamento de cada escuela son ficticios y se editan en *Certificados → Diseño del certificado*; el título y el texto del certificado también (no los cambie antes de presentar si no quiere que difieran de los PDF ya generados). En *Sedes*, la Filial Bagua Grande queda marcada como filial.
 - La ciudad de la fecha es la de la sede de la escuela (Configuración → Sedes → «Ciudad de la sede»); si la sede no tiene ciudad se imprime Chachapoyas.
 - La aceptación de la demostración por el Product Owner sigue pendiente (issue #232).

@@ -349,3 +349,70 @@ test('9. la ciudad de la fecha es la de la sede de la escuela, se configura en S
     expect((await admin('PATCH', `/campuses/${campus.id}`, { city: null })).status).toBe(200);
   }
 });
+
+test('10. el título, el departamento y la autoridad que firma se configuran desde la pantalla, se imprimen en el PDF nuevo y no cambian el anterior; la sede puede ser filial', async ({ page }) => {
+  const view = async () => (await admin('GET', `/certificates/text-settings/${s.school.id}`)).body as { template: { title: string; bodyText: string }; school: { department: string | null; signatoryName: string | null } };
+  const original = (await view()).template;
+  const before = await approvedCertificate(8, 'firmante-antes');
+  expect((await admin('POST', `/certificates/${before}/generate`, {})).status).toBe(200);
+
+  try {
+    await loginUi(page, accounts.admin);
+    await page.goto(`/certificados?escuela=${s.school.id}`);
+    await page.getByText('Diseño del certificado', { exact: true }).click();
+
+    await page.getByLabel('Título del documento').fill('CONSTANCIA');
+    await page.getByRole('button', { name: 'Guardar texto' }).click();
+    await expect.poll(async () => (await view()).template.title).toBe('CONSTANCIA');
+
+    await page.getByLabel('Departamento académico').fill('Sistemicas');
+    await page.getByLabel('Nombre y grado de la autoridad que firma').fill('Mg. Ana Perez Rojas');
+    await page.getByLabel('Cargo de la autoridad').fill('Directora de la Escuela');
+    await page.getByRole('button', { name: 'Guardar datos de la escuela' }).click();
+    await expect.poll(async () => (await view()).school.signatoryName).toBe('Mg. Ana Perez Rojas');
+
+    // Persisten al recargar.
+    await page.reload();
+    await page.getByText('Diseño del certificado', { exact: true }).click();
+    await expect(page.getByLabel('Cargo de la autoridad')).toHaveValue('Directora de la Escuela');
+    await expect(page.getByLabel('Título del documento')).toHaveValue('CONSTANCIA');
+
+    const after = await approvedCertificate(9, 'firmante-despues');
+    expect((await admin('POST', `/certificates/${after}/generate`, {})).status).toBe(200);
+    const text = await pdfText(s.adminToken, after);
+    expect(text).toContain('CONSTANCIA');
+    expect(text).toContain('Mg. Ana Perez Rojas');
+    expect(text).toContain('Directora de la Escuela');
+    expect(text).toContain('Sistemicas');
+    expect(text).not.toContain('autoridad firmante]');
+
+    // El generado antes conserva lo que imprimió.
+    const old = await pdfText(s.adminToken, before);
+    expect(old).not.toContain('Mg. Ana Perez Rojas');
+    expect(old).not.toContain('CONSTANCIA');
+
+    // Un valor inválido se rechaza con un mensaje.
+    expect((await admin('PUT', `/certificates/text-settings/${s.school.id}/school`, { department: 'x'.repeat(121), signatoryName: null, signatoryRole: null })).status).toBe(400);
+
+    // Sede o filial desde Sedes.
+    const campuses = ((await admin('GET', '/campuses')).body as { campuses: { id: string; name: string; kind?: string }[] }).campuses;
+    const campus = campuses[0]!;
+    await page.goto('/sedes');
+    await page.getByLabel(`Tipo de ${campus.name}`, { exact: true }).selectOption('FILIAL');
+    await expect.poll(async () => (((await admin('GET', '/campuses')).body as { campuses: { id: string; kind?: string }[] }).campuses.find((c) => c.id === campus.id)?.kind)).toBe('FILIAL');
+    expect((await admin('PATCH', `/campuses/${campus.id}`, { kind: campus.kind ?? 'SEDE' })).status).toBe(200);
+  } finally {
+    await admin('PUT', `/certificates/text-settings/${s.school.id}/template`, { title: original.title, bodyText: original.bodyText });
+    await admin('PUT', `/certificates/text-settings/${s.school.id}/school`, { department: null, signatoryName: null, signatoryRole: null });
+  }
+
+  // Auditoría.
+  let saved: string[] = [];
+  for (let i = 0; i < 20 && saved.length === 0; i += 1) {
+    const audit = await admin('GET', '/audit?entity=CertificateSchoolSettings&pageSize=100');
+    expect(audit.status).toBe(200);
+    saved = list<{ action: string }>(audit.body, 'items').map((e) => e.action);
+    if (saved.length === 0) await new Promise((resolve) => setTimeout(resolve, 300));
+  }
+  expect(saved).toContain('CERTIFICATE_TEXT_SAVED');
+});

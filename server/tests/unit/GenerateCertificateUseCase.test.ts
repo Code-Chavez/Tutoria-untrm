@@ -32,7 +32,7 @@ const record = (over: Partial<CertificateRecord> = {}): CertificateRecord => ({
 const PDF = Buffer.from('%PDF-1.3 demo');
 const sha = (b: Buffer) => createHash('sha256').update(b).digest('hex');
 
-function build(over: { row?: CertificateRecord | null; campus?: { city: string | null } | null; schoolCampusId?: string | null; demoMode?: boolean; resolution?: unknown; lockedStatus?: string; failAfterDecide?: boolean } = {}) {
+function build(over: { row?: CertificateRecord | null; campus?: { city: string | null } | null; settings?: { department: string | null; signatoryName: string | null; signatoryRole: string | null } | null; schoolCampusId?: string | null; demoMode?: boolean; resolution?: unknown; lockedStatus?: string; failAfterDecide?: boolean } = {}) {
   const row = over.row === undefined ? record() : over.row;
   const scopes = { resolve: jest.fn().mockResolvedValue({ kind: 'ALL' }) };
   const certificates = { findById: jest.fn().mockResolvedValue(row), pdfLocationOf: jest.fn() };
@@ -56,6 +56,7 @@ function build(over: { row?: CertificateRecord | null; campus?: { city: string |
     periods: { findById: jest.fn().mockResolvedValue({ id: 'p1', name: '2026-II' }) },
     resolutions: { find: jest.fn().mockResolvedValue(over.resolution === undefined ? { number: '030-2026-DEMO', issuedOn: new Date('2026-03-01') } : over.resolution) },
     templates: { ensure: jest.fn().mockResolvedValue({ id: 'tpl1', name: 'Demostración', version: 1, isDemo: true, title: 'CERTIFICADO', bodyText: 'Cuerpo {escuela} {periodo} {resolucion}' }) },
+    schoolSettings: { find: jest.fn().mockResolvedValue(over.settings ?? null) },
     renderer: { render: jest.fn().mockResolvedValue(PDF) },
     storage,
     demoMode: over.demoMode ?? true,
@@ -98,6 +99,28 @@ describe('GenerateCertificateUseCase', () => {
         expect(dateLine(deps)).toBe('Chachapoyas, 05 noviembre de 2026.');
         expect(patchOf()!.snapshot).toMatchObject({ city: 'Chachapoyas' });
       }
+    });
+  });
+
+  describe('departamento y autoridad que firma configurados (issue #271)', () => {
+    const rendered = (deps: { renderer: { render: jest.Mock } }) => (deps.renderer.render.mock.calls[0] as [{ signatory: string[]; body: Array<{ text: string }> }])[0];
+
+    it('imprime la autoridad y el departamento de la escuela y los deja en la instantánea', async () => {
+      const { useCase, deps, patchOf } = build({ settings: { department: 'Departamento de Ingeniería', signatoryName: 'Dr. Ana Pérez Rojas', signatoryRole: 'Directora de la Escuela' } });
+      await useCase.execute('u1', 'c1');
+
+      expect(rendered(deps).signatory.slice(0, 2)).toEqual(['Dr. Ana Pérez Rojas', 'Directora de la Escuela']);
+      expect(patchOf()!.snapshot).toMatchObject({ department: 'Departamento de Ingeniería', departmentIsPlaceholder: false, signatoryName: 'Dr. Ana Pérez Rojas', signatoryRole: 'Directora de la Escuela' });
+      expect(deps.schoolSettings.find).toHaveBeenCalledWith('s1');
+    });
+
+    it('sin configurar mantiene el marcador, el cargo predeterminado y el departamento como marcador', async () => {
+      const { useCase, deps, patchOf } = build();
+      await useCase.execute('u1', 'c1');
+
+      expect(rendered(deps).signatory[0]).toMatch(/^\[.*autoridad firmante\]$/);
+      expect(rendered(deps).signatory[1]).toBe('Director de Escuela de Ingeniería de Sistemas');
+      expect(patchOf()!.snapshot).toMatchObject({ department: 'Ingeniería de Sistemas', departmentIsPlaceholder: true });
     });
   });
 

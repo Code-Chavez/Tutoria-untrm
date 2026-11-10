@@ -65,6 +65,8 @@ describe('texto del certificado de demostración', () => {
     expect(text.dateLine).toBe('Chachapoyas, 05 noviembre de 2026.');
     expect(composeCertificateText({ ...data, city: 'Bagua Grande' }).dateLine).toBe('Bagua Grande, 05 noviembre de 2026.');
     expect(text.signatory[0]).toMatch(/^\[.*autoridad firmante\]$/);
+    const configured = composeCertificateText({ ...data, signatoryName: 'Dr. Ana Pérez Rojas', signatoryRole: 'Directora de la Escuela' });
+    expect(configured.signatory.slice(0, 2)).toEqual(['Dr. Ana Pérez Rojas', 'Directora de la Escuela']);
     expect(text.signatory).toContain('Director de Escuela de Ingeniería de Sistemas');
   });
 

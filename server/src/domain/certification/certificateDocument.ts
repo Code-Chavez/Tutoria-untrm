@@ -36,6 +36,9 @@ export interface CertificatePrintData {
   resolutionNumber: string;
   /** Ciudad de la sede de la escuela. */
   city: string;
+  /** Autoridad que firma, configurada por la escuela; sin nombre se imprime el marcador. */
+  signatoryName?: string | null;
+  signatoryRole?: string | null;
   issuedOn: Date;
 }
 
@@ -90,7 +93,7 @@ export function composeCertificateText(data: CertificatePrintData): CertificateT
     name: data.tutorName.toLocaleUpperCase('es-PE'),
     body: segments(fill(data.bodyTemplate, values)),
     dateLine: `${data.city}, ${formatCertificateDate(data.issuedOn)}.`,
-    signatory: ['[Nombre y grado de la autoridad firmante]', `Director de Escuela de ${data.schoolName}`, data.facultyName, UNIVERSITY_NAME],
+    signatory: [data.signatoryName || '[Nombre y grado de la autoridad firmante]', data.signatoryRole || `Director de Escuela de ${data.schoolName}`, data.facultyName, UNIVERSITY_NAME],
     numberLine: `N.° REG. ${data.number}`,
   };
 }

@@ -6,7 +6,11 @@ export interface Campus {
   isActive: boolean;
   /** Ciudad de la sede para la fecha del certificado; nula = la predeterminada (Chachapoyas). */
   city?: string | null;
+  /** Sede o filial: solo informativo. */
+  kind?: CampusKind;
 }
+
+export type CampusKind = 'SEDE' | 'FILIAL';
 
 export interface CampusSchool {
   id: string;
@@ -22,8 +26,8 @@ export interface CampusOverview {
 
 export const campusService = {
   overview: async (): Promise<CampusOverview> => (await apiClient.get<CampusOverview>('/campuses')).data,
-  create: async (name: string): Promise<Campus> => (await apiClient.post<{ campus: Campus }>('/campuses', { name })).data.campus,
-  update: async (id: string, changes: { name?: string; isActive?: boolean; city?: string | null }): Promise<Campus> =>
+  create: async (name: string, kind: CampusKind = 'SEDE'): Promise<Campus> => (await apiClient.post<{ campus: Campus }>('/campuses', { name, kind })).data.campus,
+  update: async (id: string, changes: { name?: string; isActive?: boolean; city?: string | null; kind?: CampusKind }): Promise<Campus> =>
     (await apiClient.patch<{ campus: Campus }>(`/campuses/${id}`, changes)).data.campus,
   setSchoolCampus: async (schoolId: string, campusId: string): Promise<void> => {
     await apiClient.put(`/schools/${schoolId}/campus`, { campusId });

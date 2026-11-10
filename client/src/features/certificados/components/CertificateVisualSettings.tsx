@@ -3,6 +3,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Button, SelectField } from '@shared/components/ui';
 import { getApiErrorMessage } from '@shared/services/apiClient';
 import { getCertificateVisualSettings, saveCertificateAsset, type CertificateAssetStatus, type CertificateOptions } from '../services/certificateService';
+import { CertificateTextSettings } from './CertificateTextSettings';
 import styles from '../pages/CertificatesPage.module.css';
 
 const labels = {
@@ -76,7 +77,7 @@ export function CertificateVisualSettings({ schools, preferredSchool }: { school
   return (
     <details className={styles.visualSettings} onToggle={(event) => setOpen(event.currentTarget.open)}>
       <summary>Diseño del certificado</summary>
-      <p>Guarda las imágenes una vez. Se aplican a los PDF que generes después. Usa JPG o PNG de hasta 1 MB. La firma visual es una imagen para la demostración.</p>
+      <p>Guarda las imágenes y los textos una vez. Se aplican a los PDF que generes después; los ya generados no cambian. Usa JPG o PNG de hasta 1 MB. La firma visual es una imagen para la demostración.</p>
       <label htmlFor="cert-visual-school">Escuela para configurar el diseño</label>
       <SelectField id="cert-visual-school" value={schoolId} onChange={(event) => setSelected(event.target.value)}>
         {schools.map((school) => <option key={school.id} value={school.id}>{school.name}</option>)}
@@ -86,6 +87,7 @@ export function CertificateVisualSettings({ schools, preferredSchool }: { school
       <div className={styles.assetGrid}>
         {settings.data?.map((asset) => <AssetForm key={`${schoolId}-${asset.kind}`} schoolId={schoolId} asset={asset} />)}
       </div>
+      <CertificateTextSettings schoolId={schoolId} open={open} />
     </details>
   );
 }

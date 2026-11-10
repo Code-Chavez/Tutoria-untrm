@@ -1,4 +1,4 @@
-import { Campus } from '@domain/entities/Campus';
+import { Campus, CampusKind, CAMPUS_KINDS } from '@domain/entities/Campus';
 import { CampusRepository } from '@domain/repositories/CampusRepository';
 import { School } from '@domain/entities/School';
 import { SchoolRepository } from '@domain/repositories/SchoolRepository';
@@ -44,6 +44,11 @@ function cleanCity(city: unknown): string | null {
   return value;
 }
 
+function cleanKind(kind: unknown): CampusKind {
+  if (!CAMPUS_KINDS.includes(kind as CampusKind)) throw new InvalidCampusError('El tipo de sede debe ser «Sede» o «Filial»');
+  return kind as CampusKind;
+}
+
 /** Sedes y escuelas con su sede: lo que necesita la pantalla de quien las configura (Vicerrectorado no ve estudiantes). */
 export class ListCampusesUseCase {
   constructor(private readonly campuses: CampusRepository, private readonly schools: SchoolRepository) {}
@@ -55,23 +60,24 @@ export class ListCampusesUseCase {
 
 export class CreateCampusUseCase {
   constructor(private readonly campuses: CampusRepository, private readonly audit: AuditLogRepository) {}
-  async execute(actingUserId: string, name: string, ip?: string | null): Promise<Campus> {
-    const created = await this.campuses.create(cleanName(name));
-    await this.audit.create({ userId: actingUserId, action: 'CAMPUS_CREATED', entity: 'Campus', entityId: created.id, details: `Sede «${created.name}» creada`, ipAddress: ip ?? null });
+  async execute(actingUserId: string, name: string, ip?: string | null, kind?: unknown): Promise<Campus> {
+    const created = await this.campuses.create(cleanName(name), kind === undefined ? 'SEDE' : cleanKind(kind));
+    await this.audit.create({ userId: actingUserId, action: 'CAMPUS_CREATED', entity: 'Campus', entityId: created.id, details: `${created.kind === 'FILIAL' ? 'Filial' : 'Sede'} «${created.name}» creada`, ipAddress: ip ?? null });
     return created;
   }
 }
 
 export class UpdateCampusUseCase {
   constructor(private readonly campuses: CampusRepository, private readonly audit: AuditLogRepository) {}
-  async execute(actingUserId: string, id: string, changes: { name?: string; isActive?: boolean; city?: string | null }, ip?: string | null): Promise<Campus> {
+  async execute(actingUserId: string, id: string, changes: { name?: string; isActive?: boolean; city?: string | null; kind?: string }, ip?: string | null): Promise<Campus> {
     if (!(await this.campuses.findById(id))) throw new CampusNotFoundError();
     let updated: Campus | null = null;
     if (changes.name !== undefined) updated = await this.campuses.rename(id, cleanName(changes.name));
     if (changes.isActive !== undefined) updated = await this.campuses.setActive(id, changes.isActive);
     if (changes.city !== undefined) updated = await this.campuses.setCity(id, cleanCity(changes.city));
+    if (changes.kind !== undefined) updated = await this.campuses.setKind(id, cleanKind(changes.kind));
     if (!updated) throw new InvalidCampusError('No hay cambios que guardar');
-    await this.audit.create({ userId: actingUserId, action: 'CAMPUS_UPDATED', entity: 'Campus', entityId: id, details: `Sede «${updated.name}» (${updated.isActive ? 'activa' : 'inactiva'}), ciudad: ${updated.city ?? 'predeterminada'}`, ipAddress: ip ?? null });
+    await this.audit.create({ userId: actingUserId, action: 'CAMPUS_UPDATED', entity: 'Campus', entityId: id, details: `${updated.kind === 'FILIAL' ? 'Filial' : 'Sede'} «${updated.name}» (${updated.isActive ? 'activa' : 'inactiva'}), ciudad: ${updated.city ?? 'predeterminada'}`, ipAddress: ip ?? null });
     return updated;
   }
 }

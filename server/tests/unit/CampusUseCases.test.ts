@@ -11,7 +11,7 @@ import { CampusRepository } from '@domain/repositories/CampusRepository';
 import { SchoolRepository } from '@domain/repositories/SchoolRepository';
 import { AuditLogRepository } from '@domain/repositories/AuditLogRepository';
 
-const campus = (over = {}) => ({ id: 'c1', name: 'Sede Bagua', city: null, isActive: true, createdAt: new Date(), ...over });
+const campus = (over = {}) => ({ id: 'c1', name: 'Sede Bagua', city: null, kind: 'SEDE' as const, isActive: true, createdAt: new Date(), ...over });
 const school = { id: 's1', name: 'Ingeniería de Sistemas', facultyId: 'f1', isActive: true, createdAt: new Date(), campusId: 'c0' };
 
 describe('sedes (fase 3)', () => {
@@ -23,10 +23,11 @@ describe('sedes (fase 3)', () => {
     campuses = {
       findAll: jest.fn().mockResolvedValue([campus()]),
       findById: jest.fn().mockResolvedValue(campus()),
-      create: jest.fn().mockImplementation(async (name: string) => campus({ name })),
+      create: jest.fn().mockImplementation(async (name: string, kind = 'SEDE') => campus({ name, kind })),
       rename: jest.fn().mockImplementation(async (_id: string, name: string) => campus({ name })),
       setActive: jest.fn().mockImplementation(async (_id: string, isActive: boolean) => campus({ isActive })),
       setCity: jest.fn().mockImplementation(async (_id: string, city: string | null) => campus({ city })),
+      setKind: jest.fn().mockImplementation(async (_id: string, kind: 'SEDE' | 'FILIAL') => campus({ kind })),
       setSchoolCampus: jest.fn().mockResolvedValue(undefined),
     };
     schools = { findAll: jest.fn().mockResolvedValue([school]), findById: jest.fn().mockResolvedValue(school) };
@@ -81,6 +82,21 @@ describe('sedes (fase 3)', () => {
     await expect(update.execute('vice', 'c1', { city: 'x'.repeat(81) })).rejects.toBeInstanceOf(InvalidCampusError);
     await expect(update.execute('vice', 'c1', { city: 'Bagua' })).rejects.toBeInstanceOf(InvalidCampusError);
     expect(campuses.setCity).not.toHaveBeenCalled();
+  });
+
+  it('fija si es sede o filial, lo crea con ese tipo y rechaza otro valor', async () => {
+    const update = new UpdateCampusUseCase(campuses, audit);
+
+    await update.execute('vice', 'c1', { kind: 'FILIAL' });
+    expect(campuses.setKind).toHaveBeenLastCalledWith('c1', 'FILIAL');
+    expect(audit.create).toHaveBeenLastCalledWith(expect.objectContaining({ action: 'CAMPUS_UPDATED', details: expect.stringContaining('Filial') }));
+
+    const created = await new CreateCampusUseCase(campuses, audit).execute('vice', 'Filial Bagua Grande', null, 'FILIAL');
+    expect(campuses.create).toHaveBeenLastCalledWith('Filial Bagua Grande', 'FILIAL');
+    expect(created.kind).toBe('FILIAL');
+
+    await expect(update.execute('vice', 'c1', { kind: 'SUCURSAL' })).rejects.toBeInstanceOf(InvalidCampusError);
+    await expect(new CreateCampusUseCase(campuses, audit).execute('vice', 'Otra sede', null, 'x')).rejects.toBeInstanceOf(InvalidCampusError);
   });
 
   describe('sede de una escuela', () => {

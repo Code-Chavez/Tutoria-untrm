@@ -11,8 +11,8 @@ import {
   UpdateCampusUseCase,
 } from '@application/use-cases/campuses/CampusUseCases';
 
-const nameSchema = z.object({ name: z.string() });
-const updateSchema = z.object({ name: z.string().optional(), isActive: z.boolean().optional(), city: z.string().nullable().optional() });
+const nameSchema = z.object({ name: z.string(), kind: z.enum(['SEDE', 'FILIAL']).optional() });
+const updateSchema = z.object({ name: z.string().optional(), isActive: z.boolean().optional(), city: z.string().nullable().optional(), kind: z.enum(['SEDE', 'FILIAL']).optional() });
 const schoolCampusSchema = z.object({ campusId: z.string().uuid('La sede debe ser un UUID válido') });
 
 export class CampusController {
@@ -33,8 +33,8 @@ export class CampusController {
 
   create = async (req: Request, res: Response) => {
     try {
-      const { name } = nameSchema.parse(req.body);
-      const campus = await this.createCampus.execute(req.auth?.sub as string, name, req.ip);
+      const { name, kind } = nameSchema.parse(req.body);
+      const campus = await this.createCampus.execute(req.auth?.sub as string, name, req.ip, kind);
       res.status(201).json({ campus });
     } catch (error) {
       this.fail(res, error);

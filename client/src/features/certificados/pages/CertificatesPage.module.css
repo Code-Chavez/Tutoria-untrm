@@ -124,3 +124,9 @@
   min-width: 0;
   max-width: 100%;
 }
+
+.textGrid { display: grid; gap: var(--s4); grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); margin-top: var(--s4); }
+.textForm { display: flex; flex-direction: column; gap: var(--s2); }
+.textForm label { font-size: var(--fs-sm); color: var(--g700); }
+.textForm input, .textForm textarea { width: 100%; box-sizing: border-box; padding: var(--s2) var(--s3); border: 1px solid var(--g300); border-radius: var(--r2, 6px); font: inherit; }
+.textForm textarea { resize: vertical; }
