@@ -224,7 +224,8 @@ export class ListCertificateCandidatesUseCase {
 export interface CertificateOptionsView {
   periods: { id: string; name: string; isActive: boolean }[];
   currentPeriodId: string | null;
-  schools: { id: string; name: string }[];
+  /** `campuses`: sedes donde se dicta la escuela (la principal primero); la pantalla pide elegir una cuando hay más de una. */
+  schools: { id: string; name: string; campuses: { id: string; name: string }[] }[];
 }
 
 /** Lo que la pantalla necesita para sus filtros: los periodos y solo las escuelas del alcance de quien consulta. */
@@ -233,6 +234,7 @@ export class GetCertificateOptionsUseCase {
     private readonly scope: CertificateScopeResolver,
     private readonly periods: AcademicPeriodRepository,
     private readonly schools: SchoolRepository,
+    private readonly campuses?: Pick<import('@domain/repositories/CampusRepository').CampusRepository, 'findAll' | 'campusIdsBySchool'>,
   ) {}
 
   async execute(requesterId: string): Promise<CertificateOptionsView> {
@@ -240,10 +242,12 @@ export class GetCertificateOptionsUseCase {
     const periods = await this.periods.findAll();
     const active = await this.periods.findActive();
     const schools = (await this.schools.findAll()).filter((s) => scope.kind === 'ALL' || scope.schoolIds.includes(s.id));
+    const links = (await this.campuses?.campusIdsBySchool()) ?? new Map<string, string[]>();
+    const campusById = new Map(((await this.campuses?.findAll()) ?? []).map((c) => [c.id, { id: c.id, name: c.name }]));
     return {
       periods: periods.map((p) => ({ id: p.id, name: p.name, isActive: p.isActive })),
       currentPeriodId: active?.id ?? null,
-      schools: schools.map((s) => ({ id: s.id, name: s.name })).sort((a, b) => a.name.localeCompare(b.name, 'es')),
+      schools: schools.map((s) => ({ id: s.id, name: s.name, campuses: (links.get(s.id) ?? (s.campusId ? [s.campusId] : [])).map((id) => campusById.get(id)).filter((c): c is { id: string; name: string } => !!c).sort((a, b) => Number(b.id === s.campusId) - Number(a.id === s.campusId)) })).sort((a, b) => a.name.localeCompare(b.name, 'es')),
     };
   }
 }

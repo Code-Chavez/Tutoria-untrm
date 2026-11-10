@@ -5,7 +5,7 @@ import { getApiErrorMessage } from '@shared/services/apiClient';
 import { useDraft } from '@shared/hooks/useDraft';
 import { useAuth } from '@features/auth/hooks/useAuth';
 import { type Campus, type CampusKind } from '../services/campusService';
-import { useCampuses, useCreateCampus, useSetSchoolCampus, useUpdateCampus } from '../hooks/useCampuses';
+import { useCampuses, useCreateCampus, useSetSchoolCampus, useSetSchoolCampuses, useUpdateCampus } from '../hooks/useCampuses';
 import styles from './CampusesPage.module.css';
 
 /** Ciudad de la sede (se imprime en la fecha del certificado). Vacía = la ciudad predeterminada. */
@@ -34,6 +34,7 @@ export function CampusesPage() {
   const create = useCreateCampus();
   const update = useUpdateCampus();
   const setCampus = useSetSchoolCampus();
+  const setCampuses = useSetSchoolCampuses();
   const { user } = useAuth();
   // El nombre de la sede nueva que se estaba escribiendo se conserva como borrador de la pestaña.
   const nameIsEmpty = useCallback((value: string) => value.trim() === '', []);
@@ -151,6 +152,27 @@ export function CampusesPage() {
                             </option>
                           ))}
                       </SelectField>
+                      {active.length > 1 && (
+                        <fieldset className={styles.alsoTaught}>
+                          <legend>Se dicta también en</legend>
+                          {active.map((c) => {
+                            const taughtIn = school.campusIds ?? (school.campusId ? [school.campusId] : []);
+                            const checked = taughtIn.includes(c.id);
+                            return (
+                              <label key={c.id}>
+                                <input
+                                  type="checkbox"
+                                  aria-label={`${school.name} se dicta en ${c.name}`}
+                                  checked={checked}
+                                  disabled={checked && taughtIn.length === 1}
+                                  onChange={() => run(() => setCampuses.mutateAsync({ schoolId: school.id, campusIds: checked ? taughtIn.filter((id) => id !== c.id) : [...taughtIn, c.id] }))}
+                                />{' '}
+                                {c.name}
+                              </label>
+                            );
+                          })}
+                        </fieldset>
+                      )}
                     </li>
                   ))}
                 </ul>

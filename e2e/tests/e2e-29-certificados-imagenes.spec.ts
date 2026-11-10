@@ -416,3 +416,37 @@ test('10. el título, el departamento y la autoridad que firma se configuran des
   }
   expect(saved).toContain('CERTIFICATE_TEXT_SAVED');
 });
+
+test('11. una escuela se dicta en varias sedes: quien emite elige la sede y se imprime su ciudad; una sede donde no se dicta se rechaza', async ({ page }) => {
+  const overview = async () => (await admin('GET', '/campuses')).body as { campuses: { id: string; name: string; city?: string | null; isActive: boolean }[]; schools: { id: string; campusId: string | null; campusIds: string[] }[] };
+  const before = (await overview()).schools.find((x) => x.id === s.school.id)!;
+  const campuses = (await overview()).campuses.filter((c) => c.isActive);
+  const main = campuses.find((c) => c.id === before.campusId) ?? campuses[0]!;
+  const other = campuses.find((c) => c.id !== main.id)!;
+  const third = campuses.find((c) => c.id !== main.id && c.id !== other.id)!;
+  expect((await admin('PUT', `/schools/${s.school.id}/campus`, { campusId: main.id })).status).toBe(200);
+  expect((await admin('PUT', `/schools/${s.school.id}/campuses`, { campusIds: [main.id] })).status).toBe(200);
+  await admin('PATCH', `/campuses/${main.id}`, { city: 'Chachapoyas' });
+  await admin('PATCH', `/campuses/${other.id}`, { city: 'Bagua Grande' });
+
+  try {
+    // Desde Sedes se marca la segunda sede.
+    await loginUi(page, accounts.admin);
+    await page.goto('/sedes');
+    await page.getByLabel(`${s.school.name} se dicta en ${other.name}`, { exact: true }).click();
+    await expect.poll(async () => (await overview()).schools.find((x) => x.id === s.school.id)?.campusIds.length).toBe(2);
+
+    // La API de generación valida la sede y la ciudad impresa es la elegida.
+    const id = await approvedCertificate(10, 'sedes');
+    const rejected = await admin('POST', `/certificates/${id}/generate`, { campusId: third.id });
+    expect(rejected.status).toBe(400);
+    expect((await admin('POST', `/certificates/${id}/generate`, { campusId: other.id })).status).toBe(200);
+    const text = await pdfText(s.adminToken, id);
+    expect(text).toContain('Bagua Grande, ');
+    expect(text).not.toContain('Chachapoyas, ');
+  } finally {
+    await admin('PUT', `/schools/${s.school.id}/campuses`, { campusIds: [main.id] });
+    await admin('PATCH', `/campuses/${main.id}`, { city: null });
+    await admin('PATCH', `/campuses/${other.id}`, { city: null });
+  }
+});

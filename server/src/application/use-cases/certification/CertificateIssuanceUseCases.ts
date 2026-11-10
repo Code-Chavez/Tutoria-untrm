@@ -116,7 +116,7 @@ export interface GenerateCertificateDeps {
   resolutions: CommitteeResolutionRepository;
   templates: CertificateTemplateRepository;
   renderer: CertificatePdfRenderer;
-  campuses: Pick<import('@domain/repositories/CampusRepository').CampusRepository, 'findById'>;
+  campuses: Pick<import('@domain/repositories/CampusRepository').CampusRepository, 'findById'> & Partial<Pick<import('@domain/repositories/CampusRepository').CampusRepository, 'campusIdsOf'>>;
   /** Departamento académico y autoridad que firma, configurados por escuela. */
   schoolSettings?: Pick<import('@domain/repositories/CertificateSchoolSettingsRepository').CertificateSchoolSettingsRepository, 'find'>;
   visuals?: Pick<import('./CertificateVisualSettings').CertificateVisualSettings, 'forDocument'>;
@@ -142,7 +142,7 @@ export class GenerateCertificateUseCase extends CertificateStep {
     super(scopes, certificates, workflow, audit, now);
   }
 
-  async execute(requesterId: string, id: string, ip?: string | null) {
+  async execute(requesterId: string, id: string, ip?: string | null, campusId?: string | null) {
     if (!this.deps.demoMode) throw new DemoModeDisabledError();
     const row = await this.visible(requesterId, id);
     if (!row.isDemo) throw new CertificateStateError('No hay plantilla oficial: solo se generan certificados de demostración');
@@ -162,7 +162,13 @@ export class GenerateCertificateUseCase extends CertificateStep {
     if (!school || !faculty || !tutor || !period) throw new CertificateNotReadyError('Faltan datos de la escuela, la facultad, el docente o el periodo para generar el certificado');
     const template = await this.deps.templates.ensure({ ...DEMO_TEMPLATE, isDemo: true });
     // La ciudad de la fecha es la de la sede de la escuela; sin sede o sin ciudad configurada se usa la predeterminada.
-    const campus = school.campusId ? await this.deps.campuses.findById(school.campusId) : null;
+    // Una escuela puede dictarse en varias sedes (central y filial): quien emite elige la sede y se imprime su ciudad; sin elegir, la principal.
+    if (campusId) {
+      const taughtIn = (await this.deps.campuses.campusIdsOf?.(school.id)) ?? (school.campusId ? [school.campusId] : []);
+      if (!taughtIn.includes(campusId)) throw new InvalidCertificateInputError('La escuela no se dicta en la sede elegida');
+    }
+    const chosenCampusId = campusId || school.campusId || null;
+    const campus = chosenCampusId ? await this.deps.campuses.findById(chosenCampusId) : null;
     const city = campus?.city?.trim() || DEFAULT_CERTIFICATE_CITY;
 
     const configured = await this.deps.schoolSettings?.find(school.id);
@@ -210,6 +216,8 @@ export class GenerateCertificateUseCase extends CertificateStep {
             periodId: period.id,
             resolutionIssuedOn: resolution.issuedOn,
             departmentIsPlaceholder: !configured?.department,
+            campusId: campus?.id ?? null,
+            campusName: campus?.name ?? null,
             template: { id: template.id, name: template.name, version: template.version, title: template.title },
             ...(signer && { visualSignatureOwnerId: signer.id }),
             demo: true,

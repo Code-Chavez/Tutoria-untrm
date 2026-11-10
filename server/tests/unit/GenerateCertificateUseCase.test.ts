@@ -32,7 +32,7 @@ const record = (over: Partial<CertificateRecord> = {}): CertificateRecord => ({
 const PDF = Buffer.from('%PDF-1.3 demo');
 const sha = (b: Buffer) => createHash('sha256').update(b).digest('hex');
 
-function build(over: { row?: CertificateRecord | null; campus?: { city: string | null } | null; settings?: { department: string | null; signatoryName: string | null; signatoryRole: string | null } | null; schoolCampusId?: string | null; demoMode?: boolean; resolution?: unknown; lockedStatus?: string; failAfterDecide?: boolean } = {}) {
+function build(over: { row?: CertificateRecord | null; campus?: { city: string | null; id?: string; name?: string } | null; settings?: { department: string | null; signatoryName: string | null; signatoryRole: string | null } | null; schoolCampusId?: string | null; demoMode?: boolean; resolution?: unknown; lockedStatus?: string; failAfterDecide?: boolean } = {}) {
   const row = over.row === undefined ? record() : over.row;
   const scopes = { resolve: jest.fn().mockResolvedValue({ kind: 'ALL' }) };
   const certificates = { findById: jest.fn().mockResolvedValue(row), pdfLocationOf: jest.fn() };
@@ -50,7 +50,10 @@ function build(over: { row?: CertificateRecord | null; campus?: { city: string |
   const audit = { create: jest.fn().mockResolvedValue({}) };
   const deps = {
     schools: { findById: jest.fn().mockResolvedValue({ id: 's1', name: 'Ingeniería de Sistemas', facultyId: 'f1', campusId: over.schoolCampusId === undefined ? 'c1' : over.schoolCampusId }) },
-    campuses: { findById: jest.fn().mockResolvedValue(over.campus === undefined ? { id: 'c1', city: null } : over.campus) },
+    campuses: {
+      findById: jest.fn(async (id: string) => (id === 'c2' ? { id: 'c2', name: 'Filial Bagua Grande', city: 'Bagua Grande' } : over.campus === undefined ? { id: 'c1', name: 'Sede Central', city: null } : over.campus)),
+      campusIdsOf: jest.fn().mockResolvedValue(['c1', 'c2']),
+    },
     faculties: { findAll: jest.fn().mockResolvedValue([{ id: 'f1', name: 'Facultad de Ingeniería de Sistemas y Mecánica Eléctrica' }]) },
     users: { findById: jest.fn().mockResolvedValue({ id: 't1', firstName: 'Docente', lastName: 'Ficticio' }) },
     periods: { findById: jest.fn().mockResolvedValue({ id: 'p1', name: '2026-II' }) },
@@ -99,6 +102,33 @@ describe('GenerateCertificateUseCase', () => {
         expect(dateLine(deps)).toBe('Chachapoyas, 05 noviembre de 2026.');
         expect(patchOf()!.snapshot).toMatchObject({ city: 'Chachapoyas' });
       }
+    });
+  });
+
+  describe('escuela dictada en varias sedes (issue #273)', () => {
+    const dateLine = (deps: { renderer: { render: jest.Mock } }) => (deps.renderer.render.mock.calls[0] as [{ dateLine: string }])[0].dateLine;
+
+    it('imprime la ciudad de la sede elegida y la deja en la instantánea', async () => {
+      const { useCase, deps, patchOf } = build({ campus: { city: 'Chachapoyas' } });
+      await useCase.execute('u1', 'c1', null, 'c2');
+
+      expect(dateLine(deps)).toBe('Bagua Grande, 05 noviembre de 2026.');
+      expect(patchOf()!.snapshot).toMatchObject({ city: 'Bagua Grande', campusId: 'c2', campusName: 'Filial Bagua Grande' });
+    });
+
+    it('sin elegir sede usa la principal de la escuela', async () => {
+      const { useCase, deps, patchOf } = build({ campus: { id: 'c1', city: 'Chachapoyas' } });
+      await useCase.execute('u1', 'c1');
+
+      expect(dateLine(deps)).toBe('Chachapoyas, 05 noviembre de 2026.');
+      expect(patchOf()!.snapshot).toMatchObject({ campusId: 'c1' });
+    });
+
+    it('rechaza una sede donde la escuela no se dicta y no genera nada', async () => {
+      const { useCase, deps, storage } = build();
+      await expect(useCase.execute('u1', 'c1', null, 'otra')).rejects.toThrow('La escuela no se dicta en la sede elegida');
+      expect(deps.renderer.render).not.toHaveBeenCalled();
+      expect(storage.save).not.toHaveBeenCalled();
     });
   });
 

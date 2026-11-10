@@ -264,6 +264,8 @@ const SCHOOLS = [
   {
     match: /^Administración de Empresas$/,
     authority: ['Mg. Patricia Zumaeta Chávez', 'Directora de la Escuela Profesional de Administración de Empresas'],
+    // Se dicta en la sede central y en la filial (una sola carrera).
+    campuses: [/Central/, /Filial/],
     resolution: '007-2026-D-FCEA',
     tutors: [
       ['Gladys', 'Herrera Sánchez', 1, 'ACEPTADA', 'GENERADO'],
@@ -271,16 +273,10 @@ const SCHOOLS = [
       ['Doris', 'Pérez Vásquez', 3, 'PENDIENTE', null],
       ['Hugo', 'Terrones Bardales', 4, 'PENDIENTE', null],
       ['Nelly', 'Zumaeta Fernández', null, null, null],
-    ],
-  },
-  {
-    match: /Filial Bagua Grande/,
-    authority: ['Mg. Sofía Herrera Bustamante', 'Directora de la Escuela Profesional de Administración de Empresas (Filial Bagua Grande)'],
-    resolution: '008-2026-D-FCEA',
-    tutors: [
-      ['Rocío', 'Vigo Pizarro', 1, 'ACEPTADA', 'GENERADO'],
-      ['César', 'Llanos Medina', 2, 'ACEPTADA', 'INICIADO'],
-      ['Teresa', 'Burga Salazar', 3, 'PENDIENTE', null],
+      // Docentes que la imparten en la Filial Bagua Grande (sexto elemento: sede donde se emite el certificado).
+      ['Rocío', 'Vigo Pizarro', 5, 'ACEPTADA', 'GENERADO', /Filial/],
+      ['César', 'Llanos Medina', 6, 'ACEPTADA', 'INICIADO', /Filial/],
+      ['Teresa', 'Burga Salazar', 7, 'PENDIENTE', null],
       ['Óscar', 'Mego Díaz', null, null, null],
     ],
   },
@@ -344,6 +340,11 @@ async function main() {
   for (const school of SCHOOLS) {
     const found = school.row;
     console.log(`Escuela: ${found.name}`);
+    if (school.campuses) {
+      const all = list(campusOverview, 'campuses');
+      const ids = school.campuses.map((rx) => all.find((c) => rx.test(c.name))?.id).filter(Boolean);
+      must(await call('PUT', `/schools/${found.id}/campuses`, { campusIds: ids }), [200], `sedes de ${found.name}`);
+    }
 
     // La resolución de decanato es una por escuela y periodo; si ya existe se respeta.
     const resolutions = list((await call('GET', `/committee-resolutions?periodId=${period.id}&schoolId=${found.id}`)).body, 'resolutions');
@@ -353,7 +354,7 @@ async function main() {
     const certificates = list((await call('GET', `/certificates?periodId=${period.id}&schoolId=${found.id}`)).body, 'certificates');
 
     let availabilityIndex = 0;
-    for (const [first, last, cycle, designation, procedure] of school.tutors) {
+    for (const [first, last, cycle, designation, procedure, issuedAt] of school.tutors) {
       const email = emailOf(first, last);
       let user = existingUsers.get(email);
       if (!user) {
@@ -402,7 +403,10 @@ async function main() {
         continue;
       }
       must(await call('POST', `/certificates/${cert.id}/approve`, {}), [200], 'aprobar');
-      if (procedure === 'GENERADO') must(await call('POST', `/certificates/${cert.id}/generate`, {}), [200], 'generar PDF');
+      if (procedure === 'GENERADO') {
+        const campus = issuedAt ? list(campusOverview, 'campuses').find((c) => issuedAt.test(c.name)) : null;
+        must(await call('POST', `/certificates/${cert.id}/generate`, campus ? { campusId: campus.id } : {}), [200], 'generar PDF');
+      }
       log(`  trámite ${procedure} para ${first} ${last}`);
     }
   }

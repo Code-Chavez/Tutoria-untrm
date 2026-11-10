@@ -62,7 +62,7 @@ import { ResendDeclineNoticeUseCase } from '@application/use-cases/cycle-tutors/
 import { CycleTutorApplier, ListCycleTutorsUseCase, RemoveCycleTutorUseCase, SetCycleTutorUseCase } from '@application/use-cases/cycle-tutors/CycleTutorUseCases';
 import { GetInstitutionalPendingUseCase } from '@application/use-cases/pending/GetInstitutionalPendingUseCase';
 import { PrismaCampusRepository } from './repositories/PrismaCampusRepository';
-import { CreateCampusUseCase, ListCampusesUseCase, SetSchoolCampusUseCase, UpdateCampusUseCase } from '@application/use-cases/campuses/CampusUseCases';
+import { CreateCampusUseCase, ListCampusesUseCase, SetSchoolCampusesUseCase, SetSchoolCampusUseCase, UpdateCampusUseCase } from '@application/use-cases/campuses/CampusUseCases';
 import { PrismaFacultyRepository } from './repositories/PrismaFacultyRepository';
 import { PrismaWorkPlanRepository } from './repositories/PrismaWorkPlanRepository';
 import { StudentAccessGuard } from '@application/access/StudentAccessGuard';
@@ -368,7 +368,7 @@ const certificateScope = new CertificateScopeResolver(studentAccessGuard);
 const listCertificatesUseCase = new ListCertificatesUseCase(certificateScope, certificateRepository, userRepository, schoolRepository, academicPeriodRepository);
 const getCertificateUseCase = new GetCertificateUseCase(certificateScope, certificateRepository, userRepository, schoolRepository, academicPeriodRepository, new PrismaCertificateFactsReader(prisma));
 const listCertificateCandidatesUseCase = new ListCertificateCandidatesUseCase(certificateScope, certificateRepository, userRepository, schoolRepository);
-const getCertificateOptionsUseCase = new GetCertificateOptionsUseCase(certificateScope, academicPeriodRepository, schoolRepository);
+const getCertificateOptionsUseCase = new GetCertificateOptionsUseCase(certificateScope, academicPeriodRepository, schoolRepository, new PrismaCampusRepository(prisma));
 const listTutorTeachersUseCase = new ListTutorTeachersUseCase(certificateScope, new PrismaTutorTeacherReader(prisma), schoolRepository, academicPeriodRepository);
 const importTutorsUseCase = new ImportTutorsUseCase(userRepository, roleRepository, schoolRepository, createUserUseCase, issueInvitationUseCase, emailPolicy);
 const updateUserUseCase = new UpdateUserUseCase(userRepository, roleRepository, schoolRepository, facultyRepository, emailPolicy);
@@ -603,6 +603,7 @@ const listCampusesUseCase = new ListCampusesUseCase(campusRepository, schoolRepo
 const createCampusUseCase = new CreateCampusUseCase(campusRepository, auditLogRepository);
 const updateCampusUseCase = new UpdateCampusUseCase(campusRepository, auditLogRepository);
 const setSchoolCampusUseCase = new SetSchoolCampusUseCase(schoolRepository, campusRepository, auditLogRepository);
+const setSchoolCampusesUseCase = new SetSchoolCampusesUseCase(schoolRepository, campusRepository, auditLogRepository);
 const listFacultiesUseCase = new ListFacultiesUseCase(facultyRepository);
 const listWorkPlansUseCase = new ListWorkPlansUseCase(
   userRepository,
@@ -987,6 +988,7 @@ export const container = {
     createCampusUseCase,
     updateCampusUseCase,
     setSchoolCampusUseCase,
+    setSchoolCampusesUseCase,
     listFacultiesUseCase,
     listWorkPlansUseCase,
     getWorkPlanUseCase,

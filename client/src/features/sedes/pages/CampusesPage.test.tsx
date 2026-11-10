@@ -6,7 +6,7 @@ import { CampusesPage } from './CampusesPage';
 import { campusService } from '../services/campusService';
 
 vi.mock('../services/campusService', () => ({
-  campusService: { overview: vi.fn(), create: vi.fn(), update: vi.fn(), setSchoolCampus: vi.fn() },
+  campusService: { overview: vi.fn(), create: vi.fn(), update: vi.fn(), setSchoolCampus: vi.fn(), setSchoolCampuses: vi.fn() },
 }));
 vi.mock('@features/auth/hooks/useAuth', () => ({ useAuth: () => ({ user: { id: 'me' } }) }));
 const mocked = vi.mocked(campusService);
@@ -17,7 +17,7 @@ const overview = {
     { id: 'c2', name: 'Sede Bagua', isActive: true },
     { id: 'c3', name: 'Sede Vieja', isActive: false },
   ],
-  schools: [{ id: 's1', name: 'Ingeniería de Sistemas', facultyId: 'f1', campusId: 'c1' }],
+  schools: [{ id: 's1', name: 'Ingeniería de Sistemas', facultyId: 'f1', campusId: 'c1', campusIds: ['c1'] }],
 };
 
 const renderPage = () =>
@@ -68,6 +68,15 @@ describe('CampusesPage', () => {
     await userEvent.selectOptions(screen.getByLabelText('Tipo de la nueva sede'), 'FILIAL');
     await userEvent.click(screen.getByRole('button', { name: 'Agregar' }));
     await waitFor(() => expect(mocked.create).toHaveBeenCalledWith('Filial Bagua Grande', 'FILIAL'));
+  });
+
+  it('marca las sedes donde se dicta una escuela y no deja quitar la única', async () => {
+    mocked.setSchoolCampuses.mockResolvedValue();
+    renderPage();
+
+    expect(await screen.findByLabelText('Ingeniería de Sistemas se dicta en Sede Central')).toBeDisabled();
+    await userEvent.click(screen.getByLabelText('Ingeniería de Sistemas se dicta en Sede Bagua'));
+    await waitFor(() => expect(mocked.setSchoolCampuses).toHaveBeenCalledWith('s1', ['c1', 'c2']));
   });
 
   it('cambia la sede de una escuela', async () => {
