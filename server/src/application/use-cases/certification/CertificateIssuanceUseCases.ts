@@ -116,6 +116,7 @@ export interface GenerateCertificateDeps {
   resolutions: CommitteeResolutionRepository;
   templates: CertificateTemplateRepository;
   renderer: CertificatePdfRenderer;
+  visuals?: Pick<import('./CertificateVisualSettings').CertificateVisualSettings, 'forDocument'>;
   storage: EvidenceStorage;
   /** `CERTIFICATE_DEMO_MODE`: sin plantilla oficial solo existen certificados de demostración. */
   demoMode: boolean;
@@ -158,6 +159,8 @@ export class GenerateCertificateUseCase extends CertificateStep {
     if (!school || !faculty || !tutor || !period) throw new CertificateNotReadyError('Faltan datos de la escuela, la facultad, el docente o el periodo para generar el certificado');
     const template = await this.deps.templates.ensure({ ...DEMO_TEMPLATE, isDemo: true });
 
+    const visuals = await this.deps.visuals?.forDocument(requesterId, school.id, faculty.id);
+    const signer = visuals?.signature ? await this.deps.users.findById(requesterId) : null;
     let savedKey: string | undefined;
     try {
       const updated = await this.move(id, async (current, _evidences, tools) => {
@@ -168,7 +171,11 @@ export class GenerateCertificateUseCase extends CertificateStep {
         const tutorName = `${tutor.firstName} ${tutor.lastName}`;
         // Hoy no hay dato de departamento académico: se usa el nombre de la escuela y la instantánea lo deja dicho.
         const printed = { number, tutorName, schoolName: school.name, facultyName: faculty.name, department: school.name, periodName: period.name, resolutionNumber: resolution.number, issuedOn };
-        const buffer = await this.deps.renderer.render(composeCertificateText({ ...printed, title: template.title, bodyTemplate: template.bodyText }));
+        const text = composeCertificateText({ ...printed, title: template.title, bodyTemplate: template.bodyText });
+        if (signer) {
+          text.signatory = [`${signer.firstName} ${signer.lastName}`, 'Firma visual de demostración', faculty.name];
+        }
+        const buffer = await this.deps.renderer.render(text, visuals);
         savedKey = await this.deps.storage.save(buffer, `${number}.pdf`);
         return {
           status,
@@ -185,6 +192,7 @@ export class GenerateCertificateUseCase extends CertificateStep {
             resolutionIssuedOn: resolution.issuedOn,
             departmentIsPlaceholder: true,
             template: { id: template.id, name: template.name, version: template.version, title: template.title },
+            ...(signer && { visualSignatureOwnerId: signer.id }),
             demo: true,
           },
         };

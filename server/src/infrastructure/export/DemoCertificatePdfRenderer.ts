@@ -1,3 +1,4 @@
+import type { CertificateVisuals } from '@application/use-cases/certification/CertificateVisualSettings';
 import PDFDocument from 'pdfkit';
 import { CertificatePdfRenderer } from '@application/ports/CertificatePdfRenderer';
 import { CertificateText } from '@domain/certification/certificateDocument';
@@ -9,13 +10,13 @@ const PAGE = { width: 841.89, height: 595.28 }; // A4 horizontal
 const SIDE = 60;
 
 /**
- * Certificado de DEMOSTRACIÓN (corte 4): A4 horizontal, una sola página, con la disposición del ejemplo de la escuela. No usa los
- * logotipos ni las franjas oficiales: dibuja recuadros rotulados como marcadores y la marca de agua «DEMOSTRACIÓN — SIN VALOR»
+ * Certificado de DEMOSTRACIÓN (corte 4): A4 horizontal, una sola página, con la disposición del ejemplo de la escuela. No usa las
+ * franjas oficiales: dibuja marcadores si faltan los logotipos y conserva la marca de agua «DEMOSTRACIÓN — SIN VALOR»
  * cruzando la página. Cuando la institución entregue el formato oficial se cargará como plantilla vigente (Q24) y este
  * generador quedará solo como herramienta de prueba.
  */
 export class DemoCertificatePdfRenderer implements CertificatePdfRenderer {
-  render(text: CertificateText): Promise<Buffer> {
+  render(text: CertificateText, visuals: CertificateVisuals = {}): Promise<Buffer> {
     return new Promise((resolve, reject) => {
       // Márgenes en cero: toda la colocación es explícita y ninguna línea puede abrir una segunda página.
       const doc = new PDFDocument({ size: [PAGE.width, PAGE.height], margin: 0, info: { Title: `Certificado de demostración ${text.numberLine}`, Subject: 'DEMOSTRACIÓN — SIN VALOR', Keywords: 'DEMO' } });
@@ -26,8 +27,16 @@ export class DemoCertificatePdfRenderer implements CertificatePdfRenderer {
 
       this.band(doc, 36);
       this.band(doc, PAGE.height - 56);
-      this.logoPlaceholder(doc, SIDE + 20, 66, 250, 62, text.logoPlaceholders.left);
-      this.logoPlaceholder(doc, PAGE.width - SIDE - 20 - 70, 66, 70, 62, text.logoPlaceholders.right);
+      if (visuals.watermark) {
+        doc.save().opacity(0.09);
+        doc.image(visuals.watermark, (PAGE.width - 290) / 2, 150, { fit: [290, 290], align: 'center', valign: 'center' });
+        doc.restore();
+      }
+      const facultyX = PAGE.width - SIDE - 90;
+      if (visuals.universityLogo) doc.image(visuals.universityLogo, SIDE + 20, 66, { fit: [250, 62], valign: 'center' });
+      else this.logoPlaceholder(doc, SIDE + 20, 66, 250, 62, text.logoPlaceholders.left);
+      if (visuals.facultyLogo) doc.image(visuals.facultyLogo, facultyX, 66, { fit: [70, 62], align: 'center', valign: 'center' });
+      else this.logoPlaceholder(doc, facultyX, 66, 70, 62, text.logoPlaceholders.right);
 
       doc.font('Helvetica-Bold').fontSize(52).fillColor(NAVY).text(text.title, 0, 128, { width: PAGE.width, align: 'center', lineBreak: false });
       doc.font('Helvetica').fontSize(11.5).fillColor('#222222').text(text.intro, SIDE + 50, 200, { width: PAGE.width - 2 * (SIDE + 50), lineGap: 3 });
@@ -38,6 +47,7 @@ export class DemoCertificatePdfRenderer implements CertificatePdfRenderer {
       this.body(doc, text, SIDE + 50, 294, PAGE.width - 2 * (SIDE + 50));
 
       doc.font('Helvetica').fontSize(11.5).fillColor('#222222').text(text.dateLine, SIDE + 50, 382, { width: PAGE.width - 2 * (SIDE + 50), align: 'right', lineBreak: false });
+      if (visuals.signature) doc.image(visuals.signature, (PAGE.width - 165) / 2, 400, { fit: [165, 53], align: 'center', valign: 'center' });
       this.signature(doc, text.signatory);
       doc.font('Helvetica').fontSize(10).fillColor(GREY).text(text.numberLine, SIDE, PAGE.height - 36, { lineBreak: false });
 
