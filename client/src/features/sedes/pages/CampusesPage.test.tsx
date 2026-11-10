@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen, waitFor } from '@testing-library/react';
+import { render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { QueryClientTestWrapper } from '@shared/test-utils/QueryClientTestWrapper';
 import { CampusesPage } from './CampusesPage';
@@ -40,6 +40,19 @@ describe('CampusesPage', () => {
     expect(await screen.findByRole('button', { name: 'Desactivar Sede Bagua' })).toBeInTheDocument();
     expect(screen.getByText('Inactiva')).toBeInTheDocument();
     expect(screen.getByLabelText('Ingeniería de Sistemas')).toHaveValue('c1');
+  });
+
+  it('guarda la ciudad de una sede, y vacía la quita', async () => {
+    mocked.update.mockResolvedValue({ id: 'c2', name: 'Sede Bagua', isActive: true, city: 'Bagua Grande' });
+    renderPage();
+
+    const field = await screen.findByLabelText('Ciudad de Sede Bagua');
+    const form = field.closest('form') as HTMLElement;
+    expect(within(form).getByRole('button', { name: 'Guardar ciudad' })).toBeDisabled();
+    await userEvent.type(field, 'Bagua Grande');
+    await userEvent.click(within(form).getByRole('button', { name: 'Guardar ciudad' }));
+
+    await waitFor(() => expect(mocked.update).toHaveBeenCalledWith('c2', { city: 'Bagua Grande' }));
   });
 
   it('cambia la sede de una escuela', async () => {

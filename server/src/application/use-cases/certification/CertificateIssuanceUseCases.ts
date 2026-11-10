@@ -1,7 +1,7 @@
 import { createHash } from 'node:crypto';
 import { CertificatePdfRenderer } from '@application/ports/CertificatePdfRenderer';
 import { EvidenceStorage, StoredFileReader } from '@application/ports/EvidenceStorage';
-import { DEMO_TEMPLATE, composeCertificateText } from '@domain/certification/certificateDocument';
+import { DEFAULT_CERTIFICATE_CITY, DEMO_TEMPLATE, composeCertificateText } from '@domain/certification/certificateDocument';
 import { DEMO_SEQUENCE_SCOPE, deriveAcronym, formatDemoCertificateNumber } from '@domain/certification/certificateNumber';
 import { InvalidTransitionError, applyTransition } from '@domain/certification/certificateWorkflow';
 import { AcademicPeriodRepository } from '@domain/repositories/AcademicPeriodRepository';
@@ -116,6 +116,7 @@ export interface GenerateCertificateDeps {
   resolutions: CommitteeResolutionRepository;
   templates: CertificateTemplateRepository;
   renderer: CertificatePdfRenderer;
+  campuses: Pick<import('@domain/repositories/CampusRepository').CampusRepository, 'findById'>;
   visuals?: Pick<import('./CertificateVisualSettings').CertificateVisualSettings, 'forDocument'>;
   storage: EvidenceStorage;
   /** `CERTIFICATE_DEMO_MODE`: sin plantilla oficial solo existen certificados de demostración. */
@@ -158,6 +159,9 @@ export class GenerateCertificateUseCase extends CertificateStep {
     const period = await this.deps.periods.findById(row.periodId);
     if (!school || !faculty || !tutor || !period) throw new CertificateNotReadyError('Faltan datos de la escuela, la facultad, el docente o el periodo para generar el certificado');
     const template = await this.deps.templates.ensure({ ...DEMO_TEMPLATE, isDemo: true });
+    // La ciudad de la fecha es la de la sede de la escuela; sin sede o sin ciudad configurada se usa la predeterminada.
+    const campus = school.campusId ? await this.deps.campuses.findById(school.campusId) : null;
+    const city = campus?.city?.trim() || DEFAULT_CERTIFICATE_CITY;
 
     const visuals = await this.deps.visuals?.forDocument(requesterId, school.id, faculty.id);
     const signer = visuals?.signature ? await this.deps.users.findById(requesterId) : null;
@@ -170,7 +174,7 @@ export class GenerateCertificateUseCase extends CertificateStep {
         const number = formatDemoCertificateNumber(await tools.nextSequence(DEMO_SEQUENCE_SCOPE, year), year, deriveAcronym(faculty.name), deriveAcronym(school.name));
         const tutorName = `${tutor.firstName} ${tutor.lastName}`;
         // Hoy no hay dato de departamento académico: se usa el nombre de la escuela y la instantánea lo deja dicho.
-        const printed = { number, tutorName, schoolName: school.name, facultyName: faculty.name, department: school.name, periodName: period.name, resolutionNumber: resolution.number, issuedOn };
+        const printed = { number, tutorName, schoolName: school.name, facultyName: faculty.name, department: school.name, periodName: period.name, resolutionNumber: resolution.number, city, issuedOn };
         const text = composeCertificateText({ ...printed, title: template.title, bodyTemplate: template.bodyText });
         if (signer) {
           text.signatory = [`${signer.firstName} ${signer.lastName}`, 'Firma visual de demostración', faculty.name];

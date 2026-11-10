@@ -1,4 +1,4 @@
-import { deflateSync } from 'node:zlib';
+import { deflateSync, inflateSync } from 'node:zlib';
 import { expect, test, type Page } from '@playwright/test';
 import { accounts, type Account } from '../support/accounts';
 import { api, apiLogin, apiPublic } from '../support/api';
@@ -10,6 +10,7 @@ import { loginUi } from '../support/ui';
 // ya estaban generados no cambian. Una cuenta de la escuela sin permiso de marca solo puede guardar su firma, y esa firma no la usa otra
 // cuenta. Los archivos dañados o demasiado grandes se rechazan sin guardar nada. La sección se usa en pantalla ancha y en 375 px sin
 // desbordar. Todo con docentes, cuentas e imágenes de datos ficticios (los PNG se construyen aquí mismo).
+// Además (issue #267), la ciudad de la fecha es la de la sede de la escuela, se configura en Sedes y no cambia los PDF ya generados.
 // Necesita la bandeja de correo de pruebas (Mailpit) para el enlace de aceptación del docente.
 test.describe.configure({ mode: 'serial' });
 
@@ -99,6 +100,24 @@ const imageCount = async (token: string, id: string) => {
   expect(raw.startsWith('%PDF-')).toBe(true);
   return (raw.match(/\/Subtype \/Image/g) ?? []).length;
 };
+
+/** Texto impreso en un PDF de PDFKit: se inflan sus flujos y se leen las cadenas hexadecimales (el interletrado las parte en trozos). */
+async function pdfText(token: string, id: string): Promise<string> {
+  const res = await fetch(`${API_URL}/certificates/${id}/pdf`, { headers: { authorization: `Bearer ${token}` } });
+  expect(res.status).toBe(200);
+  const raw = Buffer.from(await res.arrayBuffer());
+  const source = raw.toString('latin1');
+  let content = '';
+  for (const start of source.matchAll(/stream\r?\n/g)) {
+    const from = start.index + start[0].length;
+    try {
+      content += inflateSync(raw.subarray(from, source.indexOf('endstream', from))).toString('latin1') + '\n';
+    } catch {
+      // flujos que no son texto comprimido (imágenes): no interesan
+    }
+  }
+  return [...content.matchAll(/<([0-9a-fA-F]{2,})>/g)].map((m) => Buffer.from(m[1] as string, 'hex').toString('latin1')).join('');
+}
 
 async function acceptanceToken(email: string): Promise<string> {
   for (let i = 0; i < 60; i += 1) {
@@ -293,4 +312,40 @@ test('8. guardar y quitar imágenes queda en la bitácora', async () => {
   }
   expect(actions).toContain('CERTIFICATE_ASSET_SAVED');
   expect(actions).toContain('CERTIFICATE_ASSET_REMOVED');
+});
+
+test('9. la ciudad de la fecha es la de la sede de la escuela, se configura en Sedes y no cambia los PDF ya generados', async ({ page }) => {
+  const overview = async () => (await admin('GET', '/campuses')).body as { campuses: { id: string; name: string; city?: string | null; isActive: boolean }[]; schools: { id: string; campusId: string | null }[] };
+  let campusId = (await overview()).schools.find((x) => x.id === s.school.id)?.campusId ?? null;
+  if (!campusId) {
+    campusId = (await overview()).campuses.find((c) => c.isActive)!.id;
+    expect((await admin('PUT', `/schools/${s.school.id}/campus`, { campusId })).status).toBe(200);
+  }
+  const campus = (await overview()).campuses.find((c) => c.id === campusId)!;
+  await admin('PATCH', `/campuses/${campus.id}`, { city: null });
+
+  // Sin ciudad en la sede, la fecha usa la predeterminada; este PDF ya existe y no debe cambiar.
+  expect(await pdfText(s.adminToken, s.configuredId)).toContain('Chachapoyas, ');
+
+  try {
+    await loginUi(page, accounts.admin);
+    await page.goto('/sedes');
+    const field = page.getByLabel(`Ciudad de ${campus.name}`, { exact: true });
+    await field.fill('Bagua Grande');
+    await page.locator('form', { has: field }).getByRole('button', { name: 'Guardar ciudad' }).click();
+    await expect.poll(async () => (await overview()).campuses.find((c) => c.id === campus.id)?.city).toBe('Bagua Grande');
+    await expect(field).toHaveValue('Bagua Grande');
+
+    const id = await approvedCertificate(7, 'ciudad');
+    expect((await admin('POST', `/certificates/${id}/generate`, {})).status).toBe(200);
+    const text = await pdfText(s.adminToken, id);
+    expect(text).toContain('Bagua Grande, ');
+    expect(text).not.toContain('Chachapoyas, ');
+    expect(text).not.toContain('[Ciudad]');
+
+    // Cambiar la ciudad después no altera ni el PDF anterior ni este.
+    expect(await pdfText(s.adminToken, s.configuredId)).toContain('Chachapoyas, ');
+  } finally {
+    expect((await admin('PATCH', `/campuses/${campus.id}`, { city: null })).status).toBe(200);
+  }
 });

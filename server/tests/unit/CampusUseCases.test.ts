@@ -11,7 +11,7 @@ import { CampusRepository } from '@domain/repositories/CampusRepository';
 import { SchoolRepository } from '@domain/repositories/SchoolRepository';
 import { AuditLogRepository } from '@domain/repositories/AuditLogRepository';
 
-const campus = (over = {}) => ({ id: 'c1', name: 'Sede Bagua', isActive: true, createdAt: new Date(), ...over });
+const campus = (over = {}) => ({ id: 'c1', name: 'Sede Bagua', city: null, isActive: true, createdAt: new Date(), ...over });
 const school = { id: 's1', name: 'Ingeniería de Sistemas', facultyId: 'f1', isActive: true, createdAt: new Date(), campusId: 'c0' };
 
 describe('sedes (fase 3)', () => {
@@ -26,6 +26,7 @@ describe('sedes (fase 3)', () => {
       create: jest.fn().mockImplementation(async (name: string) => campus({ name })),
       rename: jest.fn().mockImplementation(async (_id: string, name: string) => campus({ name })),
       setActive: jest.fn().mockImplementation(async (_id: string, isActive: boolean) => campus({ isActive })),
+      setCity: jest.fn().mockImplementation(async (_id: string, city: string | null) => campus({ city })),
       setSchoolCampus: jest.fn().mockResolvedValue(undefined),
     };
     schools = { findAll: jest.fn().mockResolvedValue([school]), findById: jest.fn().mockResolvedValue(school) };
@@ -59,6 +60,27 @@ describe('sedes (fase 3)', () => {
     await expect(update.execute('vice', 'c1', {})).rejects.toBeInstanceOf(InvalidCampusError);
     campuses.findById.mockResolvedValue(null);
     await expect(update.execute('vice', 'x', { name: 'Otra sede' })).rejects.toBeInstanceOf(CampusNotFoundError);
+  });
+
+  it('fija la ciudad de la sede (se limpia y un valor vacío la quita) y la deja en la bitácora', async () => {
+    const update = new UpdateCampusUseCase(campuses, audit);
+
+    await update.execute('vice', 'c1', { city: '  Bagua   Grande ' });
+    expect(campuses.setCity).toHaveBeenLastCalledWith('c1', 'Bagua Grande');
+    expect(audit.create).toHaveBeenLastCalledWith(expect.objectContaining({ action: 'CAMPUS_UPDATED', details: expect.stringContaining('ciudad: Bagua Grande') }));
+
+    await update.execute('vice', 'c1', { city: '   ' });
+    expect(campuses.setCity).toHaveBeenLastCalledWith('c1', null);
+    await update.execute('vice', 'c1', { city: null });
+    expect(campuses.setCity).toHaveBeenLastCalledWith('c1', null);
+  });
+
+  it('rechaza una ciudad demasiado larga o con caracteres de control', async () => {
+    const update = new UpdateCampusUseCase(campuses, audit);
+
+    await expect(update.execute('vice', 'c1', { city: 'x'.repeat(81) })).rejects.toBeInstanceOf(InvalidCampusError);
+    await expect(update.execute('vice', 'c1', { city: 'Bagua' })).rejects.toBeInstanceOf(InvalidCampusError);
+    expect(campuses.setCity).not.toHaveBeenCalled();
   });
 
   describe('sede de una escuela', () => {

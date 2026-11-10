@@ -6,6 +6,7 @@ export interface CampusRepository {
   create(name: string): Promise<Campus>;
   rename(id: string, name: string): Promise<Campus>;
   setActive(id: string, isActive: boolean): Promise<Campus>;
+  setCity(id: string, city: string | null): Promise<Campus>;
   /** Cambia la sede de una escuela. */
   setSchoolCampus(schoolId: string, campusId: string): Promise<void>;
 }

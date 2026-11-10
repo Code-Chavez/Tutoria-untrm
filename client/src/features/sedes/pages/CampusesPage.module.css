@@ -70,3 +70,8 @@
 .grid { gap: 14px; }
 .row { padding: 9px 0; gap: 8px; }
 .add { padding-top: 10px; gap: 8px; }
+
+/* Ciudad de la sede: segunda línea de cada fila, a todo el ancho. */
+.cityForm { display: flex; align-items: center; flex-wrap: wrap; gap: var(--s2); flex-basis: 100%; }
+.cityForm label { font-size: var(--fs-sm); color: var(--g700); }
+@media (max-width: 480px) { .cityForm { align-items: stretch; flex-direction: column; } .cityForm > * { width: 100%; box-sizing: border-box; } }

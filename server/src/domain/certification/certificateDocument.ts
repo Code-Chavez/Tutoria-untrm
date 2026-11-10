@@ -19,6 +19,9 @@ export const DEMO_TEMPLATE = {
     'Docente adscrito al Departamento Académico de {departamento} de la {facultad}, como miembro de la {{Comisión de Tutoría de Estudiantes}} de la Escuela Profesional de {escuela}, aprobado con Resolución de Decanato N.° {resolucion}, a la fecha desempeñando su labor conforme a las actividades planificadas durante el semestre académico {periodo}.',
 } as const;
 
+/** Ciudad que se imprime en la fecha cuando la sede de la escuela no tiene una configurada. */
+export const DEFAULT_CERTIFICATE_CITY = 'Chachapoyas';
+
 export interface CertificatePrintData {
   title: string;
   /** Plantilla del cuerpo con variables; `{{…}}` marca el texto en negrita. */
@@ -31,6 +34,8 @@ export interface CertificatePrintData {
   department: string;
   periodName: string;
   resolutionNumber: string;
+  /** Ciudad de la sede de la escuela. */
+  city: string;
   issuedOn: Date;
 }
 
@@ -84,7 +89,7 @@ export function composeCertificateText(data: CertificatePrintData): CertificateT
     intro: `El Director de la Escuela Profesional de ${data.schoolName} de la ${data.facultyName}, de la ${UNIVERSITY_NAME}. Extiende la presente constancia a:`,
     name: data.tutorName.toLocaleUpperCase('es-PE'),
     body: segments(fill(data.bodyTemplate, values)),
-    dateLine: `[Ciudad], ${formatCertificateDate(data.issuedOn)}.`,
+    dateLine: `${data.city}, ${formatCertificateDate(data.issuedOn)}.`,
     signatory: ['[Nombre y grado de la autoridad firmante]', `Director de Escuela de ${data.schoolName}`, data.facultyName, UNIVERSITY_NAME],
     numberLine: `N.° REG. ${data.number}`,
   };

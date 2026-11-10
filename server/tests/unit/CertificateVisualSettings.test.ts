@@ -13,7 +13,7 @@ describe('diseño del certificado', () => {
     const text = composeCertificateText({
       title: DEMO_TEMPLATE.title, bodyTemplate: DEMO_TEMPLATE.bodyText, number: 'DEMO-001', tutorName: 'Docente de prueba',
       schoolName: 'Sistemas', facultyName: 'Ingeniería', department: 'Sistemas', periodName: '2026-II',
-      resolutionNumber: '010', issuedOn: new Date('2026-11-08'),
+      resolutionNumber: '010', city: 'Chachapoyas', issuedOn: new Date('2026-11-08'),
     });
     const pdf = await new DemoCertificatePdfRenderer().render(text, {
       signature: image, universityLogo: image, facultyLogo: image, watermark: image,

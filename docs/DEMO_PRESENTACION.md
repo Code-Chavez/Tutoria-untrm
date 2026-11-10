@@ -45,5 +45,5 @@ Abrir con el Administrador DBU. **Presentar a 1920 × 1080**; en una pantalla de
 ## Lo que se dice claro en la presentación
 
 - Es un certificado **de demostración**: sin valor, sin firma digital. La plantilla y el formato oficiales dependen de decisiones institucionales pendientes (Q20–Q22, Q24 y Q25 del levantamiento).
-- La línea de fecha lleva el marcador «[Ciudad]» hasta que se decida el texto institucional.
+- La ciudad de la fecha es la de la sede de la escuela (Configuración → Sedes → «Ciudad de la sede»); si la sede no tiene ciudad se imprime Chachapoyas.
 - La aceptación de la demostración por el Product Owner sigue pendiente (issue #232).

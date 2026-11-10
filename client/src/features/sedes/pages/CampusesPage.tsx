@@ -4,8 +4,28 @@ import { MapPinIcon } from '@shared/components/icons';
 import { getApiErrorMessage } from '@shared/services/apiClient';
 import { useDraft } from '@shared/hooks/useDraft';
 import { useAuth } from '@features/auth/hooks/useAuth';
+import { type Campus } from '../services/campusService';
 import { useCampuses, useCreateCampus, useSetSchoolCampus, useUpdateCampus } from '../hooks/useCampuses';
 import styles from './CampusesPage.module.css';
+
+/** Ciudad de la sede (se imprime en la fecha del certificado). Vacía = la ciudad predeterminada. */
+function CampusCity({ campus, save }: { campus: Campus; save: (city: string | null) => Promise<unknown> }) {
+  const [city, setCity] = useState(campus.city ?? '');
+  const changed = city.trim() !== (campus.city ?? '');
+  const submit = (event: FormEvent) => {
+    event.preventDefault();
+    if (changed) void save(city.trim() === '' ? null : city.trim());
+  };
+  return (
+    <form className={styles.cityForm} onSubmit={submit}>
+      <label htmlFor={`city-${campus.id}`}>Ciudad de {campus.name}</label>
+      <input id={`city-${campus.id}`} className={styles.input} value={city} onChange={(e) => setCity(e.target.value)} placeholder="Chachapoyas (predeterminada)" maxLength={80} />
+      <Button type="submit" variant="secondary" size="sm" disabled={!changed}>
+        Guardar ciudad
+      </Button>
+    </form>
+  );
+}
 
 // Sedes de la universidad y la sede de cada escuela. Las configura Vicerrectorado (o la DBU): una escuela pertenece a una sola sede,
 // y de ella depende qué docentes pueden tutorear a sus estudiantes.
@@ -77,6 +97,7 @@ export function CampusesPage() {
                     >
                       {campus.isActive ? 'Desactivar' : 'Activar'}
                     </Button>
+                    <CampusCity key={`${campus.id}-${campus.city ?? ''}`} campus={campus} save={(city) => run(() => update.mutateAsync({ id: campus.id, city }))} />
                   </li>
                 ))}
               </ul>
