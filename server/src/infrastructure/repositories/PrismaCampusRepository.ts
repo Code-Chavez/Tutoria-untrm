@@ -60,7 +60,11 @@ export class PrismaCampusRepository implements CampusRepository {
   }
 
   async campusIdsOf(schoolId: string): Promise<string[]> {
-    return (await this.prisma.schoolCampus.findMany({ where: { schoolId }, select: { campusId: true } })).map((r) => r.campusId);
+    const links = await this.prisma.schoolCampus.findMany({ where: { schoolId }, select: { campusId: true } });
+    if (links.length > 0) return links.map((r) => r.campusId);
+    // Una escuela con sede principal pero sin filas de vínculo (creada después de la migración y sin reasignar) se dicta en su sede principal.
+    const school = await this.prisma.school.findUnique({ where: { id: schoolId }, select: { campusId: true } });
+    return school?.campusId ? [school.campusId] : [];
   }
 
   async setSchoolCampuses(schoolId: string, campusIds: string[], mainCampusId: string): Promise<void> {
