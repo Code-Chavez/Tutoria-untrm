@@ -177,7 +177,7 @@ describe('avisos de sesión y destinatario de la solicitud', () => {
       const panel = await call('ana', 'GET', '/api/home-panel');
       const kpis = ((panel.json?.panel as { kpis?: unknown[] } | undefined)?.kpis ?? []) as { key: string; value: string; hint?: string; link?: string }[];
       const mine = kpis.find((k) => k.key === 'my-requests');
-      expect(mine).toMatchObject({ link: '/solicitar-tutoria' });
+      expect(mine).toMatchObject({ link: '/solicitar-tutoria?accion=historial' });
       expect(mine?.value).toMatch(/esperando respuesta/);
       expect(mine?.hint).toContain('Te avisaremos en cuanto Elena');
     });
