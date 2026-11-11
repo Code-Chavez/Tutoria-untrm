@@ -7,6 +7,7 @@ import { QueryClientTestWrapper } from '@shared/test-utils/QueryClientTestWrappe
 import { AuthContext, type AuthContextValue } from '@features/auth/context/AuthContext';
 import { DataRequestPage } from './DataRequestPage';
 import { dataRequestService, type DataRequest } from '../services/dataRequestService';
+import { catalogService } from '@features/catalogos/services/catalogService';
 import { schoolService, type School } from '@features/tutorados/services/schoolService';
 
 vi.mock('../services/dataRequestService', async (importOriginal) => ({
@@ -14,6 +15,8 @@ vi.mock('../services/dataRequestService', async (importOriginal) => ({
   dataRequestService: { list: vi.fn(), send: vi.fn(), markReceived: vi.fn(), setRequestEmail: vi.fn() },
 }));
 vi.mock('@features/tutorados/services/schoolService', () => ({ schoolService: { getSchools: vi.fn() } }));
+
+vi.mock('@features/catalogos/services/catalogService', () => ({ catalogService: { list: vi.fn() } }));
 
 const requests = vi.mocked(dataRequestService);
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
@@ -83,6 +86,21 @@ describe('DataRequestPage (pedido de listas por correo)', () => {
     expect(await screen.findByRole('option', { name: 'Mecánica Eléctrica' })).toBeInTheDocument();
   });
 
+  it('permite pedir todas las escuelas activas de una facultad con un solo envío', async () => {
+    vi.mocked(catalogService.list).mockResolvedValue([{ id: 'f1', kind: 'faculties', name: 'Ingeniería', isActive: true, requestEmail: 'facultad@untrm.edu.pe', usage: 2, code: null, facultyId: null, startDate: null, endDate: null }]);
+    requests.send.mockResolvedValue({ request: record({ schoolId: null, facultyId: 'f1', toEmail: 'facultad@untrm.edu.pe' }), replayed: false });
+    const user = userEvent.setup();
+    renderPage('Administrador DBU', 'admin-1');
+
+    await user.selectOptions(await screen.findByLabelText('Alcance del pedido'), 'facultad');
+    expect(await screen.findByText('facultad@untrm.edu.pe')).toBeInTheDocument();
+    expect(screen.getByText(/Un solo correo incluirá/)).toHaveTextContent('Ingeniería de Sistemas, Mecánica Eléctrica');
+    expect(screen.queryByRole('group', { name: 'Ciclos a solicitar' })).not.toBeInTheDocument();
+    await user.click(screen.getByRole('button', { name: 'Enviar pedido' }));
+    await waitFor(() => expect(requests.send).toHaveBeenCalledTimes(1));
+    expect(requests.send).toHaveBeenCalledWith(expect.objectContaining({ facultyId: 'f1', cycles: [] }));
+    expect(requests.send.mock.calls[0][0]).not.toHaveProperty('schoolId');
+  });
   it('envía el pedido con los ciclos marcados y las observaciones, y confirma a quién salió', async () => {
     requests.send.mockResolvedValue({ request: record(), replayed: false });
     const user = userEvent.setup();
@@ -382,13 +400,13 @@ describe('DataRequestPage (pedido de listas por correo)', () => {
   it('U13: al pedir docentes cambian título, plantilla, destino y siguientes pasos; al volver a estudiantes, también', async () => {
     const user = userEvent.setup();
     renderPage('Administrador DBU', 'dbu-1', '/pedir-listas');
-    expect(await screen.findByRole('heading', { name: 'Pedir listas de estudiantes' })).toBeInTheDocument();
+    expect(await screen.findByRole('heading', { name: 'Pedir listas' })).toBeInTheDocument();
     expect(await screen.findByText(/código, nombres, apellidos, correo, teléfono, ciclo y escuela/)).toBeInTheDocument();
     expect(screen.getByRole('link', { name: 'Carga de estudiantes' })).toHaveAttribute('href', '/carga-masiva');
 
     await user.selectOptions(await screen.findByLabelText('Qué lista pedir'), 'DOCENTES');
 
-    expect(screen.getByRole('heading', { name: 'Pedir la lista de docentes tutores' })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'Pedir listas' })).toBeInTheDocument();
     expect(screen.getByText(/nombres, apellidos, correo institucional, teléfono \(opcional\) y escuela/)).toBeInTheDocument();
     expect(screen.queryByText(/código, nombres, apellidos, correo, teléfono, ciclo/)).not.toBeInTheDocument();
     expect(screen.queryByRole('group', { name: 'Ciclos a solicitar' })).not.toBeInTheDocument();
@@ -397,7 +415,7 @@ describe('DataRequestPage (pedido de listas por correo)', () => {
     expect(screen.queryByRole('link', { name: 'Carga de estudiantes' })).not.toBeInTheDocument();
 
     await user.selectOptions(screen.getByLabelText('Qué lista pedir'), 'ESTUDIANTES');
-    expect(screen.getByRole('heading', { name: 'Pedir listas de estudiantes' })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'Pedir listas' })).toBeInTheDocument();
     expect(screen.getByRole('navigation', { name: 'Cuando llegue la lista de estudiantes' })).toBeInTheDocument();
   });
 

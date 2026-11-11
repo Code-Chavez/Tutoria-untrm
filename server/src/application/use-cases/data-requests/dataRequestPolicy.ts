@@ -46,7 +46,7 @@ export function equivalenceKey(parts: { kind: DataRequestKind; schoolId: string;
 }
 
 /** Resumen de lo que efectivamente se envía: destinatario, nota, ciclos, tipo, escuela y periodo. */
-export function contentHash(parts: { kind: DataRequestKind; schoolId: string; periodId: string; toEmail: string; cycles: number[]; note: string | null }): string {
-  const canonical = JSON.stringify([parts.kind, parts.schoolId, parts.periodId, parts.toEmail.trim().toLowerCase(), [...parts.cycles], parts.note]);
+export function contentHash(parts: { kind: DataRequestKind; schoolId: string; periodId: string; toEmail: string; cycles: number[]; note: string | null; coverage?: string[] }): string {
+  const canonical = JSON.stringify([parts.kind, parts.schoolId, parts.periodId, parts.toEmail.trim().toLowerCase(), [...parts.cycles], parts.note, ...(parts.coverage ? [parts.coverage] : [])]);
   return createHash('sha256').update(canonical).digest('hex');
 }

@@ -126,7 +126,7 @@ describe('SectionShell (pantallas juntas con pestañas)', () => {
     const nav = screen.getByRole('navigation', { name: 'Secciones de Configuración' });
     expect(nav).toHaveTextContent('Organización');
     expect(nav).toHaveTextContent('Sistema y acceso');
-    expect(screen.getByRole('link', { name: 'Correos de las escuelas' })).toHaveAttribute('aria-current', 'page');
+    expect(screen.getByRole('link', { name: 'Correos para pedidos de listas' })).toHaveAttribute('aria-current', 'page');
     expect(screen.queryByRole('button', { name: 'Ver más pestañas' })).not.toBeInTheDocument();
     await userEvent.selectOptions(screen.getByLabelText('Sección de configuración'), '/sedes');
     expect(screen.getByText('Pantalla de sedes')).toBeInTheDocument();

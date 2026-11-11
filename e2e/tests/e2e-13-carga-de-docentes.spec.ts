@@ -56,7 +56,7 @@ test('en la carga de estudiantes, el bloque «pide la lista» lleva a Pedir list
 
   await page.getByRole('link', { name: /Ir a «Pedir listas»/ }).click();
   await expect(page).toHaveURL(/\/pedir-listas\?lista=estudiantes/);
-  await expect(page.getByRole('heading', { name: 'Pedir listas de estudiantes' })).toBeVisible({ timeout: 45_000 });
+  await expect(page.getByRole('heading', { name: 'Pedir listas' })).toBeVisible({ timeout: 45_000 });
 });
 
 test('en la carga de docentes, la DBU llega a Pedir listas con la lista de docentes elegida y la pide', async ({ page }) => {
@@ -67,7 +67,7 @@ test('en la carga de docentes, la DBU llega a Pedir listas con la lista de docen
   await page.getByRole('link', { name: /Ir a «Pedir listas»/ }).click();
   await expect(page.getByLabel('Qué lista pedir')).toHaveValue('DOCENTES', { timeout: 45_000 });
   // U13: título, plantilla y siguiente paso son los de docentes, no los de estudiantes.
-  await expect(page.getByRole('heading', { name: 'Pedir la lista de docentes tutores' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Pedir listas' })).toBeVisible();
   await expect(page.getByText(/correo institucional, teléfono \(opcional\) y escuela/)).toBeVisible();
   await expect(page.locator('form').getByRole('link', { name: 'Carga de docentes' })).toHaveAttribute('href', '/carga-docentes');
   await page.getByLabel('Escuela profesional').selectOption({ label: 'Ingeniería de Sistemas' });
