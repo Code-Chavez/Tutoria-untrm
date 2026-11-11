@@ -15,6 +15,7 @@ export function useCatalogMutations(kind: CatalogKind) {
   const refresh = () =>
     Promise.all([
       queryClient.invalidateQueries({ queryKey: catalogKey(kind) }),
+      ...(kind === 'periods' ? [queryClient.invalidateQueries({ queryKey: ['periods'] })] : []),
       // Los filtros de reportes y otros selectores se alimentan de estos catálogos.
       queryClient.invalidateQueries({ queryKey: ['reportFilterOptions'] }),
       queryClient.invalidateQueries({ queryKey: ['schools'] }),

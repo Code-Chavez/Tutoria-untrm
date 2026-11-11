@@ -129,7 +129,7 @@ export const TutoradoTable: React.FC<TutoradoTableProps> = ({
                 </td>
                 <td>{schoolName(student.schoolId)}</td>
                 <td>
-                  <Badge tone="info">Ciclo {student.cycle}</Badge>
+                  <Badge tone="info">Ciclo {student.periodCycle ?? student.cycle}</Badge>
                 </td>
                 <td>
                   {currentTutor ? (

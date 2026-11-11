@@ -6,6 +6,7 @@ export interface Student {
   email?: string | null;
   phone?: string | null;
   cycle: number;
+  periodCycle?: number;
   isAtRisk: boolean;
   riskReason?: string | null;
   riskMarkedAt?: Date | null;
