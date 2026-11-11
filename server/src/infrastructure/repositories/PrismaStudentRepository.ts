@@ -21,10 +21,10 @@ export class PrismaStudentRepository implements StudentRepository {
     return this.prisma.student.findUnique({ where: { userId } });
   }
 
-  findAll(filters?: StudentFilters): Promise<Student[]> {
+  async findAll(filters?: StudentFilters): Promise<Student[]> {
     const where: Prisma.StudentWhereInput = {
       ...(filters?.schoolId && { schoolId: filters.schoolId }),
-      ...(filters?.cycle !== undefined && { cycle: filters.cycle }),
+      ...(!filters?.periodId && filters?.cycle !== undefined && { cycle: filters.cycle }),
       ...(filters?.isActive !== undefined && { isActive: filters.isActive }),
       ...(filters?.isAtRisk !== undefined && { isAtRisk: filters.isAtRisk }),
       ...(filters?.email && { email: { equals: filters.email, mode: 'insensitive' } }),
@@ -39,7 +39,15 @@ export class PrismaStudentRepository implements StudentRepository {
       }),
     };
 
-    return this.prisma.student.findMany({ where, orderBy: { lastName: 'asc' } });
+    if (!filters?.periodId) return this.prisma.student.findMany({ where, orderBy: { lastName: 'asc' } });
+
+    const enrollment = { periodId: filters.periodId, ...(filters.cycle !== undefined && { cycle: filters.cycle }) };
+    const rows = await this.prisma.student.findMany({
+      where: { ...where, enrollments: { some: enrollment } },
+      include: { enrollments: { where: enrollment, select: { cycle: true } } },
+      orderBy: { lastName: 'asc' },
+    });
+    return rows.map(({ enrollments, ...student }) => ({ ...student, periodCycle: enrollments[0]?.cycle }));
   }
 
   create(data: Omit<Student, 'id' | 'createdAt' | 'updatedAt'>): Promise<Student> {

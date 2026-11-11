@@ -20,6 +20,7 @@ export interface Student {
   email?: string | null;
   phone?: string | null;
   cycle: number;
+  periodCycle?: number;
   isAtRisk: boolean;
   riskReason?: string | null;
   riskMarkedAt?: string | null;
@@ -31,6 +32,7 @@ export interface Student {
 }
 
 export interface StudentFilters {
+  periodId?: string;
   schoolId?: string;
   cycle?: number;
   isActive?: boolean;
@@ -73,9 +75,19 @@ export interface ImportReport {
   errors: ImportRowError[];
 }
 
+export interface StudentPeriodOption {
+  id: string;
+  name: string;
+  isActive: boolean;
+}
+
 export const studentService = {
+  async getPeriodOptions(): Promise<StudentPeriodOption[]> {
+    return (await apiClient.get<{ periods: StudentPeriodOption[] }>('/periods/options')).data.periods;
+  },
   getStudents: async (filters?: StudentFilters): Promise<Student[]> => {
     const params = new URLSearchParams();
+    if (filters?.periodId) params.append('periodId', filters.periodId);
     if (filters?.schoolId) params.append('schoolId', filters.schoolId);
     if (filters?.cycle !== undefined) params.append('cycle', String(filters.cycle));
     if (filters?.isActive !== undefined) params.append('isActive', String(filters.isActive));
