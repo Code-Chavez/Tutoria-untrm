@@ -15,6 +15,8 @@ export interface CatalogEntry {
   code: string | null;
   /** Solo escuelas. */
   facultyId: string | null;
+  campuses?: { id: string; name: string; isActive: boolean }[];
+  requestEmail?: string | null;
   cycleCount?: number;
   /** Solo periodos. */
   startDate: Date | null;
@@ -28,6 +30,7 @@ export interface CatalogInput {
   isActive?: boolean;
   code?: string;
   facultyId?: string;
+  requestEmail?: string | null;
   cycleCount?: number;
   startDate?: Date;
   endDate?: Date;

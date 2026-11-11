@@ -21,11 +21,11 @@ import { StudentAccessGuard } from '@application/access/StudentAccessGuard';
 import { buildDataRequestEmail } from '@application/services/dataRequestEmail';
 import { isValidOptionalEmail, EMAIL_INVALID } from '@application/validation/studentFields';
 import { normalizeEmail } from '@application/use-cases/users/normalizeEmail';
-import { SchoolNotFoundError } from '@application/use-cases/students/StudentErrors';
+import { SchoolNotFoundError, StudentAccessDeniedError } from '@application/use-cases/students/StudentErrors';
 
 export class RequestEmailNotConfiguredError extends Error {
-  constructor() {
-    super('Esta escuela no tiene configurado el correo al que se piden las listas: configúrelo primero');
+  constructor(target: 'escuela' | 'facultad' = 'escuela') {
+    super(`Esta ${target} no tiene configurado el correo al que se piden las listas: configúrelo primero`);
     this.name = 'RequestEmailNotConfiguredError';
   }
 }
@@ -97,7 +97,8 @@ export class SetSchoolRequestEmailUseCase {
 }
 
 export interface SendDataRequestInput {
-  schoolId: string;
+  schoolId?: string;
+  facultyId?: string;
   cycles?: number[];
   note?: string;
   kind?: DataRequestKind;
@@ -178,36 +179,34 @@ export class SendDataRequestUseCase {
       if (!this.teacherTemplate) throw new InvalidDataRequestError('La lista de docentes no está disponible');
       if ((await this.guard.scopeFor(requesterId)).kind !== 'ALL') throw new TeacherListForbiddenError();
     }
-    await this.guard.assertSchoolAccess(requesterId, input.schoolId);
-    const school = await this.schools.findById(input.schoolId);
-    if (!school) throw new SchoolNotFoundError(input.schoolId);
-    if (!school.requestEmail) throw new RequestEmailNotConfiguredError();
+    const target = await this.resolveTarget(requesterId, input);
     const period = await this.periods.findActive();
     if (!period) throw new NoPeriodToRequestError();
 
     const requested = [...new Set(input.cycles ?? [])].sort((a, b) => a - b);
     if (requested.some((c) => !Number.isInteger(c) || c < 1 || c > 14)) throw new InvalidDataRequestError('Los ciclos deben ser números enteros entre 1 y 14');
-    if (kind === 'ESTUDIANTES' && requested.some((cycle) => cycle > (school.cycleCount ?? 0))) {
+    if (kind === 'ESTUDIANTES' && requested.some((cycle) => cycle > (target.cycleCount ?? 0))) {
       throw new InvalidDataRequestError('Los ciclos elegidos exceden la cantidad configurada para esta escuela');
     }
     // En la lista de docentes los ciclos no aplican: no se guardan.
-    const cycles = kind === 'DOCENTES' ? [] : requested;
+    const cycles = kind === 'DOCENTES' || target.facultyId ? [] : requested;
     const note = input.note?.trim() || null;
     if (note && note.length > 500) throw new InvalidDataRequestError('Las observaciones no pueden pasar de 500 caracteres');
 
     const requester = await this.users.findById(requesterId);
     if (!requester) throw new InvalidDataRequestError('No se pudo identificar a quien pide');
-    const faculty = (await this.faculties.findAll()).find((f) => f.id === school.facultyId);
-
-    const key = equivalenceKey({ kind, schoolId: school.id, periodId: period.id, scope: cyclesScope(kind, cycles, school.cycleCount) });
-    const hash = contentHash({ kind, schoolId: school.id, periodId: period.id, toEmail: school.requestEmail, cycles, note });
-    const operationId = input.operationId;
-
-    const reservation = await this.reserveOnce(requesterId, key, hash, operationId, input.confirmDuplicateOf, {
+    const targetKey = target.facultyId ? `faculty:${target.facultyId}` : target.schoolId!;
+    const key = equivalenceKey({ kind, schoolId: targetKey, periodId: period.id, scope: cyclesScope(kind, cycles, target.cycleCount) });
+    const hash = contentHash({
+      kind, schoolId: targetKey, periodId: period.id, toEmail: target.toEmail, cycles, note,
+      ...(target.facultyId && { coverage: [target.facultyName!, ...target.schoolNames!] }),
+    });
+    const reservation = await this.reserveOnce(requesterId, key, hash, input.operationId, input.confirmDuplicateOf, {
       periodId: period.id,
-      schoolId: school.id,
+      schoolId: target.schoolId,
+      ...(target.facultyId && { facultyId: target.facultyId, facultyName: target.facultyName, schoolNames: target.schoolNames }),
       kind,
-      toEmail: school.requestEmail,
+      toEmail: target.toEmail,
       cycles,
       note,
     });
@@ -218,10 +217,11 @@ export class SendDataRequestUseCase {
     let error: string | null = null;
     try {
       const message = buildDataRequestEmail({
-        toEmail: school.requestEmail,
+        toEmail: target.toEmail,
         requester,
-        school: school.name,
-        faculty: faculty?.name,
+        school: target.schoolName,
+        faculty: target.facultyName,
+        schoolNames: target.schoolNames,
         period: period.name,
         cycles,
         note,
@@ -235,7 +235,7 @@ export class SendDataRequestUseCase {
       error = e instanceof Error ? e.name : 'desconocido';
       // Para diagnóstico queda en el registro del servidor solo el nombre y el código de la causa: el mensaje de nodemailer puede traer
       // direcciones de correo (datos personales) y no se registra. La respuesta HTTP tampoco lo expone (ver toPublicRequest).
-      console.error('[pedido de listas] el correo no salió', { requestId: pending.id, schoolId: school.id, status, reason: error, code: typeof (e as { code?: unknown })?.code === 'string' ? (e as { code: string }).code : undefined });
+      console.error('[pedido de listas] el correo no salió', { requestId: pending.id, targetId: target.facultyId ?? target.schoolId, status, reason: error, code: typeof (e as { code?: unknown })?.code === 'string' ? (e as { code: string }).code : undefined });
     }
 
     const notBefore = new Date(this.now().getTime() - DATA_REQUEST_ATTEMPT_MARGIN_MS);
@@ -245,12 +245,44 @@ export class SendDataRequestUseCase {
     await this.auditLogs.create({
       userId: requesterId,
       action: 'DATA_REQUEST_SENT',
-      entity: 'School',
-      entityId: school.id,
+      entity: target.facultyId ? 'Faculty' : 'School',
+      entityId: target.facultyId ?? target.schoolId!,
       details: `Pedido de lista de ${kind === 'DOCENTES' ? 'docentes' : 'estudiantes'} (${period.name}) ${saved.status === 'ENVIADO' ? 'enviado' : saved.status === 'FALLIDO' ? 'no enviado' : 'con resultado de envío incierto'}`,
       ipAddress: ipAddress ?? null,
     });
     return { request: saved, replayed: false };
+  }
+
+  private async resolveTarget(requesterId: string, input: SendDataRequestInput): Promise<{
+    schoolId: string | null;
+    schoolName?: string;
+    facultyId?: string;
+    facultyName?: string;
+    schoolNames?: string[];
+    cycleCount?: number;
+    toEmail: string;
+  }> {
+    if (input.facultyId) {
+      if (input.schoolId || input.cycles?.length) throw new InvalidDataRequestError('El pedido por facultad abarca todos los ciclos de sus escuelas');
+      if ((await this.guard.scopeFor(requesterId)).kind !== 'ALL') throw new StudentAccessDeniedError();
+      const faculty = (await this.faculties.findAll()).find((item) => item.id === input.facultyId && item.isActive);
+      if (!faculty) throw new InvalidDataRequestError('La facultad indicada no está disponible');
+      if (!faculty.requestEmail) throw new RequestEmailNotConfiguredError('facultad');
+      const schoolNames = (await this.schools.findAll())
+        .filter((school) => school.isActive && school.facultyId === faculty.id)
+        .map((school) => school.name)
+        .sort((left, right) => left.localeCompare(right, 'es'));
+      if (!schoolNames.length) throw new InvalidDataRequestError('La facultad no tiene escuelas activas');
+      return { schoolId: null, facultyId: faculty.id, facultyName: faculty.name, schoolNames, toEmail: faculty.requestEmail };
+    }
+
+    if (!input.schoolId) throw new InvalidDataRequestError('Elige una escuela o una facultad');
+    await this.guard.assertSchoolAccess(requesterId, input.schoolId);
+    const school = await this.schools.findById(input.schoolId);
+    if (!school) throw new SchoolNotFoundError(input.schoolId);
+    if (!school.requestEmail) throw new RequestEmailNotConfiguredError();
+    const faculty = (await this.faculties.findAll()).find((item) => item.id === school.facultyId);
+    return { schoolId: school.id, schoolName: school.name, facultyName: faculty?.name, cycleCount: school.cycleCount, toEmail: school.requestEmail };
   }
 
   /** Reserva en una transacción corta; si dos peticiones del mismo identificador chocan, la segunda se resuelve como repetición. */
@@ -260,7 +292,7 @@ export class SendDataRequestUseCase {
     hash: string,
     operationId: string,
     confirmDuplicateOf: string | undefined,
-    data: { periodId: string; schoolId: string; kind: DataRequestKind; toEmail: string; cycles: number[]; note: string | null },
+    data: { periodId: string; schoolId: string | null; facultyId?: string; facultyName?: string; schoolNames?: string[]; kind: DataRequestKind; toEmail: string; cycles: number[]; note: string | null },
   ): Promise<Reservation> {
     for (let attempt = 0; attempt < 2; attempt += 1) {
       try {
@@ -334,7 +366,8 @@ export class MarkDataRequestReceivedUseCase {
   async execute(requesterId: string, id: string): Promise<DataRequest> {
     const request = await this.requests.findById(id);
     if (!request) throw new DataRequestNotFoundError();
-    await this.guard.assertSchoolAccess(requesterId, request.schoolId);
+    if (request.schoolId) await this.guard.assertSchoolAccess(requesterId, request.schoolId);
+    else if ((await this.guard.scopeFor(requesterId)).kind !== 'ALL') throw new StudentAccessDeniedError();
     const updated = await this.requests.markReceived(id, requesterId, this.now());
     if (!updated) throw new DataRequestNotFoundError();
     return updated;

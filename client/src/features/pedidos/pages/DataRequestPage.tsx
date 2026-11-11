@@ -6,6 +6,7 @@ import { PageHeader, Card, CardHeader, CardBody, Button, Badge, SelectField, Emp
 import { SendIcon } from '@shared/components/icons';
 import { getApiErrorMessage } from '@shared/services/apiClient';
 import { isLostResponse, parseSendConflict, type DataRequestKind, type DataRequestStatus, type PreviousRequest } from '../services/dataRequestService';
+import { useCatalog } from '@features/catalogos/hooks/useCatalog';
 import { useAuth } from '@features/auth/hooks/useAuth';
 import { useDataRequests, useMarkReceived, useRequestSchools, useSendDataRequest } from '../hooks/useDataRequests';
 import styles from './DataRequestPage.module.css';
@@ -22,10 +23,8 @@ const STATUS_VIEW: Record<DataRequestStatus, { label: string; tone: 'success' | 
   INCIERTO: { label: 'Envío incierto', tone: 'warning', hint: 'No se puede saber si el correo salió. Verifica con la escuela antes de volver a pedirlo.' },
 };
 
-// Todo lo que cambia según la lista que se pide: título, explicación, columnas de la plantilla y a dónde seguir al recibirla.
+// Todo lo que cambia según la lista que se pide: columnas de la plantilla y a dónde seguir al recibirla.
 const COPY: Record<DataRequestKind, {
-  title: string;
-  subtitle: string;
   columns: string;
   loadTo: string;
   loadLabel: string;
@@ -33,8 +32,6 @@ const COPY: Record<DataRequestKind, {
   steps: { to: string; label: string; description: string }[];
 }> = {
   ESTUDIANTES: {
-    title: 'Pedir listas de estudiantes',
-    subtitle: 'Al iniciar el periodo, pide por correo a la escuela la lista de estudiantes con el formato de la plantilla; cuando llegue, cárgala en «Carga de estudiantes».',
     columns: 'código, nombres, apellidos, correo, teléfono, ciclo y escuela',
     loadTo: '/carga-masiva',
     loadLabel: 'Carga de estudiantes',
@@ -45,8 +42,6 @@ const COPY: Record<DataRequestKind, {
     ],
   },
   DOCENTES: {
-    title: 'Pedir la lista de docentes tutores',
-    subtitle: 'Pide por correo a la escuela la lista de docentes que podrían ejercer la tutoría; cuando llegue, cárgala en «Carga de docentes».',
     columns: 'nombres, apellidos, correo institucional, teléfono (opcional) y escuela',
     loadTo: '/carga-docentes',
     loadLabel: 'Carga de docentes',
@@ -85,6 +80,16 @@ export function DataRequestPage() {
   const setCycles = (values: number[]) => setCycleSelection({ schoolId: school?.id ?? '', total: availableCycles.length, values });
   // La DBU también pide la lista de docentes tutores (la coordinación solo la de estudiantes).
   const isDbu = user?.role === 'Administrador DBU';
+  const facultyMode = isDbu && url.get('alcance') === 'facultad';
+  const facultyQuery = useCatalog('faculties', facultyMode);
+  const faculties = facultyQuery.entries.filter((item) => item.isActive && schools.some((school) => school.isActive && school.facultyId === item.id));
+  const faculty = faculties.find((item) => item.id === url.get('facultad')) ?? faculties[0];
+  const facultySchools = schools.filter((item) => item.isActive && item.facultyId === faculty?.id);
+  const recipient = facultyMode ? faculty?.requestEmail : school?.requestEmail;
+  const recipientTarget = facultyMode ? 'facultad' : 'escuela';
+  const contactUrl = facultyMode
+    ? `/correos-escuelas?tipo=facultades${faculty ? `&facultad=${faculty.id}` : ''}`
+    : `/correos-escuelas?escuela=${school?.id ?? ''}`;
   // Las pantallas de carga llevan aquí con la lista ya elegida (?lista=docentes); la de docentes solo la pide la DBU.
   const kind: DataRequestKind = isDbu && url.get('lista') === 'docentes' ? 'DOCENTES' : 'ESTUDIANTES';
   const setKind = (value: DataRequestKind) => url.set({ lista: value === 'DOCENTES' ? 'docentes' : null }, { replace: true });
@@ -99,18 +104,19 @@ export function DataRequestPage() {
   const submitting = useRef(false);
 
   const toggleCycle = (cycle: number) => setCycles(cycles.includes(cycle) ? cycles.filter((value) => value !== cycle) : [...cycles, cycle].sort((a, b) => a - b));
-  const hasEmail = !!school?.requestEmail;
+  const hasEmail = !!recipient;
   const copy = COPY[kind];
 
   const attempt = async (confirmDuplicateOf?: string) => {
-    if (!school || submitting.current) return;
+    const target = facultyMode ? (faculty && { facultyId: faculty.id }) : (school && { schoolId: school.id });
+    if (!target || !recipient || submitting.current) return;
     submitting.current = true;
     setFeedback(null);
-    const sentCycles = kind === 'DOCENTES' ? [] : cycles;
-    const fingerprint = JSON.stringify([school.id, kind, sentCycles, note.trim(), confirmDuplicateOf ?? null]);
+    const sentCycles = kind === 'DOCENTES' || facultyMode ? [] : cycles;
+    const fingerprint = JSON.stringify([target, recipient, kind, sentCycles, note.trim(), confirmDuplicateOf ?? null]);
     if (operation.current?.fingerprint !== fingerprint) operation.current = { id: crypto.randomUUID(), fingerprint };
     try {
-      const { request, replayed } = await send.mutateAsync({ schoolId: school.id, cycles: sentCycles, note: note.trim() || undefined, kind, operationId: operation.current.id, confirmDuplicateOf });
+      const { request, replayed } = await send.mutateAsync({ ...target, cycles: sentCycles, note: note.trim() || undefined, kind, operationId: operation.current.id, confirmDuplicateOf });
       operation.current = null;
       setDuplicate(null);
       discardNote();
@@ -119,7 +125,7 @@ export function DataRequestPage() {
       } else if (request.status === 'FALLIDO') {
         setFeedback({ type: 'error', text: request.error ? `El pedido quedó registrado, pero el correo no salió. ${request.error}. Avisa a la administración del sistema o entrega la plantilla por otro medio.` : 'El pedido quedó registrado, pero el correo no salió. Puedes volver a intentarlo más tarde o entregar la plantilla por otro medio.' });
       } else if (request.status === 'INCIERTO') {
-        setFeedback({ type: 'error', text: 'El pedido quedó registrado, pero no se puede saber si el correo salió. Verifica con la escuela antes de volver a pedirlo.' });
+        setFeedback({ type: 'error', text: `El pedido quedó registrado, pero no se puede saber si el correo salió. Verifica con la ${recipientTarget} antes de volver a pedirlo.` });
       } else {
         setFeedback({ type: 'ok', text: 'El pedido se está enviando. Revisa su estado en «Pedidos hechos».' });
       }
@@ -145,8 +151,7 @@ export function DataRequestPage() {
 
   const submit = async (event: FormEvent) => {
     event.preventDefault();
-    if (!school) return;
-    if (kind === 'ESTUDIANTES' && cycles.length === 0) {
+    if (!facultyMode && kind === 'ESTUDIANTES' && cycles.length === 0) {
       setFeedback({ type: 'error', text: 'Selecciona al menos un ciclo para enviar el pedido.' });
       return;
     }
@@ -156,8 +161,8 @@ export function DataRequestPage() {
   return (
     <div className={styles.page}>
       <PageHeader
-        title={copy.title}
-        subtitle={copy.subtitle}
+        title="Pedir listas"
+        subtitle="Solicita por correo las listas del periodo vigente con la plantilla de Excel adjunta."
         icon={<SendIcon size={24} />}
       />
 
@@ -186,6 +191,31 @@ export function DataRequestPage() {
                   </SelectField>
                 </div>
               )}
+              {isDbu && (
+                <div className={styles.field}>
+                  <label htmlFor="req-scope">Alcance del pedido</label>
+                  <SelectField id="req-scope" value={facultyMode ? 'facultad' : 'escuela'} onChange={(event) => {
+                    url.set({ alcance: event.target.value === 'facultad' ? 'facultad' : null }, { replace: true });
+                    setFeedback(null);
+                  }}>
+                    <option value="escuela">Una escuela profesional</option>
+                    <option value="facultad">Toda una facultad</option>
+                  </SelectField>
+                </div>
+              )}
+              {facultyMode ? (
+                <div className={styles.field}>
+                  <label htmlFor="req-faculty">Facultad</label>
+                  <SelectField id="req-faculty" value={faculty?.id ?? ''} onChange={(event) => {
+                    url.set({ facultad: event.target.value }, { replace: true });
+                    setFeedback(null);
+                  }}>
+                    {!faculty && <option value="">{facultyQuery.loading ? 'Cargando facultades…' : 'Sin facultades disponibles'}</option>}
+                    {faculties.map((item) => <option key={item.id} value={item.id}>{item.name}</option>)}
+                  </SelectField>
+                  {facultyQuery.error && <Button type="button" variant="ghost" onClick={() => facultyQuery.refresh()}>Reintentar facultades</Button>}
+                </div>
+              ) : (
               <div className={`${styles.field} ${!isDbu ? styles.fullWidth : ''}`}>
                 <label htmlFor="req-school">Escuela profesional</label>
                 <SelectField id="req-school" value={school?.id ?? ''} onChange={(e) => { setChosen(e.target.value); setFeedback(null); }}>
@@ -196,27 +226,35 @@ export function DataRequestPage() {
                   ))}
                 </SelectField>
               </div>
+              )}
 
               <div className={`${styles.field} ${styles.recipient}`}>
                 <span className={styles.label}>Se pedirá a</span>
                 {hasEmail ? (
                   <div className={styles.row}>
-                    <strong>{school?.requestEmail}</strong>
-                    <Link to={`/correos-escuelas?escuela=${school?.id ?? ''}`} className={styles.editLink}>
+                    <strong>{recipient}</strong>
+                    <Link to={contactUrl} className={styles.editLink}>
                       Editar correo
                     </Link>
                   </div>
                 ) : (
                   <div className={styles.emailForm}>
-                    <p className={styles.note}>Esta escuela aún no tiene un correo configurado para pedir las listas.</p>
-                    <Link to={`/correos-escuelas?escuela=${school?.id ?? ''}`} className={styles.linkButton}>
+                    <p className={styles.note}>Esta {recipientTarget} aún no tiene un correo configurado para pedir las listas.</p>
+                    <Link to={contactUrl} className={styles.linkButton}>
                       Configurar correo
                     </Link>
                   </div>
                 )}
               </div>
 
-              {kind === 'ESTUDIANTES' && (
+              {facultyMode && faculty && (
+                <p className={`${styles.note} ${styles.fullWidth}`}>
+                  Un solo correo incluirá {facultySchools.length === 1 ? 'esta escuela' : 'estas escuelas'}: {facultySchools.map((item) => item.name).join(', ')}.
+                  {kind === 'ESTUDIANTES' && ' Se solicitarán todos los ciclos de cada escuela.'}
+                </p>
+              )}
+
+              {!facultyMode && kind === 'ESTUDIANTES' && (
                 <fieldset className={`${styles.field} ${styles.fullWidth}`}>
                 <legend className={styles.label}>Ciclos a solicitar</legend>
                 {availableCycles.length === 0 && <p className={styles.note}>Configura la cantidad de ciclos de esta escuela en Catálogos → Escuelas antes de pedir listas.</p>}
@@ -243,7 +281,7 @@ export function DataRequestPage() {
               </div>
 
               <div className={styles.formFooter}>
-              <Button type="submit" variant="primary" loading={send.isPending} disabled={!hasEmail || (kind === 'ESTUDIANTES' && cycles.length === 0)}>
+              <Button type="submit" variant="primary" loading={send.isPending} disabled={!hasEmail || (!facultyMode && kind === 'ESTUDIANTES' && cycles.length === 0)}>
                 Enviar pedido
               </Button>
               <p className={styles.note}>
@@ -269,7 +307,7 @@ export function DataRequestPage() {
                 <li key={r.id} className={styles.historyItem}>
                   <div className={styles.historyHead}>
                     <strong>
-                      {r.schoolName} · {r.periodName} · {r.kind === 'DOCENTES' ? 'Docentes tutores' : 'Estudiantes'}
+                      {r.facultyName ?? r.schoolName} · {r.periodName} · {r.kind === 'DOCENTES' ? 'Docentes tutores' : 'Estudiantes'}
                     </strong>
                     <Badge tone={STATUS_VIEW[r.status].tone}>{STATUS_VIEW[r.status].label}</Badge>
                     {r.receivedAt && <Badge tone="info">Recibido el {fmt(r.receivedAt)}</Badge>}
@@ -277,6 +315,7 @@ export function DataRequestPage() {
                   <span className={styles.note}>
                     {fmt(r.createdAt)} · a {r.toEmail} · {r.kind === 'DOCENTES' ? 'lista de docentes' : r.cycles.length > 0 ? `ciclos ${r.cycles.join(', ')}` : 'todos los ciclos'}
                   </span>
+                  {r.schoolNames?.length ? <span className={styles.note}>{r.schoolNames.join(', ')}</span> : null}
                   {STATUS_VIEW[r.status].hint && <span className={styles.note}>{STATUS_VIEW[r.status].hint}</span>}
                   {r.status === 'ENVIADO' && !r.receivedAt && (
                     <div>
@@ -302,7 +341,7 @@ export function DataRequestPage() {
         title="Ya hay un pedido equivalente"
         message={
           duplicate
-            ? `Hace poco (${fmtTime(duplicate.createdAt)}) ya se hizo un pedido equivalente: ${STATUS_VIEW[duplicate.status].label.toLowerCase()}. ¿Quieres pedirlo de nuevo? Se enviará otro correo a la escuela.`
+            ? `Hace poco (${fmtTime(duplicate.createdAt)}) ya se hizo un pedido equivalente: ${STATUS_VIEW[duplicate.status].label.toLowerCase()}. ¿Quieres pedirlo de nuevo? Se enviará otro correo a la ${recipientTarget}.`
             : ''
         }
         confirmLabel="Pedir de nuevo"

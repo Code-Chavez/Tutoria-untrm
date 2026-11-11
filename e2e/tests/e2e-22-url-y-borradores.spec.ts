@@ -236,7 +236,7 @@ test('7. Identidad visual: lo escrito sin guardar se recupera y se limpia al des
   await expect(page.getByRole('status').filter({ hasText: DRAFT_NOTICE })).toHaveCount(0);
 });
 
-test('8. Correos de las escuelas: editar y lo escrito sobreviven a recargar, y la escuela enfocada se restaura', async ({ browser }) => {
+test('8. Correos para pedidos de listas: editar y lo escrito sobreviven a recargar, y la escuela enfocada se restaura', async ({ browser }) => {
   // El administrador no tiene escuelas a cargo; se usa la coordinadora sembrada, en su propia sesión.
   const context = await browser.newContext();
   const page = await context.newPage();

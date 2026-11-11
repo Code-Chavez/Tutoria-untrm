@@ -98,6 +98,33 @@ describe('pedidos de lista por HTTP: idempotencia y equivalencia', () => {
     mockMail.delivered = 0;
   });
 
+  it('consolida las escuelas activas de una facultad en un pedido persistido y un solo correo', async () => {
+    if (!dbUp) return;
+    const faculty = await prisma.faculty.create({ data: { name: `Facultad pedidos ${stamp}`, requestEmail: 'facultad@example.com' } });
+    try {
+      await prisma.school.createMany({ data: [
+        { name: 'Carrera Alfa', facultyId: faculty.id },
+        { name: 'Carrera Beta', facultyId: faculty.id },
+        { name: 'Carrera inactiva', facultyId: faculty.id, isActive: false },
+      ] });
+      const payload = { facultyId: faculty.id, operationId: uuid(99) };
+      expect((await post('a', payload)).status).toBe(403);
+      const sent = await post('admin', payload);
+      expect(sent.status).toBe(201);
+      expect((await json(sent)).request).toMatchObject({
+        facultyId: faculty.id, schoolId: null, schoolNames: ['Carrera Alfa', 'Carrera Beta'], toEmail: 'facultad@example.com',
+      });
+      expect((await post('admin', payload)).status).toBe(200);
+      expect(mockMail.delivered).toBe(1);
+      expect(await prisma.dataRequest.count({ where: { facultyId: faculty.id } })).toBe(1);
+    } finally {
+      await prisma.dataRequest.deleteMany({ where: { facultyId: faculty.id } });
+      await prisma.auditLog.deleteMany({ where: { entity: 'Faculty', entityId: faculty.id } });
+      await prisma.school.deleteMany({ where: { facultyId: faculty.id } });
+      await prisma.faculty.delete({ where: { id: faculty.id } });
+    }
+  });
+
   it('sin sesión responde 401 y no envía nada', async () => {
     if (!dbUp) return;
     const res = await post(null, ask([1], { operationId: uuid(1) }));
