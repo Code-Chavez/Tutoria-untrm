@@ -1,6 +1,7 @@
 import { Student } from '../entities/Student';
 
 export interface StudentFilters {
+  periodId?: string;
   schoolId?: string;
   cycle?: number;
   isActive?: boolean;
