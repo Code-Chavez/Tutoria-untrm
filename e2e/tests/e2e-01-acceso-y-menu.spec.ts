@@ -73,7 +73,7 @@ test('el menú es corto: Periodo académico, Informes y Configuración son una p
   // Configuración: todo lo configurable en una sola pantalla
   await nav.getByRole('link', { name: 'Configuración', exact: true }).click();
   const config = page.getByRole('navigation', { name: 'Secciones de Configuración' });
-  await expect(config.getByRole('link')).toHaveText(startingWith(['Correos de las escuelas', 'Sedes', 'Evaluación de tutoría', 'Catálogos', 'Usuarios y roles', 'Roles y permisos', 'Parámetros', 'Identidad visual', 'Bitácora de auditoría']));
+  await expect(config.getByRole('link')).toHaveText(startingWith(['Correos para pedidos de listas', 'Sedes', 'Evaluación de tutoría', 'Catálogos', 'Usuarios y roles', 'Roles y permisos', 'Parámetros', 'Identidad visual', 'Bitácora de auditoría']));
 
   // Los grupos del menú se pliegan
   await nav.getByRole('button', { name: /Gestión/ }).click();
