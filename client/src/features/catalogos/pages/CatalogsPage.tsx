@@ -1,9 +1,14 @@
-import { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
+import { useEffect, useRef, useState } from 'react';
 import { PageHeader, Card, Button, Badge, ConfirmDialog, EmptyState, TableSkeleton } from '@shared/components/ui';
-import { SettingsIcon, PlusIcon } from '@shared/components/icons';
+import { SettingsIcon, PlusIcon, ChevronDownIcon } from '@shared/components/icons';
 import { getApiErrorMessage } from '@shared/services/apiClient';
 import { useUrlParams } from '@shared/hooks/useUrlParams';
+import { ROLE_CODES } from '@shared/components/layout/navigation';
+import { tabsFor } from '@shared/components/layout/sections';
 import { useAuth } from '@features/auth/hooks/useAuth';
+import { CatalogNavigation } from '../components/CatalogNavigation';
+import { CatalogErrorMessage } from '../components/CatalogErrorMessage';
 import { CatalogEntryModal } from '../components/CatalogEntryModal';
 import { useCatalog, useCatalogMutations } from '../hooks/useCatalog';
 import { CATALOGS, CatalogEntry, CatalogKind } from '../services/catalogService';
@@ -15,12 +20,14 @@ const date = (iso: string | null) => (iso ? new Date(iso).toLocaleDateString('es
 // ciclos, servicios y motivos. Lo que está en uso solo se desactiva; la baja
 // definitiva se permite únicamente si nada lo referencia.
 export function CatalogsPage() {
-  // La pestaña y la ventana abierta viven en la URL (?tipo=, ?nuevo=1, ?editar=<id>, ?eliminar=<id>): recargar o compartir el enlace
+  // El catálogo seleccionado y la ventana abierta viven en la URL (?tipo=, ?nuevo=1, ?editar=<id>, ?eliminar=<id>): recargar o compartir el enlace
   // vuelve al mismo lugar. Lo que se escribe en el formulario se conserva como borrador de la pestaña.
   const url = useUrlParams();
   const { user: me } = useAuth();
+  const showCampuses = tabsFor('configuracion', me ? ROLE_CODES[me.role] : undefined, me?.permissions).some((tab) => tab.path === '/sedes');
   const kind: CatalogKind = CATALOGS.find((c) => c.kind === url.get('tipo'))?.kind ?? 'faculties';
-  const [actionError, setActionError] = useState('');
+  const mobileCatalog = useRef<HTMLDetailsElement>(null);
+  const [actionError, setActionError] = useState<{ kind: CatalogKind; message: string } | null>(null);
 
   const definition = CATALOGS.find((c) => c.kind === kind)!;
   const { entries, loading, error, refresh } = useCatalog(kind);
@@ -54,29 +61,24 @@ export function CatalogsPage() {
   const detailHeader = kind === 'schools' ? 'Facultad' : kind === 'periods' ? 'Vigencia' : definition.hasCode ? 'Código' : '';
 
   const toggleActive = async (entry: CatalogEntry) => {
-    setActionError('');
+    setActionError(null);
     try {
       await update.mutateAsync({ id: entry.id, input: { isActive: !entry.isActive } });
     } catch (err) {
-      setActionError(getApiErrorMessage(err));
+      setActionError({ kind, message: getApiErrorMessage(err) });
     }
   };
 
   const confirmDelete = async () => {
     if (!toDelete) return;
-    setActionError('');
+    setActionError(null);
     try {
       await remove.mutateAsync(toDelete.id);
     } catch (err) {
-      setActionError(getApiErrorMessage(err));
+      setActionError({ kind, message: getApiErrorMessage(err) });
     } finally {
       setToDelete(null);
     }
-  };
-
-  const switchTab = (next: CatalogKind) => {
-    url.set({ tipo: next === 'faculties' ? null : next, nuevo: null, editar: null, eliminar: null }, { replace: true });
-    setActionError('');
   };
 
   return (
@@ -92,24 +94,27 @@ export function CatalogsPage() {
         }
       />
 
-      <div role="tablist" className={styles.tabs}>
-        {CATALOGS.map((c) => (
-          <button
-            key={c.kind}
-            role="tab"
-            type="button"
-            aria-selected={kind === c.kind}
-            className={kind === c.kind ? styles.tabActive : styles.tab}
-            onClick={() => switchTab(c.kind)}
-          >
-            {c.label}
-          </button>
-        ))}
-      </div>
+      <details ref={mobileCatalog} className={styles.catalogSelector}>
+        <summary>
+          <span>Catálogo <strong>{definition.label}</strong></span>
+          <ChevronDownIcon size={16} />
+        </summary>
+        <CatalogNavigation showCampuses={showCampuses} onSelect={() => {
+          if (mobileCatalog.current) mobileCatalog.current.open = false;
+          setActionError(null);
+        }} />
+      </details>
 
-      {actionError && (
+      {kind === 'faculties' && (
+        <p className={styles.campusNote}>
+          Las sedes de cada facultad se muestran según las sedes asignadas a sus escuelas.
+          {showCampuses && <> <Link to="/sedes">Gestionar sedes por escuela</Link>.</>}
+        </p>
+      )}
+
+      {actionError?.kind === kind && (
         <p role="alert" className={styles.error}>
-          {actionError}
+          <CatalogErrorMessage kind={kind} message={actionError.message} />
         </p>
       )}
 

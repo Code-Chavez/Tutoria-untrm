@@ -99,7 +99,7 @@ export function MySessionsPage() {
     <div>
       <PageHeader
         title="Mis sesiones"
-        subtitle="Tus sesiones de tutoría programadas, con fecha, modalidad y lugar o enlace"
+        subtitle="Consulta cuándo es tu próxima cita, dónde te atenderán y qué sesiones ya tuviste."
         icon={<CalendarIcon size={24} />}
       />
 
@@ -121,7 +121,8 @@ export function MySessionsPage() {
         <EmptyState
           icon={<CalendarIcon size={26} />}
           title="Aún no tienes sesiones programadas"
-          description="Tu tutor programará las sesiones. Si necesitas una, usa «Solicitar tutoría»."
+          description="Cuando te programen una cita, verás aquí la fecha, la modalidad y el lugar o enlace."
+          action={<Link className={styles.requestLink} to="/solicitar-tutoria">Solicitar tutoría</Link>}
         />
       ) : (
         <>

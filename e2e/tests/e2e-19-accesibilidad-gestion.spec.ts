@@ -7,7 +7,7 @@ import { goToMenu, loginUi } from '../support/ui';
 // Misma regla que E2E-18: axe no debe encontrar infracciones serias o críticas ni de estructura (un <main>, regiones, títulos en
 // orden); las leves se anotan. Axe NO sustituye al lector de pantalla ni al teléfono real, que siguen pendientes.
 const SCREENS: { who: AccountKey; screens: string[] }[] = [
-  { who: 'coordinator', screens: ['Estudiantes', 'Solicitudes de tutoría', 'Pendientes', 'Pedir listas', 'Carga de estudiantes', 'Asignación por ciclo', 'Plan semestral', 'Horarios y asistencia', 'Indicadores', 'Resultados de evaluación', 'Sugerencias de estudiantes', 'Correos de las escuelas', 'Amonestaciones'] },
+  { who: 'coordinator', screens: ['Estudiantes', 'Solicitudes de tutoría', 'Pendientes', 'Pedir listas', 'Carga de estudiantes', 'Asignación por ciclo', 'Plan semestral', 'Horarios y asistencia', 'Indicadores', 'Resultados de evaluación', 'Sugerencias de estudiantes', 'Correos para pedidos de listas', 'Amonestaciones'] },
   { who: 'admin', screens: ['Carga de docentes', 'Docentes tutores', 'Cierre de periodo', 'Casos derivados', 'Seguimiento DBU', 'Informe consolidado', 'Sedes', 'Evaluación de tutoría', 'Catálogos', 'Usuarios y roles', 'Parámetros', 'Identidad visual', 'Bitácora de auditoría'] },
   { who: 'tutor', screens: ['Estudiantes', 'Sesiones', 'Casos derivados', 'Informe semestral'] },
   { who: 'psychology', screens: ['Casos derivados'] },
@@ -31,7 +31,8 @@ for (const { who, screens } of SCREENS) {
           if (r.status() >= 400) problems.push(`${r.status()} ${r.request().method()} ${r.url()}`);
         });
         await loginUi(page, accounts[who]);
-        await goToMenu(page, screen);
+        if (screen === 'Plan semestral') await page.goto('/plan-semestral');
+        else await goToMenu(page, screen);
         await expect(page.getByRole('heading', { level: 1 }).first()).toBeVisible();
         try {
           await expect(page.getByRole('progressbar')).toHaveCount(0, { timeout: 60_000 }); // ya cargó: se revisa la pantalla final

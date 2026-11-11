@@ -7,6 +7,7 @@ import { CloseIcon } from '@shared/components/icons';
 import { getApiErrorMessage } from '@shared/services/apiClient';
 import { useCatalog } from '../hooks/useCatalog';
 import { CatalogDefinition, CatalogEntry, CatalogInput } from '../services/catalogService';
+import { CatalogErrorMessage } from './CatalogErrorMessage';
 import styles from './CatalogEntryModal.module.css';
 
 interface CatalogEntryModalProps {
@@ -170,7 +171,7 @@ export function CatalogEntryModal({ definition, entry, draftOwnerId, draftScope,
 
           {error && (
             <p role="alert" className={styles.error}>
-              {error}
+              <CatalogErrorMessage kind={definition.kind} message={error} />
             </p>
           )}
 

@@ -1,3 +1,4 @@
+import { useId } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '@features/auth/hooks/useAuth';
 import { ChevronRightIcon } from '@shared/components/icons';
@@ -8,20 +9,22 @@ import styles from './QuickActions.module.css';
 // lleva su número de paso, para que se vea qué sigue después de qué.
 export function QuickActions() {
   const { user } = useAuth();
+  const id = useId();
+  const personal = user?.role === 'Tutorado' || user?.role === 'Docente Tutor';
   const groups = quickActionGroupsFor(user?.role, user?.permissions);
 
   if (groups.length === 0) return null;
 
   return (
     <div className={styles.groups}>
-      {groups.map((group) => (
-        <section key={group.title} aria-labelledby={`qa-${group.title}`} className={styles.group}>
-          <h2 id={`qa-${group.title}`} className={styles.groupTitle}>
+      {groups.map((group, groupIndex) => (
+        <section key={group.title} aria-labelledby={`${id}-${groupIndex}`} className={styles.group}>
+          <h3 id={`${id}-${groupIndex}`} className={styles.groupTitle}>
             {group.title}
-          </h2>
+          </h3>
           <div className={styles.grid}>
-            {group.actions.map((action) => (
-              <Link key={`${action.group}-${action.label}-${action.to}`} to={action.to} className={styles.action}>
+            {group.actions.map((action, index) => (
+              <Link key={`${action.group}-${action.label}-${action.to}`} to={action.to} className={styles.action} data-featured={personal && groupIndex === 0 && index === 0}>
                 <span className={styles.icon}>
                   <action.Icon size={20} />
                 </span>

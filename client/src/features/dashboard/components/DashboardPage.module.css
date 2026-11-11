@@ -91,3 +91,12 @@
 .contextImage { width: 170px; height: 96px; object-fit: cover; border-radius: 9px; flex-shrink: 0; }
 .hero > div { flex: 1 1 230px; }
 @media (max-width: 650px) { .contextImage { width: 80px; height: 80px; } .hero { padding: 12px; gap: 12px; } }
+
+.hero[data-personal='true'] {
+  padding: clamp(18px, 3vw, 32px);
+  background: linear-gradient(125deg, var(--blanco) 45%, var(--celeste));
+  border-left: 4px solid var(--azul-med);
+}
+.eyebrow { display: block; margin-bottom: 6px; color: var(--azul-med); font-weight: 700; font-size: var(--fs-sm); }
+.period { margin: var(--s2) 0 0; color: var(--azul); font-size: var(--fs-sm); font-weight: 600; }
+.kpis { grid-template-columns: repeat(auto-fit, minmax(min(100%, 200px), 1fr)); }
