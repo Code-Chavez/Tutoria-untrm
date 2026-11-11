@@ -9,7 +9,8 @@ const escapeHtml = (value: string) => value.replace(/&/g, '&amp;').replace(/</g,
 export interface DataRequestEmailInput {
   toEmail: string;
   requester: { firstName: string; lastName: string; email: string };
-  school: string;
+  school?: string;
+  schoolNames?: string[];
   faculty?: string;
   period: string;
   cycles: number[];
@@ -39,14 +40,17 @@ export const REQUESTED_TEACHER_COLUMNS = ['nombres', 'apellidos', 'correo instit
  */
 export function buildDataRequestEmail(input: DataRequestEmailInput): MailMessage {
   const who = `${input.requester.firstName} ${input.requester.lastName}`.trim();
-  const where = input.faculty ? `${input.school} (${input.faculty})` : input.school;
+  const where = input.schoolNames ? input.faculty : input.faculty ? `${input.school} (${input.faculty})` : input.school;
+  const requestedArea = input.schoolNames
+    ? `la facultad ${where}. Escuelas incluidas: ${input.schoolNames.join(', ')}`
+    : `la Escuela Profesional de ${where}`;
   const teachers = input.kind === 'DOCENTES';
   const cycles = input.cycles.length > 0 ? ` de los ciclos ${input.cycles.join(', ')}` : ' de todos los ciclos';
-  const subject = `Solicitud de lista de ${teachers ? 'docentes tutores' : 'estudiantes'} — ${input.school} — periodo ${input.period}`;
+  const subject = `Solicitud de lista de ${teachers ? 'docentes tutores' : 'estudiantes'} — ${input.school ?? input.faculty} — periodo ${input.period}`;
   const note = input.note?.trim();
 
   const intro = `Estimado(a):`;
-  const body1 = `La Dirección de Bienestar Universitario, a través del Sistema Integral de Tutoría (SIT), solicita la lista de ${teachers ? 'docentes que podrían ejercer la tutoría' : `estudiantes${cycles}`} de la Escuela Profesional de ${where} para el periodo académico ${input.period}.`;
+  const body1 = `La Dirección de Bienestar Universitario, a través del Sistema Integral de Tutoría (SIT), solicita la lista de ${teachers ? 'docentes que podrían ejercer la tutoría' : `estudiantes${cycles}`} de ${requestedArea} para el periodo académico ${input.period}.`;
   const body2 = `Datos requeridos (una fila por ${teachers ? 'docente' : 'estudiante'}): ${(teachers ? REQUESTED_TEACHER_COLUMNS : REQUESTED_COLUMNS).join(', ')}.`;
   const body3 = 'Formato: archivo Excel (.xlsx) con la plantilla adjunta; por favor mantenga los encabezados.';
   const body4 = `Solicitado por: ${who} (${input.requester.email}). Responda a este correo adjuntando el archivo.`;

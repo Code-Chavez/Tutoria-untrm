@@ -13,9 +13,9 @@ test.describe.configure({ mode: 'serial' });
 test('la coordinadora configura el correo, pide las listas y el correo sale con la plantilla adjunta', async ({ page }) => {
   await loginUi(page, accounts.coordinator);
 
-  // El correo se configura en su apartado (Configuración → Correos de las escuelas), no en «Pedir listas».
-  await goToMenu(page, 'Correos de las escuelas');
-  await expect(page.getByRole('heading', { name: 'Correos de las escuelas' }).last()).toBeVisible({ timeout: 45_000 });
+  // El correo se configura en su apartado (Configuración → Correos para pedidos de listas), no en «Pedir listas».
+  await goToMenu(page, 'Correos para pedidos de listas');
+  await expect(page.getByRole('heading', { name: 'Correos para pedidos de listas' }).last()).toBeVisible({ timeout: 45_000 });
   const edit = page.getByRole('button', { name: /Editar el correo de Ingeniería de Sistemas/ });
   const field = page.getByLabel('Correo de Ingeniería de Sistemas', { exact: true });
   // Con o sin correo configurado: se espera a que cargue la escuela y se llega al campo (con «Editar» si ya había correo).
@@ -27,7 +27,7 @@ test('la coordinadora configura el correo, pide las listas y el correo sale con 
 
   // «Pedir listas» solo muestra a qué correo saldrá el pedido (con «Editar correo» por si hubo un error).
   await goToMenu(page, 'Pedir listas');
-  await expect(page.getByRole('heading', { name: 'Pedir listas de estudiantes' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Pedir listas' })).toBeVisible();
   await expect(page.getByText(destination)).toBeVisible({ timeout: 45_000 });
   await expect(page.getByRole('link', { name: 'Editar correo' })).toBeVisible();
   await expect(page.getByLabel('Correo al que se piden las listas')).toHaveCount(0);

@@ -12,7 +12,10 @@ export interface DataRequest {
   id: string;
   createdAt: Date;
   periodId: string;
-  schoolId: string;
+  schoolId: string | null;
+  facultyId?: string | null;
+  facultyName?: string | null;
+  schoolNames?: string[];
   kind: DataRequestKind;
   toEmail: string;
   cycles: number[];
@@ -30,7 +33,7 @@ export interface DataRequest {
   attemptStartedAt: Date | null;
 }
 
-export type NewDataRequest = Pick<DataRequest, 'periodId' | 'schoolId' | 'kind' | 'toEmail' | 'cycles' | 'note' | 'requestedById' | 'operationId' | 'contentHash' | 'equivalenceKey' | 'resendOfId' | 'attemptStartedAt'>;
+export type NewDataRequest = Pick<DataRequest, 'periodId' | 'schoolId' | 'facultyId' | 'facultyName' | 'schoolNames' | 'kind' | 'toEmail' | 'cycles' | 'note' | 'requestedById' | 'operationId' | 'contentHash' | 'equivalenceKey' | 'resendOfId' | 'attemptStartedAt'>;
 
 /** Otro intento ya guardó ese identificador de operación para la misma persona (carrera entre dos peticiones iguales). */
 export class OperationIdTakenError extends Error {

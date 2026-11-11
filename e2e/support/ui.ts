@@ -40,7 +40,7 @@ const SECTION_OF: Record<string, string> = {
   'Cierre de periodo': 'Periodo académico',
   Certificados: 'Periodo académico',
   Pendientes: 'Periodo académico',
-  'Correos de las escuelas': 'Configuración',
+  'Correos para pedidos de listas': 'Configuración',
   Sedes: 'Configuración',
   'Evaluación de tutoría': 'Configuración',
   Catálogos: 'Configuración',

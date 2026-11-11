@@ -31,6 +31,7 @@ export function CatalogEntryModal({ definition, entry, draftOwnerId, draftScope,
   const initial = useMemo(
     () => ({
       name: entry?.name ?? '',
+      requestEmail: entry?.requestEmail ?? '',
       code: entry?.code ?? '',
       facultyId: entry?.facultyId ?? '',
       cycleCount: String(entry?.cycleCount ?? ''),
@@ -53,6 +54,10 @@ export function CatalogEntryModal({ definition, entry, draftOwnerId, draftScope,
     e.preventDefault();
     setError('');
     const input: CatalogInput = { name: form.name.trim() };
+    const requestEmail = form.requestEmail?.trim();
+    if (definition.kind === 'faculties' && requestEmail !== undefined && requestEmail !== initial.requestEmail) {
+      input.requestEmail = requestEmail || null;
+    }
     if (definition.hasCode && !editing) input.code = form.code.trim();
     if (definition.kind === 'schools') {
       input.facultyId = form.facultyId;
@@ -128,6 +133,14 @@ export function CatalogEntryModal({ definition, entry, draftOwnerId, draftScope,
             <label htmlFor="cat-name">Nombre</label>
             <input id="cat-name" value={form.name} onChange={(e) => set({ name: e.target.value })} required minLength={2} />
           </div>
+
+          {definition.kind === 'faculties' && (
+            <div className={styles.field}>
+              <label htmlFor="cat-request-email">Correo institucional para pedidos de listas</label>
+              <input id="cat-request-email" type="email" maxLength={254} value={form.requestEmail ?? initial.requestEmail} onChange={(event) => set({ requestEmail: event.target.value })} />
+              <small>Recibe un solo pedido por las escuelas activas de esta facultad.</small>
+            </div>
+          )}
 
           {definition.kind === 'schools' && (
             <>

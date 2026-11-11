@@ -5,12 +5,15 @@ import { MemoryRouter } from 'react-router-dom';
 import { QueryClientTestWrapper } from '@shared/test-utils/QueryClientTestWrapper';
 import { RequestEmailsPage } from './RequestEmailsPage';
 import { dataRequestService } from '../services/dataRequestService';
+import { catalogService, type CatalogEntry } from '@features/catalogos/services/catalogService';
 import { schoolService, type School } from '@features/tutorados/services/schoolService';
 
 let role = 'Coordinador';
 vi.mock('@features/auth/hooks/useAuth', () => ({ useAuth: () => ({ user: { id: 'coord-1', role } }) }));
 vi.mock('../services/dataRequestService', () => ({ dataRequestService: { list: vi.fn(), send: vi.fn(), setRequestEmail: vi.fn(), markReceived: vi.fn() } }));
 vi.mock('@features/tutorados/services/schoolService', () => ({ schoolService: { getSchools: vi.fn() } }));
+
+vi.mock('@features/catalogos/services/catalogService', () => ({ catalogService: { list: vi.fn(), update: vi.fn() } }));
 
 const requests = vi.mocked(dataRequestService);
 const school = (over: Partial<School> = {}): School => ({ id: 's1', name: 'Ingeniería de Sistemas', facultyId: 'f1', isActive: true, coordinatorId: 'coord-1', requestEmail: 'registros@untrm.edu.pe', ...over });
@@ -39,6 +42,27 @@ describe('RequestEmailsPage (configuración del correo de pedido de listas)', ()
     expect(screen.queryByText('Ajena')).not.toBeInTheDocument();
   });
 
+  it('la DBU puede configurar el correo de la facultad enlazada desde el pedido', async () => {
+    role = 'Administrador DBU';
+    const faculty: CatalogEntry = { id: 'f1', kind: 'faculties', name: 'Ingeniería', isActive: true, requestEmail: null, usage: 2, code: null, facultyId: null, startDate: null, endDate: null };
+    vi.mocked(catalogService.list).mockResolvedValue([faculty]);
+    vi.mocked(catalogService.update).mockResolvedValue({ ...faculty, requestEmail: 'facultad@untrm.edu.pe' });
+    renderPage('/correos-escuelas?tipo=facultades&facultad=f1');
+
+    expect(screen.getByRole('button', { name: 'Facultades' })).toHaveAttribute('aria-pressed', 'true');
+    await userEvent.type(await screen.findByLabelText('Correo de Ingeniería'), 'facultad@untrm.edu.pe');
+    await userEvent.click(screen.getByRole('button', { name: 'Guardar' }));
+    await waitFor(() => expect(catalogService.update).toHaveBeenCalledWith('faculties', 'f1', { requestEmail: 'facultad@untrm.edu.pe' }));
+    expect(await screen.findByRole('status')).toHaveTextContent('Correo de Ingeniería guardado');
+    expect(requests.setRequestEmail).not.toHaveBeenCalled();
+  });
+
+  it('la coordinación conserva el alcance de escuelas incluso con un enlace de facultad', async () => {
+    renderPage('/correos-escuelas?tipo=facultades&facultad=f1');
+    expect(await screen.findByText('Ingeniería de Sistemas')).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Facultades' })).not.toBeInTheDocument();
+    expect(catalogService.list).not.toHaveBeenCalled();
+  });
   it('la DBU ve todas las escuelas', async () => {
     role = 'Administrador DBU';
     renderPage();

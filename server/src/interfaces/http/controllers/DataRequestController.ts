@@ -17,7 +17,8 @@ import {
 import { SchoolNotFoundError, StudentAccessDeniedError } from '@application/use-cases/students/StudentErrors';
 
 const sendSchema = z.object({
-  schoolId: z.string().uuid('La escuela indicada no es válida'),
+  schoolId: z.string().uuid('La escuela indicada no es válida').optional(),
+  facultyId: z.string().uuid('La facultad indicada no es válida').optional(),
   cycles: z.array(z.coerce.number().int().min(1).max(14)).max(14).optional(),
   note: z.string().trim().max(500, 'Las observaciones no pueden pasar de 500 caracteres').optional(),
   kind: z.enum(['ESTUDIANTES', 'DOCENTES']).optional(),
@@ -25,7 +26,7 @@ const sendSchema = z.object({
   // Obligatorio: sin él no hay forma de reconocer una repetición. Se rechaza la petición, no se genera uno en el servidor.
   operationId: z.uuid({ error: (issue) => (issue.input === undefined ? 'Falta el identificador de la operación (operationId): el cliente debe enviarlo para poder reintentar sin duplicar el pedido' : 'El identificador de la operación no es válido') }),
   confirmDuplicateOf: z.string().uuid('El pedido a confirmar no es válido').optional(),
-});
+}).refine(({ schoolId, facultyId }) => Boolean(schoolId) !== Boolean(facultyId), 'Elige una escuela o una facultad');
 const emailSchema = z.object({ email: z.string().trim().max(254).nullable() });
 
 /**

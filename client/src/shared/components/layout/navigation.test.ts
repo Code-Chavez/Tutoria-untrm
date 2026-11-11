@@ -115,9 +115,9 @@ describe('navegación (UI-01, UI-04, UI-07)', () => {
 
       it('todo lo que se configura está en Configuración, y cada rol ve solo lo suyo', () => {
         expect(tabs('configuracion', 'Administrador DBU')).toEqual([
-          'Correos de las escuelas', 'Sedes', 'Evaluación de tutoría', 'Catálogos', 'Usuarios y roles', 'Roles y permisos', 'Parámetros', 'Identidad visual', 'Bitácora de auditoría',
+          'Correos para pedidos de listas', 'Sedes', 'Evaluación de tutoría', 'Catálogos', 'Usuarios y roles', 'Roles y permisos', 'Parámetros', 'Identidad visual', 'Bitácora de auditoría',
         ]);
-        expect(tabs('configuracion', 'Coordinador')).toEqual(['Correos de las escuelas']);
+        expect(tabs('configuracion', 'Coordinador')).toEqual(['Correos para pedidos de listas']);
         expect(tabs('configuracion', 'Vicerrectorado')).toEqual(['Sedes']);
         for (const role of ['Docente Tutor', 'Tutorado', 'Profesional de Servicio', 'Decano']) expect(tabs('configuracion', role), role).toEqual([]);
       });

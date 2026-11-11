@@ -192,6 +192,8 @@ model Faculty {
   isActive  Boolean  @default(true) @map("is_active")
   createdAt DateTime @default(now()) @map("created_at")
 
+  requestEmail String? @map("request_email")
+  dataRequests DataRequest[]
   schools School[]
   deans   User[]   @relation("FacultyDean")
 
@@ -994,8 +996,12 @@ model DataRequest {
 
   periodId String         @map("period_id")
   period   AcademicPeriod @relation(fields: [periodId], references: [id], onDelete: Cascade)
-  schoolId String         @map("school_id")
-  school   School         @relation(fields: [schoolId], references: [id])
+  schoolId String?        @map("school_id")
+  school   School?        @relation(fields: [schoolId], references: [id], onDelete: Restrict)
+  facultyId String?       @map("faculty_id")
+  faculty   Faculty?      @relation(fields: [facultyId], references: [id], onDelete: Restrict)
+  facultyName String?     @map("faculty_name")
+  schoolNames String[]    @default([]) @map("school_names")
 
   // Qué lista se pide: la de estudiantes o la de docentes tutores (solo la DBU pide esta).
   kind    String @default("ESTUDIANTES")

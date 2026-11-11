@@ -55,7 +55,7 @@ export const SECTIONS: Record<'periodo' | 'informes' | 'configuracion', Section>
     title: 'Configuración',
     path: '/configuracion',
     tabs: [
-      { label: 'Correos de las escuelas', path: '/correos-escuelas', roles: ['coord', 'dbu'], permissions: ROUTE_PERMISSIONS['/correos-escuelas'] },
+      { label: 'Correos para pedidos de listas', path: '/correos-escuelas', roles: ['coord', 'dbu'], permissions: ROUTE_PERMISSIONS['/correos-escuelas'] },
       { label: 'Sedes', path: '/sedes', roles: ['dbu', 'vice'], permissions: ROUTE_PERMISSIONS['/sedes'] },
       { label: 'Evaluación de tutoría', path: '/evaluacion/configuracion', roles: ['dbu'], permissions: ROUTE_PERMISSIONS['/evaluacion/configuracion'] },
       { label: 'Catálogos', path: '/catalogos', roles: ['dbu'], permissions: ROUTE_PERMISSIONS['/catalogos'] },

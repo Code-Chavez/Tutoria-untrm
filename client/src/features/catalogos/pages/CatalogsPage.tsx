@@ -54,11 +54,14 @@ export function CatalogsPage() {
   const { entries: faculties } = useCatalog('faculties');
 
   const detail = (entry: CatalogEntry) => {
+    if (entry.kind === 'faculties') {
+      return entry.campuses?.map((campus) => campus.isActive ? campus.name : `${campus.name} (inactiva)`).join(', ') || 'Sin sedes registradas';
+    }
     if (entry.kind === 'schools') return `${faculties.find((f) => f.id === entry.facultyId)?.name ?? '—'} · ${entry.cycleCount ?? 'Sin configurar'} ciclos`;
     if (entry.kind === 'periods') return `${date(entry.startDate)} – ${date(entry.endDate)}`;
     return entry.code ?? '—';
   };
-  const detailHeader = kind === 'schools' ? 'Facultad' : kind === 'periods' ? 'Vigencia' : definition.hasCode ? 'Código' : '';
+  const detailHeader = kind === 'faculties' ? 'Sedes' : kind === 'schools' ? 'Facultad' : kind === 'periods' ? 'Vigencia' : definition.hasCode ? 'Código' : '';
 
   const toggleActive = async (entry: CatalogEntry) => {
     setActionError(null);
