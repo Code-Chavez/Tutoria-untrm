@@ -1,5 +1,5 @@
 import { useState, type FormEvent } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import { useAuth } from '@features/auth/hooks/useAuth';
 import { getApiErrorMessage } from '@shared/services/apiClient';
 import { PageHeader, Button, DraftNotice, SelectField } from '@shared/components/ui';
@@ -75,6 +75,8 @@ function AppointmentNote({ appointment }: { appointment: NonNullable<TutoringReq
 
 export function MyTutoringRequestPage() {
   const queryClient = useQueryClient();
+  const [searchParams] = useSearchParams();
+  const historyOnly = searchParams.get('accion') === 'historial';
   const { user } = useAuth();
   // Sin periodo abierto la tutoría está en solo lectura: se ve el historial, no se puede solicitar.
   const { data: periodStatus } = usePeriodStatus();
@@ -136,12 +138,17 @@ export function MyTutoringRequestPage() {
   return (
     <div className={styles.page}>
       <PageHeader
-        title="Solicitar tutoría"
-        subtitle="Cuéntanos qué necesitas y se la haremos llegar a tu tutor o a la coordinación de tu escuela."
+        title={historyOnly ? 'Mis solicitudes' : 'Solicitar tutoría'}
+        subtitle={historyOnly
+          ? 'Revisa el estado de tus solicitudes, las respuestas y las citas asociadas.'
+          : 'Cuéntanos qué necesitas y se la haremos llegar a tu tutor o a la coordinación de tu escuela.'}
+        actions={<Link className={styles.studentLink} to={historyOnly ? '/solicitar-tutoria' : '/solicitar-tutoria?accion=historial'}>
+          {historyOnly ? 'Nueva solicitud' : 'Ver mis solicitudes'}
+        </Link>}
         icon={<SendIcon size={22} />}
       />
 
-      <div className={styles.panel}>
+      {!historyOnly && <div className={styles.panel}>
         <div className={styles.panelHead}>
           <h2>Nueva solicitud</h2>
         </div>
@@ -220,11 +227,11 @@ export function MyTutoringRequestPage() {
             </Button>
           </form>
         </div>
-      </div>
+      </div>}
 
-      <div className={styles.panel} style={{ marginTop: 18 }}>
+      <div className={styles.panel} style={{ marginTop: historyOnly ? 0 : 18 }}>
         <div className={styles.panelHead}>
-          <h2>Mis solicitudes</h2>
+          <h2>{historyOnly ? 'Historial de solicitudes' : 'Mis solicitudes'}</h2>
         </div>
         <div className={styles.panelBody}>
           {history.loading ? (

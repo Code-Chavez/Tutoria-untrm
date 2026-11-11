@@ -40,7 +40,7 @@ describe('navegación (UI-01, UI-04, UI-07)', () => {
   });
 
   it('las entradas de gestión no comparten icono', () => {
-    const labels = ['Periodo académico', 'Plan semestral', 'Informes', 'Amonestaciones', 'Configuración', 'Seguimiento DBU'];
+    const labels = ['Periodo académico', 'Informes', 'Amonestaciones', 'Configuración', 'Seguimiento DBU'];
     const icons = labels.map((l) => ALL_NAV_ITEMS.find((i) => i.label === l)?.Icon);
     expect(icons.every(Boolean)).toBe(true);
     expect(new Set(icons).size).toBe(labels.length);
@@ -82,11 +82,11 @@ describe('navegación (UI-01, UI-04, UI-07)', () => {
       expect(labelsFor('Administrador DBU')).toEqual([
         'Panel de inicio',
         'Estudiantes', 'Solicitudes de tutoría', 'Casos derivados', 'Seguimiento DBU',
-        'Periodo académico', 'Plan semestral', 'Informes', 'Amonestaciones',
+        'Periodo académico', 'Informes', 'Amonestaciones',
         'Configuración',
       ]);
       expect(labelsFor('Administrador DBU').length).toBeLessThanOrEqual(10);
-      expect(labelsFor('Coordinador')).toEqual(['Panel de inicio', 'Estudiantes', 'Solicitudes de tutoría', 'Periodo académico', 'Plan semestral', 'Informes', 'Amonestaciones', 'Configuración']);
+      expect(labelsFor('Coordinador')).toEqual(['Panel de inicio', 'Estudiantes', 'Solicitudes de tutoría', 'Periodo académico', 'Informes', 'Amonestaciones', 'Configuración']);
       expect(labelsFor('Vicerrectorado')).toEqual(['Panel de inicio', 'Informes', 'Configuración']);
     });
 

@@ -206,7 +206,7 @@ export class GetHomePanelUseCase {
           value: open.length === 0 ? 'Ninguna pendiente' : plural(open.length, 'esperando respuesta', 'esperando respuesta'),
           hint: open.length === 0 ? (recipientText ? `Si necesitas ayuda, tu solicitud la recibirá ${recipientText}` : 'Si necesitas ayuda, pide tutoría') : `Te avisaremos en cuanto ${open[0].routedToName} responda`,
           tone: open.length > 0 ? 'warning' : 'neutral',
-          link: '/solicitar-tutoria',
+          link: '/solicitar-tutoria?accion=historial',
         }
       : null;
 

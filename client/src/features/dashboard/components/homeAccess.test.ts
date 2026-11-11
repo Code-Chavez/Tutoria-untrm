@@ -31,8 +31,8 @@ describe('accesos del panel de inicio para un rol personalizado', () => {
   const labels = (permissions: string[]) => quickActionsFor('Revisor', permissions).map((a) => a.label);
 
   it('muestra solo los accesos que sus permisos abren, sin repetir el mismo destino', () => {
-    expect(labels(['students:read', 'referrals:read', 'students:import'])).toEqual(['Ver estudiantes', 'Casos derivados', 'Pedir listas', 'Carga de estudiantes']);
-    expect(labels(['students:write'])).toEqual(['Registrar estudiante', 'Asignación por ciclo']);
+    expect(labels(['students:read', 'referrals:read', 'students:import'])).toEqual(['Ver estudiantes', 'Casos derivados', 'Pedir listas', 'Carga de estudiantes', 'Correos para pedidos de listas']);
+    expect(labels(['students:write'])).toEqual(['Asignación por ciclo', 'Pendientes']);
   });
 
   it('no ofrece accesos exclusivos de un rol base (estudiante, seguimiento DBU) ni sin permisos', () => {

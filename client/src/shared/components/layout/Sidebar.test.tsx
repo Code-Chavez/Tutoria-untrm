@@ -101,14 +101,14 @@ describe('Sidebar (A15): cada acceso habilitado conduce a una tarea', () => {
 
       const gestion = screen.getByRole('button', { name: /Gestión/ });
       expect(gestion).toHaveAttribute('aria-expanded', 'true');
-      expect(screen.getByRole('link', { name: 'Plan semestral' })).toBeInTheDocument();
+      expect(screen.getByRole('link', { name: 'Informes' })).toBeInTheDocument();
 
       await userEvent.click(gestion);
       expect(screen.getByRole('button', { name: /Gestión/ })).toHaveAttribute('aria-expanded', 'false');
-      expect(screen.queryByRole('link', { name: 'Plan semestral' })).not.toBeInTheDocument();
+      expect(screen.queryByRole('link', { name: 'Informes' })).not.toBeInTheDocument();
 
       await userEvent.click(screen.getByRole('button', { name: /Gestión/ }));
-      expect(screen.getByRole('link', { name: 'Plan semestral' })).toBeInTheDocument();
+      expect(screen.getByRole('link', { name: 'Informes' })).toBeInTheDocument();
     });
 
     it('«Inicio» no se pliega (es una sola entrada)', () => {

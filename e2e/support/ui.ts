@@ -70,6 +70,9 @@ export async function goToMenu(page: Page, name: string): Promise<void> {
     // Con una sola pestaña no hay barra: esa pantalla es la que ya se abrió al entrar a la sección.
     if (tabs.length === 1) return;
     link = page.getByRole('navigation', { name: `Secciones de ${sectionName}` }).getByRole('link', { name, exact: true });
+    if (name === 'Sedes' && (await link.count()) === 0) {
+      await page.getByRole('button', { name: 'Categorías de Catálogos', expanded: false }).click();
+    }
   }
   await link.click();
 }

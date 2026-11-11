@@ -60,3 +60,16 @@
 .where a {
   text-decoration: underline;
 }
+
+.requestLink {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  padding: 8px 14px;
+  border-radius: 8px;
+  background: var(--celeste);
+  color: var(--azul);
+  font-weight: 600;
+}
+.requestLink:hover { text-decoration: underline; }
+.requestLink:focus-visible { outline: 2px solid var(--azul-med); outline-offset: 3px; }

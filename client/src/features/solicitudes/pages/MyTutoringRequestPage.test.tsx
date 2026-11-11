@@ -142,9 +142,11 @@ describe('MyTutoringRequestPage', () => {
 
       render(
         <AuthContext.Provider value={{ ...auth, user: { ...auth.user!, id: 'otra-persona' } }}>
-          <QueryClientTestWrapper>
-            <MyTutoringRequestPage />
-          </QueryClientTestWrapper>
+          <MemoryRouter>
+            <QueryClientTestWrapper>
+              <MyTutoringRequestPage />
+            </QueryClientTestWrapper>
+          </MemoryRouter>
         </AuthContext.Provider>,
       );
       expect(screen.getByLabelText(/descripción del motivo/i)).toHaveValue('');

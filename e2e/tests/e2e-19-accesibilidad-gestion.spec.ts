@@ -31,7 +31,8 @@ for (const { who, screens } of SCREENS) {
           if (r.status() >= 400) problems.push(`${r.status()} ${r.request().method()} ${r.url()}`);
         });
         await loginUi(page, accounts[who]);
-        await goToMenu(page, screen);
+        if (screen === 'Plan semestral') await page.goto('/plan-semestral');
+        else await goToMenu(page, screen);
         await expect(page.getByRole('heading', { level: 1 }).first()).toBeVisible();
         try {
           await expect(page.getByRole('progressbar')).toHaveCount(0, { timeout: 60_000 }); // ya cargó: se revisa la pantalla final

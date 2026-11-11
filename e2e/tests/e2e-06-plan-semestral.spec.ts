@@ -1,7 +1,7 @@
 import { expect, Page, test } from '@playwright/test';
 import { accounts } from '../support/accounts';
 import { api, apiLogin } from '../support/api';
-import { goToMenu, loginUi } from '../support/ui';
+import { loginUi } from '../support/ui';
 
 // E2E-06 (HU-41, HU-42): la coordinadora deja vigente el plan de su escuela con una resolución y, al editarlo,
 // se crea una nueva revisión que conserva la versión aprobada. Termina siempre con el plan vigente.
@@ -51,7 +51,7 @@ test.beforeAll(async () => {
 
 test('la coordinadora deja vigente el plan con la resolución', async ({ page }) => {
   await loginUi(page, accounts.coordinator);
-  await goToMenu(page, 'Plan semestral');
+  await page.goto('/plan-semestral');
   await expect(page.getByRole('heading', { level: 2, name: 'Resolución de aprobación' })).toBeVisible();
 
   if (!(await page.getByText('Plan vigente').isVisible())) await attachResolution(page);
@@ -61,7 +61,7 @@ test('la coordinadora deja vigente el plan con la resolución', async ({ page })
 
 test('al editar el plan aprobado se crea una revisión y se conserva la versión aprobada', async ({ page }) => {
   await loginUi(page, accounts.coordinator);
-  await goToMenu(page, 'Plan semestral');
+  await page.goto('/plan-semestral');
   await expect(page.getByText('Plan vigente')).toBeVisible();
 
   const denomination = `Plan de tutoría E2E ${Date.now().toString(36)}`;

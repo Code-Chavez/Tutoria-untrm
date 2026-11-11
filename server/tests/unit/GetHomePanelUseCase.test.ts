@@ -271,7 +271,7 @@ describe('GetHomePanelUseCase (HU-49)', () => {
       const panel = await run();
 
       expect(kpi(panel, 'my-tutor')).toMatchObject({ value: 'Sin asignar', hint: 'Mientras tanto, tus solicitudes las recibe la coordinación de tu escuela (Rosa Mendoza)' });
-      expect(kpi(panel, 'my-requests')).toMatchObject({ value: 'Ninguna pendiente', tone: 'neutral', hint: 'Si necesitas ayuda, tu solicitud la recibirá la coordinación de tu escuela (Rosa Mendoza)', link: '/solicitar-tutoria' });
+      expect(kpi(panel, 'my-requests')).toMatchObject({ value: 'Ninguna pendiente', tone: 'neutral', hint: 'Si necesitas ayuda, tu solicitud la recibirá la coordinación de tu escuela (Rosa Mendoza)', link: '/solicitar-tutoria?accion=historial' });
     });
 
     it('con una solicitud esperando: la cuenta (las atendidas no) y dice quién debe responder', async () => {

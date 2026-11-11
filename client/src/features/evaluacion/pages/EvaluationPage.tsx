@@ -93,7 +93,7 @@ export function EvaluationPage() {
       <div className={styles.page}>
         <PageHeader
           title="Evaluar tutoría"
-          subtitle="Cuestionario de evaluación de la función tutorial (Anexo N°7)"
+          subtitle="Comparte cómo fue tu experiencia de tutoría"
           icon={<StarIcon size={22} />}
         />
         <EmptyState
@@ -114,7 +114,7 @@ export function EvaluationPage() {
       <div className={styles.page}>
         <PageHeader
           title="Evaluar tutoría"
-          subtitle="Cuestionario de evaluación de la función tutorial (Anexo N°7)"
+          subtitle="Comparte cómo fue tu experiencia de tutoría"
           icon={<StarIcon size={22} />}
         />
         <EmptyState
@@ -130,7 +130,7 @@ export function EvaluationPage() {
     <div className={styles.page}>
       <PageHeader
         title="Evaluar tutoría"
-        subtitle={`Cuestionario de evaluación de la función tutorial (Anexo N°7) · Periodo ${status.periodName}`}
+        subtitle={`Comparte cómo fue tu experiencia de tutoría · Periodo ${status.periodName}`}
         icon={<StarIcon size={22} />}
       />
 
