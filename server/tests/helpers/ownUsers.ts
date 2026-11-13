@@ -10,7 +10,7 @@ export const DEMO_PASSWORD = 'Demo2026!';
 
 export async function ownUser(
   prisma: PrismaClient,
-  data: { email: string; roleName: 'Coordinador' | 'Docente Tutor'; firstName: string; lastName: string; schoolId?: string },
+  data: { email: string; roleName: 'Coordinador' | 'Docente Tutor' | 'Tutorado'; firstName: string; lastName: string; schoolId?: string },
 ): Promise<string> {
   const role = await prisma.role.findFirstOrThrow({ where: { name: data.roleName } });
   const hash = (await prisma.user.findFirstOrThrow({ where: { email: 'elena.ramirez@untrm.edu.pe' } })).passwordHash;

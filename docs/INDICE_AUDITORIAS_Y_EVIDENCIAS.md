@@ -11,6 +11,7 @@ Estos documentos conservan el estado observado en su fecha y en el commit indica
 - [Auditoría previa a release](AUDITORIA_PRE_RELEASE_2026-10-12.md).
 - [Lista de pendientes y fechas](LISTA_PENDIENTES_FECHAS_2026-10-13.md): planificación referencial, no fechas efectivamente cumplidas.
 - [Plan de beta](PLAN_BETA_UNTRM_2026-10-15.md).
+- [Informe de seguridad del 11/10](INFORME_SEGURIDAD_2026-10-11.md) y [repaso del 12/11](INFORME_SEGURIDAD_TT101_REVISION_2026-11-12.md) (TT-101).
 - [Verificación de rendimiento](VERIFICACION_RENDIMIENTO_BETA_2026-10-13.md).
 - [Prompt de auditoría de calidad y uso](PROMPT_CLAUDE_AUDITORIA_CALIDAD_Y_USABILIDAD.md): material reutilizable, no instrucciones de ejecución automática.
 

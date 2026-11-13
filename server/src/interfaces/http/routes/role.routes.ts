@@ -14,7 +14,8 @@ const roleController = new RoleController(
 
 router.use('/roles', authenticate(container.services.tokenService));
 router.get('/roles/permissions', authorize(['admin:system']), roleController.listPermissions);
-router.get('/roles', roleController.list);
+// La lista trae todos los roles con sus permisos y cuántas cuentas tiene cada uno: la ven quienes administran usuarios, no cualquier cuenta (TT-101).
+router.get('/roles', authorize(['users:read']), roleController.list);
 // Crear roles es una operación de administración del sistema (solo DBU).
 router.post('/roles', authorize(['admin:system']), roleController.create);
 // Editar permisos y activar/desactivar: solo administración del sistema; los roles base están protegidos.
