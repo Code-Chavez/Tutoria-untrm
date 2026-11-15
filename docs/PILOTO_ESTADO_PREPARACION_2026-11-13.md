@@ -63,8 +63,8 @@ Se ejecutaron las tareas T1 a T9 de la guía (sección 6.1, docente tutor) con P
 | # | Hallazgo | Impacto | Estado |
 |---|---|---|---|
 | H5 | En «Sesión grupal» no se podía marcar a los estudiantes que ya tienen tutor (aviso «Ya tiene tutor: para cambiarlo usa «Reasignar»»), es decir, a los propios tutorados de quien agenda; el filtro «Solo sin asignar» tampoco hacía nada. | **Alto** para T4: la tutora no podía formar un grupo con sus tutorados. | Corregido en #296 (issue #295). |
-| H6 | En la ficha de derivación hay que marcar al menos un aspecto observado; sin eso el diálogo no se cierra. En el ensayo se detectó porque el guion no lo marcó; no se verificó dónde se muestra el aviso. | Posible confusión de quien no marca ninguno. | Revisar en las sesiones reales si el aviso se ve sin desplazarse. |
-| H7 | En «Solicitar tutoría» de la estudiante, la lista no se actualizó sola cuando la tutora respondió: mostraba «Pendiente» hasta recargar la página. | Bajo a medio: la estudiante ve el estado desfasado si deja la pantalla abierta. | Sin corregir; evaluar. |
+| H6 | En la ficha de derivación hay que marcar al menos un aspecto observado; sin eso el diálogo no se cierra. En el ensayo se detectó porque el guion no lo marcó; no se verificó dónde se muestra el aviso. | Posible confusión de quien no marca ninguno. | **Corregido en #302** (issue #301): el aviso va en el pie del diálogo, junto al botón, y se anuncia como alerta. Verificado en pantalla el 15/11. |
+| H7 | En «Solicitar tutoría» de la estudiante, la lista no se actualizó sola cuando la tutora respondió: mostraba «Pendiente» hasta recargar la página. | Bajo a medio: la estudiante ve el estado desfasado si deja la pantalla abierta. | **Corregido en #302** (issue #301): la lista se revisa cada 30 s y al volver a la pestaña. Verificado en pantalla el 15/11: la respuesta apareció sin recargar a los 23 s. |
 | H8 | La agenda no admite dos sesiones que se solapen y lo dice con claridad («El tutor ya tiene una sesión programada que se solapa con este horario»). | Ninguno; es un buen mensaje. | — |
 
 Evidencia (capturas y PDF) en `C:\tmp\ensayo\evidencia` del equipo de ensayo; los guiones están en el worktree `C:\tmp\wt-ensayo\e2e\tests-ensayo`.
@@ -92,3 +92,7 @@ Se ejecutaron con Playwright y Chrome, contra `sit-ensayo` (código de develop `
 | H13 | Al desactivar una cuenta se pide confirmación («¿Confirmas desactivar a …?»); la cuenta queda inactiva de inmediato. | Ninguno; es un buen comportamiento. | — |
 
 Evidencia (capturas y PDF) en `C:\tmp\ensayo\evidencia` del equipo de ensayo; los guiones están en el worktree `C:\tmp\wt-ensayo\e2e\tests-ensayo` (`piloto-r1-dbu`, `piloto-r2-coordinador`, `piloto-r3-servicio-estudiante-vice`). Al terminar, el entorno conserva las cuentas, solicitudes, casos, plan y respuesta de evaluación creados; se puede volver al punto de partida con el respaldo indicado en el README del entorno.
+
+## Verificación de H6 y H7 (15/11/2026)
+
+Tras fusionar #302 se reconstruyó `sit-ensayo` con develop `795a50b` y se repitieron ambos casos con Playwright y Chrome: (H6) con la ventana a 1280×720 y sin marcar ningún aspecto, el aviso queda dentro de la ventana visible, encima de «Derivar caso», y el siguiente aviso (motivo) aparece en el mismo lugar; (H7) la estudiante dejó abierta «Solicitar tutoría», la tutora respondió desde otra sesión y la respuesta apareció sola a los 23 s, sin recargar. Capturas en `C:	mp\ensayo\evidencia` (`H6-verificado-*`, `H7-verificado-*`).
