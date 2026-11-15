@@ -231,9 +231,14 @@ export const ReferralFormModal: React.FC<ReferralFormModalProps> = ({
             La ficha es confidencial desde su creación (Anexo N° 6). Al registrarla se genera una
             constancia descargable.
           </div>
-
-          {(error || serverError) && <span className={styles.error}>{error || serverError}</span>}
         </div>
+
+        {/* El aviso va en el pie, junto al botón: dentro de la zona con scroll quedaba fuera de la vista. */}
+        {(error || serverError) && (
+          <p className={styles.footerError} role="alert">
+            {error || serverError}
+          </p>
+        )}
 
         <div className={styles.actions}>
           <Button variant="secondary" onClick={onCancel}>
