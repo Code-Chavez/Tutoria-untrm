@@ -177,6 +177,14 @@
   color: var(--peligro);
 }
 
+.footerError {
+  flex-shrink: 0;
+  margin: 0;
+  padding: var(--s3) var(--s5) 0;
+  font-size: var(--fs-sm);
+  color: var(--peligro);
+}
+
 .actions {
   display: flex;
   justify-content: flex-end;

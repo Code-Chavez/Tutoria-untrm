@@ -42,6 +42,10 @@ describe('ReferralFormModal', () => {
     await user.click(screen.getByRole('button', { name: /derivar caso/i }));
 
     expect(await screen.findByText(/marca al menos un aspecto/i)).toBeInTheDocument();
+    // El aviso se anuncia como alerta y está en el pie del diálogo, junto al botón (no dentro de la zona con scroll)
+    const alert = screen.getByRole('alert');
+    expect(alert).toHaveTextContent(/marca al menos un aspecto/i);
+    expect(alert.closest('[class*="body"]')).toBeNull();
     expect(onSubmit).not.toHaveBeenCalled();
   });
 
