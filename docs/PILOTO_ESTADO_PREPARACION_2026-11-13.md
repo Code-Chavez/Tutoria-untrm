@@ -70,3 +70,25 @@ Se ejecutaron las tareas T1 a T9 de la guía (sección 6.1, docente tutor) con P
 Evidencia (capturas y PDF) en `C:\tmp\ensayo\evidencia` del equipo de ensayo; los guiones están en el worktree `C:\tmp\wt-ensayo\e2e\tests-ensayo`.
 
 Nota: el cliente del entorno de ensayo corre ahora con la corrección de H5 (develop más #296). Si #296 no se fusiona, el ensayo de T4 sigue sin poder completarse.
+
+## Ensayo con escritura de los demás roles (15/11/2026)
+
+Se ejecutaron con Playwright y Chrome, contra `sit-ensayo` (código de develop `bbfc664`, que incluye #296), las tareas D1 a D6 (DBU), C1 a C5 (coordinador), S1 a S4 (profesional de servicio), E1 a E4 (estudiante) y V1 a V2 (Vicerrectorado) de la guía (sección 6), con datos ficticios. En total 22 tareas; todas se pudieron completar, algunas con las salvedades de la tabla de hallazgos.
+
+| Rol | Tareas | Resultado |
+|---|---|---|
+| DBU | D1 cuenta de psicóloga con servicio; D2 habilitar la evaluación; D3 seguimiento; D4 bitácora; D5 duración de sesión a 40 min (se restituyó); D6 desactivar cuenta | Completas |
+| Coordinador | C1 asignar ciclos; C2 reasignar con motivo; C3 resolución del plan; C4 nueva revisión del plan aprobado; C5 indicadores y PDF | Completas (ver H9 y H10) |
+| Profesional de servicio | S1 abrir el caso desde el aviso; S2 recibir e iniciar la atención; S3 cerrar con observaciones; S4 constancia en PDF | Completas |
+| Estudiante | E1 pedir apoyo; E2 ver la próxima sesión; E3 ver la respuesta; E4 evaluar a su tutora | Completas |
+| Vicerrectorado | V1 consolidado y PDF; V2 comparar semestres | V1 completa; V2 solo se vio el periodo vigente (ver H12) |
+
+| # | Hallazgo | Impacto | Estado |
+|---|---|---|---|
+| H9 | Un docente atiende un solo ciclo. Con dos docentes en la escuela, el tercer ciclo abre el diálogo «Registrar excepción» y pide un motivo. Es la regla del sistema, no un defecto. | **Medio** para preparar el piloto: la escuela necesita tantos docentes como ciclos con estudiantes, o la coordinación tendrá que registrar excepciones. | Informar al coordinador antes de la sesión; llevar suficientes docentes en el escenario. |
+| H10 | «Plan semestral» no está en el menú lateral: se abre desde la tarjeta del panel de inicio. El formulario tiene decenas de campos obligatorios y valida al final: en el ensayo, con el plan vacío, el aviso («Indique al menos un objetivo específico») aparecía al pie, lejos de los campos vacíos. Por eso C3 cargó el plan por API y solo ensayó por pantalla la resolución. | **Medio**: C3 puede tomar mucho más tiempo del esperado o no completarse. | Sin corregir. Dar a la coordinadora el plan ya redactado o ensayar el formulario completo en una sesión aparte; evaluar mostrar el error junto al campo. |
+| H11 | La guía llama «Profesional de Servicio» al rol; la pantalla dice «Profesional de servicio» (y «Estudiante» para el rol de los tutorados). | Ninguno. | Alinear la redacción de la guía. |
+| H12 | El entorno de ensayo solo tiene el periodo 2026-II, así que la comparación con un semestre cerrado (V2) no se pudo ensayar. | Bajo. | Cerrar un periodo de prueba en el ensayo o ensayar V2 en el entorno de desarrollo (que tiene 2027-I cerrado). |
+| H13 | Al desactivar una cuenta se pide confirmación («¿Confirmas desactivar a …?»); la cuenta queda inactiva de inmediato. | Ninguno; es un buen comportamiento. | — |
+
+Evidencia (capturas y PDF) en `C:\tmp\ensayo\evidencia` del equipo de ensayo; los guiones están en el worktree `C:\tmp\wt-ensayo\e2e\tests-ensayo` (`piloto-r1-dbu`, `piloto-r2-coordinador`, `piloto-r3-servicio-estudiante-vice`). Al terminar, el entorno conserva las cuentas, solicitudes, casos, plan y respuesta de evaluación creados; se puede volver al punto de partida con el respaldo indicado en el README del entorno.
