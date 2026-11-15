@@ -280,6 +280,7 @@ export const GroupSessionFormModal: React.FC<GroupSessionFormModalProps> = ({
                 onFilterChange={setFilters}
                 onToggle={toggle}
                 onToggleAllVisible={toggleAllVisible}
+                allowAssigned
               />
             </div>
           </div>
