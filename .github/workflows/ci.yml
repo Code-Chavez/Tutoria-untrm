@@ -307,7 +307,7 @@ jobs:
   # actualizan, para que un fallo de este job sea del producto y no de una prueba desactualizada.
   e2e-playwright:
     name: E2E — Playwright (Chrome)
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 25
 
     services:
