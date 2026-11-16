@@ -2,7 +2,7 @@
 
 Tercera beta de pruebas controladas en el servidor de la UNTRM, con participantes autorizados y **datos ficticios**. Es la versión que se prueba en TT-104 y se somete a la aprobación del Product Owner; sigue sin ser la estable `v1.0.0` ni autoriza usar datos sensibles reales. Las limitaciones de `RELEASE_v1.0.0-beta.1.md` y `RELEASE_v1.0.0-beta.2.md` que no se mencionan abajo siguen vigentes.
 
-Base de comparación: `v1.0.0-beta.2` (`main`, 05/11/2026). Esta candidata reúne los PR #223 a #303 de `develop` (237 archivos cambiados).
+Base de comparación: `v1.0.0-beta.2` (`main`, 05/11/2026). Esta candidata reúne los PR #223 a #305 de `develop` (244 archivos cambiados).
 
 ## Qué incluye respecto a v1.0.0-beta.2
 
@@ -16,7 +16,7 @@ Base de comparación: `v1.0.0-beta.2` (`main`, 05/11/2026). Esta candidata reún
 | Sesión y acceso | Al caducar la sesión, la misma persona vuelve a la vista anterior al entrar de nuevo (#276); la ruta espera los permisos del servidor antes de negarse con la sesión guardada (#226); listar roles exige `users:read`, con la revisión de seguridad de TT-101 (#292). |
 | Correcciones del ensayo del piloto | La tutora elige estudiantes que ya tienen tutor en la sesión grupal (#296); el aviso de la ficha de derivación queda en el pie y la estudiante ve la respuesta de su tutora sin recargar (sondeo cada 30 s) (#302). |
 | Accesibilidad y URL | Nombres accesibles que contienen su texto visible en pestañas y asignación por ciclo (#247); `useUrlParams` conserva el cambio previo cuando un render antiguo se confirma tarde (#257); etiqueta de cierre de periodo (#264); esquema de actualización de catálogos (#280); respaldo de ids de sede (#278). |
-| Pruebas y CI | Restablecer clave con tope configurable fuera de producción (#246); E2E en el CI (#227), suites E2E aisladas y al día (#249, #250, #258); ejecución manual y programada en Firefox y WebKit, fijada a `ubuntu-24.04` (#251, #299); pruebas del cliente con tiempos de espera propios (#260, #290). |
+| Pruebas y CI | Pruebas del filtro de estudiantes por periodo (#305); restablecer clave con tope configurable fuera de producción (#246); E2E en el CI (#227), suites E2E aisladas y al día (#249, #250, #258); ejecución manual y programada en Firefox y WebKit, fijada a `ubuntu-24.04` (#251, #299); pruebas del cliente con tiempos de espera propios (#260, #290). |
 | Documentación | Diseño de certificación (#224, #252), flujo de issues con Playwright (#238), estado del piloto y ensayo con todos los roles (#294, #297, #300, #303). |
 
 ## Requisitos de despliegue (léalos antes de instalar)
