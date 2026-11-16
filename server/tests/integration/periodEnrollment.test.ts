@@ -3,7 +3,7 @@ import http from 'http';
 import ExcelJS from 'exceljs';
 import app from '../../src/app';
 import { prisma } from '../../src/infrastructure/database/prisma';
-import { currentPeriodId } from '../helpers/currentPeriod';
+import { TEST_PERIOD_CREATED_AT, currentPeriodId } from '../helpers/currentPeriod';
 import { DEMO_PASSWORD, ownUser, removeOwnUserTraces } from '../helpers/ownUsers';
 
 /**
@@ -249,6 +249,62 @@ describe('matrícula por periodo y pedido de listas (fase 2)', () => {
     expect((await call('POST', '/api/data-requests', 'sistemas', { schoolId, kind: 'DOCENTES', operationId: randomUUID() })).status).toBe(403);
     const list = ((await (await call('GET', '/api/data-requests', 'admin')).json()) as { requests: { id: string; kind: string }[] }).requests;
     expect(list.find((r) => r.id === createdTeacherRequestId)?.kind).toBe('DOCENTES');
+  });
+
+  it('la lista de estudiantes se filtra por periodo y trae el ciclo que cursaban en él', async () => {
+    if (!dbUp) return;
+    // Un periodo propio y antiguo (no desplaza al vigente) en el que el estudiante que continúa cursaba el ciclo 2; hoy está en el 4.
+    const past = await prisma.academicPeriod.create({
+      data: { name: `Periodo de prueba ${stamp}`, startDate: new Date('2000-01-01'), endDate: new Date('2000-06-30'), isActive: false, createdAt: TEST_PERIOD_CREATED_AT },
+    });
+    try {
+      const old = await prisma.student.findUniqueOrThrow({ where: { studentCode: OLD_CODE } });
+      await prisma.periodEnrollment.create({ data: { periodId: past.id, studentId: old.id, schoolId, cycle: 2 } });
+      type Row = { studentCode: string; cycle: number; periodCycle?: number };
+      const list = async (query: string) => ((await (await call('GET', `/api/students${query}`, 'admin')).json()) as { students: Row[] }).students;
+
+      const inPast = await list(`?periodId=${past.id}`);
+      expect(inPast.map((s) => s.studentCode)).toEqual([OLD_CODE]);
+      expect(inPast[0]).toMatchObject({ cycle: 4, periodCycle: 2 });
+
+      const inCurrent = await list(`?periodId=${periodId}`);
+      expect(inCurrent.map((s) => s.studentCode)).toEqual(expect.arrayContaining([NEW_CODE, OLD_CODE]));
+      expect(inCurrent.find((s) => s.studentCode === OLD_CODE)).toMatchObject({ periodCycle: 4 });
+
+      // El ciclo filtra por el de la matrícula de ese periodo, no por el actual del estudiante.
+      expect((await list(`?periodId=${past.id}&cycle=2`)).map((s) => s.studentCode)).toEqual([OLD_CODE]);
+      expect(await list(`?periodId=${past.id}&cycle=4`)).toEqual([]);
+
+      // Sin periodo nada cambia: sin periodCycle y con el ciclo actual.
+      const all = await list('');
+      expect(all.find((s) => s.studentCode === OLD_CODE)).toMatchObject({ cycle: 4 });
+      expect(all.find((s) => s.studentCode === OLD_CODE)).not.toHaveProperty('periodCycle');
+    } finally {
+      await prisma.academicPeriod.delete({ where: { id: past.id } }); // arrastra su matrícula
+    }
+  });
+
+  it('un periodo mal escrito se rechaza con 400 y un periodo sin matrícula devuelve la lista vacía', async () => {
+    if (!dbUp) return;
+    const bad = await call('GET', '/api/students?periodId=no-es-un-uuid', 'admin');
+    expect(bad.status).toBe(400);
+    expect(((await bad.json()) as { error: string }).error).toBe('El periodo indicado no es válido');
+
+    const empty = await call('GET', `/api/students?periodId=${randomUUID()}`, 'admin');
+    expect(empty.status).toBe(200);
+    expect(((await empty.json()) as { students: unknown[] }).students).toEqual([]);
+  });
+
+  it('las opciones de periodo las lee quien puede leer estudiantes, solo con id, nombre y vigencia', async () => {
+    if (!dbUp) return;
+    const res = await call('GET', '/api/periods/options', 'admin');
+    expect(res.status).toBe(200);
+    const { periods } = (await res.json()) as { periods: Record<string, unknown>[] };
+    expect(periods.length).toBeGreaterThan(0);
+    for (const period of periods) expect(Object.keys(period).sort()).toEqual(['id', 'isActive', 'name']);
+    expect(periods.some((p) => p.id === periodId)).toBe(true);
+
+    expect((await call('GET', '/api/periods/options')).status).toBe(401);
   });
 
   it('un tutor no puede pedir listas ni ver los pedidos', async () => {
