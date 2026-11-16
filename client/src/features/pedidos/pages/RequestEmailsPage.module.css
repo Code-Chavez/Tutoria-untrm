@@ -90,3 +90,10 @@
 .input { min-height: 38px; }
 .hint { margin-top: 10px; padding: 8px 10px; font-size: var(--fs-xs); }
 @media (max-width: 800px) { .row { grid-template-columns: minmax(0, 1fr); } }
+
+.scope {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s2);
+  margin-bottom: var(--s4);
+}

@@ -18,10 +18,15 @@ interface RequireRoleProps {
  * de datos. Si el rol no está permitido, redirige a /unauthorized.
  */
 export function RequireRole({ roles, permissions, children }: RequireRoleProps) {
-  const { user } = useAuth();
+  // `isSessionFresh` puede faltar en quien simula la sesión en una prueba: se entiende vigente.
+  const { user, isSessionFresh = true } = useAuth();
 
   const allowed = !!user && (ROLE_CODES[user.role] !== undefined ? roles.includes(user.role) : hasAnyPermission(user.permissions, permissions));
   if (!allowed) {
+    // Los permisos restaurados al abrir la aplicación son los de la última vez y pueden haber cambiado (se concedió un permiso
+    // mientras la sesión estaba abierta): antes de negar el acceso se espera a confirmarlos, porque la redirección no se deshace
+    // cuando llegan los vigentes. Si el dato guardado ya concede el acceso no se espera: se muestra y, si cambió, se corrige.
+    if (user && !isSessionFresh) return null;
     return <Navigate to="/unauthorized" replace />;
   }
 

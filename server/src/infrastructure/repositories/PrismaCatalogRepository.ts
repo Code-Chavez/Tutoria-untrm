@@ -25,6 +25,8 @@ const blank = (kind: CatalogKind): Omit<CatalogEntry, 'id' | 'name' | 'isActive'
   endDate: null,
 });
 
+const campusSummary = { id: true, name: true, isActive: true } as const;
+
 export class PrismaCatalogRepository implements CatalogRepository {
   constructor(private readonly prisma: PrismaClient) {}
 
@@ -33,15 +35,33 @@ export class PrismaCatalogRepository implements CatalogRepository {
       case 'faculties': {
         const rows = await this.prisma.faculty.findMany({
           orderBy: { name: 'asc' },
-          include: { _count: { select: { schools: true } } },
+          include: {
+            _count: { select: { schools: true, dataRequests: true } },
+            schools: {
+              select: {
+                campus: { select: campusSummary },
+                campusLinks: { select: { campus: { select: campusSummary } } },
+              },
+            },
+          },
         });
-        return rows.map((r) => ({
-          ...blank(kind),
-          id: r.id,
-          name: r.name,
-          isActive: r.isActive,
-          usage: r._count.schools,
-        }));
+        return rows.map((faculty) => {
+          // La cobertura se deriva de las escuelas, con la sede principal como respaldo para datos anteriores.
+          const campuses = new Map<string, NonNullable<CatalogEntry['campuses']>[number]>();
+          for (const school of faculty.schools) {
+            if (school.campus) campuses.set(school.campus.id, school.campus);
+            for (const { campus } of school.campusLinks) campuses.set(campus.id, campus);
+          }
+          return {
+            ...blank(kind),
+            id: faculty.id,
+            name: faculty.name,
+            isActive: faculty.isActive,
+            usage: faculty._count.schools + faculty._count.dataRequests,
+            requestEmail: faculty.requestEmail,
+            campuses: [...campuses.values()].sort((left, right) => left.name.localeCompare(right.name, 'es')),
+          };
+        });
       }
       case 'schools': {
         const rows = await this.prisma.school.findMany({
@@ -115,7 +135,7 @@ export class PrismaCatalogRepository implements CatalogRepository {
     let id: string;
     switch (kind) {
       case 'faculties':
-        id = (await this.prisma.faculty.create({ data: { name: input.name, isActive: input.isActive ?? true } })).id;
+        id = (await this.prisma.faculty.create({ data: { name: input.name, isActive: input.isActive ?? true, requestEmail: input.requestEmail } })).id;
         break;
       case 'schools':
         id = (
@@ -158,7 +178,7 @@ export class PrismaCatalogRepository implements CatalogRepository {
     };
     switch (kind) {
       case 'faculties':
-        await this.prisma.faculty.update({ where: { id }, data: common });
+        await this.prisma.faculty.update({ where: { id }, data: { ...common, requestEmail: input.requestEmail } });
         break;
       case 'schools':
         await this.prisma.school.update({

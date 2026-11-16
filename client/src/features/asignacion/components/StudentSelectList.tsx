@@ -22,6 +22,8 @@ interface StudentSelectListProps {
   onFilterChange: (values: AssignFilterValues) => void;
   onToggle: (id: string) => void;
   onToggleAllVisible: (checked: boolean) => void;
+  /** Permite marcar también a quien ya tiene tutor (p. ej. una sesión grupal). La asignación inicial no lo permite: allí cambiar de tutor es una reasignación. */
+  allowAssigned?: boolean;
 }
 
 export const StudentSelectList: React.FC<StudentSelectListProps> = ({
@@ -34,10 +36,11 @@ export const StudentSelectList: React.FC<StudentSelectListProps> = ({
   onFilterChange,
   onToggle,
   onToggleAllVisible,
+  allowAssigned = false,
 }) => {
   const set = (patch: Partial<AssignFilterValues>) => onFilterChange({ ...filters, ...patch });
   // La asignación inicial es solo para quien aún no tiene tutor; cambiar de tutor se hace desde «Tutorados», con motivo.
-  const selectable = students.filter((s) => !s.tutorId);
+  const selectable = allowAssigned ? students : students.filter((s) => !s.tutorId);
   const allVisibleSelected = selectable.length > 0 && selectable.every((s) => selectedIds.has(s.id));
 
   return (
@@ -76,14 +79,16 @@ export const StudentSelectList: React.FC<StudentSelectListProps> = ({
             </option>
           ))}
         </SelectField>
-        <label className={styles.check}>
-          <input
-            type="checkbox"
-            checked={filters.onlyUnassigned}
-            onChange={(e) => set({ onlyUnassigned: e.target.checked })}
-          />
-          Solo sin asignar
-        </label>
+        {!allowAssigned && (
+          <label className={styles.check}>
+            <input
+              type="checkbox"
+              checked={filters.onlyUnassigned}
+              onChange={(e) => set({ onlyUnassigned: e.target.checked })}
+            />
+            Solo sin asignar
+          </label>
+        )}
       </div>
 
       <div className={table.scroll}>
@@ -122,8 +127,8 @@ export const StudentSelectList: React.FC<StudentSelectListProps> = ({
                       checked={selectedIds.has(student.id)}
                       onChange={() => onToggle(student.id)}
                       onClick={(e) => e.stopPropagation()}
-                      disabled={Boolean(student.tutorId)}
-                      title={student.tutorId ? 'Ya tiene tutor: para cambiarlo usa «Reasignar» en Estudiantes' : undefined}
+                      disabled={!allowAssigned && Boolean(student.tutorId)}
+                      title={!allowAssigned && student.tutorId ? 'Ya tiene tutor: para cambiarlo usa «Reasignar» en Estudiantes' : undefined}
                       aria-label={`Seleccionar ${student.firstName} ${student.lastName}`}
                     />
                   </td>

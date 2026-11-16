@@ -48,10 +48,10 @@ const students: Student[] = [
   },
 ];
 
-const renderModal = (onSubmit = vi.fn()) => {
+const renderModal = (onSubmit = vi.fn(), list: Student[] = students) => {
   render(
     <GroupSessionFormModal
-      students={students}
+      students={list}
       schools={schools}
       durationMinutes={45}
       tutorName={() => null}
@@ -122,6 +122,24 @@ describe('GroupSessionFormModal', () => {
       location: 'Auditorio de la Escuela',
       meetingLink: undefined,
     });
+  });
+
+  it('permite agrupar a quienes ya tienen tutor (los tutorados de quien agenda) y no muestra «Solo sin asignar»', async () => {
+    const withTutor = students.map((s) => ({ ...s, tutorId: 'tutor-1' }));
+    const onSubmit = renderModal(vi.fn(), withTutor);
+    const user = userEvent.setup();
+
+    expect(screen.queryByLabelText(/solo sin asignar/i)).not.toBeInTheDocument();
+    expect(screen.getByLabelText(/seleccionar ana torres/i)).toBeEnabled();
+
+    await user.type(screen.getByLabelText(/fecha/i), '2026-10-01');
+    await user.type(screen.getByLabelText(/hora/i), '15:00');
+    await user.type(screen.getByLabelText(/tema de la sesión/i), 'Técnicas de estudio');
+    await user.type(screen.getByLabelText(/^lugar$/i), 'Auditorio de la Escuela');
+    await user.click(screen.getByLabelText(/seleccionar todos los visibles/i));
+    await user.click(screen.getByRole('button', { name: /programar sesión grupal/i }));
+
+    expect(onSubmit).toHaveBeenCalledWith(expect.objectContaining({ studentIds: ['s1', 's2', 's3'], modality: 'PRESENCIAL' }));
   });
 
   it('confirma con el enlace de videollamada al elegir modalidad virtual', async () => {

@@ -7,7 +7,7 @@ export class FacultyController {
   list = async (_req: Request, res: Response) => {
     try {
       const faculties = await this.listFacultiesUseCase.execute();
-      res.status(200).json({ faculties });
+      res.status(200).json({ faculties: faculties.map(({ id, name, isActive, createdAt }) => ({ id, name, isActive, createdAt })) });
     } catch {
       res.status(500).json({ error: 'Error interno del servidor' });
     }

@@ -20,6 +20,8 @@ describe('administración de roles por HTTP', () => {
   let adminToken = '';
   let memberId = '';
   let memberToken = '';
+  let studentId = '';
+  let studentToken = '';
   const createdRoleIds: string[] = [];
 
   const call = (method: string, path: string, token: string | null, body?: unknown) =>
@@ -41,6 +43,7 @@ describe('administración de roles por HTTP', () => {
       return;
     }
     memberId = await ownUser(prisma, { email: `roles-http-${stamp}@untrm.edu.pe`, roleName: 'Coordinador', firstName: 'Rol', lastName: 'Prueba' });
+    studentId = await ownUser(prisma, { email: `roles-http-est-${stamp}@untrm.edu.pe`, roleName: 'Tutorado', firstName: 'Rol', lastName: 'Estudiante' });
     const { default: app } = await import('../../src/app');
     const listening = app.listen(0);
     await new Promise<void>((resolve) => listening.once('listening', () => resolve()));
@@ -50,14 +53,15 @@ describe('administración de roles por HTTP', () => {
     baseUrl = `http://localhost:${address.port}`;
     adminToken = await login('7183255722@untrm.edu.pe', 'Admin2026!');
     memberToken = await login(`roles-http-${stamp}@untrm.edu.pe`, DEMO_PASSWORD);
+    studentToken = await login(`roles-http-est-${stamp}@untrm.edu.pe`, DEMO_PASSWORD);
   });
 
   afterAll(async () => {
     const running = server;
     if (running) await new Promise((resolve) => running.close(resolve));
     if (dbUp) {
-      await removeOwnUserTraces(prisma, [memberId].filter(Boolean), createdRoleIds);
-      await prisma.user.deleteMany({ where: { id: memberId } });
+      await removeOwnUserTraces(prisma, [memberId, studentId].filter(Boolean), createdRoleIds);
+      await prisma.user.deleteMany({ where: { id: { in: [memberId, studentId].filter(Boolean) } } });
       await prisma.rolePermission.deleteMany({ where: { roleId: { in: createdRoleIds } } });
       await prisma.role.deleteMany({ where: { id: { in: createdRoleIds } } });
     }
@@ -129,6 +133,13 @@ describe('administración de roles por HTTP', () => {
 
     const entries = await prisma.auditLog.findMany({ where: { entityId: roleId, action: 'ROLE_UPDATED' }, orderBy: { createdAt: 'asc' } });
     expect(entries.map((e) => e.details)).toEqual([expect.stringContaining('añade: students:read'), expect.stringContaining('quita: students:read')]);
+  });
+
+  it('la lista de roles (con permisos y cuentas por rol) la ve quien administra usuarios; un tutorado o una sesión ausente no (TT-101)', async () => {
+    if (!dbUp) return;
+    expect((await call('GET', '/roles', null)).status).toBe(401);
+    expect((await call('GET', '/roles', studentToken)).status).toBe(403);
+    expect((await call('GET', '/roles', adminToken)).status).toBe(200);
   });
 
   it('los roles base no se modifican ni se desactivan (409) y su lista los marca como base', async () => {

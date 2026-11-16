@@ -56,6 +56,31 @@ describe('pedido de listas por correo (fase 2)', () => {
   const send = () => new SendDataRequestUseCase(guard as unknown as StudentAccessGuard, periods, schools, faculties, users, mailer, template, requests, audit);
 
   describe('enviar el pedido', () => {
+    it('envía un solo correo por facultad con todas sus escuelas activas y conserva el pedido al reintentar', async () => {
+      faculties.findAll.mockResolvedValue([{ id: 'f1', name: 'Ingeniería', isActive: true, createdAt: new Date(), requestEmail: 'facultad@untrm.edu.pe' }]);
+      schools.findAll.mockResolvedValue([
+        school,
+        { ...school, id: 's2', name: 'Mecánica Eléctrica' },
+        { ...school, id: 's3', name: 'Inactiva', isActive: false },
+        { ...school, id: 's4', name: 'Otra facultad', facultyId: 'f2' },
+      ]);
+      const input = { facultyId: 'f1', operationId: op() };
+      const first = await send().execute('u1', input);
+      const retry = await send().execute('u1', input);
+
+      expect(first.request).toMatchObject({ schoolId: null, facultyId: 'f1', schoolNames: ['Ingeniería de Sistemas', 'Mecánica Eléctrica'], cycles: [] });
+      expect(retry).toMatchObject({ replayed: true, request: { id: first.request.id } });
+      expect(mailer.send).toHaveBeenCalledTimes(1);
+      expect(mailer.send).toHaveBeenCalledWith(expect.objectContaining({
+        to: 'facultad@untrm.edu.pe',
+        text: expect.stringContaining('Ingeniería de Sistemas, Mecánica Eléctrica'),
+      }));
+      expect(mailer.send.mock.calls[0][0].text).not.toContain('Inactiva');
+      guard.scopeFor.mockResolvedValue({ kind: 'SCHOOLS', schoolIds: ['s1'] });
+      await expect(send().execute('u2', { ...input, operationId: op() })).rejects.toBeInstanceOf(StudentAccessDeniedError);
+      expect(mailer.send).toHaveBeenCalledTimes(1);
+    });
+
     it('rechaza un ciclo ajeno al plan de la escuela antes de enviar correo', async () => {
       await expect(send().execute('u1', { operationId: op(), schoolId: 's1', cycles: [11] })).rejects.toBeInstanceOf(InvalidDataRequestError);
       expect(mailer.send).not.toHaveBeenCalled();

@@ -15,12 +15,17 @@ export const TUTOR_WORKLOAD_QUERY_KEY = ['tutorWorkload'] as const;
  * tutores disponibles (para mostrar/reasignar el tutor de cada tutorado).
  * El filtrado y la paginación se resuelven en el cliente sobre estos datos.
  */
-export function useStudents() {
+export function useStudents(periodId = '', includePeriods = false) {
   const queryClient = useQueryClient();
 
   const studentsQuery = useQuery({
-    queryKey: STUDENTS_QUERY_KEY,
-    queryFn: () => studentService.getStudents(),
+    queryKey: periodId ? [...STUDENTS_QUERY_KEY, periodId] : STUDENTS_QUERY_KEY,
+    queryFn: () => studentService.getStudents(periodId ? { periodId } : undefined),
+  });
+  const periodsQuery = useQuery({
+    queryKey: ['periods', 'student-options'],
+    queryFn: () => studentService.getPeriodOptions(),
+    enabled: includePeriods,
   });
   const schoolsQuery = useQuery({
     queryKey: SCHOOLS_QUERY_KEY,
@@ -41,6 +46,9 @@ export function useStudents() {
 
   return {
     students: studentsQuery.data ?? [],
+    periods: periodsQuery.data ?? [],
+    periodsError: periodsQuery.isError,
+    retryPeriods: periodsQuery.refetch,
     schools: schoolsQuery.data ?? [],
     tutors: tutorsQuery.data ?? [],
     loading: studentsQuery.isLoading || schoolsQuery.isLoading || tutorsQuery.isLoading,

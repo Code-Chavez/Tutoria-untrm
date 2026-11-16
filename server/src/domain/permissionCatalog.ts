@@ -143,6 +143,30 @@ export const PERMISSION_CATALOG = [
   {
     "code": "work-plans:write",
     "description": "Elaborar planes de trabajo semestrales"
+  },
+  {
+    "code": "certificados:registrar",
+    "description": "Iniciar el trámite de certificación de un docente tutor y reunir sus evidencias"
+  },
+  {
+    "code": "certificados:aprobar",
+    "description": "Revisar las evidencias y aprobar, observar o rechazar un certificado de tutoría"
+  },
+  {
+    "code": "certificados:emitir",
+    "description": "Generar el certificado de tutoría sin firma y asignarle su número de registro"
+  },
+  {
+    "code": "certificados:consultar",
+    "description": "Ver los trámites de certificación de tutoría de las escuelas dentro del alcance"
+  },
+  {
+    "code": "certificados:descargar",
+    "description": "Descargar el PDF del certificado de tutoría"
+  },
+  {
+    "code": "certificados:administrar",
+    "description": "Anular certificados de tutoría y administrar sus plantillas y resoluciones"
   }
 ] as const;
 

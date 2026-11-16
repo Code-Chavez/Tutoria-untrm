@@ -38,7 +38,18 @@ const KPI_ICON: Record<string, ReactNode> = {
   attended: <CheckCircleIcon size={22} />,
   closed: <CheckCircleIcon size={22} />,
   evaluation: <StarIcon size={22} />,
+  'my-requests': <InboxIcon size={22} />,
   'my-tutor': <UsersIcon size={22} />,
+};
+
+const ROLE_INTRO: Record<string, string> = {
+  Tutorado: 'Encuentra apoyo, revisa tus citas y sigue las respuestas a tus solicitudes.',
+  'Docente Tutor': 'Organiza tus sesiones, atiende solicitudes y da seguimiento a tus estudiantes.',
+  Coordinador: 'Organiza la tutoría de tu escuela y revisa las tareas pendientes del periodo.',
+  'Administrador DBU': 'Supervisa la tutoría, gestiona el periodo y administra los accesos del sistema.',
+  'Profesional de Servicio': 'Consulta los casos derivados a tu servicio y registra su atención.',
+  Vicerrectorado: 'Consulta los informes y revisa la cobertura de la tutoría.',
+  Decano: 'Consulta y registra las amonestaciones de tu facultad.',
 };
 
 function KpiCard({ kpi }: { kpi: HomeKpi }) {
@@ -65,6 +76,13 @@ export function DashboardPage() {
   const { panel, loading, error } = useHomePanel();
 
   const firstName = user?.firstName ?? '';
+  const student = user?.role === 'Tutorado';
+  const tutor = user?.role === 'Docente Tutor';
+  const role = user?.role ?? '';
+  const kpis = panel?.kpis ?? [];
+  const visibleKpis = student
+    ? [...kpis.filter((kpi) => kpi.key === 'next-session'), ...kpis.filter((kpi) => kpi.key !== 'next-session')]
+    : kpis;
   // Solo se muestra lo que la persona puede usar: sin tarjetas vacías ni «sin acceso» (R02).
   const hasQuickActions = quickActionsFor(user?.role, user?.permissions).length > 0;
   const canSeeAlerts = canSeeRiskAlerts(user?.role, user?.permissions);
@@ -72,15 +90,16 @@ export function DashboardPage() {
 
   return (
     <div>
-      <div className={styles.hero}>
+      <div className={styles.hero} data-personal={student || tutor}>
         <div>
+          {(student || tutor) && <span className={styles.eyebrow}>{student ? 'Mi espacio de tutoría' : 'Mi espacio docente'}</span>}
           <h1 className={styles.welcome}>
             Bienvenido{firstName ? `, ${firstName}` : ''}
           </h1>
           <p className={styles.sub}>
-            Resumen de tu trabajo en el sistema
-            {panel?.periodName ? ` · Periodo académico ${panel.periodName}` : ''}
+            {ROLE_INTRO[role] ?? 'Consulta la información y las tareas que tienes disponibles.'}
           </p>
+          {panel?.periodName && <p className={styles.period}>Periodo académico {panel.periodName}</p>}
         </div>
         {user && <span className={styles.roleTag}>{getRoleLabel(user.role, user.service)}</span>}
       </div>
@@ -97,7 +116,7 @@ export function DashboardPage() {
             No se pudieron cargar tus indicadores. Recarga la página para intentarlo de nuevo.
           </p>
         ) : (
-          (panel?.kpis ?? []).map((kpi) => <KpiCard key={kpi.key} kpi={kpi} />)
+          visibleKpis.map((kpi) => <KpiCard key={kpi.key} kpi={kpi} />)
         )}
       </div>
 
@@ -106,7 +125,7 @@ export function DashboardPage() {
           <Card>
             <CardHeader
               title="Acciones rápidas"
-              description="Accesos directos a las tareas frecuentes"
+              description={student ? 'Pide ayuda, revisa tus solicitudes o consulta tu próxima cita.' : tutor ? 'Accesos para atender, registrar y consultar tu trabajo de tutoría.' : 'Encuentra tus tareas organizadas por área.'}
             />
             <CardBody>
               <QuickActions />

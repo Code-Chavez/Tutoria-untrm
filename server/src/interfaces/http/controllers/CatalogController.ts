@@ -42,6 +42,7 @@ export class CatalogController {
     } else if (error instanceof CatalogDuplicateError || error instanceof CatalogEntryInUseError) {
       res.status(409).json({ error: error.message });
     } else {
+      console.error('Error en catálogos maestros', error);
       res.status(500).json({ error: 'Error interno del servidor' });
     }
   }

@@ -4,8 +4,28 @@ import { MapPinIcon } from '@shared/components/icons';
 import { getApiErrorMessage } from '@shared/services/apiClient';
 import { useDraft } from '@shared/hooks/useDraft';
 import { useAuth } from '@features/auth/hooks/useAuth';
-import { useCampuses, useCreateCampus, useSetSchoolCampus, useUpdateCampus } from '../hooks/useCampuses';
+import { type Campus, type CampusKind } from '../services/campusService';
+import { useCampuses, useCreateCampus, useSetSchoolCampus, useSetSchoolCampuses, useUpdateCampus } from '../hooks/useCampuses';
 import styles from './CampusesPage.module.css';
+
+/** Ciudad de la sede (se imprime en la fecha del certificado). Vacía = la ciudad predeterminada. */
+function CampusCity({ campus, save }: { campus: Campus; save: (city: string | null) => Promise<unknown> }) {
+  const [city, setCity] = useState(campus.city ?? '');
+  const changed = city.trim() !== (campus.city ?? '');
+  const submit = (event: FormEvent) => {
+    event.preventDefault();
+    if (changed) void save(city.trim() === '' ? null : city.trim());
+  };
+  return (
+    <form className={styles.cityForm} onSubmit={submit}>
+      <label htmlFor={`city-${campus.id}`}>Ciudad de {campus.name}</label>
+      <input id={`city-${campus.id}`} className={styles.input} value={city} onChange={(e) => setCity(e.target.value)} placeholder="Chachapoyas (predeterminada)" maxLength={80} />
+      <Button type="submit" variant="secondary" size="sm" disabled={!changed}>
+        Guardar ciudad
+      </Button>
+    </form>
+  );
+}
 
 // Sedes de la universidad y la sede de cada escuela. Las configura Vicerrectorado (o la DBU): una escuela pertenece a una sola sede,
 // y de ella depende qué docentes pueden tutorear a sus estudiantes.
@@ -14,11 +34,13 @@ export function CampusesPage() {
   const create = useCreateCampus();
   const update = useUpdateCampus();
   const setCampus = useSetSchoolCampus();
+  const setCampuses = useSetSchoolCampuses();
   const { user } = useAuth();
   // El nombre de la sede nueva que se estaba escribiendo se conserva como borrador de la pestaña.
   const nameIsEmpty = useCallback((value: string) => value.trim() === '', []);
   const { value: name, setValue: setName, discard: clearName } = useDraft<string>(user?.id, 'campus-name', '', nameIsEmpty);
   const [error, setError] = useState('');
+  const [newKind, setNewKind] = useState<CampusKind>('SEDE');
 
   const campuses = overview.data?.campuses ?? [];
   const schools = overview.data?.schools ?? [];
@@ -36,8 +58,9 @@ export function CampusesPage() {
   const submit = (event: FormEvent) => {
     event.preventDefault();
     void run(async () => {
-      await create.mutateAsync(name);
+      await create.mutateAsync({ name, kind: newKind });
       clearName();
+      setNewKind('SEDE');
     });
   };
 
@@ -77,12 +100,25 @@ export function CampusesPage() {
                     >
                       {campus.isActive ? 'Desactivar' : 'Activar'}
                     </Button>
+                    <SelectField
+                      aria-label={`Tipo de ${campus.name}`}
+                      value={campus.kind ?? 'SEDE'}
+                      onChange={(e) => run(() => update.mutateAsync({ id: campus.id, kind: e.target.value as CampusKind }))}
+                    >
+                      <option value="SEDE">Sede</option>
+                      <option value="FILIAL">Filial</option>
+                    </SelectField>
+                    <CampusCity key={`${campus.id}-${campus.city ?? ''}`} campus={campus} save={(city) => run(() => update.mutateAsync({ id: campus.id, city }))} />
                   </li>
                 ))}
               </ul>
               <form className={styles.add} onSubmit={submit}>
-                <label htmlFor="campus-name">Nueva sede</label>
-                <input id="campus-name" className={styles.input} value={name} onChange={(e) => setName(e.target.value)} placeholder="Sede …" maxLength={80} />
+                <label htmlFor="campus-name">Nueva sede o filial</label>
+                <input id="campus-name" className={styles.input} value={name} onChange={(e) => setName(e.target.value)} placeholder="Sede … o Filial …" maxLength={80} />
+                <SelectField aria-label="Tipo de la nueva sede" value={newKind} onChange={(e) => setNewKind(e.target.value as CampusKind)}>
+                  <option value="SEDE">Sede</option>
+                  <option value="FILIAL">Filial</option>
+                </SelectField>
                 <Button type="submit" size="sm" disabled={name.trim().length < 3} loading={create.isPending}>
                   Agregar
                 </Button>
@@ -116,6 +152,27 @@ export function CampusesPage() {
                             </option>
                           ))}
                       </SelectField>
+                      {active.length > 1 && (
+                        <fieldset className={styles.alsoTaught}>
+                          <legend>Se dicta también en</legend>
+                          {active.map((c) => {
+                            const taughtIn = school.campusIds ?? (school.campusId ? [school.campusId] : []);
+                            const checked = taughtIn.includes(c.id);
+                            return (
+                              <label key={c.id}>
+                                <input
+                                  type="checkbox"
+                                  aria-label={`${school.name} se dicta en ${c.name}`}
+                                  checked={checked}
+                                  disabled={checked && taughtIn.length === 1}
+                                  onChange={() => run(() => setCampuses.mutateAsync({ schoolId: school.id, campusIds: checked ? taughtIn.filter((id) => id !== c.id) : [...taughtIn, c.id] }))}
+                                />{' '}
+                                {c.name}
+                              </label>
+                            );
+                          })}
+                        </fieldset>
+                      )}
                     </li>
                   ))}
                 </ul>

@@ -1,0 +1,24 @@
+.categories {
+  display: grid;
+  gap: 2px;
+  margin: 2px 0 6px 19px;
+  padding: 2px 0 2px 10px;
+  border-left: 1px solid var(--borde);
+  list-style: none;
+}
+
+.categories a {
+  display: block;
+  padding: 8px 10px;
+  border-radius: 7px;
+  color: var(--g700);
+  font-size: var(--fs-sm);
+}
+
+.categories a:hover,
+.categories a[aria-current='page'] {
+  background: var(--celeste);
+  color: var(--azul);
+}
+
+.categories a[aria-current='page'] { font-weight: 700; }

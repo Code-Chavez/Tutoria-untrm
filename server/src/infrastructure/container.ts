@@ -39,6 +39,21 @@ import { ImportTutorsUseCase } from '@application/use-cases/users/ImportTutorsUs
 import { GetTutorAcceptanceUseCase, RequestTutorAcceptanceUseCase, RespondTutorAcceptanceUseCase } from '@application/use-cases/cycle-tutors/TutorAcceptanceUseCases';
 import { ExcelTutorParser } from './parsers/ExcelTutorParser';
 import { PrismaAdmonitionRepository } from './repositories/PrismaAdmonitionRepository';
+import { PrismaCertificateRepository } from './repositories/PrismaCertificateRepository';
+import { PrismaTutorTeacherReader } from './repositories/PrismaTutorTeacherReader';
+import { ListTutorTeachersUseCase } from '@application/use-cases/certification/TutorTeacherListUseCase';
+import { PrismaCertificateWorkflowRepository } from './repositories/PrismaCertificateWorkflowRepository';
+import { PrismaCommitteeResolutionRepository } from './repositories/PrismaCommitteeResolutionRepository';
+import { PrismaCertificateTemplateRepository } from './repositories/PrismaCertificateTemplateRepository';
+import { DemoCertificatePdfRenderer } from './export/DemoCertificatePdfRenderer';
+import { CertificateVisualSettings } from '@application/use-cases/certification/CertificateVisualSettings';
+import { PrismaCertificateVisualStore } from './repositories/PrismaCertificateVisualStore';
+import { CertificateTextSettings } from '@application/use-cases/certification/CertificateTextSettings';
+import { PrismaCertificateSchoolSettingsRepository } from './repositories/PrismaCertificateSchoolSettingsRepository';
+import { DownloadCertificatePdfUseCase, GenerateCertificateUseCase, ListCommitteeResolutionsUseCase, SaveCommitteeResolutionUseCase } from '@application/use-cases/certification/CertificateIssuanceUseCases';
+import { ApproveCertificateUseCase, ObserveCertificateUseCase, RejectCertificateUseCase, ReviewEvidenceUseCase, StartCertificateUseCase, SubmitCertificateUseCase, VoidCertificateUseCase } from '@application/use-cases/certification/CertificateWorkflowUseCases';
+import { CertificateScopeResolver, GetCertificateOptionsUseCase, GetCertificateUseCase, ListCertificateCandidatesUseCase, ListCertificatesUseCase } from '@application/use-cases/certification/CertificateQueryUseCases';
+import { PrismaCertificateFactsReader } from './repositories/PrismaCertificateFactsReader';
 import { AdmonitionScopeResolver, GetAdmonitionFileUseCase, IssueAdmonitionUseCase, ListAdmonishableTutorsUseCase, ListAdmonitionsUseCase } from '@application/use-cases/admonitions/AdmonitionUseCases';
 import { PrismaCycleTutorRepository } from './repositories/PrismaCycleTutorRepository';
 import { PrismaDeclineNoticeRepository } from './repositories/PrismaDeclineNoticeRepository';
@@ -47,7 +62,7 @@ import { ResendDeclineNoticeUseCase } from '@application/use-cases/cycle-tutors/
 import { CycleTutorApplier, ListCycleTutorsUseCase, RemoveCycleTutorUseCase, SetCycleTutorUseCase } from '@application/use-cases/cycle-tutors/CycleTutorUseCases';
 import { GetInstitutionalPendingUseCase } from '@application/use-cases/pending/GetInstitutionalPendingUseCase';
 import { PrismaCampusRepository } from './repositories/PrismaCampusRepository';
-import { CreateCampusUseCase, ListCampusesUseCase, SetSchoolCampusUseCase, UpdateCampusUseCase } from '@application/use-cases/campuses/CampusUseCases';
+import { CreateCampusUseCase, ListCampusesUseCase, SetSchoolCampusesUseCase, SetSchoolCampusUseCase, UpdateCampusUseCase } from '@application/use-cases/campuses/CampusUseCases';
 import { PrismaFacultyRepository } from './repositories/PrismaFacultyRepository';
 import { PrismaWorkPlanRepository } from './repositories/PrismaWorkPlanRepository';
 import { StudentAccessGuard } from '@application/access/StudentAccessGuard';
@@ -348,6 +363,13 @@ const listAdmonitionsUseCase = new ListAdmonitionsUseCase(admonitionScope, userR
 const listAdmonishableTutorsUseCase = new ListAdmonishableTutorsUseCase(admonitionScope, userRepository, roleRepository, schoolRepository);
 const issueAdmonitionUseCase = new IssueAdmonitionUseCase(admonitionScope, userRepository, roleRepository, schoolRepository, admonitionRepository, evidenceStorage, auditLogRepository);
 const getAdmonitionFileUseCase = new GetAdmonitionFileUseCase(admonitionScope, admonitionRepository, evidenceStorage);
+const certificateRepository = new PrismaCertificateRepository(prisma);
+const certificateScope = new CertificateScopeResolver(studentAccessGuard);
+const listCertificatesUseCase = new ListCertificatesUseCase(certificateScope, certificateRepository, userRepository, schoolRepository, academicPeriodRepository);
+const getCertificateUseCase = new GetCertificateUseCase(certificateScope, certificateRepository, userRepository, schoolRepository, academicPeriodRepository, new PrismaCertificateFactsReader(prisma));
+const listCertificateCandidatesUseCase = new ListCertificateCandidatesUseCase(certificateScope, certificateRepository, userRepository, schoolRepository);
+const getCertificateOptionsUseCase = new GetCertificateOptionsUseCase(certificateScope, academicPeriodRepository, schoolRepository, new PrismaCampusRepository(prisma));
+const listTutorTeachersUseCase = new ListTutorTeachersUseCase(certificateScope, new PrismaTutorTeacherReader(prisma), schoolRepository, academicPeriodRepository);
 const importTutorsUseCase = new ImportTutorsUseCase(userRepository, roleRepository, schoolRepository, createUserUseCase, issueInvitationUseCase, emailPolicy);
 const updateUserUseCase = new UpdateUserUseCase(userRepository, roleRepository, schoolRepository, facultyRepository, emailPolicy);
 const toggleUserStatusUseCase = new ToggleUserStatusUseCase(userRepository);
@@ -378,6 +400,36 @@ const changePasswordUseCase = new ChangePasswordUseCase(
 
 const cycleTutorRepository = new PrismaCycleTutorRepository(prisma);
 const cycleTutorApplier = new CycleTutorApplier(cycleTutorRepository, studentRepository, tutorAssignmentHistoryRepository);
+const certificateWorkflowRepository = new PrismaCertificateWorkflowRepository(prisma);
+const startCertificateUseCase = new StartCertificateUseCase(certificateScope, certificateWorkflowRepository, userRepository, academicPeriodRepository, cycleTutorRepository, schoolRepository, auditLogRepository);
+const submitCertificateUseCase = new SubmitCertificateUseCase(certificateScope, certificateRepository, certificateWorkflowRepository, auditLogRepository);
+const reviewEvidenceUseCase = new ReviewEvidenceUseCase(certificateScope, certificateRepository, certificateWorkflowRepository, auditLogRepository);
+const observeCertificateUseCase = new ObserveCertificateUseCase(certificateScope, certificateRepository, certificateWorkflowRepository, auditLogRepository);
+const rejectCertificateUseCase = new RejectCertificateUseCase(certificateScope, certificateRepository, certificateWorkflowRepository, auditLogRepository);
+const approveCertificateUseCase = new ApproveCertificateUseCase(certificateScope, certificateRepository, certificateWorkflowRepository, auditLogRepository);
+const voidCertificateUseCase = new VoidCertificateUseCase(certificateScope, certificateRepository, certificateWorkflowRepository, auditLogRepository);
+const committeeResolutionRepository = new PrismaCommitteeResolutionRepository(prisma);
+const saveCommitteeResolutionUseCase = new SaveCommitteeResolutionUseCase(certificateScope, schoolRepository, academicPeriodRepository, committeeResolutionRepository, auditLogRepository);
+const listCommitteeResolutionsUseCase = new ListCommitteeResolutionsUseCase(certificateScope, committeeResolutionRepository, schoolRepository, academicPeriodRepository);
+const certificateVisualSettings = new CertificateVisualSettings(certificateScope, schoolRepository, new PrismaCertificateVisualStore(prisma));
+const certificateSchoolSettings = new PrismaCertificateSchoolSettingsRepository(prisma);
+const certificateTemplates = new PrismaCertificateTemplateRepository(prisma);
+const certificateTextSettings = new CertificateTextSettings(certificateScope, schoolRepository, certificateTemplates, certificateSchoolSettings, auditLogRepository);
+const generateCertificateUseCase = new GenerateCertificateUseCase(certificateScope, certificateRepository, certificateWorkflowRepository, auditLogRepository, {
+  schools: schoolRepository,
+  faculties: facultyRepository,
+  users: userRepository,
+  periods: academicPeriodRepository,
+  resolutions: committeeResolutionRepository,
+  templates: certificateTemplates,
+  renderer: new DemoCertificatePdfRenderer(),
+  campuses: new PrismaCampusRepository(prisma),
+  visuals: certificateVisualSettings,
+  schoolSettings: certificateSchoolSettings,
+  storage: evidenceStorage,
+  demoMode: env.CERTIFICATE_DEMO_MODE,
+});
+const downloadCertificatePdfUseCase = new DownloadCertificatePdfUseCase(certificateScope, certificateRepository, certificateWorkflowRepository, auditLogRepository, evidenceStorage);
 const listCycleTutorsUseCase = new ListCycleTutorsUseCase(studentAccessGuard, academicPeriodRepository, cycleTutorRepository, schoolRepository);
 // Aviso a la coordinación del rechazo de un docente (LEV-R05): guardado en cola de forma atómica con el rechazo y entregado por el
 // intento inmediato o por el proceso de fondo, que comparten la misma reserva. Sin SMTP el aviso queda en cola y se explica por qué.
@@ -551,6 +603,7 @@ const listCampusesUseCase = new ListCampusesUseCase(campusRepository, schoolRepo
 const createCampusUseCase = new CreateCampusUseCase(campusRepository, auditLogRepository);
 const updateCampusUseCase = new UpdateCampusUseCase(campusRepository, auditLogRepository);
 const setSchoolCampusUseCase = new SetSchoolCampusUseCase(schoolRepository, campusRepository, auditLogRepository);
+const setSchoolCampusesUseCase = new SetSchoolCampusesUseCase(schoolRepository, campusRepository, auditLogRepository);
 const listFacultiesUseCase = new ListFacultiesUseCase(facultyRepository);
 const listWorkPlansUseCase = new ListWorkPlansUseCase(
   userRepository,
@@ -906,6 +959,24 @@ export const container = {
     listAdmonishableTutorsUseCase,
     issueAdmonitionUseCase,
     getAdmonitionFileUseCase,
+    listCertificatesUseCase,
+    certificateVisualSettings,
+    certificateTextSettings,
+    getCertificateUseCase,
+    listCertificateCandidatesUseCase,
+    listTutorTeachersUseCase,
+    getCertificateOptionsUseCase,
+    startCertificateUseCase,
+    submitCertificateUseCase,
+    reviewEvidenceUseCase,
+    observeCertificateUseCase,
+    rejectCertificateUseCase,
+    approveCertificateUseCase,
+    voidCertificateUseCase,
+    saveCommitteeResolutionUseCase,
+    listCommitteeResolutionsUseCase,
+    generateCertificateUseCase,
+    downloadCertificatePdfUseCase,
     listCycleTutorsUseCase,
     getInstitutionalPendingUseCase,
     requestTutorAcceptanceUseCase,
@@ -917,6 +988,7 @@ export const container = {
     createCampusUseCase,
     updateCampusUseCase,
     setSchoolCampusUseCase,
+    setSchoolCampusesUseCase,
     listFacultiesUseCase,
     listWorkPlansUseCase,
     getWorkPlanUseCase,

@@ -87,3 +87,13 @@
   color: var(--azul-med);
   transform: translateX(2px);
 }
+
+.grid { grid-template-columns: repeat(auto-fit, minmax(min(100%, 212px), 1fr)); }
+.action { min-height: 76px; }
+.action[data-featured='true'] { border-color: var(--azul-med); background: var(--celeste); }
+.action[data-featured='true'] .icon { background: var(--azul-med); color: var(--blanco); }
+.action:focus-visible { outline: 2px solid var(--azul-med); outline-offset: 3px; }
+@media (prefers-reduced-motion: reduce) {
+  .action, .icon, .arrow { transition: none; }
+  .action:hover, .action:hover .arrow { transform: none; }
+}

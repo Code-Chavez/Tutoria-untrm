@@ -2,30 +2,30 @@
   padding-bottom: var(--s8);
 }
 
-.tabs {
-  display: flex;
-  gap: var(--s1);
-  flex-wrap: wrap;
-  border-bottom: 1px solid var(--borde);
-  margin-bottom: var(--s5);
-}
+.catalogSelector { display: none; }
 
-.tab,
-.tabActive {
-  background: none;
-  border: none;
-  border-bottom: 2px solid transparent;
-  padding: var(--s2) var(--s4);
-  font-family: var(--ft);
-  font-size: var(--fs-sm);
-  color: var(--g600);
-  cursor: pointer;
-}
+@media (max-width: 900px) {
+  .catalogSelector {
+    display: block;
+    margin-bottom: var(--s4);
+    border: 1px solid var(--borde);
+    border-radius: 10px;
+    background: var(--blanco);
+  }
 
-.tabActive {
-  color: var(--azul);
-  font-weight: 600;
-  border-bottom-color: var(--azul);
+  .catalogSelector summary {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    padding: 12px;
+    cursor: pointer;
+    list-style: none;
+  }
+
+  .catalogSelector summary::-webkit-details-marker { display: none; }
+  .catalogSelector summary strong { margin-left: 8px; }
+  .catalogSelector[open] summary svg { transform: rotate(180deg); }
 }
 
 .error {
@@ -70,15 +70,18 @@
   text-align: right;
 }
 
-.tabs { padding: 6px; gap: 6px; border: 1px solid var(--borde); border-radius: 10px; background: var(--g50); }
-.tab, .tabActive { padding: 10px 14px; min-height: 44px; border: 0; border-radius: 8px; font-weight: 600; }
-.tabActive { background: var(--blanco); color: var(--azul); box-shadow: var(--sombra-xs); }
 .tableWrap { border: 1px solid var(--borde); border-radius: 12px; background: var(--blanco); }
 .table th, .table td { padding: 16px; }
 .table th { background: var(--g50); }
 .table tbody tr:last-child td { border-bottom: 0; }
 .table tbody tr:hover { background: var(--g50); }
-@media (max-width: 480px) { .tab, .tabActive { flex: 1 1 120px; } .table th, .table td { padding: 12px; } }
-.tabs { padding: 4px; gap: 4px; margin-bottom: 12px; }
-.tab, .tabActive { padding: 7px 10px; min-height: 36px; }
+@media (max-width: 480px) { .table th, .table td { padding: 12px; } }
 .table th, .table td { padding: 10px 12px; }
+
+.campusNote {
+  margin: 0 0 var(--s4);
+  font-size: var(--fs-sm);
+  color: var(--g700);
+}
+
+.campusNote a { color: var(--azul); text-decoration: underline; }

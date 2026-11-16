@@ -4,8 +4,8 @@ import { catalogService, CatalogInput, CatalogKind } from '../services/catalogSe
 const catalogKey = (kind: CatalogKind) => ['catalog', kind] as const;
 
 /** Elementos de un catálogo maestro con su uso actual (HU-48). */
-export function useCatalog(kind: CatalogKind) {
-  const query = useQuery({ queryKey: catalogKey(kind), queryFn: () => catalogService.list(kind) });
+export function useCatalog(kind: CatalogKind, enabled = true) {
+  const query = useQuery({ queryKey: catalogKey(kind), queryFn: () => catalogService.list(kind), enabled });
   return { entries: query.data ?? [], loading: query.isLoading, error: query.isError, refresh: query.refetch };
 }
 
@@ -15,6 +15,7 @@ export function useCatalogMutations(kind: CatalogKind) {
   const refresh = () =>
     Promise.all([
       queryClient.invalidateQueries({ queryKey: catalogKey(kind) }),
+      ...(kind === 'periods' ? [queryClient.invalidateQueries({ queryKey: ['periods'] })] : []),
       // Los filtros de reportes y otros selectores se alimentan de estos catálogos.
       queryClient.invalidateQueries({ queryKey: ['reportFilterOptions'] }),
       queryClient.invalidateQueries({ queryKey: ['schools'] }),

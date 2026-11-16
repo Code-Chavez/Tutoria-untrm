@@ -12,7 +12,7 @@ test('la DBU crea, desactiva y elimina una facultad del catálogo', async ({ pag
   const name = unique('Facultad');
   await loginUi(page, accounts.admin);
   await goToMenu(page, 'Catálogos');
-  await page.getByRole('tab', { name: 'Facultades' }).click();
+  await expect(page.getByRole('link', { name: 'Facultades', exact: true })).toHaveAttribute('aria-current', 'page');
 
   await page.getByRole('button', { name: 'Nueva facultad' }).click();
   const form = page.getByRole('dialog', { name: 'Nueva facultad' });

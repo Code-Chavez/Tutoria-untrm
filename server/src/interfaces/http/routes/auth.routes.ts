@@ -1,7 +1,8 @@
 import { Router, type IRouter } from 'express';
 import { AuthController } from '../controllers/AuthController';
 import { container } from '@infrastructure/container';
-import { rateLimit } from '../middleware/rateLimit';
+import { rateLimit, effectiveMax } from '../middleware/rateLimit';
+import { env } from '@infrastructure/config/env';
 
 const controller = new AuthController(
   container.useCases.loginUseCase,
@@ -17,7 +18,7 @@ const router: IRouter = Router();
 // y el bloqueo deliberado de cuentas ajenas con intentos fallidos. Holgado para uso normal (una oficina tras un mismo NAT).
 const loginLimiter = rateLimit({
   windowMs: 5 * 60_000,
-  max: 100,
+  max: effectiveMax(100, env.LOGIN_RATE_LIMIT_MAX, env.NODE_ENV),
   message: 'Demasiados intentos de inicio de sesión desde esta red. Espera unos minutos e inténtalo de nuevo.',
 });
 router.post('/auth/login', loginLimiter, controller.login);
@@ -31,7 +32,7 @@ const forgotLimiter = rateLimit({
 });
 const resetLimiter = rateLimit({
   windowMs: 15 * 60_000,
-  max: 10,
+  max: effectiveMax(10, env.RESET_PASSWORD_RATE_LIMIT_MAX, env.NODE_ENV),
   message: 'Demasiados intentos. Espera unos minutos e inténtalo de nuevo.',
 });
 router.post('/auth/forgot-password', forgotLimiter, controller.requestPasswordReset);

@@ -1,19 +1,20 @@
 import { useState, type FormEvent } from 'react';
 import { normalizeEmail } from '@shared/utils/email';
-import { Navigate, useLocation, useNavigate, Link } from 'react-router-dom';
+import { Navigate, useLocation, Link } from 'react-router-dom';
 import { getApiErrorMessage } from '@shared/services/apiClient';
+import { hasReturnTo, isSafeReturnPath, takeReturnTo } from '@shared/utils/returnTo';
+import { tokenStorage } from '@shared/services/tokenStorage';
 import { useAuth } from '../hooks/useAuth';
 import { useBranding } from '@shared/theme/BrandingProvider';
 import styles from './LoginPage.module.css';
 
 interface LocationState {
-  from?: { pathname: string };
+  from?: { pathname: string; search?: string; hash?: string };
 }
 
 export function LoginPage() {
   const { isAuthenticated, login } = useAuth();
   const { branding, logoSrc } = useBranding();
-  const navigate = useNavigate();
   const location = useLocation();
 
   const [email, setEmail] = useState('');
@@ -21,9 +22,13 @@ export function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [redirectTo, setRedirectTo] = useState<string | null>(null);
 
   // Si ya hay sesión, esta pantalla no aporta nada.
-  if (isAuthenticated) {
+  // Tras iniciar sesión se va a la vista que se estaba usando; el destino se decide una vez y se aplica al renderizar (sin carreras con «/»).
+  if (redirectTo) return <Navigate to={redirectTo} replace />;
+  // Si ya hay sesión, esta pantalla no aporta nada.
+  if (isAuthenticated && !isSubmitting) {
     return <Navigate to="/" replace />;
   }
 
@@ -34,8 +39,14 @@ export function LoginPage() {
 
     try {
       await login({ email: normalizeEmail(email), password });
-      const destination = (location.state as LocationState | null)?.from?.pathname ?? '/';
-      navigate(destination, { replace: true });
+      // Primero la vista guardada al terminar la sesión por inactividad (solo para la misma persona); si no, la URL protegida que se intentó abrir.
+      const from = (location.state as LocationState | null)?.from;
+      const attempted = from ? `${from.pathname}${from.search ?? ''}${from.hash ?? ''}` : null;
+      const userId = tokenStorage.getUser<{ id: string }>()?.id ?? '';
+      // Si la sesión anterior terminó sola, la URL de `from` es de esa persona: solo vale si es quien entra (la guardada); si no, al inicio.
+      const sessionEnded = hasReturnTo();
+      const destination = takeReturnTo(userId) ?? (!sessionEnded && isSafeReturnPath(attempted) ? attempted : '/');
+      setRedirectTo(destination);
     } catch (err) {
       setError(getApiErrorMessage(err));
     } finally {

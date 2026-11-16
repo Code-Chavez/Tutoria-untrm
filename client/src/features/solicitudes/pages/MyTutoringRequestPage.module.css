@@ -216,3 +216,17 @@
 .historyResponse a {
   text-decoration: underline;
 }
+
+.studentLink {
+  display: inline-flex;
+  min-height: 44px;
+  align-items: center;
+  padding: 8px 14px;
+  border: 1px solid var(--borde);
+  border-radius: 8px;
+  color: var(--azul);
+  background: var(--blanco);
+  font-weight: 600;
+}
+.studentLink:hover { background: var(--celeste); }
+.studentLink:focus-visible { outline: 2px solid var(--azul-med); outline-offset: 3px; }

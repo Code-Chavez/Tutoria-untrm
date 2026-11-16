@@ -58,6 +58,7 @@ const ana = { id: 's1', studentCode: '20191234', firstName: 'Ana', lastName: 'To
 const authAs = (role: string): AuthContextValue => ({
   user: { id: 'u1', email: 'elena@untrm.edu.pe', firstName: 'Elena', lastName: 'Ramírez', role },
   isAuthenticated: true,
+  isSessionFresh: true,
   login: vi.fn(),
   logout: vi.fn(),
   markPasswordChanged: vi.fn(),

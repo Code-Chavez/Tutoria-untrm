@@ -1,0 +1,132 @@
+.demo {
+  margin: 0 0 var(--s4);
+  padding: var(--s3) var(--s4);
+  border-left: 4px solid var(--ambar, #b54708);
+  background: var(--ambar-bg, #fffaeb);
+  border-radius: var(--r-sm);
+  font-size: var(--fs-sm);
+  color: var(--g800, var(--g700));
+}
+
+.filters {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: var(--s3);
+  margin-bottom: var(--s4);
+}
+
+.filters label {
+  display: block;
+  margin-bottom: 4px;
+  font-size: var(--fs-xs);
+  font-weight: 600;
+  color: var(--g700);
+}
+
+.scroll {
+  overflow-x: auto;
+  /* Contiene el encabezado oculto para lectores de pantalla (position:absolute): sin esto escapa del scroll y estira la página en móvil. */
+  position: relative;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--fs-sm);
+}
+
+.table th,
+.table td {
+  padding: var(--s2) var(--s3);
+  text-align: left;
+  border-bottom: 1px solid var(--g100);
+  vertical-align: middle;
+}
+
+.table th {
+  font-size: var(--fs-xs);
+  color: var(--g600);
+  font-weight: 600;
+}
+
+.muted {
+  margin: 0;
+  color: var(--g600);
+  font-size: var(--fs-sm);
+}
+
+.error {
+  margin: 0 0 var(--s3);
+  color: var(--rojo, #b42318);
+  font-weight: 600;
+}
+
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+.visualSettings {
+  margin-bottom: 1rem;
+  padding: .85rem 1rem;
+  border: 1px solid var(--border, #d8e2ef);
+  border-radius: .75rem;
+  background: var(--surface, #fff);
+}
+
+.visualSettings summary {
+  cursor: pointer;
+  font-weight: 700;
+}
+
+.visualSettings label {
+  display: block;
+  margin-bottom: .25rem;
+}
+
+.visualSettings select {
+  max-width: 25rem;
+}
+
+.assetGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 19rem), 1fr));
+  gap: .65rem;
+  margin-top: .75rem;
+}
+
+.assetForm {
+  display: grid;
+  align-content: start;
+  gap: .35rem;
+  min-width: 0;
+  padding: .7rem;
+  border: 1px solid var(--border, #d8e2ef);
+  border-radius: .5rem;
+}
+
+.assetForm small:empty {
+  display: none;
+}
+
+.assetActions {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: .35rem;
+}
+
+.assetActions input {
+  min-width: 0;
+  max-width: 100%;
+}
+
+.textGrid { display: grid; gap: var(--s4); grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); margin-top: var(--s4); }
+.textForm { display: flex; flex-direction: column; gap: var(--s2); }
+.textForm label { font-size: var(--fs-sm); color: var(--g700); }
+.textForm input, .textForm textarea { width: 100%; box-sizing: border-box; padding: var(--s2) var(--s3); border: 1px solid var(--g300); border-radius: var(--r2, 6px); font: inherit; }
+.textForm textarea { resize: vertical; }

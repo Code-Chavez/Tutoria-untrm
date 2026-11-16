@@ -175,8 +175,16 @@ export class StudentController {
 
   list = async (req: Request, res: Response) => {
     try {
-      const { schoolId, cycle, isActive, isAtRisk, search } = req.query;
+      const { schoolId, cycle, isActive, isAtRisk, search, periodId } = req.query;
       const filters: StudentFilters = {};
+      if (periodId !== undefined) {
+        const parsed = z.uuid().safeParse(periodId);
+        if (!parsed.success) {
+          res.status(400).json({ error: 'El periodo indicado no es válido' });
+          return;
+        }
+        filters.periodId = parsed.data;
+      }
 
       if (typeof schoolId === 'string') filters.schoolId = schoolId;
       if (typeof search === 'string' && search.trim() !== '') filters.search = search.trim();

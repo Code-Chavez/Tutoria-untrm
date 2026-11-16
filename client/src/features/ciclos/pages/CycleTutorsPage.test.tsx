@@ -130,7 +130,7 @@ describe('CycleTutorsPage', () => {
 
     await userEvent.click(await screen.findByRole('button', { name: 'Todos los ciclos' }));
     expect(await screen.findByText('Excepción')).toBeInTheDocument();
-    await userEvent.click(screen.getByRole('button', { name: 'Quitar tutor del ciclo 3' }));
+    await userEvent.click(screen.getByRole('button', { name: 'Quitar asignación del ciclo 3' }));
 
     expect(mocked.remove).not.toHaveBeenCalled();
     expect(screen.getByRole('dialog')).toHaveTextContent('Los estudiantes conservarán el tutor que ya tienen.');

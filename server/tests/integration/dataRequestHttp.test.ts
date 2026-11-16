@@ -98,6 +98,33 @@ describe('pedidos de lista por HTTP: idempotencia y equivalencia', () => {
     mockMail.delivered = 0;
   });
 
+  it('consolida las escuelas activas de una facultad en un pedido persistido y un solo correo', async () => {
+    if (!dbUp) return;
+    const faculty = await prisma.faculty.create({ data: { name: `Facultad pedidos ${stamp}`, requestEmail: 'facultad@example.com' } });
+    try {
+      await prisma.school.createMany({ data: [
+        { name: 'Carrera Alfa', facultyId: faculty.id },
+        { name: 'Carrera Beta', facultyId: faculty.id },
+        { name: 'Carrera inactiva', facultyId: faculty.id, isActive: false },
+      ] });
+      const payload = { facultyId: faculty.id, operationId: uuid(99) };
+      expect((await post('a', payload)).status).toBe(403);
+      const sent = await post('admin', payload);
+      expect(sent.status).toBe(201);
+      expect((await json(sent)).request).toMatchObject({
+        facultyId: faculty.id, schoolId: null, schoolNames: ['Carrera Alfa', 'Carrera Beta'], toEmail: 'facultad@example.com',
+      });
+      expect((await post('admin', payload)).status).toBe(200);
+      expect(mockMail.delivered).toBe(1);
+      expect(await prisma.dataRequest.count({ where: { facultyId: faculty.id } })).toBe(1);
+    } finally {
+      await prisma.dataRequest.deleteMany({ where: { facultyId: faculty.id } });
+      await prisma.auditLog.deleteMany({ where: { entity: 'Faculty', entityId: faculty.id } });
+      await prisma.school.deleteMany({ where: { facultyId: faculty.id } });
+      await prisma.faculty.delete({ where: { id: faculty.id } });
+    }
+  });
+
   it('sin sesión responde 401 y no envía nada', async () => {
     if (!dbUp) return;
     const res = await post(null, ask([1], { operationId: uuid(1) }));
@@ -219,14 +246,18 @@ describe('pedidos de lista por HTTP: idempotencia y equivalencia', () => {
   it('con un envío en curso (PENDIENTE) otro equivalente recibe 409 DATA_REQUEST_IN_FLIGHT aunque lo confirme', async () => {
     if (!dbUp) return;
     let release: () => void = () => undefined;
-    mockMail.handler = () => new Promise<void>((resolve) => (release = resolve));
+    let mailReached = false;
+    mockMail.handler = () => new Promise<void>((resolve) => { mailReached = true; release = resolve; });
     const inFlight = post('a', ask([7], { operationId: uuid(60) }));
     let pendingId = '';
-    for (let i = 0; i < 100 && !pendingId; i += 1) {
+    // El pedido queda PENDIENTE antes de que el correo llegue al envío: se espera a ambos, o `release()` se llamaría antes de que
+    // exista y el envío esperaría su plazo (60 s) hasta quedar INCIERTO (202), lo que hacía fallar la prueba en un CI lento.
+    for (let i = 0; i < 500 && !(pendingId && mailReached); i += 1) {
       pendingId = (await prisma.dataRequest.findFirst({ where: { schoolId, status: 'PENDIENTE' } }))?.id ?? '';
-      if (!pendingId) await new Promise((r) => setTimeout(r, 20));
+      if (!(pendingId && mailReached)) await new Promise((r) => setTimeout(r, 20));
     }
     expect(pendingId).not.toBe('');
+    expect(mailReached).toBe(true);
 
     const blocked = await post('a', ask([7], { operationId: uuid(61), confirmDuplicateOf: pendingId }));
 

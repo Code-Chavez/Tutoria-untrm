@@ -72,7 +72,7 @@ const WRITE_ROLES = ['Coordinador', 'Administrador DBU'];
 const INTERVIEW_ROLES = ['Docente Tutor', 'Administrador DBU'];
 const PAGE_SIZE = 10;
 
-const EMPTY_FILTERS: StudentFilterValues = { search: '', schoolId: '', cycle: '', status: '' };
+const EMPTY_FILTERS: StudentFilterValues = { search: '', schoolId: '', cycle: '', status: '', periodId: '' };
 
 // Accesos del menú del tutor (Entrevista inicial, Seguimiento, Derivar caso): abren esta lista en modo
 // «elegir tutorado» para que cada acceso conduzca a su formulario real (A15).
@@ -90,7 +90,8 @@ export const StudentsPage: React.FC = () => {
   const canWrite = user ? WRITE_ROLES.includes(user.role) : false;
   const canConductInterview = user ? INTERVIEW_ROLES.includes(user.role) : false;
 
-  const { students, schools, tutors, loading, error, refresh } = useStudents();
+  const periodId = url.get('periodo');
+  const { students, schools, tutors, periods = [], periodsError, retryPeriods, loading, error, refresh } = useStudents(periodId, true);
 
   const requestedAction = url.get('accion');
   const pickAction: PickAction | null =
@@ -105,7 +106,7 @@ export const StudentsPage: React.FC = () => {
   // Lo que conviene conservar al recargar o compartir el enlace vive en la URL: los filtros (q, escuela, ciclo, estado), la página
   // (pagina) y la ventana abierta con el estudiante sobre el que se abrió (?dialogo=<ventana>&estudiante=<id>).
   const [q, schoolParam, cycleParam, statusParam] = [url.get('q'), url.get('escuela'), url.get('ciclo'), url.get('estado')];
-  const filters = useMemo<StudentFilterValues>(() => ({ search: q, schoolId: schoolParam, cycle: cycleParam, status: statusParam }), [q, schoolParam, cycleParam, statusParam]);
+  const filters = useMemo<StudentFilterValues>(() => ({ search: q, schoolId: schoolParam, cycle: cycleParam, status: statusParam, periodId }), [q, schoolParam, cycleParam, statusParam, periodId]);
   const page = Math.max(1, Number.parseInt(url.get('pagina'), 10) || 1);
   const setPage = (next: number) => url.set({ pagina: next > 1 ? String(next) : null }, { replace: true });
 
@@ -216,7 +217,7 @@ export const StudentsPage: React.FC = () => {
   };
 
   const cycles = useMemo(
-    () => Array.from(new Set(students.map((s) => s.cycle))).sort((a, b) => a - b),
+    () => Array.from(new Set(students.map((s) => s.periodCycle ?? s.cycle))).sort((a, b) => a - b),
     [students],
   );
 
@@ -224,7 +225,7 @@ export const StudentsPage: React.FC = () => {
     const term = filters.search.trim().toLowerCase();
     return students.filter((s) => {
       if (filters.schoolId && s.schoolId !== filters.schoolId) return false;
-      if (filters.cycle && String(s.cycle) !== filters.cycle) return false;
+      if (filters.cycle && String(s.periodCycle ?? s.cycle) !== filters.cycle) return false;
       if (filters.status === 'active' && !s.isActive) return false;
       if (filters.status === 'inactive' && s.isActive) return false;
       if (filters.status === 'risk' && !s.isAtRisk) return false;
@@ -240,7 +241,7 @@ export const StudentsPage: React.FC = () => {
 
   // Reinicia la página cuando cambian los filtros.
   const handleFilters = (next: StudentFilterValues) => {
-    url.set({ q: next.search, escuela: next.schoolId, ciclo: next.cycle, estado: next.status, pagina: null }, { replace: true });
+    url.set({ q: next.search, escuela: next.schoolId, ciclo: next.cycle, estado: next.status, periodo: next.periodId, pagina: null }, { replace: true });
   };
 
   const handleOpenModal = (student?: Student) => url.set(student ? { dialogo: 'editar', estudiante: student.id } : { dialogo: 'nuevo', estudiante: null });
@@ -537,11 +538,17 @@ export const StudentsPage: React.FC = () => {
         <TutoradoFilters
           values={filters}
           schools={schools}
+          periods={periods}
           cycles={cycles}
           onChange={handleFilters}
           onClear={() => handleFilters(EMPTY_FILTERS)}
         />
 
+        {periodsError && (
+          <p role="alert">
+            No se pudieron cargar los periodos. <Button variant="ghost" size="sm" onClick={() => retryPeriods()}>Reintentar periodos</Button>
+          </p>
+        )}
         {loading ? (
           <TableSkeleton rows={6} columns={canWrite || canConductInterview ? 7 : 6} />
         ) : error ? (
@@ -555,16 +562,18 @@ export const StudentsPage: React.FC = () => {
         ) : filtered.length === 0 ? (
           <EmptyState
             icon={<SearchIcon size={26} />}
-            title={total === 0 ? 'Aún no hay estudiantes registrados' : 'Sin resultados'}
+            title={total === 0 && periodId ? 'Sin estudiantes matriculados en este periodo' : total === 0 ? 'Aún no hay estudiantes registrados' : 'Sin resultados'}
             description={
-              total === 0
+              total === 0 && periodId
+                ? 'Prueba con otro periodo o revisa la matrícula en Carga de estudiantes.'
+                : total === 0
                 ? canWrite
                   ? 'Registra un estudiante o utiliza la carga masiva para importarlos desde Excel.'
                   : 'Aún no tienes estudiantes asignados. La coordinación de tu escuela los asigna por ciclo en «Asignación por ciclo»; cuando lo haga, aparecerán aquí.'
                 : 'No se encontraron estudiantes con los filtros aplicados. Prueba ajustarlos.'
             }
             action={
-              total === 0 && canWrite ? (
+              total === 0 && !periodId && canWrite ? (
                 <>
                   <Button icon={<PlusIcon size={16} />} onClick={() => handleOpenModal()}>
                     Nuevo estudiante

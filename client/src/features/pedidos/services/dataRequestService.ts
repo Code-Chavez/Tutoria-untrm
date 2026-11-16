@@ -14,7 +14,10 @@ export interface DataRequest {
   createdAt: string;
   periodId: string;
   periodName: string;
-  schoolId: string;
+  schoolId: string | null;
+  facultyId?: string | null;
+  facultyName?: string | null;
+  schoolNames?: string[];
   schoolName: string;
   kind: DataRequestKind;
   toEmail: string;
@@ -26,7 +29,8 @@ export interface DataRequest {
 }
 
 export interface SendDataRequestInput {
-  schoolId: string;
+  schoolId?: string;
+  facultyId?: string;
   cycles: number[];
   note?: string;
   kind?: DataRequestKind;

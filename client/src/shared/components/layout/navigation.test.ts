@@ -40,7 +40,7 @@ describe('navegación (UI-01, UI-04, UI-07)', () => {
   });
 
   it('las entradas de gestión no comparten icono', () => {
-    const labels = ['Periodo académico', 'Plan semestral', 'Informes', 'Amonestaciones', 'Configuración', 'Seguimiento DBU'];
+    const labels = ['Periodo académico', 'Informes', 'Amonestaciones', 'Configuración', 'Seguimiento DBU'];
     const icons = labels.map((l) => ALL_NAV_ITEMS.find((i) => i.label === l)?.Icon);
     expect(icons.every(Boolean)).toBe(true);
     expect(new Set(icons).size).toBe(labels.length);
@@ -82,11 +82,11 @@ describe('navegación (UI-01, UI-04, UI-07)', () => {
       expect(labelsFor('Administrador DBU')).toEqual([
         'Panel de inicio',
         'Estudiantes', 'Solicitudes de tutoría', 'Casos derivados', 'Seguimiento DBU',
-        'Periodo académico', 'Plan semestral', 'Informes', 'Amonestaciones',
+        'Periodo académico', 'Informes', 'Amonestaciones',
         'Configuración',
       ]);
       expect(labelsFor('Administrador DBU').length).toBeLessThanOrEqual(10);
-      expect(labelsFor('Coordinador')).toEqual(['Panel de inicio', 'Estudiantes', 'Solicitudes de tutoría', 'Periodo académico', 'Plan semestral', 'Informes', 'Amonestaciones', 'Configuración']);
+      expect(labelsFor('Coordinador')).toEqual(['Panel de inicio', 'Estudiantes', 'Solicitudes de tutoría', 'Periodo académico', 'Informes', 'Amonestaciones', 'Configuración']);
       expect(labelsFor('Vicerrectorado')).toEqual(['Panel de inicio', 'Informes', 'Configuración']);
     });
 
@@ -100,7 +100,7 @@ describe('navegación (UI-01, UI-04, UI-07)', () => {
       const tabs = (section: 'periodo' | 'informes' | 'configuracion', role: string) => tabsFor(section, ROLE_CODES[role]).map((t) => t.label);
 
       it('el periodo académico sigue el flujo real: pedir listas, cargar, asignar por ciclo y cerrar', () => {
-        expect(tabs('periodo', 'Administrador DBU')).toEqual(['Pedir listas', 'Carga de estudiantes', 'Carga de docentes', 'Asignación por ciclo', 'Cierre de periodo', 'Pendientes']);
+        expect(tabs('periodo', 'Administrador DBU')).toEqual(['Pedir listas', 'Carga de estudiantes', 'Carga de docentes', 'Asignación por ciclo', 'Docentes tutores', 'Cierre de periodo', 'Certificados', 'Pendientes']);
         expect(tabs('periodo', 'Coordinador')).toEqual(['Pedir listas', 'Carga de estudiantes', 'Asignación por ciclo', 'Pendientes']);
         expect(tabs('periodo', 'Docente Tutor')).toEqual([]);
       });
@@ -115,9 +115,9 @@ describe('navegación (UI-01, UI-04, UI-07)', () => {
 
       it('todo lo que se configura está en Configuración, y cada rol ve solo lo suyo', () => {
         expect(tabs('configuracion', 'Administrador DBU')).toEqual([
-          'Correos de las escuelas', 'Sedes', 'Evaluación de tutoría', 'Catálogos', 'Usuarios y roles', 'Roles y permisos', 'Parámetros', 'Identidad visual', 'Bitácora de auditoría',
+          'Correos para pedidos de listas', 'Sedes', 'Evaluación de tutoría', 'Catálogos', 'Usuarios y roles', 'Roles y permisos', 'Parámetros', 'Identidad visual', 'Bitácora de auditoría',
         ]);
-        expect(tabs('configuracion', 'Coordinador')).toEqual(['Correos de las escuelas']);
+        expect(tabs('configuracion', 'Coordinador')).toEqual(['Correos para pedidos de listas']);
         expect(tabs('configuracion', 'Vicerrectorado')).toEqual(['Sedes']);
         for (const role of ['Docente Tutor', 'Tutorado', 'Profesional de Servicio', 'Decano']) expect(tabs('configuracion', role), role).toEqual([]);
       });

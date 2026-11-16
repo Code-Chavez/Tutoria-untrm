@@ -137,7 +137,7 @@ test('administrador', async ({ page }) => {
   await page.keyboard.press('Escape');
 
   await goToMenu(page, 'Catálogos');
-  await page.getByRole('tab', { name: 'Facultades' }).waitFor();
+  await page.getByRole('heading', { name: 'Catálogos maestros' }).waitFor();
   await shot(page, '30-catalogos');
   await goToMenu(page, 'Parámetros');
   await page.getByRole('heading', { level: 1, name: 'Parámetros del sistema' }).first().waitFor();

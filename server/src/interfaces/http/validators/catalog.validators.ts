@@ -8,7 +8,7 @@ const date = z.coerce.date();
 // Campos de alta por tipo de catálogo (HU-48). En la edición todo es opcional
 // y el código (ciclos, servicios, motivos) no se puede cambiar.
 const CREATE: Record<CatalogKind, z.ZodObject<z.ZodRawShape>> = {
-  faculties: z.object({ name, isActive }),
+  faculties: z.object({ name, isActive, requestEmail: z.string().trim().toLowerCase().pipe(z.email()).nullable().optional() }),
   schools: z.object({ name, facultyId: z.string().uuid('La facultad debe ser un UUID válido'), cycleCount: z.number().int().min(1).max(14).optional(), isActive }),
   periods: z.object({ name, startDate: date, endDate: date, isActive }),
   cycles: z.object({
@@ -30,5 +30,9 @@ const CREATE: Record<CatalogKind, z.ZodObject<z.ZodRawShape>> = {
 
 export const catalogCreateSchema = (kind: CatalogKind) => CREATE[kind];
 
-export const catalogUpdateSchema = (kind: CatalogKind) =>
-  CREATE[kind].omit({ code: true } as never).partial() as z.ZodObject<z.ZodRawShape>;
+export const catalogUpdateSchema = (kind: CatalogKind): z.ZodObject<z.ZodRawShape> => {
+  const schema = CREATE[kind];
+  // `omit` de una clave que no existe lanza un Error (no un ZodError) y la edición respondía 500: solo se quita `code` donde lo hay.
+  const editable = 'code' in schema.shape ? schema.omit({ code: true } as never) : schema;
+  return editable.partial() as z.ZodObject<z.ZodRawShape>;
+};

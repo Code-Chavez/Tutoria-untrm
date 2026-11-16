@@ -1,11 +1,13 @@
 import React from 'react';
 import { SearchField, SelectField, Button } from '@shared/components/ui';
 import { RefreshIcon } from '@shared/components/icons';
+import type { StudentPeriodOption } from '../services/studentService';
 import { School } from '../services/schoolService';
 import styles from './TutoradoFilters.module.css';
 
 export interface StudentFilterValues {
   search: string;
+  periodId: string;
   schoolId: string;
   cycle: string;
   status: string;
@@ -14,6 +16,7 @@ export interface StudentFilterValues {
 interface TutoradoFiltersProps {
   values: StudentFilterValues;
   schools: School[];
+  periods: StudentPeriodOption[];
   cycles: number[];
   onChange: (values: StudentFilterValues) => void;
   onClear: () => void;
@@ -22,13 +25,14 @@ interface TutoradoFiltersProps {
 export const TutoradoFilters: React.FC<TutoradoFiltersProps> = ({
   values,
   schools,
+  periods,
   cycles,
   onChange,
   onClear,
 }) => {
   const set = (patch: Partial<StudentFilterValues>) => onChange({ ...values, ...patch });
   const hasFilters =
-    values.search !== '' || values.schoolId !== '' || values.cycle !== '' || values.status !== '';
+    values.periodId !== '' || values.search !== '' || values.schoolId !== '' || values.cycle !== '' || values.status !== '';
 
   return (
     <div className={styles.bar}>
@@ -39,6 +43,22 @@ export const TutoradoFilters: React.FC<TutoradoFiltersProps> = ({
         aria-label="Buscar estudiante"
         wrapClassName={styles.search}
       />
+      <SelectField
+        value={values.periodId}
+        onChange={(event) => set({ periodId: event.target.value, cycle: '' })}
+        aria-label="Filtrar por periodo"
+        wrapClassName={styles.selectSm}
+      >
+        <option value="">Todos los periodos</option>
+        {values.periodId && !periods.some((period) => period.id === values.periodId) && (
+          <option value={values.periodId}>Periodo seleccionado</option>
+        )}
+        {periods.map((period) => (
+          <option key={period.id} value={period.id}>
+            {period.name}{period.isActive ? ' (vigente)' : ''}
+          </option>
+        ))}
+      </SelectField>
       <SelectField
         value={values.schoolId}
         onChange={(e) => set({ schoolId: e.target.value })}

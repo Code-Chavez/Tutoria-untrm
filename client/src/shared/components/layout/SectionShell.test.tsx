@@ -35,11 +35,20 @@ describe('SectionShell (pantallas juntas con pestañas)', () => {
     renderAt('/asignacion');
     await userEvent.click(screen.getByText('Organización', { exact: true }));
     expect(screen.getByText('Organización', { exact: true }).closest('details')).not.toHaveAttribute('open');
-    expect(screen.getByLabelText('Asignación por ciclo')).not.toBeVisible();
+    expect(screen.getByRole('link', { name: /^Asignación por ciclo/, hidden: true })).not.toBeVisible();
     expect(screen.getByText('Pantalla de asignación')).toBeInTheDocument();
-    expect(screen.getByRole('link', { name: 'Pendientes' })).toBeVisible();
+    expect(screen.getByRole('link', { name: /^Pendientes/ })).toBeVisible();
     await userEvent.click(screen.getByText('Organización', { exact: true }));
     expect(screen.getByRole('link', { name: 'Asignación por ciclo' })).toHaveAttribute('aria-current', 'page');
+  });
+
+  it('el nombre accesible de cada pestaña contiene su texto visible y no lo sustituye un aria-label', () => {
+    role = 'Administrador DBU';
+    renderAt('/asignacion');
+    for (const link of screen.getAllByRole('link')) {
+      expect(link).not.toHaveAttribute('aria-label');
+      expect(link).toHaveAccessibleName(new RegExp('^' + link.children[1].textContent));
+    }
   });
 
   it('conserva la descripción accesible y permite descartar la ayuda con Escape', async () => {
@@ -79,7 +88,7 @@ describe('SectionShell (pantallas juntas con pestañas)', () => {
 
     const nav = screen.getByRole('navigation', { name: 'Secciones de Periodo académico' });
     expect(nav).toBeInTheDocument();
-    expect(screen.getAllByRole('link').map((a) => a.getAttribute('aria-label') ?? a.textContent)).toEqual(['Pedir listas', 'Carga de estudiantes', 'Carga de docentes', 'Asignación por ciclo', 'Pendientes', 'Cierre de periodo']);
+    expect(screen.getAllByRole('link').map((a) => a.children[1].textContent)).toEqual(['Pedir listas', 'Carga de estudiantes', 'Carga de docentes', 'Asignación por ciclo', 'Docentes tutores', 'Pendientes', 'Certificados', 'Cierre de periodo']);
     expect(screen.getByRole('link', { name: 'Asignación por ciclo' })).toHaveAttribute('aria-current', 'page');
     expect(screen.getByText('Pantalla de asignación')).toBeInTheDocument();
   });
@@ -88,7 +97,7 @@ describe('SectionShell (pantallas juntas con pestañas)', () => {
     role = 'Coordinador';
     renderAt('/pedir-listas');
 
-    expect(screen.getAllByRole('link').map((a) => a.getAttribute('aria-label') ?? a.textContent)).toEqual(['Pedir listas', 'Carga de estudiantes', 'Asignación por ciclo', 'Pendientes']);
+    expect(screen.getAllByRole('link').map((a) => a.children[1].textContent)).toEqual(['Pedir listas', 'Carga de estudiantes', 'Asignación por ciclo', 'Pendientes']);
   });
 
   it('con una sola pestaña no dibuja la barra (solo está la pantalla)', () => {
@@ -117,7 +126,7 @@ describe('SectionShell (pantallas juntas con pestañas)', () => {
     const nav = screen.getByRole('navigation', { name: 'Secciones de Configuración' });
     expect(nav).toHaveTextContent('Organización');
     expect(nav).toHaveTextContent('Sistema y acceso');
-    expect(screen.getByRole('link', { name: 'Correos de las escuelas' })).toHaveAttribute('aria-current', 'page');
+    expect(screen.getByRole('link', { name: 'Correos para pedidos de listas' })).toHaveAttribute('aria-current', 'page');
     expect(screen.queryByRole('button', { name: 'Ver más pestañas' })).not.toBeInTheDocument();
     await userEvent.selectOptions(screen.getByLabelText('Sección de configuración'), '/sedes');
     expect(screen.getByText('Pantalla de sedes')).toBeInTheDocument();

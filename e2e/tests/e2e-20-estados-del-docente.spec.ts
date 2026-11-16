@@ -1,8 +1,8 @@
-import { execFileSync } from 'node:child_process';
 import { expect, test } from '@playwright/test';
 import { accounts } from '../support/accounts';
 import { api, apiLogin } from '../support/api';
 import { createPortalStudent, ensureAnaWithElena, releaseCycles, userId } from '../support/setup';
+import { runSql, stackDatabase, stopMailServer } from '../support/stack';
 import { goToMenu, loginUi } from '../support/ui';
 
 // E2E-20: los tres estados en que una designación de docente deja un ciclo sin tutor efectivo — RECHAZO, SIN RESPUESTA y CORREO NO
@@ -11,6 +11,8 @@ import { goToMenu, loginUi } from '../support/ui';
 // docs/DECISIONES_DBU_COBERTURA_Y_PLAN_2026-10-18.md, temas 1 y 2): las pruebas marcadas «comportamiento actual» cambiarán cuando la
 // DBU decida.
 test.describe.configure({ mode: 'serial' });
+// Dos casos necesitan actuar sobre la pila probada (vencer un enlace, dejar sin correo): requieren E2E_DATABASE_URL y el puerto SMTP (E2E_SMTP_PORT, 1025 por defecto).
+test.skip(!stackDatabase(), 'Defina E2E_DATABASE_URL con la base de la pila probada (ver e2e/README.md).');
 
 const MAILPIT = process.env.E2E_MAILPIT_URL ?? 'http://localhost:8025';
 const CYCLE = 10;
@@ -22,7 +24,6 @@ let elenaId = '';
 let student: Awaited<ReturnType<typeof createPortalStudent>>;
 
 const clear = () => releaseCycles(SCHOOL, accounts.tutor.email, [CYCLE]);
-const docker = (...args: string[]) => execFileSync('docker', args, { encoding: 'utf8', timeout: 60_000 });
 
 async function coordinatorToken() {
   return apiLogin(accounts.coordinator);
@@ -68,9 +69,12 @@ test.beforeAll(async () => {
   student = await createPortalStudent(setup.adminToken, elenaId, { cycle: CYCLE, assignToElena: false });
 });
 
+// Función que vuelve a levantar el servidor de correo si una prueba lo dejó detenido.
+let restoreMail = null as (() => void) | null;
+
 test.afterAll(async () => {
   try {
-    docker('start', 'sit-mailpit'); // por si una prueba lo dejó detenido
+    restoreMail?.();
   } catch {
     /* ya estaba levantado */
   }
@@ -116,11 +120,8 @@ test('SIN RESPUESTA: el enlace vence sin que el docente responda; aparece como p
   expect(await designate()).toBe(true);
   const link = await latestAcceptanceLink();
 
-  // Se hace vencer el enlace de ESTA designación (datos de prueba del ciclo 10 de Sistemas, en la base de desarrollo)
-  docker(
-    'exec', 'sit-postgres', 'psql', '-U', 'sit_user', '-d', 'sit_db', '-c',
-    `UPDATE cycle_tutor_assignments SET acceptance_expires_at = now() - interval '1 hour' WHERE cycle = ${CYCLE} AND acceptance_status = 'PENDIENTE' AND school_id = '${schoolId}'`,
-  );
+  // Se hace vencer el enlace de ESTA designación (ciclo 10 de Sistemas, en la base de la pila probada)
+  runSql(`UPDATE cycle_tutor_assignments SET acceptance_expires_at = now() - interval '1 hour' WHERE cycle = ${CYCLE} AND acceptance_status = 'PENDIENTE' AND school_id = '${schoolId}'`);
 
   const items = await pendingItems();
   expect(items.map((i) => i.kind)).toContain('DESIGNATION_NO_RESPONSE');
@@ -140,7 +141,7 @@ test('SIN RESPUESTA: el enlace vence sin que el docente responda; aparece como p
 test('CORREO NO ENVIADO: si el servidor de correo no responde, se avisa a quien designó y queda como pendiente; al reenviar desaparece', async ({ page }) => {
   await clear();
   await clearMailbox();
-  docker('stop', 'sit-mailpit');
+  restoreMail = stopMailServer();
   try {
     expect(await designate()).toBe(false); // el correo no salió, y la API lo dice
 
@@ -154,7 +155,8 @@ test('CORREO NO ENVIADO: si el servidor de correo no responde, se avisa a quien 
     await expect(item).toContainText('Correo no enviado');
     await expect(item).toContainText('no recibió el enlace');
   } finally {
-    docker('start', 'sit-mailpit');
+    restoreMail?.();
+    restoreMail = null;
   }
 
   // Con el correo otra vez disponible, la coordinación reenvía y el pendiente desaparece

@@ -1,0 +1,62 @@
+.filters {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+  gap: var(--s3);
+  margin-bottom: var(--s4);
+  align-items: end;
+}
+
+.filters label {
+  display: block;
+  margin-bottom: 4px;
+  font-size: var(--fs-xs);
+  font-weight: 600;
+  color: var(--g700);
+}
+
+.scroll {
+  overflow-x: auto;
+  /* Contiene el encabezado oculto para lectores de pantalla (position:absolute): sin esto escapa del scroll y estira la página en móvil. */
+  position: relative;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--fs-sm);
+}
+
+.table th,
+.table td {
+  padding: var(--s2) var(--s3);
+  text-align: left;
+  border-bottom: 1px solid var(--g100);
+  vertical-align: middle;
+}
+
+.table th {
+  font-size: var(--fs-xs);
+  color: var(--g600);
+  font-weight: 600;
+}
+
+.cycles {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s1);
+}
+
+.error {
+  margin: 0 0 var(--s3);
+  color: var(--rojo, #b42318);
+  font-weight: 600;
+}
+
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}

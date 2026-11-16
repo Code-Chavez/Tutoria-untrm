@@ -1,13 +1,13 @@
 import { randomUUID } from 'node:crypto';
 import { promises as fs } from 'node:fs';
 import path from 'node:path';
-import { EvidenceStorage } from '@application/ports/EvidenceStorage';
+import { EvidenceStorage, StoredFileReader } from '@application/ports/EvidenceStorage';
 import { env } from '@infrastructure/config/env';
 
 // Guarda las evidencias en disco, fuera del repositorio de código. La clave
 // de almacenamiento es siempre un UUID generado aquí (nunca el nombre de
 // archivo original) para que un nombre malicioso no pueda escapar la carpeta.
-export class LocalEvidenceStorage implements EvidenceStorage {
+export class LocalEvidenceStorage implements EvidenceStorage, StoredFileReader {
   private readonly baseDir = path.resolve(process.cwd(), env.EVIDENCE_STORAGE_DIR);
 
   async save(buffer: Buffer, originalFileName: string): Promise<string> {
@@ -20,6 +20,11 @@ export class LocalEvidenceStorage implements EvidenceStorage {
 
   resolvePath(storageKey: string): string {
     return path.join(this.baseDir, storageKey);
+  }
+
+  read(storageKey: string): Promise<Buffer> {
+    // Solo el nombre del archivo: la clave nunca puede salir de la carpeta de evidencias.
+    return fs.readFile(path.join(this.baseDir, path.basename(storageKey)));
   }
 
   async delete(storageKey: string): Promise<void> {

@@ -19,10 +19,11 @@ const mockedProfile = vi.mocked(profileService);
 let loginError: unknown = null;
 
 function Probe() {
-  const { user, login, logout } = useAuth();
+  const { user, isSessionFresh, login, logout } = useAuth();
   return (
     <>
       <span data-testid="user">{user?.firstName ?? 'nadie'}</span>
+      <span data-testid="fresh">{String(isSessionFresh)}</span>
       <button
         onClick={() => {
           login({ email: 'b@untrm.edu.pe', password: 'x' }).catch((e) => {
@@ -102,6 +103,33 @@ describe('AuthProvider: aislamiento de datos entre cuentas (A05)', () => {
 
     expect(screen.getByTestId('user').textContent).toBe('Beatriz');
     expect(queryClient.getQueryData(['homePanel'])).toBeUndefined();
+  });
+
+  it('los permisos restaurados de la sesión guardada no son vigentes hasta confirmarlos con el servidor; los de un inicio de sesión sí', async () => {
+    tokenStorage.save('a', 'r', { id: 'u1', email: 'a@untrm.edu.pe', firstName: 'Ana', lastName: 'A', role: 'Revisor', permissions: ['reports:read'] } as never);
+    let answer: (value: never) => void = () => undefined;
+    mockedProfile.get.mockReturnValue(new Promise((resolve) => (answer = resolve)));
+    renderProvider();
+    expect(screen.getByTestId('fresh').textContent).toBe('false');
+
+    await act(async () => {
+      answer({ id: 'u1', email: 'a@untrm.edu.pe', firstName: 'Ana', lastName: 'A', role: 'Revisor', permissions: ['reports:read', 'users:read'] } as never);
+    });
+    expect(screen.getByTestId('fresh').textContent).toBe('true');
+
+    mocked.login.mockResolvedValue({ accessToken: 'a2', refreshToken: 'r2', user: { id: 'u2', email: 'b@untrm.edu.pe', firstName: 'Beatriz', lastName: 'B', role: 'Revisor', permissions: [] } });
+    mockedProfile.get.mockReturnValue(new Promise(() => undefined)); // la confirmación posterior no se resuelve
+    await act(async () => {
+      screen.getByText('entrar').click();
+    });
+    expect(screen.getByTestId('fresh').textContent).toBe('true');
+  });
+
+  it('si no se puede consultar el servidor, la sesión guardada queda confirmada con lo que tenía', async () => {
+    tokenStorage.save('a', 'r', { id: 'u1', email: 'a@untrm.edu.pe', firstName: 'Ana', lastName: 'A', role: 'Revisor', permissions: ['reports:read'] } as never);
+    renderProvider(); // el perfil falla (beforeEach)
+    await act(async () => undefined);
+    expect(screen.getByTestId('fresh').textContent).toBe('true');
   });
 
   it('si el login falla no hay cambio de cuenta: se conserva la caché actual', async () => {

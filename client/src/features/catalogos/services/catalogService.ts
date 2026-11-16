@@ -11,6 +11,8 @@ export interface CatalogEntry {
   /** Ciclos, servicios y motivos: el valor que referencian los demás datos. */
   code: string | null;
   facultyId: string | null;
+  campuses?: { id: string; name: string; isActive: boolean }[];
+  requestEmail?: string | null;
   cycleCount?: number;
   startDate: string | null;
   endDate: string | null;
@@ -23,6 +25,7 @@ export interface CatalogInput {
   isActive?: boolean;
   code?: string;
   facultyId?: string;
+  requestEmail?: string | null;
   cycleCount?: number;
   startDate?: string;
   endDate?: string;

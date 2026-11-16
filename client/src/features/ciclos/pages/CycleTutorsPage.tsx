@@ -204,7 +204,7 @@ export function CycleTutorsPage() {
                     const otherCycles = rows.filter((other) => other.cycle !== row.cycle && other.assignment?.tutorId === selectedId).map((other) => other.cycle);
                     return (
                     <li key={row.cycle} className={styles.row} aria-label={`Asignación del ciclo ${row.cycle}`}>
-                      <div className={styles.rowHeading}><h3 className={styles.cycle}>Ciclo {row.cycle}</h3>
+                      <div className={styles.rowHeading}><h2 className={styles.cycle}>Ciclo {row.cycle}</h2>
                       <span className={styles.count}>
                         {row.enrolled} estudiante{row.enrolled !== 1 ? 's' : ''}
                       </span></div>
@@ -251,7 +251,7 @@ export function CycleTutorsPage() {
                         </Button>
                       )}
                       {row.assignment && (
-                        <Button variant="ghost" size="sm" disabled={busy} aria-label={`Quitar tutor del ciclo ${row.cycle}`} onClick={() => setRemoving(row.cycle)}>
+                        <Button variant="ghost" size="sm" disabled={busy} aria-label={`Quitar asignación del ciclo ${row.cycle}`} onClick={() => setRemoving(row.cycle)}>
                           Quitar asignación
                         </Button>
                       )}

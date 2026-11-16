@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '@features/auth/hooks/useAuth';
 import { useBranding } from '@shared/theme/BrandingProvider';
-import { ChevronDownIcon, ChevronRightIcon, CloseIcon } from '@shared/components/icons';
+import { ChevronDownIcon, ChevronLeftIcon, ChevronRightIcon, CloseIcon } from '@shared/components/icons';
 import { getRoleLabel } from '@shared/utils/roleLabel';
 import { hasAnyPermission } from '../../routePermissions';
 import { findActiveItem, NAV, ROLE_CODES, type NavGroup, type NavItem } from './navigation';
@@ -23,13 +23,15 @@ function readState(): Record<string, boolean> {
 
 interface SidebarProps {
   drawerOpen: boolean;
+  compact?: boolean;
+  onToggleCompact?: () => void;
   onClose: () => void;
 }
 
 // El id de un grupo no puede llevar espacios (en aria-controls cada espacio separaría otro identificador): «Atención a estudiantes» → «atencion-a-estudiantes».
 const groupId = (title: string) => `nav-group-${title.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().replace(/[^a-z0-9]+/g, '-')}`;
 
-export function Sidebar({ drawerOpen, onClose }: SidebarProps) {
+export function Sidebar({ drawerOpen, onClose, compact = false, onToggleCompact }: SidebarProps) {
   const { user } = useAuth();
   const { branding, logoSrc } = useBranding();
   const roleCode = user ? ROLE_CODES[user.role] : undefined;
@@ -61,6 +63,9 @@ export function Sidebar({ drawerOpen, onClose }: SidebarProps) {
       return next;
     });
 
+  const CompactIcon = compact ? ChevronRightIcon : ChevronLeftIcon;
+  const compactLabel = compact ? 'Mostrar menú principal completo' : 'Mostrar solo iconos del menú principal';
+
   return (
     <>
       <div
@@ -68,7 +73,12 @@ export function Sidebar({ drawerOpen, onClose }: SidebarProps) {
         onClick={onClose}
         aria-hidden="true"
       />
-      <aside className={`${styles.side} ${drawerOpen ? styles.open : ''}`}>
+      <aside data-compact={compact} className={`${styles.side} ${drawerOpen ? styles.open : ''}`}>
+        {onToggleCompact && (
+          <button type="button" className={styles.compactBtn} onClick={onToggleCompact} aria-label={compactLabel} title={compactLabel}>
+            <CompactIcon size={18} />
+          </button>
+        )}
         <div className={styles.brand}>
           <img src={logoSrc} alt="" className={styles.logo} />
           <div className={styles.brandText}>
@@ -104,20 +114,21 @@ export function Sidebar({ drawerOpen, onClose }: SidebarProps) {
                 ) : (
                   <span className={styles.group}>{group.title}</span>
                 )}
-                {expanded && <div id={groupId(group.title)}>{visible.map((item) => (
+                <div id={groupId(group.title)} hidden={!expanded}>{visible.map((item) => (
                   <Link
                     key={item.label}
                     to={item.action ? `${item.path}?accion=${item.action}` : item.path}
                     onClick={onClose}
                     className={`${styles.link} ${isActive(item) ? styles.active : ''}`}
+                    title={compact ? item.label : undefined}
                     aria-current={isActive(item) ? 'page' : undefined}
                   >
                     <span className={styles.icon}>
                       <item.Icon size={19} />
                     </span>
-                    {item.label}
+                    <span className={styles.linkLabel}>{item.label}</span>
                   </Link>
-                ))}</div>}
+                ))}</div>
               </div>
             );
           })}

@@ -1,3 +1,4 @@
+import { PrismaCatalogRepository } from '@infrastructure/repositories/PrismaCatalogRepository';
 import { Request, Response } from 'express';
 import {
   CreateCatalogEntryUseCase,
@@ -281,5 +282,23 @@ describe('Catálogos maestros (HU-48)', () => {
     it('sin usuario autenticado (seed, migraciones) no audita', () => {
       expect(buildAuditEntry({ model: 'Faculty', operation: 'create', args: {}, result: { id: 'x' } })).toBeNull();
     });
+  });
+});
+describe('Sedes de una facultad', () => {
+  it('reúne las sedes de sus escuelas sin repetir la sede principal', async () => {
+    const bagua = { id: 'bagua', name: 'Bagua', isActive: true };
+    const central = { id: 'central', name: 'Chachapoyas', isActive: true };
+    const repository = new PrismaCatalogRepository({
+      faculty: {
+        findMany: async () => [{
+          id: 'facultad', name: 'Facultad', isActive: true, _count: { schools: 2 },
+          schools: [{ campus: bagua, campusLinks: [{ campus: bagua }] }, { campus: central, campusLinks: [] }],
+        }],
+      },
+    } as unknown as ConstructorParameters<typeof PrismaCatalogRepository>[0]);
+
+    expect(await repository.list('faculties')).toEqual([
+      expect.objectContaining({ campuses: [bagua, central] }),
+    ]);
   });
 });

@@ -54,6 +54,7 @@ const view = (over: Partial<TutoringRequestView> = {}): TutoringRequestView => (
 const auth: AuthContextValue = {
   user: { id: 'u1', email: 'ana@untrm.edu.pe', firstName: 'Ana', lastName: 'Torres', role: 'Tutorado' },
   isAuthenticated: true,
+  isSessionFresh: true,
   login: vi.fn(),
   logout: vi.fn(),
   markPasswordChanged: vi.fn(),
@@ -141,9 +142,11 @@ describe('MyTutoringRequestPage', () => {
 
       render(
         <AuthContext.Provider value={{ ...auth, user: { ...auth.user!, id: 'otra-persona' } }}>
-          <QueryClientTestWrapper>
-            <MyTutoringRequestPage />
-          </QueryClientTestWrapper>
+          <MemoryRouter>
+            <QueryClientTestWrapper>
+              <MyTutoringRequestPage />
+            </QueryClientTestWrapper>
+          </MemoryRouter>
         </AuthContext.Provider>,
       );
       expect(screen.getByLabelText(/descripción del motivo/i)).toHaveValue('');

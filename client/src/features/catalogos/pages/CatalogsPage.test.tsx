@@ -45,6 +45,12 @@ function renderPage(url = '/catalogos') {
   );
 }
 
+async function chooseCatalog(user: ReturnType<typeof userEvent.setup>, name: string) {
+  const label = screen.getByText(/^Catálogo$/);
+  await user.click(label.closest('summary')!);
+  await user.click(screen.getByText(name, { selector: 'a' }));
+}
+
 describe('CatalogsPage', () => {
   beforeEach(() => {
     vi.clearAllMocks();
@@ -131,7 +137,7 @@ describe('CatalogsPage', () => {
     const user = userEvent.setup();
     renderPage();
 
-    await user.click(screen.getByRole('tab', { name: 'Ciclos' }));
+    await chooseCatalog(user, 'Ciclos');
     await screen.findByText('Ciclo 3');
     await user.click(screen.getByRole('button', { name: 'Editar Ciclo 3' }));
 
@@ -143,9 +149,9 @@ describe('CatalogsPage', () => {
     const user = userEvent.setup();
     renderPage();
     expect(await screen.findByRole('button', { name: 'Nueva facultad' })).toBeInTheDocument();
-    await user.click(screen.getByRole('tab', { name: 'Escuelas' }));
+    await chooseCatalog(user, 'Escuelas');
     expect(await screen.findByRole('button', { name: 'Nueva escuela profesional' })).toBeInTheDocument();
-    await user.click(screen.getByRole('tab', { name: 'Periodos' }));
+    await chooseCatalog(user, 'Periodos');
     expect(await screen.findByRole('button', { name: 'Nuevo periodo académico' })).toBeInTheDocument();
   });
 
@@ -153,7 +159,7 @@ describe('CatalogsPage', () => {
     mocked.list.mockImplementation(async (kind) => kind === 'schools' ? [entry({ id: 's1', kind, name: 'Sistemas', facultyId: 'f1', cycleCount: 10 })] : kind === 'faculties' ? [entry({ id: 'f1', name: 'Ingeniería' })] : []);
     mocked.update.mockResolvedValue(entry({ id: 's1', kind: 'schools', name: 'Sistemas', facultyId: 'f1', cycleCount: 12 }));
     renderPage();
-    await userEvent.click(await screen.findByRole('tab', { name: 'Escuelas' }));
+    await chooseCatalog(userEvent.setup(), 'Escuelas');
     await userEvent.click(await screen.findByRole('button', { name: 'Editar Sistemas' }));
     const input = screen.getByLabelText('Cantidad de ciclos de la escuela');
     expect(input).toHaveValue(10);
@@ -181,7 +187,7 @@ describe('CatalogsPage: el estado de la pantalla vive en la URL', () => {
     await user.click(screen.getByRole('button', { name: 'Cerrar' }));
     expect(screen.getByLabelText('url')).toBeEmptyDOMElement();
 
-    await user.click(screen.getByRole('tab', { name: 'Escuelas' }));
+    await chooseCatalog(user, 'Escuelas');
     expect(screen.getByLabelText('url')).toHaveTextContent('tipo=schools');
   });
 
@@ -192,7 +198,7 @@ describe('CatalogsPage: el estado de la pantalla vive en la URL', () => {
 
     renderPage('/catalogos?tipo=schools&nuevo=1');
     expect(await screen.findByRole('dialog')).toBeInTheDocument();
-    expect(screen.getByRole('tab', { name: 'Escuelas' })).toHaveAttribute('aria-selected', 'true');
+    expect(screen.getByText(/^Catálogo$/).closest('summary')).toHaveTextContent('Escuelas');
   });
 
   it('un elemento que no existe no deja ventana abierta', async () => {

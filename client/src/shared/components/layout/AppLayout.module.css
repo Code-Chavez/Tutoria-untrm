@@ -50,3 +50,7 @@
 @media (max-width: 900px) {
   .content.contentWide { padding: 20px 16px var(--s7); }
 }
+
+@media (min-width: 901px) {
+  .app[data-sidebar-compact='true'] { grid-template-columns: 68px minmax(0, 1fr); }
+}

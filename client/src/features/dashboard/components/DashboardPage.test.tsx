@@ -91,7 +91,7 @@ describe('DashboardPage (paneles por rol)', () => {
     const emptyPanel: HomePanel = { role: 'x', periodName: '2026-II', kpis: [] };
 
     it.each([
-      ['Tutorado', ['Solicitar tutoría', 'Mis sesiones', 'Evaluar tutoría'], false, false],
+      ['Tutorado', ['Solicitar tutoría', 'Mis solicitudes', 'Mis sesiones', 'Evaluar tutoría'], false, false],
       ['Docente Tutor', ['Ver estudiantes', 'Mi calendario', 'Solicitudes de tutoría', 'Casos derivados'], true, false],
       ['Coordinador', ['Registrar estudiante', 'Carga de estudiantes', 'Solicitudes de tutoría', 'Plan semestral'], true, false],
       ['Administrador DBU', ['Usuarios y roles', 'Seguimiento de derivaciones', 'Solicitudes de tutoría'], true, true],

@@ -1,7 +1,8 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { MemoryRouter, Routes, Route } from 'react-router-dom';
+import { MemoryRouter, Routes, Route, useLocation } from 'react-router-dom';
+import { rememberReturnTo } from '@shared/utils/returnTo';
 import { AuthProvider } from '../context/AuthProvider';
 import { LoginPage } from './LoginPage';
 import { authService } from '../services/authService';
@@ -25,13 +26,20 @@ const loginResult: LoginResult = {
   },
 };
 
-function renderLogin() {
+function Where() {
+  const location = useLocation();
+  return <p data-testid="where">{`${location.pathname}${location.search}${location.hash}`}</p>;
+}
+
+function renderLogin(entry: string | { pathname: string; state?: unknown } = '/login') {
   return render(
     <AuthProvider>
-      <MemoryRouter initialEntries={['/login']}>
+      <MemoryRouter initialEntries={[entry]}>
         <Routes>
           <Route path="/login" element={<LoginPage />} />
           <Route path="/" element={<h1>Panel principal</h1>} />
+          <Route path="/tutorados" element={<Where />} />
+          <Route path="/informes" element={<Where />} />
         </Routes>
       </MemoryRouter>
     </AuthProvider>,
@@ -48,6 +56,8 @@ async function fillAndSubmit(email = 'tutor@untrm.edu.pe', password = 'Password1
 describe('LoginPage', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    sessionStorage.clear();
+    localStorage.clear();
   });
 
   it('envía las credenciales ingresadas al servicio de autenticación', async () => {
@@ -71,6 +81,57 @@ describe('LoginPage', () => {
     await fillAndSubmit();
 
     expect(await screen.findByRole('heading', { name: /panel principal/i })).toBeInTheDocument();
+  });
+
+  describe('volver a la vista anterior (issue #274)', () => {
+    it('tras una sesión terminada por inactividad, la misma persona vuelve a la vista con sus filtros', async () => {
+      rememberReturnTo('/tutorados?escuela=s1&page=2', 'user-1');
+      loginMock.mockResolvedValue(loginResult);
+      renderLogin({ pathname: '/login', state: { reason: 'timeout' } });
+
+      await fillAndSubmit();
+
+      expect(await screen.findByTestId('where')).toHaveTextContent('/tutorados?escuela=s1&page=2');
+    });
+
+    it('otra persona entra al panel principal, no a la vista de quien tenía la sesión', async () => {
+      rememberReturnTo('/tutorados?escuela=s1', 'otra-persona');
+      loginMock.mockResolvedValue(loginResult);
+      renderLogin();
+
+      await fillAndSubmit();
+
+      expect(await screen.findByRole('heading', { name: /panel principal/i })).toBeInTheDocument();
+    });
+
+    it('una URL protegida que se intentó abrir se recupera completa, con sus filtros', async () => {
+      loginMock.mockResolvedValue(loginResult);
+      renderLogin({ pathname: '/login', state: { from: { pathname: '/informes', search: '?periodo=p1', hash: '#fila' } } });
+
+      await fillAndSubmit();
+
+      expect(await screen.findByTestId('where')).toHaveTextContent('/informes?periodo=p1#fila');
+    });
+
+    it('otra persona tampoco hereda la URL que dejó la sesión anterior en el estado de la navegación', async () => {
+      rememberReturnTo('/tutorados?escuela=s1', 'otra-persona');
+      loginMock.mockResolvedValue(loginResult);
+      renderLogin({ pathname: '/login', state: { from: { pathname: '/tutorados', search: '?escuela=s1' } } });
+
+      await fillAndSubmit();
+
+      expect(await screen.findByRole('heading', { name: /panel principal/i })).toBeInTheDocument();
+    });
+
+    it('un destino externo o inseguro se ignora y se entra al panel principal', async () => {
+      sessionStorage.setItem('sit:return-to', JSON.stringify({ path: 'https://evil.example/x', userId: 'user-1', savedAt: Date.now() }));
+      loginMock.mockResolvedValue(loginResult);
+      renderLogin({ pathname: '/login', state: { from: { pathname: '//evil.example' } } });
+
+      await fillAndSubmit();
+
+      expect(await screen.findByRole('heading', { name: /panel principal/i })).toBeInTheDocument();
+    });
   });
 
   it('persiste la sesión para sobrevivir a una recarga', async () => {
