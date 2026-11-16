@@ -2,10 +2,12 @@
 
 **Sistema de Información para la Sistematización de los Procesos de Acompañamiento de Tutoría Universitaria**
 Universidad Nacional Toribio Rodríguez de Mendoza de Amazonas · Dirección de Bienestar Universitario (DBU)
-Borrador de actualización: 30 de octubre de 2026 · Software: 1.0.0-beta.1
+Actualizado: 16 de noviembre de 2026 · Software: 1.0.0-beta.3 (candidata a 1.0.0)
 
 Este manual explica, para cada tipo de persona que usa el sistema, **qué puede hacer y cómo hacerlo**. Los ejemplos utilizan datos de demostración (personas y casos ficticios). Los nombres entre comillas o en *cursiva*
 son los que aparecen en pantalla. Si necesita instalar o mantener el sistema, vea `docs/MANUAL_TECNICO.md`.
+
+> **Estado del manual.** Describe el sistema tal como está en `1.0.0-beta.3`. Aún no tiene la aprobación del Product Owner. Los recorridos de cada rol se ensayaron con datos ficticios en Chrome; Edge, Safari y el teléfono no se verificaron. Los certificados de los docentes tutores son **de demostración** hasta que la universidad entregue el formato oficial.
 
 ## Contenido
 
@@ -47,18 +49,18 @@ Estas instrucciones documentan el comportamiento de los cambios #193–#195; no 
 Cada persona entra con su cuenta institucional y ve **solo** el menú y la información que le corresponde. No es un error que a usted no le aparezca una opción
 que otro compañero sí tiene: depende de su rol.
 
-El menú es **corto a propósito** y está agrupado por tareas. Cada grupo se despliega y se pliega con un clic en su título (el sistema recuerda lo que usted dejó abierto; el grupo de la pantalla en que está siempre se ve abierto). Tres entradas son **una sola pantalla con pestañas**: *Periodo académico*, *Informes* y *Configuración*; al entrar, las pestañas aparecen arriba de la pantalla, en el orden en que se usan. Una persona solo ve lo que le sirve:
+El menú es **corto a propósito** y está agrupado por tareas. Cada grupo se despliega y se pliega con un clic en su título (el sistema recuerda lo que usted dejó abierto; el grupo de la pantalla en que está siempre se ve abierto). Tres entradas son **una sola pantalla con su propio menú de sección**: *Periodo académico*, *Informes* y *Configuración*. Al entrar, ese menú aparece **a la izquierda de la pantalla** (con una ayuda breve al pasar el cursor por cada opción) y, en el teléfono o en una ventana estrecha, se reemplaza por un **selector** («Tarea del periodo», «Sección de configuración» o «Tipo de informe»). Una persona solo ve lo que le sirve:
 
 | Entrada del menú | Qué hay | Quién la ve |
 |---|---|---|
 | **Inicio** → Panel de inicio | Resumen y accesos directos | Todos |
-| **Mi tutoría** | Solicitar tutoría · Mis sesiones · Evaluar tutoría | Estudiante |
+| **Mi tutoría** | Solicitar tutoría · Mis solicitudes · Mis sesiones · Evaluar tutoría | Estudiante |
 | **Atención a estudiantes** | Estudiantes · Entrevista inicial · Sesiones · Seguimiento · Derivar caso · Solicitudes de tutoría · Casos derivados · Seguimiento DBU | Docente tutor (todo menos Seguimiento DBU), coordinación (Tutorados, Solicitudes), profesional de servicio (Casos derivados), DBU |
-| **Gestión** → Periodo académico | *Pestañas:* 1 Pedir listas → 2 Carga de estudiantes → 3 Carga de docentes (solo DBU) → 4 Asignación por ciclo → 5 Cierre de periodo (solo DBU) · y, aparte de ese orden, **Pendientes** | Coordinación (pestañas 1, 2 y 4) y DBU (todas) |
-| **Gestión** → Plan semestral | Plan de trabajo de la escuela | Coordinación y DBU |
-| **Gestión** → Informes | *Pestañas:* Horarios y asistencia · Informe semestral · Informe consolidado · Indicadores · Resultados de evaluación · Sugerencias de estudiantes | Cada rol ve las que le corresponden: el docente (Horarios, Semestral), la coordinación (Horarios, Indicadores, Resultados, Sugerencias), Vicerrectorado (Consolidado, Indicadores) y la DBU (todas menos la del docente) |
+| **Gestión** → Periodo académico | *Grupo «Organización», en el orden en que se hace:* Pedir listas → Carga de estudiantes → Carga de docentes (solo DBU) → Asignación por ciclo → Docentes tutores (solo DBU) · *Grupo «Seguimiento y cierre»:* Pendientes · Certificados (solo DBU) · Cierre de periodo (solo DBU) | Coordinación (Pedir listas, Carga de estudiantes, Asignación por ciclo y Pendientes) y DBU (todas) |
+| **Panel de inicio** → Plan semestral | Plan de trabajo de la escuela. **No está en el menú lateral**: se abre con la tarjeta «Plan semestral» del Panel de inicio (bloque «Planificación y evaluación»), que ve la coordinación | Coordinación (la DBU también puede abrirlo, escribiendo la dirección `/plan-semestral`) |
+| **Gestión** → Informes | *Opciones:* Horarios y asistencia · Informe semestral · Informe consolidado · Indicadores · Resultados de evaluación · Sugerencias de estudiantes | Cada rol ve las que le corresponden: el docente (Horarios, Semestral), la coordinación (Horarios, Indicadores, Resultados, Sugerencias), Vicerrectorado (Consolidado, Indicadores) y la DBU (todas menos la del docente) |
 | **Gestión** → Amonestaciones | Registro y consulta de amonestaciones a docentes | Decano (las registra), coordinación y DBU (consulta) |
-| **Configuración** | *Pestañas:* Correos de las escuelas · Sedes · Evaluación de tutoría · Catálogos · Usuarios y roles · Parámetros · Identidad visual · Bitácora de auditoría | Coordinación (solo Correos de las escuelas), Vicerrectorado (solo Sedes) y DBU (todas) |
+| **Configuración** | *Grupo «Organización»:* Correos para pedidos de listas · Catálogos (con sus categorías y, dentro de ellas, **Sedes**) · Evaluación de tutoría · *Grupo «Sistema y acceso»:* Usuarios y roles · Roles y permisos · Parámetros · Identidad visual · Bitácora de auditoría | Coordinación (solo Correos para pedidos de listas), Vicerrectorado (solo Sedes) y DBU (todas) |
 
 **El expediente de un estudiante** no es una entrada del menú: se abre desde **Estudiantes**, con el botón *Ver expediente* de cada fila (y de ahí se vuelve a Estudiantes).
 
@@ -68,7 +70,7 @@ El menú es **corto a propósito** y está agrupado por tareas. Cada grupo se de
 |---|---|---|
 | Crear cuentas y asignar roles (docentes, coordinadores, Decano…) | DBU | Configuración → Usuarios y roles (también *Importar docentes* desde Excel) |
 | Registrar facultades, escuelas y periodos | DBU | Configuración → Catálogos |
-| Fijar la sede de cada escuela | Vicerrectorado o DBU | Facultad y sedes → Sedes |
+| Fijar la sede de cada escuela | Vicerrectorado o DBU | Configuración → Sedes |
 | Pedir a cada escuela la lista de estudiantes | Coordinación o DBU | Periodo académico → Pedir listas |
 | Configurar a qué correo se pide la lista de cada escuela (y corregirlo) | Coordinación (sus escuelas) o DBU | Configuración → Correos para pedidos de listas |
 | Cargar a los estudiantes del periodo | Coordinación o DBU | Periodo académico → Carga de estudiantes |
@@ -76,19 +78,19 @@ El menú es **corto a propósito** y está agrupado por tareas. Cada grupo se de
 | Asignar el tutor de cada ciclo (y ver si aceptó). **Se asigna por ciclo, no estudiante por estudiante** | Coordinación o DBU | Periodo académico → Asignación por ciclo |
 | Aceptar o rechazar ser tutor de un ciclo | El docente, desde el enlace de su correo | Correo → página de aceptación (sin iniciar sesión) |
 | Reasignar a un estudiante en un caso puntual (con motivo) | Coordinación o DBU | Atención a estudiantes → Estudiantes → Más → Reasignar tutor |
-| Entrevista, sesiones, asistencia, seguimiento | Docente tutor | Atención a tutorados |
-| Derivar un caso a un servicio | Docente tutor | Atención a tutorados → Derivar caso |
-| Atender un caso derivado | Profesional de servicio | Atención a tutorados → Casos derivados |
+| Entrevista, sesiones, asistencia, seguimiento | Docente tutor | Atención a estudiantes |
+| Derivar un caso a un servicio | Docente tutor | Atención a estudiantes → Derivar caso |
+| Atender un caso derivado | Profesional de servicio | Atención a estudiantes → Casos derivados |
 | Pedir tutoría y evaluar a su tutor | Estudiante | Mi tutoría |
-| Plan de trabajo de la escuela | Coordinación | Planificación y evaluación → Plan semestral |
-| Informe semestral del docente | Docente tutor | Gestión → Informes → pestaña Informe semestral |
-| Amonestar a un docente | Decano (o DBU) | Facultad y sedes → Amonestaciones |
+| Plan de trabajo de la escuela | Coordinación | Panel de inicio → tarjeta «Plan semestral» |
+| Informe semestral del docente | Docente tutor | Gestión → Informes → opción Informe semestral |
+| Amonestar a un docente | Decano (o DBU) | Gestión → Amonestaciones |
 | Cerrar el periodo | DBU | Periodo académico → Cierre de periodo |
 
 **Pedir las listas desde la pantalla de carga.** Arriba de *Carga de estudiantes* y de *Carga de docentes* hay un bloque «¿Aún no tienes la lista? Pídela primero» con el botón **Ir a «Pedir listas»**, que lleva a esa pantalla con la lista ya elegida (estudiantes o docentes). Allí se elige la escuela y se pide; la lista de docentes tutores la pide solo la DBU. **El correo al que se pide no se escribe ahí:** se configura una vez en **Configuración → Correos para pedidos de listas** (la coordinación, sus escuelas; la DBU, todas), con un botón **Editar** para corregirlo si hubo un error y **Quitar** para borrarlo. En *Pedir listas* solo se ve a qué correo saldrá el pedido, con el enlace **Editar correo**; si la escuela no tiene correo, aparece el botón **Configurar correo** que lleva al apartado de configuración.
 
 **En un celular o una ventana estrecha** las bandejas (solicitudes y casos derivados) muestran cada caso como una **tarjeta** con su estado y su botón de acción siempre a la vista, sin desplazarse a los lados.
-En las pantallas con pestañas, la pestaña en la que está se lleva a la vista y, si hay más pestañas fuera de la pantalla, aparece una **flecha** para verlas.
+En las pantallas con menú de sección, la opción en la que está queda resaltada; el estado de la pantalla (filtros, opción elegida y ventana abierta) vive en la dirección de la página, de modo que al recargar o compartir el enlace se ve lo mismo.
 
 **Aviso del rechazo de un docente (coordinación y DBU)** *(borrador, sujeto a la aprobación de los cambios de requisitos)*. Cuando un docente rechaza ser tutor de un ciclo, su respuesta **queda registrada siempre**: el docente ve «Tu respuesta quedó registrada y está disponible para los responsables de tutoría» y no tiene que esperar ningún correo. El sistema además intenta **avisar por correo a la coordinación de la escuela**, y en *Pendientes*, dentro de la misma fila del rechazo, muestra **solo lo que se sabe del envío**; nunca «se avisó» ni «lo recibió»:
 
@@ -200,7 +202,7 @@ Mientras la pantalla carga, aparece **«Cargando tus sesiones…»**. Si tarda m
 **Antes de enviarla** la pantalla ya le dice quién la recibirá: «Tu solicitud la recibirá tu tutor *(nombre)*». Si aún no tiene tutor, le explica que la recibirá la coordinación de su escuela (con el nombre de quien coordina) y que le avisarán cuando responda. El sistema **no promete un plazo de respuesta**: los plazos los define la DBU. En su **Panel de inicio**, *Mi tutor* dice «Sin asignar» y quién recibe sus solicitudes mientras tanto, y *Mis solicitudes* dice cuántas esperan respuesta (o «Ninguna pendiente»).
 
 Debajo, en *Mis solicitudes*, ve el historial con el estado de cada una: **Pendiente** → **En atención** → **Atendida**. Cuando su tutor la atiende
-verá también **su respuesta** (por ejemplo, fecha y lugar de la sesión) y recibirá un aviso en la campana.
+verá también **su respuesta** (por ejemplo, fecha y lugar de la sesión) y recibirá un aviso en la campana. **No hace falta recargar la página:** mientras *Mis solicitudes* está abierta, la lista se actualiza sola cada 30 segundos y al volver a la ventana, así que la respuesta de su tutor aparece en unos instantes.
 
 ### 2.3 Evaluar a mi tutor
 
@@ -231,7 +233,7 @@ La coordinación y la DBU ven el mismo contador, en primer lugar.
 *Figura: Lista de tutorados con sus acciones.*
 
 *Estudiantes* muestra a los estudiantes que usted tiene asignados, con su código, escuela, ciclo y estado. Puede buscar por código, nombre o apellido y filtrar por
-escuela, ciclo y estado. En cada fila:
+**periodo**, escuela, ciclo y estado. El filtro *Filtrar por periodo* empieza en «Todos los periodos»; al elegir uno se ven solo los estudiantes **matriculados en ese periodo**, y la columna y el filtro de ciclo muestran el ciclo que cursaban **en ese periodo**, no el actual. Si en un periodo no hay matriculados, la pantalla lo dice («Sin estudiantes matriculados en este periodo»). Elegir un periodo deja en blanco el filtro de ciclo, y *Limpiar* quita todos los filtros. El periodo elegido queda en la dirección de la página, como los demás filtros. En cada fila:
 
 - 📁 **Ver expediente**: línea de tiempo completa del acompañamiento.
 - 📅 **Programar sesión**.
@@ -300,6 +302,8 @@ el estudiante y usted la firmen, y **adjunte el escaneo** en *Hoja firmada del s
    Opcionalmente indique la instancia o profesional que recibe.
 3. Pulse *Derivar caso*. El profesional de ese servicio recibe un aviso.
 
+La ficha es larga: la lista de aspectos ocupa buena parte de la ventana y se recorre con la barra de desplazamiento, mientras que el botón *Derivar caso* queda fijo abajo. Si falta algo (por ejemplo, marcar al menos un aspecto o escribir el motivo), el aviso rojo aparece **justo encima de los botones**, siempre a la vista, aunque la lista esté desplazada.
+
 **Seguimiento del caso:** en *Casos derivados* ve sus derivaciones con su estado (**Enviado → Recibido → En atención → Atendido → Cerrado**). Con el icono de la
 lupa abre el detalle y con el otro icono descarga la **constancia** (PDF). La bandeja abre en **Pendientes** (lo enviado, recibido o en atención) y los casos atendidos o cerrados
 se consultan con los botones **Atendidos**, **Cerrados**, **Abiertas** o **Todos**; cada botón muestra cuántos casos tiene y *Buscar* encuentra por estudiante, código, servicio o instancia.
@@ -367,7 +371,7 @@ Además de ver los tutorados **de su escuela** (nunca de otras), el coordinador:
 
 ### 4.1 Asignar tutores
 
-La asignación es **por ciclo**: se elige un docente tutor para cada ciclo de la escuela y todos los estudiantes matriculados de ese ciclo pasan a él (ver 7.9). No se asignan estudiantes uno por uno.
+La asignación es **por ciclo**: se elige un docente tutor para cada ciclo de la escuela y todos los estudiantes matriculados de ese ciclo pasan a él (ver 7.9). No se asignan estudiantes uno por uno. **Un docente atiende un solo ciclo**, así que la escuela necesita tantos docentes como ciclos va a cubrir; si solo hay dos y falta un tercer ciclo, el sistema pide registrar una excepción con su motivo (ver 7.9).
 
 - *Asignación por ciclo* (menú Gestión → Periodo académico): la lista muestra **primero lo que necesita acción** (ciclos con estudiantes y sin tutor, luego los que el docente rechazó, luego los que tienen estudiantes sin tutor) y al final los ya resueltos.
 - **Reasignación individual** (caso puntual): en *Estudiantes*, menú *Más* → *Reasignar tutor*; indique el motivo. Queda en el historial de asignaciones.
@@ -401,8 +405,8 @@ Se atienden igual que el tutor (sección 3.7). Si la escuela no tuviera coordina
 ![Plan semestral y resolución de aprobación](manual/img/21-plan-semestral.jpg)
 *Figura: Plan semestral y resolución de aprobación.*
 
-1. *Plan semestral* muestra el plan de **su escuela** (si tuviera varias, elija en el selector).
-2. Complete las secciones (datos generales, objetivos, metodología, programación, recursos, presupuesto, actividades operativas) y pulse *Guardar plan*. Queda como **Borrador**.
+1. Abra el plan desde la tarjeta **Plan semestral** del *Panel de inicio* (bloque «Planificación y evaluación»): **no está en el menú lateral**. Muestra el plan de **su escuela** (si tuviera varias, elija en el selector).
+2. Complete las seis secciones del formulario, que se eligen arriba (*Datos generales*, *Fundamentación y objetivos*, *Cronograma*, *Recursos*, *Presupuesto* y *Otras consideraciones*), y pulse *Guardar plan*. Queda como **Borrador**. El formulario es largo y **la validación se hace al guardar**: si falta un dato obligatorio, el aviso aparece **al pie de la pantalla** y el campo que falta puede estar en otra sección; conviene revisar todas las secciones antes de pulsar *Guardar plan*.
 3. En *Resolución de aprobación* pulse *Adjuntar resolución* y suba el **PDF de la resolución**. El plan pasa a **Plan vigente**.
 4. Si necesita cambiar un plan aprobado, edítelo y pulse *Guardar como nueva revisión*. El sistema pide confirmación: **la versión aprobada se conserva**
    (en *Versiones aprobadas anteriores* puede descargar su resolución y su PDF) y la nueva revisión queda **pendiente de resolución** hasta que adjunte la que la apruebe.
@@ -495,7 +499,7 @@ El administrador tiene acceso a todo. Además de lo descrito para los demás rol
 *Figura: Alta de un Profesional de Servicio: el servicio es obligatorio.*
 *Usuarios y roles*: alta de cuentas (*Nuevo Usuario*: nombre, apellido, correo, teléfono y rol), cambio de rol y **activar/desactivar** (una persona desactivada pierde el acceso de inmediato, aunque tenga la sesión abierta).
 
-**Profesionales de servicio:** al elegir el rol *Profesional de Servicio* aparece el campo obligatorio *Servicio al que pertenece* (Escuela Profesional, Psicopedagogía, Psicología, Asistencia Social o Salud). **De ese servicio depende qué casos derivados ve y recibe**: sin él no vería ninguno, por eso el sistema no deja guardar sin elegirlo. En la tabla de usuarios aparece junto al rol (por ejemplo, «Profesional de Servicio · Psicología»).
+**Profesionales de servicio:** al elegir el rol *Profesional de servicio* (así se escribe en el selector de rol) aparece el campo obligatorio *Servicio al que pertenece* (Escuela Profesional, Psicopedagogía, Psicología, Asistencia Social o Salud). **De ese servicio depende qué casos derivados ve y recibe**: sin él no vería ninguno, por eso el sistema no deja guardar sin elegirlo. En la tabla de usuarios aparece junto al rol (por ejemplo, «Profesional de Servicio · Psicología»).
 
 **El correo de una cuenta debe ser institucional (@untrm.edu.pe).** El formulario lo indica debajo del campo y avisa al instante si es de otro dominio («El correo debe ser institucional…»); el sistema lo comprueba también al guardar y al cargar docentes desde Excel. Se guarda en una sola forma: da igual escribirlo con mayúsculas o con espacios al principio o al final. **No puede haber dos cuentas con el mismo correo**, aunque se escriba distinto. Una cuenta anterior a esta regla que use otro dominio sigue funcionando y se puede editar sin tocar su correo; solo se exige el dominio al crear una cuenta o al cambiar su correo. Si TI autoriza a profesionales externos, es una excepción formal de la DBU que TI agrega a la configuración del servidor (`EMAIL_ALLOWED_DOMAINS`): no se hace desde la pantalla.
 
@@ -505,7 +509,7 @@ Al crear la cuenta **no se genera ninguna clave**: el sistema envía al correo d
 
 ![Catálogos maestros](manual/img/30-catalogos.jpg)
 *Figura: Catálogos maestros.*
-*Catálogos*: pestañas **Facultades, Escuelas, Periodos, Ciclos, Servicios y Motivos**. Use *Nueva …* → *Crear*; *Editar*; *Desactivar/Activar*; *Eliminar* (con confirmación; lo que ya está en uso solo se puede desactivar).
+*Catálogos*: categorías **Facultades, Escuelas, Periodos, Ciclos, Servicios y Motivos** (se eligen al desplegar *Catálogos* en el menú de la sección, y *Sedes* aparece en esa misma lista). Use *Nueva …* → *Crear*; *Editar*; *Desactivar/Activar*; *Eliminar* (con confirmación; lo que ya está en uso solo se puede desactivar).
 El **periodo académico activo** determina el semestre en curso para reportes y numeración de asistencias; al activar otro, el anterior queda **cerrado** con su corte de matrícula.
 
 ### 7.3 Parámetros del sistema
@@ -582,7 +586,7 @@ En **Certificados** (*Gestión → Periodo académico → Certificados*; la DBU 
 7. **Generar y descargar el PDF.** Con el trámite aprobado, *Generar PDF de demostración* le asigna su número y crea el archivo. *Descargar PDF* lo baja; cada descarga queda en la bitácora.
 8. **Anular.** *Anular* pide un motivo; un certificado anulado conserva su número y no se reabre.
 
-La pantalla se comprobó con axe, con el teclado (el foco entra al diálogo, `Tab` no sale de él, `Escape` cierra el de arriba y el foco vuelve al botón que lo abrió) y en pantallas de 320 y 375 píxeles de ancho; en el teléfono, *Periodo académico* muestra un selector «Tarea del periodo» en lugar de las pestañas. Axe no sustituye la prueba con un lector de pantalla ni con un teléfono real.
+La pantalla se comprobó con axe, con el teclado (el foco entra al diálogo, `Tab` no sale de él, `Escape` cierra el de arriba y el foco vuelve al botón que lo abrió) y en pantallas de 320 y 375 píxeles de ancho; en el teléfono, *Periodo académico* muestra un selector «Tarea del periodo» en lugar del menú de la sección. Axe no sustituye la prueba con un lector de pantalla ni con un teléfono real.
 
 Lo que escriba en los motivos y comentarios se guarda como **borrador solo en esa pestaña** (nunca en la dirección de la página): si recarga o cierra la ventana sin enviar, vuelve a aparecer con el aviso *«Recuperamos lo que habías escrito»* y puede descartarlo; al enviar con éxito se borra.
 
