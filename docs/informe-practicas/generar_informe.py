@@ -7,9 +7,13 @@ from docx.enum.table import WD_TABLE_ALIGNMENT, WD_CELL_VERTICAL_ALIGNMENT
 from docx.oxml import OxmlElement
 from docx.oxml.ns import qn
 
+import sys
+
 BASE = Path(__file__).resolve().parent
-source = BASE / 'INFORME_PRACTICAS_REDACCION_V02.md'
-target = BASE / 'Informe_Practicas_Brayni_Chavez_V02.docx'
+# Versión del informe a generar (por omisión la última; V02 queda como corte histórico): python generar_informe.py V02
+version = sys.argv[1] if len(sys.argv) > 1 else 'V03'
+source = BASE / f'INFORME_PRACTICAS_REDACCION_{version}.md'
+target = BASE / f'Informe_Practicas_Brayni_Chavez_{version}.docx'
 document = Document()
 section = document.sections[0]
 section.page_width, section.page_height = Inches(8.5), Inches(11)
