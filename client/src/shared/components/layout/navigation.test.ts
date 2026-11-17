@@ -86,8 +86,15 @@ describe('navegación (UI-01, UI-04, UI-07)', () => {
         'Configuración',
       ]);
       expect(labelsFor('Administrador DBU').length).toBeLessThanOrEqual(10);
-      expect(labelsFor('Coordinador')).toEqual(['Panel de inicio', 'Estudiantes', 'Solicitudes de tutoría', 'Periodo académico', 'Informes', 'Amonestaciones', 'Configuración']);
+      expect(labelsFor('Coordinador')).toEqual(['Panel de inicio', 'Estudiantes', 'Solicitudes de tutoría', 'Periodo académico', 'Plan semestral', 'Informes', 'Amonestaciones', 'Configuración']);
       expect(labelsFor('Vicerrectorado')).toEqual(['Panel de inicio', 'Informes', 'Configuración']);
+    });
+
+    it('«Plan semestral» está en el menú de la coordinación y mantiene su título (H10)', () => {
+      expect(labelsFor('Coordinador')).toContain('Plan semestral');
+      expect(labelsFor('Docente Tutor')).not.toContain('Plan semestral');
+      expect(findActiveItem(visibleFor('Coordinador'), '/plan-semestral', '')?.label).toBe('Plan semestral');
+      expect(resolveMeta('/plan-semestral')).toEqual({ title: 'Plan semestral', group: 'Gestión' });
     });
 
     it('el expediente no es una entrada del menú: se abre desde Tutorados, que queda activa mientras se ve uno', () => {

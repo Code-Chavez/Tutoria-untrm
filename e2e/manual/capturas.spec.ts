@@ -98,9 +98,8 @@ test('coordinador', async ({ page }) => {
   await page.getByRole('button', { name: 'Todos los ciclos' }).click();
   await page.getByLabel('Tutor del ciclo 3').waitFor();
   await shot(page, '20-asignacion');
-  // «Plan semestral» no está en el menú lateral: se abre con la tarjeta del Panel de inicio.
-  await goToMenu(page, 'Panel de inicio');
-  await page.getByRole('main').getByRole('link', { name: /^Plan semestral/ }).click();
+  // «Plan semestral» está en el grupo «Gestión» del menú lateral.
+  await goToMenu(page, 'Plan semestral');
   await page.getByRole('heading', { level: 2, name: 'Resolución de aprobación' }).waitFor();
   await shot(page, '21-plan-semestral');
   await goToMenu(page, 'Indicadores');

@@ -57,7 +57,7 @@ El menú es **corto a propósito** y está agrupado por tareas. Cada grupo se de
 | **Mi tutoría** | Solicitar tutoría · Mis solicitudes · Mis sesiones · Evaluar tutoría | Estudiante |
 | **Atención a estudiantes** | Estudiantes · Entrevista inicial · Sesiones · Seguimiento · Derivar caso · Solicitudes de tutoría · Casos derivados · Seguimiento DBU | Docente tutor (todo menos Seguimiento DBU), coordinación (Tutorados, Solicitudes), profesional de servicio (Casos derivados), DBU |
 | **Gestión** → Periodo académico | *Grupo «Organización», en el orden en que se hace:* Pedir listas → Carga de estudiantes → Carga de docentes (solo DBU) → Asignación por ciclo → Docentes tutores (solo DBU) · *Grupo «Seguimiento y cierre»:* Pendientes · Certificados (solo DBU) · Cierre de periodo (solo DBU) | Coordinación (Pedir listas, Carga de estudiantes, Asignación por ciclo y Pendientes) y DBU (todas) |
-| **Panel de inicio** → Plan semestral | Plan de trabajo de la escuela. **No está en el menú lateral**: se abre con la tarjeta «Plan semestral» del Panel de inicio (bloque «Planificación y evaluación»), que ve la coordinación | Coordinación (la DBU también puede abrirlo, escribiendo la dirección `/plan-semestral`) |
+| **Gestión** → Plan semestral | Plan de trabajo de la escuela. La coordinación lo abre desde el menú lateral (grupo «Gestión») o desde la tarjeta «Plan semestral» del Panel de inicio | Coordinación (la DBU también puede abrirlo, escribiendo la dirección `/plan-semestral`) |
 | **Gestión** → Informes | *Opciones:* Horarios y asistencia · Informe semestral · Informe consolidado · Indicadores · Resultados de evaluación · Sugerencias de estudiantes | Cada rol ve las que le corresponden: el docente (Horarios, Semestral), la coordinación (Horarios, Indicadores, Resultados, Sugerencias), Vicerrectorado (Consolidado, Indicadores) y la DBU (todas menos la del docente) |
 | **Gestión** → Amonestaciones | Registro y consulta de amonestaciones a docentes | Decano (las registra), coordinación y DBU (consulta) |
 | **Configuración** | *Grupo «Organización»:* Correos para pedidos de listas · Catálogos (con sus categorías y, dentro de ellas, **Sedes**) · Evaluación de tutoría · *Grupo «Sistema y acceso»:* Usuarios y roles · Roles y permisos · Parámetros · Identidad visual · Bitácora de auditoría | Coordinación (solo Correos para pedidos de listas), Vicerrectorado (solo Sedes) y DBU (todas) |
@@ -82,7 +82,7 @@ El menú es **corto a propósito** y está agrupado por tareas. Cada grupo se de
 | Derivar un caso a un servicio | Docente tutor | Atención a estudiantes → Derivar caso |
 | Atender un caso derivado | Profesional de servicio | Atención a estudiantes → Casos derivados |
 | Pedir tutoría y evaluar a su tutor | Estudiante | Mi tutoría |
-| Plan de trabajo de la escuela | Coordinación | Panel de inicio → tarjeta «Plan semestral» |
+| Plan de trabajo de la escuela | Coordinación | Gestión → Plan semestral (o la tarjeta del Panel de inicio) |
 | Informe semestral del docente | Docente tutor | Gestión → Informes → opción Informe semestral |
 | Amonestar a un docente | Decano (o DBU) | Gestión → Amonestaciones |
 | Cerrar el periodo | DBU | Periodo académico → Cierre de periodo |
@@ -405,8 +405,8 @@ Se atienden igual que el tutor (sección 3.7). Si la escuela no tuviera coordina
 ![Plan semestral y resolución de aprobación](manual/img/21-plan-semestral.jpg)
 *Figura: Plan semestral y resolución de aprobación.*
 
-1. Abra el plan desde la tarjeta **Plan semestral** del *Panel de inicio* (bloque «Planificación y evaluación»): **no está en el menú lateral**. Muestra el plan de **su escuela** (si tuviera varias, elija en el selector).
-2. Complete las seis secciones del formulario, que se eligen arriba (*Datos generales*, *Fundamentación y objetivos*, *Cronograma*, *Recursos*, *Presupuesto* y *Otras consideraciones*), y pulse *Guardar plan*. Queda como **Borrador**. El formulario es largo y **la validación se hace al guardar**: si falta un dato obligatorio, el aviso aparece **al pie de la pantalla** y el campo que falta puede estar en otra sección; conviene revisar todas las secciones antes de pulsar *Guardar plan*.
+1. Abra **Plan semestral** desde el menú lateral (grupo «Gestión») o desde la tarjeta del mismo nombre del *Panel de inicio* (bloque «Planificación y evaluación»). Muestra el plan de **su escuela** (si tuviera varias, elija en el selector).
+2. Complete las seis secciones del formulario, que se eligen arriba (*Datos generales*, *Fundamentación y objetivos*, *Cronograma*, *Recursos*, *Presupuesto* y *Otras consideraciones*), y pulse *Guardar plan*. Queda como **Borrador**. El formulario es largo y **la validación se hace al guardar**: si falta un dato obligatorio, el sistema **abre la sección donde está, marca el campo con «Este campo es obligatorio» y lleva el cursor a él**; el aviso al pie nombra el campo y su sección. Se avisa de un campo a la vez: complételo y vuelva a guardar. Las tablas (cronograma, recursos y presupuesto) pueden quedar sin filas, pero cada fila que agregue debe estar completa.
 3. En *Resolución de aprobación* pulse *Adjuntar resolución* y suba el **PDF de la resolución**. El plan pasa a **Plan vigente**.
 4. Si necesita cambiar un plan aprobado, edítelo y pulse *Guardar como nueva revisión*. El sistema pide confirmación: **la versión aprobada se conserva**
    (en *Versiones aprobadas anteriores* puede descargar su resolución y su PDF) y la nueva revisión queda **pendiente de resolución** hasta que adjunte la que la apruebe.
