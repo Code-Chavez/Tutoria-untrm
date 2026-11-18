@@ -4,11 +4,26 @@ Complementa la [Guía del piloto](GUIA_PILOTO.md) (sección 2, lista de preparac
 
 ## Versión a probar
 
+Actualizado el 17/11/2026 (#321). El resto del documento conserva el texto de cada fecha; esta sección y la tabla siguiente son la referencia vigente.
+
 | Dato | Estado |
 |---|---|
-| Última etiqueta | `v1.0.0-beta.2` (05/11/2026) |
-| Estado de `develop` | 102 commits posteriores (certificación del tutor, pedidos de listas por facultad, estudiantes por periodo, reorganización del menú, endurecimiento de `GET /roles`). CI en verde. |
-| **Decisión pendiente (DBU/asesor)** | Probar `v1.0.0-beta.2` tal cual o crear una etiqueta nueva sobre `develop`. La guía solo pide anotar etiqueta y commit en la hoja de sesión. |
+| Versión de referencia | `v1.0.0-beta.3` (commit `11486c3`, 16/11/2026), liberada en `main` por el PR #304. Sustituye a `v1.0.0-beta.2` (05/11/2026), que era la base del ensayo del 13/11. |
+| Estado de `develop` | 15 commits posteriores a la etiqueta, todos con CI en verde: corrección de H10 y H11 (#314), manuales y capturas (#308, #310, #316), informe V03 (#312) y registro de H12 (#318). Un cambio de código nuevo exigiría otra etiqueta. |
+| **Decisión pendiente (PO/DBU)** | Presentar `v1.0.0-beta.3` tal cual (sin las correcciones de H10 y H11) o crear una etiqueta nueva sobre `develop` por el flujo de release. |
+| Aceptación del PO | Pendiente (casillas del PR #304 sin marcar; prevista el 18/11). |
+
+### Vínculo entre versión, pruebas y entregables
+
+| Aspecto | Evidencia | Estado |
+|---|---|---|
+| Pruebas automáticas | CI de `main` sobre `11486c3`: 1 704 pruebas de servidor, 766 de cliente, 141 E2E en Chrome (1 omitida); fuente en `docs/informe-practicas/CONTROL_DE_EVIDENCIAS.md`. | Verde |
+| Ensayo con todos los roles | Secciones siguientes de este documento (13–17/11, datos ficticios, equipo de desarrollo, no usuarios reales); H10–H12 cerrados o ensayados. | Hecho |
+| Revisión de seguridad | `docs/INFORME_SEGURIDAD_TT101_REVISION_2026-11-12.md` (#291 sigue abierto: faltan los endpoints agregados después). | Parcial |
+| Manuales | `docs/MANUAL_USUARIO.md`, `docs/MANUAL_TECNICO.md` y `docs/manual/img`; capturas del coordinador regeneradas tras la etiqueta (#316). | Hecho, posterior a la etiqueta |
+| Informe de prácticas | `docs/informe-practicas/INFORME_PRACTICAS_REDACCION_V03.md` y su `.docx`. | Falta revisión del asesor y formato de la escuela |
+| Piloto con usuarios reales | #293. | Pendiente (participantes, fecha, entorno de TI) |
+| Visto bueno | PO sobre `v1.0.0-beta.3`. | Pendiente |
 
 ## Lista de preparación (guía, sección 2)
 
