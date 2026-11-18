@@ -63,3 +63,9 @@
     grid-template-columns: 1fr;
   }
 }
+
+.periodNote {
+  margin: var(--s2) 0;
+  font-size: var(--fs-sm);
+  color: var(--g600);
+}

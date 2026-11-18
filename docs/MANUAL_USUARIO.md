@@ -233,7 +233,7 @@ La coordinación y la DBU ven el mismo contador, en primer lugar.
 *Figura: Lista de tutorados con sus acciones.*
 
 *Estudiantes* muestra a los estudiantes que usted tiene asignados, con su código, escuela, ciclo y estado. Puede buscar por código, nombre o apellido y filtrar por
-**periodo**, escuela, ciclo y estado. El filtro *Filtrar por periodo* empieza en «Todos los periodos»; al elegir uno se ven solo los estudiantes **matriculados en ese periodo**, y la columna y el filtro de ciclo muestran el ciclo que cursaban **en ese periodo**, no el actual. Si en un periodo no hay matriculados, la pantalla lo dice («Sin estudiantes matriculados en este periodo»). Elegir un periodo deja en blanco el filtro de ciclo, y *Limpiar* quita todos los filtros. El periodo elegido queda en la dirección de la página, como los demás filtros. En cada fila:
+**periodo**, escuela, ciclo y estado. El filtro *Filtrar por periodo* empieza en «Todos los periodos»; al elegir uno se ven solo los estudiantes **matriculados en ese periodo**, y la columna y el filtro de ciclo muestran el ciclo que cursaban **en ese periodo**, no el actual. La **escuela y el tutor** que se muestran son siempre los actuales del estudiante (los encabezados lo indican con «(actual)» y una nota bajo los filtros lo recuerda), aunque hayan cambiado desde ese semestre. Si en un periodo no hay matriculados, la pantalla lo dice («Sin estudiantes matriculados en este periodo»). Elegir un periodo deja en blanco el filtro de ciclo, y *Limpiar* quita todos los filtros. El periodo elegido queda en la dirección de la página, como los demás filtros. En cada fila:
 
 - 📁 **Ver expediente**: línea de tiempo completa del acompañamiento.
 - 📅 **Programar sesión**.

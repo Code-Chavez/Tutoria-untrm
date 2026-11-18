@@ -19,6 +19,8 @@ interface TutoradoTableProps {
   students: Student[];
   schoolName: (schoolId: string) => string;
   tutorName: (tutorId?: string | null) => string | null;
+  /** Con un semestre elegido solo el ciclo es el de aquella matrícula: escuela y tutor se rotulan como actuales. */
+  currentLabels?: boolean;
   canWrite: boolean;
   canConductInterview: boolean;
   /** Modo «elegir tutorado» (accesos del menú): muestra este botón por fila y lo dirige a onPick. */
@@ -41,6 +43,7 @@ export const TutoradoTable: React.FC<TutoradoTableProps> = ({
   students,
   schoolName,
   tutorName,
+  currentLabels = false,
   canWrite,
   canConductInterview,
   pickLabel,
@@ -104,9 +107,9 @@ export const TutoradoTable: React.FC<TutoradoTableProps> = ({
           <tr>
             <th>Código</th>
             <th>Estudiante</th>
-            <th>Escuela profesional</th>
+            <th>{currentLabels ? 'Escuela profesional (actual)' : 'Escuela profesional'}</th>
             <th>Ciclo</th>
-            <th>Tutor</th>
+            <th>{currentLabels ? 'Tutor (actual)' : 'Tutor'}</th>
             <th>Estado</th>
             {showActions && <th className={table.right}>Acciones</th>}
           </tr>
