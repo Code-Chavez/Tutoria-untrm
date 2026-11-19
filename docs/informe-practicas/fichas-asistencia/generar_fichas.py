@@ -1,7 +1,7 @@
 """Genera las fichas de asistencia de prácticas (Control de asistencia de prácticas pre profesionales, FISME-Bagua).
 
 Parte de `plantilla_control_asistencia.docx` (el formato de la escuela: 7 hojas, 120 filas) y solo cambia lo que debe cambiar:
-las fechas de las 120 filas, el nombre del estudiante y un pie con el periodo y el bloque de visto bueno del encargado.
+las fechas de las 120 filas, la salida de la tarde (17:00), el nombre del estudiante y un pie con el periodo y el bloque de visto bueno del encargado.
 No se escribe ninguna hora, firma ni observación: eso lo registra y lo firma quien supervisa.
 
 Calendario: lunes a viernes desde el inicio del plan (08/06/2026), 120 días, **descontando los feriados nacionales ciertos**
@@ -30,6 +30,8 @@ FERIADOS = {
     date(2026, 10, 8): 'Combate de Angamos',
 }
 NOMBRE_DIA = ['lun', 'mar', 'mié', 'jue', 'vie']
+SALIDA_ANTERIOR = '18:00'  # horario impreso en la plantilla
+SALIDA_TARDE = '17:00'  # horario acordado: la tarde termina a las 17:00
 
 
 def dias_habiles() -> list[date]:
@@ -59,6 +61,12 @@ def generar(salida: Path) -> list[date]:
                     celdas.append(celda)
     if len(celdas) != DIAS:
         raise SystemExit(f'La plantilla debía tener {DIAS} fechas y tiene {len(celdas)}')
+    # Horario programado: la salida de la tarde pasa de 18:00 a 17:00 en todas las filas de días.
+    for celda in celdas:
+        for hermana in celda._tc.getparent().iterchildren():
+            for texto in hermana.iter('{http://schemas.openxmlformats.org/wordprocessingml/2006/main}t'):
+                if texto.text and texto.text.strip() == SALIDA_ANTERIOR:
+                    texto.text = SALIDA_TARDE
     for celda, dia in zip(celdas, fechas):
         corrida = next(r for p in celda.paragraphs for r in p.runs if r.text.strip())
         corrida.text = etiqueta(dia)
