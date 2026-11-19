@@ -313,11 +313,11 @@ export function DataRequestPage() {
                     {r.receivedAt && <Badge tone="info">Recibido el {fmt(r.receivedAt)}</Badge>}
                   </div>
                   <span className={styles.note}>
-                    {fmt(r.createdAt)} · a {r.toEmail} · {r.kind === 'DOCENTES' ? 'lista de docentes' : r.cycles.length > 0 ? `ciclos ${r.cycles.join(', ')}` : 'todos los ciclos'}
+                    {fmt(r.createdAt)}{r.toEmail ? ` · a ${r.toEmail}` : ' · pedido de la facultad que incluye tu escuela'} · {r.kind === 'DOCENTES' ? 'lista de docentes' : r.cycles.length > 0 ? `ciclos ${r.cycles.join(', ')}` : 'todos los ciclos'}
                   </span>
                   {r.schoolNames?.length ? <span className={styles.note}>{r.schoolNames.join(', ')}</span> : null}
                   {STATUS_VIEW[r.status].hint && <span className={styles.note}>{STATUS_VIEW[r.status].hint}</span>}
-                  {r.status === 'ENVIADO' && !r.receivedAt && (
+                  {r.status === 'ENVIADO' && !r.receivedAt && r.toEmail && (
                     <div>
                       <Button type="button" variant="secondary" loading={markReceived.isPending} onClick={() => markReceived.mutate(r.id)}>
                         Marcar como recibido
@@ -338,10 +338,16 @@ export function DataRequestPage() {
       <ConfirmDialog
         open={duplicate !== null}
         tone="danger"
-        title="Ya hay un pedido equivalente"
+        title={duplicate?.overlap ? 'Ya hay un pedido que abarca lo mismo' : 'Ya hay un pedido equivalente'}
         message={
           duplicate
-            ? `Hace poco (${fmtTime(duplicate.createdAt)}) ya se hizo un pedido equivalente: ${STATUS_VIEW[duplicate.status].label.toLowerCase()}. ¿Quieres pedirlo de nuevo? Se enviará otro correo a la ${recipientTarget}.`
+            ? `${
+                duplicate.overlap === 'FACULTY_INCLUDES_SCHOOL'
+                  ? `Esta escuela ya quedó incluida (${fmtTime(duplicate.createdAt)}) en un pedido de su facultad`
+                  : duplicate.overlap === 'SCHOOL_IN_FACULTY'
+                    ? `Hace poco (${fmtTime(duplicate.createdAt)}) se pidió la lista de una de las escuelas de esta facultad`
+                    : `Hace poco (${fmtTime(duplicate.createdAt)}) ya se hizo un pedido equivalente`
+              }: ${STATUS_VIEW[duplicate.status].label.toLowerCase()}. ¿Quieres pedirlo de nuevo? Se enviará otro correo a la ${recipientTarget}.`
             : ''
         }
         confirmLabel="Pedir de nuevo"

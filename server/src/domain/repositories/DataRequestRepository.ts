@@ -50,6 +50,11 @@ export interface DataRequestTx {
   expireStalePending(equivalenceKey: string, cutoff: Date): Promise<void>;
   /** El pedido más reciente, desde `since`, que cuenta para advertir: PENDIENTE, ENVIADO o INCIERTO (no FALLIDO). */
   findLatestCounting(equivalenceKey: string, since: Date): Promise<DataRequest | null>;
+  /**
+   * El pedido más reciente, desde `since`, que cuenta para advertir y que abarca lo mismo por otro alcance: el de la facultad
+   * (`facultyId`) o el de alguna de las escuelas (`schoolIds`), del mismo tipo y periodo. Una escuela y su facultad no comparten clave.
+   */
+  findLatestOverlapping(filters: { kind: DataRequestKind; periodId: string; since: Date; facultyId?: string; schoolIds?: string[] }): Promise<DataRequest | null>;
   /** Guarda el pedido como PENDIENTE. Lanza OperationIdTakenError si ese identificador ya existe para esa persona. */
   insertPending(data: NewDataRequest): Promise<DataRequest>;
 }
@@ -65,8 +70,8 @@ export interface DataRequestRepository {
    * (`notBefore`). Devuelve null si no (p. ej. ya quedó INCIERTO): un resultado tardío no pisa ese estado.
    */
   finishAttempt(id: string, attemptStartedAt: Date, result: { status: 'ENVIADO' | 'FALLIDO' | 'INCIERTO'; error: string | null }, notBefore: Date): Promise<DataRequest | null>;
-  /** Más recientes primero. Con `schoolIds` solo las de esas escuelas. */
-  list(filters?: { schoolIds?: string[]; periodId?: string }): Promise<DataRequest[]>;
+  /** Más recientes primero. Con `schoolIds` solo las de esas escuelas; con `facultyIds` además las de esas facultades. */
+  list(filters?: { schoolIds?: string[]; facultyIds?: string[]; periodId?: string }): Promise<DataRequest[]>;
   findById(id: string): Promise<DataRequest | null>;
   markReceived(id: string, byId: string, at: Date): Promise<DataRequest | null>;
 }

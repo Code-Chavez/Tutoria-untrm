@@ -53,6 +53,14 @@ export class InMemoryDataRequests implements DataRequestRepository {
         [...this.rows]
           .filter((r) => r.equivalenceKey === key && r.createdAt >= since && (['PENDIENTE', 'ENVIADO', 'INCIERTO'] as DataRequestStatus[]).includes(r.status))
           .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())[0] ?? null,
+      findLatestOverlapping: async ({ kind, periodId, since, facultyId, schoolIds }) =>
+        [...this.rows]
+          .filter(
+            (r) =>
+              r.kind === kind && r.periodId === periodId && r.createdAt >= since && (['PENDIENTE', 'ENVIADO', 'INCIERTO'] as DataRequestStatus[]).includes(r.status) &&
+              ((facultyId !== undefined && r.facultyId === facultyId) || (r.schoolId !== null && (schoolIds ?? []).includes(r.schoolId))),
+          )
+          .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())[0] ?? null,
       insertPending: async (data: NewDataRequest) => {
         if (data.operationId && this.rows.some((r) => r.requestedById === data.requestedById && r.operationId === data.operationId)) throw new OperationIdTakenError();
         this.seq += 1;
@@ -75,8 +83,11 @@ export class InMemoryDataRequests implements DataRequestRepository {
     return { ...row };
   }
 
-  async list(): Promise<DataRequest[]> {
-    return [...this.rows].reverse();
+  async list(filters?: { schoolIds?: string[]; facultyIds?: string[] }): Promise<DataRequest[]> {
+    const rows = filters?.schoolIds
+      ? this.rows.filter((r) => (r.schoolId !== null && filters.schoolIds!.includes(r.schoolId)) || (r.facultyId != null && (filters.facultyIds ?? []).includes(r.facultyId)))
+      : this.rows;
+    return [...rows].reverse();
   }
 
   async findById(id: string): Promise<DataRequest | null> {
