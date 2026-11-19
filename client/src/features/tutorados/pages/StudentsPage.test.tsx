@@ -81,6 +81,19 @@ describe('StudentsPage: el estado de la lista vive en la URL', () => {
     expect(screen.getByLabelText('url')).toHaveTextContent('ciclo=5');
   });
 
+  it('con un semestre elegido rotula escuela y tutor como actuales y avisa de que solo el ciclo es del semestre; sin semestre no cambia nada', async () => {
+    const first = renderPage('/tutorados?periodo=p1');
+    expect(await screen.findByRole('columnheader', { name: 'Escuela profesional (actual)' })).toBeInTheDocument();
+    expect(screen.getByRole('columnheader', { name: 'Tutor (actual)' })).toBeInTheDocument();
+    expect(screen.getByRole('note')).toHaveTextContent(/el ciclo es el de la matrícula en ese semestre; la escuela y el tutor son los actuales/);
+    first.unmount();
+
+    renderPage();
+    expect(await screen.findByRole('columnheader', { name: 'Escuela profesional' })).toBeInTheDocument();
+    expect(screen.getByRole('columnheader', { name: 'Tutor' })).toBeInTheDocument();
+    expect(screen.queryByRole('note')).not.toBeInTheDocument();
+  });
+
   it('abrir «Editar estudiante» pone la ventana y el estudiante en la URL; cerrarla los quita', async () => {
     const user = userEvent.setup();
     renderPage();
