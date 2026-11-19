@@ -113,14 +113,24 @@ export interface PreviousRequestSummary {
   id: string;
   createdAt: Date;
   status: DataRequest['status'];
+  /** Solo si el pedido anterior no es el mismo alcance sino otro que lo abarca: el de la facultad de la escuela, o el de una escuela de la facultad. */
+  overlap?: DataRequestOverlap;
 }
 
-const summarize = (r: DataRequest): PreviousRequestSummary => ({ id: r.id, createdAt: r.createdAt, status: r.status });
+export type DataRequestOverlap = 'FACULTY_INCLUDES_SCHOOL' | 'SCHOOL_IN_FACULTY';
+
+const summarize = (r: DataRequest, overlap?: DataRequestOverlap): PreviousRequestSummary => ({ id: r.id, createdAt: r.createdAt, status: r.status, ...(overlap && { overlap }) });
 
 /** Ya hay un pedido equivalente reciente: el reenvío exige confirmar ESE pedido (`confirmDuplicateOf`). */
 export class DuplicateDataRequestError extends Error {
   constructor(readonly previous: PreviousRequestSummary) {
-    super('Ya se hizo un pedido equivalente hace poco. Si quieres pedirlo de nuevo, confírmalo expresamente.');
+    super(
+      previous.overlap === 'FACULTY_INCLUDES_SCHOOL'
+        ? 'La escuela ya quedó incluida hace poco en un pedido de su facultad. Si quieres pedirla de nuevo, confírmalo expresamente.'
+        : previous.overlap === 'SCHOOL_IN_FACULTY'
+          ? 'Hace poco se pidió la lista de una de las escuelas de esta facultad. Si quieres pedir toda la facultad, confírmalo expresamente.'
+          : 'Ya se hizo un pedido equivalente hace poco. Si quieres pedirlo de nuevo, confírmalo expresamente.',
+    );
     this.name = 'DuplicateDataRequestError';
   }
 }
@@ -201,7 +211,8 @@ export class SendDataRequestUseCase {
       kind, schoolId: targetKey, periodId: period.id, toEmail: target.toEmail, cycles, note,
       ...(target.facultyId && { coverage: [target.facultyName!, ...target.schoolNames!] }),
     });
-    const reservation = await this.reserveOnce(requesterId, key, hash, input.operationId, input.confirmDuplicateOf, {
+    const overlapScope = target.facultyId ? { schoolIds: target.schoolIds } : { facultyId: target.parentFacultyId };
+    const reservation = await this.reserveOnce(requesterId, key, hash, input.operationId, input.confirmDuplicateOf, overlapScope, {
       periodId: period.id,
       schoolId: target.schoolId,
       ...(target.facultyId && { facultyId: target.facultyId, facultyName: target.facultyName, schoolNames: target.schoolNames }),
@@ -259,6 +270,10 @@ export class SendDataRequestUseCase {
     facultyId?: string;
     facultyName?: string;
     schoolNames?: string[];
+    /** Pedido por facultad: las escuelas que abarca. */
+    schoolIds?: string[];
+    /** Pedido por escuela: su facultad. */
+    parentFacultyId?: string;
     cycleCount?: number;
     toEmail: string;
   }> {
@@ -268,12 +283,12 @@ export class SendDataRequestUseCase {
       const faculty = (await this.faculties.findAll()).find((item) => item.id === input.facultyId && item.isActive);
       if (!faculty) throw new InvalidDataRequestError('La facultad indicada no está disponible');
       if (!faculty.requestEmail) throw new RequestEmailNotConfiguredError('facultad');
-      const schoolNames = (await this.schools.findAll())
+      const facultySchools = (await this.schools.findAll())
         .filter((school) => school.isActive && school.facultyId === faculty.id)
-        .map((school) => school.name)
-        .sort((left, right) => left.localeCompare(right, 'es'));
+        .sort((left, right) => left.name.localeCompare(right.name, 'es'));
+      const schoolNames = facultySchools.map((school) => school.name);
       if (!schoolNames.length) throw new InvalidDataRequestError('La facultad no tiene escuelas activas');
-      return { schoolId: null, facultyId: faculty.id, facultyName: faculty.name, schoolNames, toEmail: faculty.requestEmail };
+      return { schoolId: null, facultyId: faculty.id, facultyName: faculty.name, schoolNames, schoolIds: facultySchools.map((school) => school.id), toEmail: faculty.requestEmail };
     }
 
     if (!input.schoolId) throw new InvalidDataRequestError('Elige una escuela o una facultad');
@@ -282,7 +297,7 @@ export class SendDataRequestUseCase {
     if (!school) throw new SchoolNotFoundError(input.schoolId);
     if (!school.requestEmail) throw new RequestEmailNotConfiguredError();
     const faculty = (await this.faculties.findAll()).find((item) => item.id === school.facultyId);
-    return { schoolId: school.id, schoolName: school.name, facultyName: faculty?.name, cycleCount: school.cycleCount, toEmail: school.requestEmail };
+    return { schoolId: school.id, schoolName: school.name, facultyName: faculty?.name, parentFacultyId: school.facultyId, cycleCount: school.cycleCount, toEmail: school.requestEmail };
   }
 
   /** Reserva en una transacción corta; si dos peticiones del mismo identificador chocan, la segunda se resuelve como repetición. */
@@ -292,6 +307,7 @@ export class SendDataRequestUseCase {
     hash: string,
     operationId: string,
     confirmDuplicateOf: string | undefined,
+    overlapScope: { facultyId?: string; schoolIds?: string[] },
     data: { periodId: string; schoolId: string | null; facultyId?: string; facultyName?: string; schoolNames?: string[]; kind: DataRequestKind; toEmail: string; cycles: number[]; note: string | null },
   ): Promise<Reservation> {
     for (let attempt = 0; attempt < 2; attempt += 1) {
@@ -312,6 +328,19 @@ export class SendDataRequestUseCase {
           if (latest) {
             if (latest.status === 'PENDIENTE') throw new DataRequestInFlightError(summarize(latest));
             if (confirmDuplicateOf !== latest.id) throw new DuplicateDataRequestError(summarize(latest));
+          } else {
+            // Otro alcance que abarca lo mismo (la facultad y sus escuelas no comparten clave): se advierte igual, y se puede confirmar.
+            const covering = await tx.findLatestOverlapping({
+              kind: data.kind,
+              periodId: data.periodId,
+              since: new Date(now.getTime() - DATA_REQUEST_DUPLICATE_WINDOW_MS),
+              ...overlapScope,
+            });
+            if (covering) {
+              const overlap: DataRequestOverlap = data.facultyId ? 'SCHOOL_IN_FACULTY' : 'FACULTY_INCLUDES_SCHOOL';
+              if (covering.status === 'PENDIENTE') throw new DataRequestInFlightError(summarize(covering, overlap));
+              if (confirmDuplicateOf !== covering.id) throw new DuplicateDataRequestError(summarize(covering, overlap));
+            }
           }
 
           const created = await tx.insertPending({
@@ -348,10 +377,19 @@ export class ListDataRequestsUseCase {
   async execute(requesterId: string): Promise<DataRequestView[]> {
     const scope = await this.guard.scopeFor(requesterId);
     if (scope.kind !== 'ALL' && scope.kind !== 'SCHOOLS') return [];
-    const list = await this.requests.list(scope.kind === 'SCHOOLS' ? { schoolIds: scope.schoolIds } : undefined);
     const [schools, periods] = await Promise.all([this.schools.findAll(), this.periods.findAll()]);
+    // Con alcance por escuela también se ven los pedidos de la facultad que las incluyen, pero solo lo que a esa persona le toca saber.
+    const own = scope.kind === 'SCHOOLS' ? schools.filter((school) => scope.schoolIds.includes(school.id)) : [];
+    const list = await this.requests.list(scope.kind === 'SCHOOLS' ? { schoolIds: scope.schoolIds, facultyIds: [...new Set(own.map((school) => school.facultyId))] } : undefined);
+    const ownNames = new Set(own.map((school) => school.name));
     const now = this.now();
-    return list.map((r) => withEffectiveStatus(r, now)).map((r) => ({ ...r, schoolName: schools.find((s) => s.id === r.schoolId)?.name ?? '—', periodName: periods.find((p) => p.id === r.periodId)?.name ?? '—' }));
+    return list
+      .map((r) => withEffectiveStatus(r, now))
+      .map((r) => {
+        const coversOnly = scope.kind === 'SCHOOLS' && r.schoolId === null;
+        const visible = coversOnly ? { ...r, toEmail: '', note: null, schoolNames: (r.schoolNames ?? []).filter((name) => ownNames.has(name)) } : r;
+        return { ...visible, schoolName: schools.find((s) => s.id === r.schoolId)?.name ?? '—', periodName: periods.find((p) => p.id === r.periodId)?.name ?? '—' };
+      });
   }
 }
 

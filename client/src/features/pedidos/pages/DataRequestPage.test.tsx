@@ -293,6 +293,20 @@ describe('DataRequestPage (pedido de listas por correo)', () => {
       await waitFor(() => expect(screen.queryByRole('alertdialog')).not.toBeInTheDocument());
     });
 
+    it('si lo anterior fue un pedido de la facultad que incluye la escuela, el diálogo lo dice y confirmar cita ese pedido', async () => {
+      requests.send
+        .mockRejectedValueOnce(httpError(409, { code: 'DUPLICATE_DATA_REQUEST', error: 'x', previous: previous({ overlap: 'FACULTY_INCLUDES_SCHOOL' }) }))
+        .mockResolvedValue({ request: record(), replayed: false });
+      const user = await sendOnce();
+
+      const dialog = await screen.findByRole('alertdialog');
+      expect(dialog).toHaveTextContent(/Esta escuela ya quedó incluida \(.*\) en un pedido de su facultad: enviado/);
+
+      await user.click(within(dialog).getByRole('button', { name: 'Pedir de nuevo' }));
+
+      await waitFor(() => expect(requests.send).toHaveBeenLastCalledWith(expect.objectContaining({ confirmDuplicateOf: 'prev-1' })));
+    });
+
     it('si mientras el diálogo estaba abierto se registró otro equivalente, la confirmación no vale: se muestra el nuevo pedido', async () => {
       requests.send
         .mockRejectedValueOnce(httpError(409, { code: 'DUPLICATE_DATA_REQUEST', error: 'x', previous: previous() }))
@@ -378,6 +392,16 @@ describe('DataRequestPage (pedido de listas por correo)', () => {
 
       expect(await screen.findByText(/no se puede saber si el correo salió/)).toBeInTheDocument();
       expect(screen.queryByText(/Pedido enviado a/)).not.toBeInTheDocument();
+    });
+
+    it('un pedido de la facultad que incluye tu escuela se ve sin correo y sin poder marcarlo como recibido', async () => {
+      requests.list.mockResolvedValue([record({ id: 'rf', schoolId: null, facultyName: 'Ingeniería', toEmail: '', schoolNames: ['Ingeniería de Sistemas'], status: 'ENVIADO' })]);
+      renderPage();
+
+      expect(await screen.findByText(/Ingeniería · 2026-II/)).toBeInTheDocument();
+      expect(screen.getByText(/pedido de la facultad que incluye tu escuela/)).toBeInTheDocument();
+      expect(screen.queryByText(/ · a /)).not.toBeInTheDocument();
+      expect(screen.queryByRole('button', { name: 'Marcar como recibido' })).not.toBeInTheDocument();
     });
 
     it('el historial distingue enviándose y envío incierto, sin ofrecer marcarlos como recibidos', async () => {

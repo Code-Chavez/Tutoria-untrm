@@ -45,6 +45,8 @@ export interface PreviousRequest {
   id: string;
   createdAt: string;
   status: DataRequestStatus;
+  /** Si el pedido anterior no es el mismo alcance sino otro que lo abarca (la facultad de la escuela, o una escuela de la facultad). */
+  overlap?: 'FACULTY_INCLUDES_SCHOOL' | 'SCHOOL_IN_FACULTY';
 }
 
 export type SendConflict =
