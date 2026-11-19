@@ -95,8 +95,10 @@ test('coordinador', async ({ page }) => {
   await loginUi(page, accounts.coordinator);
   await shot(page, '19-inicio-coordinador');
   await goToMenu(page, 'Asignación por ciclo');
-  await page.getByLabel('Tutor del ciclo 1').waitFor();
+  await page.getByRole('button', { name: 'Todos los ciclos' }).click();
+  await page.getByLabel('Tutor del ciclo 3').waitFor();
   await shot(page, '20-asignacion');
+  // «Plan semestral» está en el grupo «Gestión» del menú lateral.
   await goToMenu(page, 'Plan semestral');
   await page.getByRole('heading', { level: 2, name: 'Resolución de aprobación' }).waitFor();
   await shot(page, '21-plan-semestral');
@@ -132,7 +134,7 @@ test('administrador', async ({ page }) => {
   await page.getByRole('button', { name: /Nuevo/ }).first().click();
   await page.getByRole('dialog').waitFor();
   const role = page.getByRole('dialog').getByLabel('Rol', { exact: true });
-  await role.selectOption({ label: 'Profesional de Servicio' });
+  await role.selectOption({ label: 'Profesional de servicio' });
   await shot(page, '29-usuario-nuevo-servicio');
   await page.keyboard.press('Escape');
 
@@ -146,7 +148,7 @@ test('administrador', async ({ page }) => {
   await page.getByLabel('Nombre corto').waitFor();
   await shot(page, '32-identidad-visual');
   await goToMenu(page, 'Evaluación de tutoría');
-  await page.getByRole('row', { name: /Sistemas/ }).waitFor();
+  await page.getByText(/Escuelas con evaluación/).first().waitFor();
   await shot(page, '33-evaluacion-habilitacion');
   await goToMenu(page, 'Seguimiento DBU');
   await page.getByRole('heading', { level: 1 }).first().waitFor();

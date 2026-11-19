@@ -18,6 +18,17 @@ vi.mock('../services/workPlanService', async () => {
 
 const mocked = vi.mocked(workPlanService);
 
+async function fillRequired(user: ReturnType<typeof userEvent.setup>, denomination: string) {
+  for (const [label, value] of [
+    ['I. Introducción', 'Intro'], ['2.1 Denominación', denomination], ['2.2 Tipo de evento', 'Taller'], ['2.3 Fecha de ejecución', '2026-10-01'],
+    ['2.4 Horario', '9:00'], ['2.5 Lugar', 'Aula 1'], ['2.6 Modalidad', 'Presencial'], ['2.7 Organizadores', 'Escuela'],
+  ]) await user.type(await screen.findByLabelText(label), value);
+  await user.click(screen.getByRole('tab', { name: 'Fundamentación y objetivos' }));
+  for (const [label, value] of [
+    ['III. Fundamentación', 'Base'], ['IV. Objetivo general', 'General'], ['Objetivo específico 1', 'Uno'], ['V. Público objetivo', 'Estudiantes'], ['VI. Metodología', 'Activa'],
+  ]) await user.type(await screen.findByLabelText(label), value);
+}
+
 function renderPage() {
   return render(
     <MemoryRouter><QueryClientTestWrapper>
@@ -25,6 +36,13 @@ function renderPage() {
     </QueryClientTestWrapper></MemoryRouter>,
   );
 }
+
+// Un plan ya guardado tiene todos los campos obligatorios (el servidor los exige).
+const filled = {
+  introduction: 'Intro', denomination: 'Taller aprobado', eventType: 'Taller', executionDate: '2026-10-01', schedule: '9:00',
+  place: 'Aula 1', modality: 'Presencial', organizers: 'Escuela', supportUnit: '', foundation: 'Base', generalObjective: 'General',
+  specificObjectives: ['Uno'], targetAudience: 'Estudiantes', methodology: 'Activa',
+};
 
 describe('WorkPlanPage', () => {
   beforeEach(() => {
@@ -47,7 +65,7 @@ describe('WorkPlanPage', () => {
     const user = userEvent.setup();
     renderPage();
 
-    await user.type(await screen.findByLabelText('2.1 Denominación'), 'Taller de inducción');
+    await fillRequired(user, 'Taller de inducción');
     await user.click(screen.getByRole('tab', { name: 'Presupuesto' }));
     await user.click(screen.getByRole('button', { name: /Agregar fila/ }));
     await user.type(screen.getByLabelText('Cant. fila 1'), '2');
@@ -80,8 +98,7 @@ describe('WorkPlanPage', () => {
         revision: 1,
         inForce: true,
         resolution: { fileName: 'RD.pdf', fileSize: 1, uploadedAt: '2026-10-03T10:00:00Z' },
-        denomination: 'Taller aprobado',
-        specificObjectives: [],
+        ...filled,
         planning: [],
         programming: [],
         physicalResources: [],
@@ -114,8 +131,7 @@ describe('WorkPlanPage', () => {
         revision: 1,
         inForce: true,
         resolution: { fileName: 'RD.pdf', fileSize: 1, uploadedAt: '2026-10-03T10:00:00Z' },
-        denomination: 'Taller aprobado',
-        specificObjectives: [],
+        ...filled,
         planning: [],
         programming: [],
         physicalResources: [],
@@ -149,5 +165,74 @@ describe('WorkPlanPage', () => {
     await waitFor(() => expect(screen.queryByRole('alertdialog')).not.toBeInTheDocument());
     expect(await screen.findByRole('status')).toHaveTextContent('Cambios guardados como nueva revisión');
     await waitFor(() => expect(screen.getByRole('button', { name: 'Guardar como nueva revisión' })).toHaveFocus());
+  });
+
+  it('H10: al guardar con un campo obligatorio vacío salta a su pestaña, lo marca y le da el foco, sin llamar al servidor', async () => {
+    mocked.getOverview.mockResolvedValue({
+      periodName: '2026-II',
+      schools: [{ schoolId: 's1', schoolName: 'Sistemas', hasPlan: false, inForce: false, status: null }],
+    });
+    mocked.getBySchool.mockResolvedValue({ periodName: '2026-II', schoolName: 'Sistemas', plan: null });
+    const user = userEvent.setup();
+    renderPage();
+
+    await user.click(await screen.findByRole('button', { name: 'Guardar plan' }));
+
+    const field = await screen.findByLabelText('I. Introducción');
+    expect(field).toHaveAttribute('aria-invalid', 'true');
+    await waitFor(() => expect(field).toHaveFocus());
+    expect(screen.getByRole('alert')).toHaveTextContent('Falta completar «I. Introducción» (pestaña «Datos generales»)');
+    expect(field).toHaveAccessibleDescription('Este campo es obligatorio.');
+    expect(mocked.save).not.toHaveBeenCalled();
+
+    // Al escribir en el campo, deja de marcarse.
+    await user.type(field, 'Texto');
+    expect(field).not.toHaveAttribute('aria-invalid');
+  });
+
+  it('H10: si lo que falta está en otra pestaña (objetivos), cambia a ella y marca el primer objetivo', async () => {
+    mocked.getOverview.mockResolvedValue({
+      periodName: '2026-II',
+      schools: [{ schoolId: 's1', schoolName: 'Sistemas', hasPlan: false, inForce: false, status: null }],
+    });
+    mocked.getBySchool.mockResolvedValue({ periodName: '2026-II', schoolName: 'Sistemas', plan: null });
+    const user = userEvent.setup();
+    renderPage();
+
+    // Con todo lo demás completo, el único vacío es el objetivo específico.
+    await fillRequired(user, 'Taller');
+    await user.clear(screen.getByLabelText('Objetivo específico 1'));
+    await user.click(screen.getByRole('tab', { name: 'Presupuesto' }));
+    await user.click(screen.getByRole('button', { name: 'Guardar plan' }));
+
+    const objective = await screen.findByLabelText('Objetivo específico 1');
+    expect(screen.getByRole('tab', { name: 'Fundamentación y objetivos' })).toHaveAttribute('aria-selected', 'true');
+    expect(objective).toHaveAttribute('aria-invalid', 'true');
+    await waitFor(() => expect(objective).toHaveFocus());
+    expect(screen.getByRole('alert')).toHaveTextContent('Falta completar «Objetivos específicos»');
+    expect(mocked.save).not.toHaveBeenCalled();
+  });
+
+  it('H10: con un plan aprobado incompleto avisa antes de pedir la confirmación de la revisión', async () => {
+    mocked.getOverview.mockResolvedValue({
+      periodName: '2026-II',
+      schools: [{ schoolId: 's1', schoolName: 'Sistemas', hasPlan: true, inForce: true, status: 'APROBADO' }],
+    });
+    mocked.getBySchool.mockResolvedValue({
+      periodName: '2026-II',
+      schoolName: 'Sistemas',
+      plan: {
+        id: 'wp1', status: 'APROBADO', revision: 1, inForce: true, resolution: null,
+        ...filled, place: '', planning: [], programming: [], physicalResources: [], humanResources: [], budget: [], operationalActivities: [],
+      } as never,
+    });
+    const user = userEvent.setup();
+    renderPage();
+
+    await user.click(await screen.findByRole('button', { name: 'Guardar como nueva revisión' }));
+
+    expect(screen.queryByRole('alertdialog')).not.toBeInTheDocument();
+    expect(await screen.findByLabelText('2.5 Lugar')).toHaveAttribute('aria-invalid', 'true');
+    expect(mocked.save).not.toHaveBeenCalled();
   });
 });

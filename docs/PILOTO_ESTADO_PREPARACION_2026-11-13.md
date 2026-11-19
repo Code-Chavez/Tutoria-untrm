@@ -4,11 +4,26 @@ Complementa la [Guía del piloto](GUIA_PILOTO.md) (sección 2, lista de preparac
 
 ## Versión a probar
 
+Actualizado el 17/11/2026 (#321). El resto del documento conserva el texto de cada fecha; esta sección y la tabla siguiente son la referencia vigente.
+
 | Dato | Estado |
 |---|---|
-| Última etiqueta | `v1.0.0-beta.2` (05/11/2026) |
-| Estado de `develop` | 102 commits posteriores (certificación del tutor, pedidos de listas por facultad, estudiantes por periodo, reorganización del menú, endurecimiento de `GET /roles`). CI en verde. |
-| **Decisión pendiente (DBU/asesor)** | Probar `v1.0.0-beta.2` tal cual o crear una etiqueta nueva sobre `develop`. La guía solo pide anotar etiqueta y commit en la hoja de sesión. |
+| Versión de referencia | `v1.0.0-beta.3` (commit `11486c3`, 16/11/2026), liberada en `main` por el PR #304. Sustituye a `v1.0.0-beta.2` (05/11/2026), que era la base del ensayo del 13/11. |
+| Estado de `develop` | 15 commits posteriores a la etiqueta, todos con CI en verde: corrección de H10 y H11 (#314), manuales y capturas (#308, #310, #316), informe V03 (#312) y registro de H12 (#318). Un cambio de código nuevo exigiría otra etiqueta. |
+| **Decisión pendiente (PO/DBU)** | Presentar `v1.0.0-beta.3` tal cual (sin las correcciones de H10 y H11) o crear una etiqueta nueva sobre `develop` por el flujo de release. |
+| Aceptación del PO | Pendiente (casillas del PR #304 sin marcar; prevista el 18/11). |
+
+### Vínculo entre versión, pruebas y entregables
+
+| Aspecto | Evidencia | Estado |
+|---|---|---|
+| Pruebas automáticas | CI de `main` sobre `11486c3`: 1 704 pruebas de servidor, 766 de cliente, 141 E2E en Chrome (1 omitida); fuente en `docs/informe-practicas/CONTROL_DE_EVIDENCIAS.md`. | Verde |
+| Ensayo con todos los roles | Secciones siguientes de este documento (13–17/11, datos ficticios, equipo de desarrollo, no usuarios reales); H10–H12 cerrados o ensayados. | Hecho |
+| Revisión de seguridad | `docs/INFORME_SEGURIDAD_TT101_REVISION_2026-11-12.md` (#291 sigue abierto: faltan los endpoints agregados después). | Parcial |
+| Manuales | `docs/MANUAL_USUARIO.md`, `docs/MANUAL_TECNICO.md` y `docs/manual/img`; capturas del coordinador regeneradas tras la etiqueta (#316). | Hecho, posterior a la etiqueta |
+| Informe de prácticas | `docs/informe-practicas/INFORME_PRACTICAS_REDACCION_V03.md` y su `.docx`. | Falta revisión del asesor y formato de la escuela |
+| Piloto con usuarios reales | #293. | Pendiente (participantes, fecha, entorno de TI) |
+| Visto bueno | PO sobre `v1.0.0-beta.3`. | Pendiente |
 
 ## Lista de preparación (guía, sección 2)
 
@@ -81,14 +96,14 @@ Se ejecutaron con Playwright y Chrome, contra `sit-ensayo` (código de develop `
 | Coordinador | C1 asignar ciclos; C2 reasignar con motivo; C3 resolución del plan; C4 nueva revisión del plan aprobado; C5 indicadores y PDF | Completas (ver H9 y H10) |
 | Profesional de servicio | S1 abrir el caso desde el aviso; S2 recibir e iniciar la atención; S3 cerrar con observaciones; S4 constancia en PDF | Completas |
 | Estudiante | E1 pedir apoyo; E2 ver la próxima sesión; E3 ver la respuesta; E4 evaluar a su tutora | Completas |
-| Vicerrectorado | V1 consolidado y PDF; V2 comparar semestres | V1 completa; V2 solo se vio el periodo vigente (ver H12) |
+| Vicerrectorado | V1 consolidado y PDF; V2 comparar semestres | Completas (V2 ensayada el 17/11 con un semestre cerrado, ver H12) |
 
 | # | Hallazgo | Impacto | Estado |
 |---|---|---|---|
 | H9 | Un docente atiende un solo ciclo. Con dos docentes en la escuela, el tercer ciclo abre el diálogo «Registrar excepción» y pide un motivo. Es la regla del sistema, no un defecto. | **Medio** para preparar el piloto: la escuela necesita tantos docentes como ciclos con estudiantes, o la coordinación tendrá que registrar excepciones. | Informar al coordinador antes de la sesión; llevar suficientes docentes en el escenario. |
-| H10 | «Plan semestral» no está en el menú lateral: se abre desde la tarjeta del panel de inicio. El formulario tiene decenas de campos obligatorios y valida al final: en el ensayo, con el plan vacío, el aviso («Indique al menos un objetivo específico») aparecía al pie, lejos de los campos vacíos. Por eso C3 cargó el plan por API y solo ensayó por pantalla la resolución. | **Medio**: C3 puede tomar mucho más tiempo del esperado o no completarse. | Sin corregir. Dar a la coordinadora el plan ya redactado o ensayar el formulario completo en una sesión aparte; evaluar mostrar el error junto al campo. |
-| H11 | La guía llama «Profesional de Servicio» al rol; la pantalla dice «Profesional de servicio» (y «Estudiante» para el rol de los tutorados). | Ninguno. | Alinear la redacción de la guía. |
-| H12 | El entorno de ensayo solo tiene el periodo 2026-II, así que la comparación con un semestre cerrado (V2) no se pudo ensayar. | Bajo. | Cerrar un periodo de prueba en el ensayo o ensayar V2 en el entorno de desarrollo (que tiene 2027-I cerrado). |
+| H10 | «Plan semestral» no está en el menú lateral: se abre desde la tarjeta del panel de inicio. El formulario tiene decenas de campos obligatorios y valida al final: en el ensayo, con el plan vacío, el aviso («Indique al menos un objetivo específico») aparecía al pie, lejos de los campos vacíos. Por eso C3 cargó el plan por API y solo ensayó por pantalla la resolución. | **Medio**: C3 puede tomar mucho más tiempo del esperado o no completarse. | **Corregido el 16/11 (#313):** «Plan semestral» está en el menú lateral (grupo «Gestión») y el formulario avisa junto al primer campo obligatorio vacío, abriendo su pestaña y llevando el foco. Sigue siendo un formulario largo: conviene darle a la coordinadora el plan ya redactado. |
+| H11 | La guía llama «Profesional de Servicio» al rol; la pantalla dice «Profesional de servicio» (y «Estudiante» para el rol de los tutorados). | Ninguno. | **Corregido el 16/11 (#313):** `docs/GUIA_PILOTO.md` usa «Profesional de servicio». |
+| H12 | El entorno de ensayo solo tenía el periodo 2026-II, así que la comparación con un semestre cerrado (V2) no se había podido ensayar. | Bajo. | **Ensayado el 17/11 (#317):** el DBU cerró 2026-II (Periodo académico → Cierre de periodo, escribiendo el nombre), se creó 2027-I como periodo vigente y el Vicerrectorado cambió entre ambos en Indicadores → Semestre. Cada periodo carga su propio tablero; el cerrado muestra lo guardado (23 estudiantes activos, 3 en riesgo, 1 derivación, 0 sesiones, 0 respuestas de evaluación). Sin defectos. `sit-ensayo` queda con 2026-II cerrado y 2027-I vigente; para repetir los guiones por rol hay que restaurar la base limpia. |
 | H13 | Al desactivar una cuenta se pide confirmación («¿Confirmas desactivar a …?»); la cuenta queda inactiva de inmediato. | Ninguno; es un buen comportamiento. | — |
 
 Evidencia (capturas y PDF) en `C:\tmp\ensayo\evidencia` del equipo de ensayo; los guiones están en el worktree `C:\tmp\wt-ensayo\e2e\tests-ensayo` (`piloto-r1-dbu`, `piloto-r2-coordinador`, `piloto-r3-servicio-estudiante-vice`). Al terminar, el entorno conserva las cuentas, solicitudes, casos, plan y respuesta de evaluación creados; se puede volver al punto de partida con el respaldo indicado en el README del entorno.

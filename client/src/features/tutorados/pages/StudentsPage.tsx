@@ -549,6 +549,11 @@ export const StudentsPage: React.FC = () => {
             No se pudieron cargar los periodos. <Button variant="ghost" size="sm" onClick={() => retryPeriods()}>Reintentar periodos</Button>
           </p>
         )}
+        {periodId && (
+          <p role="note" className={styles.periodNote}>
+            Con un semestre elegido, el ciclo es el de la matrícula en ese semestre; la escuela y el tutor son los actuales del estudiante.
+          </p>
+        )}
         {loading ? (
           <TableSkeleton rows={6} columns={canWrite || canConductInterview ? 7 : 6} />
         ) : error ? (
@@ -593,6 +598,7 @@ export const StudentsPage: React.FC = () => {
           <>
             <TutoradoTable
               students={pageItems}
+              currentLabels={Boolean(periodId)}
               schoolName={schoolName}
               tutorName={tutorName}
               canWrite={canWrite}

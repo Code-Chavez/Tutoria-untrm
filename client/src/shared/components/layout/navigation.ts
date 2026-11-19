@@ -14,6 +14,7 @@ import {
   MessageSquareIcon,
   SettingsIcon,
   AlertTriangleIcon,
+  CalendarRangeIcon,
 } from '@shared/components/icons';
 
 import { SECTIONS, sectionPermissions } from './sections';
@@ -105,6 +106,7 @@ export const NAV: NavGroup[] = [
     title: 'Gestión',
     items: [
       { label: SECTIONS.periodo.title, Icon: RefreshIcon, path: SECTIONS.periodo.path, alsoPaths: sectionPaths('periodo'), roles: ['coord', 'dbu'], permissions: sectionPermissions('periodo') },
+      { label: 'Plan semestral', Icon: CalendarRangeIcon, path: '/plan-semestral', roles: ['coord'], permissions: ROUTE_PERMISSIONS['/plan-semestral'] },
       { label: SECTIONS.informes.title, Icon: ReportIcon, path: SECTIONS.informes.path, alsoPaths: sectionPaths('informes'), roles: ['tutor', 'coord', 'dbu', 'vice'], permissions: sectionPermissions('informes') },
       { label: 'Amonestaciones', Icon: AlertTriangleIcon, path: '/amonestaciones', roles: ['dec', 'dbu', 'coord'], permissions: ROUTE_PERMISSIONS['/amonestaciones'] },
     ],
@@ -140,7 +142,6 @@ export const ALL_NAV_ITEMS: NavItem[] = NAV.flatMap((group) => group.items);
 
 // Pantallas fuera del menú (el resto sale de navigation.ts).
 const EXTRA_META: Record<string, { title: string; group: string }> = {
-  '/plan-semestral': { title: 'Plan semestral', group: 'Gestión' },
   '/profile': { title: 'Mi perfil', group: 'Cuenta' },
   '/unauthorized': { title: 'Acceso denegado', group: '' },
   '/expediente': { title: 'Expediente', group: 'Atención a estudiantes' },

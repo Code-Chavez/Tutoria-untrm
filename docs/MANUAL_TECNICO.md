@@ -2,7 +2,7 @@
 
 **Sistema de Información para la Sistematización de los Procesos de Acompañamiento de Tutoría Universitaria**
 Universidad Nacional Toribio Rodríguez de Mendoza de Amazonas · Dirección de Bienestar Universitario
-Versión del documento: 1.0 (octubre de 2026) · Versión del software: 1.0.0-beta.3 (candidata a 1.0.0)
+Versión del documento: 1.1 (16 de noviembre de 2026) · Versión del software: 1.0.0-beta.3 (candidata a 1.0.0)
 
 > Este manual está dirigido a quien instala, opera y mantiene el sistema. Para el uso diario por cada rol, vea `docs/MANUAL_USUARIO.md`.
 > Los detalles de despliegue, respaldo y reversión viven en `deploy/README.md` y `backup/README.md`; aquí se resumen y se enlazan.
@@ -100,7 +100,8 @@ client/src/
 | Docente Tutor | Sus tutorados: entrevistas, sesiones, seguimiento, derivaciones, solicitudes, informe semestral. |
 | Tutorado | Sus sesiones, solicitar tutoría y evaluar a su tutor. |
 | Profesional de Servicio | Los casos derivados a su servicio (Escuela, Psicopedagogía, Psicología, Asistencia Social, Salud). |
-| Vicerrectorado | Solo lectura: informe consolidado e indicadores. |
+| Vicerrectorado | Solo lectura: informe consolidado e indicadores. Configura las sedes (`campuses:manage`). |
+| Decano | Su facultad (`User.facultyId`): registra y consulta amonestaciones a docentes tutores (`admonitions:read` y `admonitions:write`). No ve estudiantes ni expedientes. |
 
 Los permisos finos (`students:read`, `referrals:write`, …) se siembran en `infrastructure/bootstrap/seedBase.ts`. La autorización lee el rol **de la base
 de datos**, no del contenido del token.
@@ -206,6 +207,8 @@ Variables del servidor (`server/.env.example`, `.env.production.example`; los va
 | `EMAIL_ALLOWED_DOMAINS` | vacío = `untrm.edu.pe` | Dominios de correo permitidos para las **cuentas de usuario** (RF-01), separados por comas. Rige el alta y la edición de cuentas, la carga de docentes y el primer administrador (`ADMIN_EMAIL`). Una excepción (p. ej. profesionales externos) se agrega aquí por decisión formal de la DBU. Un dominio mal escrito impide el arranque (no se ignora en silencio). Las cuentas anteriores a la regla siguen funcionando; solo se exige al crear una cuenta o al cambiar su correo. No aplica al correo de contacto de los estudiantes. Los formularios consultan la política en `GET /api/users/email-policy`. |
 | `SMTP_HOST`, `SMTP_PORT`, `SMTP_SECURE`, `SMTP_REQUIRE_TLS`, `SMTP_USER`, `SMTP_PASS`, `MAIL_FROM` | — | Correo saliente. En producción `SMTP_HOST` es obligatorio y hay que definir `SMTP_SECURE=true` o `SMTP_REQUIRE_TLS` (true = STARTTLS obligatorio; false solo en un relay interno aprobado). Los correos de avisos se entregan con cola y reintentos (tabla `email_outbox`, ver `GUIA_SMTP.md` §5b). |
 | `PASSWORD_RESET_TTL_MINUTES` | `60` | Vigencia del enlace de recuperación. |
+| `CERTIFICATE_DEMO_MODE` | `true` fuera de producción; `false` en producción | Certificación del docente tutor: sin plantilla oficial solo existen certificados de **demostración** (marca de agua, numeración `DEMO-`, sin firma ni entrega). En producción solo se activa con `CERTIFICATE_DEMO_MODE=true`, por decisión de la DBU. |
+| `RESET_PASSWORD_RATE_LIMIT_MAX`, `LOGIN_RATE_LIMIT_MAX` | vacío (10 cada 15 min y 100 cada 5 min por IP) | Solo para pruebas E2E: suben el tope de `POST /auth/reset-password` y `POST /auth/login`. En producción se ignoran. |
 | `EMAIL_NOTIFICATIONS` | `true` | Envía cada aviso de la aplicación (nueva solicitud, derivación, cambio de estado) al correo institucional de la persona. Necesita `SMTP_HOST`; `false` lo desactiva. |
 | `ADMIN_EMAIL`, `ADMIN_PASSWORD` | — | Solo para crear el primer administrador (contraseña de ≥ 12 caracteres, no de ejemplo). |
 | `BACKUP_CRON`, `BACKUP_KEEP`, `BACKUP_OFFSITE_DIR`, `BACKUP_UPLOAD_CMD` | `0 2 * * *`; conserva 7 (desarrollo) o 14 (producción) | Respaldos (ver sección 9). |
@@ -214,7 +217,7 @@ Variables del cliente (en tiempo de compilación): `VITE_IDLE_TIMEOUT_MINUTES` (
 de sesión por inactividad. **Volver a la vista (#274):** al cerrarse la sesión por inactividad (`SessionTimeout`) o por un 401 que no se puede renovar (`apiClient`), el cliente guarda en `sessionStorage` (`sit:return-to`, ruta + consulta + ancla, id de la persona y hora) la vista actual (`shared/utils/returnTo.ts`); `LoginPage` la recupera una sola vez tras iniciar sesión solo para la misma persona, hasta 12 horas, y solo si es una ruta interna segura (nunca `//`, `\`, caracteres de control ni las pantallas públicas de acceso). «Salir» (cierre voluntario) no la guarda. La visita directa a una URL protegida (`ProtectedRoute`) conserva además la consulta y el ancla. Tras iniciar sesión el destino se aplica al renderizar (`<Navigate>`), sin carrera con la redirección a «/».
 
 **Parámetros del sistema** (se editan en la aplicación, *Parámetros*, por la DBU): duración de la sesión (45 min), sesiones por semestre (8), umbral de
-alerta por inasistencias (2) y plazo de atención de derivaciones (48 h).
+alerta por inasistencias (2), plazo de atención de derivaciones (48 h) y máximo de horas de atención por semana de un tutor (`tutor_max_weekly_hours`). En el grupo *Seguridad de acceso*: cierre de sesión por inactividad (`inactivity_timeout_minutes`, 15 min), intentos fallidos antes del bloqueo (`login_max_attempts`, 5) y duración del bloqueo (`login_lockout_minutes`, 15 min). Las definiciones, rangos y valores por defecto están en `server/src/application/use-cases/system-parameters/parameterDefinitions.ts`, y `securityPolicy.ts` aplica la política de seguridad.
 
 **Identidad visual** (*Identidad visual*): nombre de la institución, nombre corto (barra lateral y título del navegador), colores y logotipo.
 
@@ -228,20 +231,22 @@ Implementación: `server/src/infrastructure/repositories/EmailNotificationReposi
 
 ## 7. Base de datos
 
-- **Esquema:** `server/prisma/schema.prisma`; 35 migraciones escritas a mano en `server/prisma/migrations/<fecha>_<nombre>/migration.sql`.
+- **Esquema:** `server/prisma/schema.prisma`; 58 migraciones escritas a mano en `server/prisma/migrations/<fecha>_<nombre>/migration.sql`.
 - **Aplicar migraciones:** `pnpm prisma migrate deploy` (desarrollo) o, en la imagen de producción, `node node_modules/prisma/build/index.js migrate deploy` (ya
   incluido en el arranque). Estado: `… migrate status`.
 - **Modelos principales:**
 
 | Grupo | Modelos |
 |---|---|
-| Acceso | `User`, `Role`, `Permission`, `RolePermission`, `RefreshToken` (con hash), `PasswordResetToken` (con hash, un solo uso), `AuditLog` |
-| Estructura académica | `Faculty`, `School`, `AcademicPeriod` (con `closedAt`, `closedById` y `closureSummary` al cerrarse), `CatalogItem`, `StudentPeriodSnapshot` (corte de matrícula por semestre) |
-| Tutoría | `Student`, `PeriodEnrollment` (matrícula por periodo), `DataRequest` (pedidos de listas por correo), `TutorAssignmentHistory`, `TutorInterview`, `TutorFollowUp`, `SupportContact`, `TutoringRequest` |
+| Acceso | `User`, `Role`, `Permission`, `RolePermission`, `UserAccessPolicy` (alcance por persona), `RefreshToken` (con hash), `PasswordResetToken` (con hash, un solo uso), `AuditLog` |
+| Estructura académica | `Faculty`, `Campus` (sedes y filiales), `School`, `SchoolCampus` (escuela dictada en varias sedes), `AcademicPeriod` (con `closedAt`, `closedById` y `closureSummary` al cerrarse), `CatalogItem`, `StudentPeriodSnapshot` (corte de matrícula por semestre) |
+| Tutoría | `Student`, `PeriodEnrollment` (matrícula por periodo), `DataRequest` (pedidos de listas por correo), `CycleTutorAssignment` (tutor por ciclo y su aceptación), `DeclineNoticeAttempt` (avisos del rechazo de un docente), `TutorAssignmentHistory`, `TutorInterview`, `TutorFollowUp`, `SupportContact`, `TutoringRequest` |
 | Sesiones | `Session`, `SessionParticipant`, `SessionAttendance` (numeración por semestre), `SessionChangeHistory`, `SessionEvidence` |
 | Derivaciones | `StudentReferral`, `ReferralStatusHistory`, `Notification`, `SignedDocument` |
 | Evaluación e informes | `TutorEvaluation`, `EvaluationWindow`, `WorkPlan`, `WorkPlanVersion`, `TutorSemesterReport` |
-| Configuración | `SystemParameter`, `BrandingSetting` |
+| Certificación | `Certificate`, `CertificateEvidence`, `CertificateSequence` (numeración), `CertificateTemplate`, `CommitteeResolution` (resolución de decanato), `CertificateVisualAsset` y `CertificateSchoolSettings` (imágenes y textos del certificado de demostración) |
+| Amonestaciones | `Admonition` |
+| Configuración y correo | `SystemParameter`, `BrandingSetting`, `EmailOutbox` (cola de correos con reintentos) |
 
 - **Cierre de periodo:** `POST /api/periods/:id/close` (DBU, confirmando el nombre), `POST /api/periods/:id/reopen`, `GET /api/periods/:id/closure` (resumen) y `GET /api/periods/current` (cualquier sesión). Sin periodo vigente, el middleware `requireOpenPeriod` rechaza con `409 PERIOD_CLOSED` los registros operativos (sesiones, asistencias, entrevistas, seguimientos, red de apoyo, derivaciones, solicitudes y adjuntos firmados); las cargas y la administración no pasan por él. Se consulta la base en cada escritura para que el cierre rija al instante.
 - **Matrícula por periodo:** `POST /api/students/import` y el alta manual matriculan al estudiante en el periodo vigente (los que ya existían continúan: se actualiza su ciclo y se reactivan; sin periodo vigente la carga responde `409 NO_OPEN_PERIOD`). El middleware `requireEnrollment` rechaza con `403 NOT_ENROLLED` las acciones propias del estudiante (`POST /tutoring-requests/me`, `POST /evaluations`) si no figura en la matrícula del periodo vigente; `GET /api/periods/current` devuelve `enrolled` para estudiantes. La migración matricula a los estudiantes activos en el periodo vigente al actualizar. El corte de matrícula y el resumen del cierre usan la matrícula cuando el periodo la tiene.
@@ -265,7 +270,7 @@ Implementación: `server/src/infrastructure/repositories/EmailNotificationReposi
 - **Escuela en varias sedes (#273).** Tabla `school_campuses` (migración `20261110230000_school_campuses`, rellenada con la sede principal de cada escuela); `schools.campus_id` sigue siendo la sede principal y siempre figura en la tabla. `PUT /api/schools/:id/campuses` (`{ campusIds }`, permiso `campuses:manage`, al menos una sede activa; conserva la principal si sigue en la lista) deja `SCHOOL_CAMPUS_SET` en la bitácora; `PUT /api/schools/:id/campus` mueve la sede principal. `GET /api/campuses` trae `campusIds` por escuela y `GET /api/certificates/options` las sedes de cada escuela (la principal primero). `POST /api/certificates/:id/generate` acepta `{ campusId }` opcional: debe ser una sede donde se dicta la escuela (`400` si no) y su ciudad se imprime en la fecha; sin él se usa la sede principal. La instantánea guarda `campusId` y `campusName`.
 - **Límite de recuperación de contraseña configurable fuera de producción (#245).** `POST /api/auth/reset-password` sigue limitado a 10 por IP cada 15 minutos. La variable opcional `RESET_PASSWORD_RATE_LIMIT_MAX` (entero positivo de hasta 6 cifras) sube ese tope solo cuando `NODE_ENV` no es `production`; en producción se ignora, igual que un valor vacío o no válido. Sirve para repetir `test:ci` contra el mismo servidor sin recibir 429. Lo mismo vale para `POST /api/auth/login` (100 por IP cada 5 minutos) con `LOGIN_RATE_LIMIT_MAX` (#248): el job E2E del CI lo sube porque, con todas las suites seguidas, inicia más sesiones que ese tope y recibía 429.
 - **Pedido de listas:** `PUT /api/schools/:id/request-email` (DBU o coordinación de esa escuela), `POST /api/data-requests` (correo formal con la plantilla Excel adjunta, copia y Reply-To a quien pide; queda con un estado de envío: `PENDIENTE`, `ENVIADO`, `FALLIDO` o `INCIERTO`), `GET /api/data-requests` y `POST /api/data-requests/:id/received`. Permiso `students:import`, con el alcance por escuela de siempre. `POST /api/data-requests` acepta `kind: 'ESTUDIANTES' | 'DOCENTES'` (por omisión estudiantes); la lista de docentes usa la plantilla de docentes y su propio texto, y la pide solo la DBU (`403` para la coordinación). El cliente la ofrece con un clic en las pantallas de carga (`RequestListBanner`). **Idempotencia y equivalencia (LEV-R04):** el cuerpo lleva `operationId` (UUID, **obligatorio**: sin él `400`) y, al reenviar un pedido equivalente, `confirmDuplicateOf` (id del pedido anterior que se mostró). Respuestas: `201` creado y enviado; `200` repetición de una operación ya guardada (`replayed: true`, no se envía otro correo); `202` registrado con resultado incierto (`INCIERTO`); `502` registrado pero el correo no fue aceptado (`FALLIDO`); `409` con `code` `DUPLICATE_DATA_REQUEST` (equivalente en la ventana provisional de 10 min; trae `previous` = `{ id, createdAt, status }`) o `DATA_REQUEST_IN_FLIGHT` (hay un envío equivalente en curso: no admite confirmación); `422` `OPERATION_ID_CONFLICT` (mismo `operationId` con otro contenido). El `operationId` es por persona. El envío se espera como máximo 60 s; vencer ese plazo no cancela el transporte SMTP ni prueba que el correo no salió (queda `INCIERTO`). No hay entrega «exactamente una vez». Detalle en `docs/levantamiento/05` (LEV-R04). **Campos y mensajes públicos de `POST /api/data-requests`, `GET /api/data-requests` y `POST /api/data-requests/:id/received`:** cada pedido trae `status` y `error`. `error` es **texto para la persona usuaria o `null`**, nunca el nombre técnico de la causa: con `FALLIDO` (fallo **demostrado**: el servidor de correo no aceptó el mensaje) y causa conocida vale «El envío de correo no está configurado en el sistema»; con `FALLIDO` sin causa conocida y con `INCIERTO` (**no se sabe** si el correo salió) vale `null`. La respuesta de `POST` añade `message`: `201` «Pedido enviado»; `200` «La operación ya estaba registrada; no se envió otro correo»; `502` (fallo confirmado) «El pedido quedó registrado pero el correo no salió»; `202` (incierto) «El pedido quedó registrado pero no se puede saber si el correo salió». El cliente construye su texto con el estado: en fallo confirmado indica la causa conocida (si la hay) y como siguiente paso avisar a la administración del sistema, volver a intentarlo más tarde o entregar la plantilla por otro medio; en resultado **incierto** solo dice que no se sabe si salió y que se verifique con la escuela antes de volver a pedirlo (no recomienda reenviar ni otra vía como si el correo no hubiera salido). El nombre técnico del error (p. ej. `MailNotConfiguredError`) se guarda en la columna `data_requests.error` para diagnóstico y el detalle completo se escribe en el registro del servidor (`[pedido de listas] el correo no salió`, con el id del pedido, el id de la escuela, el estado, el nombre y el código de la causa; sin el mensaje de nodemailer —que puede traer direcciones—, ni direcciones ni contenido del correo); no sale en ninguna respuesta HTTP ni en el historial que ve la persona usuaria.
-- **Pedido por facultad.** El envío acepta `facultyId` como alternativa a `schoolId` y exige alcance institucional. Usa el correo configurado en `PUT /api/catalogs/faculties/:id` mediante el campo `requestEmail`. Envía una plantilla en un solo mensaje que enumera las escuelas activas de la facultad y, para estudiantes, abarca todos sus ciclos. El historial conserva el nombre de la facultad y las escuelas incluidas en el momento del envío. El registro se rige por las mismas reglas de idempotencia y confirmación de equivalentes, con una clave separada de los pedidos individuales.
+- **Pedido por facultad.** El envío acepta `facultyId` como alternativa a `schoolId` y exige alcance institucional. Usa el correo configurado en `PUT /api/catalogs/faculties/:id` mediante el campo `requestEmail`. Envía una plantilla en un solo mensaje que enumera las escuelas activas de la facultad y, para estudiantes, abarca todos sus ciclos. El historial conserva el nombre de la facultad y las escuelas incluidas en el momento del envío. El registro se rige por las mismas reglas de idempotencia y confirmación de equivalentes, con una clave separada de los pedidos individuales. La facultad y sus escuelas tienen claves de equivalencia distintas; además, dentro de la ventana de 10 minutos, un pedido por escuela advierte si su facultad ya fue pedida (mismo tipo y periodo) y uno por facultad advierte si alguna de sus escuelas lo fue (`DUPLICATE_DATA_REQUEST` con `previous.overlap`, confirmable con `confirmDuplicateOf`; si el otro sigue enviándose bloquea con `DATA_REQUEST_IN_FLIGHT`). `GET /api/data-requests` para coordinación incluye los pedidos de facultad de sus escuelas con `toEmail` vacío, sin nota y solo con sus escuelas en `schoolNames`.
 - **Datos base** (`seedBase`): permisos, roles, parámetros. **Datos de demostración** (`prisma/seed.ts`): solo desarrollo.
 - Los archivos adjuntos **no** están en la base: viven en `EVIDENCE_STORAGE_DIR` y se respaldan junto con ella.
 
@@ -304,13 +309,13 @@ nada a medias**, no borra los respaldos existentes y marca `FAIL` (el contenedor
 | Nivel | Herramienta | Cómo ejecutarlo |
 |---|---|---|
 | Servidor: unitarias | Jest | `cd server && npx jest tests/unit` |
-| Servidor: integración y rutas (**base real**) | Jest | `cd server && REQUIRE_DB_TESTS=1 npx jest --runInBand` (necesita la base de desarrollo sembrada) |
+| Servidor: integración y rutas (**base real y exclusiva**) | Jest | `cd server && TEST_DATABASE_URL=postgresql://…/sit_db_test pnpm run test:db:prepare && pnpm run test:integration [archivo]`. Se niega a correr si la base no termina en `_test`, nunca toca la de desarrollo y cada corrida borra solo lo que creó. Detalle en `docs/PRUEBAS_DE_INTEGRACION.md`. |
 | Cliente | Vitest + Testing Library | `cd client && npx vitest run --maxWorkers=3` (en un equipo de 4 núcleos; sin ese límite Vitest usa un worker por hilo menos uno y, con la CPU saturada, algunas pruebas pesadas superan los 5 s; ver issue #256) |
-| Extremo a extremo | Playwright | `cd e2e && npx playwright test` (ver `e2e/README.md`; necesita `docker compose up -d`) |
+| Extremo a extremo | Playwright | `cd e2e && pnpm run test:ci` (las suites mantenidas; ver `e2e/README.md`; necesita el stack levantado). Corre en el CI en Chrome; Firefox y WebKit tienen su propio flujo (sección 11). |
 | Tipos y estilo | TypeScript estricto, ESLint | `npx tsc --noEmit` y `pnpm lint` en `server/` y `client/` |
 | Dependencias | `pnpm audit --prod` | en `server/` y `client/` |
 
-Las **capturas del manual de usuario** (`docs/manual/img/`) se regeneran con `cd e2e && npx playwright test -c playwright.manual.config.ts`, sobre un entorno recién sembrado (`docker compose down -v && docker compose up -d --build`) y con datos de demostración realistas; no forman parte de la suite de pruebas.
+Las **capturas del manual de usuario** (`docs/manual/img/`) se regeneran con `cd e2e && E2E_BASE_URL=… E2E_API_URL=… E2E_CHANNEL=chrome npx playwright test -c playwright.manual.config.ts`, sobre un entorno aislado y recién sembrado (`docker compose down -v && docker compose up -d --build && docker compose exec server pnpm run seed`). La siembra base no trae sesiones, solicitudes ni derivaciones: antes de correr el generador hay que crear a mano o por pantalla las dos sesiones de la tutora con la estudiante («Bienvenida y plan de trabajo» y «Reforzamiento de Cálculo I»), una solicitud sobre Cálculo II, una derivación a Psicología y un plan semestral con su resolución. Con datos de demostración ficticios; no forman parte de la suite de pruebas.
 
 La trazabilidad entre historias de usuario y pruebas está en `docs/MATRIZ_TRAZABILIDAD_PRUEBAS.md`. La aceptación manual con evidencia está en
 `docs/ACEPTACION_*.md`.
@@ -320,10 +325,13 @@ La trazabilidad entre historias de usuario y pruebas está en `docs/MATRIZ_TRAZA
 GitHub Actions (`.github/workflows/`):
 
 - **`ci.yml`** (en cada push y pull request a `develop` y `main`): lint, compilación y pruebas del servidor (con PostgreSQL de servicio) y del cliente,
-  auditoría de dependencias, ensayo de restauración de respaldos y, solo en *push*, construcción de las imágenes Docker.
+  auditoría de dependencias, ensayo de restauración de respaldos, **E2E con Playwright en Chrome** (`pnpm run test:ci`, con PostgreSQL y Mailpit de servicio y datos ficticios) y, solo en *push*, construcción de las imágenes Docker con las migraciones aplicadas.
+- **`e2e-browsers.yml`** (Firefox y WebKit): en los pull requests a `develop` que tocan `client`, `server` o `e2e`, y además cada noche y a demanda. Firefox corre las suites E2E-21, 22, 23, 26 y 27; WebKit en Linux solo la E2E-27 (se cae al recargar en otros recorridos). Edge usa el mismo motor que Chrome y se prueba a mano antes de cada release.
+- **`dialog-browser.yml`**: contrato de los diálogos accesibles en Firefox, cuando cambian los componentes de diálogo.
 - **`pr-checks.yml`** (en cada pull request): título con *Conventional Commits*, descripción con contenido, rama de origen permitida para `main` y, hacia `main`,
-  el **DoD técnico** completo.
-- La suite E2E (`e2e/`) **no** se ejecuta en CI todavía: requiere levantar el stack completo.
+  el **DoD técnico** completo («Gate — Main Branch Protection»: cuenta solo las casillas del bloque `DOD-GATE` de la descripción).
+- Los ejecutores usan `ubuntu-24.04` (fijado): con `ubuntu-latest` los navegadores de Playwright dejaron de instalarse.
+- `develop` y `main` exigen pull request; si una rama queda atrás, hay que actualizarla (`gh pr update-branch`) y esperar de nuevo el CI.
 
 ## 12. Operación diaria y solución de problemas
 
@@ -363,6 +371,5 @@ Lo que conviene conservar al recargar, compartir el enlace o volver con «atrás
 
 - Los tokens de sesión se guardan en `localStorage` del navegador (riesgo bajo con la política de contenido actual; ver informe de seguridad).
 - El tope de intentos por IP es un contador **en memoria** de una sola instancia del servidor.
-- Los parámetros `inactivity_timeout_minutes`, `login_max_attempts` y `login_lockout_minutes` existen en la base pero **no se usan**: la inactividad
-  (15 min) se fija en el cliente y el bloqueo (5 intentos, 15 min) en el servidor.
+- Los certificados de los docentes tutores son **de demostración** (`CERTIFICATE_DEMO_MODE`): sin el formato oficial de la DBU no hay firma ni entrega.
 - Falta ejecutar un escáner dinámico (OWASP ZAP) y el ensayo completo de instalación en el servidor real con el dominio definitivo.

@@ -36,6 +36,19 @@ class PrismaDataRequestTx implements DataRequestTx {
     return row ? toDomain(row) : null;
   }
 
+  async findLatestOverlapping(filters: { kind: DataRequestKind; periodId: string; since: Date; facultyId?: string; schoolIds?: string[] }): Promise<DataRequest | null> {
+    const scopes = [
+      ...(filters.facultyId ? [{ facultyId: filters.facultyId }] : []),
+      ...(filters.schoolIds?.length ? [{ schoolId: { in: filters.schoolIds } }] : []),
+    ];
+    if (!scopes.length) return null;
+    const row = await this.tx.dataRequest.findFirst({
+      where: { kind: filters.kind, periodId: filters.periodId, createdAt: { gte: filters.since }, status: { in: COUNTING }, OR: scopes },
+      orderBy: { createdAt: 'desc' },
+    });
+    return row ? toDomain(row) : null;
+  }
+
   async insertPending(data: NewDataRequest): Promise<DataRequest> {
     try {
       return toDomain(await this.tx.dataRequest.create({ data: { ...data, status: 'PENDIENTE', error: null } }));
@@ -71,10 +84,12 @@ export class PrismaDataRequestRepository implements DataRequestRepository {
     return this.findById(id);
   }
 
-  async list(filters?: { schoolIds?: string[]; periodId?: string }): Promise<DataRequest[]> {
+  async list(filters?: { schoolIds?: string[]; facultyIds?: string[]; periodId?: string }): Promise<DataRequest[]> {
     const rows = await this.prisma.dataRequest.findMany({
       where: {
-        ...(filters?.schoolIds ? { schoolId: { in: filters.schoolIds } } : {}),
+        ...(filters?.schoolIds
+          ? { OR: [{ schoolId: { in: filters.schoolIds } }, ...(filters.facultyIds?.length ? [{ facultyId: { in: filters.facultyIds } }] : [])] }
+          : {}),
         ...(filters?.periodId ? { periodId: filters.periodId } : {}),
       },
       orderBy: { createdAt: 'desc' },

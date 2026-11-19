@@ -41,3 +41,7 @@ Base de comparación: `v1.0.0-beta.2` (`main`, 05/11/2026). Esta candidata reún
 - Los certificados son solo de demostración hasta que la DBU entregue la plantilla oficial.
 - Solo Chrome verificado en el ensayo con participantes; Edge, Safari y móvil sin verificar.
 - Siguen pendientes los manuales con capturas actualizadas (TT-105).
+
+## Actualización posterior a la etiqueta (17/11/2026)
+
+Estas notas describen el corte del 16/11 y no se reescriben. Después de la etiqueta, en `develop`: H10 y H11 se corrigieron (#314, issue #313: «Plan semestral» entró al menú y el formulario valida al guardar; la guía usa «Profesional de servicio»), H12 se ensayó con un semestre cerrado (#318) y los manuales con capturas actualizadas se entregaron (#308, #310, #316). H9 sigue abierto como decisión de producto. Ver la tabla de versión y evidencias en `docs/PILOTO_ESTADO_PREPARACION_2026-11-13.md`.

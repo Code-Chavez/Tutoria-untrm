@@ -45,7 +45,7 @@ Marcar cada punto con fecha y responsable. Propuesta: **9 al 12 de noviembre** (
 ### 2.2 Datos base (los carga la DBU desde la aplicación)
 
 - [ ] *Catálogos*: facultades, escuelas y el **periodo académico activo**.
-- [ ] *Usuarios y roles*: una cuenta por participante, con su rol. **Para cada Profesional de Servicio hay que elegir su servicio** (sin él no recibe ningún caso).
+- [ ] *Usuarios y roles*: una cuenta por participante, con su rol. **Para cada Profesional de servicio hay que elegir su servicio** (sin él no recibe ningún caso).
 - [ ] Coordinador asignado a cada escuela que participe (si no, las solicitudes llegan a la DBU).
 - [ ] *Carga masiva* de los estudiantes del piloto: usar `docs/piloto/estudiantes_ficticios_piloto.xlsx` (ver sección 4) o la lista autorizada.
 - [ ] *Asignación*: repartir los estudiantes entre los tutores participantes.

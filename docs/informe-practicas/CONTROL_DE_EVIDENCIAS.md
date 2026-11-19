@@ -86,3 +86,42 @@ El script lee la V02 en Markdown y escribe `Informe_Practicas_Brayni_Chavez_V02.
 ## Criterio editorial mantenido
 
 Se describen productos y resultados verificables; lo previsto en el plan se distingue de lo ejecutado; no se atribuyen mejoras cuantificadas, participantes, tiempos ni horas sin fuente; las dificultades recogen hallazgos reales del proyecto. Antes de entregar, revisar el nombre del asesor, el título formal, el formato exigido por la escuela y completar los puntos 13 a 20 según corresponda.
+
+---
+
+# Actualización del 16 de noviembre de 2026 (versión V03)
+
+Fecha de corte: 16 de noviembre de 2026. Fuente de la redacción: `INFORME_PRACTICAS_REDACCION_V03.md`; el Word se genera con `python generar_informe.py` (por omisión la V03; `python generar_informe.py V02` regenera la anterior). La V01 y la V02 se conservan sin cambios como cortes históricos.
+
+## Qué cambió frente a la V02
+
+- Referencia técnica: del commit `3860bd2` y la etiqueta `v0.4.1` al commit `11486c3` de `main` y la etiqueta `v1.0.0-beta.3` (integración continua en verde).
+- La tabla de **entregas** pasa de 6 a 12 versiones (v0.4.2 a v1.0.0-beta.3).
+- Secciones nuevas o reescritas: 7.8 certificación en demostración, 7.9 pruebas de extremo a extremo en la integración continua, 7.10 dos revisiones de seguridad, 7.11 ensayo técnico de los roles, 7.12 manuales; se reescribió la tabla de resultados del apartado 8.
+- Se actualizaron conclusiones, recomendaciones y se agregaron las referencias [18]-[21].
+
+## Cifras de la V03 y de dónde salen
+
+| Cifra | Valor | Fuente verificable |
+| --- | --- | --- |
+| Pruebas del servidor | 1 704 (183 conjuntos), cobertura de sentencias 90,95 % | Registro del trabajo «Server — Test» de la ejecución de CI 43901232247 (commit 11486c3, `main`) |
+| Pruebas del cliente | 766 (102 archivos), cobertura de sentencias 78,75 % | Registro del trabajo «Client — Test» de la misma ejecución |
+| Pruebas E2E en Chrome | 141 aprobadas, 1 omitida (15 suites, `test:ci`) | Registro del trabajo «E2E — Playwright (Chrome)» de la misma ejecución; `e2e/package.json` |
+| Modelos de datos / migraciones | 50 / 58 (`0_init` más 57 con fecha) | `server/prisma/schema.prisma`; `server/prisma/migrations/` en la etiqueta `v1.0.0-beta.3` |
+| Tamaño del código | ~27 mil líneas del servidor (459 archivos `.ts`); ~24 mil del cliente (226 archivos `.ts` y `.tsx` sin pruebas) | Recuento con `git ls-files` sobre `origin/develop` al 16/11; orden de magnitud |
+| Solicitudes de integración fusionadas | 266 | `gh pr list --state merged` al 16/11 |
+| Fechas de las versiones | v0.4.2 11/10 · v0.4.3 y v0.4.4 12/10 · beta.1 13/10 · beta.2 05/11 · beta.3 16/11 | `git tag` (fecha del tag) |
+| Hallazgos de seguridad | Revisión del 11/10: 0 altos, 1 medio, 5 bajos corregidos, 1 bajo documentado. Revisión del 12/11: 1 bajo corregido, 1 informativo | `docs/INFORME_SEGURIDAD_2026-10-11.md` y `docs/INFORME_SEGURIDAD_TT101_REVISION_2026-11-12.md` |
+| Ensayo técnico de los roles | 22 tareas de los demás roles más 9 de la tutora, completadas; 3 defectos corregidos y 4 observaciones pendientes | `docs/PILOTO_ESTADO_PREPARACION_2026-11-13.md` (evidencia local en el entorno de ensayo, no versionada) |
+
+## Qué sigue sin evidencia (no se redactó como resultado)
+
+Siguen las confirmaciones 1 a 20 de las secciones anteriores. En particular:
+
+- **Piloto con usuarios reales:** el ensayo del 13 al 15 de noviembre lo hizo el propio equipo con guiones automatizados y datos ficticios; no es un piloto ni mide usabilidad.
+- **Aprobación del Product Owner de v1.0.0-beta.3**, horas acreditadas, asistencia, supervisor y constancias.
+- **Entorno de producción, correo real y copia de respaldo fuera del servidor:** dependen de TI y no están confirmados.
+- **Formato oficial del certificado:** los certificados son solo de demostración.
+- **Diagramas AS-IS/TO-BE, casos de uso, clases y MER:** el plan de documentación integral (`documentacion-integral/`, trabajo del estudiante, sin versionar) los contempla; no se presentan como existentes hasta contrastarlos con el corte.
+- **Formato obligatorio de la escuela y nombre oficial del asesor:** siguen por confirmar (confirmaciones 1 y 4).
+- **Capturas en el informe:** no se incluyeron; las 35 capturas del manual de usuario se regeneraron el 16/11 y pueden citarse como anexo.

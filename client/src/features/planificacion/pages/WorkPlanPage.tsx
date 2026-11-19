@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useUrlParams } from '@shared/hooks/useUrlParams';
 import { getApiErrorMessage } from '@shared/services/apiClient';
 import { PageHeader, Card, Button, ConfirmDialog, SelectField, EmptyState, TableSkeleton } from '@shared/components/ui';
@@ -102,6 +102,24 @@ const TABS = [
 ] as const;
 type TabId = (typeof TABS)[number]['id'];
 
+// Campos de texto obligatorios, en el orden en que aparecen, con su etiqueta y la pestaña donde están (H10): al guardar con uno
+// vacío se avisa junto al campo, no solo al pie de la página con el mensaje del servidor.
+const REQUIRED_FIELDS: { key: TextKey | 'specificObjectives'; label: string; tab: TabId }[] = [
+  { key: 'introduction', label: 'I. Introducción', tab: 'general' },
+  { key: 'denomination', label: '2.1 Denominación', tab: 'general' },
+  { key: 'eventType', label: '2.2 Tipo de evento', tab: 'general' },
+  { key: 'executionDate', label: '2.3 Fecha de ejecución', tab: 'general' },
+  { key: 'schedule', label: '2.4 Horario', tab: 'general' },
+  { key: 'place', label: '2.5 Lugar', tab: 'general' },
+  { key: 'modality', label: '2.6 Modalidad', tab: 'general' },
+  { key: 'organizers', label: '2.7 Organizadores', tab: 'general' },
+  { key: 'foundation', label: 'III. Fundamentación', tab: 'objectives' },
+  { key: 'generalObjective', label: 'IV. Objetivo general', tab: 'objectives' },
+  { key: 'specificObjectives', label: 'Objetivos específicos', tab: 'objectives' },
+  { key: 'targetAudience', label: 'V. Público objetivo', tab: 'objectives' },
+  { key: 'methodology', label: 'VI. Metodología', tab: 'objectives' },
+];
+
 const toRows = (rows: object[]): Row[] =>
   rows.map((r) => Object.fromEntries(Object.entries(r).map(([k, v]) => [k, String(v ?? '')])));
 
@@ -191,6 +209,8 @@ function WorkPlanEditor({ schoolId, plan }: { schoolId: string; plan: WorkPlan |
   const setTab = (next: TabId) => url.set({ pestana: next === 'general' ? null : next }, { replace: true });
   const [form, setForm] = useState<FormState>(() => (plan ? fromPlan(plan) : emptyForm()));
   const [message, setMessage] = useState<{ type: 'ok' | 'error'; text: string } | null>(null);
+  // Campo obligatorio que quedó vacío al guardar: se marca y recibe el foco (H10).
+  const [invalidKey, setInvalidKey] = useState<string | null>(null);
 
   const save = useSaveWorkPlan(schoolId);
   const [confirmRevision, setConfirmRevision] = useState(false);
@@ -198,7 +218,26 @@ function WorkPlanEditor({ schoolId, plan }: { schoolId: string; plan: WorkPlan |
   // Editar un plan con resolución abre una nueva revisión que debe aprobarse otra vez (A12).
   const approved = plan?.status === 'APROBADO';
 
-  const setText = (key: TextKey, value: string) => setForm((f) => ({ ...f, [key]: value }));
+  const setText = (key: TextKey, value: string) => {
+    setForm((f) => ({ ...f, [key]: value }));
+    if (invalidKey === key) setInvalidKey(null);
+  };
+
+  const firstMissing = () =>
+    REQUIRED_FIELDS.find(({ key }) =>
+      key === 'specificObjectives' ? !form.specificObjectives.some((o) => o.trim()) : !form[key].trim(),
+    );
+
+  // Al saltar a la pestaña del campo vacío, esperamos a que se dibuje para darle el foco.
+  useEffect(() => {
+    if (!invalidKey) return;
+    const id = invalidKey === 'specificObjectives' ? 'wp-objective-0' : `wp-${invalidKey}`;
+    const el = document.getElementById(id);
+    if (el) {
+      el.scrollIntoView?.({ block: 'center' });
+      el.focus();
+    }
+  }, [invalidKey, tab]);
 
   const setCell = (table: TableKey | 'operationalActivities', i: number, key: string, value: string) =>
     setForm((f) => ({
@@ -213,8 +252,29 @@ function WorkPlanEditor({ schoolId, plan }: { schoolId: string; plan: WorkPlan |
   const removeRow = (table: TableKey, i: number) =>
     setForm((f) => ({ ...f, [table]: f[table].filter((_, idx) => idx !== i) }));
 
-  const handleSave = async () => {
+  // Avisa del primer campo obligatorio vacío (saltando a su pestaña) y dice si hay alguno.
+  const reportMissing = () => {
     setMessage(null);
+    const missing = firstMissing();
+    if (!missing) {
+      setInvalidKey(null);
+      return false;
+    }
+    const tabLabel = TABS.find((t) => t.id === missing.tab)?.label;
+    setConfirmRevision(false);
+    setInvalidKey(missing.key);
+    setTab(missing.tab);
+    setMessage({ type: 'error', text: `Falta completar «${missing.label}» (pestaña «${tabLabel}»).` });
+    return true;
+  };
+
+  // Con un plan aprobado, se valida antes de pedir la confirmación para no hacer confirmar algo que no se va a guardar.
+  const requestRevision = () => {
+    if (!reportMissing()) setConfirmRevision(true);
+  };
+
+  const handleSave = async () => {
+    if (reportMissing()) return;
     try {
       await save.mutateAsync(toContent(form));
       setMessage({
@@ -231,21 +291,27 @@ function WorkPlanEditor({ schoolId, plan }: { schoolId: string; plan: WorkPlan |
     }
   };
 
-  const textField = (key: TextKey, label: string, multiline = false) => (
-    <div className={styles.field} key={key}>
-      <label htmlFor={`wp-${key}`}>{label}</label>
-      {multiline ? (
-        <textarea
-          id={`wp-${key}`}
-          rows={4}
-          value={form[key]}
-          onChange={(e) => setText(key, e.target.value)}
-        />
-      ) : (
-        <input id={`wp-${key}`} value={form[key]} onChange={(e) => setText(key, e.target.value)} />
-      )}
-    </div>
-  );
+  const textField = (key: TextKey, label: string, multiline = false) => {
+    const invalid = invalidKey === key;
+    const common = {
+      id: `wp-${key}`,
+      value: form[key],
+      onChange: (e: { target: { value: string } }) => setText(key, e.target.value),
+      'aria-invalid': invalid || undefined,
+      'aria-describedby': invalid ? `wp-${key}-error` : undefined,
+    };
+    return (
+      <div className={styles.field} key={key}>
+        <label htmlFor={`wp-${key}`}>{label}</label>
+        {multiline ? <textarea rows={4} {...common} /> : <input {...common} />}
+        {invalid && (
+          <span id={`wp-${key}-error`} className={styles.fieldError}>
+            Este campo es obligatorio.
+          </span>
+        )}
+      </div>
+    );
+  };
 
   const rowsTable = (table: TableKey) => {
     const { title, columns } = TABLES[table];
@@ -352,19 +418,28 @@ function WorkPlanEditor({ schoolId, plan }: { schoolId: string; plan: WorkPlan |
                     {textField('generalObjective', 'IV. Objetivo general', true)}
                     <div className={styles.field}>
                       <label>Objetivos específicos</label>
+                      {invalidKey === 'specificObjectives' && (
+                        <span id="wp-specificObjectives-error" className={styles.fieldError}>
+                          Indique al menos un objetivo específico.
+                        </span>
+                      )}
                       {form.specificObjectives.map((o, i) => (
                         <div className={styles.objectiveRow} key={i}>
                           <input
+                            id={`wp-objective-${i}`}
                             aria-label={`Objetivo específico ${i + 1}`}
+                            aria-invalid={invalidKey === 'specificObjectives' || undefined}
+                            aria-describedby={invalidKey === 'specificObjectives' ? 'wp-specificObjectives-error' : undefined}
                             value={o}
-                            onChange={(e) =>
+                            onChange={(e) => {
+                              if (invalidKey === 'specificObjectives') setInvalidKey(null);
                               setForm((f) => ({
                                 ...f,
                                 specificObjectives: f.specificObjectives.map((x, idx) =>
                                   idx === i ? e.target.value : x,
                                 ),
-                              }))
-                            }
+                              }));
+                            }}
                           />
                           <button
                             type="button"
@@ -452,7 +527,7 @@ function WorkPlanEditor({ schoolId, plan }: { schoolId: string; plan: WorkPlan |
                 </p>
               )}
               <div className={styles.actions}>
-                <Button onClick={approved ? () => setConfirmRevision(true) : handleSave} loading={save.isPending}>
+                <Button onClick={approved ? requestRevision : handleSave} loading={save.isPending}>
                   {approved ? 'Guardar como nueva revisión' : 'Guardar plan'}
                 </Button>
               </div>

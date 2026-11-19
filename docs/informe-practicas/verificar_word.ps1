@@ -1,8 +1,8 @@
 $ErrorActionPreference = 'Stop'
-$reportDocPath = Join-Path $PSScriptRoot 'Informe_Practicas_Brayni_Chavez_V02.docx'
+$reportDocPath = Join-Path $PSScriptRoot 'Informe_Practicas_Brayni_Chavez_V03.docx'
 $reportRenderDir = Join-Path (Split-Path (Split-Path $PSScriptRoot -Parent) -Parent) 'tmp/informe-practicas-render'
 New-Item -ItemType Directory -Path $reportRenderDir -Force | Out-Null
-$reportPdfPath = Join-Path $reportRenderDir 'Informe_Practicas_Brayni_Chavez_V02.pdf'
+$reportPdfPath = Join-Path $reportRenderDir 'Informe_Practicas_Brayni_Chavez_V03.pdf'
 $reportWordApp = $null
 $reportWordDocument = $null
 $reportOwnEmptyInstance = $false

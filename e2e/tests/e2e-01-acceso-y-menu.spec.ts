@@ -6,7 +6,7 @@ import { goToMenu, loginUi, sidebar } from '../support/ui';
 const MENU: Record<AccountKey, string[]> = {
   student: ['Panel de inicio', 'Solicitar tutoría', 'Mis solicitudes', 'Mis sesiones', 'Evaluar tutoría'],
   tutor: ['Panel de inicio', 'Estudiantes', 'Entrevista inicial', 'Sesiones', 'Seguimiento', 'Derivar caso', 'Solicitudes de tutoría', 'Casos derivados', 'Informes'],
-  coordinator: ['Panel de inicio', 'Estudiantes', 'Solicitudes de tutoría', 'Periodo académico', 'Informes', 'Amonestaciones', 'Configuración'],
+  coordinator: ['Panel de inicio', 'Estudiantes', 'Solicitudes de tutoría', 'Periodo académico', 'Plan semestral', 'Informes', 'Amonestaciones', 'Configuración'],
   psychology: ['Panel de inicio', 'Casos derivados'],
   vice: ['Panel de inicio', 'Informes', 'Configuración'],
   dean: ['Panel de inicio', 'Amonestaciones'],

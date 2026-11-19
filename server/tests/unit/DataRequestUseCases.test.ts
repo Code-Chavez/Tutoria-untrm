@@ -6,6 +6,7 @@ import {
   NoPeriodToRequestError,
   RequestEmailNotConfiguredError,
   SendDataRequestUseCase,
+  DuplicateDataRequestError,
   SetSchoolRequestEmailUseCase,
   TeacherListForbiddenError,
 } from '@application/use-cases/data-requests/DataRequestUseCases';
@@ -154,6 +155,73 @@ describe('pedido de listas por correo (fase 2)', () => {
     });
   });
 
+  describe('pedidos de la facultad y de sus escuelas (solapamiento)', () => {
+    const faculty = { id: 'f1', name: 'Ingeniería', isActive: true, createdAt: new Date(), requestEmail: 'facultad@untrm.edu.pe' };
+    let clock: Date;
+    const sendAt = () => new SendDataRequestUseCase(guard as unknown as StudentAccessGuard, periods, schools, faculties, users, mailer, template, requests, audit, undefined, () => clock);
+
+    beforeEach(() => {
+      clock = new Date('2026-11-18T10:00:00Z');
+      faculties.findAll.mockResolvedValue([faculty]);
+      schools.findAll.mockResolvedValue([school, { ...school, id: 's2', name: 'Mecánica Eléctrica' }, { ...school, id: 's4', name: 'Otra facultad', facultyId: 'f2' }]);
+      schools.findById.mockImplementation(async (id: string) => (await schools.findAll()).find((item) => item.id === id) ?? null);
+    });
+
+    it('pedir una escuela justo después de pedir su facultad advierte, y se puede confirmar ese pedido', async () => {
+      const whole = await sendAt().execute('u1', { facultyId: 'f1', operationId: op() });
+
+      const warning = await sendAt().execute('u1', { schoolId: 's1', cycles: [1], operationId: op() }).catch((e) => e);
+      expect(warning).toBeInstanceOf(DuplicateDataRequestError);
+      expect(warning.previous).toMatchObject({ id: whole.request.id, overlap: 'FACULTY_INCLUDES_SCHOOL' });
+      expect(warning.message).toContain('ya quedó incluida');
+      expect(mailer.send).toHaveBeenCalledTimes(1);
+
+      await sendAt().execute('u1', { schoolId: 's1', cycles: [1], operationId: op(), confirmDuplicateOf: whole.request.id });
+      expect(mailer.send).toHaveBeenCalledTimes(2);
+    });
+
+    it('pedir la facultad justo después de pedir una de sus escuelas también advierte', async () => {
+      const one = await sendAt().execute('u1', { schoolId: 's2', cycles: [2], operationId: op() });
+
+      const warning = await sendAt().execute('u1', { facultyId: 'f1', operationId: op() }).catch((e) => e);
+      expect(warning).toBeInstanceOf(DuplicateDataRequestError);
+      expect(warning.previous).toMatchObject({ id: one.request.id, overlap: 'SCHOOL_IN_FACULTY' });
+      expect(mailer.send).toHaveBeenCalledTimes(1);
+    });
+
+    it('no advierte pasada la ventana, con otra facultad ni con otro tipo de lista', async () => {
+      await sendAt().execute('u1', { facultyId: 'f1', operationId: op() });
+
+      await sendAt().execute('u1', { schoolId: 's4', cycles: [1], operationId: op() });
+      expect(mailer.send).toHaveBeenCalledTimes(2);
+
+      clock = new Date(clock.getTime() + 11 * 60_000);
+      await sendAt().execute('u1', { schoolId: 's1', cycles: [1], operationId: op() });
+      expect(mailer.send).toHaveBeenCalledTimes(3);
+    });
+
+    it('un pedido de la facultad todavía enviándose bloquea el de la escuela sin posibilidad de confirmar', async () => {
+      const pending = await requests.reserve('x', async (tx) =>
+        tx.insertPending({ periodId: 'p1', schoolId: null, facultyId: 'f1', facultyName: 'Ingeniería', schoolNames: ['Ingeniería de Sistemas'], kind: 'ESTUDIANTES', toEmail: 'facultad@untrm.edu.pe', cycles: [], note: null, requestedById: 'u9', operationId: op(), contentHash: 'h', equivalenceKey: 'k', resendOfId: null, attemptStartedAt: clock }),
+      );
+
+      await expect(sendAt().execute('u1', { schoolId: 's1', cycles: [1], operationId: op(), confirmDuplicateOf: pending.id })).rejects.toMatchObject({ name: 'DataRequestInFlightError' });
+      expect(mailer.send).not.toHaveBeenCalled();
+    });
+
+    it('la coordinación ve el pedido de la facultad que incluye su escuela, sin correo, nota ni las demás escuelas', async () => {
+      await requests.reserve('k', async (tx) =>
+        tx.insertPending({ periodId: 'p1', schoolId: null, facultyId: 'f1', facultyName: 'Ingeniería', schoolNames: ['Ingeniería de Sistemas', 'Mecánica Eléctrica'], kind: 'ESTUDIANTES', toEmail: 'facultad@untrm.edu.pe', cycles: [], note: 'Reservado', requestedById: 'admin', operationId: op(), contentHash: 'h', equivalenceKey: 'k', resendOfId: null, attemptStartedAt: clock }),
+      );
+      guard.scopeFor.mockResolvedValue({ kind: 'SCHOOLS', schoolIds: ['s1'] });
+
+      const [view, ...rest] = await new ListDataRequestsUseCase(guard as unknown as StudentAccessGuard, schools, periods, requests, () => clock).execute('coord');
+
+      expect(rest).toHaveLength(0);
+      expect(view).toMatchObject({ facultyName: 'Ingeniería', toEmail: '', note: null, schoolNames: ['Ingeniería de Sistemas'] });
+    });
+  });
+
   describe('pedir la lista de docentes tutores', () => {
     let teacherTemplate: jest.Mocked<StudentTemplateProvider>;
     const sendTeachers = () =>
@@ -236,7 +304,7 @@ describe('pedido de listas por correo (fase 2)', () => {
 
       guard.scopeFor.mockResolvedValue({ kind: 'SCHOOLS', schoolIds: ['s1'] });
       await list().execute('coord');
-      expect(listSpy).toHaveBeenLastCalledWith({ schoolIds: ['s1'] });
+      expect(listSpy).toHaveBeenLastCalledWith({ schoolIds: ['s1'], facultyIds: ['f1'] });
 
       guard.scopeFor.mockResolvedValue({ kind: 'TUTOR', tutorId: 't' });
       expect(await list().execute('tutor')).toEqual([]);
