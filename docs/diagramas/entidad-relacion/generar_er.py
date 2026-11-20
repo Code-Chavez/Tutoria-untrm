@@ -13,6 +13,7 @@ from pathlib import Path
 AQUI = Path(__file__).parent
 ESQUEMA = AQUI.parent.parent.parent / 'server' / 'prisma' / 'schema.prisma'
 SALIDA = AQUI / 'ER_POR_MODULO.md'
+DICCIONARIO = AQUI / 'DICCIONARIO_DE_DATOS.md'
 
 MODULOS = [
     ('Acceso, cuentas y auditoría', 'ER-01', ['User', 'Role', 'UserAccessPolicy', 'Permission', 'RolePermission', 'RefreshToken', 'PasswordResetToken', 'AuditLog']),
@@ -102,6 +103,39 @@ def bloque(nombres, modelos, rels):
     return '\n'.join(lineas)
 
 
+def diccionario(modelos, rels):
+    """Tabla de columnas por tabla: la información que el diagrama compacto del informe no dibuja."""
+    fks_por_modelo = {n: {fk for r in rels if r['hijo'] == n for fk in r['fks']} for n in modelos}
+    partes = [
+        '# Diccionario de datos',
+        '',
+        f'**Fuente:** `server/prisma/schema.prisma` ({len(modelos)} tablas). **Referencia:** commit `{commit_actual()}`. **Estado:** actual (implementado). Generado con `generar_er.py`; no se edita a mano. Las columnas son las de la base de datos (`@map`); «Clave» indica clave primaria (PK), foránea (FK) o única (UK).',
+        '',
+    ]
+    for titulo, ident, nombres in MODULOS:
+        partes += [f'## {ident} · {titulo}', '']
+        for nombre in nombres:
+            modelo = modelos[nombre]
+            partes += [f'### Tabla `{modelo["tabla"]}` ({nombre})', '', '| Columna | Tipo | Clave | Nulo | Por defecto |', '| --- | --- | --- | --- | --- |']
+            for campo in modelo['campos']:
+                tipo = campo['tipo'].rstrip('?')
+                base = tipo[:-2] if tipo.endswith('[]') else tipo
+                if base in modelos:
+                    continue
+                marcas = []
+                if '@id' in campo['attrs'] or campo['nombre'] in modelo['pk_compuesta']:
+                    marcas.append('PK')
+                if campo['nombre'] in fks_por_modelo[nombre]:
+                    marcas.append('FK')
+                if '@unique' in campo['attrs']:
+                    marcas.append('UK')
+                por_defecto = re.search(r'@default\((.*?)\)(?:\s|$)', campo['attrs'])
+                legible = TIPOS.get(base, base) + ('[]' if tipo.endswith('[]') else '')
+                partes.append(f'| `{columna(campo)}` | {legible} | {", ".join(marcas) or "—"} | {"sí" if campo["tipo"].endswith("?") else "no"} | {("`" + por_defecto.group(1) + "`") if por_defecto else "—"} |')
+            partes.append('')
+    DICCIONARIO.write_text('\n'.join(partes), encoding='utf-8')
+
+
 def commit_actual():
     try:
         return subprocess.check_output(['git', 'rev-parse', '--short', 'HEAD'], cwd=AQUI, text=True).strip()
@@ -137,7 +171,8 @@ def main():
         partes += [f'| `{n}` | `{modelos[n]["tabla"]}` |' for n in nombres]
         partes += ['', '```mermaid', bloque(nombres, modelos, rels), '```', '']
     SALIDA.write_text('\n'.join(partes), encoding='utf-8')
-    print(f'{SALIDA.name}: {len(modelos)} tablas, {len(rels)} relaciones, {len(MODULOS)} diagramas')
+    diccionario(modelos, rels)
+    print(f'{SALIDA.name} y {DICCIONARIO.name}: {len(modelos)} tablas, {len(rels)} relaciones, {len(MODULOS)} diagramas')
 
 
 if __name__ == '__main__':
