@@ -24,7 +24,15 @@ export function useUpdateReferralInCache() {
 
   return (updated: StudentReferral) => {
     queryClient.setQueryData<StudentReferral[]>(REFERRALS_QUERY_KEY, (prev) =>
-      prev ? prev.map((r) => (r.id === updated.id ? updated : r)) : prev,
+      // La respuesta de un cambio de estado no trae el nombre ni el código del estudiante (solo lo trae la lista): se conservan
+      // los de la lista, o el encabezado del detalle pasa de «Estudiante: Ana…» a «Estudiante ID: …».
+      prev
+        ? prev.map((r) =>
+            r.id === updated.id
+              ? { ...updated, studentName: updated.studentName ?? r.studentName, studentCode: updated.studentCode ?? r.studentCode }
+              : r,
+          )
+        : prev,
     );
   };
 }
