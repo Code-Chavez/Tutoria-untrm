@@ -219,6 +219,7 @@ describe('pedido de listas por correo (fase 2)', () => {
 
       expect(rest).toHaveLength(0);
       expect(view).toMatchObject({ facultyName: 'Ingeniería', toEmail: '', note: null, schoolNames: ['Ingeniería de Sistemas'] });
+      expect(view).toMatchObject({ requestedById: '', receivedById: null, operationId: null, contentHash: null, equivalenceKey: null, resendOfId: null });
     });
   });
 
