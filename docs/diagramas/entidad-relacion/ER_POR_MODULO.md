@@ -1,6 +1,6 @@
 # Diagramas entidad-relación por módulo
 
-**Fuente:** `server/prisma/schema.prisma` (50 tablas, 92 relaciones). **Referencia:** commit `67207b6`. **Estado:** actual (implementado). Generado con `generar_er.py`; no se edita a mano.
+**Fuente:** `server/prisma/schema.prisma` (50 tablas, 92 relaciones). **Referencia:** commit `37278bb`. **Estado:** actual (implementado). Generado con `generar_er.py`; no se edita a mano.
 
 **Cómo leerlos.** Cada recuadro es una tabla con sus columnas reales; `PK` es la clave primaria, `FK` una clave foránea, `UK` una columna única y `"nulo"` una columna que admite nulo. `||--o{` es «uno a muchos» obligatorio; `|o--o{` es «uno a muchos» donde la clave foránea puede ser nula. Una tabla de otro módulo aparece solo con el nombre cuando una relación la cruza.
 
