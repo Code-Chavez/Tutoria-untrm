@@ -387,7 +387,21 @@ export class ListDataRequestsUseCase {
       .map((r) => withEffectiveStatus(r, now))
       .map((r) => {
         const coversOnly = scope.kind === 'SCHOOLS' && r.schoolId === null;
-        const visible = coversOnly ? { ...r, toEmail: '', note: null, schoolNames: (r.schoolNames ?? []).filter((name) => ownNames.has(name)) } : r;
+        const visible = coversOnly
+          ? {
+              ...r,
+              toEmail: '',
+              note: null,
+              schoolNames: (r.schoolNames ?? []).filter((name) => ownNames.has(name)),
+              // Nada que identifique a otras personas ni la mecánica interna del pedido.
+              requestedById: '',
+              receivedById: null,
+              operationId: null,
+              contentHash: null,
+              equivalenceKey: null,
+              resendOfId: null,
+            }
+          : r;
         return { ...visible, schoolName: schools.find((s) => s.id === r.schoolId)?.name ?? '—', periodName: periods.find((p) => p.id === r.periodId)?.name ?? '—' };
       });
   }
