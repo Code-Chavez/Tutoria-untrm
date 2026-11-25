@@ -181,15 +181,24 @@ def diseno():
         renderizar(ident, m.group(4), ancho=1800 if 'sequence' in m.group(4)[:20] else 1600)
 
 
+def compactos():
+    print('Compactos')
+    texto = (AQUI / 'diagramas_compactos.md').read_text(encoding='utf-8')
+    patron = re.compile(r'^## (dc-\w+) · (.*?)\n(.*?)```mermaid\n(.*?)\n```', flags=re.S | re.M)
+    for m in patron.finditer(texto):
+        renderizar(m.group(1), m.group(4), ancho=1600)
+
+
 def main():
     FIGURAS.mkdir(exist_ok=True)
     TMP.mkdir(exist_ok=True)
     if not (MMDC / 'node_modules').exists():
         raise SystemExit(f'Falta instalar mermaid-cli en {MMDC} (ver el encabezado de este archivo)')
-    casos_de_uso()
-    entidad_relacion()
-    clases()
-    diseno()
+    solo = sys.argv[1] if len(sys.argv) > 1 else None
+    pasos = {'casos': casos_de_uso, 'er': entidad_relacion, 'clases': clases, 'diseno': diseno, 'compactos': compactos}
+    for nombre, paso in pasos.items():
+        if solo in (None, nombre):
+            paso()
 
 
 if __name__ == '__main__':

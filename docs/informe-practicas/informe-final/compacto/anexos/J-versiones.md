@@ -1,0 +1,16 @@
+# Anexo J. Notas de las versiones candidatas
+
+Resumen de lo que cada versión candidata `v1.0.0-beta` exige para desplegarse, cómo se verificó y qué limitaciones declaró. El contenido funcional de cada versión está en la tabla de entregas del Capítulo V (sección 5.7); las notas completas son `docs/RELEASE_v1.0.0-beta.1.md` a `docs/RELEASE_v1.0.0-beta.4.md`. Son versiones de pruebas controladas con datos ficticios, **no** la versión estable `v1.0.0`.
+
+[[tabla: Requisitos de despliegue, verificación y limitaciones por versión]]
+
+| Versión | Migraciones y variables | Verificación declarada | Limitaciones declaradas |
+| --- | --- | --- | --- |
+| beta.1 (13/10/2026) | Tres migraciones (clave obligatoria de cambio, parámetros de seguridad, cola de correos); `SMTP_REQUIRE_TLS` o `SMTP_SECURE` obligatorio: sin esa decisión el servidor no arranca en producción | 40 recorridos E2E y la suite del servidor contra base real | Anonimato de la evaluación sin decidir (no describirla como anónima); brechas con los formatos de los anexos; solo la DBU abre la evaluación; dominio de correo sin excepciones; rendimiento del expediente de unos 4 s, sin cumplir 3 s; respaldo externo y monitoreo con TI; solo Chrome verificado |
+| beta.2 (05/11/2026) | 14 migraciones nuevas (de `school_cycle_count` a `roles_base_and_active`); `INVITATION_TTL_HOURS` (72) y `EMAIL_ALLOWED_DOMAINS`; las cuentas nuevas se entregan por enlace de invitación; los roles base no se editan y `admin:system` no es delegable | E2E-21 (5 de 5) y E2E-22 (9 de 9) en Chrome en una pila aislada; no se repitieron los 40 recorridos | Solo Chrome; aviso de borrador no visible en Amonestaciones hasta recargar; pendientes con la DBU (A06, formatos, RF-39, RF-01); rendimiento, respaldo externo y manuales con capturas actualizadas |
+| beta.3 (16/11/2026) | 7 migraciones (de `certification_model` a `faculty_data_requests`); `CERTIFICATE_DEMO_MODE` (por defecto `false` en producción); el listado de roles exige `users:read` | CI de `develop` en verde; Firefox y WebKit manual sobre `bbfc664`; ensayo del piloto con todos los roles | H9 a H12 sin corregir al corte; entorno, SMTP, respaldo externo, participantes y fechas pendientes; certificados solo de demostración; solo Chrome en el ensayo |
+| beta.4 (19/11/2026) | Ninguna migración ni variable nuevas; conviene respaldar la base antes | CI completo de cada PR; ensayo de V2 con un semestre cerrado (17/11); CI de `main` con 1 709 pruebas del servidor, 775 del cliente y 141 E2E | H9 abierto; historial por semestre con escuela y tutor actuales; entorno institucional, certificado oficial, formatos, anonimato y aprobación del PO pendientes; no se repitieron Firefox y WebKit ni el ensayo completo sobre el código final |
+
+[[fuente: Notas de cada versión (documentos del proyecto) y etiquetas del repositorio.]]
+
+La versión **beta.4** corrige H10 y H11 del ensayo, entrega el menú «Plan semestral» con validación al guardar, acota la lista de estudiantes por permiso y alcance, avisa del solapamiento entre pedidos de facultad y de escuela, y rotula el historial por semestre. Su estado de aprobación por el Product Owner sigue **pendiente** (Anexo L).

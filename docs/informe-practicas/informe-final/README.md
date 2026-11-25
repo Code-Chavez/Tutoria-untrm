@@ -12,6 +12,16 @@ Fuentes y herramientas del informe final de prácticas preprofesionales (Word y 
 5. `python generar_informe_final.py` (escribe `Informe_Final_Practicas_Brayni_Chavez.docx`).
 6. `powershell -File herramientas/actualizar_word.ps1` (Word actualiza los índices y los campos y exporta el PDF).
 
+## Versión compacta para empastar
+
+Misma estructura con menos páginas (capítulos y anexos resumidos en `compacto/`, figuras anotadas de los manuales y diagramas compactos). Se genera aparte y su salida no se versiona:
+
+1. `python herramientas/anotar_capturas.py` (figuras `man-XX.png` a partir de `docs/manual/img`).
+2. `python herramientas/renderizar_diagramas.py` (incluye los diagramas de `herramientas/diagramas_compactos.md`) y `python herramientas/componer_figuras.py`.
+3. `python herramientas/preparar_anexos.py --compacto` (anexos A, B y F resumidos).
+4. `python generar_informe_final.py --compacto` (escribe `Informe_Final_Practicas_Brayni_Chavez_Compacto.docx`).
+5. `powershell -File herramientas/actualizar_word.ps1 -Docx <ruta del _Compacto.docx>` (índices, campos y PDF).
+
 ## Reglas del contenido
 
 - Todas las referencias de `capitulos/08-referencias.md` son **externas** al proyecto, están en APA 7 y se comprobaron contra su fuente (DOI, editorial o página oficial). Los documentos del proyecto se presentan como anexos (evidencia), no como referencias.

@@ -26,7 +26,21 @@ from docx.shared import Inches, Pt, RGBColor
 AQUI = Path(__file__).resolve().parent
 SALIDA = AQUI / 'Informe_Final_Practicas_Brayni_Chavez.docx'
 LOGO = AQUI / 'assets' / 'logo_untrm.png'
-ANCHO_UTIL = 6.3  # pulgadas (carta con márgenes de 1,1 pulgadas)
+# Parámetros de maquetación. El modo --compacto (informe para empastar, con menos páginas) los cambia sin tocar el resto del código.
+CONF = {
+    'fuente': AQUI, 'salida': SALIDA,
+    'interlineado': 1.5, 'espacio_post': 6, 'sangria': 0.4, 'interlineado_lista': 1.3, 'espacio_ref': 8,
+    'margen_izq': 1.1, 'margen_der': 1.1, 'margen_sup': 1.0, 'margen_inf': 1.0,
+    'tam_texto': 12, 'tam_tabla': 10, 'tam_tabla_ancha': 9,
+    'ancho_vert': 6.3, 'alto_vert': 8.0, 'ancho_horiz': 9.0, 'alto_horiz': 5.9,
+}
+COMPACTO = {
+    'fuente': AQUI / 'compacto', 'salida': AQUI / 'Informe_Final_Practicas_Brayni_Chavez_Compacto.docx',
+    'interlineado': 1.2, 'espacio_post': 4, 'sangria': 0.3, 'interlineado_lista': 1.1, 'espacio_ref': 5,
+    'margen_izq': 1.4, 'margen_der': 0.9, 'margen_sup': 0.9, 'margen_inf': 0.9,
+    'tam_texto': 11.5, 'tam_tabla': 9, 'tam_tabla_ancha': 8.5,
+    'ancho_vert': 5.9, 'alto_vert': 8.4, 'ancho_horiz': 8.6, 'alto_horiz': 5.9,
+}
 
 CARATULA = {
     'universidad': 'UNIVERSIDAD NACIONAL TORIBIO RODRÍGUEZ DE MENDOZA DE AMAZONAS',
@@ -69,7 +83,7 @@ PARTES = [
 
 documento = Document()
 contador = {'Tabla': 0, 'Figura': 0}
-estado = {'sangria_francesa': False, 'leyenda_tabla': None, 'ancho': 6.3, 'alto': 8.0}
+estado = {'sangria_francesa': False, 'leyenda_tabla': None, 'ancho': 6.3, 'alto': 8.0}  # ancho y alto se fijan en main()
 
 
 # ── Estilos y utilidades de bajo nivel ──────────────────────────────────────────────────────────────────────────────
@@ -77,15 +91,17 @@ def configurar_estilos():
     normal = documento.styles['Normal']
     normal.font.name = 'Times New Roman'
     normal.element.rPr.rFonts.set(qn('w:eastAsia'), 'Times New Roman')
-    normal.font.size = Pt(12)
-    normal.paragraph_format.space_after = Pt(6)
-    normal.paragraph_format.line_spacing = 1.5
+    normal.font.size = Pt(CONF['tam_texto'])
+    normal.paragraph_format.space_after = Pt(CONF['espacio_post'])
+    normal.paragraph_format.line_spacing = CONF['interlineado']
     for nombre, tam, antes in [('Heading 1', 16, 0), ('Heading 2', 14, 14), ('Heading 3', 12, 12), ('Heading 4', 12, 10)]:
         estilo = documento.styles[nombre]
         estilo.font.name = 'Times New Roman'
         estilo.element.rPr.rFonts.set(qn('w:eastAsia'), 'Times New Roman')
         estilo.element.rPr.rFonts.set(qn('w:ascii'), 'Times New Roman')
         estilo.element.rPr.rFonts.set(qn('w:hAnsi'), 'Times New Roman')
+        for atributo in ('w:asciiTheme', 'w:hAnsiTheme', 'w:eastAsiaTheme', 'w:cstheme'):
+            estilo.element.rPr.rFonts.attrib.pop(qn(atributo), None)
         estilo.font.size = Pt(tam)
         estilo.font.bold = True
         estilo.font.italic = nombre == 'Heading 4'
@@ -96,7 +112,7 @@ def configurar_estilos():
         estilo.paragraph_format.line_spacing = 1.15
     for nombre in ['List Bullet', 'List Bullet 2']:
         documento.styles[nombre].font.name = 'Times New Roman'
-        documento.styles[nombre].paragraph_format.line_spacing = 1.3
+        documento.styles[nombre].paragraph_format.line_spacing = CONF['interlineado_lista']
     caption = documento.styles['Caption']
     caption.font.name = 'Times New Roman'
     caption.font.size = Pt(11)
@@ -227,7 +243,14 @@ def agregar_tabla(filas):
     tabla = documento.add_table(rows=len(celdas), cols=columnas)
     tabla.style = 'Table Grid'
     tabla.alignment = WD_TABLE_ALIGNMENT.CENTER
-    tam = 9 if columnas >= 4 else 10
+    propiedades = tabla._tbl.tblPr
+    for ancho_previo in propiedades.findall(qn('w:tblW')):
+        propiedades.remove(ancho_previo)
+    ancho_tabla = OxmlElement('w:tblW')
+    ancho_tabla.set(qn('w:w'), '5000')
+    ancho_tabla.set(qn('w:type'), 'pct')
+    propiedades.append(ancho_tabla)
+    tam = CONF['tam_tabla_ancha'] if columnas >= 4 else CONF['tam_tabla']
     for i, fila in enumerate(celdas):
         for j in range(columnas):
             celda = tabla.cell(i, j)
@@ -238,12 +261,13 @@ def agregar_tabla(filas):
             escribir(parrafo, texto.replace('<br>', '\n'), tam=tam, negrita=(i == 0))
             if i == 0:
                 sombrear(celda, 'D9E2F3')
+                parrafo.paragraph_format.keep_with_next = True
         if i == 0:
             repetir_encabezado(tabla.rows[0])
     documento.add_paragraph().paragraph_format.space_after = Pt(2)
 
 
-def agregar_imagen(ruta: Path, texto: str):
+def agregar_imagen(ruta: Path, texto: str, ancho_tope=None):
     if not ruta.exists():
         parrafo = documento.add_paragraph()
         escribir(parrafo, f'[Falta la imagen: {ruta.name}]', negrita=True)
@@ -253,14 +277,17 @@ def agregar_imagen(ruta: Path, texto: str):
     parrafo.paragraph_format.keep_with_next = True
     parrafo.paragraph_format.line_spacing = 1.0
     figura = parrafo.add_run().add_picture(str(ruta))
-    ancho_max, alto_max = Inches(estado['ancho']), Inches(estado['alto'])
+    ancho_max, alto_max = Inches(min(estado['ancho'], ancho_tope) if ancho_tope else estado['ancho']), Inches(estado['alto'])
     if figura.width > ancho_max:
         factor = ancho_max / figura.width
         figura.width, figura.height = int(figura.width * factor), int(figura.height * factor)
     if figura.height > alto_max:
         factor = alto_max / figura.height
         figura.width, figura.height = int(figura.width * factor), int(figura.height * factor)
-    leyenda('Figura', texto)
+    titulo, _, fuente = texto.partition(' Fuente:')
+    leyenda('Figura', titulo.rstrip('.') + '.' if fuente else titulo)
+    if fuente:
+        nota_fuente(fuente.strip().rstrip('.') + '.')
 
 
 def cambiar_orientacion(horizontal: bool):
@@ -272,11 +299,11 @@ def cambiar_orientacion(horizontal: bool):
     if horizontal:
         seccion.orientation = WD_ORIENT.LANDSCAPE
         seccion.page_width, seccion.page_height = Inches(11), Inches(8.5)
-        estado['ancho'], estado['alto'] = 9.0, 5.9
+        estado['ancho'], estado['alto'] = CONF['ancho_horiz'], CONF['alto_horiz']
     else:
         seccion.orientation = WD_ORIENT.PORTRAIT
         seccion.page_width, seccion.page_height = Inches(8.5), Inches(11)
-        estado['ancho'], estado['alto'] = 6.3, 8.0
+        estado['ancho'], estado['alto'] = CONF['ancho_vert'], CONF['alto_vert']
 
 
 def sangria_francesa(parrafo):
@@ -284,7 +311,7 @@ def sangria_francesa(parrafo):
     formato.left_indent = Inches(0.5)
     formato.first_line_indent = Inches(-0.5)
     formato.line_spacing = 1.15
-    formato.space_after = Pt(8)
+    formato.space_after = Pt(CONF['espacio_ref'])
 
 
 def procesar(ruta: Path, desplazamiento=0, titulo=None):
@@ -348,9 +375,9 @@ def procesar(ruta: Path, desplazamiento=0, titulo=None):
             escribir(parrafo, texto)
             i += 1
             continue
-        imagen = re.match(r'^!\[(.*?)\]\((.*?)\)$', suelta)
+        imagen = re.match(r'^!\[(.*?)\]\((.*?)\)(?:\{w=([\d.]+)\})?$', suelta)
         if imagen:
-            agregar_imagen((base / imagen.group(2)).resolve(), imagen.group(1) or 'Figura')
+            agregar_imagen((base / imagen.group(2)).resolve(), imagen.group(1) or 'Figura', float(imagen.group(3)) if imagen.group(3) else None)
             i += 1
             continue
         if suelta.startswith('|'):
@@ -372,7 +399,7 @@ def procesar(ruta: Path, desplazamiento=0, titulo=None):
             parrafo = documento.add_paragraph()
             parrafo.paragraph_format.left_indent = Inches(0.5)
             parrafo.paragraph_format.first_line_indent = Inches(-0.25)
-            parrafo.paragraph_format.line_spacing = 1.3
+            parrafo.paragraph_format.line_spacing = CONF['interlineado_lista']
             escribir(parrafo, f'{numerada.group(2)}. {numerada.group(3)}')
             i += 1
             continue
@@ -394,7 +421,7 @@ def procesar(ruta: Path, desplazamiento=0, titulo=None):
             sangria_francesa(parrafo)
         else:
             parrafo.alignment = WD_ALIGN_PARAGRAPH.JUSTIFY
-            parrafo.paragraph_format.first_line_indent = Inches(0.4)
+            parrafo.paragraph_format.first_line_indent = Inches(CONF['sangria'])
         escribir(parrafo, ' '.join(partes))
 
 
@@ -447,14 +474,22 @@ def indices():
 
 
 def main():
+    if '--compacto' in sys.argv:
+        CONF.update(COMPACTO)
+    for argumento in sys.argv[1:]:
+        if argumento.startswith('--fuente='):
+            CONF['fuente'] = (AQUI / argumento.split('=', 1)[1]).resolve()
+        elif argumento.startswith('--salida='):
+            CONF['salida'] = AQUI / argumento.split('=', 1)[1]
     configurar_estilos()
     documento.core_properties.title = CARATULA['tipo'].capitalize()
     documento.core_properties.author = CARATULA['autor']
     documento.core_properties.subject = 'Sistema de acompañamiento tutorial FISME UNTRM'
     seccion = documento.sections[0]
     seccion.page_width, seccion.page_height = Inches(8.5), Inches(11)
-    seccion.left_margin = seccion.right_margin = Inches(1.1)
-    seccion.top_margin = seccion.bottom_margin = Inches(1.0)
+    seccion.left_margin, seccion.right_margin = Inches(CONF['margen_izq']), Inches(CONF['margen_der'])
+    seccion.top_margin, seccion.bottom_margin = Inches(CONF['margen_sup']), Inches(CONF['margen_inf'])
+    estado['ancho'], estado['alto'] = CONF['ancho_vert'], CONF['alto_vert']
     sin_numero(seccion)
     caratula()
 
@@ -471,13 +506,13 @@ def main():
         if tipo == 'indices':
             indices()
             continue
-        archivo = AQUI / ruta
+        archivo = CONF['fuente'] / ruta
         if not archivo.exists():
             print(f'AVISO: falta {ruta}', file=sys.stderr)
             continue
         procesar(archivo)
-    documento.save(str(SALIDA))
-    print(f'{SALIDA.name}: {contador["Tabla"]} tablas, {contador["Figura"]} figuras')
+    documento.save(str(CONF['salida']))
+    print(f'{CONF["salida"].name}: {contador["Tabla"]} tablas, {contador["Figura"]} figuras')
 
 
 if __name__ == '__main__':
