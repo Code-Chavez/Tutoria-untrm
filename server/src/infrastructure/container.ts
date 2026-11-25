@@ -81,6 +81,7 @@ import { PrismaEvaluationWindowRepository } from './repositories/PrismaEvaluatio
 import { BcryptPasswordHasher } from './services/BcryptPasswordHasher';
 import { JwtTokenService } from './services/JwtTokenService';
 import { LocalEvidenceStorage } from './services/LocalEvidenceStorage';
+import { CloudinaryEvidenceStorage, CloudinarySdkGateway } from './services/CloudinaryEvidenceStorage';
 import { LoginUseCase } from '@application/use-cases/auth/LoginUseCase';
 import { ListAuditLogUseCase, GetAuditLogOptionsUseCase } from '@application/use-cases/audit/AuditLogUseCases';
 import { DEFAULT_PASSWORD_RESET_CONFIG } from '@application/use-cases/auth/RequestPasswordResetUseCase';
@@ -120,7 +121,14 @@ const evaluationWindowRepository = new PrismaEvaluationWindowRepository(prisma);
 
 const passwordHasher = new BcryptPasswordHasher();
 const tokenService = new JwtTokenService();
-const evidenceStorage = new LocalEvidenceStorage();
+const localStorage = new LocalEvidenceStorage();
+const evidenceStorage =
+  env.CLOUDINARY_CLOUD_NAME && env.CLOUDINARY_API_KEY && env.CLOUDINARY_API_SECRET
+    ? new CloudinaryEvidenceStorage(
+        new CloudinarySdkGateway({ cloudName: env.CLOUDINARY_CLOUD_NAME, apiKey: env.CLOUDINARY_API_KEY, apiSecret: env.CLOUDINARY_API_SECRET }),
+        localStorage,
+      )
+    : localStorage;
 
 // Política única de alcance sobre los tutorados (Art. 9.a y 14.c): la usan todos los casos de uso que tocan datos de un estudiante.
 const userAccessPolicyRepository = new PrismaUserAccessPolicyRepository(prisma);
@@ -245,6 +253,7 @@ import { GetUserAccessUseCase, SetUserAccessUseCase } from '@application/use-cas
 import { GetProfileUseCase } from '@application/use-cases/profile/GetProfileUseCase';
 import { UpdateProfileUseCase } from '@application/use-cases/profile/UpdateProfileUseCase';
 import { ChangePasswordUseCase } from '@application/use-cases/profile/ChangePasswordUseCase';
+import { UploadProfilePhotoUseCase, RemoveProfilePhotoUseCase, GetProfilePhotoFileUseCase } from '@application/use-cases/profile/ProfilePhotoUseCases';
 import { CreateStudentUseCase } from '@application/use-cases/students/CreateStudentUseCase';
 import { UpdateStudentUseCase } from '@application/use-cases/students/UpdateStudentUseCase';
 import { ListStudentsUseCase } from '@application/use-cases/students/ListStudentsUseCase';
@@ -391,6 +400,9 @@ const setUserAccessUseCase = new SetUserAccessUseCase(userRepository, roleReposi
 
 const getProfileUseCase = new GetProfileUseCase(userRepository, roleRepository);
 const updateProfileUseCase = new UpdateProfileUseCase(userRepository, roleRepository);
+const uploadProfilePhotoUseCase = new UploadProfilePhotoUseCase(userRepository, evidenceStorage);
+const removeProfilePhotoUseCase = new RemoveProfilePhotoUseCase(userRepository, evidenceStorage);
+const getProfilePhotoFileUseCase = new GetProfilePhotoFileUseCase(userRepository, evidenceStorage);
 const changePasswordUseCase = new ChangePasswordUseCase(
   userRepository,
   refreshTokenRepository,
@@ -921,6 +933,9 @@ export const container = {
     setUserAccessUseCase,
     getProfileUseCase,
     updateProfileUseCase,
+    uploadProfilePhotoUseCase,
+    removeProfilePhotoUseCase,
+    getProfilePhotoFileUseCase,
     changePasswordUseCase,
     createStudentUseCase,
     updateStudentUseCase,

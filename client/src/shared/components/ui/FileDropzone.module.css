@@ -1,0 +1,57 @@
+.zone {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--s3);
+  padding: var(--s4);
+  border: 2px dashed var(--borde-fuerte);
+  border-radius: var(--r-lg);
+  background: var(--g50);
+  color: var(--g700);
+  font-size: var(--fs-sm);
+  text-align: center;
+  cursor: pointer;
+  transition: border-color 0.18s, background 0.18s;
+}
+
+.zone:hover,
+.zone:focus-within {
+  border-color: var(--azul-med);
+}
+
+.dragging {
+  border-color: var(--azul-med);
+  background: var(--celeste);
+}
+
+.disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.zone strong {
+  color: var(--azul-med);
+}
+
+.hint {
+  display: block;
+  color: var(--g500);
+  font-size: var(--fs-xs, 0.75rem);
+}
+
+.error {
+  margin: var(--s1) 0 0;
+  color: var(--rojo, #b42318);
+  font-size: var(--fs-sm);
+}
+
+/* El input sigue en el DOM y es enfocable con el teclado, pero no se ve. */
+.input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}

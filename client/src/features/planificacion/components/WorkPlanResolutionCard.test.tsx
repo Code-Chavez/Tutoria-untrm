@@ -47,7 +47,7 @@ describe('WorkPlanResolutionCard', () => {
   it('indica que el plan no es vigente mientras no haya resolución', () => {
     renderCard(basePlan);
     expect(screen.getByText('Plan no vigente')).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: /Adjuntar resolución/ })).toBeInTheDocument();
+    expect(screen.getByLabelText('Archivo de la resolución')).toBeInTheDocument();
     expect(screen.queryByRole('button', { name: /Descargar/ })).not.toBeInTheDocument();
   });
 

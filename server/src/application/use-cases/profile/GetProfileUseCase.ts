@@ -25,6 +25,7 @@ export class GetProfileUseCase {
       lastName: user.lastName,
       phone: user.phone ?? null,
       photoUrl: user.photoUrl ?? null,
+      hasPhoto: !!user.photoStorageKey,
       role: role?.name ?? 'Desconocido',
       service: user.service,
       permissions: grantedPermissionCodes(role),

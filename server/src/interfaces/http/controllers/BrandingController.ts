@@ -10,6 +10,7 @@ import {
   UpdateBrandingUseCase,
   UploadBrandingLogoUseCase,
 } from '@application/use-cases/branding/BrandingUseCases';
+import { sendStoredFile } from '../sendStoredFile';
 
 const hex = z.string().regex(/^#[0-9a-fA-F]{6}$/, 'Usa el formato #RRGGBB');
 
@@ -59,7 +60,7 @@ export class BrandingController {
       res.setHeader('Content-Type', mimeType);
       res.setHeader('X-Content-Type-Options', 'nosniff');
       res.setHeader('Cache-Control', 'public, max-age=300');
-      res.sendFile(absolutePath);
+      await sendStoredFile(res, absolutePath);
     } catch (error) {
       this.handleError(error, res);
     }

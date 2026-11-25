@@ -10,6 +10,9 @@ vi.mock('../services/profileService', () => ({
   profileService: {
     get: vi.fn(),
     update: vi.fn(),
+    uploadPhoto: vi.fn(),
+    removePhoto: vi.fn(),
+    photo: vi.fn(),
     changePassword: vi.fn(),
   },
 }));
@@ -23,6 +26,7 @@ const profile: UserProfile = {
   lastName: 'Pérez',
   phone: '987654321',
   photoUrl: null,
+  hasPhoto: false,
   role: 'Docente Tutor',
 };
 
@@ -60,9 +64,40 @@ describe('ProfilePage', () => {
     await user.click(screen.getByRole('button', { name: /guardar cambios/i }));
 
     await waitFor(() => {
-      expect(mocked.update).toHaveBeenCalledWith({ phone: '999888777', photoUrl: '' });
+      expect(mocked.update).toHaveBeenCalledWith({ phone: '999888777' });
     });
     expect(await screen.findByText(/datos actualizados/i)).toBeInTheDocument();
+  });
+
+  it('sube la foto de perfil al elegirla o arrastrarla', async () => {
+    mocked.uploadPhoto.mockResolvedValue(undefined);
+    const user = userEvent.setup();
+    render(
+      <QueryClientTestWrapper>
+        <ProfilePage />
+      </QueryClientTestWrapper>,
+    );
+
+    const photo = new File([new Uint8Array([137, 80, 78, 71])], 'yo.png', { type: 'image/png' });
+    await user.upload(await screen.findByLabelText('Foto de perfil'), photo);
+
+    await waitFor(() => expect(mocked.uploadPhoto).toHaveBeenCalledWith(photo));
+    expect(await screen.findByText('Foto actualizada.')).toBeInTheDocument();
+  });
+
+  it('rechaza una foto de más de 1 MB sin subirla', async () => {
+    const user = userEvent.setup();
+    render(
+      <QueryClientTestWrapper>
+        <ProfilePage />
+      </QueryClientTestWrapper>,
+    );
+
+    const big = new File([new Uint8Array(1024 * 1024 + 1)], 'grande.png', { type: 'image/png' });
+    await user.upload(await screen.findByLabelText('Foto de perfil'), big);
+
+    expect(await screen.findByText('La foto no puede superar 1 MB.')).toBeInTheDocument();
+    expect(mocked.uploadPhoto).not.toHaveBeenCalled();
   });
 
   it('no envía el cambio de contraseña si la confirmación no coincide', async () => {

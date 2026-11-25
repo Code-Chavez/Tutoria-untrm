@@ -27,6 +27,11 @@ export const env = {
   // de los límites de solicitudes sale de X-Forwarded-For; sin esto todas serían la IP del proxy.
   TRUST_PROXY: parseInt(process.env.TRUST_PROXY || '0', 10),
   EVIDENCE_STORAGE_DIR: process.env.EVIDENCE_STORAGE_DIR || 'storage/evidence',
+  // Cloudinary: si las tres variables están definidas, los archivos nuevos (evidencias, documentos, imágenes) se guardan allí; si no, en
+  // disco. Los archivos que ya estaban en disco siguen funcionando.
+  CLOUDINARY_CLOUD_NAME: process.env.CLOUDINARY_CLOUD_NAME || '',
+  CLOUDINARY_API_KEY: process.env.CLOUDINARY_API_KEY || '',
+  CLOUDINARY_API_SECRET: process.env.CLOUDINARY_API_SECRET || '',
   // URL pública del cliente: con ella se arman los enlaces de los correos.
   PUBLIC_APP_URL: (process.env.PUBLIC_APP_URL || 'http://localhost:5173').replace(/\/+$/, ''),
   // Correo saliente (recuperación de contraseña). Sin SMTP_HOST el envío falla de forma explícita.

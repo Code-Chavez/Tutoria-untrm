@@ -6,6 +6,8 @@ export interface User {
   lastName: string;
   phone?: string | null;
   photoUrl?: string | null;
+  /** Foto subida desde el sistema: clave en el almacenamiento de archivos. */
+  photoStorageKey?: string | null;
   roleId: string;
   service?: string | null;
   /** Escuela profesional del Docente Tutor (de ella salen su facultad y su sede). */
