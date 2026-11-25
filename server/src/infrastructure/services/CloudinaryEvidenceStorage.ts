@@ -9,7 +9,7 @@ export const CLOUDINARY_KEY_PREFIX = 'cld:';
 /** Lo mínimo que se necesita de Cloudinary; permite probar el almacenamiento sin red. */
 export interface CloudinaryGateway {
   upload(buffer: Buffer, publicId: string): Promise<void>;
-  /** URL firmada para leer desde el servidor un archivo privado. Nunca se entrega al navegador. */
+  /** URL firmada y de corta vida para leer desde el servidor un archivo privado. Nunca se entrega al navegador. */
   signedUrl(publicId: string): string;
   destroy(publicId: string): Promise<void>;
 }
@@ -46,7 +46,13 @@ export class CloudinarySdkGateway implements CloudinaryGateway {
   }
 
   signedUrl(publicId: string): string {
-    return cloudinary.url(publicId, { resource_type: 'raw', type: 'authenticated', sign_url: true, secure: true });
+    // Descarga por la API (firmada con el secreto y con vencimiento): la entrega por CDN de un activo `authenticated` exige un token
+    // que esta cuenta no tiene. El `public_id` de un archivo `raw` ya lleva la extensión, por eso el formato va vacío.
+    return cloudinary.utils.private_download_url(publicId, '', {
+      resource_type: 'raw',
+      type: 'authenticated',
+      expires_at: Math.floor(Date.now() / 1000) + 300,
+    });
   }
 
   async destroy(publicId: string): Promise<void> {
