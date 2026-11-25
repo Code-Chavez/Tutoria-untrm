@@ -142,7 +142,7 @@ Las 50 tablas con sus columnas reales: `nombre tipo` (str texto, int entero, boo
 
 | Tabla | Columnas |
 | --- | --- |
-| **users** (ER-01) | id str[PK], email str[UK], password_hash str, first_name str, last_name str, phone str?, photo_url str?, is_active bool, failed_login_attempts int, locked_until dt?, must_change_password bool, created_at dt, updated_at dt, role_id str[FK], service str?, school_id str[FK]?, faculty_id str[FK]? |
+| **users** (ER-01) | id str[PK], email str[UK], password_hash str, first_name str, last_name str, phone str?, photo_url str?, photo_storage_key str?, is_active bool, failed_login_attempts int, locked_until dt?, must_change_password bool, created_at dt, updated_at dt, role_id str[FK], service str?, school_id str[FK]?, faculty_id str[FK]? |
 | **roles** (ER-01) | id str[PK], name str[UK], description str, created_at dt, is_base bool, is_active bool |
 | **user_access_policies** (ER-01) | id str[PK], user_id str[FK][UK], role_id str[FK], kind str, school_ids str[], faculty_ids str[], service str?, revision int |
 | **permissions** (ER-01) | id str[PK], code str[UK], description str |

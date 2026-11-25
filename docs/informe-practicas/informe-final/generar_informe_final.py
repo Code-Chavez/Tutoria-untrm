@@ -52,7 +52,7 @@ CARATULA = {
     'asesor': 'Mg. Eder Nicanor Figueroa Piscoya',
     'lugar': 'Bagua, Amazonas, Perú',
     'anio': '2026',
-    'nota': 'Versión final de trabajo · Software v1.0.0-beta.4 · Corte del 19 de noviembre de 2026',
+    'nota': 'Versión final de trabajo · Software v1.0.0 · Corte del 25 de noviembre de 2026',
 }
 
 # Orden del documento: (tipo, ruta relativa a esta carpeta). `incluir` toma un .md de fuera y desplaza sus títulos.

@@ -99,6 +99,8 @@ El entorno institucional (servidor, dominio, HTTPS, correo y copia externa) **no
 | v1.0.0-beta.2 | 05/11/2026 | Invitación de un solo uso, alta masiva de docentes, cierre y reapertura del periodo, matrícula por periodo, pedidos de listas por correo, un tutor por ciclo con aceptación, rol Decano y amonestaciones, roles y alcances configurables, estado de la pantalla en la URL y borradores |
 | v1.0.0-beta.3 | 16/11/2026 | Certificación del docente tutor en demostración con certificados configurables, pedidos de listas por facultad, estudiantes por periodo, reorganización del menú, regreso a la vista anterior tras caducar la sesión, E2E en integración continua y correcciones del ensayo del piloto |
 | v1.0.0-beta.4 | 19/11/2026 | «Plan semestral» en el menú de la coordinación y validación del formulario al guardar; tutores solo con permiso y escuelas acotadas en la lista de estudiantes; aviso de solapamiento entre pedidos de facultad y de escuela; rótulos «(actual)» en el historial por semestre; manuales, informe y documentos de estado actualizados |
+| v1.0.0-beta.5 | 25/11/2026 | Archivos nuevos (evidencias, documentos firmados, resoluciones, imágenes y foto de perfil) en Cloudinary en modo privado, con un solo control de arrastrar o elegir; la foto de perfil se sube en lugar de pegar un enlace; correcciones de la auditoría y del detalle de derivaciones |
+| v1.0.0 | 25/11/2026 | Foto de perfil enviada correctamente como archivo; todos los roles se editan salvo el del Administrador; icono de la pestaña con el logotipo; el horario de aceptación de tutoría se corrige solo si dura menos de una sesión |
 
 [[fuente: Etiquetas del repositorio y notas de cada versión (Anexo J). Las versiones posteriores a v0.4.1 son candidatas.]]
 
