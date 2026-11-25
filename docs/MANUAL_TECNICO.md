@@ -2,7 +2,7 @@
 
 **Sistema de Información para la Sistematización de los Procesos de Acompañamiento de Tutoría Universitaria**
 Universidad Nacional Toribio Rodríguez de Mendoza de Amazonas · Dirección de Bienestar Universitario
-Versión del documento: 1.1 (16 de noviembre de 2026) · Versión del software: 1.0.0-beta.3 (candidata a 1.0.0)
+Versión del documento: 1.1 (16 de noviembre de 2026) · Versión del software: 1.0.0
 
 > Este manual está dirigido a quien instala, opera y mantiene el sistema. Para el uso diario por cada rol, vea `docs/MANUAL_USUARIO.md`.
 > Los detalles de despliegue, respaldo y reversión viven en `deploy/README.md` y `backup/README.md`; aquí se resumen y se enlazan.
@@ -85,7 +85,7 @@ client/src/
 
 ### 2.3 Modelo de roles
 
-**Administración de roles (LEV-R11, primera parte, 2/11/2026).** `POST /api/roles` (acepta `permissions` y `copyFromRoleId`), `PUT /api/roles/:id` y `PATCH /api/roles/:id/status` exigen `admin:system`. Errores: `400 UNKNOWN_PERMISSION`, `403 PERMISSION_NOT_GRANTABLE` (`admin:system` no es delegable; nadie otorga lo que no tiene), `404`, `409 ROLE_EXISTS | ROLE_PROTECTED | ROLE_IN_USE`. Los roles base (los siete sembrados, `is_base`) no se modifican ni se desactivan; un rol desactivado no concede permisos y no se asigna (`409`). Cada cambio vacía las cachés de roles y permisos y deja `ROLE_CREATED/UPDATED/ACTIVATED/DEACTIVATED` en la bitácora en la misma transacción. `GET /api/roles` informa `isBase`, `isActive` y `userCount`.
+**Administración de roles (LEV-R11, primera parte, 2/11/2026).** `POST /api/roles` (acepta `permissions` y `copyFromRoleId`), `PUT /api/roles/:id` y `PATCH /api/roles/:id/status` exigen `admin:system`. Errores: `400 UNKNOWN_PERMISSION`, `403 PERMISSION_NOT_GRANTABLE` (`admin:system` no es delegable; nadie otorga lo que no tiene), `404`, `409 ROLE_EXISTS | ROLE_PROTECTED | ROLE_IN_USE`. El rol del Administrador (el que tiene `admin:system`) no se modifica (`409 ROLE_PROTECTED`); los demás roles base (`is_base`) se editan igual que los personalizados, sin poder recibir `admin:system`, y ningún rol base se desactiva; el arranque asigna los permisos por defecto de un rol base solo al crearlo, de modo que no deshace lo editado; un rol desactivado no concede permisos y no se asigna (`409`). Cada cambio vacía las cachés de roles y permisos y deja `ROLE_CREATED/UPDATED/ACTIVATED/DEACTIVATED` en la bitácora en la misma transacción. `GET /api/roles` informa `isBase`, `isActive` y `userCount`.
 
 **Alcance por persona (LEV-R12, API, 2/11/2026).** `GET` y `PUT /api/users/:id/access` (`admin:system`) leen y definen el alcance de una cuenta con su rol: `NONE`, `OWN`, `SCHOOLS`, `FACULTIES`, `INSTITUTION`, `SERVICE`. Errores: `400 ACCESS_SCOPE_INVALID` (faltan o no existen escuelas, facultades o servicio), `404`, `409 ACCESS_SCOPE_NOT_CONFIGURABLE` (cuenta propia, tutorado, administración distinta de `INSTITUTION`). Al cambiar el rol, el trigger de la base deja el alcance en `NONE`. Bitácora `USER_ACCESS_UPDATED`. Rige desde la siguiente petición.
 
