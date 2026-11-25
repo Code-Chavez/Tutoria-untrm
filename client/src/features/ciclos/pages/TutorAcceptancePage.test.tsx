@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen, waitFor } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
 import { TutorAcceptancePage } from './TutorAcceptancePage';
@@ -96,5 +96,24 @@ describe('TutorAcceptancePage', () => {
     await userEvent.click(screen.getByRole('button', { name: 'Enviar respuesta' }));
 
     expect(await screen.findByRole('alert')).toHaveTextContent('al menos 45 minutos');
+  });
+
+  it('si el horario queda más corto que una sesión, corrige la hora final a inicio + 45 minutos', async () => {
+    renderPage();
+    await userEvent.click(await screen.findByLabelText('Acepto'));
+
+    // Hasta antes que el mínimo: 08:00 → 08:20 pasa a 08:45.
+    fireEvent.change(screen.getByLabelText('Hasta 1'), { target: { value: '08:20' } });
+    expect(screen.getByLabelText('Hasta 1')).toHaveValue('08:45');
+    expect(screen.getByText(/pasó a 08:45/)).toBeInTheDocument();
+
+    // Desde que deja el fin demasiado cerca: 10:00 con fin 08:45 → 10:45.
+    fireEvent.change(screen.getByLabelText('Desde 1'), { target: { value: '10:00' } });
+    expect(screen.getByLabelText('Hasta 1')).toHaveValue('10:45');
+
+    // Una hora final válida no se toca.
+    fireEvent.change(screen.getByLabelText('Hasta 1'), { target: { value: '12:00' } });
+    expect(screen.getByLabelText('Hasta 1')).toHaveValue('12:00');
+    expect(screen.queryByText(/pasó a/)).not.toBeInTheDocument();
   });
 });

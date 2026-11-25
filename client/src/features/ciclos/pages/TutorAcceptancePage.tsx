@@ -7,6 +7,12 @@ import local from './TutorAcceptancePage.module.css';
 
 const EMPTY_SLOT: AvailabilitySlot = { day: 1, start: '08:00', end: '09:30' };
 
+const toMinutes = (time: string) => {
+  const match = /^(\d{2}):(\d{2})$/.exec(time);
+  return match ? Number(match[1]) * 60 + Number(match[2]) : null;
+};
+const toTime = (minutes: number) => `${String(Math.floor(minutes / 60)).padStart(2, '0')}:${String(minutes % 60).padStart(2, '0')}`;
+
 type Step = { kind: 'loading' } | { kind: 'invalid'; message: string } | { kind: 'form'; info: AcceptanceInfo } | { kind: 'done'; accepted: boolean; activationLink?: string; activationUnavailable?: boolean };
 
 // Página pública a la que llega el docente desde el correo: no requiere sesión, el enlace personal de un solo uso es la autorización.
@@ -18,6 +24,7 @@ export function TutorAcceptancePage() {
   const [reason, setReason] = useState('');
   const [error, setError] = useState('');
   const [sending, setSending] = useState(false);
+  const [adjusted, setAdjusted] = useState('');
 
   useEffect(() => {
     let active = true;
@@ -31,6 +38,21 @@ export function TutorAcceptancePage() {
   }, [token]);
 
   const updateSlot = (index: number, change: Partial<AvailabilitySlot>) => setSlots((current) => current.map((s, i) => (i === index ? { ...s, ...change } : s)));
+
+  // Si el horario queda más corto que una sesión, la hora final se corrige sola a «inicio + duración de la sesión» (el servidor sigue
+  // rechazando lo que no cumpla, p. ej. si pasara de medianoche).
+  const updateTime = (index: number, change: Partial<AvailabilitySlot>, sessionMinutes: number) => {
+    const next = { ...slots[index]!, ...change };
+    const start = toMinutes(next.start);
+    const end = toMinutes(next.end);
+    if (start !== null && end !== null && end - start < sessionMinutes && start + sessionMinutes < 24 * 60) {
+      next.end = toTime(start + sessionMinutes);
+      setAdjusted(`Una sesión dura ${sessionMinutes} minutos: la hora final del horario ${index + 1} pasó a ${next.end}.`);
+    } else {
+      setAdjusted('');
+    }
+    updateSlot(index, { start: next.start, end: next.end });
+  };
 
   const submit = async (event: FormEvent) => {
     event.preventDefault();
@@ -115,8 +137,8 @@ export function TutorAcceptancePage() {
                         </option>
                       ))}
                     </select>
-                    <input type="time" aria-label={`Desde ${i + 1}`} value={slot.start} onChange={(e) => updateSlot(i, { start: e.target.value })} />
-                    <input type="time" aria-label={`Hasta ${i + 1}`} value={slot.end} onChange={(e) => updateSlot(i, { end: e.target.value })} />
+                    <input type="time" aria-label={`Desde ${i + 1}`} value={slot.start} onChange={(e) => updateTime(i, { start: e.target.value }, step.info.sessionMinutes)} />
+                    <input type="time" aria-label={`Hasta ${i + 1}`} value={slot.end} onChange={(e) => updateTime(i, { end: e.target.value }, step.info.sessionMinutes)} />
                     {slots.length > 1 && (
                       <button type="button" className={local.remove} aria-label={`Quitar horario ${i + 1}`} onClick={() => setSlots((current) => current.filter((_, j) => j !== i))}>
                         Quitar
@@ -128,6 +150,11 @@ export function TutorAcceptancePage() {
                   <button type="button" className={local.add} onClick={() => setSlots((current) => [...current, { ...EMPTY_SLOT }])}>
                     + Agregar otro horario
                   </button>
+                )}
+                {adjusted && (
+                  <p className={local.hint} aria-live="polite">
+                    {adjusted}
+                  </p>
                 )}
                 <p className={local.hint}>Aquí registra solo sus días y horas disponibles; no se fija el lugar de las sesiones.</p>
               </fieldset>
