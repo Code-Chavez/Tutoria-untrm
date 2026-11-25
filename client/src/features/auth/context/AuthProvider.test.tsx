@@ -252,7 +252,7 @@ describe('AuthProvider: rol y permisos vigentes al abrir la aplicación', () => 
   });
 
   it('actualiza el rol y los permisos guardados con los vigentes en el servidor', async () => {
-    mockedProfile.get.mockResolvedValue({ id: 'u1', email: stored.email, firstName: 'Ana', lastName: 'R', phone: null, photoUrl: null, role: 'Revisor', permissions: ['students:read', 'reports:read'] });
+    mockedProfile.get.mockResolvedValue({ id: 'u1', email: stored.email, firstName: 'Ana', lastName: 'R', phone: null, photoUrl: null, hasPhoto: false, role: 'Revisor', permissions: ['students:read', 'reports:read'] });
     renderPerms();
     expect(await screen.findByText('Revisor:students:read,reports:read')).toBeInTheDocument();
     expect(JSON.parse(localStorage.getItem('sit.user') ?? '{}').permissions).toEqual(['students:read', 'reports:read']);

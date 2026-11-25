@@ -37,6 +37,10 @@ services:
       # Sin sondeo, los cambios en el host no disparan recarga dentro del contenedor.
       CHOKIDAR_USEPOLLING: "true"
       CHOKIDAR_INTERVAL: "300"
+      # Cloudinary (opcional): se leen del entorno o de un .env en la raíz (no versionado). Vacías = archivos en disco.
+      CLOUDINARY_CLOUD_NAME: ${CLOUDINARY_CLOUD_NAME:-}
+      CLOUDINARY_API_KEY: ${CLOUDINARY_API_KEY:-}
+      CLOUDINARY_API_SECRET: ${CLOUDINARY_API_SECRET:-}
     ports:
       - "3000:3000"
     volumes:

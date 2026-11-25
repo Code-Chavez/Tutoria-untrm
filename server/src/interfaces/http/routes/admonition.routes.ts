@@ -12,6 +12,7 @@ import {
   AdmonitionTutorError,
   InvalidAdmonitionError,
 } from '@application/use-cases/admonitions/AdmonitionUseCases';
+import { sendStoredFile } from '../sendStoredFile';
 
 // Resolución o memorándum escaneado: PDF o imagen, en memoria hasta guardarse (máx. 10 MB).
 const MIME_TYPES = ['application/pdf', 'image/png', 'image/jpeg'];
@@ -72,7 +73,7 @@ router.post('/admonitions', requireAuth, authorize(['admonitions:write']), uploa
 router.get('/admonitions/:id/file', requireAuth, auditAccess('Admonition', 'DOWNLOAD', byParam('id')), authorize(['admonitions:read']), async (req: Request, res: Response) => {
   try {
     const { fileName, absolutePath } = await container.useCases.getAdmonitionFileUseCase.execute(req.params.id as string, req.auth?.sub as string);
-    res.download(absolutePath, fileName);
+    await sendStoredFile(res, absolutePath, { fileName });
   } catch (error) {
     fail(res, error);
   }

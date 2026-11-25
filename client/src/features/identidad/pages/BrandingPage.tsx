@@ -1,9 +1,9 @@
-import { useCallback, useRef, useState, type CSSProperties } from 'react';
+import { useCallback, useState, type CSSProperties } from 'react';
 import { useDraft } from '@shared/hooks/useDraft';
 import { useAuth } from '@features/auth/hooks/useAuth';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { PageHeader, Card, Button, ConfirmDialog, DraftNotice } from '@shared/components/ui';
-import { SettingsIcon, UploadIcon } from '@shared/components/icons';
+import { PageHeader, Card, Button, ConfirmDialog, DraftNotice, FileDropzone } from '@shared/components/ui';
+import { SettingsIcon } from '@shared/components/icons';
 import { getApiErrorMessage } from '@shared/services/apiClient';
 import { BRANDING_QUERY_KEY, useBranding } from '@shared/theme/BrandingProvider';
 import { Branding, brandingService } from '@shared/theme/brandingService';
@@ -29,7 +29,6 @@ function BrandingEditor({
   setMessage: (message: Message) => void;
 }) {
   const queryClient = useQueryClient();
-  const fileInput = useRef<HTMLInputElement>(null);
   const { user } = useAuth();
   const saved = {
     institutionName: current.institutionName,
@@ -99,7 +98,6 @@ function BrandingEditor({
     } else {
       void run(() => upload.mutateAsync(file), 'Logotipo actualizado.');
     }
-    if (fileInput.current) fileInput.current.value = '';
   };
 
   // La vista previa aplica la paleta elegida solo dentro de su contenedor.
@@ -155,10 +153,13 @@ function BrandingEditor({
         <div className={styles.logoRow}>
           <img src={logoSrc} alt="Logotipo actual" className={styles.logoThumb} />
           <div className={styles.logoActions}>
-            <input ref={fileInput} type="file" accept={LOGO_TYPES.join(',')} hidden aria-label="Archivo del logotipo" onChange={(e) => handleFile(e.target.files?.[0])} />
-            <Button variant="secondary" size="sm" icon={<UploadIcon size={16} />} loading={upload.isPending} onClick={() => fileInput.current?.click()}>
-              {current.hasCustomLogo ? 'Reemplazar logotipo' : 'Subir logotipo'}
-            </Button>
+            <FileDropzone
+              accept={LOGO_TYPES.join(',')}
+              ariaLabel="Archivo del logotipo"
+              title={current.hasCustomLogo ? 'Reemplaza el logotipo: arrástralo aquí o' : 'Sube el logotipo: arrástralo aquí o'}
+              busy={upload.isPending}
+              onFile={handleFile}
+            />
             {current.hasCustomLogo && (
               <Button variant="ghost" size="sm" loading={remove.isPending} onClick={() => run(() => remove.mutateAsync(), 'Se restableció el logotipo institucional.')}>
                 Usar el logotipo institucional

@@ -1,7 +1,7 @@
-import { useRef, useState } from 'react';
+import { useState } from 'react';
 import { getApiErrorMessage } from '@shared/services/apiClient';
-import { Badge, Button, Card } from '@shared/components/ui';
-import { DownloadIcon, UploadIcon } from '@shared/components/icons';
+import { Badge, Button, Card, FileDropzone } from '@shared/components/ui';
+import { DownloadIcon } from '@shared/components/icons';
 import { useUploadWorkPlanResolution, useWorkPlanVersions } from '../hooks/useWorkPlans';
 import { downloadFile } from '@shared/services/downloadFile';
 import { WorkPlan, workPlanService } from '../services/workPlanService';
@@ -16,7 +16,6 @@ const formatSize = (bytes: number) =>
 // plan no es vigente.
 export function WorkPlanResolutionCard({ schoolId, plan }: { schoolId: string; plan: WorkPlan }) {
   const upload = useUploadWorkPlanResolution(schoolId);
-  const inputRef = useRef<HTMLInputElement>(null);
   const [error, setError] = useState('');
   const { versions } = useWorkPlanVersions(schoolId, plan.revision > 1);
 
@@ -35,8 +34,6 @@ export function WorkPlanResolutionCard({ schoolId, plan }: { schoolId: string; p
       await upload.mutateAsync(file);
     } catch (err) {
       setError(getApiErrorMessage(err));
-    } finally {
-      if (inputRef.current) inputRef.current.value = '';
     }
   };
 
@@ -89,22 +86,14 @@ export function WorkPlanResolutionCard({ schoolId, plan }: { schoolId: string; p
       )}
 
       <div className={styles.actions}>
-        <input
-          ref={inputRef}
-          type="file"
+        <FileDropzone
           accept="application/pdf"
-          hidden
-          aria-label="Archivo de la resolución"
-          onChange={(e) => handleFile(e.target.files?.[0])}
+          ariaLabel="Archivo de la resolución"
+          title={plan.resolution ? 'Reemplaza la resolución: arrástrala aquí o' : 'Adjunta la resolución: arrástrala aquí o'}
+          hint="PDF · máximo 10 MB"
+          busy={upload.isPending}
+          onFile={(file) => void handleFile(file)}
         />
-        <Button
-          variant="secondary"
-          icon={<UploadIcon size={16} />}
-          loading={upload.isPending}
-          onClick={() => inputRef.current?.click()}
-        >
-          {plan.resolution ? 'Reemplazar resolución' : 'Adjuntar resolución'}
-        </Button>
         {plan.resolution && (
           <Button variant="ghost" icon={<DownloadIcon size={16} />} onClick={handleDownload}>
             Descargar

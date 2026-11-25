@@ -36,6 +36,7 @@ import {
   cancelSessionSchema,
   recordAttendanceSchema,
 } from '../validators/session.validators';
+import { sendStoredFile } from '../sendStoredFile';
 
 export class SessionController {
   constructor(
@@ -236,7 +237,7 @@ export class SessionController {
         evidenceId,
         req.auth?.sub as string,
       );
-      res.download(absolutePath, evidence.fileName);
+      await sendStoredFile(res, absolutePath, { fileName: evidence.fileName });
     } catch (error) {
       if (error instanceof SessionNotFoundError || error instanceof SessionEvidenceNotFoundError) {
         res.status(404).json({ error: error.message });

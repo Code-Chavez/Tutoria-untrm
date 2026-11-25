@@ -65,7 +65,7 @@ describe('SignedDocumentsPanel (A14)', () => {
 
   it('quien no puede adjuntar solo consulta y descarga', async () => {
     setup({ documents: [doc], canUpload: false });
-    expect(screen.queryByRole('button', { name: /Adjuntar documento firmado/ })).not.toBeInTheDocument();
+    expect(screen.queryByLabelText(/Archivo firmado/)).not.toBeInTheDocument();
     await userEvent.setup().click(screen.getByRole('button', { name: /Descargar/ }));
     expect(mocked.download).toHaveBeenCalledWith(doc);
   });

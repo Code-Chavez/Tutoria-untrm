@@ -1,6 +1,6 @@
 import { useId, useState, type FormEvent } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Button, SelectField } from '@shared/components/ui';
+import { Button, FileDropzone, SelectField } from '@shared/components/ui';
 import { getApiErrorMessage } from '@shared/services/apiClient';
 import { getCertificateVisualSettings, saveCertificateAsset, type CertificateAssetStatus, type CertificateOptions } from '../services/certificateService';
 import { CertificateTextSettings } from './CertificateTextSettings';
@@ -38,17 +38,16 @@ function AssetForm({ schoolId, asset }: { schoolId: string; asset: CertificateAs
       <small id={`${id}-help`}>{help} {asset.configured ? 'Configurada.' : 'Sin configurar.'}</small>
       {asset.editable && (
         <div className={styles.assetActions}>
-          <input
+          <FileDropzone
             key={mutation.submittedAt && !file ? mutation.submittedAt : 'file'}
-            aria-label={label}
-            aria-describedby={`${id}-help`}
-            type="file"
+            ariaLabel={label}
             accept="image/png,image/jpeg"
-            disabled={mutation.isPending}
-            onChange={(event) => {
+            hint={file ? `Elegido: ${file.name}` : 'PNG o JPG · máximo 1 MB'}
+            busy={mutation.isPending}
+            onFile={(picked) => {
               mutation.reset();
               setNotice('');
-              setFile(event.target.files?.[0] ?? null);
+              setFile(picked);
             }}
           />
           <Button type="submit" size="sm" disabled={!file || tooLarge || mutation.isPending}>Guardar</Button>

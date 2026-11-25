@@ -1,7 +1,7 @@
-import { useRef, useState } from 'react';
+import { useState } from 'react';
 import { getApiErrorMessage } from '@shared/services/apiClient';
-import { Button } from '@shared/components/ui';
-import { DownloadIcon, UploadIcon } from '@shared/components/icons';
+import { Button, FileDropzone } from '@shared/components/ui';
+import { DownloadIcon } from '@shared/components/icons';
 import { SIGNED_MAX_BYTES, SIGNED_MIME_TYPES, signedDocumentService, type SignedDocument } from '../services/signedDocumentService';
 import styles from './SignedDocumentsPanel.module.css';
 
@@ -23,7 +23,6 @@ const formatSize = (bytes: number) => (bytes >= 1024 * 1024 ? `${(bytes / (1024 
 // Documentos firmados a mano y escaneados (A14). Marcar algo en pantalla no sustituye la firma: aquí se
 // adjunta el impreso firmado y queda registrado quién lo subió, cuándo y su huella SHA-256.
 export function SignedDocumentsPanel({ title, hint, documents, loading, canUpload, onUpload, actions }: SignedDocumentsPanelProps) {
-  const inputRef = useRef<HTMLInputElement>(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
 
@@ -45,7 +44,6 @@ export function SignedDocumentsPanel({ title, hint, documents, loading, canUploa
       setError(getApiErrorMessage(err));
     } finally {
       setBusy(false);
-      if (inputRef.current) inputRef.current.value = '';
     }
   };
 
@@ -66,19 +64,14 @@ export function SignedDocumentsPanel({ title, hint, documents, loading, canUploa
       <div className={styles.actions}>
         {actions}
         {canUpload && (
-          <>
-            <input
-              ref={inputRef}
-              type="file"
-              accept="application/pdf,image/png,image/jpeg"
-              hidden
-              aria-label={`Archivo firmado: ${title}`}
-              onChange={(e) => handleFile(e.target.files?.[0])}
-            />
-            <Button variant="secondary" size="sm" icon={<UploadIcon size={15} />} loading={busy} onClick={() => inputRef.current?.click()}>
-              Adjuntar documento firmado
-            </Button>
-          </>
+          <FileDropzone
+            accept="application/pdf,image/png,image/jpeg"
+            ariaLabel={`Archivo firmado: ${title}`}
+            title="Adjunta el documento firmado: arrástralo aquí o"
+            hint="PDF, PNG o JPG · máximo 10 MB"
+            busy={busy}
+            onFile={(file) => void handleFile(file)}
+          />
         )}
       </div>
 

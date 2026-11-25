@@ -1,7 +1,7 @@
 import { useState, type FormEvent } from 'react';
 import { useUrlParams } from '@shared/hooks/useUrlParams';
 import { useDraftForm } from '@shared/hooks/useDraftForm';
-import { PageHeader, Card, CardBody, Button, SelectField, EmptyState, TableSkeleton, DraftNotice } from '@shared/components/ui';
+import { PageHeader, Card, CardBody, Button, SelectField, EmptyState, TableSkeleton, DraftNotice, FileDropzone } from '@shared/components/ui';
 import { AlertTriangleIcon, PlusIcon } from '@shared/components/icons';
 import { getApiErrorMessage } from '@shared/services/apiClient';
 import { useAuth } from '@features/auth/hooks/useAuth';
@@ -132,8 +132,9 @@ export function AdmonitionsPage() {
             <label htmlFor="adm-reason">Motivo</label>
             <textarea id="adm-reason" className={styles.input} value={reason} minLength={10} maxLength={1000} onChange={(e) => setReason(e.target.value)} required />
 
-            <label htmlFor="adm-file">Documento (resolución o memorándum, opcional)</label>
-            <input id="adm-file" type="file" accept=".pdf,.png,.jpg,.jpeg" onChange={(e) => setFile(e.target.files?.[0] ?? null)} />
+            <span>Documento (resolución o memorándum, opcional)</span>
+            <FileDropzone accept=".pdf,.png,.jpg,.jpeg" ariaLabel="Documento (resolución o memorándum, opcional)" title="Arrastra el documento aquí o" hint="PDF, PNG o JPG" onFile={setFile} />
+            {file && <small>Archivo elegido: {file.name}</small>}
 
             {error && (
               <p role="alert" className={styles.error}>
