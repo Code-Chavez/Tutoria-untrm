@@ -142,17 +142,26 @@ describe('administración de roles por HTTP', () => {
     expect((await call('GET', '/roles', adminToken)).status).toBe(200);
   });
 
-  it('los roles base no se modifican ni se desactivan (409) y su lista los marca como base', async () => {
+  it('el rol del Administrador no se modifica (409); los demás roles base se editan pero ningún base se desactiva', async () => {
     if (!dbUp) return;
+    const adminRole = await prisma.role.findFirstOrThrow({ where: { name: 'Administrador DBU' } });
+    const blocked = await call('PUT', `/roles/${adminRole.id}`, adminToken, { permissions: ['reports:read'] });
+    expect(blocked.status).toBe(409);
+    expect((await json(blocked)).code).toBe('ROLE_PROTECTED');
+
+    // Coordinador: se edita (se reenvían sus mismos permisos y se cambia solo la descripción, que luego se restablece).
     const coord = await prisma.role.findFirstOrThrow({ where: { name: 'Coordinador' } });
-    const edit = await call('PUT', `/roles/${coord.id}`, adminToken, { permissions: ['reports:read'] });
-    expect(edit.status).toBe(409);
-    expect((await json(edit)).code).toBe('ROLE_PROTECTED');
+    const codes = (await prisma.rolePermission.findMany({ where: { roleId: coord.id }, include: { permission: true } })).map((rp) => rp.permission.code);
+    const edit = await call('PUT', `/roles/${coord.id}`, adminToken, { description: 'Coordinador (editado en la prueba)', permissions: codes });
+    expect(edit.status).toBe(200);
+    expect((await call('PUT', `/roles/${coord.id}`, adminToken, { permissions: [...codes, 'admin:system'] })).status).toBe(403);
+    await prisma.role.update({ where: { id: coord.id }, data: { description: coord.description } });
+
     expect((await call('PATCH', `/roles/${coord.id}/status`, adminToken, { isActive: false })).status).toBe(409);
     const list = await json(await call('GET', '/roles', adminToken));
     const names = (list.roles as { name: string; isBase: boolean }[]).filter((r) => r.isBase).map((r) => r.name);
     expect(names).toEqual(expect.arrayContaining(['Administrador DBU', 'Coordinador', 'Docente Tutor', 'Tutorado']));
-    expect(await prisma.rolePermission.count({ where: { roleId: coord.id } })).toBeGreaterThan(10); // intactos
+    expect(await prisma.rolePermission.count({ where: { roleId: coord.id } })).toBe(codes.length); // intactos
   });
 
   it('desactivar: se rechaza si hay cuentas con el rol; sin cuentas se desactiva, no concede permisos y no se puede asignar', async () => {

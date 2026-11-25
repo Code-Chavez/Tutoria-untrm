@@ -20,8 +20,13 @@ export class RoleTargetUserNotFoundError extends Error {
 }
 
 export class RoleProtectedError extends Error {
-  constructor(name: string) {
-    super(`El rol «${name}» es un rol base: se puede ver y copiar como plantilla, pero no modificar ni desactivar`);
+  /** `edit`: el rol del Administrador no se modifica; `deactivate`: ningún rol base se desactiva. */
+  constructor(name: string, action: 'edit' | 'deactivate' = 'deactivate') {
+    super(
+      action === 'edit'
+        ? `El rol «${name}» concentra la administración del sistema: se puede ver y copiar como plantilla, pero no modificar`
+        : `El rol «${name}» es un rol base: se puede ver, copiar y editar, pero no desactivar`,
+    );
     this.name = 'RoleProtectedError';
   }
 }

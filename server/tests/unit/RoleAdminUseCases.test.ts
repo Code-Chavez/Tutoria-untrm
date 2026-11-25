@@ -98,11 +98,20 @@ describe('UpdateRoleUseCase', () => {
     expect(admin.update).toHaveBeenCalledWith('r1', { description: 'nueva', permissionCodes: ['students:read'] }, { userId: 'a1', ipAddress: '10.0.0.1' });
     expect(onChanged).toHaveBeenCalledTimes(1);
   });
-  it('un rol base no se modifica', async () => {
-    const { roles, admin, onChanged } = build(role({ isBase: true }));
-    await expect(new UpdateRoleUseCase(roles, admin, onChanged).execute('r1', { permissions: ['students:read'] }, 'a1', null, ADMIN_PERMS)).rejects.toThrow(RoleProtectedError);
-    expect(admin.update).not.toHaveBeenCalled();
-    expect(onChanged).not.toHaveBeenCalled();
+  it('el rol del Administrador no se modifica, ni por su nombre ni por tener admin:system', async () => {
+    for (const admin of [role({ name: 'Administrador DBU', isBase: true }), role({ name: 'Otro', isBase: true, permissions: [perm('admin:system')] })]) {
+      const { roles, admin: repo, onChanged } = build(admin);
+      await expect(new UpdateRoleUseCase(roles, repo, onChanged).execute('r1', { permissions: ['students:read'] }, 'a1', null, ADMIN_PERMS)).rejects.toThrow(RoleProtectedError);
+      expect(repo.update).not.toHaveBeenCalled();
+      expect(onChanged).not.toHaveBeenCalled();
+    }
+  });
+  it('los demás roles base sí se editan, pero sin poder recibir admin:system', async () => {
+    const { roles, admin, onChanged } = build(role({ name: 'Coordinador', isBase: true }));
+    const useCase = new UpdateRoleUseCase(roles, admin, onChanged);
+    await useCase.execute('r1', { permissions: ['students:read'] }, 'a1', null, ADMIN_PERMS);
+    expect(admin.update).toHaveBeenCalledTimes(1);
+    await expect(useCase.execute('r1', { permissions: ['admin:system'] }, 'a1', null, ADMIN_PERMS)).rejects.toThrow(PermissionNotGrantableError);
   });
   it('no concede admin:system ni permisos del catálogo inexistentes, ni más de lo que posee quien edita', async () => {
     const { roles, admin, onChanged } = build();
