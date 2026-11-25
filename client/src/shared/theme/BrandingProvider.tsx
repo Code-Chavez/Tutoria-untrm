@@ -62,6 +62,16 @@ export function BrandingProvider({ children }: { children: ReactNode }) {
     document.title = branding.shortName;
   }, [branding.primaryColor, branding.accentColor, branding.shortName]);
 
+  // El icono de la pestaña sigue al logotipo institucional configurado; sin logotipo propio rige el de la UNTRM de index.html.
+  const customLogoUrl = branding.hasCustomLogo ? brandingLogoUrl(branding.updatedAt) : null;
+  useLayoutEffect(() => {
+    const link = document.getElementById('app-favicon');
+    if (!(link instanceof HTMLLinkElement)) return;
+    const original = link.dataset.original ?? link.getAttribute('href') ?? '';
+    link.dataset.original = original;
+    link.setAttribute('href', customLogoUrl ?? original);
+  }, [customLogoUrl]);
+
   const value = useMemo<BrandingContextValue>(
     () => ({ branding, logoSrc: branding.hasCustomLogo ? brandingLogoUrl(branding.updatedAt) : defaultLogo }),
     [branding],

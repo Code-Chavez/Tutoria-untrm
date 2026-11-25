@@ -19,6 +19,7 @@ export async function seedBase(prisma: PrismaClient) {
   const permMap = Object.fromEntries(permissions.map(p => [p.code, p.id]));
 
   // Roles del sistema (Art. 4 del Protocolo)
+  const existingRoleIds = new Set((await prisma.role.findMany({ where: { isBase: true }, select: { id: true } })).map((r) => r.id));
   const adminRole = await prisma.role.upsert({
     where: { name: 'Administrador DBU' },
     update: {},
@@ -72,7 +73,10 @@ export async function seedBase(prisma: PrismaClient) {
     [deanRole.id]: ['admonitions:read', 'admonitions:write'],
   };
 
+  // Los roles base se pueden editar desde «Roles» (menos el del Administrador): los permisos por defecto solo se asignan al CREAR el
+  // rol; volver a asignarlos en cada arranque devolvería lo que la DBU quitó. El Administrador siempre tiene todos.
   for (const [roleId, codes] of Object.entries(rolePerms)) {
+    if (roleId !== adminRole.id && existingRoleIds.has(roleId)) continue;
     for (const code of codes) {
       await prisma.rolePermission.upsert({
         where: { roleId_permissionId: { roleId, permissionId: permMap[code] } },

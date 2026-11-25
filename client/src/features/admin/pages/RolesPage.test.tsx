@@ -16,6 +16,7 @@ const mocked = vi.mocked(roleService);
 const perm = (code: string, description: string) => ({ code, description });
 const CATALOG = [perm('students:read', 'Ver tutorados'), perm('students:write', 'Crear/editar tutorados'), perm('reports:read', 'Ver informes'), perm('admin:system', 'Administración del sistema')];
 const adminRole: Role = { id: 'r-admin', name: 'Administrador DBU', description: 'Administra', isBase: true, isActive: true, userCount: 2, permissions: CATALOG };
+const coordRole: Role = { id: 'r-coord', name: 'Coordinador', description: 'Coordina', isBase: true, isActive: true, userCount: 4, permissions: [CATALOG[0]!, CATALOG[1]!] };
 const custom: Role = { id: 'r-rev', name: 'Revisor', description: 'Solo lectura', isBase: false, isActive: true, userCount: 0, permissions: [CATALOG[0]!] };
 const inUse: Role = { id: 'r-uso', name: 'Con cuentas', description: 'En uso', isBase: false, isActive: true, userCount: 3, permissions: [CATALOG[2]!] };
 
@@ -43,7 +44,7 @@ describe('RolesPage', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     sessionStorage.clear();
-    mocked.getRoles.mockResolvedValue([adminRole, custom, inUse]);
+    mocked.getRoles.mockResolvedValue([adminRole, coordRole, custom, inUse]);
     mocked.getPermissionCatalog.mockResolvedValue(CATALOG);
   });
 
@@ -56,7 +57,21 @@ describe('RolesPage', () => {
     expect(within(screen.getByRole('button', { name: /Revisor/ })).getByText('Personalizado')).toBeInTheDocument();
   });
 
-  it('un rol base se ve completo pero no se edita: casillas bloqueadas y solo se puede copiar', async () => {
+  it('un rol base distinto del Administrador se edita y se guarda, pero no se desactiva', async () => {
+    mocked.update.mockResolvedValue(coordRole);
+    const user = userEvent.setup();
+    renderPage();
+    await pickRole(user, 'Coordinador');
+
+    expect(screen.getByLabelText(/Ver tutorados/)).toBeEnabled();
+    await user.click(screen.getByLabelText(/Ver informes/));
+    await user.click(screen.getByRole('button', { name: 'Guardar cambios' }));
+
+    expect(mocked.update).toHaveBeenCalledWith('r-coord', { description: 'Coordina', permissions: expect.arrayContaining(['students:read', 'students:write', 'reports:read']) });
+    expect(screen.queryByRole('button', { name: 'Desactivar' })).not.toBeInTheDocument();
+  });
+
+  it('el rol del Administrador se ve completo pero no se edita: casillas bloqueadas y solo se puede copiar', async () => {
     const user = userEvent.setup();
     renderPage();
     await pickRole(user, 'Administrador DBU');

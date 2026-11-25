@@ -14,6 +14,9 @@ import styles from './RolesPage.module.css';
 // Permisos que ningún rol creado aquí puede incluir (el servidor también lo rechaza): la administración del sistema no se delega.
 const NON_DELEGABLE = ['admin:system'];
 
+/** El rol de administración del sistema: el único que no se edita (el servidor aplica la misma regla). */
+const isAdministratorRole = (role: Role) => role.name === 'Administrador DBU' || (role.permissions ?? []).some((p) => NON_DELEGABLE.includes(p.code));
+
 const roleCodes = (role: Role) => (role.permissions ?? []).map((p) => p.code).sort();
 const sameCodes = (a: string[], b: string[]) => a.length === b.length && [...a].sort().every((code, i) => code === [...b].sort()[i]);
 const toggled = (codes: string[], code: string) => (codes.includes(code) ? codes.filter((c) => c !== code) : [...codes, code]);
@@ -113,7 +116,8 @@ interface EditDraft {
 // El detalle de un rol. Los cambios sin guardar se conservan como borrador de la pestaña (por rol).
 function RoleEditor({ role, catalog, ownerId, onCopy, onAskDeactivate, onActivate, onSaved, onError }: { role: Role; catalog: Permission[]; ownerId?: string; onCopy: () => void; onAskDeactivate: () => void; onActivate: () => void; onSaved: (role: Role) => void; onError: (message: string) => void }) {
   const update = useUpdateRole();
-  const readOnly = role.isBase === true;
+  // Solo el rol del Administrador es de solo lectura: los demás roles base se editan igual que los personalizados.
+  const readOnly = isAdministratorRole(role);
   const users = role.userCount ?? 0;
   const initial = useMemo<EditDraft>(() => ({ description: role.description ?? '', permissions: roleCodes(role) }), [role]);
   const unchanged = useCallback((value: EditDraft) => value.description.trim() === initial.description && sameCodes(value.permissions, initial.permissions), [initial]);
@@ -132,7 +136,7 @@ function RoleEditor({ role, catalog, ownerId, onCopy, onAskDeactivate, onActivat
 
   return (
     <>
-      <CardHeader title={role.name} description={role.isBase ? 'Rol base: se puede ver y copiar, no modificar.' : 'Rol personalizado'} />
+      <CardHeader title={role.name} description={readOnly ? 'Rol del Administrador: se puede ver y copiar, no modificar.' : role.isBase ? 'Rol base: se puede editar, pero no desactivar.' : 'Rol personalizado'} />
       <CardBody>
         <div className={styles.form}>
           {restored && !readOnly && (
@@ -146,10 +150,10 @@ function RoleEditor({ role, catalog, ownerId, onCopy, onAskDeactivate, onActivat
           <label htmlFor="role-edit-description">Descripción</label>
           <textarea id="role-edit-description" className={styles.input} rows={2} maxLength={300} value={form.description} disabled={readOnly} onChange={(e) => setForm((f) => ({ ...f, description: e.target.value }))} />
           <h3 className={styles.sub}>Permisos ({form.permissions.length})</h3>
-          {role.isBase && <p className={styles.muted}>Los roles base no se modifican porque el sistema restablece sus permisos. Cópialo para crear uno parecido.</p>}
-          <PermissionChecklist catalog={catalog} checked={form.permissions} disabled={readOnly} isBase={role.isBase === true} onToggle={(code) => setForm((f) => ({ ...f, permissions: toggled(f.permissions, code) }))} />
+          {readOnly && <p className={styles.muted}>El rol del Administrador concentra la administración del sistema y no se modifica. Cópialo para crear uno parecido.</p>}
+          <PermissionChecklist catalog={catalog} checked={form.permissions} disabled={readOnly} isBase={readOnly} onToggle={(code) => setForm((f) => ({ ...f, permissions: toggled(f.permissions, code) }))} />
           <div className={styles.actions}>
-            {role.isBase ? (
+            {readOnly ? (
               <Button onClick={onCopy}>Crear a partir de este rol</Button>
             ) : (
               <>
@@ -159,7 +163,7 @@ function RoleEditor({ role, catalog, ownerId, onCopy, onAskDeactivate, onActivat
                 <Button variant="secondary" onClick={onCopy}>
                   Copiar
                 </Button>
-                {role.isActive === false ? (
+                {role.isBase ? null : role.isActive === false ? (
                   <Button variant="secondary" onClick={onActivate}>
                     Activar
                   </Button>
@@ -178,8 +182,8 @@ function RoleEditor({ role, catalog, ownerId, onCopy, onAskDeactivate, onActivat
   );
 }
 
-// Roles configurables (LEV-R11): la DBU crea roles con permisos del catálogo, los edita y los desactiva. Los siete roles base se ven y
-// se copian, pero no se modifican. A quién se asigna cada rol y hasta dónde llega se define en «Usuarios y roles».
+// Roles configurables (LEV-R11): la DBU crea roles con permisos del catálogo, los edita y los desactiva. Los roles base también se editan
+// (y se copian), pero no se desactivan; el del Administrador solo se ve y se copia. A quién se asigna cada rol y hasta dónde llega se define en «Usuarios y roles».
 // El rol elegido y la ventana abierta viven en la URL (?rol=<id>, ?nuevo=1&copiar=<id>, ?confirmar=1): recargar o compartir el enlace
 // vuelve al mismo lugar.
 export function RolesPage() {

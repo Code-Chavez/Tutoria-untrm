@@ -239,9 +239,12 @@ test('4. una cuenta sin autorización no puede darse privilegios ni modificar lo
   await s.page.goto('/users');
   await expect(s.page.locator('#contenido').getByRole('heading', { name: 'Acceso denegado' })).toBeVisible();
 
-  // Incluso la administración no puede alterar un rol base ni delegar la administración del sistema.
-  const baseEdit = await api(s.adminToken, 'PUT', `/roles/${tutorRole.id}`, { description: 'Alterado' });
-  expect(baseEdit.status).toBeGreaterThanOrEqual(400);
+  // Incluso la administración no puede alterar el rol del Administrador, ni delegar la administración del sistema en otro rol
+  // (los demás roles base sí se editan, pero sin recibir `admin:system`).
+  const adminEdit = await api(s.adminToken, 'PUT', `/roles/${adminRole.id}`, { description: 'Alterado' });
+  expect(adminEdit.status).toBeGreaterThanOrEqual(400);
+  const baseGrant = await api(s.adminToken, 'PUT', `/roles/${tutorRole.id}`, { permissions: ['students:read', 'admin:system'] });
+  expect(baseGrant.status).toBeGreaterThanOrEqual(400);
   const delegate = await api(s.adminToken, 'POST', '/roles', { name: `Rol delegado ${stamp}`, description: 'Intento', permissions: ['admin:system'] });
   expect(delegate.status).toBeGreaterThanOrEqual(400);
 });
