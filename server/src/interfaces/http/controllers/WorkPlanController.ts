@@ -17,6 +17,7 @@ import {
 } from '@application/use-cases/work-plans/WorkPlanErrors';
 import { NoActivePeriodError } from '@application/use-cases/evaluation/EvaluationErrors';
 import { saveWorkPlanSchema } from '../validators/workPlan.validators';
+import { sendStoredFile } from '../sendStoredFile';
 
 export class WorkPlanController {
   constructor(
@@ -108,7 +109,7 @@ export class WorkPlanController {
         req.auth?.sub as string,
         req.params.schoolId as string,
       );
-      res.download(absolutePath, fileName);
+      await sendStoredFile(res, absolutePath, { fileName });
     } catch (error) {
       this.handleError(error, res);
     }
@@ -136,7 +137,7 @@ export class WorkPlanController {
         req.params.schoolId as string,
         revision,
       );
-      res.download(absolutePath, fileName);
+      await sendStoredFile(res, absolutePath, { fileName });
     } catch (error) {
       this.handleError(error, res);
     }

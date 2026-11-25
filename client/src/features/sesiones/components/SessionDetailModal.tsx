@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useDialogFocus } from '@shared/hooks/useDialog';
-import { Badge, Button } from '@shared/components/ui';
+import { Badge, Button, FileDropzone } from '@shared/components/ui';
 import {
   CalendarIcon,
   CloseIcon,
@@ -10,7 +10,6 @@ import {
   CheckCircleIcon,
   AlertTriangleIcon,
   ClipboardIcon,
-  UploadIcon,
   DownloadIcon,
 } from '@shared/components/icons';
 import { TutoringSession, SessionEvidence } from '../services/sessionService';
@@ -333,21 +332,14 @@ export const SessionDetailModal: React.FC<SessionDetailModalProps> = ({
                 ))}
               </ul>
             )}
-            <label className={styles.uploadLabel}>
-              <UploadIcon size={14} />
-              {uploadingEvidence ? 'Subiendo…' : 'Adjuntar evidencia'}
-              <input
-                type="file"
-                accept=".pdf,.png,.jpg,.jpeg"
-                className={styles.hiddenInput}
-                disabled={uploadingEvidence}
-                onChange={(e) => {
-                  const file = e.target.files?.[0];
-                  if (file) onUploadEvidence?.(file);
-                  e.target.value = '';
-                }}
-              />
-            </label>
+            <FileDropzone
+              accept=".pdf,.png,.jpg,.jpeg"
+              ariaLabel="Adjuntar evidencia"
+              title="Adjunta una evidencia: arrástrala aquí o"
+              hint="PDF, PNG o JPG"
+              busy={uploadingEvidence}
+              onFile={(file) => onUploadEvidence?.(file)}
+            />
             {evidenceError && <span className={styles.error}>{evidenceError}</span>}
           </div>
         </div>

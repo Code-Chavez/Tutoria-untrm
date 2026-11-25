@@ -17,6 +17,8 @@ model User {
   lastName            String    @map("last_name")
   phone               String?
   photoUrl            String?   @map("photo_url")
+  // Foto subida desde el sistema (clave de almacenamiento); photoUrl queda para enlaces anteriores.
+  photoStorageKey     String?   @map("photo_storage_key")
   isActive            Boolean   @default(true) @map("is_active")
   failedLoginAttempts Int       @default(0) @map("failed_login_attempts")
   lockedUntil         DateTime? @map("locked_until")

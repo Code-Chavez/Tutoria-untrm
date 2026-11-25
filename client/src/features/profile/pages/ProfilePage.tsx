@@ -3,14 +3,26 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { getApiErrorMessage } from '@shared/services/apiClient';
 import { AuthContext } from '@features/auth/context/AuthContext';
 import { getRoleLabel } from '@shared/utils/roleLabel';
+import { FileDropzone } from '@shared/components/ui';
 import { profileService } from '../services/profileService';
 import styles from './ProfilePage.module.css';
 
 const PROFILE_QUERY_KEY = ['profile'] as const;
+const PHOTO_QUERY_KEY = ['profile-photo'] as const;
+const PHOTO_MAX_BYTES = 1024 * 1024;
 
 interface Feedback {
   type: 'ok' | 'error';
   text: string;
+}
+
+function blobToDataUrl(blob: Blob): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(String(reader.result));
+    reader.onerror = () => reject(reader.error);
+    reader.readAsDataURL(blob);
+  });
 }
 
 function initials(firstName: string, lastName: string): string {
@@ -28,7 +40,7 @@ export function ProfilePage() {
 
   // Formulario de datos de contacto
   const [phone, setPhone] = useState('');
-  const [photoUrl, setPhotoUrl] = useState('');
+  const [savingPhoto, setSavingPhoto] = useState(false);
   const [savingProfile, setSavingProfile] = useState(false);
   const [profileMsg, setProfileMsg] = useState<Feedback | null>(null);
 
@@ -47,15 +59,46 @@ export function ProfilePage() {
     if (!profile || initialized.current) return;
     initialized.current = true;
     setPhone(profile.phone ?? '');
-    setPhotoUrl(profile.photoUrl ?? '');
   }, [profile]);
+
+  // La foto subida no tiene URL pública: se pide con la sesión y se muestra desde un objeto local.
+  const hasUploadedPhoto = profile?.hasPhoto === true;
+  const { data: uploadedPhotoSrc } = useQuery({
+    queryKey: PHOTO_QUERY_KEY,
+    queryFn: async () => blobToDataUrl(await profileService.photo()),
+    enabled: hasUploadedPhoto,
+  });
+  const photoSrc = (hasUploadedPhoto ? uploadedPhotoSrc : null) ?? profile?.photoUrl ?? null;
+
+  const changePhoto = async (action: () => Promise<void>, okText: string) => {
+    setProfileMsg(null);
+    setSavingPhoto(true);
+    try {
+      await action();
+      await queryClient.invalidateQueries({ queryKey: PROFILE_QUERY_KEY });
+      await queryClient.invalidateQueries({ queryKey: PHOTO_QUERY_KEY });
+      setProfileMsg({ type: 'ok', text: okText });
+    } catch (error) {
+      setProfileMsg({ type: 'error', text: getApiErrorMessage(error) });
+    } finally {
+      setSavingPhoto(false);
+    }
+  };
+
+  const handlePhotoFile = (file: File) => {
+    if (file.size > PHOTO_MAX_BYTES) {
+      setProfileMsg({ type: 'error', text: 'La foto no puede superar 1 MB.' });
+      return;
+    }
+    void changePhoto(() => profileService.uploadPhoto(file), 'Foto actualizada.');
+  };
 
   const handleProfileSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setProfileMsg(null);
     setSavingProfile(true);
     try {
-      const updated = await profileService.update({ phone, photoUrl });
+      const updated = await profileService.update({ phone });
       queryClient.setQueryData(PROFILE_QUERY_KEY, updated);
       setProfileMsg({ type: 'ok', text: 'Datos actualizados correctamente.' });
     } catch (error) {
@@ -129,8 +172,8 @@ export function ProfilePage() {
           </div>
           <div className={styles.panelBody}>
             <div className={styles.identity}>
-              {photoUrl ? (
-                <img className={styles.avatar} src={photoUrl} alt="Foto de perfil" />
+              {photoSrc ? (
+                <img className={styles.avatar} src={photoSrc} alt="Foto de perfil" />
               ) : (
                 <span className={styles.avatarFallback}>
                   {initials(profile.firstName, profile.lastName)}
@@ -149,6 +192,28 @@ export function ProfilePage() {
               <span className={styles.readonlyValue}>{profile.email}</span>
             </div>
 
+            <div className={styles.field}>
+              <span>Foto de perfil</span>
+              <FileDropzone
+                accept="image/png,image/jpeg,image/webp"
+                ariaLabel="Foto de perfil"
+                title="Arrastra tu foto aquí o"
+                hint="PNG, JPG o WebP · máximo 1 MB"
+                busy={savingPhoto}
+                onFile={handlePhotoFile}
+              />
+              {profile.hasPhoto && (
+                <button
+                  type="button"
+                  className={styles.button}
+                  disabled={savingPhoto}
+                  onClick={() => void changePhoto(() => profileService.removePhoto(), 'Foto eliminada.')}
+                >
+                  Quitar foto
+                </button>
+              )}
+            </div>
+
             <form onSubmit={handleProfileSubmit}>
               {profileMsg && (
                 <div className={profileMsg.type === 'ok' ? styles.ok : styles.error} role="alert">
@@ -165,19 +230,6 @@ export function ProfilePage() {
                   placeholder="Ej. 987654321"
                   value={phone}
                   onChange={(e) => setPhone(e.target.value)}
-                  disabled={savingProfile}
-                />
-              </div>
-
-              <div className={styles.field}>
-                <label htmlFor="photoUrl">URL de la foto</label>
-                <input
-                  id="photoUrl"
-                  type="url"
-                  className={styles.input}
-                  placeholder="https://…"
-                  value={photoUrl}
-                  onChange={(e) => setPhotoUrl(e.target.value)}
                   disabled={savingProfile}
                 />
               </div>

@@ -152,14 +152,14 @@ describe('ExpedientePage', () => {
     expect(await screen.findByText('Hoja de asistencia (Anexo N° 4)')).toBeInTheDocument();
     expect(screen.getByText('Periodo 2026-II')).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /Descargar hoja para imprimir/ })).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: /Adjuntar documento firmado/ })).toBeInTheDocument();
+    expect(screen.getByLabelText(/Archivo firmado/)).toBeInTheDocument();
     unmount();
 
     // Coordinación consulta, pero no adjunta.
     mockRole = 'Coordinador';
     renderPage();
     await screen.findByText('Hoja de asistencia (Anexo N° 4)');
-    expect(screen.queryByRole('button', { name: /Adjuntar documento firmado/ })).not.toBeInTheDocument();
+    expect(screen.queryByLabelText(/Archivo firmado/)).not.toBeInTheDocument();
   });
 
   it('incorpora la solicitud de tutoría al expediente, con su estado y la respuesta (R01)', async () => {

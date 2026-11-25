@@ -31,6 +31,7 @@ export class UpdateProfileUseCase {
       lastName: updated.lastName,
       phone: updated.phone ?? null,
       photoUrl: updated.photoUrl ?? null,
+      hasPhoto: !!updated.photoStorageKey,
       role: role?.name ?? 'Desconocido',
     };
   }

@@ -17,6 +17,7 @@ import {
 import { ReferralForbiddenError, ReferralNotFoundError } from '@application/use-cases/referrals/ReferralErrors';
 import { StudentAccessDeniedError, StudentNotFoundError } from '@application/use-cases/students/StudentErrors';
 import { AttendanceSheetPdf } from '../../../infrastructure/parsers/AttendanceSheetPdf';
+import { sendStoredFile } from '../sendStoredFile';
 
 const periodQuery = z.object({ periodId: z.string().uuid().optional() });
 
@@ -117,7 +118,7 @@ export class SignedDocumentController {
   download = async (req: Request, res: Response) => {
     try {
       const { fileName, absolutePath } = await this.getSignedDocumentFile.execute(req.params.docId as string, req.auth?.sub as string);
-      res.download(absolutePath, fileName);
+      await sendStoredFile(res, absolutePath, { fileName });
     } catch (error) {
       this.handleError(error, res);
     }
