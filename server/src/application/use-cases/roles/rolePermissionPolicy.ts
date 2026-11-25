@@ -7,6 +7,13 @@ import { PermissionNotGrantableError, UnknownPermissionError } from './RoleError
  */
 export const NON_DELEGABLE_PERMISSIONS: readonly string[] = ['admin:system'];
 
+/** El rol de administración del sistema: el único que no se edita (lo identifica su nombre o tener `admin:system`). */
+export const ADMINISTRATOR_ROLE_NAME = 'Administrador DBU';
+
+export function isAdministratorRole(role: { name: string; permissions?: { code: string }[] }): boolean {
+  return role.name === ADMINISTRATOR_ROLE_NAME || (role.permissions ?? []).some((p) => NON_DELEGABLE_PERMISSIONS.includes(p.code));
+}
+
 const KNOWN = new Set<string>(PERMISSION_CATALOG.map((p) => p.code));
 
 /**

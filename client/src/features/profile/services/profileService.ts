@@ -21,7 +21,7 @@ export const profileService = {
   async uploadPhoto(file: File): Promise<void> {
     const form = new FormData();
     form.append('file', file);
-    await apiClient.put('/profile/photo', form);
+    await apiClient.put('/profile/photo', form, { headers: { 'Content-Type': 'multipart/form-data' } });
   },
 
   async removePhoto(): Promise<void> {

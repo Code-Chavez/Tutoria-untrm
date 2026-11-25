@@ -1,0 +1,39 @@
+# Capítulo VII. Dificultades, conclusiones y recomendaciones
+
+## 7.1 Dificultades técnicas y aprendizajes
+
+**Cerrar un flujo, no solo mostrar una pantalla.** Una dificultad evidenciada por las auditorías fue diferenciar la disponibilidad de una pantalla del cierre real de un flujo. El caso de las solicitudes mostró que guardar el registro no bastaba: debía acompañarse de un responsable, una bandeja, un estado y una respuesta. La corrección ilustra la necesidad de comprobar procesos completos y no solo funciones aisladas.
+
+**Simplicidad sin perder protección.** Otra dificultad fue mantener una presentación simple sin debilitar la protección de datos. Los menús por perfil orientan al usuario, pero el servidor aplica las restricciones independientemente de lo que la interfaz muestre. La revisión de seguridad lo confirmó con un caso concreto: una ruta que la interfaz no mostraba a un estudiante respondía igualmente a su cuenta hasta que se le exigió un permiso en el servidor. Es el tipo de riesgo que el OWASP Top 10 ubica en primer lugar: el control de acceso roto (OWASP Foundation, 2021).
+
+**Lo que revelan las pruebas de extremo a extremo.** La verificación de extremo a extremo aportó un aprendizaje distinto al de las pruebas por componentes: varios defectos dependían de la interacción entre partes (el estado de un formulario tras la respuesta del servidor, una caché compartida entre el inicio de sesión y la identidad visual, o una lista que no se refrescaba mientras otra persona respondía). Las pruebas unitarias de cada pieza no los habían revelado, lo que justifica mantener ambos niveles.
+
+**Los datos de demostración pueden ocultar carencias.** Un profesional de servicio sembrado con su servicio funcionaba; uno creado desde la interfaz no podía recibirlo. Más tarde, las capturas del manual dependían de sesiones y solicitudes que la siembra base ya no creaba, y el generador falló hasta preparar esos datos. Escribir la documentación obliga a recorrer cada paso como lo haría una persona nueva.
+
+**Las pruebas dependen de su entorno.** Las pruebas de integración que escribían sobre la base de desarrollo obligaron a aislarlas en una base exclusiva, y la ejecución programada de los navegadores falló cuando el servicio de automatización cambió la imagen de sus ejecutores. Un fallo de automatización puede no ser un defecto del producto, pero hay que investigarlo para saberlo. Del trabajo con ramas protegidas queda otra lección operativa: tras cada fusión hay que actualizar la rama siguiente y esperar de nuevo la integración continua, y los archivos se agregan por ruta exacta para no subir documentos que no corresponden.
+
+**Interpretar bien las evidencias.** Un archivo de prueba escrito no es un resultado ejecutado; una ejecución satisfactoria de la API no es un piloto; un ensayo hecho por el propio equipo con guiones no equivale a una prueba con usuarios; y una restauración en un entorno de ensayo no acredita la recuperación operativa de una instalación institucional. Estas distinciones fortalecen la trazabilidad y evitan conclusiones que excedan lo observado.
+
+## 7.2 Aportes
+
+- Un sistema que articula, con trazabilidad y control de acceso, los registros del protocolo de tutoría de la UNTRM, de la solicitud a la derivación y a los informes.
+- Una arquitectura hexagonal con pruebas automáticas de sus reglas, de sus permisos y de los recorridos principales.
+- Documentación de diseño generada desde el código y el esquema de datos, que se regenera y no puede divergir de ellos.
+- Manuales de usuario y del sistema contrastados con la interfaz real, y una guía para el piloto.
+
+## 7.3 Conclusiones
+
+1. La documentación del proyecto relaciona las necesidades del proceso tutorial con requisitos, historias de usuario y criterios de terminado, y la matriz de trazabilidad vincula las historias con sus pruebas. La aceptación del alcance y de sus cambios debe acompañar esta relación documental, y las ampliaciones posteriores al plan (roles configurables, cierre del periodo, certificación) deben distinguirse del alcance original.
+2. El repositorio contiene una aplicación web que integra los módulos principales del acompañamiento tutorial (del registro del estudiante a la derivación, la evaluación y los informes institucionales), el cierre del periodo y la certificación en demostración, sobre una estructura tecnológica para persistencia, autenticación y operación en contenedores, entregada en trece versiones incrementales hasta la v1.0.0-beta.4.
+3. La auditoría por perfiles, las pruebas de extremo a extremo, la aceptación manual, las revisiones de seguridad y el ensayo técnico de los roles permitieron identificar y corregir defectos de navegación, continuidad de atención y protección de datos. Cada corrección quedó vinculada con su versión y con una prueba de regresión.
+4. Las pruebas automáticas aportan evidencia técnica verificada por integración continua de las reglas del sistema y de sus accesos (1 709 pruebas del servidor, 775 del cliente y 141 recorridos de extremo a extremo en el commit de referencia), y los ensayos de respaldo, restauración y migración respaldan la operación. Permanecen diferenciadas de la medición de rendimiento, la evaluación con usuarios y la puesta en producción institucional.
+5. El cierre formal de las prácticas requiere completar el piloto con usuarios, validar los formatos y el certificado oficial con la DBU, definir la infraestructura de producción, obtener la aprobación del Product Owner, acreditar las horas y obtener las constancias de ejecución y entrega. En consecuencia, este informe no declara el cumplimiento integral de los seis objetivos, sino el estado verificable de cada uno.
+
+## 7.4 Recomendaciones
+
+1. **Seleccionar una versión de referencia para la entrega.** Mantener la relación entre cada requisito, cambio y prueba, y elegir la versión que se presentará (v1.0.0-beta.3 tal cual, o v1.0.0-beta.4 con las correcciones posteriores). Las capturas, los diagramas, los reportes y los manuales deben corresponder a esa versión; cualquier cambio solicitado debe pasar por el mismo flujo de integración y de lanzamiento, y regenerarse los manuales.
+2. **Completar el piloto** con tareas representativas de estudiantes, docentes y profesionales, registrando éxito de tarea, pasos, dificultades y comentarios sin incorporar información clínica ni credenciales a los anexos. Los cambios de interfaz deben apoyarse en esas observaciones y en verificaciones de accesibilidad. Antes de la primera sesión, la DBU debe decidir la regla de un docente por ciclo, que condiciona cuántos docentes se necesitan por escuela.
+3. **Definir el entorno de producción** antes de la puesta en marcha: dominio y servidor con HTTPS, cuenta de correo institucional, destino de copias de respaldo fuera del servidor con un ensayo de restauración en otro equipo, y responsables de operación y de monitoreo. Ejecutar un escáner dinámico de seguridad sobre el entorno desplegado y medir el rendimiento allí.
+4. **Obtener la plantilla oficial del certificado** de la DBU, con sus logos y la ciudad de cada sede, antes de activar la certificación fuera del modo de demostración, y decidir el tratamiento de los datos reales (anonimato de la evaluación, alcance por rol) conforme a la normativa de protección de datos personales.
+5. **Ampliar las pruebas** a los recorridos que aún no las tienen y vigilar la estabilidad de las pruebas del cliente en equipos con poca capacidad. Guardar la escuela y el tutor por periodo (migración y revisión de autorización) para que el historial de cada semestre muestre su propia situación.
+6. **Acreditar la ejecución de las prácticas** con las fichas de asistencia firmadas por la persona encargada, las constancias de la unidad y la validación del asesor, y confirmar el formato de la escuela para la versión definitiva de este informe.
