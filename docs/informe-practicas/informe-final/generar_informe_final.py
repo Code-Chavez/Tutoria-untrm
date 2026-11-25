@@ -26,6 +26,7 @@ from docx.shared import Inches, Pt, RGBColor
 AQUI = Path(__file__).resolve().parent
 SALIDA = AQUI / 'Informe_Final_Practicas_Brayni_Chavez.docx'
 LOGO = AQUI / 'assets' / 'logo_untrm.png'
+ESCUDO = AQUI / 'assets' / 'escudo_untrm.png'  # el del acta de visto bueno: va solo en la carátula
 # Parámetros de maquetación. El modo --compacto (informe para empastar, con menos páginas) los cambia sin tocar el resto del código.
 CONF = {
     'fuente': AQUI, 'salida': SALIDA,
@@ -37,7 +38,7 @@ CONF = {
 COMPACTO = {
     'fuente': AQUI / 'compacto', 'salida': AQUI / 'Informe_Final_Practicas_Brayni_Chavez_Compacto.docx',
     'interlineado': 1.2, 'espacio_post': 4, 'sangria': 0.3, 'interlineado_lista': 1.1, 'espacio_ref': 5,
-    'margen_izq': 1.4, 'margen_der': 0.9, 'margen_sup': 0.9, 'margen_inf': 0.9,
+    'margen_izq': 1.4, 'margen_der': 0.9, 'margen_sup': 1.0, 'margen_inf': 0.9,
     'tam_texto': 11.5, 'tam_tabla': 9, 'tam_tabla_ancha': 8.5,
     'ancho_vert': 5.9, 'alto_vert': 8.4, 'ancho_horiz': 8.6, 'alto_horiz': 5.9,
 }
@@ -52,7 +53,7 @@ CARATULA = {
     'asesor': 'Mg. Eder Nicanor Figueroa Piscoya',
     'lugar': 'Bagua, Amazonas, Perú',
     'anio': '2026',
-    'nota': 'Versión final de trabajo · Software v1.0.0-beta.4 · Corte del 19 de noviembre de 2026',
+    'nota': 'Versión final de trabajo · Software v1.0.0 · Corte del 25 de noviembre de 2026',
 }
 
 # Orden del documento: (tipo, ruta relativa a esta carpeta). `incluir` toma un .md de fuera y desplaza sus títulos.
@@ -439,11 +440,49 @@ def centrado(texto, tam=12, negrita=False, antes=0, despues=6, cursiva=False):
     return parrafo
 
 
+def encabezado(seccion):
+    """Encabezado de página como el del control de asistencia: logotipo institucional a la izquierda y la facultad a la derecha."""
+    ancho = seccion.page_width - seccion.left_margin - seccion.right_margin
+    cabecera = seccion.header
+    cabecera.is_linked_to_previous = False
+    seccion.header_distance = Inches(0.3)
+    resto = cabecera.paragraphs[0]
+    for corrida in list(resto.runs):
+        corrida._r.getparent().remove(corrida._r)
+    tabla = cabecera.add_table(1, 2, ancho)
+    tabla.alignment = WD_TABLE_ALIGNMENT.CENTER
+    tabla.autofit = False
+    mitad = int(ancho * 0.55)
+    for celda, medida in zip(tabla.rows[0].cells, (mitad, ancho - mitad)):
+        celda.width = medida
+    izquierda, derecha = tabla.rows[0].cells
+    izquierda.paragraphs[0].add_run().add_picture(str(LOGO), height=Inches(0.42))
+    derecha.paragraphs[0].alignment = WD_ALIGN_PARAGRAPH.RIGHT
+    corrida = derecha.paragraphs[0].add_run('Facultad de Ingeniería de Sistemas y\nMecánica Eléctrica-FISME-Bagua')
+    corrida.font.size = Pt(8)
+    corrida.font.name = 'Arial'
+    for celda in (izquierda, derecha):
+        celda.paragraphs[0].paragraph_format.space_after = Pt(0)
+    # La tabla va antes del párrafo final obligatorio, que queda mínimo y con una línea fina sobre él (separa el encabezado del texto).
+    resto._p.addprevious(tabla._tbl)
+    resto.paragraph_format.space_before = Pt(2)
+    resto.paragraph_format.space_after = Pt(0)
+    propiedades = resto._p.get_or_add_pPr()
+    borde = OxmlElement('w:pBdr')
+    linea = OxmlElement('w:top')
+    for atributo, valor in (('w:val', 'single'), ('w:sz', '4'), ('w:space', '1'), ('w:color', '808080')):
+        linea.set(qn(atributo), valor)
+    borde.append(linea)
+    propiedades.append(borde)
+    pequeno = resto.add_run('')
+    pequeno.font.size = Pt(2)
+
+
 def caratula():
-    if LOGO.exists():
+    if ESCUDO.exists():
         parrafo = documento.add_paragraph()
         parrafo.alignment = WD_ALIGN_PARAGRAPH.CENTER
-        parrafo.add_run().add_picture(str(LOGO), height=Inches(1.2))
+        parrafo.add_run().add_picture(str(ESCUDO), height=Inches(1.4))
     centrado(CARATULA['universidad'], 14, True, 6)
     centrado(CARATULA['facultad'], 12, True)
     centrado(CARATULA['escuela'], 12, True, 0, 40)
@@ -511,6 +550,10 @@ def main():
             print(f'AVISO: falta {ruta}', file=sys.stderr)
             continue
         procesar(archivo)
+    # Encabezado en todas las secciones menos la carátula (cada una con el ancho útil de su orientación).
+    for indice, seccion in enumerate(documento.sections):
+        if indice > 0:
+            encabezado(seccion)
     documento.save(str(CONF['salida']))
     print(f'{CONF["salida"].name}: {contador["Tabla"]} tablas, {contador["Figura"]} figuras')
 

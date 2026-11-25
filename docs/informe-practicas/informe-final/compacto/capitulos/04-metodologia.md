@@ -61,7 +61,7 @@ Las fechas reales de cada fase no se reconstruyen a partir de lo previsto: se to
 
 ## 4.4 Bloques de entrega y versiones
 
-Los bloques de entrega corresponden a las versiones etiquetadas: el bloque 1 a `v0.0.1` (01/09/2026), el 2 a `v0.1.0` (24/09), el 3 a `v0.2.0` (25/09), el 4 a `v0.3.0` (01/10), el 5 y su remediación a `v0.4.0` a `v0.4.4` (09 a 12/10) y el 6 (pruebas integrales, piloto, despliegue y manuales) a `v1.0.0-beta.1` a `v1.0.0-beta.4` (13/10, 05/11, 16/11 y 19/11/2026). El contenido de cada versión está en la sección 5.7 y las notas completas en el Anexo J; las posteriores a `v0.4.1` son candidatas y no constan como entregadas formalmente.
+Los bloques de entrega corresponden a las versiones etiquetadas: el bloque 1 a `v0.0.1` (01/09/2026), el 2 a `v0.1.0` (24/09), el 3 a `v0.2.0` (25/09), el 4 a `v0.3.0` (01/10), el 5 y su remediación a `v0.4.0` a `v0.4.4` (09 a 12/10) y el 6 (pruebas integrales, piloto, despliegue y manuales) a `v1.0.0-beta.1` a `v1.0.0-beta.5` y `v1.0.0` (13/10, 05/11, 16/11, 19/11 y 25/11/2026, esta última para las dos). El contenido de cada versión está en la sección 5.7 y las notas completas en el Anexo J; las posteriores a `v0.4.1` son candidatas y no constan como entregadas formalmente.
 
 ## 4.5 Ciclo de trabajo de un cambio
 
@@ -75,7 +75,7 @@ Descrito a partir de cómo se integró el trabajo en el repositorio, con Git com
 6. **Integración continua:** estilo, compilación, pruebas, auditoría de dependencias, ensayo de restauración del respaldo y extremo a extremo en Chrome; la construcción de imágenes Docker corre en `develop` y `main`.
 7. **Fusión a `develop`** con commit de fusión y, para un lanzamiento, rama de versión, solicitud a `main`, etiqueta y retorno de `main` a `develop`.
 
-Al corte del 19/11/2026 se habían fusionado 277 solicitudes de integración.
+Al corte del 25/11/2026 se habían fusionado 295 solicitudes de integración.
 
 ## 4.6 Verificación y calidad
 
@@ -83,7 +83,7 @@ La calidad se documenta con validaciones de entrada y de permisos, pruebas unita
 
 ## 4.7 Ampliaciones respecto del levantamiento inicial
 
-Los roles configurables (`v1.0.0-beta.2`) y la certificación del docente tutor en **modo de demostración** (`v1.0.0-beta.3`) están implementados y comprobados. Los certificados **no** tienen valor oficial: la plantilla, los logos, la firma y la autoridad firmante siguen pendientes de la DBU.
+Los roles configurables (`v1.0.0-beta.2`) y la certificación del docente tutor en **modo de demostración** (`v1.0.0-beta.3`) están implementados y comprobados; desde `v1.0.0-beta.5` los archivos subidos se guardan en Cloudinary, en modo privado, y desde `v1.0.0` todos los roles menos el del Administrador se editan desde la aplicación. Los certificados **no** tienen valor oficial: la plantilla, los logos, la firma y la autoridad firmante siguen pendientes de la DBU.
 
 ## 4.8 Pendientes de la metodología
 

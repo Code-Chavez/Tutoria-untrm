@@ -1,6 +1,6 @@
 # Metodología del trabajo
 
-Texto para el capítulo «Metodología y organización del trabajo» del informe de prácticas (V04). Corte del 19 de noviembre de 2026, software `v1.0.0-beta.4`. Reemplaza el borrador `documentacion-integral/METODOLOGIA_BORRADOR.md`, que sigue como antecedente. **La denominación del enfoque está pendiente de confirmar con el asesor** (ver «Pendiente»).
+Texto para el capítulo «Metodología y organización del trabajo» del informe de prácticas (V04). Corte del 25 de noviembre de 2026, software `v1.0.0`. Reemplaza el borrador `documentacion-integral/METODOLOGIA_BORRADOR.md`, que sigue como antecedente. **La denominación del enfoque está pendiente de confirmar con el asesor** (ver «Pendiente»).
 
 ## 1. Enfoque
 
@@ -66,9 +66,9 @@ Las fechas reales de cada fase no se reconstruyen a partir de lo previsto: se to
 | 3 | `v0.2.0` | 25/09/2026 |
 | 4 | `v0.3.0` | 01/10/2026 |
 | 5 y remediación | `v0.4.0` a `v0.4.4` | 09/10 a 12/10/2026 |
-| 6 (pruebas integrales, piloto, despliegue, manuales) | `v1.0.0-beta.1` a `v1.0.0-beta.4` | 13/10, 05/11, 16/11 y 19/11/2026 |
+| 6 (pruebas integrales, piloto, despliegue, manuales) | `v1.0.0-beta.1` a `v1.0.0-beta.5` y `v1.0.0` | 13/10, 05/11, 16/11, 19/11, 25/11 y 25/11/2026 |
 
-La correspondencia entre bloques y versiones se toma de las notas de cada versión (`docs/RELEASE_*.md`) y de las etiquetas del repositorio (`git tag`); el contenido de cada versión está en el informe, sección «Entregas realizadas». Las versiones posteriores a `v0.4.1` son candidatas y no constan como entregadas formalmente.
+La correspondencia entre bloques y versiones se toma de las notas de cada versión (`docs/RELEASE_*.md`) y de las etiquetas del repositorio (`git tag`); el contenido de cada versión está en el informe, sección «Entregas realizadas». Las versiones posteriores a `v0.4.1` se publicaron como candidatas de pruebas controladas; la `v1.0.0` se publicó el 25/11/2026 por decisión del estudiante, **sin** el visto bueno del Product Owner, sin el entorno institucional de TI y sin piloto con usuarios reales (condiciones registradas en `docs/RELEASE_v1.0.0.md` y en el Anexo L del informe).
 
 ## 5. Ciclo de trabajo de un cambio
 
@@ -82,15 +82,15 @@ Descrito a partir de cómo se integró el trabajo en el repositorio:
 6. **Integración continua:** estilo, compilación, pruebas, auditoría de dependencias, ensayo de restauración del respaldo y extremo a extremo en Chrome; la construcción de imágenes Docker corre en `develop` y `main`.
 7. **Fusión a `develop`** con *commit* de fusión y, para un lanzamiento, rama de versión, solicitud a `main`, etiqueta y retorno de `main` a `develop`.
 
-Número de solicitudes de integración fusionadas: se obtiene con `gh pr list --state merged --limit 1000` (277 al 19/11/2026); el recuento cambia con cada corte.
+Número de solicitudes de integración fusionadas: se obtiene con `gh pr list --state merged --limit 1000` (295 al 25/11/2026); el recuento cambia con cada corte.
 
 ## 6. Verificación y calidad
 
-La calidad se documenta con validaciones de entrada y de permisos, pruebas unitarias y de integración, recorridos de extremo a extremo, revisión de interfaz, las revisiones de seguridad (informe del 11/10 y repasos del 12/11 y del 19/11; este último está en un PR aún no fusionado a esta fecha) y los controles de la integración continua. Cada resultado debe indicar commit, entorno, fecha y alcance. Una ejecución verde de la integración continua **no** acredita por sí sola usabilidad con usuarios reales, cumplimiento integral del protocolo ni aceptación institucional. El ensayo técnico del piloto lo realizó el equipo de desarrollo con guiones y datos ficticios, y así se declara.
+La calidad se documenta con validaciones de entrada y de permisos, pruebas unitarias y de integración, recorridos de extremo a extremo, revisión de interfaz, las revisiones de seguridad (informe del 11/10 y repasos del 12/11 y del 19/11) y los controles de la integración continua. Cada resultado debe indicar commit, entorno, fecha y alcance. Una ejecución verde de la integración continua **no** acredita por sí sola usabilidad con usuarios reales, cumplimiento integral del protocolo ni aceptación institucional. El ensayo técnico del piloto lo realizó el equipo de desarrollo con guiones y datos ficticios, y así se declara.
 
 ## 7. Ampliaciones respecto del levantamiento inicial
 
-Los roles configurables (`v1.0.0-beta.2`) y la certificación del docente tutor en **modo de demostración** (`v1.0.0-beta.3`) están implementados y comprobados. Los certificados **no** tienen valor oficial: la plantilla, los logos, la firma y la autoridad firmante siguen pendientes de la DBU. La sincronización y lo no implementado se mantienen en el levantamiento como propuesta.
+Los roles configurables (`v1.0.0-beta.2`) y la certificación del docente tutor en **modo de demostración** (`v1.0.0-beta.3`) están implementados y comprobados; desde `v1.0.0-beta.5` los archivos que se suben (evidencias, documentos firmados, imágenes y foto de perfil) se guardan en Cloudinary, en modo privado, y desde `v1.0.0` todos los roles menos el del Administrador se editan desde la aplicación. Los certificados **no** tienen valor oficial: la plantilla, los logos, la firma y la autoridad firmante siguen pendientes de la DBU. La sincronización y lo no implementado se mantienen en el levantamiento como propuesta.
 
 ## Pendiente
 
