@@ -8,6 +8,12 @@ $word.Visible = $false
 $word.DisplayAlerts = 0
 try {
   $doc = $word.Documents.Open($Docx)
+  foreach ($estilo in -20, -21, -22, -36) {
+    $formato = $doc.Styles.Item($estilo).ParagraphFormat
+    $formato.SpaceBefore = 0; $formato.SpaceAfter = 0; $formato.LineSpacingRule = 0
+  }
+  $doc.Styles.Item(-36).Font.Size = 11
+  $doc.Styles.Item(-20).Font.Size = 11.5
   $doc.Repaginate()
   foreach ($toc in @($doc.TablesOfContents)) { $toc.Update() }
   foreach ($toc in @($doc.TablesOfFigures)) { $toc.Update() }
